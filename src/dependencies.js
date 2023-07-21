@@ -16,6 +16,7 @@ import Quill from "Quill";
 import libsignal from "libsignal-protocol";
 import sha1 from "sha1_hasher";
 import VanillaQR from "VanillaQR";
+import idleJs from "idle-js";
 import "~/css/color-scheme.css";
 import "~/css/materialdesignicons.css";
 import "~/css/materialize.css";
@@ -44,6 +45,7 @@ export default _.extend({
     libsignal: libsignal,
     slug: slug,
     sha1: sha1,
+    idleJs: idleJs,
     xabber_i18next: i18next,
     xabber_i18next_sprintf: i18next_sprintf,
     sha256: sha256,

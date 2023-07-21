@@ -1810,6 +1810,7 @@ xabber.SettingsView = xabber.BasicView.extend({
     events: {
         "click .settings-tabs-wrap .settings-tab:not(.delete-all-accounts)": "jumpToBlock",
         "click .btn-add-account": "showAddAccountView",
+        "click .setting.idling label": "setIdling",
         "click .setting.notifications label": "setNotifications",
         "click .setting.private-notifications label": "setPrivateNotifications",
         "click .setting.group-notifications label": "setGroupNotifications",
@@ -1866,6 +1867,8 @@ xabber.SettingsView = xabber.BasicView.extend({
             .prop({checked: settings.load_media});
         this.$('.typing-notifications input[type=checkbox]')
             .prop({checked: settings.typing_notifications});
+        this.$('.idling input[type=checkbox]')
+            .prop({checked: settings.idling});
         this.$('.mapping-service input[type=checkbox]')
             .prop({checked: settings.mapping_service});
         let sound_private_value = settings.private_sound ? settings.sound_on_private_message : '';
@@ -1956,6 +1959,13 @@ xabber.SettingsView = xabber.BasicView.extend({
         this.$('.settings-panel-head span').text($elem.attr('data-header'))
         $tab.addClass('active').siblings().removeClass('active');
         this.scrollToChild($elem);
+    },
+
+    setIdling: function (ev) {
+        let value = !this.model.get('idling');
+        this.model.save('idling', value);
+        ev.preventDefault();
+        $(ev.target).closest('.setting.idling').find('input').prop('checked', value);
     },
 
     setNotifications: function (ev) {
@@ -3791,6 +3801,23 @@ _.extend(xabber, {
         $(window).on("blur focus", function (ev) {
             self.set('focused', ev.type === 'focus');
         });
+
+        let idle = new idleJs({
+            idle: 30000, // idle time in ms
+            events: ['mousemove', 'keydown', 'mousedown', 'touchstart', 'focus', 'blur'], // events that will trigger the idle resetter
+            onIdle: () => {
+                if (self._settings.get('idling'))
+                    self.set('idle', true);
+                else
+                    self.set('idle', false);
+            } , // callback function to be executed after idle time
+            onActive:() => {
+                self.set('idle', false);
+            }  , // callback function to be executed after back form idleness
+            keepTracking: true, // set it to false if you want to be notified only on the first idleness change
+            startAtIdle: false // set it to true if you want to start in the idle state
+        })
+        idle.start();
 
         $(window).on("resize", function (ev) {
             self.set({

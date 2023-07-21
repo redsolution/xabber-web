@@ -3320,7 +3320,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
     readVisibleMessages: function () {
         if (!this.isVisible())
             return;
-        if (this.$('.chat-message.unread-message').length && xabber.get('focused')){
+        if (this.$('.chat-message.unread-message').length && xabber.get('focused') && !xabber.get('idle')){
             let last_visible_unread_msg;
             this.$('.chat-message.unread-message').each((idx, msg) => {
                 if ($(msg).isVisibleInContainer(this.$('.chat-content'))) {
@@ -4120,7 +4120,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
             } else {
                 if (!(message.isSenderMe() || message.get('silent') || ((message.get('type') === 'system') && !message.get('auth_request')))) {
                     message.set('is_unread', true);
-                    if (message.get('is_unread') && xabber.get('focused') && this.isVisible()){
+                    if (message.get('is_unread') && xabber.get('focused') && !xabber.get('idle') && this.isVisible()){
                         this.readVisibleMessages();
                     }
                     if (!xabber.get('focused')) {
@@ -13108,6 +13108,17 @@ xabber.once("start", function () {
 
     this.on("change:focused", function () {
         if (this.get('focused')) {
+            let view = this.chats_view.active_chat;
+            if (view && view.model.get('display')) {
+                view.content.onScroll(null, true);
+                if (view.model.get('is_accepted') !== false)
+                    view.content.bottom.focusOnInput();
+            }
+        }
+    }, this);
+
+    this.on("change:idle", function () {
+        if (!this.get('idle')) {
             let view = this.chats_view.active_chat;
             if (view && view.model.get('display')) {
                 view.content.onScroll(null, true);

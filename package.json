@@ -28,6 +28,7 @@
     "url": "https://github.com/redsolution/xabber-web"
   },
   "dependencies": {
+    "idle-js": "^1.2.0",
     "xmldom": "^0.4.0"
   },
   "resolutions": {

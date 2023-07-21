@@ -291,6 +291,7 @@ let Xabber = Backbone.Model.extend({
     Settings: Backbone.ModelWithStorage.extend({
         defaults: {
             max_connection_retries: -1,
+            idling: true,
             notifications: true,
             notifications_private: true,
             notifications_group: true,
