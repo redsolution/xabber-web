@@ -24,7 +24,7 @@
         </div>
 {[} else {]}
     <a href="{{original_text}}" target=”_blank” class="msg-hyperlink">
-        <div class="link-message-reference message-reference-preview-item{[if (image_width && image_width >= 590) {]} message-reference-preview-item-big-image{[}]}">
+        <div class="link-message-reference message-reference-preview-item{[if (image_width && image_width >= 590 || image_height && image_height < 80) {]} message-reference-preview-item-big-image{[}]}">
             {[ if (image) {]}
             <img class="attached-image" data-mfp-src="{{image}}" src="{{image}}">
             {[}]}

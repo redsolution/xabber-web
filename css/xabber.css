@@ -10290,6 +10290,9 @@ img.fwd-img-preview {
     width: unset;
     max-width: 100%;
 }
+.message-reference-preview .link-message-reference .attached-image{
+    max-width: 200px;
+}
 
 .message-reference-preview .attached-image-preview .attached-file-size,
 .message-reference-preview .link-message-reference .attached-file-size,
