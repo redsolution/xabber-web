@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.3.3.157","version_description":"added idle.js lib, added idle setting and and message reading when not idle"}'
+'{"version_number":"2.3.3.158","version_description":"fixed opening already opened chat with loading placeholder, returned old link exemption mechanism for ogp"}'
 )});
