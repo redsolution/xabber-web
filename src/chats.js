@@ -4230,8 +4230,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
 
 
     decryptImages: function (message, force) {
-        let scrolled_from_bottom = this.getScrollBottom(),
-            unique_id = message.get('unique_id');
+        let scrolled_from_bottom = this.getScrollBottom();
         if (this.model.get('encrypted') || message.get('encrypted') || force) {
             let images = message.get('images') || [];
             if (images.length) {
@@ -4244,9 +4243,9 @@ xabber.ChatContentView = xabber.BasicView.extend({
                             return;
                         let $msg = [];
                         if (this.model.messages_view && xabber.body.screen.get('right') === 'message_context')
-                            $msg = this.model.messages_view.$(`.chat-message[data-uniqueid="${unique_id}"] img[src="${source}"]`);
+                            $msg = this.model.messages_view.$(`.chat-message[data-uniqueid="${message.get('unique_id')}"] img[src="${source}"]`);
                         else
-                            $msg = this.$(`.chat-message[data-uniqueid="${unique_id}"] img[src="${source}"]`);
+                            $msg = this.$(`.chat-message[data-uniqueid="${message.get('unique_id')}"] img[src="${source}"]`);
                         if ($msg.length) {
                             $msg[0].src = result;
                             $msg[0].onload = () => {
@@ -4262,8 +4261,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
             }
             let fwd_msgs = message.get('forwarded_message') || [];
             fwd_msgs.forEach((fwd_msg) => {
-                let fwd_images = fwd_msg.get('images') || [],
-                    fwd_unique_id = fwd_msg.get('unique_id');
+                let fwd_images = fwd_msg.get('images') || [];
                 fwd_images.forEach((img) => {
                     let source = img.sources[0];
                     if (!img.key)
@@ -4271,7 +4269,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
                     this.model.messages.decryptFile(source, img.key).then((result) => {
                         if (result === null)
                             return;
-                        let $msg = this.$(`.chat-message[data-uniqueid="${unique_id}"] .fwd-message[data-uniqueid="${fwd_unique_id}"] img[src="${source}"]`);
+                        let $msg = this.$(`.chat-message[data-uniqueid="${message.get('unique_id')}"] .fwd-message[data-uniqueid="${fwd_msg.get('unique_id')}"] img[src="${source}"]`);
                         if ($msg.length) {
                             $msg[0].src = result;
                             $msg[0].onload = () => {
