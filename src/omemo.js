@@ -1419,7 +1419,7 @@ xabber.Omemo = Backbone.ModelWithStorage.extend({
                 jid = (Strophe.getBareJidFromJid($msg.attr('from')) === this.account.get('jid') ? Strophe.getBareJidFromJid($msg.attr('to')) : Strophe.getBareJidFromJid($msg.attr('from'))) || options.from_jid,
                 contact = this.account.contacts.get(options.conversation ? options.conversation : jid),
                 stanza_id = $msg.children(`stanza-id[by="${this.account.get('jid')}"]`).attr('id'),
-                cached_msg = stanza_id && this.cached_messages.getMessage(contact, stanza_id);
+                cached_msg = stanza_id && this.cached_messages && this.cached_messages.getMessage(contact, stanza_id);
 
             if (Strophe.getBareJidFromJid($msg.attr('from')) != this.account.get('jid') && options.carbon_copied && options.carbon_direction && options.carbon_direction === 'sent')
                 return;
@@ -1840,7 +1840,7 @@ xabber.Omemo = Backbone.ModelWithStorage.extend({
         this.prekeys.remove(id);
         if (bundle.preKeys.length && bundle.preKeys.length < constants.MIN_PREKEYS_COUNT) {
             let missing_keys = constants.PREKEYS_COUNT - bundle.preKeys.length,
-                last_id = _.sortBy(xabber.accounts.connected[0].omemo.bundle.preKeys, 'keyId').last().keyId;
+                last_id = _.sortBy(this.bundle.preKeys, 'keyId').last().keyId;
             for (let i = ++last_id; last_id + missing_keys; i++)
                 await this.bundle.generatePreKey(i);
             this.account.omemo.publishBundle();
@@ -1888,22 +1888,9 @@ xabber.Omemo = Backbone.ModelWithStorage.extend({
             }
         });
         this.account.getConnectionForIQ().omemo.getBundleInfo({jid: this.account.get('jid'), id: this.get('device_id')}, (res) => {
-            if ($(res).find(`items[node="${Strophe.NS.OMEMO}:bundles"]`).children().length){
-                pks.forEach((pk) => {
-                    let id = pk.keyId,
-                        pubKey = utils.ArrayBuffertoBase64(pk.keyPair.pubKey),
-                        privKey = utils.ArrayBuffertoBase64(pk.keyPair.privKey),
-                        key = JSON.stringify({pubKey, privKey});
-                    if (!pk.signature) {
-                        this.prekeys.put({id, key});
-                    }
-                });
+            this.publish(spk, ik.pubKey, pks, () => {
                 dfd.resolve();
-            } else {
-                this.publish(spk, ik.pubKey, pks, () => {
-                    dfd.resolve();
-                });
-            }
+            });
         }, (err) => {
             if (($(err).find('error').attr('code') == 404)){
                 this.account.getConnectionForIQ().omemo.createBundleNode(() => {
