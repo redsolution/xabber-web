@@ -1358,7 +1358,7 @@ xabber.Omemo = Backbone.ModelWithStorage.extend({
                         has_devices = peer.devices && Object.keys(peer.devices).length,
                         has_changes = this.hasChanges(peer.devices, devices);
                     peer.updateDevices(devices);
-                    if (has_devices && has_changes) {
+                    if (has_changes) {
                         this.account.trigger('trusting_updated');
                     }
                 }

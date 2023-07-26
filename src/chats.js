@@ -1754,7 +1754,7 @@ xabber.MessagesBase = Backbone.Collection.extend({
         let is_group_chat = this.get('group_chat'),
             iq_retraction = $iq({type: 'set', to: is_group_chat ? (this.contact.get('full_jid') || this.contact.get('jid')) : this.account.get('jid')}),
             retract_attrs = {xmlns: Strophe.NS.REWRITE, symmetric: symmetric};
-        !is_group_chat && (retract_attrs.conversation = this.get('jid'));
+        retract_attrs.conversation = this.get('jid');
         this.get('encrypted') && (retract_attrs.type = 'encrypted');
         iq_retraction.c('retract-all', retract_attrs);
         this.account.sendIQFast(iq_retraction, (iq_response) => {
@@ -12447,6 +12447,7 @@ xabber.ChatBottomView = xabber.BasicView.extend({
             }
             $message_actions.find('.pin-message-wrap').showIf(this.model.get('group_chat')).switchClass('non-active', ((length !== 1) && this.model.get('group_chat')));
             $message_actions.find('.reply-message-wrap').switchClass('non-active', this.model.get('blocked'));
+            $message_actions.find('.forward-message-wrap').switchClass('non-active', this.model.get('encrypted'));
             $message_actions.find('.edit-message-wrap').switchClass('non-active', !((length === 1) && my_msg) || this.content_view.$('.chat-message.saved-main.selected').length || this.model.get('blocked'));
             !this.view.$('.chat-notification').hasClass('encryption-warning') && this.view.$('.chat-notification').removeClass('hidden').addClass('msgs-counter').text(xabber.getQuantityString("chat_screen__bottom_panel__selected_messages__text", length));
         } else {
@@ -12795,7 +12796,9 @@ xabber.ChatBottomView = xabber.BasicView.extend({
     },
 
     forwardMessages: function () {
-        if (!this.model.get('active'))
+        if (!this.model.get('active') || this.model.get('encrypted'))
+            return;
+        if (this.$('.forward-message-wrap').hasClass('non-active'))
             return;
         let $msgs = this.content_view.$('.chat-message.selected'),
             msgs = [];
