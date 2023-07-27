@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.3.3.162","version_description":"removed canvas image redrawing if it is not needed"}'
+'{"version_number":"2.3.3.163","version_description":"changed how accounts archive retraction version is got"}'
 )});

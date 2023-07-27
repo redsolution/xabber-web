@@ -9014,19 +9014,9 @@ xabber.Roster = xabber.ContactsBase.extend({
         let sync_timestamp = Number($(iq).children(`query[xmlns="${Strophe.NS.SYNCHRONIZATION}"]`).attr('stamp')),
             sync_rsm_after = $(iq).find(`query set[xmlns="${Strophe.NS.RSM}"]`).children('last').text();
         this.account.last_msg_timestamp = Math.round(sync_timestamp/1000);
-        let last_chat_msg_id = $(iq).find('set last'),
-            encrypted_retract_version = $(iq).find('query conversation[type="encrypted"]').first().children('metadata[node="' + Strophe.NS.REWRITE + '"]').children('retract').attr('version'),
-            retract_version = $(iq).find('query conversation[type="chat"]').first().children(`metadata[node="${Strophe.NS.REWRITE}"]`).children('retract').attr('version');
+        let last_chat_msg_id = $(iq).find('set last');
         if (!request_with_stamp)
             last_chat_msg_id.length ? (this.last_chat_msg_id = last_chat_msg_id.text()) : (this.conversations_loaded = true);
-        if (!_.isUndefined(encrypted_retract_version) && this.account.omemo && this.account.omemo.getRetractVersion() < encrypted_retract_version)
-            this.account.getAllMessageRetractions(true);
-        if (request_with_stamp) {
-            if (this.account.retraction_version < retract_version)
-                this.account.getAllMessageRetractions();
-        } else {
-            this.account.retraction_version = retract_version;
-        }
         this.account.set('last_sync', sync_timestamp);
         this.account.settings.update_settings({last_sync_timestamp: sync_timestamp});
         xabber.chats_view.hideChatsFeedback();
@@ -9052,6 +9042,11 @@ xabber.Roster = xabber.ContactsBase.extend({
                 let saved_chat = this.account.chats.getSavedChat();
                 saved_chat.set('opened', true);
                 saved_chat.item_view.updateLastMessage();
+                this.account.getAllMessageRetractions((result) => {
+                    let retract_version = $(result).find(`query[xmlns="${Strophe.NS.REWRITE}"]`).attr('version');
+                    if (retract_version > this.account.retraction_version)
+                        this.account.retraction_version = retract_version;
+                })
                 this.account.get('first_sync') && this.syncFromServer({stamp: this.account.get('first_sync'), max: constants.SYNCHRONIZATION_RSM_MAX, last_version_sync: true}, true);
             }
         }

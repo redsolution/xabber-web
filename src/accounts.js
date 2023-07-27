@@ -892,9 +892,8 @@ xabber.Account = Backbone.Model.extend({
             this.enableCarbons();
         },
 
-        getAllMessageRetractions: function (encrypted, callback) {
-            let query_options = {xmlns: Strophe.NS.REWRITE, version: (encrypted && this.omemo) ? this.omemo.getRetractVersion() : this.retraction_version};
-            encrypted && (query_options.type = 'encrypted');
+        getAllMessageRetractions: function (callback) {
+            let query_options = {xmlns: Strophe.NS.REWRITE, version: this.retraction_version};
             let retractions_query = $iq({type: 'get'})
                 .c('query', query_options);
             this.sendIQ(retractions_query, callback);

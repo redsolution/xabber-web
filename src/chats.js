@@ -7641,11 +7641,8 @@ xabber.AccountChats = xabber.ChatsBase.extend({
                 chat.item_view.content.removeMessage(msg_item);
                 chat.item_view.updateLastMessage(chat.last_message);
             }
-            if (retract_version > this.account.retraction_version) {
-                if (chat.get('encrypted') && this.account.omemo)
-                    this.account.omemo.cacheRetractVersion(retract_version);
-                else
-                    this.account.retraction_version = retract_version;
+            if (!chat.get('group_chat') && retract_version > this.account.retraction_version) {
+                this.account.retraction_version = retract_version;
             }
         }
         if ($message.find('retract-user').length) {
