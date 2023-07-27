@@ -127,7 +127,7 @@ var compressImage = function (file) {
             file_type = file.type,
             file_name = file.name,
             new_size = getImageSize({width: width, height: height}, MAX_IMG_SIZE);
-        if (file.type === 'image/svg+xml' || file.type.includes('image/gif')) {
+        if (file.type === 'image/svg+xml' || file.type.includes('image/gif') || (width < MAX_IMG_SIZE && height < MAX_IMG_SIZE)) {
             file.width = width;
             file.height = height;
             deferred.resolve(file);
