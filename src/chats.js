@@ -7623,7 +7623,7 @@ xabber.AccountChats = xabber.ChatsBase.extend({
             }
         }
         if ($message.find('retract-message').length) {
-            let is_encrypted = $message.find('retract-message').attr('type') == 'encrypted';
+            let is_encrypted = $message.find('retract-message').attr('type') == Strophe.NS.OMEMO;
             !contact && (contact = this.account.contacts.get($message.find('retract-message').attr('conversation'))) && (chat = this.account.chats.getChat(contact,  is_encrypted && 'encrypted'));
             if ($message.find('retract-message').attr('conversation') === this.account.get('jid'))
                 chat = this.getSavedChat();
