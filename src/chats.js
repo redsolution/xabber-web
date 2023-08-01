@@ -6032,6 +6032,10 @@ xabber.ChatContentView = xabber.BasicView.extend({
                 formData.append('duration', file.duration);
             if (file.size)
                 formData.append('size', file.size);
+            if (file.width)
+                formData.append('width', file.width);
+            if (file.height)
+                formData.append('height', file.height);
             if (file.voice)
                 formData.append('media_type', file.type + '+voice');
             else
@@ -11950,7 +11954,11 @@ xabber.ChatBottomView = xabber.BasicView.extend({
                     this.model.set('recording_voice_message', false)
                     return;
                 }
-                let mediaRecorder = new MediaRecorder(stream),
+                let mediaRecorder = new opusRecorder({
+                        encoderPath: opusRecorderEncoderPath,
+                        encoderSampleRate: 16000,
+                        numberOfChannels: 1
+                }),
                     timer = 1, start_time, end_time,
                     mic_hover = true;
                     mediaRecorder.onstart = () => {
@@ -12006,13 +12014,13 @@ xabber.ChatBottomView = xabber.BasicView.extend({
 
                     mediaRecorder.start();
 
-                    mediaRecorder.onstop = () => {
+                mediaRecorder.onstop = () => {
                     clearInterval(this._chatstate_send_timeout);
                     (xabber.settings.typing_notifications) && this.view.sendChatState('paused');
                     end_time = moment.now();
                     if (mic_hover && ((end_time - start_time)/1000 >= 1.5)) {
                         let audio_name = ("voice message " + moment().format('YYYY-MM-DD HH:mm:ss') + '.ogg'), audio_type = 'audio/ogg; codecs=opus',
-                            blob = new Blob(chunks, { 'type' : audio_type}),
+                            blob = new Blob([chunks], { 'type' : audio_type}),
                             file = new File([blob], audio_name, {
                                 type: audio_type,
                             });
@@ -12024,8 +12032,7 @@ xabber.ChatBottomView = xabber.BasicView.extend({
                 };
 
                 mediaRecorder.ondataavailable = (e) => {
-                    chunks.push(e.data);
-                    stream.getTracks().forEach(track => track.stop() );
+                    chunks = e;
                 };
             };
 

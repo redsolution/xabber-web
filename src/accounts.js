@@ -1187,9 +1187,9 @@ xabber.Account = Backbone.Model.extend({
                 this.connection.disconnect();
                 if (this.fast_conn_manager) this.fast_connection.disconnect();
             }
-            this.cached_sync_conversations.deleteDataBase();
-            this.cached_roster.deleteDataBase();
-            this.cached_server_features.deleteDataBase();
+            this.cached_sync_conversations && this.cached_sync_conversations.deleteDataBase();
+            this.cached_roster && this.cached_roster.deleteDataBase();
+            this.cached_server_features && this.cached_server_features.deleteDataBase();
             this.trigger('remove_saved_chat');
         },
 
@@ -3869,14 +3869,14 @@ xabber.EmojiProfileImageView = xabber.BasicView.extend({
     },
 
     saveAvatar: function (ev) {
-        let blob = Images.getDefaultAvatar(this.$('.chosen-emoji').data('value') ,this.$('.circle-avatar').css( "background-color" ), "bold 96px sans-serif", 176, 176),
-            file = new File([blob], "avatar", {
-                type: "image/png",
-            });
-        file.generated = true;
-        file.base64 = blob;
-        if (file && file.base64) {
-            if (this.registration && this.registration_view){
+        if (this.registration && this.registration_view){
+            let blob = Images.getDefaultAvatar(this.$('.chosen-emoji').data('value') ,this.$('.circle-avatar').css( "background-color" ), "bold 96px sans-serif", 176, 176),
+                file = new File([blob], "avatar.png", {
+                    type: "image/png",
+                });
+            file.generated = true;
+            file.base64 = blob;
+            if (file && file.base64) {
                 this.registration_view.avatar = file;
                 this.registration_view.$('.btn-next').prop('disabled', false);
                 this.registration_view.$('.circle-avatar').addClass('changed');
@@ -3884,7 +3884,14 @@ xabber.EmojiProfileImageView = xabber.BasicView.extend({
                 xabber._settings.save('main_color', this.$('.circle-avatar').attr('data-value'));
                 xabber.trigger('update_main_color');
                 this.close();
-            } else {
+            }
+        } else {
+            let blob = Images.getBlobImage(Images.getDefaultAvatar(this.$('.chosen-emoji').data('value') ,this.$('.circle-avatar').css( "background-color" ), "bold 96px sans-serif", 176, 176)),
+                file = new File([blob], "avatar.png", {
+                    type: "image/png",
+                });
+            file.base64 = blob;
+            if (file && file.base64) {
                 this.$('.modal-preloader-wrap').html(env.templates.contacts.preloader());
                 this.$('.btn-save').addClass('hidden-disabled');
                 this.account.pubAvatar(file, () => {

@@ -99,6 +99,10 @@ module.exports = {
                 test: /\.css$/i,
                 use: [MiniCssExtractPlugin.loader, "css-loader"],
             },
+            {
+                test: /encoderWorker\.min\.js$/,
+                use: [{ loader: 'file-loader' }],
+            }
         ],
     },
     devtool: 'source-map',

@@ -29,6 +29,7 @@
   },
   "dependencies": {
     "idle-js": "^1.2.0",
+    "opus-recorder": "^8.0.5",
     "xmldom": "^0.4.0"
   },
   "resolutions": {
@@ -40,6 +41,7 @@
     "clean-css-cli": "~4.0.11",
     "css-loader": "^6.7.3",
     "css-minimizer-webpack-plugin": "^4.2.2",
+    "file-loader": "^6.2.0",
     "http-server": "^0.9.0",
     "i18next": "^19.8.9",
     "javascript-obfuscator": "^4.0.0",

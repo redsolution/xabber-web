@@ -15,6 +15,8 @@ import plyr from "Plyr";
 import Quill from "Quill";
 import libsignal from "libsignal-protocol";
 import sha1 from "sha1_hasher";
+import Recorder from 'opus-recorder';
+import encoderPath from 'opus-recorder/dist/encoderWorker.min.js';
 import VanillaQR from "VanillaQR";
 import idleJs from "idle-js";
 import "~/css/color-scheme.css";
@@ -46,6 +48,8 @@ export default _.extend({
     slug: slug,
     sha1: sha1,
     idleJs: idleJs,
+    opusRecorder: Recorder,
+    opusRecorderEncoderPath: encoderPath,
     xabber_i18next: i18next,
     xabber_i18next_sprintf: i18next_sprintf,
     sha256: sha256,
