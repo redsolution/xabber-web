@@ -1045,9 +1045,6 @@ xabber.MessagesBase = Backbone.Collection.extend({
 
     onChangedLastReadMsg: function (options) {
         if (this.get('prev_last_read_msg') && this.get('last_read_msg') && this.get('prev_last_read_msg') !== this.get('last_read_msg')){
-            console.log(options);
-            console.log(this.get('last_read_msg'));
-            console.log(this.get('prev_last_read_msg'));
             if (this.item_view && !this.item_view.content){
                 this.item_view.content = new xabber.ChatContentView({chat_item: this.item_view});
             }
@@ -1069,7 +1066,6 @@ xabber.MessagesBase = Backbone.Collection.extend({
     },
 
     requestHistoryBetweenAnchors: function (query) {
-        console.log(query);
         this.item_view.content.MAMRequest(query, (success, messages, rsm) => {
             if (rsm.complete)
                 this.set('last_sync_unread_id', this.get('last_read_msg'));
@@ -1094,7 +1090,6 @@ xabber.MessagesBase = Backbone.Collection.extend({
                 message_item && message_item.set('is_unread', false)
             });
             if (rsm.complete){
-                console.log(this.get('last_read_msg'));
                 let last_read_msg = this.messages.find(m => this.get('last_read_msg') && (m.get('stanza_id') === this.get('last_read_msg') || m.get('contact_stanza_id') === this.get('last_read_msg'))),
                     deferred = new $.Deferred();
                 deferred.done(() => {
@@ -1721,7 +1716,13 @@ xabber.MessagesBase = Backbone.Collection.extend({
                 contact_stanza_id = item.get('contact_stanza_id');
             if (stanza_id || contact_stanza_id) {
                 let iq_retraction = $iq({type: 'set', to: group_chat ? (this.contact.get('full_jid') || this.contact.get('jid')) : this.account.get('jid')})
-                    .c('retract-message', {id: (this.get('group_chat') && contact_stanza_id || stanza_id), xmlns: Strophe.NS.REWRITE, symmetric: symmetric, by: this.account.get('jid')});
+                    .c('retract-message', {
+                        id: (this.get('group_chat') && contact_stanza_id || stanza_id),
+                        xmlns: Strophe.NS.REWRITE,
+                        symmetric: symmetric,
+                        type: this.get('sync_type') ? this.get('sync_type') : this.getConversationType(this),
+                        by: this.account.get('jid')
+                    });
                 this.account.sendIQFast(iq_retraction, (success) => {
                         this.item_view.content.removeMessage(item);
                         msgs_responses++;
@@ -2287,6 +2288,7 @@ xabber.ChatItemView = xabber.BasicView.extend({
                     .c('retract-message', {
                         id: item.get('stanza_id'),
                         xmlns: Strophe.NS.REWRITE,
+                        type: Strophe.NS.SYNCHRONIZATION_REGULAR_CHAT,
                         symmetric: false,
                     });
                 this.account.sendIQFast(iq_retraction);
@@ -3702,8 +3704,6 @@ xabber.ChatContentView = xabber.BasicView.extend({
             this.showHistoryFeedback();
         }
         let account = this.model.account, counter = 0;
-        console.log(query);
-        console.log(options);
         this.MAMRequest(query, (success, messages, rsm) => {
             clearTimeout(this._load_history_timeout);
             this._loading_history = false;

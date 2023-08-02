@@ -8888,6 +8888,7 @@ xabber.Roster = xabber.ContactsBase.extend({
             && chat.retracted_msg_id_list.includes(message.children('stanza-id').attr('id'))){
             return;
         };
+        chat.set('sync_type', type);
         (iq && !($item.attr('status') === 'deleted')) && this.account.cached_sync_conversations.putInCachedConversations({
             account_conversation_type: $(item).attr('jid') +  '/' + $(item).attr('type'),
             conversation: item.outerHTML,
@@ -8963,7 +8964,6 @@ xabber.Roster = xabber.ContactsBase.extend({
         chat.set('last_displayed_id', last_displayed_msg);
         chat.set('last_read_msg', last_read_msg);
         chat.trigger('update_last_read_msg', {sync_update: true});
-        chat.set('sync_type', type);
         if (!message.length) {
             chat.set('timestamp', chat_timestamp);
             if (!(Number(last_delivered_msg) || Number(last_displayed_msg) || Number(last_read_msg))
@@ -10055,7 +10055,7 @@ xabber.Account.addInitPlugin(function () {
         primKey: 'jid'
     });
     this.cached_sync_conversations = new xabber.CachedSyncСonversations(null, {
-        name:'cached-conversation-list-' + this.get('jid') + '-' + this.get('account_unique_id'),
+        name:'cached-conversation-list-v108-' + this.get('jid') + '-' + this.get('account_unique_id'),
         objStoreName: 'conversation_items',
         primKey: 'account_conversation_type'
     });

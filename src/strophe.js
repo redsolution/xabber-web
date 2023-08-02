@@ -746,7 +746,7 @@ Strophe.addNamespace('HTTP_AUTH', 'http://jabber.org/protocol/http-auth');
 Strophe.addNamespace('AUTH_TOKENS', 'https://xabber.com/protocol/auth-tokens');
 Strophe.addNamespace('AUTH_DEVICES', 'https://xabber.com/protocol/devices');
 Strophe.addNamespace('SYNCHRONIZATION', 'https://xabber.com/protocol/synchronization');
-Strophe.addNamespace('SYNCHRONIZATION_REGULAR_CHAT', 'https://xabber.com/protocol/synchronization#chat');
+Strophe.addNamespace('SYNCHRONIZATION_REGULAR_CHAT', 'urn:xabber:chat');
 Strophe.addNamespace('SYNCHRONIZATION_CHANNEL', 'https://xabber.com/protocol/channels');
 Strophe.addNamespace('SYNCHRONIZATION_OLD_OMEMO', 'urn:xmpp:omemo:1');
 Strophe.addNamespace('SYNCHRONIZATION_OMEMO', 'urn:xmpp:omemo:2');

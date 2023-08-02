@@ -547,7 +547,6 @@ xabber.SearchView = xabber.BasicView.extend({
           this.keyup_timeout = null;
           this.query_text = query;
           let query_transliterated = query_transliterate(query);
-          console.log(query_transliterated);
           this.$('.contacts-list').html("");
           this.$('.chats-list').html("");
           xabber.accounts.connected.forEach((acc) => {
