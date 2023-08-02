@@ -8187,7 +8187,7 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
         this.$('.chat-list-wrap').switchClass('with-padding', xabber.toolbar_view.$('.toolbar-item:not(.toolbar-logo).unread').length);
         if (options.right !== 'chat' && options.right !== 'contact_details' && !options.no_unread && options.right !== 'searched_messages' && options.right !== 'message_context' && options.right !== 'participant_messages' || options.clear_search) {
             this.clearSearch();
-            if (xabber.toolbar_view.$('.active').hasClass('all-chats')) {
+            if (xabber.toolbar_view.$('.active').hasClass('all-chats') && !xabber.toolbar_view.data.get('account_filtering')) {
                 this.showAllChats();
             }
         }

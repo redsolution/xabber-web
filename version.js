@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.3.3.166","version_description":"new cached conv db name for changing sync types, retract message conversation types"}'
+'{"version_number":"2.3.3.167","version_description":"fixed account chats filtering after opening encrypted chat"}'
 )});
