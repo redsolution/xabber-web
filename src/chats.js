@@ -2389,7 +2389,7 @@ xabber.ChatItemView = xabber.BasicView.extend({
       onScroll: function () {
           this.$('.back-to-bottom').hideIf(this.isScrolledToBottom());
           this._prev_scrolltop = this._scrolltop || this._prev_scrolltop || 0;
-          this._scrolltop = this.getScrollTop();
+          this._scrolltop = this.getScrollTop() || this._scrolltop || this._prev_scrolltop || 0;
           if (!this.history_loaded && !this.loading_history && (this._scrolltop < this._prev_scrolltop) && (this._scrolltop < 100 || this.getPercentScrolled() < 0.1)) {
               this.loading_history = true;
               this.messagesRequest({before: this.first_msg_id}, () => {
@@ -2495,7 +2495,7 @@ xabber.ChatItemView = xabber.BasicView.extend({
       onScroll: function () {
           this.$('.back-to-bottom').hideIf(this.isScrolledToBottom());
           this._prev_scrolltop = this._scrolltop || this._prev_scrolltop || 0;
-          this._scrolltop = this.getScrollTop();
+          this._scrolltop = this.getScrollTop() || this._scrolltop || this._prev_scrolltop || 0;
           this._scrollbottom = this.getScrollBottom();
 
           if (!this.loading_history)
@@ -3454,7 +3454,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
 
     onScrollY: function () {
         this._prev_scrolltop = this._scrolltop || this._prev_scrolltop || 0;
-        this._scrolltop = this.getScrollTop();
+        this._scrolltop = this.getScrollTop() || this._scrolltop || this._prev_scrolltop || 0;
         this._is_scrolled_bottom = this.isScrolledToBottom();
         if (this._scrolltop === 0 && this.$('.subscription-buttons-wrap').hasClass('hidden')) {
             this.$('.fixed-day-indicator-wrap').css('opacity', 1);

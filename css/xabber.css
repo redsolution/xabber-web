@@ -13168,6 +13168,7 @@ input[type='range'].voice-message-volume:focus {
 .gallery-files.grid .gallery-file{
     aspect-ratio: 1;
     position: relative;
+    border: 1px solid hsla(0,0%,62%,.25);
 }
 .gallery-files.grid .gallery-file img{
     width: 100%;

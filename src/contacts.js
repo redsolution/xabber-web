@@ -9026,29 +9026,31 @@ xabber.Roster = xabber.ContactsBase.extend({
             this.account.set('first_sync', sync_timestamp);
         if (!$(iq).find('conversation').length || $(iq).find('conversation').length < constants.SYNCHRONIZATION_RSM_MAX ){
             this.account.cached_sync_conversations.getAllFromCachedConversations((res) => {
-                cached_conversations_exclude = cached_conversations_exclude.concat($(iq).find('conversation').map(function () {
-                    return $(this).attr('jid') +  '/' + $(this).attr('type');
-                }).toArray());
-                res = res.filter(item => !cached_conversations_exclude.includes(item.account_conversation_type));
-                this.syncCachedConversations(null, request_with_stamp, is_first_sync, res);
+                if (!is_last_sync){
+                    cached_conversations_exclude = cached_conversations_exclude.concat($(iq).find('conversation').map(function () {
+                        return $(this).attr('jid') +  '/' + $(this).attr('type');
+                    }).toArray());
+                    res = res.filter(item => !cached_conversations_exclude.includes(item.account_conversation_type));
+                    this.syncCachedConversations(null, request_with_stamp, is_first_sync, res);
+                }
                 this.syncConversations(iq, request_with_stamp, is_first_sync, res);
+                this.account.cached_sync_conversations.putInCachedConversations({
+                    account_conversation_type: 'last_sync_timestamp',
+                    timestamp: sync_timestamp,
+                });
+                if (!is_last_sync){
+                    this.account.sendPresence();
+                    let saved_chat = this.account.chats.getSavedChat();
+                    saved_chat.set('opened', true);
+                    saved_chat.item_view.updateLastMessage();
+                    this.account.getAllMessageRetractions((result) => {
+                        let retract_version = $(result).find(`query[xmlns="${Strophe.NS.REWRITE}"]`).attr('version');
+                        if (retract_version > this.account.retraction_version)
+                            this.account.retraction_version = retract_version;
+                    })
+                    this.account.get('first_sync') && this.syncFromServer({stamp: this.account.get('first_sync'), max: constants.SYNCHRONIZATION_RSM_MAX, last_version_sync: true}, true);
+                }
             });
-            this.account.cached_sync_conversations.putInCachedConversations({
-                account_conversation_type: 'last_sync_timestamp',
-                timestamp: sync_timestamp,
-            });
-            if (!is_last_sync){
-                this.account.sendPresence();
-                let saved_chat = this.account.chats.getSavedChat();
-                saved_chat.set('opened', true);
-                saved_chat.item_view.updateLastMessage();
-                this.account.getAllMessageRetractions((result) => {
-                    let retract_version = $(result).find(`query[xmlns="${Strophe.NS.REWRITE}"]`).attr('version');
-                    if (retract_version > this.account.retraction_version)
-                        this.account.retraction_version = retract_version;
-                })
-                this.account.get('first_sync') && this.syncFromServer({stamp: this.account.get('first_sync'), max: constants.SYNCHRONIZATION_RSM_MAX, last_version_sync: true}, true);
-            }
         }
         else if ($(iq).find('conversation').length) {
             this.account.cached_sync_conversations.getAllFromCachedConversations((res) => {
