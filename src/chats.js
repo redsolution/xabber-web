@@ -1739,7 +1739,12 @@ xabber.MessagesBase = Backbone.Collection.extend({
 
     retractMessagesByUser: function (user_id) {
         let iq_retraction = $iq({type: 'set', to: this.contact.get('full_jid') || this.contact.get('jid')})
-            .c('retract-user', {id: user_id, xmlns: Strophe.NS.REWRITE, symmetric: true});
+            .c('retract-user', {
+                id: user_id,
+                xmlns: Strophe.NS.REWRITE,
+                type: this.get('sync_type') ? this.get('sync_type') : this.getConversationType(this),
+                symmetric: true
+            });
         this.account.sendIQFast(iq_retraction, (success) => {
             let user_msgs = this.messages.filter(msg => msg.get('user_info') && (msg.get('user_info').id == user_id));
             $(user_msgs).each((idx, msg) => {
@@ -1754,7 +1759,11 @@ xabber.MessagesBase = Backbone.Collection.extend({
     retractAllMessages: function (symmetric, callback, errback) {
         let is_group_chat = this.get('group_chat'),
             iq_retraction = $iq({type: 'set', to: is_group_chat ? (this.contact.get('full_jid') || this.contact.get('jid')) : this.account.get('jid')}),
-            retract_attrs = {xmlns: Strophe.NS.REWRITE, symmetric: symmetric};
+            retract_attrs = {
+                xmlns: Strophe.NS.REWRITE,
+                type: this.get('sync_type') ? this.get('sync_type') : this.getConversationType(this),
+                symmetric: symmetric
+        };
         retract_attrs.conversation = this.get('jid');
         this.get('encrypted') && (retract_attrs.type = 'encrypted');
         iq_retraction.c('retract-all', retract_attrs);
@@ -12504,7 +12513,11 @@ xabber.ChatBottomView = xabber.BasicView.extend({
             link_references = text_markups.link_references || [],
             blockquotes = text_markups.blockquotes || [],
             mentions = text_markups.mentions || [],
-            iq = $iq({type: 'set', to: (this.contact && this.contact.get('group_chat')) ? this.contact.get('jid') : this.account.get('jid')}).c('replace', {xmlns: Strophe.NS.REWRITE, id: stanza_id}),
+            iq = $iq({type: 'set', to: (this.contact && this.contact.get('group_chat')) ? this.contact.get('jid') : this.account.get('jid')}).c('replace', {
+                xmlns: Strophe.NS.REWRITE,
+                type: this.model.get('sync_type') ? this.model.get('sync_type') : this.model.getConversationType(this.model),
+                id: stanza_id
+            }),
             $message = $build('message').attrs({xmlns: undefined});
         forward_ref && forward_ref.forEach((fwd, idx) => {
             let fwd_msg = this.edit_message.get('forwarded_message')[idx],
