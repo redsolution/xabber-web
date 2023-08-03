@@ -82,7 +82,7 @@ xabber.Message = Backbone.Model.extend({
     isSenderMe: function () {
         if (this.account)
             return this.account.get('jid') === this.get('from_jid');
-        else if (this.collection.account)
+        else if (this.collection && this.collection.account)
             return this.collection.account.get('jid') === this.get('from_jid');
         else
             false;
