@@ -13541,6 +13541,12 @@ input[type='range'].voice-message-volume:focus {
 
 }
 
+.details-panel-right .participant-details-wrap .right-item .select-timer .dropdown-content,
+.details-panel-right .restrictions-wrap .right-item .select-timer .dropdown-content{
+    left: unset !important;
+    right: 0px;
+}
+
 .details-panel-right .participant-details-wrap .right-item .right-name,
 .details-panel-right .restrictions-wrap .right-item .right-name {
     margin: 0 0 0 27px;

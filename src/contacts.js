@@ -3607,6 +3607,12 @@ xabber.MediaBaseView = xabber.BasicView.extend({
         this.temporary_items = [];
         this.$('.gallery-files .gallery-empty').remove();
         $(templates.media_items_empty()).appendTo(this.$('.gallery-files'));
+        if (this.filter_type === 'filter_image')
+            this.$('.gallery-files .gallery-empty-text').html(`${xabber.getString("no_images")}`);
+        else if (this.filter_type === 'filter_video')
+            this.$('.gallery-files .gallery-empty-text').html(`${xabber.getString("no_videos")}`);
+        else if (this.filter_type === 'filter_voice')
+            this.$('.gallery-files .gallery-empty-text').html(`${xabber.getString("no_voice_messages")}`);
         this.$('.gallery-files .preloader-wrapper').remove();
     },
 
