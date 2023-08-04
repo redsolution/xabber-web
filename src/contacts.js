@@ -3428,6 +3428,8 @@ xabber.MediaBaseView = xabber.BasicView.extend({
         this.chat = this.account.chats.getChat(this.contact, this.encrypted && 'encrypted');
         this.temporary_items = []
         this.parent.ps_container.on("ps-scroll-up.mediagallery ps-scroll-down.mediagallery", this.onScroll.bind(this));
+        xabber.on("update_screen", this.onUpdatedScreen, this);
+        xabber.on("update_layout", this.onUpdatedScreen, this);
     },
 
     _render: function () {
@@ -3458,6 +3460,11 @@ xabber.MediaBaseView = xabber.BasicView.extend({
         }
     },
 
+    onUpdatedScreen: function () {
+        let block_height = xabber.body.$el.height() - 350;
+        this.$el.css('min-height', `${block_height}px`);
+    },
+
     updateForParticipant: function () {
         this.delegateEvents({})
         this.parent.ps_container.off('ps-scroll-up.mediagallery').off('ps-scroll-down.mediagallery').on("ps-scroll-up.mediagallery ps-scroll-down.mediagallery", this.onScroll.bind(this));
@@ -3466,7 +3473,7 @@ xabber.MediaBaseView = xabber.BasicView.extend({
         });
     },
 
-    getMediaFromDecryptedMessages: function () {//34
+    getMediaFromDecryptedMessages: function () {
 
         let dfd = new $.Deferred();
 
@@ -3818,6 +3825,7 @@ xabber.MediaImagesView = xabber.MediaBaseView.extend({
                 this.participant && this.updateForParticipant();
             });
         }
+        this.onUpdatedScreen();
     },
 
     filterEncryptedFiles: function () {
@@ -3866,6 +3874,7 @@ xabber.MediaVideosView = xabber.MediaBaseView.extend({
                 this.participant && this.updateForParticipant();
             });
         }
+        this.onUpdatedScreen();
     },
 
     filterEncryptedFiles: function () {
@@ -3913,6 +3922,7 @@ xabber.MediaFilesView = xabber.MediaBaseView.extend({
                 this.participant && this.updateForParticipant();
             });
         }
+        this.onUpdatedScreen();
     },
 
     filterEncryptedFiles: function () {
@@ -3960,6 +3970,7 @@ xabber.MediaVoiceView = xabber.MediaBaseView.extend({
                 this.participant && this.updateForParticipant();
             });
         }
+        this.onUpdatedScreen();
     },
 
     filterEncryptedFiles: function () {
