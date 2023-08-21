@@ -9662,6 +9662,11 @@ img.fwd-img-preview {
     padding-top: 3px;
 }
 
+.audio-control-time {
+    margin: 0;
+    display: inline;
+}
+
 .file-link-download {
     line-height: 19px;
 }

@@ -3719,7 +3719,7 @@ xabber.MediaBaseView = xabber.BasicView.extend({
             this.prev_audio_message.voice_message.pause();
             return;
         }
-        else if (!$elem.parents('.gallery-file-audio-container').length) {
+        else if (!$elem.parents('.gallery-file-audio-container').length || $elem.closest('.audio-control-time').length) {
             let $file = $elem.closest('.gallery-file');
             this.parent.saveScrollBarOffset()
             xabber.body.data.set('contact_details_view', this.parent)

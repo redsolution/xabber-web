@@ -1296,6 +1296,40 @@ xabber.Account = Backbone.Model.extend({
             }
         },
 
+        testGalleryFileSlot: function(file, callback) {
+            if (this.get('gallery_token') && this.get('gallery_url')){
+                let reader = new FileReader();
+                reader.onloadend = () => {
+                    let b64 = reader.result.split('base64,'),
+                        binary_file = atob(b64[1]),
+                        bytes = new Uint8Array(binary_file.length);
+                    for (let i = 0; i < binary_file.length; i++)
+                        bytes[i] = binary_file.charCodeAt(i);
+                    $.ajax({
+                        type: 'GET',
+                        headers: {"Authorization": 'Bearer ' + this.get('gallery_token')},
+                        url: this.get('gallery_url') + 'v1/files/slot/',
+                        dataType: 'json',
+                        contentType: "application/json",
+                        data: {size: file.size, name: file.name, hash: sha1(bytes)},
+                        success: (response) => {
+                            console.log(response);
+                            callback && callback(response);
+                        },
+                        error: (response) => {
+                            console.log(response);
+                            callback && callback(response.responseJSON);
+                        }
+                    });
+                }
+                reader.onerror = (e) => {
+                    console.log(reader.error);
+                    callback && callback(false)
+                };
+                reader.readAsDataURL(file);
+            }
+        },
+
         initGalleryAuth: function(gallery_feature) {
             this.set('gallery_url', gallery_feature.get('from'));
             if (this.get('gallery_url') && !this.get('gallery_auth')) {
