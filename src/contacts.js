@@ -1959,8 +1959,9 @@ xabber.ContactDetailsViewRight = xabber.ContactDetailsView.extend({
             this.$('.main-info').removeClass('fixed-scroll');
             this.$('.main-info .block-name').addClass('fade-out');
         }
-        if (bottom_block_scroll && bottom_block_scroll < 150) {
-            this.$('.bottom-block:not(.edit-bottom-block) .tabs').addClass('fixed-scroll');
+        if (!this.$('.bottom-block:not(.edit-bottom-block)').hasClass('fixed-scroll') && bottom_block_scroll && bottom_block_scroll < 150
+            || this.$('.bottom-block:not(.edit-bottom-block)').hasClass('fixed-scroll') && bottom_block_scroll && bottom_block_scroll < 110) {
+            this.$('.bottom-block:not(.edit-bottom-block)').addClass('fixed-scroll');
             this.$('.btn-escape').addClass('btn-top');
             this.$('.btn-escape i').addClass('mdi-arrow-right').removeClass('mdi-close');
             this.$('.bottom-block:not(.edit-bottom-block) .participants-search-form').addClass('fixed-scroll');
@@ -1974,7 +1975,7 @@ xabber.ContactDetailsViewRight = xabber.ContactDetailsView.extend({
         else {
             this.$('.btn-escape').removeClass('btn-top');
             this.$('.btn-escape i').addClass('mdi-close').removeClass('mdi-arrow-right');
-            this.$('.bottom-block:not(.edit-bottom-block) .tabs').removeClass('fixed-scroll');
+            this.$('.bottom-block:not(.edit-bottom-block)').removeClass('fixed-scroll');
             this.$('.bottom-block:not(.edit-bottom-block) .participants-search-form').removeClass('fixed-scroll');
             this.$('.buttons-wrap').hideIf(false);
             this.$('.btn-edit').hideIf(false);
@@ -2140,12 +2141,12 @@ xabber.ContactDetailsViewRight = xabber.ContactDetailsView.extend({
             list_name = $target.data('value');
         this.$('.tabs').animate({scrollLeft: $target.position().left}, 400);
         this.ps_container.animate(
-            {scrollTop: this.$('.bottom-block:not(.edit-bottom-block)').position().top + this.ps_container.scrollTop()-110},
+            {scrollTop: this.$('.bottom-block:not(.edit-bottom-block)').position().top + this.ps_container.scrollTop()-109},
             200,
             () => {
                 this.onScroll();
                 this.ps_container.animate(
-                    {scrollTop: this.$('.bottom-block:not(.edit-bottom-block)').position().top + this.ps_container.scrollTop()-110},
+                    {scrollTop: this.$('.bottom-block:not(.edit-bottom-block)').position().top + this.ps_container.scrollTop()-109},
                     0,
                 );
         });
@@ -2732,8 +2733,9 @@ xabber.GroupChatDetailsViewRight = xabber.BasicView.extend({
             this.$('.main-info').removeClass('fixed-scroll');
             this.$('.header-buttons .block-name').addClass('fade-out');
         }
-        if (bottom_block_scroll && bottom_block_scroll < 150) {
-            this.$('.bottom-block:not(.edit-bottom-block):not(.participant-bottom-block) .tabs').addClass('fixed-scroll');
+        if (!this.$('.bottom-block:not(.edit-bottom-block):not(.participant-bottom-block)').hasClass('fixed-scroll') && bottom_block_scroll && bottom_block_scroll < 150
+            || this.$('.bottom-block:not(.edit-bottom-block):not(.participant-bottom-block)').hasClass('fixed-scroll') && bottom_block_scroll && bottom_block_scroll < 110) {
+            this.$('.bottom-block:not(.edit-bottom-block):not(.participant-bottom-block)').addClass('fixed-scroll');
             this.$('.btn-escape').addClass('btn-top');
             this.$('.btn-escape i').addClass('mdi-arrow-right').removeClass('mdi-close');
             this.$('.bottom-block:not(.edit-bottom-block):not(.participant-bottom-block) .participants-search-form').addClass('fixed-scroll');
@@ -2747,7 +2749,7 @@ xabber.GroupChatDetailsViewRight = xabber.BasicView.extend({
         else {
             this.$('.btn-escape').removeClass('btn-top');
             this.$('.btn-escape i').addClass('mdi-close').removeClass('mdi-arrow-right');
-            this.$('.bottom-block:not(.edit-bottom-block):not(.participant-bottom-block) .tabs').removeClass('fixed-scroll');
+            this.$('.bottom-block:not(.edit-bottom-block):not(.participant-bottom-block)').removeClass('fixed-scroll');
             this.$('.bottom-block:not(.edit-bottom-block):not(.participant-bottom-block) .participants-search-form').removeClass('fixed-scroll');
             this.$('.main-info .buttons-wrap').hideIf(false);
             this.$('.btn-edit').hideIf(false);
@@ -2818,7 +2820,7 @@ xabber.GroupChatDetailsViewRight = xabber.BasicView.extend({
         this.$('.header-buttons .block-name').addClass('fade-out');
         this.$('.btn-escape').removeClass('btn-top');
         this.$('.btn-escape i').addClass('mdi-close').removeClass('mdi-arrow-right');
-        this.$('.bottom-block:not(.edit-bottom-block):not(.participant-bottom-block) .tabs').removeClass('fixed-scroll');
+        this.$('.bottom-block:not(.edit-bottom-block):not(.participant-bottom-block)').removeClass('fixed-scroll');
         this.$('.bottom-block:not(.edit-bottom-block):not(.participant-bottom-block) .participants-search-form').removeClass('fixed-scroll');
         this.$('.main-info .buttons-wrap').hideIf(false);
         this.$('.btn-edit').hideIf(false);
@@ -2838,12 +2840,12 @@ xabber.GroupChatDetailsViewRight = xabber.BasicView.extend({
             this.$('.main-info .header-buttons .block-name.second-text').text($target.text())
             this.$('.tabs').animate({scrollLeft: $target.position().left - 80}, 400);
             this.ps_container.animate(
-                {scrollTop: this.$('.bottom-block:not(.edit-bottom-block):not(.participant-bottom-block)').position().top + this.ps_container.scrollTop() - 110},
+                {scrollTop: this.$('.bottom-block:not(.edit-bottom-block):not(.participant-bottom-block)').position().top + this.ps_container.scrollTop() - 109},
                 400,
                 () => {
                     this.onScroll();
                     this.ps_container.animate(
-                        {scrollTop: this.$('.bottom-block:not(.edit-bottom-block):not(.participant-bottom-block)').position().top + this.ps_container.scrollTop() - 110},
+                        {scrollTop: this.$('.bottom-block:not(.edit-bottom-block):not(.participant-bottom-block)').position().top + this.ps_container.scrollTop() - 109},
                         0,
                     );
                 });
@@ -5228,6 +5230,16 @@ xabber.ParticipantPropertiesViewRight = xabber.BasicView.extend({
         let $target = $(ev.target).closest('.list-variant'),
             list_name = $target.data('value');
         this.$('.tabs').animate({scrollLeft: $target.position().left}, 400);
+        this.ps_container.animate(
+            {scrollTop: this.$('.bottom-block').position().top + this.ps_container.scrollTop() - 109},
+            400,
+            () => {
+                this.onScroll();
+                this.ps_container.animate(
+                    {scrollTop: this.$('.bottom-block').position().top + this.ps_container.scrollTop() - 109},
+                    0,
+                );
+            });
         this.updateList(list_name);
     },
 
@@ -5290,7 +5302,7 @@ xabber.ParticipantPropertiesViewRight = xabber.BasicView.extend({
         this.$('.block-name:not(.second-text)').removeClass('fade-out');
         this.$('.btn-back').removeClass('btn-top');
         this.$('.btn-back i').addClass('mdi-close').removeClass('mdi-arrow-right');
-        this.$('.bottom-block .tabs').removeClass('fixed-scroll');
+        this.$('.bottom-block').removeClass('fixed-scroll');
         this.$('.bottom-block .participants-search-form').removeClass('fixed-scroll');
         this.$('.buttons-wrap').hideIf(false);
         this.$('.btn-edit').hideIf(false);
@@ -5329,8 +5341,9 @@ xabber.ParticipantPropertiesViewRight = xabber.BasicView.extend({
         let bottom_block_scroll
         if (this.$('.bottom-block'))
             bottom_block_scroll = this.$('.bottom-block').get(0).getBoundingClientRect().top;
-        if (bottom_block_scroll && bottom_block_scroll < 150) {
-            this.$('.bottom-block .tabs').addClass('fixed-scroll');
+        if (!this.$('.bottom-block').hasClass('fixed-scroll') && bottom_block_scroll && bottom_block_scroll < 150
+            || this.$('.bottom-block').hasClass('fixed-scroll') && bottom_block_scroll && bottom_block_scroll < 110) {
+            this.$('.bottom-block').addClass('fixed-scroll');
             this.$('.btn-back').addClass('btn-top');
             this.$('.btn-back i').addClass('mdi-arrow-right').removeClass('mdi-close');
             this.$('.bottom-block .participants-search-form').addClass('fixed-scroll');
@@ -5344,7 +5357,7 @@ xabber.ParticipantPropertiesViewRight = xabber.BasicView.extend({
         else {
             this.$('.btn-back').removeClass('btn-top');
             this.$('.btn-back i').addClass('mdi-close').removeClass('mdi-arrow-right');
-            this.$('.bottom-block .tabs').removeClass('fixed-scroll');
+            this.$('.bottom-block').removeClass('fixed-scroll');
             this.$('.bottom-block .participants-search-form').removeClass('fixed-scroll');
             this.$('.buttons-wrap').hideIf(false);
             this.$('.btn-edit').hideIf(false);

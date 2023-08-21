@@ -15422,7 +15422,11 @@ input[type='range'].voice-message-volume:focus {
     display: none !important;
 }
 
-.details-panel-right .bottom-block .tabs.fixed-scroll {
+.details-panel-right .bottom-block.fixed-scroll {
+    padding-top: 10px;
+}
+
+.details-panel-right .bottom-block.fixed-scroll .tabs {
     position: fixed;
     z-index: 4;
     top: 63px;
