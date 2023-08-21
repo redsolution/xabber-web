@@ -15423,7 +15423,7 @@ input[type='range'].voice-message-volume:focus {
 }
 
 .details-panel-right .bottom-block.fixed-scroll {
-    padding-top: 10px;
+    padding-top: 48px;
 }
 
 .details-panel-right .bottom-block.fixed-scroll .tabs {

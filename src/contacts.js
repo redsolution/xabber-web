@@ -1959,7 +1959,7 @@ xabber.ContactDetailsViewRight = xabber.ContactDetailsView.extend({
             this.$('.main-info').removeClass('fixed-scroll');
             this.$('.main-info .block-name').addClass('fade-out');
         }
-        if (!this.$('.bottom-block:not(.edit-bottom-block)').hasClass('fixed-scroll') && bottom_block_scroll && bottom_block_scroll < 150
+        if (!this.$('.bottom-block:not(.edit-bottom-block)').hasClass('fixed-scroll') && bottom_block_scroll && bottom_block_scroll < 160
             || this.$('.bottom-block:not(.edit-bottom-block)').hasClass('fixed-scroll') && bottom_block_scroll && bottom_block_scroll < 110) {
             this.$('.bottom-block:not(.edit-bottom-block)').addClass('fixed-scroll');
             this.$('.btn-escape').addClass('btn-top');
@@ -2141,12 +2141,12 @@ xabber.ContactDetailsViewRight = xabber.ContactDetailsView.extend({
             list_name = $target.data('value');
         this.$('.tabs').animate({scrollLeft: $target.position().left}, 400);
         this.ps_container.animate(
-            {scrollTop: this.$('.bottom-block:not(.edit-bottom-block)').position().top + this.ps_container.scrollTop()-109},
+            {scrollTop: this.$('.bottom-block:not(.edit-bottom-block)').position().top + this.ps_container.scrollTop()-70},
             200,
             () => {
                 this.onScroll();
                 this.ps_container.animate(
-                    {scrollTop: this.$('.bottom-block:not(.edit-bottom-block)').position().top + this.ps_container.scrollTop()-109},
+                    {scrollTop: this.$('.bottom-block:not(.edit-bottom-block)').position().top + this.ps_container.scrollTop()-70},
                     0,
                 );
         });
@@ -2733,7 +2733,7 @@ xabber.GroupChatDetailsViewRight = xabber.BasicView.extend({
             this.$('.main-info').removeClass('fixed-scroll');
             this.$('.header-buttons .block-name').addClass('fade-out');
         }
-        if (!this.$('.bottom-block:not(.edit-bottom-block):not(.participant-bottom-block)').hasClass('fixed-scroll') && bottom_block_scroll && bottom_block_scroll < 150
+        if (!this.$('.bottom-block:not(.edit-bottom-block):not(.participant-bottom-block)').hasClass('fixed-scroll') && bottom_block_scroll && bottom_block_scroll < 160
             || this.$('.bottom-block:not(.edit-bottom-block):not(.participant-bottom-block)').hasClass('fixed-scroll') && bottom_block_scroll && bottom_block_scroll < 110) {
             this.$('.bottom-block:not(.edit-bottom-block):not(.participant-bottom-block)').addClass('fixed-scroll');
             this.$('.btn-escape').addClass('btn-top');
@@ -2840,12 +2840,12 @@ xabber.GroupChatDetailsViewRight = xabber.BasicView.extend({
             this.$('.main-info .header-buttons .block-name.second-text').text($target.text())
             this.$('.tabs').animate({scrollLeft: $target.position().left - 80}, 400);
             this.ps_container.animate(
-                {scrollTop: this.$('.bottom-block:not(.edit-bottom-block):not(.participant-bottom-block)').position().top + this.ps_container.scrollTop() - 109},
+                {scrollTop: this.$('.bottom-block:not(.edit-bottom-block):not(.participant-bottom-block)').position().top + this.ps_container.scrollTop() - 70},
                 400,
                 () => {
                     this.onScroll();
                     this.ps_container.animate(
-                        {scrollTop: this.$('.bottom-block:not(.edit-bottom-block):not(.participant-bottom-block)').position().top + this.ps_container.scrollTop() - 109},
+                        {scrollTop: this.$('.bottom-block:not(.edit-bottom-block):not(.participant-bottom-block)').position().top + this.ps_container.scrollTop() - 70},
                         0,
                     );
                 });
@@ -5231,12 +5231,12 @@ xabber.ParticipantPropertiesViewRight = xabber.BasicView.extend({
             list_name = $target.data('value');
         this.$('.tabs').animate({scrollLeft: $target.position().left}, 400);
         this.ps_container.animate(
-            {scrollTop: this.$('.bottom-block').position().top + this.ps_container.scrollTop() - 109},
+            {scrollTop: this.$('.bottom-block').position().top + this.ps_container.scrollTop() - 70},
             400,
             () => {
                 this.onScroll();
                 this.ps_container.animate(
-                    {scrollTop: this.$('.bottom-block').position().top + this.ps_container.scrollTop() - 109},
+                    {scrollTop: this.$('.bottom-block').position().top + this.ps_container.scrollTop() - 70},
                     0,
                 );
             });
@@ -5341,7 +5341,7 @@ xabber.ParticipantPropertiesViewRight = xabber.BasicView.extend({
         let bottom_block_scroll
         if (this.$('.bottom-block'))
             bottom_block_scroll = this.$('.bottom-block').get(0).getBoundingClientRect().top;
-        if (!this.$('.bottom-block').hasClass('fixed-scroll') && bottom_block_scroll && bottom_block_scroll < 150
+        if (!this.$('.bottom-block').hasClass('fixed-scroll') && bottom_block_scroll && bottom_block_scroll < 160
             || this.$('.bottom-block').hasClass('fixed-scroll') && bottom_block_scroll && bottom_block_scroll < 110) {
             this.$('.bottom-block').addClass('fixed-scroll');
             this.$('.btn-back').addClass('btn-top');
