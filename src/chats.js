@@ -3343,6 +3343,17 @@ xabber.ChatContentView = xabber.BasicView.extend({
         }
     },
 
+    hideMessagesAfterSkipping: function () {
+        if (this.model.get('last_sync_unread_id')){
+            let synced_message = this.model.get('synced_msg'),
+                $synced_message = this.$(`.chat-message[data-uniqueid="${synced_message.get('unique_id')}"]`);
+            $synced_message.addClass('after-skip-message');
+            $synced_message.nextAll('.chat-message:not(.after-skip-message)').addClass('after-skip-message');
+        } else {
+            this.$('.chat-message.after-skip-message').removeClass('after-skip-message');
+        }
+    },
+
     readMessage: function (last_visible_msg, $last_visible_msg) {
         clearTimeout(this._read_last_message_timeout);
         this._read_last_message_timeout = setTimeout(() => {
@@ -3569,12 +3580,20 @@ xabber.ChatContentView = xabber.BasicView.extend({
             (this._scrolltop < 100 || this.getPercentScrolled() < 0.1)) {
             this.loadPreviousHistory();
         }
+        this.hideMessagesAfterSkipping();
         if (this._scrolltop > this._prev_scrolltop && this.model.get('last_sync_unread_id') && this.getPercentScrolled() > 0.2) {
-            this.getMessageArchive({
+            let mam_query = {
                 fast: true,
                 max: xabber.settings.mam_messages_limit,
                 after: this.model.get('last_sync_unread_id'),
-            }, {
+            };
+            if (this.model.get('synced_msg')) {
+                mam_query.var = [
+                    {var: 'after-id', value: this.model.get('last_sync_unread_id')},
+                    {var: 'before-id', value: this.model.get('synced_msg').get('stanza_id')},
+                ];
+            }
+            this.getMessageArchive(mam_query, {
                 unread_history: true,
             });
         }

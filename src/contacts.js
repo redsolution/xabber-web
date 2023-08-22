@@ -9028,6 +9028,7 @@ xabber.Roster = xabber.ContactsBase.extend({
                 if ((chat.last_message && (msg.get('timestamp') > chat.last_message.get('timestamp'))) || !chat.last_message){
                     chat.last_message = msg;
                     chat.item_view.updateLastMessage(msg);
+                    msg.get('stanza_id') && chat.set('synced_msg', msg);
                 }
             }
             chat.set('first_archive_id', msg.get('stanza_id'));
