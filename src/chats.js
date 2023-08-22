@@ -447,7 +447,15 @@ xabber.MessagesBase = Backbone.Collection.extend({
         (attrs.carbon_copied || from_jid == this.account.get('jid') && (options.is_archived || options.synced_msg)) && (attrs.state = constants.MSG_SENT);
         options.synced_msg && (attrs.synced_from_server = true);
         options.missed_history && (attrs.missed_msg = true);
-        (options.is_unread_archived && (attrs.type !== 'system')) && (attrs.is_unread = true);
+        if (options.is_unread_archived && (attrs.type !== 'system')){
+            let last_read_msg = this.find(m => this.chat.get('last_read_msg') && (m.get('stanza_id') === this.chat.get('last_read_msg') || m.get('contact_stanza_id') === this.chat.get('last_read_msg')));
+            if (last_read_msg){
+                if (Number(moment(attrs.time)) > last_read_msg.get('timestamp'))
+                    attrs.is_unread = true
+            } else {
+                attrs.is_unread = true
+            }
+        }
         if (options.echo_msg) {
             attrs.state = constants.MSG_DELIVERED;
             attrs.timestamp = Number(moment(attrs.time));
@@ -3348,6 +3356,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
             let synced_message = this.model.get('synced_msg'),
                 $synced_message = this.$(`.chat-message[data-uniqueid="${synced_message.get('unique_id')}"]`);
             $synced_message.addClass('after-skip-message');
+            $synced_message.prevAll('.chat-message.after-skip-message').removeClass('after-skip-message');
             $synced_message.nextAll('.chat-message:not(.after-skip-message)').addClass('after-skip-message');
         } else {
             this.$('.chat-message.after-skip-message').removeClass('after-skip-message');
@@ -3359,7 +3368,6 @@ xabber.ChatContentView = xabber.BasicView.extend({
         this._read_last_message_timeout = setTimeout(() => {
             this.model.sendMarker(last_visible_msg.get('msgid'), 'displayed', last_visible_msg.get('stanza_id'), last_visible_msg.get('contact_stanza_id'));
             this.model.set('last_read_msg', last_visible_msg.get('stanza_id'));
-            this.model.set('prev_last_read_msg', last_visible_msg.get('stanza_id'));
             this.model.set('prev_last_read_msg', last_visible_msg.get('stanza_id'));
             xabber.toolbar_view.recountAllMessageCounter();
         }, 1000)
@@ -3386,7 +3394,9 @@ xabber.ChatContentView = xabber.BasicView.extend({
             });
         }
         xabber.toolbar_view.recountAllMessageCounter();
-        $last_visible_msg.removeClass('unread-message-background');
+        setTimeout(() => {
+            $last_visible_msg.removeClass('unread-message-background');
+        }, 1000);
     },
 
     readMessages: function (timestamp) {
@@ -3408,6 +3418,8 @@ xabber.ChatContentView = xabber.BasicView.extend({
             let msg = this.model.last_message;
             this.model.sendMarker(msg.get('msgid'), 'displayed', msg.get('stanza_id'), msg.get('contact_stanza_id'));
             msg.set('is_unread', false);
+            msg.get('stanza_id') && this.model.set('last_read_msg', msg.get('stanza_id'));
+            msg.get('stanza_id') && this.model.set('prev_last_read_msg', msg.get('stanza_id'));
         }
         else if (this.model.last_message && this.model.last_message.get('auth_request') && this.model.messages.length){
             let messages = _.clone(this.model.messages.models),
@@ -3415,7 +3427,15 @@ xabber.ChatContentView = xabber.BasicView.extend({
             if (msg && msg.get('is_unread')) {
                 this.model.sendMarker(msg.get('msgid'), 'displayed', msg.get('stanza_id'), msg.get('contact_stanza_id'));
                 msg.set('is_unread', false);
+                msg.get('stanza_id') && this.model.set('last_read_msg', msg.get('stanza_id'));
+                msg.get('stanza_id') && this.model.set('prev_last_read_msg', msg.get('stanza_id'));
             }
+        }
+        if (!unread_messages.length) {
+            let unread_messages = _.clone(this.model.messages.models).filter(item => Boolean(item.get('is_unread')));
+            _.each(unread_messages, (msg) => {
+                msg.set('is_unread', false);
+            });
         }
     },
 
@@ -3570,7 +3590,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
         if (this.current_day_indicator !== null) {
             this.showDayIndicator(this.current_day_indicator);
         }
-        let scroll_read_timer = this._long_reading_timeout || is_focused ? 2000 : 1;
+        let scroll_read_timer = this._long_reading_timeout || is_focused ? 100 : 100;
         clearTimeout(this._onscroll_read_messages_timeout);
         this._onscroll_read_messages_timeout = setTimeout(() => {
             this.readVisibleMessages();
@@ -6604,7 +6624,9 @@ xabber.ChatContentView = xabber.BasicView.extend({
             if ((!is_unread_archived && !is_synced && !is_missed_msg) || this.model.messages_unread.indexOf(message) > -1)
                 this.model.messages_unread.remove(message);
             $msg.removeClass('unread-message');
-            $msg.removeClass('unread-message-background');
+            setTimeout(() => {
+                $msg.removeClass('unread-message-background');
+            }, 1000);
             this.model.recountUnread();
             if (!message.get('muted')) {
                 xabber.recountAllMessageCounter();

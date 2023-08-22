@@ -869,6 +869,12 @@ xabber.Account = Backbone.Model.extend({
                     this._fast_interval_worker.terminate();
                 this.fast_conn_manager = undefined;
                 this.fast_connection = undefined;
+                if (this.connection && !this.connection.disconnecting
+                    && this.connection.authenticated && this.connection.connected){
+                    this.getVCard();
+                    if (!(this.auth_view && this.auth_view.data.get('authentication')))
+                        this.trigger('ready_to_get_roster');
+                }
             }
         },
 
