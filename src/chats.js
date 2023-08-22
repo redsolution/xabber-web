@@ -3683,17 +3683,19 @@ xabber.ChatContentView = xabber.BasicView.extend({
             if (conn.connected){
                 sendMAMRequest(conn);
             }
-
+            let send_counter = 0;
             _interval = setInterval(() => {
                 is_fast = options.fast && account.fast_connection && !account.fast_connection.disconnecting
                     && account.fast_connection.authenticated && account.fast_connection.connected && account.get('status') !== 'offline';
                 conn = is_fast ? account.fast_connection : account.connection;
                 conn && console.log(conn.connected);
-                if (!conn){
+                if (!conn || send_counter >= 1){
                     clearInterval(_interval);
+                    errback && errback('No connection or too many attempts');
                     return;
                 }
-                if (conn.connected){
+                if (conn.connected && send_counter < 1){
+                    send_counter++;
                     sendMAMRequest(conn);
                 }
             }, 15000);
@@ -3779,6 +3781,9 @@ xabber.ChatContentView = xabber.BasicView.extend({
             if (options.previous_history) {
                 this._loading_history = false;
                 this.showHistoryFeedback(true);
+            }
+            if (options.unread_history_before || options.unread_history_first){
+                this.model._wait_load_unread_history.resolve();
             }
         });
     },
