@@ -3470,6 +3470,22 @@ xabber.ChatContentView = xabber.BasicView.extend({
         let $last_read_msg = this.$(`.chat-message.unread-message:first`);
         $last_read_msg.length && (this.scrollTo(this.getScrollTop()
             - (this.$el.height() * 0.2) + $last_read_msg.offset().top));
+        if (this.model.get('last_sync_unread_id')) {
+            let mam_query = {
+                fast: true,
+                max: xabber.settings.mam_messages_limit,
+                after: this.model.get('last_sync_unread_id'),
+            };
+            if (this.model.get('synced_msg')) {
+                mam_query.var = [
+                    {var: 'after-id', value: this.model.get('last_sync_unread_id')},
+                    {var: 'before-id', value: this.model.get('synced_msg').get('stanza_id')},
+                ];
+            }
+            this.getMessageArchive(mam_query, {
+                unread_history: true,
+            });
+        }
     },
 
     scrollToUnreadWithButton: function () {
@@ -3621,6 +3637,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
 
     backToBottom: function () {
         this.model.set('last_sync_unread_id', undefined);
+        this.hideMessagesAfterSkipping();
         this._no_scrolling_event = true;
         this.removeAllMessagesExceptLast();
         this.readMessages();
@@ -3763,12 +3780,18 @@ xabber.ChatContentView = xabber.BasicView.extend({
             if (options.unread_history){
                 if (messages.length)
                     this.model.set('last_sync_unread_id', $(messages[messages.length - 1]).find(`result[xmlns="${Strophe.NS.MAM}"]`).attr('id'));
-                else
+                else {
                     this.model.set('last_sync_unread_id', undefined);
+                    this.hideMessagesAfterSkipping();
+                }
             }
             if (options.unread_history_first && messages.length){
                 let first_unread_msg_stanza_id = $(messages[0]).find(`result[xmlns="${Strophe.NS.MAM}"]`).attr('id')
                 this.model.set('first_unread_msg_stanza_id', first_unread_msg_stanza_id);
+                if (messages.length < query.max){
+                    this.model.set('last_sync_unread_id', undefined);
+                    this.hideMessagesAfterSkipping();
+                }
                 this.getMessageArchive({
                     fast: true,
                     max: xabber.settings.mam_messages_limit,
