@@ -8888,6 +8888,10 @@ input[type=text].simple-input-field:hover {
     background-size: 4px 4px;
     background-position: 0px 0, 2px 2px;
 }
+.chat-message.encrypted[data-trust=untrusted] .chat-msg-content,
+.chat-message.encrypted[data-trust=none] .chat-msg-content {
+    color: #9E9E9E;
+}
 .chat-bottom-wrap[data-contact-trust=none] .fwd-messages-preview,
 .chat-bottom-wrap[data-contact-trust=none] .message-reference-preview,
 .chat-bottom-wrap[data-contact-trust=none] .input-message .ql-container{
