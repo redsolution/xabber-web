@@ -2469,6 +2469,7 @@ xabber.ChatItemView = xabber.BasicView.extend({
           this.account.context_messages = new xabber.Messages(null, {account: this.account});
           this.account.context_messages.on("change:last_replace_time", this.chat_content.updateMessage, this);
           this.account.context_messages.on("add", this.addMessage, this);
+          this.account.context_messages.on("change:is_unread", this.onChangedReadState, this);
           xabber.on('plyr_player_updated', this.onUpdatePlyr, this);
       },
 
@@ -2525,6 +2526,25 @@ xabber.ChatItemView = xabber.BasicView.extend({
                       });
                   }
               }
+
+          clearTimeout(this._onscroll_read_messages_timeout);
+          this._onscroll_read_messages_timeout = setTimeout(() => {
+              this.chat_content.readVisibleMessages(true);
+          }, 100)
+      },
+
+      onChangedReadState: function (message) {
+          let is_unread = message.get('is_unread'),
+              $msg = this.$(`.chat-message[data-uniqueid="${message.get("unique_id")}"]`);
+          if (is_unread) {
+              $msg.addClass('unread-message');
+              $msg.addClass('unread-message-background');
+          } else {
+              $msg.removeClass('unread-message');
+              setTimeout(() => {
+                  $msg.removeClass('unread-message-background');
+              }, 1000);
+          }
       },
 
       showHistoryFeedback: function () {
@@ -2569,6 +2589,13 @@ xabber.ChatItemView = xabber.BasicView.extend({
           if (message.get('auth_request'))
               return;
           if (this.mention_context && (message.get('stanza_id') === this.stanza_id)) {} else message.set('is_archived', true);
+
+          let msg_item = this.model.messages.find(msg => msg.get('stanza_id') == message.get('stanza_id') || msg.get('contact_stanza_id') == message.get('stanza_id'));
+          if (msg_item) {
+              msg_item.get('is_unread') && message.set('is_unread', msg_item.get('is_unread'));
+              msg_item.get('is_unread_archived') && message.set('is_unread_archived', msg_item.get('is_unread_archived'));
+          }
+
           let $message = this.chat_content.buildMessageHtml(message).addClass('context-message'),
               index = this.account.context_messages.indexOf(message);
           if (message.get('stanza_id') === this.stanza_id) {
@@ -3335,18 +3362,19 @@ xabber.ChatContentView = xabber.BasicView.extend({
         }
     },
 
-    readVisibleMessages: function () {
-        if (!this.isVisible())
+    readVisibleMessages: function (is_context) {
+        let self = is_context ? this.model.messages_view : this;
+        if (!self.isVisible())
             return;
-        if (this.$('.chat-message.unread-message').length && xabber.get('focused') && !xabber.get('idle')){
+        if (self.$('.chat-message.unread-message').length && xabber.get('focused') && !xabber.get('idle')){
             let last_visible_unread_msg;
-            this.$('.chat-message.unread-message').each((idx, msg) => {
-                if ($(msg).isVisibleInContainer(this.$('.chat-content'))) {
+            self.$('.chat-message.unread-message').each((idx, msg) => {
+                if ($(msg).isVisibleInContainer(self.$('.chat-content'))) {
                     last_visible_unread_msg = msg;
                 }
             });
             if (last_visible_unread_msg){
-                this.readMessage(this.model.messages.get($(last_visible_unread_msg).data('uniqueid')), $(last_visible_unread_msg));
+                this.readMessage(this.model.messages.get($(last_visible_unread_msg).data('uniqueid')), $(last_visible_unread_msg), is_context);
             }
         }
     },
@@ -3363,12 +3391,27 @@ xabber.ChatContentView = xabber.BasicView.extend({
         }
     },
 
-    readMessage: function (last_visible_msg, $last_visible_msg) {
+    readMessage: function (last_visible_msg, $last_visible_msg, is_context) {
         clearTimeout(this._read_last_message_timeout);
         this._read_last_message_timeout = setTimeout(() => {
             this.model.sendMarker(last_visible_msg.get('msgid'), 'displayed', last_visible_msg.get('stanza_id'), last_visible_msg.get('contact_stanza_id'));
             this.model.set('last_read_msg', last_visible_msg.get('stanza_id'));
             this.model.set('prev_last_read_msg', last_visible_msg.get('stanza_id'));
+
+            if (is_context){
+                let unread_context_messages = _.clone(this.account.context_messages.models).filter(item => Boolean(item.get('is_unread')) || Boolean(item.get('is_unread_archived')));
+                _.each(unread_context_messages, (msg) => {
+                    let msg_item = this.model.messages.find(message => message.get('stanza_id') == msg.get('stanza_id') || message.get('contact_stanza_id') == msg.get('stanza_id'));
+                    if (msg_item) {
+                        msg.set('is_unread', msg_item.get('is_unread'));
+                        msg.set('is_unread_archived', msg_item.get('is_unread_archived'));
+                    }
+                });
+                setTimeout(() => {
+                    $last_visible_msg.removeClass('unread-message-background');
+                }, 1000);
+            }
+
             xabber.toolbar_view.recountAllMessageCounter();
         }, 1000)
 
@@ -3394,9 +3437,12 @@ xabber.ChatContentView = xabber.BasicView.extend({
             });
         }
         xabber.toolbar_view.recountAllMessageCounter();
-        setTimeout(() => {
-            $last_visible_msg.removeClass('unread-message-background');
-        }, 1000);
+
+        if (!is_context){
+            setTimeout(() => {
+                $last_visible_msg.removeClass('unread-message-background');
+            }, 1000);
+        }
     },
 
     readMessages: function (timestamp) {
@@ -4302,6 +4348,10 @@ xabber.ChatContentView = xabber.BasicView.extend({
                 (mention_target === this.account.get('jid') || mention_target === "") && this.account.mentions.create(null, {message: message, contact: this.contact});
             });
         }
+
+        if (this.model.messages_view && xabber.body.screen.get('right') === 'message_context' && this.model.messages_view.last_history_loaded)
+            this.account.context_messages.add(message);
+
     },
 
 
