@@ -12147,7 +12147,6 @@ input[type='range'].voice-message-volume:focus {
 
 .modal.main-color-picker {
     width: 256px;
-    max-height: calc(100% - 200px);
 }
 
 .modal.main-color-picker .color-values {

@@ -391,6 +391,10 @@ let Xabber = Backbone.Model.extend({
             if (config.ASSETS_URL_PREFIX) {
                 constants.ASSETS_URL_PREFIX = config.ASSETS_URL_PREFIX;
             }
+            if (config.BACKGROUND_IMAGES_XML_URL)
+                constants.BACKGROUND_IMAGES_XML_URL = config.BACKGROUND_IMAGES_XML_URL;
+            if (config.BACKGROUND_PATTERNS_XML_URL)
+                constants.BACKGROUND_PATTERNS_XML_URL = config.BACKGROUND_PATTERNS_XML_URL;
             if (config.CONTAINER_ELEMENT)
                 constants.CONTAINER_ELEMENT = config.CONTAINER_ELEMENT;
             if (config.REGISTRATION_DOMAINS)

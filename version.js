@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.3.3.184","version_description":"changed font changing for not decrypted messages, added dialog for sending message to contact without verified devices"}'
+'{"version_number":"2.3.3.185","version_description":"moved background and patterns xmls to xabber-backgrounds repository, fixed client colors modal height"}'
 )});

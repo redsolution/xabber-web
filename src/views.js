@@ -3327,9 +3327,9 @@ xabber.SetBackgroundView = xabber.BasicView.extend({
             }
         };
         if (this.type == 'repeating-pattern') {
-            request.url = './background-patterns.xml';
+            request.url = constants.BACKGROUND_PATTERNS_XML_URL;
         } else {
-            request.url = './background-images.xml';
+            request.url = constants.BACKGROUND_IMAGES_XML_URL;
         }
         $.ajax(request);
     },
