@@ -39,6 +39,7 @@ let Xabber = Backbone.Model.extend({
         this.initDefaultLanguage();
         this.detectMediaDevices();
         window.navigator.mediaDevices && (window.navigator.mediaDevices.ondevicechange = this.detectMediaDevices.bind(this));
+        this.check_config = new $.Deferred();
         this._settings = new this.Settings({id: 'settings'},
                 {storage_name: this.getStorageName(), fetch: 'before'});
         this.settings = this._settings.attributes;
@@ -50,9 +51,7 @@ let Xabber = Backbone.Model.extend({
         this.cache = this._cache.attributes;
         this.cache.client_id && (this.set('client_id', this.cache.client_id));
         this._cache.save('client_id', this.get('client_id'));
-        this.cacheFavicons();
         this.extendFunction();
-        this.check_config = new $.Deferred();
         this.plyr_players = [];
         this.current_plyr_player = null;
         this.on("change:actual_version_number", this.throwNewVersion, this);
@@ -327,6 +326,7 @@ let Xabber = Backbone.Model.extend({
 
     start: function () {
         this.check_config.done((result) => {
+            this.cacheFavicons();
             this.check_config = undefined;
             result && this.trigger('start');
         });
@@ -342,6 +342,7 @@ let Xabber = Backbone.Model.extend({
                 'PERSONAL_AREA_URL',
                 'LOG_LEVEL',
                 'SYNCHRONIZATION_RSM_MAX',
+                'ASSETS_URL_PREFIX',
                 'CONTAINER_ELEMENT',
                 'XABBER_ACCOUNT_URL',
                 'REGISTER_XMPP_ACCOUNT',
@@ -387,6 +388,9 @@ let Xabber = Backbone.Model.extend({
             _.extend(window, env);
             if (config.SYNCHRONIZATION_RSM_MAX)
                 constants.SYNCHRONIZATION_RSM_MAX = config.SYNCHRONIZATION_RSM_MAX;
+            if (config.ASSETS_URL_PREFIX) {
+                constants.ASSETS_URL_PREFIX = config.ASSETS_URL_PREFIX;
+            }
             if (config.CONTAINER_ELEMENT)
                 constants.CONTAINER_ELEMENT = config.CONTAINER_ELEMENT;
             if (config.REGISTRATION_DOMAINS)
@@ -421,6 +425,35 @@ let Xabber = Backbone.Model.extend({
                 else if (_.isObject(config.TURN_SERVERS_LIST) && Object.keys(config.TURN_SERVERS_LIST).length)
                     _.extend(constants, {TURN_SERVERS_LIST: [config.TURN_SERVERS_LIST]});
             }
+
+            constants.FAVICON_DEFAULT = constants.ASSETS_URL_PREFIX + constants.FAVICON_DEFAULT;
+            constants.FAVICON_DEFAULT_GREY = constants.ASSETS_URL_PREFIX + constants.FAVICON_DEFAULT_GREY;
+            constants.FAVICON_MESSAGE = constants.ASSETS_URL_PREFIX + constants.FAVICON_MESSAGE;
+            constants.BACKGROUND_IMAGE = constants.ASSETS_URL_PREFIX + constants.BACKGROUND_IMAGE;
+
+            constants.SOUNDS = {
+                beep_up: constants.ASSETS_URL_PREFIX + constants.SOUNDS.beep_up,
+                tiny_noize: constants.ASSETS_URL_PREFIX + constants.SOUNDS.tiny_noize,
+                retro_game: constants.ASSETS_URL_PREFIX + constants.SOUNDS.retro_game,
+                pixel_beep: constants.ASSETS_URL_PREFIX + constants.SOUNDS.pixel_beep,
+                beep_positive: constants.ASSETS_URL_PREFIX + constants.SOUNDS.beep_positive,
+                good_chime: constants.ASSETS_URL_PREFIX + constants.SOUNDS.good_chime,
+                cellular_click: constants.ASSETS_URL_PREFIX + constants.SOUNDS.cellular_click,
+                bleep: constants.ASSETS_URL_PREFIX + constants.SOUNDS.bleep,
+                mono_u: constants.ASSETS_URL_PREFIX + constants.SOUNDS.mono_u,
+                plop: constants.ASSETS_URL_PREFIX + constants.SOUNDS.plop,
+                ether: constants.ASSETS_URL_PREFIX + constants.SOUNDS.ether,
+                pop: constants.ASSETS_URL_PREFIX + constants.SOUNDS.pop,
+                computer_chime: constants.ASSETS_URL_PREFIX + constants.SOUNDS.computer_chime,
+                beep_a: constants.ASSETS_URL_PREFIX + constants.SOUNDS.beep_a,
+                call: constants.ASSETS_URL_PREFIX + constants.SOUNDS.call,
+                connecting: constants.ASSETS_URL_PREFIX + constants.SOUNDS.connecting,
+                busy: constants.ASSETS_URL_PREFIX + constants.SOUNDS.busy,
+                attention: constants.ASSETS_URL_PREFIX + constants.SOUNDS.attention,
+            };
+
+            constants.CLIENT_LOGO = constants.ASSETS_URL_PREFIX + constants.CLIENT_LOGO;
+            constants.TOOLBAR_LOGO = constants.ASSETS_URL_PREFIX + constants.CLIENT_LOGO;
 
             if (utils.isMobile.any()) {
                 let ios_msg = this.getString("warning__client_not_support_ios_browser", [constants.CLIENT_NAME]),

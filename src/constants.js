@@ -1,5 +1,6 @@
 var constants = {
 
+    ASSETS_URL_PREFIX: './',
     STORAGE_NAME: 'xabber-storage',
     STORAGE_VERSION: 'v8',
 

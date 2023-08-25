@@ -11153,7 +11153,7 @@ xabber.ChatBottomView = xabber.BasicView.extend({
                 onloaded_sprites++;
                 (onloaded_sprites === all_sprites) && $emoji_panel_wrap.find('.uploading-emoticons').detach();
             };
-            img.src = './assets/images/emoji/spritesheet' + i++ + '.png';
+            img.src = constants.ASSETS_URL_PREFIX + 'assets/images/emoji/spritesheet' + i++ + '.png';
         }
         let window_onclick = function (ev) {
             if ($(ev.target).closest('.emoticons-panel-wrap').length || $(ev.target).closest('.insert-emoticon').length)
