@@ -266,6 +266,7 @@ xabber.MessagesBase = Backbone.Collection.extend({
                 is_archived: options.is_archived,
                 is_unread_archived: options.is_unread_archived,
                 is_between_anchors: options.is_between_anchors,
+                not_encrypted: options.not_encrypted,
             },
             mentions = [], blockquotes = [], markups = [], mutable_content = [], files = [], images = [], videos = [], locations = [], link_references = [];
 
@@ -4819,6 +4820,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
         let classes = [
             attrs.is_unread && 'unread-message',
             attrs.is_unread && 'unread-message-background',
+            attrs.not_encrypted && 'not-decrypted',
             attrs.forwarded_message && 'forwarding',
             (attrs.encrypted || this.model.get('encrypted')) ? 'encrypted' : ""
         ];
@@ -11270,7 +11272,9 @@ xabber.ChatBottomView = xabber.BasicView.extend({
                     this.account.omemo.checkContactFingerprints(this.contact);
                     (this.model.get('active') && this.model.get('display')) && this.focusOnInput();
                 } else {
-                    this.account.omemo.checkContactFingerprints(this.contact).then((is_contact_trusted) => {
+                    this.account.omemo.checkContactFingerprints(this.contact).then((obj) => {
+                        let is_contact_trusted = obj.trust,
+                            unverified_counter = obj.unverified_counter;
                         let is_scrolled_bottom = this.view.isScrolledToBottom();
                         this.$el.removeClass('loading');
                         this.$el.children('.preloader-wrapper').detach();
@@ -11285,7 +11289,7 @@ xabber.ChatBottomView = xabber.BasicView.extend({
                         } else {
                             if (is_contact_trusted === 'none') {
                                 this.view.$el.addClass('encrypted');
-                                this.view.$('.chat-notification').removeClass('hidden').addClass('encryption-warning').html(templates.content_encryption_warning({message: xabber.getString("omemo__alert_new_device_partner__text_new_device")}));
+                                this.view.$('.chat-notification').removeClass('hidden').addClass('encryption-warning').attr('data-unverified-device-count', unverified_counter).html(templates.content_encryption_warning({message: xabber.getString("omemo__alert_new_device_partner__text_new_device")}));
                             }
                             this.$el.attr('data-contact-trust', is_contact_trusted);
                         }
@@ -12251,7 +12255,7 @@ xabber.ChatBottomView = xabber.BasicView.extend({
         });
     },
 
-    submit: function (ev) {
+    submit: function (ev, forced) {
         let $rich_textarea = this.$('.input-message .rich-textarea'),
             mentions = [],
             markup_references = [],
@@ -12260,6 +12264,26 @@ xabber.ChatBottomView = xabber.BasicView.extend({
             attached_files = this.attached_files,
             text = $rich_textarea.getTextFromRichTextarea(),
             dfd = new $.Deferred();
+
+
+        if (this.model.get('encrypted') && this.view.$('.chat-notification').hasClass('encryption-warning') && !forced){
+            let unverified_counter = this.view.$('.encryption-warning').attr('data-unverified-device-count');
+            utils.dialogs.ask_extended(xabber.getQuantityString("dialog_unverified_devices__header", unverified_counter || 1), xabber.getQuantityString("dialog_unverified_devices__text", unverified_counter || 1),
+                {modal_class: 'modal-unverified-devices', no_dialog_options: true},
+                { ok_button_text: xabber.getString("omemo__alert_new_device__button_manage_devices"), optional_button: 'send-anyway', optional_button_text: xabber.getString("dialog_unverified_devices__send")})
+                .done((result) => {
+                if (result) {
+                    if (result === 'send-anyway'){
+                        this.submit(ev, true);
+                    }
+                    else{
+                        this.openDevicesWindow();
+                    }
+                }
+            });
+            return;
+        }
+
         dfd.done(() => {
             this.$('.mentions-list').html("").hide();
             $rich_textarea.find('.emoji').each((idx, emoji_item) => {

@@ -520,6 +520,10 @@ button.btn-float-left {
     margin: 4px 5px;
 }
 
+.modal .modal-footer .btn-cancel {
+    color: #9E9E9E !important;
+}
+
 .modal .modal-footer .modal-preloader-wrap {
     position: absolute;
     right: 64px;
@@ -8888,8 +8892,7 @@ input[type=text].simple-input-field:hover {
     background-size: 4px 4px;
     background-position: 0px 0, 2px 2px;
 }
-.chat-message.encrypted[data-trust=untrusted] .chat-msg-content,
-.chat-message.encrypted[data-trust=none] .chat-msg-content {
+.chat-message.encrypted.not-decrypted .chat-msg-content {
     color: #9E9E9E;
 }
 .chat-bottom-wrap[data-contact-trust=none] .fwd-messages-preview,
@@ -12672,6 +12675,14 @@ input[type='range'].voice-message-volume:focus {
     width: 30%;
 }
 
+.dialog-modal.modal-unverified-devices .modal-footer.extended .btn-cancel{
+    float: right !important;
+}
+.dialog-modal.modal-unverified-devices .modal-footer.extended .optional-button{
+    float: left !important;
+    margin-left: 0;
+    color: #9E9E9E !important;
+}
 .blocked-items .blocklist-tabs-wrap {
     width: 50%;
     min-width: 275px;

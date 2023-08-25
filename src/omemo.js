@@ -1605,11 +1605,11 @@ xabber.Omemo = Backbone.ModelWithStorage.extend({
         return new Promise((resolve, reject) => {
             let is_trusted = true,
                 peer = this.getPeer(contact.get('jid')),
-                dfd = new $.Deferred(), counter = 0;
+                dfd = new $.Deferred(), counter = 0, unverified_counter = 0;
             dfd.done((t) => {
                 let trust = t === null ? 'error' : (t === undefined ? 'none' : t);
                 contact.trigger('update_trusted', trust);
-                resolve(trust);
+                resolve({trust: trust, unverified_counter: unverified_counter});
             });
             if (Object.keys(peer.devices).length) {
                 counter = Object.keys(peer.devices).length;
@@ -1617,27 +1617,37 @@ xabber.Omemo = Backbone.ModelWithStorage.extend({
                     let device = peer.devices[device_id];
                     if (device.get('fingerprint')) {
                         let trusted = this.isTrusted(contact.get('jid'), device.id, device.get('fingerprint'));
-                        if (trusted === undefined && is_trusted !== null)
+                        if (trusted === undefined && is_trusted !== null){
                             is_trusted = undefined;
-                        if (trusted === null)
+                            unverified_counter++;
+                        }
+                        if (trusted === null){
                             is_trusted = null;
+                            unverified_counter++;
+                        }
                         counter--;
                         !counter && dfd.resolve(is_trusted);
                     } else if (device.get('ik')) {
                         device.set('fingerprint', device.generateFingerprint());
                         let trusted = this.isTrusted(contact.get('jid'), device.id, device.get('fingerprint'));
-                        if (trusted === undefined && is_trusted !== null)
+                        if (trusted === undefined && is_trusted !== null){
                             is_trusted = undefined;
-                        if (trusted === null)
+                            unverified_counter++;
+                        }
+                        if (trusted === null){
                             is_trusted = null;
+                            unverified_counter++;
+                        }
                         counter--;
                         !counter && dfd.resolve(is_trusted);
                     } else {
                         if (device.get('ik') === null) {
                             counter--;
                             if (!counter) {
-                                if (Object.keys(peer.devices).length === 1)
+                                if (Object.keys(peer.devices).length === 1){
                                     is_trusted = 'nil';
+                                    unverified_counter++;
+                                }
                                 dfd.resolve(is_trusted);
                             }
                             continue;
@@ -1646,17 +1656,23 @@ xabber.Omemo = Backbone.ModelWithStorage.extend({
                             device.set('ik', utils.fromBase64toArrayBuffer(ik));
                             device.set('fingerprint', device.generateFingerprint());
                             let trusted = this.isTrusted(contact.get('jid'), device.id, device.get('fingerprint'));
-                            if (trusted === undefined && is_trusted !== null)
+                            if (trusted === undefined && is_trusted !== null){
                                 is_trusted = undefined;
-                            if (trusted === null)
+                                unverified_counter++;
+                            }
+                            if (trusted === null){
                                 is_trusted = null;
+                                unverified_counter++;
+                            }
                             counter--;
                             !counter && dfd.resolve(is_trusted);
                         }).catch(() => {
                             counter--;
                             if (!counter) {
-                                if (Object.keys(peer.devices).length === 1)
+                                if (Object.keys(peer.devices).length === 1){
                                     is_trusted = 'nil';
+                                    unverified_counter++;
+                                }
                                 dfd.resolve(is_trusted);
                             }
                         });
@@ -1672,21 +1688,29 @@ xabber.Omemo = Backbone.ModelWithStorage.extend({
                             device.set('ik', utils.fromBase64toArrayBuffer(ik));
                             device.set('fingerprint', device.generateFingerprint());
                             let trusted = this.isTrusted(contact.get('jid'), device.id, device.get('fingerprint'));
-                            if (trusted === undefined && is_trusted !== null)
+                            if (trusted === undefined && is_trusted !== null){
                                 is_trusted = undefined;
+                                unverified_counter++;
+                            }
                             if (trusted === null) {
-                                if (Object.keys(peer.devices).length === 1)
+                                if (Object.keys(peer.devices).length === 1){
                                     is_trusted = 'nil';
-                                else
+                                    unverified_counter++;
+                                }
+                                else{
                                     is_trusted = null;
+                                    unverified_counter++;
+                                }
                             }
                             counter--;
                             !counter && dfd.resolve(is_trusted);
                         }).catch(() => {
                             counter--;
                             if (!counter) {
-                                if (Object.keys(peer.devices).length === 1)
+                                if (Object.keys(peer.devices).length === 1){
                                     is_trusted = 'nil';
+                                    unverified_counter++;
+                                }
                                 dfd.resolve(is_trusted);
                             }
                         });
@@ -1705,6 +1729,7 @@ xabber.Omemo = Backbone.ModelWithStorage.extend({
 
         let own_trusted = await this.checkOwnFingerprints(),
             contact_trusted = await this.checkContactFingerprints(contact);
+        contact_trusted = contact_trusted.trust;
         if (own_trusted === 'error' || (own_trusted === 'none' && contact_trusted !== 'error')) {
             return own_trusted;
         } else if (contact_trusted === 'error' || contact_trusted === 'none') {

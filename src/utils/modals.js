@@ -152,6 +152,9 @@ export default {
                 dialog.$modal.addClass(dialog_options.modal_class)
             }
 
+            if (dialog_options.no_dialog_options) {
+                dialog.$modal.find('.dialog-options-wrap').html('');
+            }
             if (dialog_options.inverted_buttons) {
                 dialog.$modal.find('.dialog-options-wrap').html('');
                 dialog.$modal.find('.cancel-button').removeClass('btn-dark');
