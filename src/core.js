@@ -453,7 +453,7 @@ let Xabber = Backbone.Model.extend({
             };
 
             constants.CLIENT_LOGO = constants.ASSETS_URL_PREFIX + constants.CLIENT_LOGO;
-            constants.TOOLBAR_LOGO = constants.ASSETS_URL_PREFIX + constants.CLIENT_LOGO;
+            constants.TOOLBAR_LOGO = constants.ASSETS_URL_PREFIX + constants.TOOLBAR_LOGO;
 
             if (utils.isMobile.any()) {
                 let ios_msg = this.getString("warning__client_not_support_ios_browser", [constants.CLIENT_NAME]),
