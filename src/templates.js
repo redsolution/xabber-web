@@ -298,6 +298,7 @@
     addSvgTemplate('svg.edit-outline');
     addSvgTemplate('svg.blocked-add');
     addSvgTemplate('svg.information-outline');
+    addSvgTemplate('svg.information');
     addSvgTemplate('svg.fullname');
     addSvgTemplate('svg.fullname-outline');
     addSvgTemplate('svg.ic-at');

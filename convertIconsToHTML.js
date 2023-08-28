@@ -48,6 +48,7 @@ let badges_names = [
         'edit',
         'edit-outline',
         'blocked-add',
+        'information',
         'information-outline',
         'qrcode',
         'fullname',
@@ -96,13 +97,19 @@ let badges_names = [
     fs = require('fs');
 badges_names.forEach((name) => {
     let svg = fs.readFileSync(`../xabber-icons/badge/icon/${name}.svg`, 'utf-8');
+    svg = svg.replace(/<title>.*<\/title>/, '');
+    svg = svg.replaceAll('24px', '100%');
     fs.writeFileSync(`./templates/svg/${name}.html`, svg);
 });
 material_icons.forEach((name) => {
     let svg = fs.readFileSync(`../xabber-icons/icon/material/${name}.svg`, 'utf-8');
+    svg = svg.replace(/<title>.*<\/title>/, '');
+    svg = svg.replaceAll('24px', '100%');
     fs.writeFileSync(`./templates/svg/${name}.html`, svg);
 });
 circle_icons.forEach((name) => {
     let svg = fs.readFileSync(`../xabber-icons/badge/circle/${name}.svg`, 'utf-8');
+    svg = svg.replace(/<title>.*<\/title>/, '');
+    svg = svg.replaceAll('24px', '100%');
     fs.writeFileSync(`./templates/svg/${name}.html`, svg);
 });

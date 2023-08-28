@@ -266,7 +266,7 @@ xabber.MessagesBase = Backbone.Collection.extend({
                 is_archived: options.is_archived,
                 is_unread_archived: options.is_unread_archived,
                 is_between_anchors: options.is_between_anchors,
-                not_encrypted: options.not_encrypted,
+                not_encrypted: options.not_encrypted || null,
             },
             mentions = [], blockquotes = [], markups = [], mutable_content = [], files = [], images = [], videos = [], locations = [], link_references = [];
 
@@ -4805,6 +4805,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
             from_id: from_id
         });
         attrs.encrypted = attrs.encrypted || this.model.get('encrypted');
+        attrs.not_encrypted = attrs.not_encrypted || null;
 
         if (attrs.type === 'system') {
             let tpl_name = attrs.invite ? 'group_request' : 'system';
@@ -5531,6 +5532,14 @@ xabber.ChatContentView = xabber.BasicView.extend({
                 }
             });
         }
+
+        ($msg.find('.not-decrypted-icon').length) && $msg.find('.not-decrypted-icon').dropdown({
+            inDuration: 100,
+            outDuration: 100,
+            constrainWidth: false,
+            hover: false,
+            alignment: 'right'
+        });
     },
 
     notifyMessage: function (message) {
@@ -6202,7 +6211,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
                 let xhr_status = this.fakeStatus || this.status;
                 if (xhr_status >= 200 && xhr_status < 300) {
                     $message.find('div[data-upload-file-id="' + file.upload_id + '"] .mdi-center-loading-indicator').addClass('mdi-check').removeClass('mdi-close');
-                    let response = JSON.parse(this.response)
+                    let response = this.response ? JSON.parse(this.response) : this.fakeResponse;
                     message.get('files')[idx].id = response.id;
                     message.get('files')[idx].created_at = response.created_at;
                     (response.thumbnail && response.thumbnail.url) && (message.get('files')[idx].thumbnail = response.thumbnail.url);
@@ -6219,13 +6228,25 @@ xabber.ChatContentView = xabber.BasicView.extend({
                             self.account.testGalleryFileSlot(xhr_requests[files_count].formData.get('file'), (slot_response) => {
                                 if (!is_error) {
                                     if (slot_response && slot_response.quota){
-                                        xhr_requests[files_count].open("POST", self.account.get('gallery_url') + 'v1/files/upload/', true);
-                                        xhr_requests[files_count].setRequestHeader("Authorization", 'Bearer ' + self.account.get('gallery_token'));
-                                        xhr_requests[files_count].is_uploading = true;
-                                        xhr_requests[files_count].send(xhr_requests[files_count].formData);
+                                        if (slot_response.file && slot_response.hash){
+                                            xhr_requests[files_count].fakeStatus = 200;
+                                            xhr_requests[files_count].fakeResponse = {
+                                                file: slot_response.file,
+                                                id: slot_response.id,
+                                                name: slot_response.name,
+                                                thumbnail: slot_response.thumbnail,
+                                                created_at: slot_response.created_at,
+                                            };
+                                            xhr_requests[files_count].oncancel();
+                                        } else {
+                                            xhr_requests[files_count].open("POST", self.account.get('gallery_url') + 'v1/files/upload/', true);
+                                            xhr_requests[files_count].setRequestHeader("Authorization", 'Bearer ' + self.account.get('gallery_token'));
+                                            xhr_requests[files_count].is_uploading = true;
+                                            xhr_requests[files_count].send(xhr_requests[files_count].formData);
+                                        }
                                     } else {
-                                        xhr_requests[files_count].fakeResponse = slot_response && slot_response.error ? slot_response.error : 400;
-                                        xhr_requests[files_count].fakeStatus = slot_response && slot_response.status ? slot_response.status : 'Unknown error';
+                                        xhr_requests[files_count].fakeStatus = slot_response && slot_response.status ? slot_response.status : 400;
+                                        xhr_requests[files_count].fakeResponse = slot_response && slot_response.error ? slot_response.error : 'Unknown error';
                                         xhr_requests[files_count].oncancel();
                                     }
                                 }
@@ -6254,13 +6275,25 @@ xabber.ChatContentView = xabber.BasicView.extend({
                                         self.account.testGalleryFileSlot(xhr_requests[files_count].formData.get('file'), (slot_response) => {
                                             if (!is_error) {
                                                 if (slot_response && slot_response.quota){
-                                                    xhr_requests[files_count].open("POST", self.account.get('gallery_url') + 'v1/files/upload/', true);
-                                                    xhr_requests[files_count].setRequestHeader("Authorization", 'Bearer ' + self.account.get('gallery_token'));
-                                                    xhr_requests[files_count].is_uploading = true;
-                                                    xhr_requests[files_count].send(xhr_requests[files_count].formData);
+                                                    if (slot_response.file && slot_response.hash){
+                                                        xhr_requests[files_count].fakeStatus = 200;
+                                                        xhr_requests[files_count].fakeResponse = {
+                                                            file: slot_response.file,
+                                                            id: slot_response.id,
+                                                            name: slot_response.name,
+                                                            thumbnail: slot_response.thumbnail,
+                                                            created_at: slot_response.created_at,
+                                                        };
+                                                        xhr_requests[files_count].oncancel();
+                                                    } else {
+                                                        xhr_requests[files_count].open("POST", self.account.get('gallery_url') + 'v1/files/upload/', true);
+                                                        xhr_requests[files_count].setRequestHeader("Authorization", 'Bearer ' + self.account.get('gallery_token'));
+                                                        xhr_requests[files_count].is_uploading = true;
+                                                        xhr_requests[files_count].send(xhr_requests[files_count].formData);
+                                                    }
                                                 } else {
-                                                    xhr_requests[files_count].fakeResponse = slot_response && slot_response.error ? slot_response.error : 400;
-                                                    xhr_requests[files_count].fakeStatus = slot_response && slot_response.status ? slot_response.status : 'Unknown error';
+                                                    xhr_requests[files_count].fakeStatus = slot_response && slot_response.status ? slot_response.status : 400;
+                                                    xhr_requests[files_count].fakeResponse = slot_response && slot_response.error ? slot_response.error : 'Unknown error';
                                                     xhr_requests[files_count].oncancel();
                                                 }
                                             }
@@ -6318,13 +6351,25 @@ xabber.ChatContentView = xabber.BasicView.extend({
                                     self.account.testGalleryFileSlot(xhr_requests[files_count].formData.get('file'), (slot_response) => {
                                         if (!is_error) {
                                             if (slot_response && slot_response.quota){
-                                                xhr_requests[files_count].open("POST", self.account.get('gallery_url') + 'v1/files/upload/', true);
-                                                xhr_requests[files_count].setRequestHeader("Authorization", 'Bearer ' + self.account.get('gallery_token'));
-                                                xhr_requests[files_count].is_uploading = true;
-                                                xhr_requests[files_count].send(xhr_requests[files_count].formData);
+                                                if (slot_response.file && slot_response.hash){
+                                                    xhr_requests[files_count].fakeStatus = 200;
+                                                    xhr_requests[files_count].fakeResponse = {
+                                                        file: slot_response.file,
+                                                        id: slot_response.id,
+                                                        name: slot_response.name,
+                                                        thumbnail: slot_response.thumbnail,
+                                                        created_at: slot_response.created_at,
+                                                    };
+                                                    xhr_requests[files_count].oncancel();
+                                                } else {
+                                                    xhr_requests[files_count].open("POST", self.account.get('gallery_url') + 'v1/files/upload/', true);
+                                                    xhr_requests[files_count].setRequestHeader("Authorization", 'Bearer ' + self.account.get('gallery_token'));
+                                                    xhr_requests[files_count].is_uploading = true;
+                                                    xhr_requests[files_count].send(xhr_requests[files_count].formData);
+                                                }
                                             } else {
-                                                xhr_requests[files_count].fakeResponse = slot_response && slot_response.error ? slot_response.error : 400;
-                                                xhr_requests[files_count].fakeStatus = slot_response && slot_response.status ? slot_response.status : 'Unknown error';
+                                                xhr_requests[files_count].fakeStatus = slot_response && slot_response.status ? slot_response.status : 400;
+                                                xhr_requests[files_count].fakeResponse = slot_response && slot_response.error ? slot_response.error : 'Unknown error';
                                                 xhr_requests[files_count].oncancel();
                                             }
                                         }
@@ -6344,13 +6389,25 @@ xabber.ChatContentView = xabber.BasicView.extend({
                     this.account.testGalleryFileSlot(xhr_requests[0].formData.get('file'), (slot_response) => {
                         if (!is_error) {
                             if (slot_response && slot_response.quota){
-                                xhr_requests[0].open("POST", this.account.get('gallery_url') + 'v1/files/upload/', true);
-                                xhr_requests[0].setRequestHeader("Authorization", 'Bearer ' + this.account.get('gallery_token'));
-                                xhr_requests[0].is_uploading = true;
-                                xhr_requests[0].send(xhr_requests[0].formData);
+                                if (slot_response.file && slot_response.hash){
+                                    xhr_requests[0].fakeStatus = 200;
+                                    xhr_requests[0].fakeResponse = {
+                                        file: slot_response.file,
+                                        id: slot_response.id,
+                                        name: slot_response.name,
+                                        thumbnail: slot_response.thumbnail,
+                                        created_at: slot_response.created_at,
+                                    };
+                                    xhr_requests[0].oncancel();
+                                } else {
+                                    xhr_requests[0].open("POST", this.account.get('gallery_url') + 'v1/files/upload/', true);
+                                    xhr_requests[0].setRequestHeader("Authorization", 'Bearer ' + this.account.get('gallery_token'));
+                                    xhr_requests[0].is_uploading = true;
+                                    xhr_requests[0].send(xhr_requests[0].formData);
+                                }
                             } else {
-                                xhr_requests[0].fakeResponse = slot_response && slot_response.error ? slot_response.error : 400;
-                                xhr_requests[0].fakeStatus = slot_response && slot_response.status ? slot_response.status : 'Unknown error';
+                                xhr_requests[files_count].fakeStatus = slot_response && slot_response.status ? slot_response.status : 400;
+                                xhr_requests[files_count].fakeResponse = slot_response && slot_response.error ? slot_response.error : 'Unknown error';
                                 xhr_requests[0].oncancel();
                             }
                         }
@@ -6863,7 +6920,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
             } else
                 xabber.openWindow($elem.attr('href'));
         }
-        if ($elem.hasClass('msg-delivering-state') || $elem.hasClass('audio-control-panel') || $elem.hasClass('voice-msg-current-time') || $elem.hasClass('voice-msg-total-time')) {
+        if ($elem.hasClass('msg-delivering-state') || $elem.hasClass('not-decrypted-icon') || $elem.hasClass('not-decrypted-tooltip') || $elem.hasClass('audio-control-panel') || $elem.hasClass('voice-msg-current-time') || $elem.hasClass('voice-msg-total-time')) {
             return;
         }
         if ($elem.closest(".plyr-video-container").length > 0) {

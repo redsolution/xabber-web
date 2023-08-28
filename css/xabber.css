@@ -8808,6 +8808,10 @@ input[type=text].simple-input-field:hover {
     background-position: 0px 0, 2px 2px;
 }
 
+.chat-message.encrypted.not-decrypted {
+    z-index: 1;
+}
+
 .chat-bottom-wrap[data-contact-trust=true],
 .chat-bottom-wrap[data-trust=true],
 .chat-day-indicator[data-trust=true],
@@ -9554,6 +9558,41 @@ img.fwd-img-preview {
     position: absolute;
     left: 2px;
     top: 11px;
+}
+
+.chat-message.not-decrypted .msg-delivering-state {
+    display: none;
+}
+
+.chat-message.not-decrypted .not-decrypted-icon {
+    left: 2px;
+    position: absolute;
+    top: 11px;
+    width: 14px;
+    height: 14px;
+    display: flex;
+}
+
+.chat-message.not-decrypted .not-decrypted-icon svg{
+    pointer-events: none;
+}
+
+.chat-message.not-decrypted .not-decrypted-icon svg path{
+    fill: #9e9e9e;
+}
+
+.chat-message.not-decrypted .not-decrypted-tooltip {
+    background-clip: padding-box;
+    background-color: #fff;
+    border: 1px solid rgba(0,0,0,.15);
+    border-radius: 0.25rem;
+    color: #212529;
+    font-size: 1rem;
+    list-style: none;
+    padding: 0.5rem 1.5rem;
+    text-align: left;
+    top: -10px!important;
+    width: 400px !important;
 }
 
 .chat-message .retry-send-message {

@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.3.3.185","version_description":"moved background and patterns xmls to xabber-backgrounds repository, fixed client colors modal height"}'
+'{"version_number":"2.3.3.186","version_description":"added non decrypted tooltip, changed how svgs are converted, added slot request handling if file exists in gallery"}'
 )});
