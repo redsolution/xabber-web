@@ -951,9 +951,10 @@ xabber.Contact = Backbone.Model.extend({
                     msg_text = `<span class=text-color-500>${xabber.getQuantityString("recent_chat__last_message__locations", locations.length)}</span>`;
             }
             let user_info = message.get('user_info') || {},
+                participant_info = this.participants.get(user_info.id),
                 chat_content = this.account.chats.get(this.hash_id).item_view.content,
                 is_scrolled = chat_content.isScrolledToBottom(),
-                msg_author = user_info.nickname || message.get('from_jid') || user_info.id,
+                msg_author = participant_info.get('nickname') || user_info.nickname || message.get('from_jid') || user_info.id,
                 pinned_msg = {
                     author: msg_author,
                     time: pretty_datetime(message.get('time')),
