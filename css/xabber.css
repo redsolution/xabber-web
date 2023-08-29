@@ -12713,6 +12713,12 @@ input[type='range'].voice-message-volume:focus {
     width: 30%;
 }
 
+.dialog-modal.modal-unverified-devices .modal-header{
+    padding-bottom: 10px;
+}
+.dialog-modal.modal-unverified-devices .modal-content .dialog-text{
+    line-height: 30px;
+}
 .dialog-modal.modal-unverified-devices .modal-footer.extended .btn-cancel{
     float: right !important;
 }
