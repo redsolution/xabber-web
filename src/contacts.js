@@ -301,6 +301,9 @@ xabber.Contact = Backbone.Model.extend({
     },
 
     onChangedGroupchat: function () {
+        if (this.get('group_chat') && this.get('removed')) {
+            xabber.error("removed contact became groupchat")
+        }
         if (this.get('group_chat')) {
             this.updateCounters();
             this.participants = new xabber.Participants(null, {contact: this});
@@ -437,6 +440,7 @@ xabber.Contact = Backbone.Model.extend({
             this.set('known', false);
             this.set('removed', true);
             if (this.get('group_chat')){
+                this.set('group_chat', false);
                 this.participants.reset();
                 this.account.groupchat_settings.resetParticipantsList(this.get('jid'));
             }
@@ -8643,6 +8647,9 @@ xabber.Contacts = xabber.ContactsBase.extend({
                 attrs.image = attrs.avatar;
                 delete attrs.avatar;
                 contact.cached_image = Images.getCachedImage(attrs.image);
+            }
+            if (attrs.group_chat && attrs.is_deleted) {
+                delete attrs.group_chat;
             }
             contact.set(attrs);
         } else {
