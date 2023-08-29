@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.3.3.188","version_description":"fixed timestamp updating in chat items when there is active draft, changed unverified devices dialog text"}'
+'{"version_number":"2.3.3.189","version_description":"changed tab data value for accounts media"}'
 )});
