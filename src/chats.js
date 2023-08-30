@@ -2274,6 +2274,8 @@ xabber.ChatItemView = xabber.BasicView.extend({
             }
             this.$('.last-msg').prepend(msg_from);
         }
+        if (msg.get('not_encrypted'))
+            this.$('.last-msg').html(this.$('.last-msg').html().italics());
         this.$el.emojify('.last-msg', {emoji_size: 16}).hyperlinkify({decode_uri: true});
         this.$('.last-msg-date').text(utils.pretty_short_datetime_recent_chat(msg_time))
             .attr('title', pretty_datetime(msg_time));
