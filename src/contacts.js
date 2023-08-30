@@ -8976,7 +8976,7 @@ xabber.Roster = xabber.ContactsBase.extend({
                 contact && contact.set('known', false);
                 contact && contact.set('removed', true);
                 this.account.cached_roster.removeFromRoster(jid);
-                contact.participants.reset();
+                contact.participants && contact.participants.reset();
                 this.account.groupchat_settings.resetParticipantsList(contact.get('jid'));
             }
         }

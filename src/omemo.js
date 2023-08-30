@@ -1865,10 +1865,18 @@ xabber.Omemo = Backbone.ModelWithStorage.extend({
         this.prekeys.remove(id);
         if (bundle.preKeys.length && bundle.preKeys.length < constants.MIN_PREKEYS_COUNT) {
             let missing_keys = constants.PREKEYS_COUNT - bundle.preKeys.length,
-                last_id = _.sortBy(this.bundle.preKeys, 'keyId').last().keyId;
-            for (let i = ++last_id; last_id + missing_keys; i++)
-                await this.bundle.generatePreKey(i);
-            this.account.omemo.publishBundle();
+                last_id = _.sortBy(bundle.preKeys, 'keyId')[bundle.preKeys.length - 1].keyId,
+                counter = 0;
+            for (let i = ++last_id; i < (last_id + missing_keys); i++){
+                await this.bundle.generatePreKey(i).then((prekey) => {
+                    bundle.preKeys[i] = prekey;
+                    counter++;
+                    if (counter === missing_keys)
+                        this.account.omemo.publishBundle();
+                });
+            }
+            if (missing_keys === 0)
+                this.account.omemo.publishBundle();
         }
         else
             this.account.omemo.publishBundle();

@@ -3384,7 +3384,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
     },
 
     hideMessagesAfterSkipping: function () {
-        if (this.model.get('last_sync_unread_id')){
+        if (this.model.get('last_sync_unread_id') && this.model.get('synced_msg')){
             let synced_message = this.model.get('synced_msg'),
                 $synced_message = this.$(`.chat-message[data-uniqueid="${synced_message.get('unique_id')}"]`);
             $synced_message.addClass('after-skip-message');
@@ -8680,6 +8680,11 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
                         view.content._long_reading_timeout = true;
                         view.content._no_scrolling_event = false;
                         view.content.onScroll();
+                        if (options.scroll_to_chat) {
+                            xabber.chats_view.scrollToChild(view.$el);
+                        } else {
+                            xabber.chats_view.scrollTo(scrolled_top);
+                        }
                     }
                 });
             }
@@ -10312,10 +10317,12 @@ xabber.InvitationPanelView = xabber.SearchView.extend({
         if (this.contact.get('group_chat')) {
             utils.dialogs.ask(xabber.getString("delete_chat"), xabber.getString("dialog_group_remove__confirm"), null, { ok_button_text: xabber.getString("delete")}).done((result) => {
                 if (result) {
+                    let scrolled_top = xabber.chats_view.getScrollTop() || 0;
                     (this.account.connection && this.account.connection.do_synchronization) && this.model.deleteFromSynchronization();
                     this.leaveGroupChat();
                     this.closeChat();
                     xabber.body.setScreen('all-chats', {right: undefined, right_contact: null});
+                    xabber.chats_view.scrollTo(scrolled_top);
                 }
             });
         }
@@ -10324,6 +10331,7 @@ xabber.InvitationPanelView = xabber.SearchView.extend({
             utils.dialogs.ask(xabber.getString("delete_chat"), xabber.getString("delete_chat_dialog_message") +
             (rewrite_support ? "" : `\n${xabber.getString("dialog_clear_chat_history__warning_deletion_not_supported", [this.account.domain]).fontcolor('#E53935')}`), null, { ok_button_text: rewrite_support? xabber.getString("delete") : xabber.getString("dialog_clear_chat_history__button_delete_locally")}).done((result) => {
                 if (result) {
+                    let scrolled_top = xabber.chats_view.getScrollTop() || 0;
                     if (rewrite_support) {
                         this.model.retractAllMessages(false);
                     }
@@ -10338,6 +10346,7 @@ xabber.InvitationPanelView = xabber.SearchView.extend({
                     }
                     this.closeChat();
                     xabber.body.setScreen('all-chats', {right: undefined, right_contact: null});
+                    xabber.chats_view.scrollTo(scrolled_top);
                 }
             });
         }
