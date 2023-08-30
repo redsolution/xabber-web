@@ -3979,7 +3979,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
             let pinned_message = this.contact.get('pinned_message'),
                 participant_info = {};
             pinned_message.get('user_info') && this.contact.participants && (participant_info = this.contact.participants.get(pinned_message.get('user_info').id));
-            participant_info.attributes && pinned_message.set('user_info', participant_info.attributes);
+            participant_info && participant_info.attributes && pinned_message.set('user_info', participant_info.attributes);
 
             let msg = this.buildMessageHtml(pinned_message),
                 pinned_msg_modal = new xabber.ExpandedMessagePanel({account: this.account, chat_content: this, message: pinned_message, pinned: true});
