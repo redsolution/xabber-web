@@ -7817,6 +7817,8 @@ xabber.GroupEditView = xabber.BasicView.extend({
                         restrictions_count++;
                     }
                 });
+                if (restrictions_count === 0)
+                    restrictions_count = '';
                 this.$('.btn-default-restrictions .edit-button-value').text(restrictions_count);
             }, () => {
                 utils.callback_popup_message(xabber.getString("groupchat_you_have_no_permissions_to_do_it"), 3000);
@@ -7945,10 +7947,16 @@ xabber.GroupEditView = xabber.BasicView.extend({
 
     hidePanel: function () {
         this.parent.getInvitations((response) => {
-            this.$('.invitations-variant .counted').html($(response).find('query').find('user').length);
+            let inv_count = $(response).find('query').find('user').length;
+            if (inv_count === 0)
+                inv_count = '';
+            this.$('.invitations-variant .counted').html(inv_count);
         });
         this.model.getBlockedParticipants((response) => {
-            this.$('.blocked-variant .counted').html($(response).find('query').children().length);
+            let blocked_count = $(response).find('query').children().length;
+            if (blocked_count === 0)
+                blocked_count = '';
+            this.$('.blocked-variant .counted').html(blocked_count);
         });
         this.$('.btn-back-panel').hideIf(true)
         this.$('.block-name-panel').hideIf(true)
@@ -8161,10 +8169,16 @@ xabber.GroupEditView = xabber.BasicView.extend({
             this.$('.btn-remove-selected').hideIf(true)
             this.$('.participants-edit-wrap').hideIf(true)
             this.parent.getInvitations((response) => {
-                this.$('.invitations-variant .counted').html($(response).find('query').find('user').length);
+                let inv_count = $(response).find('query').find('user').length;
+                if (inv_count === 0)
+                    inv_count = '';
+                this.$('.invitations-variant .counted').html(inv_count);
             });
             this.model.getBlockedParticipants((response) => {
-                this.$('.blocked-variant .counted').html($(response).find('query').children().length);
+                let blocked_count = $(response).find('query').children().length;
+                if (blocked_count === 0)
+                    blocked_count = '';
+                this.$('.blocked-variant .counted').html(blocked_count);
             });
             this.$('.edit-wrap').hideIf(this.model.get('edit_hidden'))
             this.parent.$('.group-edit-preloader').html('')
