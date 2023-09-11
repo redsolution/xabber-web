@@ -488,6 +488,7 @@ xabber.FingerprintsOwnDevices = xabber.BasicView.extend({
 
     renderTrustOnFingerprint: function (is_trusted, $container) {
         $container.find('.device-encryption').attr('data-trust', is_trusted).addClass('active');
+        $container.attr('data-trust', is_trusted);
         is_trusted === 'unknown' && $container.find('.device-encryption span').text(xabber.getString("settings_account__unverified_device"));
         is_trusted === 'trust' && $container.find('.device-encryption span').text(xabber.getString("settings_account__trusted_device"));
         $container.find('.device-encryption .mdi-lock').removeClass('hidden');

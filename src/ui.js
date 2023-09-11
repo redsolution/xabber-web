@@ -174,6 +174,27 @@ xabber.once("start", function () {
         roster: null
     });
 
+    this.body.addScreen('settings-modal', {
+        blur_overlay: null,
+        toolbar: null,
+        main: {
+            left: { chats: null },
+            right: {
+                chat_head: null,
+                chat_body: null,
+                chat_body_placeholder: null,
+                chat_bottom: null,
+                chat_placeholder: null
+            },
+            right_contact: {},
+            placeholders: null
+        },
+        main_overlay: {
+            settings_modal: null,
+        },
+        roster: null
+    });
+
     this.body.addScreen('add_account', {
         blur_overlay: null,
         toolbar: null,
@@ -192,6 +213,7 @@ xabber.once("start", function () {
 
     let path_acc_settings_left = new this.ViewPath('account.settings_left'),
         path_acc_settings_right = new this.ViewPath('account.settings_right'),
+        path_acc_settings_modal = new this.ViewPath('account.settings_account_modal'),
         path_acc_vcard_edit = new this.ViewPath('account.vcard_edit');
 
     this.body.addScreen('account_settings', {
@@ -205,6 +227,27 @@ xabber.once("start", function () {
                 }
             },
             placeholders: null
+        },
+        roster: null
+    });
+
+    this.body.addScreen('account_settings_modal', {
+        blur_overlay: null,
+        toolbar: null,
+        main: {
+            left: { chats: null },
+            right: {
+                chat_head: null,
+                chat_body: null,
+                chat_body_placeholder: null,
+                chat_bottom: null,
+                chat_placeholder: null
+            },
+            right_contact: {},
+            placeholders: null
+        },
+        main_overlay: {
+            account_settings_modal: path_acc_settings_modal
         },
         roster: null
     });

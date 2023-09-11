@@ -18,10 +18,19 @@ let badges_names = [
         'pinned-circle-small',
         'saved-messages',
         'translate',
+        'trash',
         'circles',
         'crosshairs-gps',
         'crosshairs-question',
         'crosshairs',
+        'client-outline',
+        'database-lock',
+        'index',
+        'bug',
+        'cloud',
+        'key',
+        'account',
+        'alert-circle',
         'map-marker-outline',
         'map-marker',
         'minus',
@@ -76,6 +85,7 @@ let badges_names = [
         'file-pdf',
         'close',
         'link',
+        'security',
         'picture-in-picture-minimize',
         'picture-in-picture-bottom-right',
         'picture-in-picture-top-right',
@@ -99,17 +109,20 @@ badges_names.forEach((name) => {
     let svg = fs.readFileSync(`../xabber-icons/badge/icon/${name}.svg`, 'utf-8');
     svg = svg.replace(/<title>.*<\/title>/, '');
     svg = svg.replaceAll('24px', '100%');
+    svg = svg.replaceAll('16px', '100%');
     fs.writeFileSync(`./templates/svg/${name}.html`, svg);
 });
 material_icons.forEach((name) => {
     let svg = fs.readFileSync(`../xabber-icons/icon/material/${name}.svg`, 'utf-8');
     svg = svg.replace(/<title>.*<\/title>/, '');
     svg = svg.replaceAll('24px', '100%');
+    svg = svg.replaceAll('16px', '100%');
     fs.writeFileSync(`./templates/svg/${name}.html`, svg);
 });
 circle_icons.forEach((name) => {
     let svg = fs.readFileSync(`../xabber-icons/badge/circle/${name}.svg`, 'utf-8');
     svg = svg.replace(/<title>.*<\/title>/, '');
     svg = svg.replaceAll('24px', '100%');
+    svg = svg.replaceAll('16px', '100%');
     fs.writeFileSync(`./templates/svg/${name}.html`, svg);
 });

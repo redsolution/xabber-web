@@ -20,7 +20,7 @@ xabber.FeatureView = xabber.BasicView.extend({
 
     _initialize: function () {
         this.render();
-        this.$el.appendTo(this.model.collection.account.settings_right.$('.capabilities'));
+        this.$el.appendTo(this.model.collection.account.settings_account_modal.$('.capabilities'));
         this.model.on("change", this.render, this);
         this.model.on("destroy", this.remove, this);
     },

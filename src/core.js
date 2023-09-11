@@ -61,9 +61,6 @@ let Xabber = Backbone.Model.extend({
         window.ononline = () => {
             this.disconnectWhenConnecting();
         };
-        // setInterval(function() {
-        //     console.log(new Date());
-        // }, 5000)
     },
 
     initDefaultLanguage: function () {

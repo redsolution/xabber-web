@@ -92,6 +92,7 @@ xabber.Account = Backbone.Model.extend({
             this.resources = new xabber.AccountResources(null, {account: this});
             this.password_view = new xabber.ChangePasswordView({model: this});
             this.vcard_edit = new xabber.VCardEditView({model: this});
+            this.vcard_edit_modal = new xabber.VCardEditModalView({model: this});
             this.updateColorScheme();
             this.settings.on("change:color", this.updateColorScheme, this);
             this.on("change:photo_hash", this.getVCard, this);
@@ -1105,9 +1106,33 @@ xabber.Account = Backbone.Model.extend({
             }
         },
 
+        showSettingsModal: function () {
+            let has_modal_settings = !_.isUndefined(this.settings_account_modal);
+            if (!has_modal_settings)
+                this.settings_account_modal = new xabber.AccountSettingsModalView({model: this});
+            this.updateColorScheme();
+            xabber.body.setScreen('account_settings_modal', {
+                account: this
+            });
+            this.trigger('open_settings');
+            if (!has_modal_settings) {
+                this.trigger('render_settings');
+                this.settings_account_modal.addChild('blocklist', xabber.BlockListView, {
+                    account: this,
+                    el: this.settings_account_modal.$('.blocklist-info')[0]
+                });
+                this.settings_account_modal.addChild('account_password_view', xabber.ChangeAccountPasswordView, {
+                    model: this,
+                    el: this.settings_account_modal.$('.change-password-container')[0]
+                });
+            }
+            this.settings_account_modal.updateHeight();
+        },
+
         updateColorScheme: function () {
             let color = this.settings.get('color');
             this.settings_left && this.settings_left.$el.attr('data-color', color);
+            this.settings_account_modal && this.settings_account_modal.$el.attr('data-color', color);
             if (this.settings_right) {
                 this.settings_right.$el.attr('data-color', color);
             }
@@ -1139,9 +1164,10 @@ xabber.Account = Backbone.Model.extend({
                 });
         },
 
-        deleteAccount: function (show_settings) {
+        deleteAccount: function (show_settings, dont_change_screen) {
             this.show_settings_after_delete = show_settings;
-            xabber.body.setScreen('all_chats', {right_contact: ''});
+            this.dont_change_screen_after_delete = dont_change_screen;
+            !dont_change_screen && xabber.body.setScreen('all_chats', {right_contact: ''});
             if (this.get('x_token'))
                 this.revokeXToken([this.get('x_token').token_uid]);
             this.session.set('delete', true);
@@ -1716,6 +1742,8 @@ xabber.Accounts = Backbone.CollectionWithStorage.extend({
                 xabber.body.setScreen('login');
             } else if (account.show_settings_after_delete) {
                 xabber.body.setScreen('settings');
+            } else if (account.dont_change_screen_after_delete) {
+                return;
             } else {
                 xabber.body.setScreen('all-chats');
                 xabber.chats_view.showAllChats();
@@ -2064,6 +2092,30 @@ xabber.AccountVCardView = xabber.VCardView.extend({
     }
 });
 
+xabber.AccountVCardModalView = xabber.VCardView.extend({
+    template: env.templates.vcard.vcard_modal,
+    events: {
+        "click .btn-vcard-refresh": "refresh",
+        "click .btn-vcard-edit": "showEditView",
+        "click .details-icon": "onClickIcon"
+    },
+
+    __initialize: function () {
+        this.updateButtons();
+        this.model.on("activate deactivate", this.updateButtons, this);
+    },
+
+    updateButtons: function () {
+        let connected = this.model.isConnected();
+        this.$('.btn-vcard-edit').showIf(connected);
+        this.$('.btn-vcard-refresh').showIf(connected);
+    },
+
+    showEditView: function ($el) {
+        this.model.vcard_edit_modal.show({$el: $el});
+    }
+});
+
 xabber.AccountMediaGalleryView = xabber.BasicView.extend({
     template: templates.media_gallery_account,
     events: {
@@ -2168,6 +2220,10 @@ xabber.AccountMediaGalleryView = xabber.BasicView.extend({
                     return;
                 }
                 !this.$('.gallery-files').children('.gallery-file').length && this.$('.tabs .list-variant.tab a').first().click();
+            }
+            if (this.parent){
+                this.parent.$('.settings-tab[data-block-name="media-gallery"] .settings-block-label')
+                    .text(xabber.getString("settings_account__storage_label", [utils.pretty_size(response.total.used), utils.pretty_size(response.quota)]))
             }
         });
     },
@@ -2449,6 +2505,8 @@ xabber.AccountMediaGalleryView = xabber.BasicView.extend({
             alignment: 'right'
         };
         this.$('.dropdown-button').dropdown(dropdown_settings)
+        if (this.parent && this.parent.updateHeight)
+            this.parent.updateHeight();
     },
 
     deleteFile: function (ev) {
@@ -2721,6 +2779,731 @@ xabber.AccountSettingsLeftView = xabber.BasicView.extend({
             this.model.deleteAccount();
         });
     }
+});
+
+xabber.AccountSettingsModalView = xabber.BasicView.extend({
+    className: 'settings-panel-wrap',
+    template: templates.account_settings_modal,
+    ps_selector: '.settings-panel',
+    ps_settings: {
+        wheelPropagation: true
+    },
+    avatar_size: constants.AVATAR_SIZES.ACCOUNT_SETTINGS_LEFT,
+
+    events: {
+        "click .background-overlay": "closeSettings",
+        "change .main-info-wrap .circle-avatar input": "changeAvatar",
+        "click .btn-choose-image": "chooseAvatar",
+        "click .btn-back": "showSettings",
+        "click .btn-color-picker": "openColorsMenu",
+        "click .btn-back-settings": "backToMenu",
+        "click .btn-back-subsettings": "backToSubMenu",
+        "click .btn-emoji-panel": "openEmojiPanel",
+        "click .btn-selfie": "openWebcamPanel",
+        "click .settings-block-wrap.status .settings-subblock-wrap .status": "openChangeStatus",
+        "click .settings-tabs-wrap .settings-tab:not(.delete-account):not(.settings-non-tab)": "jumpToBlock",
+        "click .settings-tab.delete-account": "deleteAccount",
+
+        "change .enabled-state input": "setEnabled",
+        "change .setting-send-chat-states input": "setTypingNotification",
+        "change .setting-use-omemo input": "setEnabledOmemo",
+        "click .btn-change-password": "showPasswordView",
+        "click .btn-reconnect": "reconnect",
+        "click": "hideResources",
+        "change .sync-account": "changeSyncSetting",
+        "click .btn-delete-settings": "deleteSettings",
+        "change .color-scheme input[type=radio][name=account_color]": "changeColor",
+        "click .token-wrap .btn-revoke-token": "revokeXToken",
+        "click .devices-wrap .btn-revoke-all-tokens": "revokeAllXTokens",
+        "click .btn-manage-devices": "openDevicesWindow",
+        "click .btn-block": "openBlockWindow",
+        "click .btn-unblock-selected": "unblockSelected",
+        "click .btn-deselect-blocked": "deselectBlocked",
+        "click .btn-delete-files": "deleteFilesFiltered",
+        "click .all-sessions .device-encryption.active": "openFingerprint",
+        "click .btn-purge-keys": "purgeKeys"
+    },
+
+    _initialize: function () {
+        this.status_field = new xabber.StatusMessageModalWidget({
+            el: this.$('.status-wrap')[0],
+            model: this.model
+        });
+        this.updateName();
+        this.updateAvatar();
+        this.updateBlocks();
+        this.model.on("change:name", this.updateName, this);
+        this.model.on("change:image", this.updateAvatar, this);
+        this.model.on("change:gallery_token", this.updateGallery, this);
+        this.model.on("activate deactivate", this.updateBlocks, this);
+        this.model.on("destroy", this.remove, this);
+
+        this.ps_container.on("ps-scroll-y", this.onScrollY.bind(this));
+
+        this.vcard_view = this.addChild('vcard', xabber.AccountVCardModalView,
+            {model: this.model,});
+        this.gallery_view = this.addChild('media-gallery', xabber.AccountMediaGalleryView,
+            {model: this.model, el: this.$('.media-gallery')[0]});
+        this.$('.account-name .value').text(this.model.get('jid'));
+        this.updateStatus();
+        this.updateView();
+        this.showConnectionStatus();
+        this.updateSynchronizationBlock();
+
+        this.model.resources.on("change", this.updateXTokens, this);
+        this.model.resources.on("add", this.updateXTokens, this);
+        this.model.resources.on("destroy", this.updateXTokens, this);
+        this.model.groups.on("change", this.updateGroupsLabel, this);
+        this.model.groups.on("add", this.updateGroupsLabel, this);
+        this.model.groups.on("destroy", this.updateGroupsLabel, this);
+        this.model.session.on("change:reconnecting", this.updateReconnectButton, this);
+        this.model.session.on("change:conn_feedback", this.showConnectionStatus, this);
+        this.model.settings.on("change:to_sync", this.updateSyncOption, this);
+        this.model.settings.on("change:deleted", this.updateDelSettingsButton, this);
+        this.model.settings.on("change:to_sync change:synced", this.updateSyncState, this);
+        this.model.on("change:enabled", this.updateEnabled, this);
+        this.model.on("update_omemo_devices", this.updateOmemoDevices, this);
+        this.model.on('trusting_updated', this.updateOmemoDevices, this);
+        this.model.on('trusting_updated', this.updateXTokens, this);
+        this.model.settings.on("change:omemo", this.updateEnabledOmemo, this);
+        this.model.settings.on("change:encrypted_chatstates", this.updateEncryptedChatstates, this);
+        this.model.on("change:status_updated", this.updateStatus, this);
+        this.model.on("activate deactivate", this.updateView, this);
+        this.model.on("change:auth_type", this.updateView, this);
+        this.model.on("destroy", this.remove, this);
+    },
+
+    render: function (options) {
+        this.$('.circle-avatar.dropdown-button').dropdown({
+            inDuration: 100,
+            outDuration: 100,
+            constrainWidth: false,
+            hover: false,
+            alignment: 'left'
+        });
+        this.updateCSS();
+
+        this.updateEnabledOmemo();
+        this.updateEncryptedChatstates();
+        this.updateEnabled();
+        this.updateXTokens();
+        this.updateGroupsLabel();
+        this.updateView();
+        this.$('.main-resource .client').text(xabber.get('client_name'));
+        this.$('.main-resource .resource').text(this.model.resource);
+        this.$('.main-resource .priority').text(this.model.get('priority'));
+        this.$(`.color-scheme input[type=radio][name=account_color][value="${this.model.settings.get('color')}"]`)
+            .prop('checked', true);
+        let dropdown_settings = {
+            inDuration: 100,
+            outDuration: 100,
+            constrainWidth: false,
+            hover: false,
+            alignment: 'right'
+        };
+        this.$('.dropdown-button').dropdown(dropdown_settings);
+        this.$('.btn-delete-files-variants').dropdown({
+            inDuration: 100,
+            outDuration: 100,
+            hover: true,
+            belowOrigin: true,
+        });
+        this.$('.panel-content-wrap').removeClass('hidden');
+        if (this.ps_container.length) {
+            this.ps_container.perfectScrollbar(
+                _.extend(this.ps_settings || {}, xabber.ps_settings)
+            );
+        }
+        this.updateOmemoDevices;
+        this.$('.left-column').removeClass('hidden');
+        this.$('.right-column').addClass('hidden');
+        this.$('.btn-back-settings').removeClass('hidden');
+        this.$('.btn-back-subsettings').addClass('hidden');
+        this.updateHeight();
+        return this;
+    },
+
+    updateHeight: function () {
+        let height;
+        if (!this.$('.left-column').hasClass('hidden'))
+            height = this.$('.left-column').height();
+        if (!this.$('.right-column').hasClass('hidden'))
+            height = this.$('.right-column').height();
+        this.ps_container.css('height', height + 'px');
+        this.updateScrollBar();
+    },
+
+    onScrollY: function () {
+        if (this.getScrollTop() === 0)
+            this.$('.settings-panel-head').removeClass('lined-head')
+        else
+            this.$('.settings-panel-head').addClass('lined-head')
+    },
+
+    jumpToBlock: function (ev) {
+        let $tab = $(ev.target).closest('.settings-tab'),
+            $elem = this.$('.settings-block-wrap.' + $tab.data('block-name')),
+            block_name = $tab.data('block-name');
+        if (block_name){
+            this.$('.media-gallery-button.btn-more').hideIf(block_name != 'media-gallery');
+            this.$('.device-more-button.btn-more').hideIf(block_name != 'encryption');
+        }
+        this.$('.settings-block-wrap').addClass('hidden');
+        this.$('.left-column').addClass('hidden');
+        this.$('.right-column').removeClass('hidden');
+        $elem.removeClass('hidden');
+        this.$('.settings-panel-head span.settings-panel-head-title').text($elem.attr('data-header'));
+        if (block_name === 'media-gallery'){
+            this.gallery_view.onTabClick({target: this.gallery_view.$('.tabs .list-variant:not(.hidden)').first()});
+            this.gallery_view.$('.tabs .indicator').remove();
+            this.gallery_view.$('.tabs').tabs();
+            this.gallery_view.$('.indicator').addClass('ground-color-500');
+        }
+        if (block_name === 'blocklist'){
+            this.$('.blocklist-tabs-wrap .tabs .indicator').remove();
+            this.$('.blocklist-tabs-wrap .tabs').tabs();
+            this.$('.blocklist-tabs-wrap .indicator').addClass('ground-color-500');
+        }
+        if (block_name === 'vcard-tab'){
+            this.vcard_view.showEditView(this.$('.vcard'));
+        }
+        this.$('.btn-back-subsettings').attr('data-subblock-parent-name', '');
+        if ($tab.closest('.right-column') && $tab.attr('data-subblock-parent-name')) {
+            this.$('.btn-back-settings').addClass('hidden');
+            this.$('.btn-back-subsettings').removeClass('hidden');
+            this.$('.btn-back-subsettings').attr('data-subblock-parent-name', $tab.attr('data-subblock-parent-name'));
+        }
+        this.scrollToTop();
+        this.updateHeight();
+    },
+
+    openColorsMenu: function (ev) {
+        let $elem = this.$('.settings-block-wrap.color-scheme');
+        this.$('.settings-block-wrap').addClass('hidden');
+        this.$('.left-column').addClass('hidden');
+        this.$('.right-column').removeClass('hidden');
+        $elem.removeClass('hidden');
+        this.$('.settings-panel-head span.settings-panel-head-title').text($elem.attr('data-header'));
+        this.scrollToTop();
+        this.updateHeight();
+    },
+
+    backToMenu: function (ev) {
+        this.$('.left-column').removeClass('hidden');
+        this.$('.right-column').addClass('hidden');
+        this.scrollToTop();
+        this.updateHeight();
+    },
+
+    backToSubMenu: function (ev) {
+        let $tab = $(ev.target).closest('.btn-back-subsettings'),
+            block_name = $tab.attr('data-subblock-parent-name'),
+            $elem = this.$('.settings-block-wrap.' + block_name);
+        if (block_name){
+            this.$('.media-gallery-button.btn-more').hideIf(block_name != 'media-gallery');
+            this.$('.device-more-button.btn-more').hideIf(block_name != 'encryption');
+        }
+        this.$('.settings-block-wrap').addClass('hidden');
+        $elem.removeClass('hidden');
+        this.$('.settings-panel-head span.settings-panel-head-title').text($elem.attr('data-header'));
+        this.$('.btn-back-settings').removeClass('hidden');
+        this.$('.btn-back-subsettings').addClass('hidden');
+        this.scrollToTop();
+        this.updateHeight();
+    },
+
+    updateName: function () {
+        this.$('.name').text(this.model.get('name'));
+        this.$('.jid').text(this.model.get('jid'));
+        this.updateNameCSS();
+    },
+
+    updateAvatar: function () {
+        let image = this.model.cached_image;
+        this.$('.circle-avatar').setAvatar(image, this.avatar_size);
+    },
+
+    updateBlocks: function () {
+        let connected = this.model.isConnected();
+        this.$('.main-info-wrap').switchClass('disconnected', !connected);
+        this.$('.settings-tab[data-block-name="profile"]').showIf(connected);
+        this.$('.settings-tab[data-block-name="encryption"]').showIf(connected);
+        this.$('.devices-wrap').showIf(connected);
+        this.$('.profile-image-dropdown').showIf(connected);
+        this.$('.set-groupchat-avatar').showIf(connected);
+        this.updateGallery();
+        this.updateScrollBar();
+    },
+
+    updateGallery: function () {
+        let connected = this.model.isConnected();
+        this.$('.settings-tab[data-block-name="media-gallery"]').showIf(connected && this.model.get('gallery_token'));
+    },
+
+    updateNameCSS: function () {
+        if (!this.isVisible())
+            return;
+        let $name = this.$('.name');
+        $name.removeAttr('style');
+        let wrap_width = this.$('.name-wrap').width(),
+            width = $name.width(),
+            font_size = 22;
+        while (width > wrap_width && font_size > 12) {
+            $name.css({'font-size': font_size});
+            width = $name.width();
+            font_size -= 2;
+        }
+        $name.css({'margin-left': (wrap_width - width) / 2});
+    },
+
+    chooseAvatar: function () {
+        if (this.model.get('gallery_token') && this.model.get('gallery_url')) {
+            let avatar_view = new xabber.SetAvatarView();
+            avatar_view.render({model: this.model});
+        } else
+            this.$('.main-info-wrap .circle-avatar input').click();
+    },
+
+    showSettings: function () {
+        xabber.body.setScreen('settings-modal');
+        xabber.trigger('update_placeholder');
+    },
+
+    closeSettings: function (ev) {
+        xabber.toolbar_view.showAllChats();
+    },
+
+    openEmojiPanel: function () {
+        let emoji_panel_view = new xabber.EmojiProfileImageView();
+        emoji_panel_view.open({model: this.model});
+    },
+
+    openWebcamPanel: function () {
+        let webcam_panel_view = new xabber.WebcamProfileImageView();
+        webcam_panel_view.open({model: this.model});
+    },
+
+    changeAvatar: function (ev) {
+        let field = ev.target;
+        if (!field.files.length)
+            return;
+        let file = field.files[0];
+        field.value = '';
+        if (file.size > constants.MAX_AVATAR_FILE_SIZE && !(this.model.get('gallery_token') && this.model.get('gallery_url'))) {
+            utils.dialogs.error(xabber.getString("group_settings__error__avatar_too_large"));
+            return;
+        } else if (!file.type.startsWith('image')) {
+            utils.dialogs.error(xabber.getString("group_settings__error__wrong_image"));
+            return;
+        }
+        this.$('.circle-avatar').find('.preloader-wrap').addClass('visible').find('.preloader-wrapper').addClass('active');
+        utils.images.getAvatarFromFile(file).done((image, hash, size) => {
+            if (image) {
+                this.model.pubAvatar({base64: image, hash: hash, size: size, type: file.type, file: file}, () => {
+                        this.$('.circle-avatar').setAvatar(image, this.avatar_size);
+                        this.$('.circle-avatar').find('.preloader-wrap').removeClass('visible').find('.preloader-wrapper').removeClass('active');
+                    }, () => {
+                        this.$('.circle-avatar').find('.preloader-wrap').removeClass('visible').find('.preloader-wrapper').removeClass('active');
+                        utils.dialogs.error(xabber.getString("group_settings__error__wrong_image"));
+                    });
+            } else
+                utils.dialogs.error(xabber.getString("group_settings__error__wrong_image"));
+        });
+    },
+
+    updateCSS: function () {
+        this.updateNameCSS();
+    },
+
+    openChangeStatus: function () {
+        !xabber.change_status_view && (xabber.change_status_view = new xabber.ChangeStatusView());
+        xabber.change_status_view.open(this.model);
+    },
+
+    deleteAccount: function () {
+        let dialog_options = [];
+        if (xabber.api_account && xabber.api_account.get('connected')) {
+            dialog_options = [{name: 'delete_settings',
+                checked: this.model.settings.get('to_sync'),
+                text: xabber.getString("dialog_delete_account__label_delete_synced_settings")}];
+        }
+        utils.dialogs.ask(xabber.getString("settings_account__button_quit_account"), xabber.getString("dialog_quit_account__confirm"),
+            dialog_options, { ok_button_text: xabber.getString("button_quit")}).done((res) => {
+            if (!res)
+                return;
+            if (res.delete_settings && xabber.api_account) {
+                if (xabber.api_account.get('xmpp_binding') === this.model.get('jid'))
+                    xabber.api_account._call_method('DELETE', '/accounts/current/client-settings/', {jid: this.model.get('jid')});
+                else
+                    xabber.api_account.delete_settings(this.model.get('jid'));
+            }
+            this.model.deleteAccount();
+        });
+    },
+
+
+
+
+
+    updateStatus: function () {
+        let account = this.model,
+            status = account.get('status');
+        this.$('.settings-block-wrap.status .settings-subblock-wrap .status').attr('data-status', status);
+
+        this.$('.settings-tab[data-block-name="status"] .settings-block-label').text(this.model.getStatusMessage());
+    },
+
+    updateOmemoDevices: function () {
+        if (this.model.omemo && this.model.omemo.store){
+            let identity_key = this.model.omemo.store.get('identityKey');
+            if (identity_key){
+                this.$('.btn-manage-devices').removeClass('hidden2');
+            } else {
+                this.model.omemo.store.once('change:identityKey', () => {
+                    this.$('.btn-manage-devices').removeClass('hidden2');
+                }, this);
+            }
+        }
+        else
+            this.$('.btn-manage-devices').addClass('hidden2');
+    },
+
+    updateView: function () {
+        let connected = this.model.isConnected();
+        this.$('.connection-wrap .buttons-wrap .btn-change-password').hideIf(this.model.get('auth_type') === 'x-token');
+        this.$('.connection-wrap .buttons-wrap .btn-reconnect').hideIf(this.model.get('auth_type') === 'x-token');
+        this.updateScrollBar();
+    },
+
+    updateSynchronizationBlock: function () {
+        this.$('.xabber-account-features-wrap').showIf(xabber.api_account && xabber.api_account.get('connected'));
+        this.updateSyncState();
+        this.updateSyncOption();
+        this.updateDelSettingsButton();
+    },
+
+    showResources: function (ev) {
+        this.$(`.token-resource-wrap`).hideIf(true)
+        let resource_id = $(ev.target).attr('data-resource-id');
+        this.$(`.token-resource-wrap[data-resource-id="${resource_id}"]`).hideIf(false)
+    },
+
+    hideResources: function (ev) {
+        if (!($(ev.target).hasClass('last-auth') && $(ev.target).hasClass('resource') || $(ev.target).closest(".token-resource-wrap").length > 0))
+            this.$(`.token-resource-wrap`).hideIf(true)
+    },
+
+    renderAllXTokens: function () {
+        this.$('.sessions-wrap').html("");
+        this.$('.orphaned-fingerprints-wrap').html("");
+        $(_.sortBy(this.model.x_tokens_list, '-last_auth')).each((idx, token) => {
+            let pretty_token = {
+                resource_obj: undefined,
+                client: token.client,
+                device: token.device,
+                token_uid: token.token_uid,
+                ip: token.ip,
+                last_auth: pretty_datetime_date(token.last_auth),
+                expire: pretty_datetime(token.expire)
+            };
+            let resource_obj = this.model.resources.findWhere({ token_uid: token.token_uid });
+            if (resource_obj)
+                pretty_token.resource_obj = resource_obj.toJSON();
+            if (this.model.get('x_token')) {
+                if (this.model.get('x_token').token_uid == token.token_uid) {
+                    pretty_token.is_omemo = this.model.omemo ? true : false
+                    let $cur_token_html = $(templates.current_token_item_modal(pretty_token));
+                    this.$('.current-session').append($cur_token_html);
+                    return;
+                }
+            }
+            let $token_html = $(templates.token_item_modal(pretty_token));
+            this.$('.all-sessions').append($token_html);
+            if (this.model.omemo) {
+                !this.omemo_own_devices && (this.omemo_own_devices = new xabber.FingerprintsOwnDevices({model: this.model.omemo}));
+                let omemo_device_id = token.omemo_id ? token.omemo_id : Number(pretty_token.token_uid.slice(0,8));
+                this.omemo_own_devices.updateTrustDevice(Number(omemo_device_id), $token_html);
+            } else {
+                if (token.omemo_id){
+                    $token_html.find('.device-encryption span').text(xabber.getString("settings_account__unverified_device"));
+                    $token_html.find('.device-encryption .mdi-lock').removeClass('hidden');
+                }
+            }
+        });
+        if (this.$('.all-sessions').children().length)
+            this.$('.all-sessions-wrap').removeClass('hidden');
+        else
+            this.$('.all-sessions-wrap').addClass('hidden');
+        this.updateHeight();
+    },
+
+    openFingerprint: function (ev) {
+        if (this.model.omemo){
+            let $target = $(ev.target).closest('.device-encryption'),
+                is_own = $target.hasClass('is-own');
+            !this.omemo_own_devices && (this.omemo_own_devices = new xabber.FingerprintsOwnDevices({model: this.model.omemo}));
+            let token = this.model.x_tokens_list.find(item => (item.token_uid === $target.closest('.token-wrap').attr('data-token-uid'))),
+                omemo_device_id = token && token.omemo_id ? token.omemo_id : Number($target.closest('.token-wrap').attr('data-token-uid').slice(0,8));
+            this.omemo_own_devices.open(Number(omemo_device_id), is_own);
+        }
+    },
+
+    updateXTokens: function () {
+        if (this.model.get('auth_type') !== 'x-token') {
+            this.$('.tokens').addClass('hidden');
+            this.$('.sessions-wrap').children().html("");
+            return;
+        }
+        this.model.getAllXTokens(() => {
+            this.$('.sessions-wrap').html("");
+            if (this.model.x_tokens_list && this.model.x_tokens_list.length) {
+                this.renderAllXTokens();
+            }
+        });
+    },
+
+    updateGroupsLabel: function () {
+        let groups_count = this.model.groups.length,
+            label_text = groups_count === 0 ? xabber.getString("contact_circles_empty") : xabber.getQuantityString("settings_account__section_header_circles", groups_count);
+
+        this.$('.settings-tab[data-block-name="circles-groups"] .settings-block-label').text(label_text);
+    },
+
+    revokeXToken: function (ev) {
+        let $target = $(ev.target).closest('.token-wrap'),
+            token_uid = $target.data('token-uid');
+        this.model.revokeXToken([token_uid], () => {
+            if (this.model.get('x_token')){
+                if (this.model.get('x_token').token_uid === token_uid) {
+                    this.model.deleteAccount();
+                    return;
+                }
+                this.model.getAllXTokens(() => {
+                    this.$('.sessions-wrap').html("");
+                    if (this.model.x_tokens_list && this.model.x_tokens_list.length) {
+                        this.renderAllXTokens();
+                    }
+                });
+            }
+        });
+    },
+
+    revokeAllXTokens: function () {
+        utils.dialogs.ask(xabber.getString("settings_account__dialog_terminate_sessions__header"), xabber.getString("terminate_all_sessions_title"), null, { ok_button_text: xabber.getString("button_terminate")}).done((result) => {
+            if (result && this.model.x_tokens_list)
+                this.model.revokeAllXTokens(() => {
+                    this.model.getAllXTokens(() => {
+                        this.$('.sessions-wrap').html("");
+                        if (this.model.x_tokens_list && this.model.x_tokens_list.length) {
+                            this.renderAllXTokens();
+                        }
+                    });
+                });
+        });
+    },
+
+    updateSyncState: function () {
+        let state;
+        if (!this.model.settings.get('to_sync'))
+            state = 'off';
+        else
+            state = this.model.settings.get('synced') ? 'yes' : 'no';
+        this.$('.sync-status').text(xabber.getString(constants.SYNCED_STATUS_DATA[state].tip));
+        let mdiclass = constants.SYNCED_STATUS_DATA[state].icon,
+            $sync_icon = this.$('.sync-status-icon');
+        $sync_icon.removeClass($sync_icon.attr('data-mdiclass'))
+            .attr('data-mdiclass', mdiclass).addClass(mdiclass);
+    },
+
+    updateSyncOption: function () {
+        this.$('.sync-account').prop('checked', this.model.settings.get('to_sync'));
+    },
+
+    updateDelSettingsButton: function () {
+        this.$('.btn-delete-settings').hideIf(this.model.settings.get('deleted'));
+    },
+
+    updateEnabled: function () {
+        let enabled = this.model.get('enabled');
+        this.$('.enabled-state input[type=checkbox]').prop('checked', enabled);
+    },
+
+    updateEnabledOmemo: function () {
+        let enabled = this.model.settings.get('omemo'), has_keys = false;
+        if (_.isUndefined(enabled))
+            enabled = false;
+        if (enabled && this.model.omemo_enable_view)
+            this.model.omemo_enable_view.close();
+        this.$('.setting-use-omemo input[type=checkbox]').prop('checked', enabled);
+        this.$('.omemo-settings-wrap .setting-wrap:not(.omemo-enable)').switchClass('hidden', !enabled);
+        this.$('.device-more-button').switchClass('hidden', !enabled);
+        this.$('.label-encryption-enabled').switchClass('hidden', !enabled);
+        this.$('.label-encryption-disabled').switchClass('hidden', enabled);
+        if (!this.model.omemo){
+            this.$('.btn-manage-devices').addClass('hidden2');
+        }
+    },
+
+    updateEncryptedChatstates: function () {
+        let enabled = this.model.settings.get('encrypted_chatstates');
+        this.$('.setting-send-chat-states input[type=checkbox]').prop('checked', enabled);
+    },
+
+    updateReconnectButton: function () {
+        this.$('.btn-reconnect').switchClass('disabled', this.model.session.get('reconnecting'));
+    },
+
+    setEnabled: function (ev) {
+        let enabled = this.$('.enabled-state input').prop('checked');
+        this.model.save('enabled', enabled);
+        enabled ? this.model.activate() : this.model.deactivate();
+    },
+
+    setEnabledOmemo: function () {
+        let enabled = this.$('.setting-use-omemo input').prop('checked');
+        this.model.settings.save('omemo', enabled);
+        this.$('.omemo-settings-wrap .setting-wrap:not(.omemo-enable)').switchClass('hidden', !enabled);
+        if (enabled)
+            this.initOmemo();
+        else
+            this.destroyOmemo();
+    },
+
+    setTypingNotification: function () {
+        let enabled = this.$('.setting-send-chat-states input').prop('checked');
+        this.model.settings.save('encrypted_chatstates', enabled);
+    },
+
+    initOmemo: function () {
+        this.model.omemo = new xabber.Omemo({id: 'omemo'}, {
+            account: this.model,
+            storage_name: xabber.getStorageName() + '-omemo-settings-' + this.model.get('jid'),
+            fetch: 'before'
+        });
+        setTimeout(() => {
+            this.model.omemo.onConnected();
+            this.updateXTokens();
+        }, 1000);
+    },
+
+    destroyOmemo: function () {
+        this.model.omemo.destroy();
+        this.model.omemo = undefined;
+        this.updateXTokens();
+    },
+
+    openDevicesWindow: function () {
+        if (this.model.omemo) {
+            !this.omemo_devices && (this.omemo_devices = new xabber.Fingerprints({model: this.model.omemo}));
+            this.omemo_devices.open();
+        }
+        else
+            utils.dialogs.error(xabber.getString("omemo__chat__placeholder_encryption_disabled"));
+    },
+
+    purgeKeys: function () {
+        utils.dialogs.ask(xabber.getString('omemo__dialog_purge_keys__header'), xabber.getString('omemo__dialog_purge_keys__text'),
+            null, { ok_button_text: xabber.getString('omemo__dialog_purge_keys__button_purge_keys')}).done((result) => {
+            if (result) {
+                if (this.model.omemo) {
+                    let device_id = this.model.omemo.get('device_id');
+                    this.model.omemo.save('prekeys', {});
+                    this.model.omemo.bundle && (this.model.omemo.bundle.preKeys = []);
+                    if (this.model.omemo.own_devices[device_id]) {
+                        this.model.omemo.own_devices[device_id].preKeys = [];
+                        this.model.omemo.own_devices[device_id].set({ik: null, fingerprint: null});
+                    }
+                    this.model.getConnectionForIQ().omemo.removeItemFromNode(`${Strophe.NS.OMEMO}:bundles`, device_id);
+                } else {
+                    let omemo = new xabber.Omemo({id: 'omemo'}, {
+                        account: this.model,
+                        storage_name: xabber.getStorageName() + '-omemo-settings-' + this.model.get('jid'),
+                        fetch: 'before'
+                    });
+                    omemo.save('prekeys', {});
+                    this.model.getConnectionForIQ().omemo.removeItemFromNode(`${Strophe.NS.OMEMO}:bundles`, omemo.get('device_id'));
+                    omemo.destroy();
+                }
+            }
+        });
+    },
+
+    showConnectionStatus: function () {
+        this.$('.conn-status').text(this.model.session.get('conn_feedback'));
+    },
+
+    showPasswordView: function () {
+        this.model.password_view.show();
+    },
+
+    reconnect: function () {
+        if (this.model.session.get('reconnecting'))
+            return;
+        this.model.save('enabled', true);
+        if (this.model.connection.connected)
+            this.model.connection.disconnect();
+        else
+            this.model.connect();
+    },
+
+    changeSyncSetting: function (ev) {
+        let to_sync = $(ev.target).prop('checked'),
+            settings = this.model.settings;
+        settings.save('to_sync', to_sync);
+        if (to_sync) {
+            settings.update_timestamp();
+            xabber.api_account && xabber.api_account.synchronize_main_settings();
+        }
+    },
+
+    deleteSettings: function () {
+        utils.dialogs.ask(xabber.getString("progress_title_delete_settings"), xabber.getString("delete_settings_summary"),
+            [{name: 'delete_account', checked: this.model.settings.get('to_sync'),
+                text: xabber.getString("delete_settings__optional_button__delete_synced_account")}],{ ok_button_text: xabber.getString("delete")}).done((res) => {
+            if (res) {
+                if (!res.delete_account) {
+                    this.model.settings.save('to_sync', false);
+                } else if (!this.model.settings.get('to_sync')) {
+                    this.model.deleteAccount(true);
+                }
+                xabber.api_account && xabber.api_account.delete_settings(this.model.get('jid'));
+            }
+        });
+    },
+
+    changeColor: function (ev) {
+        let value = ev.target.value;
+        this.model.settings.update_settings({color: value});
+    },
+
+    openBlockWindow: function () {
+        utils.dialogs.ask_enter_value(xabber.getString("dialog_block_xmpp_address__text"), null, {modal_class: 'account-add-blocked', input_placeholder_value: xabber.getString("dialog_block_xmpp_address__hint_address")}, { ok_button_text: xabber.getString("contact_bar_block")}).done((result) => {
+            if (result) {
+                let contact = this.model.contacts.get(result);
+                if (contact)
+                    contact.block();
+                else {
+                    this.model.contacts.blockContact(result);
+                }
+            }
+        });
+    },
+
+    unblockSelected: function () {
+        if (this.children && this.children.blocklist){
+            this.children.blocklist.unblockSelected();
+        }
+    },
+
+    deselectBlocked: function () {
+        if (this.children && this.children.blocklist)
+            this.children.blocklist.deselectBlocked();
+    },
+
+    deleteFilesFiltered: function (ev) {
+        if (this.gallery_view)
+            this.gallery_view.deleteFilesFiltered(ev);
+    },
 });
 
 xabber.AccountSettingsRightView = xabber.BasicView.extend({
@@ -3197,6 +3980,36 @@ xabber.StatusMessageWidget = xabber.InputWidget.extend({
     }
 });
 
+xabber.StatusMessageModalWidget = xabber.InputWidget.extend({
+    field_name: 'status-message',
+    placeholder: 'Set custom status',
+    template: templates.status_message_input_widget,
+
+    showInput: function () {
+        if (this.$input.prop('disabled'))
+            return;
+        this.data.set('input_mode', true);
+        this.updateValue();
+    },
+
+    keyUp: function () {
+        let value = this.getValue();
+        this.$input.switchClass('changed', this.$input.val() !== value);
+    },
+
+    bindModelEvents: function () {
+        this.model.on("change:status_updated", this.updateValue, this);
+    },
+
+    getValue: function () {
+        return this.model.getStatusMessage();
+    },
+
+    setValue: function (value) {
+        this.model.setStatus(null, value);
+    }
+});
+
 xabber.AccountSettingsItemView = xabber.BasicView.extend({
     className: 'xmpp-account draggable droppable',
     template: templates.global_settings_item,
@@ -3269,6 +4082,112 @@ xabber.AccountSettingsItemView = xabber.BasicView.extend({
     }
 });
 
+xabber.AccountSettingsItemModalView = xabber.BasicView.extend({
+    className: 'xmpp-account draggable droppable',
+    template: templates.global_settings_item_modal,
+    avatar_size: constants.AVATAR_SIZES.SETTINGS_ACCOUNT_ITEM,
+
+    events: {
+        "click .account-info-wrap": "showSettings",
+        "change .enabled-state input": "setEnabled",
+    },
+
+    _initialize: function () {
+        this.updateEnabled();
+        this.updateNickname();
+        this.updateAvatar();
+        this.updateColorScheme();
+        this.updateSyncState();
+        this.showConnectionStatus();
+        this.model.on("change:enabled", this.updateEnabled, this);
+        this.model.on("change:vcard", this.updateNickname, this);
+        this.model.settings.on("change:omemo", this.updateEnabledOmemo, this);
+        this.model.on("change:image", this.updateAvatar, this);
+        this.model.settings.on("change:color", this.updateColorScheme, this);
+        this.model.session.on("change:conn_feedback", this.showConnectionStatus, this);
+        this.$el.on('drag_to', this.onDragTo.bind(this));
+        this.$('.move-account-to-this')
+            .on('move_xmpp_account', this.onMoveAccount.bind(this));
+        this.model.settings.on("change:to_sync", this.updateSyncState, this);
+    },
+
+    updateNickname: function () {
+        if (this.model.get('vcard') && this.model.get('vcard').nickname){
+            this.$('.nickname').text(this.model.get('vcard').nickname);
+            this.$('.jid').text(this.model.get('jid'));
+            this.$('.nickname-wrap').removeClass('single-row');
+            this.$('.jid-wrap').removeClass('hidden');
+        } else {
+            this.$('.nickname').text(this.model.get('jid'));
+            this.$('.nickname-wrap').addClass('single-row');
+            this.$('.jid-wrap').addClass('hidden');
+        }
+    },
+
+    updateAvatar: function () {
+        let image = this.model.cached_image;
+        this.$('.circle-avatar').setAvatar(image, this.avatar_size);
+    },
+
+    updateColorScheme: function () {
+        this.$el.attr('data-color', this.model.settings.get('color'));
+    },
+
+    showConnectionStatus: function () {
+        // this.$('.status').attr('data-status', this.model.get('status'));
+        // this.$('.conn-status').text(this.model.session.get('conn_feedback'));
+    },
+
+    updateEnabled: function () {
+        let enabled = this.model.get('enabled');
+        this.$el.switchClass('disabled', !enabled);
+        this.$('.enabled-state input[type=checkbox]').prop('checked', enabled);
+    },
+
+    setEnabled: function (ev) {
+        let enabled = this.$('.enabled-state input').prop('checked');
+        this.model.save('enabled', enabled);
+        enabled ? this.model.activate() : this.model.deactivate();
+    },
+
+    onDragTo: function (ev, drop_elem) {
+        drop_elem && $(drop_elem).trigger('move_xmpp_account', this.model);
+    },
+
+    onMoveAccount: function (ev, account) {
+        this.model.collection.moveBefore(account, this.model);
+    },
+
+    updateSyncState: function () {
+        let connected = xabber.api_account && xabber.api_account.get('connected');
+        this.$('.sync-marker-wrap').showIf(connected);
+        this.$el.find('.sync-marker').showIf(this.model.settings.get('to_sync'));
+    },
+
+    showSettings: function () {
+        if (this.model.get('enabled'))
+            this.model.showSettingsModal();
+        else {
+            utils.dialogs.ask_extended(xabber.getString("settings_account__enable_account_label"), xabber.getString("settings_account__enable_account_text"),
+                {modal_class: 'modal-offline-account', no_dialog_options: true},
+                {
+                    ok_button_text: xabber.getString("button_enable"),
+                    optional_button: 'delete-account',
+                    optional_button_text: xabber.getString("settings_account__button_quit_account")
+                }).done((res) => {
+                    if (res){
+                        if (res === 'delete-account')
+                            this.model.deleteAccount(null, true);
+                        else {
+                            this.model.save('enabled', true);
+                            this.model.activate();
+                        }
+                    }
+            });
+        }
+    }
+});
+
 xabber.SettingsAccountsBlockView = xabber.BasicView.extend({
     _initialize: function () {
         this.updateList();
@@ -3328,6 +4247,77 @@ xabber.SettingsAccountsBlockView = xabber.BasicView.extend({
         this.$('.accounts-head-wrap').showIf(this.model.length);
         this.parent.$('.settings-tab[data-block-name="xmpp-accounts"] .settings-block-name')
             .text(this.model.length === 1 ? xabber.getString("account") : xabber.getString("settings__menu_item__xmpp_account") );
+    },
+
+    updateSyncState: function () {
+        let connected = xabber.api_account && xabber.api_account.get('connected');
+        this.$('.sync-head').showIf(connected);
+        this.$('.sync-marker-wrap').showIf(connected);
+        this.$('.sync-head').hideIf(!connected);
+        this.$('.sync-marker-wrap').hideIf(!connected);
+    },
+
+    onMoveAccountToBottom: function (ev, account) {
+        this.model.moveToBottom(account);
+    }
+});
+
+xabber.SettingsAccountsModalBlockView = xabber.BasicView.extend({
+    _initialize: function () {
+        this.updateList();
+        this.updateSyncState();
+        this.model.on("add", this.updateOneInList, this);
+        this.model.on("update_order", this.updateList, this);
+        this.model.on("destroy", this.onAccountRemoved, this);
+        xabber.api_account && xabber.api_account.on("change:connected", this.updateSyncState, this);
+        this.$('.move-account-to-bottom')
+            .on('move_xmpp_account', this.onMoveAccountToBottom.bind(this));
+    },
+
+    updateList: function () {
+        _.each(this.children, function (view) { view.detach(); });
+        this.model.each((account) => {
+            let jid = account.get('jid'), view = this.child(jid);
+            if (!view) {
+                view = this.addChild(jid, xabber.AccountSettingsItemModalView, {model: account});
+            }
+            this.$('.no-accounts-tip').before(view.$el);
+        });
+        this.updateHtml();
+        this.parent.updateScrollBar();
+    },
+
+    updateOneInList: function (account) {
+        let jid = account.get('jid'),
+            view = this.child(jid);
+        if (view)
+            view.$el.detach();
+        else
+            view = this.addChild(jid, xabber.AccountSettingsItemModalView, {model: account});
+        let index = this.model.indexOf(account);
+        if (index === 0)
+            this.$('.accounts-head-wrap').after(view.$el);
+        else
+            this.$('.xmpp-account').eq(index - 1).after(view.$el);
+        this.updateHtml();
+        this.parent.updateScrollBar();
+    },
+
+    onAccountRemoved: function (account) {
+        this.removeChild(account.get('jid'));
+        this.updateHtml();
+        this.parent.updateScrollBar();
+    },
+
+    render: function () {
+        this.updateHtml();
+        _.each(this.children, function (view) {
+            view.updateEnabled();
+        });
+    },
+
+    updateHtml: function () {
+        this.$('.no-accounts-tip').hideIf(this.model.length);
     },
 
     updateSyncState: function () {
@@ -5363,6 +6353,8 @@ xabber.once("start", function () {
     this.xmpp_login_panel = xabber.login_page.addChild('xmpp_login', this.XmppLoginPanel);
     this.account_settings = xabber.wide_panel.addChild('account_settings',
         this.NodeView, {classlist: 'settings-panel account-settings-panel'});
+    this.account_settings_modal = xabber.main_overlay_panel.addChild('account_settings_modal',
+        this.Container, {classlist: 'account-settings-panel'});
     this.acc_settings_left = xabber.account_settings.addChild('left',
         this.Container, {classlist: 'account-settings-left-container'});
     this.acc_settings_right = xabber.account_settings.addChild('right',
@@ -5377,6 +6369,8 @@ xabber.once("start", function () {
         {model: this.accounts, el: this.toolbar_view.$('.accounts')[0]});
     this.settings_view.addChild('accounts', this.SettingsAccountsBlockView,
         {model: this.accounts, el: this.settings_view.$('.xmpp-accounts')[0]});
+    this.settings_modal_view.addChild('accounts_modal', this.SettingsAccountsModalBlockView,
+        {model: this.accounts, el: this.settings_modal_view.$('.accounts-info-wrap')[0]});
 
 
     this.on("add_account", function () {

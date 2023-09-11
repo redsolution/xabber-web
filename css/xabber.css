@@ -303,6 +303,10 @@ input[type=checkbox].filled-in:checked + label:after {
     text-overflow: ellipsis;
 }
 
+.capitalized {
+    text-transform: capitalize;
+}
+
 .dotted-underline {
     text-underline-offset: 2px;
     text-decoration-line: underline;
@@ -1136,6 +1140,15 @@ body {
     box-shadow: rgba(0, 0, 0, 0.15) 1px 6px 20px 4px;
 }
 
+.main-overlay-wrap {
+    width: 100%;
+    height: 100%;
+    position: fixed;
+    top: 0;
+    z-index: 1001;
+    background-color: rgba(0,0,0,0.4);
+}
+
 .panel-wrap {
     height: 100%;
     float: left;
@@ -1164,6 +1177,15 @@ body {
     width: 100%;
 }
 
+.settings-panel-wrap {
+    width: 100%;
+    height: 100%;
+}
+
+.background-overlay {
+    width: 100%;
+    height: 100%;
+}
 .contacts-panel,
 .chats-panel,
 .chatbox-panel,
@@ -5042,11 +5064,17 @@ input[type=text].simple-input-field:hover {
 .fingerprints-wrap .buttons[data-trust="trust"] {
     color: #388E3C !important;
 }
+.device-encryption[data-trust="trust"] path{
+    fill: #388E3C !important;
+}
 
 .account-settings-panel .token-wrap .buttons[data-trust="ignore"],
 .device-encryption[data-trust="ignore"],
 .fingerprints-wrap .buttons[data-trust="ignore"] {
     color: #9E9E9E !important;
+}
+.device-encryption[data-trust="ignore"] path{
+    fill: #9E9E9E !important;
 }
 
 .account-settings-panel .token-wrap .buttons[data-trust="unknown"],
@@ -5054,11 +5082,17 @@ input[type=text].simple-input-field:hover {
 .fingerprints-wrap .buttons[data-trust="unknown"] {
     color: #FFA000 !important;
 }
+.device-encryption[data-trust="unknown"] path{
+    fill: #FFA000 !important;
+}
 
 .account-settings-panel .token-wrap .buttons[data-trust="error"],
 .device-encryption[data-trust="error"],
 .fingerprints-wrap .buttons[data-trust="error"] {
     color: #f44336 !important;
+}
+.device-encryption[data-trust="error"] path{
+    fill: #f44336 !important;
 }
 
 .fingerprints-wrap .own-fingerprint-wrap>div {
@@ -7767,6 +7801,14 @@ input[type=text].simple-input-field:hover {
 .chat-head-wrap .chat-icon {
     top: 40px;
     left: 52px;
+}
+.message-item .chat-icon svg,
+.chat-item .chat-icon svg,
+.status-bulb svg,
+.chat-list-wrap.left-panel-list-wrap .chat-item .chat-icon svg,
+.chat-head-wrap .chat-icon svg {
+    width: 16px;
+    height: 16px;
 }
 
 .chat-list-wrap.left-panel-list-wrap .chat-item .chat-icon {
@@ -11115,6 +11157,678 @@ input[type='range'].voice-message-volume:focus {
     transition: display 3s;
 }
 
+/* ---------------- XABBER MODAL SETTINGS --------------------- */
+
+.settings-panel-wrap .settings-panel {
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 16px 28px 0 rgba(0,0,0,.22), 0 25px 55px 0 rgba(0,0,0,.21);
+    height: unset;
+    left: 50%;
+    max-height: 80%;
+    max-width: 600px;
+    min-width: 400px;
+    position: absolute;
+    top: 15%;
+    transform: translate(-50%);
+    transition: height .1s;
+    width: 50%;
+}
+.settings-panel-wrap .settings-panel .panel-content-wrap {
+    position: static;
+}
+.settings-panel-wrap .settings-panel .settings-panel-head {
+    height: 64px;
+    padding: 0;
+    position: sticky;
+    top: 0;
+    background: #FFF;
+    z-index: 1;
+}
+.settings-panel-wrap .settings-panel .settings-panel-head.lined-head {
+    box-shadow: 0 1px 1px -1px rgba(0,0,0,.25);
+}
+.settings-panel-wrap .settings-panel .settings-block-wrap {
+    padding: 0 0 16px 0;
+}
+.settings-panel-wrap .settings-panel .settings-block-wrap.media-gallery {
+    min-height: 400px;
+}
+.settings-panel-wrap .settings-panel .settings-block-wrap.avatars .circle-avatar{
+    left: unset;
+    right: 64px;
+    top: 80px;
+}
+.settings-panel-wrap .settings-panel .settings-block-wrap.media-gallery {
+    min-height: 400px;
+}
+.settings-panel-wrap .settings-panel .settings-panel-head .description {
+    color: #616161;
+    font-size: 14px;
+    left: 60%;
+    padding: 0 24px;
+    position: absolute;
+    top: calc(100% + 8px);
+}
+.settings-panel-wrap .settings-panel .account-color {
+    height: unset;
+}
+
+.settings-panel-wrap .settings-panel .right-column .btn-back-settings,
+.settings-panel-wrap .settings-panel .right-column .btn-back-subsettings,
+.settings-panel-wrap .settings-panel .right-column .btn-back{
+    cursor: pointer;
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    color: #9E9E9E;
+}
+.settings-panel-wrap .settings-panel .right-column .settings-panel-head span.settings-panel-head-title{
+    position: absolute;
+    top: 20px;
+    font-size: 22px;
+    line-height: 24px;
+    height: 24px;
+    left: 72px;
+}
+.settings-panel-wrap .settings-panel .left-column {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    background-color: #FFF;
+    -webkit-transition: background-color 100ms linear;
+    -ms-transition: background-color 100ms linear;
+    transition: background-color 100ms linear;
+}
+
+
+.settings-panel-wrap .settings-panel .right-column {
+    width: 100%;
+    background-color: #FFF;
+    position: relative;
+    height: 100%;
+    margin: 0;
+}
+
+
+.settings-panel-wrap .settings-panel .accounts-info-wrap {
+    position: relative;
+    margin-top: 12px;
+}
+
+.settings-panel-wrap .settings-panel .settings-panel-label {
+    margin: 4px 0 0 20px;
+    FONT-WEIGHT: 500;
+    color: rgba(0, 0, 0, 0.54);
+    font-size: 16px;
+    text-transform: capitalize;
+    line-height: 32px;
+}
+
+.settings-panel-wrap .settings-panel .block-subheader {
+    height: unset;
+    padding: 0;
+    margin: 4px 0 0 20px;
+}
+
+.settings-panel-wrap .settings-panel .setting-name.header-setting,
+.settings-panel-wrap .settings-panel .block-subheader .block-name {
+    FONT-WEIGHT: 500;
+    color: rgba(0, 0, 0, 0.54);
+    font-size: 16px;
+    text-transform: capitalize;
+    line-height: 32px;
+}
+.settings-panel-wrap .settings-panel .setting-name.header-setting{
+    padding: 0;
+    margin: 4px 0 0 20px;
+}
+
+.settings-panel-wrap .settings-panel .setting-name {
+    padding: 10px 16px 0 72px;
+}
+
+.settings-panel-wrap .settings-panel .setting{
+    min-width: unset;
+    width: unset;
+    padding: 10px 16px 0 72px !important;
+}
+
+.settings-panel-wrap .settings-panel .setting.radio-button{
+    padding: 10px 16px 0 28px !important;
+}
+
+.settings-panel-wrap .settings-panel .setting.checkbox-setting{
+    padding: 10px 16px 0 28px !important;
+}
+
+.settings-panel-wrap .settings-panel .settings-block-wrap:not(.encryption) .switch{
+    position: absolute;
+    z-index: 1000;
+    right: 32px;
+    top: 22px;
+}
+
+.settings-panel-wrap .settings-panel .capabilities-wrap,
+.settings-panel-wrap .settings-panel .groups-wrap{
+    padding: 10px 48px 0 72px !important;
+}
+
+.settings-panel-wrap .settings-panel .groups-wrap{
+    padding: 10px 48px 0 72px !important;
+}
+
+.settings-panel-wrap .settings-panel .xmpp-account {
+    height: 64px;
+    padding: 0;
+    margin: 0;
+    position: relative;
+}
+
+.settings-panel-wrap .settings-panel .xmpp-account .account-info-wrap{
+    padding: 11px 0 0 72px;
+    height: 100%;
+}
+
+.settings-panel-wrap .settings-panel .xmpp-account .account-info-wrap .circle-avatar{
+    position: absolute;
+    top: 14px;
+    margin: 0;
+    left: 24px;
+}
+
+.settings-panel-wrap .settings-panel .xmpp-account .account-info-wrap .text-info-wrap{
+    height: 100%;
+    width: calc(100% - 12px);
+    border-bottom: 1px solid #f5f5f5;
+}
+
+.settings-panel-wrap .settings-panel .xmpp-account:last-of-type .account-info-wrap .text-info-wrap{
+    border-bottom: none;
+}
+
+.settings-panel-wrap .settings-panel .xmpp-account .account-info-wrap .jid-wrap,
+.settings-panel-wrap .settings-panel .xmpp-account .account-info-wrap .nickname-wrap{
+    width: 80%;
+}
+
+.settings-panel-wrap .settings-panel .xmpp-account .account-info-wrap .nickname-wrap{
+    color: rgba(0, 0, 0, 0.87) !important;
+    line-height: 24px;
+    font-size: 18px;
+}
+
+.settings-panel-wrap .settings-panel .xmpp-account .account-info-wrap .nickname-wrap.single-row{
+    line-height: 42px;
+    height: 42px;
+}
+
+.settings-panel-wrap .settings-panel .xmpp-account .account-info-wrap .jid-wrap{
+    margin-top: 2px;
+    line-height: 16px;
+    height: 16px;
+}
+
+.settings-panel-wrap .settings-panel .xmpp-account .account-info-wrap .jid-wrap .jid{
+    color: #9E9E9E !important;
+    font-size: 13px;
+    line-height: 16px;
+    height: 16px;
+}
+
+.settings-panel-wrap .settings-panel .xmpp-account .switch{
+    top: 22px;
+    right: 22px;
+}
+
+.settings-panel-wrap .settings-panel .xmpp-account .switch .lever{
+    /*height: 8px;*/
+    /*width: 24px;*/
+}
+
+.settings-panel-wrap .settings-panel .xmpp-account .switch .lever::after{
+    /*height: 12px;*/
+    /*width: 12px;*/
+    /*top: -2px;*/
+}
+
+.settings-panel-wrap .settings-panel .xmpp-account .switch label input[type=checkbox]:checked+.lever::after{
+    /*left: 13px;*/
+}
+
+.settings-panel-wrap .settings-panel .accounts-info-wrap .settings-divider{
+    border-bottom: 1px solid #f5f5f5;
+    width: calc(100% - 24px);
+    position: absolute;
+    bottom: 0;
+    left: 12px;
+}
+
+.settings-panel-wrap .settings-panel .xabber-info-wrap .name {
+    width: 100%;
+    min-height: 28px;
+    font-size: 24px;
+    text-align: center;
+    line-height: 28px;
+    color: #000;
+}
+
+.settings-panel-wrap .settings-panel .main-info-wrap .back-to-settings {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    color: #000;
+    cursor: pointer;
+}
+
+.settings-panel-wrap .settings-panel .xabber-info-wrap .version {
+    width: 100%;
+    height: 19px;
+    margin-top: 6px;
+    font-size: 16px;
+    font-weight: 300;
+    text-align: center;
+    line-height: 19px;
+    color: #000;
+}
+
+
+.settings-panel-wrap .settings-panel .settings-tabs-bottom-wrap {
+    position: absolute;
+    width: 100%;
+    bottom: 0;
+    background-color: #FFF;
+    -webkit-transition: background-color 100ms linear;
+    -ms-transition: background-color 100ms linear;
+    transition: background-color 100ms linear;
+}
+.settings-panel-wrap .settings-panel .settings-column .details-icon.mdi,
+.settings-panel-wrap .settings-panel .settings-tab .mdi {
+    position: static;
+}
+.settings-panel-wrap .settings-panel .settings-column .setting-icon-background{
+    left: 22px;
+    position: absolute;
+    top: 14px;
+    width: 36px;
+    height: 36px;
+    background: #000;
+    border-radius: 50%;
+    padding: 6px;
+}
+.settings-panel-wrap .settings-panel .settings-column .settings-tab.disabled:not(.real-delete-account) .setting-icon-background{
+    background: #999999 !important;
+}
+.settings-panel-wrap .settings-panel .settings-column .settings-tab[data-block-name="background"] .setting-icon-background{
+    background: #00BCD4;
+}
+.settings-panel-wrap .settings-panel .settings-column .settings-tab[data-block-name="notifications"] .setting-icon-background{
+    background: #8BC34A;
+}
+.settings-panel-wrap .settings-panel .settings-column .settings-tab[data-block-name="data_storage"] .setting-icon-background{
+    background: #F44336;
+}
+.settings-panel-wrap .settings-panel .settings-column .settings-tab[data-block-name="privacy"] .setting-icon-background{
+    background: #4050B5;
+}
+.settings-panel-wrap .settings-panel .settings-column .settings-tab[data-block-name="connection"] .setting-icon-background{
+    background: #FF9800;
+}
+.settings-panel-wrap .settings-panel .settings-column .settings-tab[data-block-name="debug"] .setting-icon-background{
+    background: #009688;
+}
+.settings-panel-wrap .settings-panel .settings-column .settings-tab[data-block-name="interface_language"] .setting-icon-background{
+    background: #795548;
+}
+.settings-panel-wrap .settings-panel .settings-column .settings-tab[data-block-name="profile"] .setting-icon-background{
+    background: #2196F3;
+}
+.settings-panel-wrap .settings-panel .settings-column .settings-tab[data-block-name="media-gallery"] .setting-icon-background{
+    background: #9D27B0;
+}
+.settings-panel-wrap .settings-panel .settings-column .settings-tab[data-block-name="encryption"] .setting-icon-background{
+    background: #FFC107;
+}
+.settings-panel-wrap .settings-panel .settings-column .settings-tab[data-block-name="appearance"] .setting-icon-background{
+    background: #FF9800;
+}
+.settings-panel-wrap .settings-panel .settings-column .settings-tab[data-block-name="chats"] .setting-icon-background{
+    background: #795548;
+}
+.settings-panel-wrap .settings-panel .settings-column .settings-tab[data-block-name="avatars"] .setting-icon-background{
+    background: #F44336;
+}
+.settings-panel-wrap .settings-panel .settings-column .settings-tab[data-block-name="web-notifications"] .setting-icon-background{
+    background: #E91E63;
+}
+.settings-panel-wrap .settings-panel .settings-column .settings-tab[data-block-name="chats-notifications"] .setting-icon-background{
+    background: #4CAF50;
+}
+.settings-panel-wrap .settings-panel .settings-column .settings-tab[data-block-name="groupchats-notifications"] .setting-icon-background{
+    background: #9C27B0;
+}
+.settings-panel-wrap .settings-panel .settings-column .settings-tab[data-block-name="calls-notifications"] .setting-icon-background{
+    background: #673AB7;
+}
+.settings-panel-wrap .settings-panel .settings-column .settings-tab[data-block-name="attention-calls"] .setting-icon-background{
+    background: #3F51B5;
+}
+.settings-panel-wrap .settings-panel .settings-column .settings-tab[data-block-name="status"] .setting-icon-background{
+    background: #2196F3;
+}
+.settings-panel-wrap .settings-panel .settings-column .settings-tab[data-block-name="vcard-tab"] .setting-icon-background{
+    background: #03A9F4;
+}
+.settings-panel-wrap .settings-panel .settings-column .settings-tab[data-block-name="password"] .setting-icon-background{
+    background: #00BCD4;
+}
+.settings-panel-wrap .settings-panel .settings-column .settings-tab[data-block-name="blocklist"] .setting-icon-background{
+    background: #009688;
+}
+.settings-panel-wrap .settings-panel .settings-column .settings-tab[data-block-name="circles-groups"] .setting-icon-background{
+    background: #4CAF50;
+}
+.settings-panel-wrap .settings-panel .settings-column .settings-tab[data-block-name="capabitilies"] .setting-icon-background{
+    background: #8BC34A;
+}
+
+.settings-panel-wrap .settings-panel .settings-column .details-icon.mdi{
+    cursor: pointer;
+    z-index: 1000;
+    top: 16px;
+}
+
+.settings-panel-wrap .settings-panel .settings-column .btn-back{
+    color: #9E9E9E;
+    position: absolute;
+    cursor: pointer;
+    top: 20px;
+    left: 20px;
+    z-index: 1000;
+}
+
+.settings-panel-wrap .settings-panel .settings-column .btn-color-picker{
+    color: #9E9E9E;
+    position: absolute;
+    top: 20px;
+    right: 60px;
+    cursor: pointer;
+    z-index: 1000;
+}
+
+.settings-panel-wrap .settings-panel .settings-column .btn-qr-code{
+    color: #9E9E9E;
+    position: absolute;
+    cursor: pointer;
+    top: 20px;
+    right: 20px;
+    z-index: 1000;
+}
+
+.settings-panel-wrap .settings-panel .settings-column .btn-color-picker path,
+.settings-panel-wrap .settings-panel .settings-column .btn-qr-code path{
+    fill: #9E9E9E;
+}
+
+.settings-panel-wrap .settings-panel .main-info-wrap{
+    height: 264px;
+    margin: 0;
+    padding: 0;
+    border-bottom: 1px solid #f5f5f5;
+}
+
+.settings-panel-wrap .settings-panel .main-info-wrap .picture-wrap{
+    height: 100%;
+}
+
+.settings-panel-wrap .settings-panel .main-info-wrap .picture-wrap .avatar-wrap{
+    height: 128px;
+    width: 128px;
+    position: absolute;
+    top: 56px;
+    left: 50%;
+    transform: translate(-50%, 0);
+}
+
+.settings-panel-wrap .settings-panel .main-info-wrap .picture-wrap .avatar-wrap .dropdown-content{
+    left: 0 !important;
+    top: 0 !important;
+}
+
+.settings-panel-wrap .settings-panel .main-info-wrap .name{
+    position: absolute;
+    display: block;
+    top: 196px;
+    left: 50%;
+    transform: translate(-50%, 0);
+    max-width: 80%;
+    line-height: 32px;
+    height: 32px;
+    color: rgba(0, 0, 0, 0.87);
+}
+
+.settings-panel-wrap .settings-panel .main-info-wrap .jid{
+    position: absolute;
+    display: block;
+    top: 228px;
+    left: 50%;
+    transform: translate(-50%, 0);
+    max-width: 80%;
+    line-height: 28px;
+    height: 28px;
+    font-size: 16px;
+    color: #9E9E9E;
+}
+
+.settings-panel-wrap .settings-panel .settings-tab.xabber-account-tab.offline .xabber-online-icon,
+.settings-panel-wrap .settings-panel .settings-tab.xabber-account-tab.online .xabber-offline-icon {
+    display: none;
+}
+
+.settings-panel-wrap .settings-panel .settings-tab {
+    height: 64px;
+    padding: 10px 16px 0px 72px;
+}
+
+.account-settings-panel .settings-panel-wrap .settings-panel .settings-tab:not(.real-delete-account):last-of-type {
+    border-bottom: 1px solid #f5f5f5;
+}
+.settings-panel-wrap .settings-panel .settings-tab.disabled {
+    cursor: auto;
+    pointer-events: none;
+}
+
+.settings-panel-wrap .settings-panel .settings-tab .settings-block-name {
+    color: rgba(0, 0, 0, 0.87);
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 24px;
+    height: 24px;
+}
+
+.settings-panel-wrap .settings-panel .settings-tab .settings-block-label {
+    margin-top: 4px;
+    line-height: 16px;
+    font-size: 13px;
+    color: #9E9E9E;
+    font-weight: 400;
+}
+
+.settings-panel-wrap .settings-panel .settings-tabs-wrap{
+    height: calc(100% - 176px) !important;
+}
+.account-settings-panel .settings-panel-wrap .settings-column .settings-tabs-wrap{
+    height: unset !important;
+}
+.account-settings-panel .settings-panel-wrap .settings-column .devices-wrap .token-wrap{
+    height: 64px;
+    padding: 10px 72px 0 72px !important;
+    display: block;
+    position: relative;
+}
+.account-settings-panel .settings-panel-wrap .settings-column .devices-wrap .token-wrap[data-trust="unknown"]{
+    background: #FFF8E1;
+}
+.account-settings-panel .settings-panel-wrap .settings-column .devices-wrap .token-wrap[data-trust="error"] .device{
+    color: #D32F2F;
+}
+.account-settings-panel .settings-panel-wrap .settings-column .devices-wrap .token-wrap[data-trust="error"] .token-icon-wrap{
+    background: #D32F2F;
+}
+.account-settings-panel .settings-panel-wrap .settings-column .devices-wrap .token-wrap[data-trust="error"] .token-icon-wrap path{
+    fill: #FFF;
+}
+.account-settings-panel .settings-panel-wrap .settings-column .devices-wrap .token-wrap .token-icon-wrap{
+    position: absolute;
+    left: 22px;
+    top: 14px;
+    background: #E0E0E0;
+    border-radius: 50%;
+    height: 36px;
+    width: 36px;
+    padding: 6px;
+    z-index: 1;
+}
+.account-settings-panel .settings-panel-wrap .settings-column .devices-wrap .token-wrap .token-icon-wrap .token-icon{
+    z-index: 2;
+}
+
+.account-settings-panel .settings-panel-wrap .settings-column .devices-wrap .token-wrap .token-icon-wrap path{
+    fill: #616161;
+}
+
+.account-settings-panel .settings-panel-wrap .settings-column .devices-wrap .token-wrap .token-client-wrap{
+    width: unset;
+}
+
+.account-settings-panel .settings-panel-wrap .settings-column .devices-wrap .token-wrap .device{
+    font-size: 16px;
+    line-height: 24px;
+    height: 24px;
+    color: rgba(0, 0, 0, 0.87);
+}
+
+.account-settings-panel .settings-panel-wrap .settings-column .devices-wrap .token-wrap .ip-address{
+    font-size: 13px;
+    line-height: 16px;
+    height: 16px;
+    color: #9E9E9E;
+    width: unset;
+}
+
+.account-settings-panel .settings-panel-wrap .settings-column .devices-wrap .token-wrap .device-encryption{
+    position: absolute;
+    top: 21px;
+    right: 27px;
+    height: 24px;
+    width: 24px;
+}
+
+.account-settings-panel .settings-panel-wrap .settings-column .devices-wrap .token-wrap .device-encryption:not(.active){
+    display: none;
+}
+
+.account-settings-panel .settings-panel-wrap .settings-column .devices-wrap .token-wrap .device-encryption.is-own svg path{
+    fill: #388E3C;
+}
+
+.account-settings-panel .settings-panel-wrap .settings-column .devices-wrap .token-wrap .btn-revoke-token{
+    position: absolute;
+    top: 21px;
+    right: 72px;
+    color: #9e9e9e;
+    cursor: pointer;
+    display: none;
+}
+
+.account-settings-panel .settings-panel-wrap .settings-column .devices-wrap .token-wrap:hover .btn-revoke-token{
+    display: block;
+}
+
+.account-settings-panel .settings-panel-wrap .settings-column .devices-wrap .btn-revoke-all-tokens{
+    height: 40px;
+    color: #D32F2F;
+    padding: 8px 72px;
+    position: relative;
+    cursor: pointer;
+}
+
+.account-settings-panel .settings-panel-wrap .settings-column .devices-wrap .btn-revoke-all-tokens:hover{
+    background-color: #f8f8f8;
+}
+
+.account-settings-panel .settings-panel-wrap .real-delete-account .setting-icon-background,
+.account-settings-panel .settings-panel-wrap .delete-account .setting-icon-background,
+.account-settings-panel .settings-panel-wrap .settings-column .devices-wrap .btn-revoke-all-tokens .mdi{
+    position: absolute;
+    top: 8px;
+    left: 28px;
+}
+
+.account-settings-panel .settings-panel-wrap .settings-column .devices-wrap .btn-revoke-all-tokens .mdi path{
+    fill: #D32F2F;
+}
+.account-settings-panel .settings-panel-wrap .real-delete-account,
+.account-settings-panel .settings-panel-wrap .delete-account{
+    cursor: pointer;
+    height: 40px;
+    padding: 8px 72px;
+    position: relative;
+}
+.account-settings-panel .settings-panel-wrap .real-delete-account .settings-block-name,
+.account-settings-panel .settings-panel-wrap .delete-account .settings-block-name,
+.account-settings-panel .settings-panel-wrap .settings-tab.delete-account .mdi{
+    color: #d32f2f;
+}
+.account-settings-panel .settings-panel-wrap .real-delete-account path{
+    fill: #d32f2f;
+}
+.account-settings-panel .settings-panel-wrap .real-delete-account .setting-icon-background,
+.account-settings-panel .settings-panel-wrap .delete-account .setting-icon-background{
+    position: absolute;
+    top: 8px;
+    left: 28px;
+    background: none !important;
+    width: 24px;
+    height: 24px;
+    padding: 0;
+    border-radius: 0;
+}
+
+.settings-panel-wrap .settings-panel .setting.status-wrap{
+    padding: 8px 24px 0 36px!important;
+}
+
+.settings-panel-wrap .settings-panel .settings-shifted-block{
+    min-width: unset;
+    width: unset !important;
+}
+.settings-panel-wrap .settings-panel .notifications .setting.radio-button .radio-field form{
+    width: 100%;
+    height: unset;
+}
+.settings-panel-wrap .settings-panel .settings-subblock-wrap .change-password-container{
+    height: unset;
+}
+.settings-panel-wrap .settings-panel .settings-subblock-wrap .status{
+    border: 1px solid #fff;
+    border-radius: 50%;
+    bottom: 8px;
+    cursor: pointer;
+    height: 18px;
+    position: absolute;
+    right: 15px;
+    width: 18px;
+    z-index: 200;
+}
+.settings-panel-wrap .settings-panel .blocklist-wrap .buttons-wrap{
+    float: right;
+}
+.settings-panel-wrap .settings-panel .blocklist-tabs-wrap{
+    min-width: unset;
+    width: 100%;
+}
 /* ---------------- XABBER SETTINGS --------------------- */
 
 .settings-panel .left-column {
@@ -11512,7 +12226,7 @@ input[type='range'].voice-message-volume:focus {
     color: #424242;
 }
 
-.settings-block-wrap.background .input-field.checkbox-field {
+.settings-block-wrap .input-field.checkbox-field {
     margin: 8px 32px 8px 9px;
 }
 
@@ -11539,18 +12253,18 @@ input[type='range'].voice-message-volume:focus {
     color: #616161;
 }
 
-.settings-block-wrap.background .current-background-wrap {
+.settings-block-wrap .current-background-wrap {
     width: 160px;
     height: 90px;
     position: relative;
     margin: 0 0 16px 16px;
 }
 
-.settings-block-wrap.background .current-background-wrap:hover {
+.settings-block-wrap .current-background-wrap:hover {
     cursor: pointer;
 }
 
-.settings-block-wrap.background .current-background-wrap .dark-placeholder {
+.settings-block-wrap .current-background-wrap .dark-placeholder {
     background-color: rgba(0, 0, 0, 0.4);
     position: absolute;
     width: 100%;
@@ -11561,12 +12275,12 @@ input[type='range'].voice-message-volume:focus {
     color: #FFF;
 }
 
-.settings-block-wrap.background .current-background-wrap:hover .dark-placeholder {
+.settings-block-wrap .current-background-wrap:hover .dark-placeholder {
     display: flex;
     z-index: 10;
 }
 
-.settings-block-wrap.background .current-background {
+.settings-block-wrap .current-background {
     width: 100%;
     background-repeat: no-repeat;
     height: 100%;
@@ -11575,26 +12289,26 @@ input[type='range'].voice-message-volume:focus {
 }
 
 .settings-block-wrap .volume-setting form,
-.settings-block-wrap.background .side-panel-setting-wrap .transparency-setting form,
-.settings-block-wrap.background .vignetting-setting-wrap form,
-.settings-block-wrap.background .blur-setting-wrap form {
+.settings-block-wrap .side-panel-setting-wrap .transparency-setting form,
+.settings-block-wrap .vignetting-setting-wrap form,
+.settings-block-wrap .blur-setting-wrap form {
     width: 166px;
     position: relative;
     margin: 0 8px;
 }
 
 .settings-block-wrap .volume-setting,
-.settings-block-wrap.background .blur-setting,
-.settings-block-wrap.background .vignetting-setting,
-.settings-block-wrap.background .transparency-setting {
+.settings-block-wrap .blur-setting,
+.settings-block-wrap .vignetting-setting,
+.settings-block-wrap .transparency-setting {
     display: flex;
     flex-direction: row;
 }
 
 .settings-block-wrap .volume-setting .disabled,
-.settings-block-wrap.background .transparency-setting .disabled,
-.settings-block-wrap.background .vignetting-setting-wrap .disabled,
-.settings-block-wrap.background .blur-setting-wrap .disabled {
+.settings-block-wrap .transparency-setting .disabled,
+.settings-block-wrap .vignetting-setting-wrap .disabled,
+.settings-block-wrap .blur-setting-wrap .disabled {
     position: absolute;
     top: 0;
     left: 0;
@@ -11617,14 +12331,14 @@ input[type='range'].voice-message-volume:focus {
     margin-left: 8px;
 }
 
-.settings-block-wrap.background .selected-color-wrap .selected-color-item {
+.settings-block-wrap .selected-color-wrap .selected-color-item {
     width: 32px;
     height: 32px;
     background-color: #E0E0E0;
     border: 1px solid #E0E0E0;
 }
 
-.settings-block-wrap.background .toolbar-color-setting-wrap .selected-color-wrap {
+.settings-block-wrap .toolbar-color-setting-wrap .selected-color-wrap {
     margin: 0 0 16px 0;
     cursor: pointer;
     display: flex;
@@ -11633,7 +12347,7 @@ input[type='range'].voice-message-volume:focus {
     align-items: center;
 }
 
-.settings-block-wrap.background .toolbar-main-color-setting-wrap .current-main-color-wrap {
+.settings-block-wrap .toolbar-main-color-setting-wrap .current-main-color-wrap {
     display: flex;
     align-items: center;
     width: min-content;
@@ -11642,12 +12356,12 @@ input[type='range'].voice-message-volume:focus {
     margin: 0 0 16px 0;
 }
 
-.settings-block-wrap.background .toolbar-main-color-setting-wrap .current-main-color {
+.settings-block-wrap .toolbar-main-color-setting-wrap .current-main-color {
     width: 32px;
     height: 32px;
 }
 
-.settings-block-wrap.background .toolbar-main-color-setting-wrap .color-name {
+.settings-block-wrap .toolbar-main-color-setting-wrap .color-name {
     text-transform: capitalize;
     font-weight: 500;
     color: #424242;
@@ -12265,6 +12979,7 @@ input[type='range'].voice-message-volume:focus {
 
 .account-settings-panel .main-info-wrap .circle-avatar input{
     pointer-events: none;
+    display: none;
 }
 
 .account-settings-panel .main-info-wrap .avatar-wrap .dropdown-content{
@@ -12579,12 +13294,15 @@ input[type='range'].voice-message-volume:focus {
 .account-settings-panel .token-wrap .ip-address{
     color: #9e9e9e;
 }
+
+.account-settings-panel .token-wrap .last-auth {
+    text-transform: capitalize;
+}
 .account-settings-panel .token-wrap .ip-address,
 .account-settings-panel .token-wrap .last-auth {
     font-size: 14px;
     line-height: 17px;
     font-weight: 400;
-    text-transform: capitalize;
     width: 20%;
 }
 
@@ -12719,9 +13437,11 @@ input[type='range'].voice-message-volume:focus {
 .dialog-modal.modal-unverified-devices .modal-content .dialog-text{
     line-height: 30px;
 }
+.dialog-modal.modal-offline-account .modal-footer.extended .btn-cancel,
 .dialog-modal.modal-unverified-devices .modal-footer.extended .btn-cancel{
     float: right !important;
 }
+.dialog-modal.modal-offline-account .modal-footer.extended .optional-button,
 .dialog-modal.modal-unverified-devices .modal-footer.extended .optional-button{
     float: left !important;
     margin-left: 0;

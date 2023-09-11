@@ -1,0 +1,14 @@
+<div class="token-wrap" data-token-uid="{{token_uid}}">
+    <div class="token-icon-wrap">
+        <svg class="mdi token-icon mdi-24px mdi-svg-template" data-svgname="device-web"></svg>
+    </div>
+    <div class="token-client-wrap">
+        <div class="device one-line">{{device}}</div>
+        <div class="ip-address">{{ip}}</div>
+    </div>
+    {[if (is_omemo) {]}
+    <div class="device-encryption one-line active is-own">
+        <svg class="mdi mdi-24px mdi-svg-template" data-svgname="security"></svg>
+    </div>
+    {[}]}
+</div>

@@ -70,6 +70,7 @@
     addTemplate('base.input_widget');
     addTemplate('base.toolbar');
     addTemplate('base.settings');
+    addTemplate('base.settings_modal');
     addTemplate('base.about');
     addTemplate('base.omemo_enable');
     addTemplate('base.backgrounds_gallery');
@@ -92,6 +93,7 @@
     addTemplate('accounts.media_gallery_account');
     addTemplate('accounts.settings_left');
     addTemplate('accounts.settings_right');
+    addTemplate('accounts.account_settings_modal');
     addTemplate('accounts.existing_groupchat_item');
     addTemplate('accounts.resource');
     addTemplate('accounts.resource_right');
@@ -100,14 +102,20 @@
     addTemplate('accounts.emoji_picker');
     addTemplate('accounts.emoji_picker_tabs');
     addTemplate('accounts.global_settings_item');
+    addTemplate('accounts.global_settings_item_modal');
     addTemplate('accounts.change_status');
     addTemplate('accounts.token_item');
+    addTemplate('accounts.token_item_modal');
     addTemplate('accounts.current_token_item');
+    addTemplate('accounts.current_token_item_modal');
     addTemplate('accounts.audio_file_waveform');
     addTemplate('accounts.avatars_gallery');
+    addTemplate('accounts.status_message_input_widget');
 
     addTemplate('vcard.vcard');
+    addTemplate('vcard.vcard_modal');
     addTemplate('vcard.vcard_edit');
+    addTemplate('vcard.vcard_edit_modal');
     addTemplate('vcard.vcard_right');
 
     addTemplate('searching.searching_wide');
@@ -294,6 +302,15 @@
     addSvgTemplate('svg.bell-sleep');
     addSvgTemplate('svg.bell-off');
     addSvgTemplate('svg.cancel');
+    addSvgTemplate('svg.client-outline');
+    addSvgTemplate('svg.database-lock');
+    addSvgTemplate('svg.index');
+    addSvgTemplate('svg.bug');
+    addSvgTemplate('svg.cloud');
+    addSvgTemplate('svg.key');
+    addSvgTemplate('svg.account');
+    addSvgTemplate('svg.alert-circle');
+    addSvgTemplate('svg.security');
     addSvgTemplate('svg.edit');
     addSvgTemplate('svg.edit-outline');
     addSvgTemplate('svg.blocked-add');
@@ -323,6 +340,7 @@
     addSvgTemplate('svg.palette');
     addSvgTemplate('svg.circles');
     addSvgTemplate('svg.translate');
+    addSvgTemplate('svg.trash');
     addSvgTemplate('svg.crosshairs-gps');
     addSvgTemplate('svg.crosshairs-question');
     addSvgTemplate('svg.crosshairs');

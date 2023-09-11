@@ -9410,6 +9410,15 @@ xabber.BlockListView = xabber.BasicView.extend({
         this.$('.indicator').addClass('ground-color-500');
     },
 
+    updateLabel: function () {
+        if (!this.parent || !(this.account.blocklist && this.account.blocklist.list && Object.keys(this.account.blocklist.list).length))
+            return;
+
+        let blocked_count = Object.keys(this.account.blocklist.list).length,
+            label_text = blocked_count === 0 ? xabber.getString("blocked_contacts_empty") : xabber.getQuantityString("blocked_contacts_number", blocked_count);
+        this.parent.$('.settings-tab[data-block-name="blocklist"] .settings-block-label').text(label_text);
+    },
+
     selectUnblock: function (ev) {
         this.updateUnblockButton();
     },
@@ -9451,6 +9460,12 @@ xabber.BlockListView = xabber.BasicView.extend({
         this.$('.' + tab_name).removeClass('hidden');
         this.$('.blocked-contact input').prop('checked', false)
         this.updateUnblockButton();
+        if (this.parent && this.parent.updateHeight){
+            this.parent.updateHeight();
+            setTimeout(() => {
+                this.parent.updateScrollBar();
+            }, 250)
+        }
     },
 
     hideTabs: function () {
@@ -9496,7 +9511,13 @@ xabber.BlockListView = xabber.BasicView.extend({
         this.updateIndicator();
         if (this.$('.blocked-items-container.hidden').length === 3)
             this.$('.blocked-list:not(:empty)').closest('.blocked-items-container').removeClass('hidden');
-        this.isVisible() && this.parent.updateScrollBar();
+        if (this.parent && this.parent.updateHeight){
+            this.updateLabel();
+            this.parent.updateHeight();
+            setTimeout(() => {
+                this.parent.updateScrollBar();
+            }, 250)
+        }
     },
 
     onContactRemoved: function (jid) {
@@ -9510,7 +9531,13 @@ xabber.BlockListView = xabber.BasicView.extend({
         blocked_domains_desc.text(blocked_domains_desc.text().replace(reg, ""));
         $elem.detach();
         this.$('.placeholder').hideIf(this.account.blocklist.length());
-        this.parent.updateScrollBar();
+        if (this.parent && this.parent.updateHeight){
+            this.updateLabel();
+            this.parent.updateHeight();
+            setTimeout(() => {
+                this.parent.updateScrollBar();
+            }, 250)
+        }
         this.hideEmptyContainers();
     },
 });
@@ -9695,7 +9722,7 @@ xabber.AccountGroupView = xabber.BasicView.extend({
         this.$('.group-name').text(this.model.get('name'));
         this.$('.group-members-count').text(this.model.get('counter').all);
         let index = this.model.collection.indexOf(this.model),
-            $parent_el = this.model.account.settings_right.$('.groups');
+            $parent_el = this.model.account.settings_account_modal.$('.groups');
         if (index === 0) {
             $parent_el.prepend(this.$el);
         } else {

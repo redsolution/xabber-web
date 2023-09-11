@@ -663,4 +663,209 @@ xabber.VCardEditView = xabber.BasicView.extend({
     },
 });
 
+xabber.VCardEditModalView = xabber.BasicView.extend({
+    className: 'account-vcard-edit-modal-wrap account-vcard-edit-wrap',
+    template: templates.vcard_edit_modal,
+    ps_selector: '.panel-content',
+
+    events: {
+        "keyup input": "keyUp",
+        "keyup textarea": "keyUp",
+        "input .first-name input": "changePlaceholder",
+        "input .middle-name input": "changePlaceholder",
+        "input .last-name input": "changePlaceholder",
+        "click .btn-vcard-save": "save",
+        // "click .btn-vcard-back": "render",
+        // "click .btn-cancel": "close",
+    },
+
+    _initialize: function () {
+        let self = this,
+            $input = this.$('.datepicker').pickadate({
+            selectMonths: true,
+            selectYears: 100,
+            autoOk: false,
+            // min = 100 years ago
+            min: new Date(moment.now() - 3153600000000),
+            max: new Date(moment.now() - 86400000),
+            format: 'dd.mm.yyyy',
+            allowKeyboardControl: false,
+            today: '',
+            onClose: function(){
+                $(document.activeElement).blur();
+                self.$('.btn-vcard-back').removeClass('hidden');
+                self.$('.btn-vcard-save').removeClass('hidden');
+            },
+            klass: {
+                weekday_display: 'picker__weekday-display ground-color-700',
+                date_display: 'picker__date-display ground-color-500',
+                navPrev: 'picker__nav--prev hover-ground-color-100',
+                navNext: 'picker__nav--next hover-ground-color-100',
+                selected: 'picker__day--selected ground-color-500',
+                now: 'picker__day--today text-color-700',
+                buttonClear: 'btn-flat btn-main btn-dark',
+                buttonClose: 'btn-flat btn-main text-color-700'
+            }
+        });
+        $input.on('mousedown', function cancelEvent(evt) {
+            evt.preventDefault();
+        });
+        this.data.on("change:saving", this.updateSaveButton, this);
+    },
+
+    render: function (options) {
+        if (options.$el && !this.is_rendered){
+            options.$el.append(this.$el);
+            this.is_rendered = true;
+
+            this.data.set('saving', false);
+            this.setData();
+            Materialize.updateTextFields();
+            this.changePlaceholder();
+            this.updateScrollBar();
+            this.$('.btn-vcard-save').addClass('hidden');
+        }
+    },
+
+    onHide: function () {
+        this.$el.detach();
+    },
+
+    close: function () {
+        this.$el.closeModal({ complete: this.hide.bind(this) });
+    },
+
+    changePlaceholder: function () {
+        let nickname_placeholder = ((this.$('.first-name input').val() + " " + this.$('.middle-name input').val()).trim() + " " + this.$('.last-name input').val()).trim() || this.model.get('jid');
+        this.$('.nickname input').attr('placeholder', nickname_placeholder);
+    },
+
+    setData: function () {
+        let vcard = this.model.get('vcard');
+
+        this.$('.nickname input').val(vcard.nickname);
+        this.$('.fullname input').val(vcard.fullname);
+        this.$('.first-name input').val(vcard.first_name);
+        this.$('.last-name input').val(vcard.last_name);
+        this.$('.middle-name input').val(vcard.middle_name);
+
+        this.$('.birthday input').val(vcard.birthday);
+
+        this.$('.role input').val(vcard.role);
+        this.$('.job-title input').val(vcard.job_title);
+        this.$('.org-name input').val(vcard.org.name);
+        this.$('.org-unit input').val(vcard.org.unit);
+
+        this.$('.url input').val(vcard.url);
+
+        this.$('.description textarea').val(vcard.description);
+
+        this.$('.phone-work input').val(vcard.phone.work);
+        this.$('.phone-home input').val(vcard.phone.home);
+        this.$('.phone-mobile input').val(vcard.phone.mobile);
+
+        this.$('.email-work input').val(vcard.email.work);
+        this.$('.email-home input').val(vcard.email.home);
+
+        let addr = vcard.address.work || {},
+            $info = this.$('.address-work-wrap');
+        $info.find('.pobox input').val(addr.pobox);
+        $info.find('.extadd input').val(addr.extadd);
+        $info.find('.street input').val(addr.street);
+        $info.find('.locality input').val(addr.locality);
+        $info.find('.region input').val(addr.region);
+        $info.find('.pcode input').val(addr.pcode);
+        $info.find('.country input').val(addr.country);
+
+        addr = vcard.address.home || {};
+        $info = this.$('.address-home-wrap');
+        $info.find('.pobox input').val(addr.pobox);
+        $info.find('.extadd input').val(addr.extadd);
+        $info.find('.street input').val(addr.street);
+        $info.find('.locality input').val(addr.locality);
+        $info.find('.region input').val(addr.region);
+        $info.find('.pcode input').val(addr.pcode);
+        $info.find('.country input').val(addr.country);
+    },
+
+    getData: function () {
+        let vcard = utils.vcard.getBlank(this.model.get('jid'));
+
+        vcard.nickname = this.$('.nickname input').val();
+        vcard.fullname = this.$('.fullname input').val();
+        vcard.first_name = this.$('.first-name input').val();
+        vcard.last_name = this.$('.last-name input').val();
+        vcard.middle_name = this.$('.middle-name input').val();
+
+        vcard.birthday = this.$('.birthday input').val();
+
+        vcard.role = this.$('.role input').val();
+        vcard.job_title = this.$('.job-title input').val();
+        vcard.org.name = this.$('.org-name input').val();
+        vcard.org.unit = this.$('.org-unit input').val();
+
+        vcard.url = this.$('.url input').val();
+
+        vcard.description = this.$('.description textarea').val();
+
+        vcard.phone.work = this.$('.phone-work input').val();
+        vcard.phone.home = this.$('.phone-home input').val();
+        vcard.phone.mobile = this.$('.phone-mobile input').val();
+
+        vcard.email.work = this.$('.email-work input').val();
+        vcard.email.home = this.$('.email-home input').val();
+
+        vcard.address.work = {};
+        let addr = vcard.address.work,
+            $info = this.$('.address-work-wrap');
+        addr.pobox = $info.find('.pobox input').val();
+        addr.extadd = $info.find('.extadd input').val();
+        addr.street = $info.find('.street input').val();
+        addr.locality = $info.find('.locality input').val();
+        addr.region = $info.find('.region input').val();
+        addr.pcode = $info.find('.pcode input').val();
+        addr.country = $info.find('.country input').val();
+
+        vcard.address.home = {};
+        addr = vcard.address.home;
+        $info = this.$('.address-home-wrap');
+        addr.pobox = $info.find('.pobox input').val();
+        addr.extadd = $info.find('.extadd input').val();
+        addr.street = $info.find('.street input').val();
+        addr.locality = $info.find('.locality input').val();
+        addr.region = $info.find('.region input').val();
+        addr.pcode = $info.find('.pcode input').val();
+        addr.country = $info.find('.country input').val();
+        return vcard;
+    },
+
+    updateSaveButton: function () {
+        this.$('.btn-vcard-save').text(this.data.get('saving') ? xabber.getString("saving") : xabber.getString("vcard_edit__button_save"));
+    },
+
+    save: function () {
+        if (this.data.get('saving')) {
+            return;
+        }
+        this.data.set('saving', true);
+        this.model.setVCard(this.getData(),
+            () => {
+                this.model.getVCard();
+                this.data.set('saving', false);
+                this.$('.btn-vcard-back').addClass('hidden');
+                this.$('.btn-vcard-save').addClass('hidden');
+            },
+            function () {
+                utils.dialogs.error(xabber.getString("account_user_info_save_fail"));
+                this.data.set('saving', false);
+            }
+        );
+    },
+
+    keyUp: function () {
+        this.$('.btn-vcard-back').removeClass('hidden');
+        this.$('.btn-vcard-save').removeClass('hidden');
+    },
+});
+
 export default xabber;
