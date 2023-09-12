@@ -55,7 +55,7 @@
                     <div class="settings-block-label label-encryption-disabled one-line">{[print(xabber.getString("settings_account__encryption_disabled_label"))]}</div>
                 </div>
             </div>
-            <div class="devices-wrap">
+            <div class="devices-wrap hidden">
                 <div class="tokens-wrap">
                     <div class="settings-panel-label">{[print(xabber.getString("settings_account__label_this_device"))]}</div>
                     <div class="current-token-wrap">
@@ -65,7 +65,7 @@
                             <div class="settings-button-devices-label">{[print(xabber.getString("account_terminate_all_sessions"))]}</div>
                         </div>
                     </div>
-                    <div class="settings-panel-label">{[print(xabber.getString("settings_account__label_active_sessions"))]}</div>
+                    <div class="settings-panel-label active-sessions-label">{[print(xabber.getString("settings_account__label_active_sessions"))]}</div>
                     <div class="all-sessions-wrap">
                         <div class="sessions-wrap all-sessions selectable-text"></div>
                     </div>
@@ -158,7 +158,7 @@
                                 <div class="settings-block-name one-line">{[print(xabber.getString("settings_account__capabilities_subheader"))]}</div>
                                 <div class="settings-block-label one-line">{[print(xabber.getString("settings_account__capabilities_subheader_label"))]}</div>
                             </div>
-                            <div class="settings-tab disabled real-delete-account settings-non-tab" data-subblock-parent-name="profile" data-block-name="delete-account">
+                            <div class="settings-tab disabled settings-deletion-button settings-non-tab" data-subblock-parent-name="profile" data-block-name="delete-account">
                                 <div class="setting-icon-background">
                                     <svg class="mdi mdi-24px mdi-svg-template" data-svgname="trash"></svg>
                                 </div>
@@ -210,7 +210,7 @@
                             <div class="blocklist-info">
                                 <div class="blocklist-wrap">
                                     <div class="buttons-wrap">
-                                        <button class="btn-block btn-flat btn-main text-color-500 ground-color-grey-100 hover-ground-color-grey-300 hidden">{[print(xabber.getString("settings_account__blocklist__button_block"))]}</button>
+                                        <button class="btn-block btn-flat btn-main text-color-500 ground-color-grey-100 hover-ground-color-grey-300">{[print(xabber.getString("settings_account__blocklist__button_block"))]}</button>
                                         <button class="btn-deselect-blocked btn-flat btn-main btn-dark ground-color-grey-100 hover-ground-color-grey-300 hidden">{[print(xabber.getString("cancel"))]}</button>
                                         <button class="btn-unblock-selected btn-flat btn-main text-color-500 ground-color-grey-100 hover-ground-color-grey-300 hidden">{[print(xabber.getString("unblock_selected"))]}</button>
                                     </div>

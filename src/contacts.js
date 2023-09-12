@@ -9410,15 +9410,6 @@ xabber.BlockListView = xabber.BasicView.extend({
         this.$('.indicator').addClass('ground-color-500');
     },
 
-    updateLabel: function () {
-        if (!this.parent || !(this.account.blocklist && this.account.blocklist.list && Object.keys(this.account.blocklist.list).length))
-            return;
-
-        let blocked_count = Object.keys(this.account.blocklist.list).length,
-            label_text = blocked_count === 0 ? xabber.getString("blocked_contacts_empty") : xabber.getQuantityString("blocked_contacts_number", blocked_count);
-        this.parent.$('.settings-tab[data-block-name="blocklist"] .settings-block-label').text(label_text);
-    },
-
     selectUnblock: function (ev) {
         this.updateUnblockButton();
     },
@@ -9512,7 +9503,7 @@ xabber.BlockListView = xabber.BasicView.extend({
         if (this.$('.blocked-items-container.hidden').length === 3)
             this.$('.blocked-list:not(:empty)').closest('.blocked-items-container').removeClass('hidden');
         if (this.parent && this.parent.updateHeight){
-            this.updateLabel();
+            this.parent.updateBlockedLabel();
             this.parent.updateHeight();
             setTimeout(() => {
                 this.parent.updateScrollBar();
@@ -9532,7 +9523,7 @@ xabber.BlockListView = xabber.BasicView.extend({
         $elem.detach();
         this.$('.placeholder').hideIf(this.account.blocklist.length());
         if (this.parent && this.parent.updateHeight){
-            this.updateLabel();
+            this.parent.updateBlockedLabel();
             this.parent.updateHeight();
             setTimeout(() => {
                 this.parent.updateScrollBar();

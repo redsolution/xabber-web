@@ -2767,10 +2767,8 @@ xabber.SettingsModalView = xabber.BasicView.extend({
     updateSoundsLabel: function () {
         let sound_private_value = this.model.get('private_sound') && this.model.get('notifications_private') ? this.model.get('sound_on_private_message') : '',
             sound_group_value = this.model.get('group_sound') && this.model.get('notifications_group') ? this.model.get('sound_on_group_message') : '',
-            sound_on_call = this.model.get('sound_on_call'),
-            sound_on_dialtone = this.model.get('sound_on_dialtone'),
             sound_on_attention = this.model.get('call_attention') ? this.model.get('sound_on_attention') : '',
-            sound_private_text, sound_group_text, sound_on_call_text, sound_on_dialtone_text, sound_on_attention_text;
+            sound_private_text, sound_group_text, sound_on_attention_text;
 
 
         if (sound_private_value === '')
@@ -2783,9 +2781,6 @@ xabber.SettingsModalView = xabber.BasicView.extend({
         else
             sound_group_text = sound_group_value.replace('_', ' ');
 
-        sound_on_call_text = sound_on_call.replace('_', ' ');
-        sound_on_dialtone_text = sound_on_dialtone.replace('_', ' ');
-
         if (sound_on_attention === '')
             sound_on_attention_text = 'No sound';
         else
@@ -2793,7 +2788,6 @@ xabber.SettingsModalView = xabber.BasicView.extend({
 
         this.$('.settings-tab[data-block-name="chats-notifications"] .settings-block-label').text(sound_private_text);
         this.$('.settings-tab[data-block-name="groupchats-notifications"] .settings-block-label').text(sound_group_text);
-        this.$('.settings-tab[data-block-name="calls-notifications"] .settings-block-label').text(sound_on_call_text + ', ' + sound_on_dialtone_text);
         this.$('.settings-tab[data-block-name="attention-calls"] .settings-block-label').text(sound_on_attention_text);
     },
 });
@@ -3901,9 +3895,9 @@ xabber.SetBackgroundView = xabber.BasicView.extend({
             }
         };
         if (this.type == 'repeating-pattern') {
-            request.url = constants.BACKGROUND_PATTERNS_XML_URL;
+            request.url =  constants.ASSETS_URL_PREFIX + 'background-patterns.xml';
         } else {
-            request.url = constants.BACKGROUND_IMAGES_XML_URL;
+            request.url = constants.ASSETS_URL_PREFIX + 'background-images.xml';
         }
         $.ajax(request);
     },

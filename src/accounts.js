@@ -2920,6 +2920,7 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
         this.$('.btn-back-settings').removeClass('hidden');
         this.$('.btn-back-subsettings').addClass('hidden');
         this.updateHeight();
+        this.updateBlockedLabel();
         return this;
     },
 
@@ -2931,6 +2932,15 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
             height = this.$('.right-column').height();
         this.ps_container.css('height', height + 'px');
         this.updateScrollBar();
+    },
+
+    updateBlockedLabel: function () {
+        if (!(this.model.blocklist && this.model.blocklist.list))
+            return;
+
+        let blocked_count = Object.keys(this.model.blocklist.list).length,
+            label_text = blocked_count === 0 ? xabber.getString("blocked_contacts_empty") : xabber.getQuantityString("blocked_contacts_number", blocked_count);
+        this.$('.settings-tab[data-block-name="blocklist"] .settings-block-label').text(label_text);
     },
 
     onScrollY: function () {
@@ -3028,7 +3038,6 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
         this.$('.main-info-wrap').switchClass('disconnected', !connected);
         this.$('.settings-tab[data-block-name="profile"]').showIf(connected);
         this.$('.settings-tab[data-block-name="encryption"]').showIf(connected);
-        this.$('.devices-wrap').showIf(connected);
         this.$('.profile-image-dropdown').showIf(connected);
         this.$('.set-groupchat-avatar').showIf(connected);
         this.updateGallery();
@@ -3230,10 +3239,17 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
                 }
             }
         });
-        if (this.$('.all-sessions').children().length)
+        if (this.$('.all-sessions').children().length){
             this.$('.all-sessions-wrap').removeClass('hidden');
-        else
+            this.$('.active-sessions-label').removeClass('hidden');
+            this.$('.btn-revoke-all-tokens').removeClass('hidden');
+        }
+        else {
             this.$('.all-sessions-wrap').addClass('hidden');
+            this.$('.active-sessions-label').addClass('hidden');
+            this.$('.btn-revoke-all-tokens').addClass('hidden');
+        }
+        this.$('.devices-wrap').removeClass('hidden')
         this.updateHeight();
     },
 
@@ -4112,8 +4128,17 @@ xabber.AccountSettingsItemModalView = xabber.BasicView.extend({
     },
 
     updateNickname: function () {
-        if (this.model.get('vcard') && this.model.get('vcard').nickname){
-            this.$('.nickname').text(this.model.get('vcard').nickname);
+        let nickname;
+        if (this.model.get('vcard')) {
+            if (this.model.get('vcard').nickname)
+                nickname = this.model.get('vcard').nickname;
+            else if (this.model.get('vcard').fullname)
+                nickname = this.model.get('vcard').fullname;
+            else if (this.model.get('vcard').first_name || this.model.get('vcard').last_name)
+                nickname = this.model.get('vcard').first_name + ' ' + this.model.get('vcard').last_name;
+        }
+        if (nickname){
+            this.$('.nickname').text(nickname);
             this.$('.jid').text(this.model.get('jid'));
             this.$('.nickname-wrap').removeClass('single-row');
             this.$('.jid-wrap').removeClass('hidden');
