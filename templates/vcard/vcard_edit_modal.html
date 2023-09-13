@@ -2,8 +2,11 @@
     <button class="btn-vcard-save btn-flat btn-main text-color-500 ground-color-grey-100 hover-ground-color-grey-300">{[print(xabber.getString("vcard_edit__button_save"))]}</button>
 </div>
 <div class="vcard-edit-wrap">
+    <div class="input-label">{[print(xabber.getString("vcard_type_personal"))]}</div>
     <div class="info-wrap personal-info-wrap">
-        <i class="details-icon mdi mdi-24px mdi-account-card-details"></i>
+        <div class="setting-icon-background">
+            <i class="details-icon mdi mdi-24px mdi-account-card-details"></i>
+        </div>
         <div class="input-field first-name">
             <input class="input-glow" id="{{view.cid}}-first-name" placeholder="{[print(xabber.getString('vcard_given_name'))]}" type="text" name="first_name">
         </div>
@@ -18,25 +21,31 @@
         </div>
     </div>
 
+    <div class="input-label">{[print(xabber.getString("vcard_nick_name"))]}</div>
     <div class="info-wrap nickname-info-wrap">
-        <div class="input-label">{[print(xabber.getString("vcard_nick_name"))]}</div>
-        <i class="details-icon mdi mdi-24px mdi-account-box-outline"></i>
+        <div class="setting-icon-background">
+            <i class="details-icon mdi mdi-24px mdi-account-box-outline"></i>
+        </div>
         <div class="input-field nickname">
             <input class="input-glow" id="{{view.cid}}-nickname" placeholder="{[print(xabber.getString('vcard_nick_name'))]}" type="text" name="nickname">
         </div>
     </div>
 
+    <div class="input-label">{[print(xabber.getString("vcard_birth_date"))]}</div>
     <div class="info-wrap birthday-info-wrap">
-        <div class="input-label">{[print(xabber.getString("vcard_birth_date"))]}</div>
-        <i class="details-icon mdi mdi-24px mdi-cake-variant"></i>
+        <div class="setting-icon-background">
+            <i class="details-icon mdi mdi-24px mdi-cake-variant"></i>
+        </div>
         <div class="input-field birthday">
             <input class="input-glow" id="{{view.cid}}-birthday" placeholder="{[print(xabber.getString('vcard_birth_date_placeholder'))]}" type="text" class="datepicker">
         </div>
     </div>
 
+    <div class="input-label">{[print(xabber.getString("vcard_job"))]}</div>
     <div class="info-wrap job-info-wrap">
-        <div class="input-label">{[print(xabber.getString("vcard_job"))]}</div>
-        <i class="details-icon mdi mdi-24px mdi-briefcase"></i>
+        <div class="setting-icon-background">
+            <i class="details-icon mdi mdi-24px mdi-briefcase"></i>
+        </div>
         <div class="input-field org-name">
             <input class="input-glow" id="{{view.cid}}-org-name" placeholder="{[print(xabber.getString('vcard_organization'))]}" type="text" name="org_name">
         </div>
@@ -50,24 +59,30 @@
             <input class="input-glow" id="{{view.cid}}-role" placeholder="{[print(xabber.getString('vcard_role'))]}" type="text" name="role">
         </div>
     </div>
+    <div class="input-label">{[print(xabber.getString("vcard_url"))]}</div>
     <div class="info-wrap site-info-wrap">
-        <div class="input-label">{[print(xabber.getString("vcard_url"))]}</div>
-        <i class="details-icon mdi mdi-24px mdi-web"></i>
+        <div class="setting-icon-background">
+            <i class="details-icon mdi mdi-24px mdi-web"></i>
+        </div>
         <div class="input-field url">
             <input class="input-glow" id="{{view.cid}}-url" placeholder="{[print(xabber.getString('vcard_url_placeholder'))]}" type="text" name="url">
         </div>
     </div>
+    <div class="input-label">{[print(xabber.getString("vcard_decsription"))]}</div>
     <div class="info-wrap description-info-wrap">
-        <div class="input-label">{[print(xabber.getString("vcard_decsription"))]}</div>
-        <i class="details-icon mdi mdi-24px mdi-file-document-box"></i>
+        <div class="setting-icon-background">
+            <i class="details-icon mdi mdi-24px mdi-file-document-box"></i>
+        </div>
         <div class="input-field description">
             <textarea id="{{view.cid}}-description" placeholder="{[print(xabber.getString('vcard_decsription_placeholder'))]}" type="text" cols="30" rows="10" class="text-field materialize-textarea" name="description"></textarea>
         </div>
     </div>
 
+    <div class="input-label">{[print(xabber.getString("vcard_telephone"))]}</div>
     <div class="info-wrap phone-info-wrap">
-        <div class="input-label">{[print(xabber.getString("vcard_telephone"))]}</div>
-        <i class="details-icon mdi mdi-24px mdi-phone"></i>
+        <div class="setting-icon-background">
+            <i class="details-icon mdi mdi-24px mdi-phone"></i>
+        </div>
         <div class="input-field phone-work">
             <input class="input-glow" id="{{view.cid}}-phone-work" placeholder="{[print(xabber.getString('vcard_type_work'))]}" type="text" name="phone_work">
         </div>
@@ -78,9 +93,11 @@
             <input class="input-glow" id="{{view.cid}}-phone-mobile" placeholder="{[print(xabber.getString('vcard_type_mobile'))]}" type="text" name="phone_mobile">
         </div>
     </div>
+    <div class="input-label">{[print(xabber.getString("vcard_email"))]}</div>
     <div class="info-wrap email-info-wrap">
-        <div class="input-label">{[print(xabber.getString("vcard_email"))]}</div>
-        <i class="details-icon mdi mdi-24px mdi-email"></i>
+        <div class="setting-icon-background">
+            <i class="details-icon mdi mdi-24px mdi-email"></i>
+        </div>
         <div class="input-field email-work">
             <input class="input-glow" id="{{view.cid}}-email-work" placeholder="{[print(xabber.getString('vcard_type_work'))]}" type="text" name="email_work">
         </div>
@@ -89,10 +106,12 @@
         </div>
     </div>
 
+    <div class="input-label">{[print(xabber.getString("vcard_home_address"))]}</div>
     <div class="info-wrap address-info-wrap">
-        <i class="details-icon mdi mdi-24px mdi-map-marker"></i>
+        <div class="setting-icon-background">
+            <i class="details-icon mdi mdi-24px mdi-map-marker"></i>
+        </div>
         <div class="input-wrap address-wrap address-home-wrap">
-            <div class="input-label">{[print(xabber.getString("vcard_home_address"))]}</div>
             <div class="input-field pobox">
                 <input class="input-glow" id="{{view.cid}}-po-home-box" placeholder="{[print(xabber.getString('vcard_address_pobox'))]}" type="text" name="po_home_box">
             </div>
@@ -115,8 +134,10 @@
                 <input class="input-glow" id="{{view.cid}}-addr-home-country" placeholder="{[print(xabber.getString('vcard_address_ctry'))]}" type="text" name="addr_home_country">
             </div>
         </div>
+    </div>
+    <div class="input-label">{[print(xabber.getString("vcard_work_address"))]}</div>
+    <div class="info-wrap address-info-wrap">
         <div class="input-wrap address-wrap address-work-wrap">
-            <div class="input-label">{[print(xabber.getString("vcard_work_address"))]}</div>
             <div class="input-field pobox">
                 <input class="input-glow" id="{{view.cid}}-po-work-box" placeholder="{[print(xabber.getString('vcard_address_pobox'))]}" type="text" name="po_work_box">
             </div>

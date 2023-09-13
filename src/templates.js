@@ -289,6 +289,7 @@
     addSvgTemplate('svg.address-outline');
     addSvgTemplate('svg.email-outline');
     addSvgTemplate('svg.description-outline');
+    addSvgTemplate('svg.contact-add');
     addSvgTemplate('svg.call-outline');
     addSvgTemplate('svg.call');
     addSvgTemplate('svg.search');

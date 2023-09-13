@@ -491,6 +491,12 @@ xabber.FingerprintsOwnDevices = xabber.BasicView.extend({
         $container.attr('data-trust', is_trusted);
         is_trusted === 'unknown' && $container.find('.device-encryption span').text(xabber.getString("settings_account__unverified_device"));
         is_trusted === 'trust' && $container.find('.device-encryption span').text(xabber.getString("settings_account__trusted_device"));
+        if (is_trusted !== 'trust' && is_trusted !== 'ignore'){
+            let $warning_container = $container.closest('.devices-wrap').find('.device-encryption-warning'),
+                untrusted_count = parseInt($warning_container.attr('data-not-trusted-count')) + 1;
+            $warning_container.removeClass('hidden').attr('data-not-trusted-count', untrusted_count);
+            $warning_container.find('.device-encryption-warning-label').html(xabber.getString("settings_account__encryption_warning_text", [untrusted_count]));
+        }
         $container.find('.device-encryption .mdi-lock').removeClass('hidden');
     },
 

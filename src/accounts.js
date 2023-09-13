@@ -2945,9 +2945,13 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
 
     onScrollY: function () {
         if (this.getScrollTop() === 0)
-            this.$('.settings-panel-head').removeClass('lined-head')
+            this.$('.settings-panel-head').removeClass('lined-head');
         else
-            this.$('.settings-panel-head').addClass('lined-head')
+            this.$('.settings-panel-head').addClass('lined-head');
+        if (this.getScrollTop() >= 180)
+            this.$('.settings-account-head').addClass('head-scrolled');
+        else
+            this.$('.settings-account-head').removeClass('head-scrolled');
     },
 
     jumpToBlock: function (ev) {
@@ -3205,6 +3209,8 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
     renderAllXTokens: function () {
         this.$('.sessions-wrap').html("");
         this.$('.orphaned-fingerprints-wrap').html("");
+        this.$('.device-encryption-warning').addClass('hidden');
+        this.$('.device-encryption-warning').attr('data-not-trusted-count', 0);
         $(_.sortBy(this.model.x_tokens_list, '-last_auth')).each((idx, token) => {
             let pretty_token = {
                 resource_obj: undefined,
@@ -4193,7 +4199,7 @@ xabber.AccountSettingsItemModalView = xabber.BasicView.extend({
         if (this.model.get('enabled'))
             this.model.showSettingsModal();
         else {
-            utils.dialogs.ask_extended(xabber.getString("settings_account__enable_account_label"), xabber.getString("settings_account__enable_account_text"),
+            utils.dialogs.ask_extended(xabber.getString("settings_account__enable_account_label"), xabber.getString("settings_account__enable_account_text", [this.model.get('jid')]),
                 {modal_class: 'modal-offline-account', no_dialog_options: true},
                 {
                     ok_button_text: xabber.getString("button_enable"),
@@ -6283,7 +6289,6 @@ xabber.AddAccountView = xabber.XmppLoginPanel.extend({
     endAuth: function () {
         this.account.save('is_new', undefined);
         this.data.set('authentication', false);
-        xabber.body.setScreen('all-chats', {right: null});
         this.account.sendPresence();
         this.account.trigger('ready_to_get_roster');
         this.account.auth_view = null;

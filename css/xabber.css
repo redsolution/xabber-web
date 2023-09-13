@@ -781,6 +781,13 @@ input[type=file] {
     line-height: 72px;
 }
 
+.mdi.mdi-40px {
+    width: 40px;
+    height: 40px;
+    font-size: 40px;
+    line-height: 40px;
+}
+
 .mdi.mdi-36px {
     width: 36px;
     height: 36px;
@@ -11223,6 +11230,7 @@ input[type='range'].voice-message-volume:focus {
     left: 20px;
     color: #9E9E9E;
 }
+.settings-panel-wrap .settings-panel .settings-account-head .name,
 .settings-panel-wrap .settings-panel .right-column .settings-panel-head span.settings-panel-head-title{
     position: absolute;
     top: 20px;
@@ -11532,11 +11540,60 @@ input[type='range'].voice-message-volume:focus {
 .settings-panel-wrap .settings-panel .settings-column .settings-tab[data-block-name="capabitilies"] .setting-icon-background{
     background: #8BC34A;
 }
+.settings-panel-wrap .settings-panel .settings-column .personal-info-wrap .setting-icon-background{
+    background: #FF9800;
+}
+.settings-panel-wrap .settings-panel .settings-column .nickname-info-wrap .setting-icon-background{
+    background: #F44336;
+}
+.settings-panel-wrap .settings-panel .settings-column .birthday-info-wrap .setting-icon-background{
+    background: #9C27B0;
+}
+.settings-panel-wrap .settings-panel .settings-column .job-info-wrap .setting-icon-background{
+    background: #3F51B5;
+}
+.settings-panel-wrap .settings-panel .settings-column .site-info-wrap .setting-icon-background{
+    background: #03A9F4;
+}
+.settings-panel-wrap .settings-panel .settings-column .description-info-wrap .setting-icon-background{
+    background: #009688;
+}
+.settings-panel-wrap .settings-panel .settings-column .phone-info-wrap .setting-icon-background{
+    background: #FFC107;
+}
+.settings-panel-wrap .settings-panel .settings-column .email-info-wrap .setting-icon-background{
+    background: #2196F3;
+}
+.settings-panel-wrap .settings-panel .settings-column .address-info-wrap .setting-icon-background{
+    background: #8BC34A;
+}
 
 .settings-panel-wrap .settings-panel .settings-column .details-icon.mdi{
     cursor: pointer;
     z-index: 1000;
     top: 16px;
+}
+
+.settings-panel-wrap .settings-panel .settings-account-head{
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    transition: background 0.5s;
+}
+.settings-panel-wrap .settings-panel .settings-account-head.head-scrolled{
+    background: #FFF;
+    height: 64px;
+}
+
+.settings-panel-wrap .settings-panel .settings-account-head .name{
+    transition: opacity 0.5s;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.settings-panel-wrap .settings-panel .settings-account-head.head-scrolled .name{
+    opacity: 1;
+    pointer-events: auto;
 }
 
 .settings-panel-wrap .settings-panel .settings-column .btn-back{
@@ -11566,6 +11623,15 @@ input[type='range'].voice-message-volume:focus {
     z-index: 1000;
 }
 
+.settings-panel-wrap .settings-panel .settings-column .btn-add-account{
+    position: absolute;
+    cursor: pointer;
+    top: 15px;
+    right: 24px;
+    z-index: 1000;
+}
+
+.settings-panel-wrap .settings-panel .settings-column .btn-add-account path,
 .settings-panel-wrap .settings-panel .settings-column .btn-color-picker path,
 .settings-panel-wrap .settings-panel .settings-column .btn-qr-code path{
     fill: #9E9E9E;
@@ -11775,6 +11841,8 @@ input[type='range'].voice-message-volume:focus {
     height: 40px;
     padding: 8px 72px;
     position: relative;
+    margin-top: 8px;
+    margin-bottom: 8px;
 }
 .settings-panel-wrap .settings-panel .settings-deletion-button .settings-block-name,
 .account-settings-panel .settings-panel-wrap .delete-account .settings-block-name,
@@ -11826,12 +11894,86 @@ input[type='range'].voice-message-volume:focus {
     width: 18px;
     z-index: 200;
 }
+.settings-panel-wrap .settings-panel .vcard .buttons-wrap,
 .settings-panel-wrap .settings-panel .blocklist-wrap .buttons-wrap{
     float: right;
+    position: sticky;
+    top: 64px;
+    right: 8px;
+    z-index: 1001;
+    height: 0;
+    padding: 0;
+}
+.settings-panel-wrap .settings-panel .vcard .buttons-wrap{
+    top: 68px;
+}
+.settings-panel-wrap .settings-panel .vcard .buttons-wrap button.btn-vcard-save{
+    top: -54px;
+}
+.settings-panel-wrap .settings-panel .vcard .buttons-wrap button,
+.settings-panel-wrap .settings-panel .blocklist-wrap .buttons-wrap button{
+    position: absolute;
+    z-index: 1002;
+    top: -50px;
+    right: 0;
+}
+.settings-panel-wrap .settings-panel .blocklist-wrap .buttons-wrap button.btn-deselect-blocked{
+    right: 172px;
+}
+.settings-panel-wrap .settings-panel .blocklist-wrap .buttons-wrap button.btn-unblock-selected{
+    white-space: nowrap;
 }
 .settings-panel-wrap .settings-panel .blocklist-tabs-wrap{
     min-width: unset;
     width: 100%;
+}
+.settings-panel-wrap .settings-panel .device-encryption-warning{
+    padding: 16px 32px 6px 72px;
+    background: #FFEBEE;
+    position: relative;
+}
+.settings-panel-wrap .settings-panel .device-encryption-icon{
+    position: absolute;
+    left: 20px;
+    top: 20px;
+}
+.settings-panel-wrap .settings-panel .device-encryption-icon path{
+    fill: #D32F2F;
+}
+.settings-panel-wrap .settings-panel .device-encryption-warning-name{
+    font-size: 16px;
+    line-height: 24px;
+    height: 24px;
+}
+.settings-panel-wrap .settings-panel .device-encryption-warning-label{
+    color: #9E9E9E;
+    font-size: 13px;
+    line-height: 20px;
+}
+.settings-panel-wrap .settings-panel .device-encryption-warning-label span{
+    color: #616161;
+}
+.settings-panel-wrap .settings-panel .vcard-edit-wrap{
+    padding: 0;
+    width: 100%;
+}
+.settings-panel-wrap .settings-panel .vcard-edit-wrap .info-wrap{
+    position: relative;
+    margin: 0;
+    padding: 10px 24px 10px 72px;
+}
+.settings-panel-wrap .settings-panel .vcard-edit-wrap .input-label{
+    FONT-WEIGHT: 500;
+    color: rgba(0,0,0,.54);
+    font-size: 16px;
+    line-height: 32px;
+    margin: 4px 0 0 20px;
+    text-transform: capitalize;
+    height: unset;
+    padding: 0;
+}
+.settings-panel-wrap .settings-panel .vcard-edit-wrap .info-wrap .details-icon{
+    color: #FFF
 }
 /* ---------------- XABBER SETTINGS --------------------- */
 

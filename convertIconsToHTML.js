@@ -41,6 +41,7 @@ let badges_names = [
         'address-outline',
         'email-outline',
         'description-outline',
+        'contact-add',
         'call-outline',
         'call',
         'search',
