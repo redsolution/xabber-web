@@ -11195,7 +11195,7 @@ input[type='range'].voice-message-volume:focus {
     position: sticky;
     top: 0;
     background: #FFF;
-    z-index: 1;
+    z-index: 2;
 }
 .settings-panel-wrap .settings-panel .settings-panel-head.lined-head {
     box-shadow: 0 1px 1px -1px rgba(0,0,0,.25);
@@ -12135,7 +12135,6 @@ input[type='range'].voice-message-volume:focus {
 }
 
 .settings-panel .settings-tab.active {
-    background-color: rgba(255, 255, 255, 0.15) !important;
 }
 
 .settings-panel .left-column .details-icon.mdi,
@@ -13281,7 +13280,6 @@ input[type='range'].voice-message-volume:focus {
 }
 
 .settings-tab.active {
-    background-color: rgba(0, 0, 0, 0.15) !important;
 }
 
 .settings-panel-head .buttons-wrap {

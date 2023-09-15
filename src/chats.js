@@ -1230,11 +1230,7 @@ xabber.MessagesBase = Backbone.Collection.extend({
     },
 
     initIncomingCall: function (full_jid, session_id) {
-        if (!xabber.get('audio')) {
-            this.messages.createSystemMessage({
-                from_jid: this.account.get('jid'),
-                message: xabber.getString("jingle__system_message__no_devices_to_answer")
-            });
+        if (!xabber.get('audio') || !xabber.settings.jingle_calls) {
             return;
         }
         xabber.current_voip_call = new xabber.JingleMessage({contact_full_jid: full_jid, session_id: session_id, call_initiator: this.contact.get('jid')}, {contact: this.contact, });
@@ -9812,6 +9808,7 @@ xabber.InvitationPanelView = xabber.SearchView.extend({
         this.contact.on("change:subscription", this.updateMenu, this);
         this.contact.on("change:in_roster", this.updateMenu, this);
         this.contact.on("update_trusted", this.updateEncryptedColor, this);
+        xabber._settings.on("change:jingle_calls", this.updateGroupChatHead, this);
         xabber.on('change:audio', this.updateGroupChatHead, this);
         xabber.on('plyr_player_updated', this.updatePlyrControls, this);
         xabber.on('update_layout', this.updatePlyrTitle, this);
@@ -9904,6 +9901,7 @@ xabber.InvitationPanelView = xabber.SearchView.extend({
         this.$('.btn-delete-contact').showIf(this.contact.get('in_roster') && !is_group_chat);
         this.$('.btn-notifications').hideIf(this.contact.get('blocked'));
         this.$('.btn-jingle-message').hideIf((this.contact.get('blocked') || is_group_chat) && xabber.current_voip_call);
+        this.$('.btn-jingle-message').hideIf(!xabber.settings.jingle_calls);
     },
 
     renderSearchPanel: function () {
@@ -10036,6 +10034,9 @@ xabber.InvitationPanelView = xabber.SearchView.extend({
     },
 
     sendJingleMessage: function () {
+        if (!xabber.settings.jingle_calls){
+            return;
+        }
         if (xabber.current_voip_call) {
             xabber.current_voip_call.modal_view.collapse();
             return;
@@ -10276,6 +10277,7 @@ xabber.InvitationPanelView = xabber.SearchView.extend({
         let is_group_chat = this.contact.get('group_chat');
         this.updateIcon();
         this.$('.btn-jingle-message').showIf(!is_group_chat && xabber.get('audio') || xabber.current_voip_call);
+        this.$('.btn-jingle-message').hideIf(!xabber.settings.jingle_calls);
         this.$('.contact-status').hideIf(is_group_chat);
         this.updateMenu();
     },

@@ -2246,6 +2246,7 @@ xabber.SettingsModalView = xabber.BasicView.extend({
         "click .setting.notifications label": "setNotifications",
         "click .private-notifications label": "setPrivateNotifications",
         "click .group-notifications label": "setGroupNotifications",
+        "click .jingle-calls label": "setJingleCalls",
         "click .setting.message-preview.private-preview label": "setPrivateMessagePreview",
         "click .setting.message-preview.group-preview label": "setGroupMessagePreview",
         "click .call-attention label": "setCallAttention",
@@ -2302,8 +2303,12 @@ xabber.SettingsModalView = xabber.BasicView.extend({
         this.$('.private-notifications input[type=checkbox]')
             .prop({checked: settings.notifications_private});
         this.$('.sound input[type=radio][name=private_sound]').prop('disabled', !settings.notifications_private)
+        this.$('.sound input[type=radio][name=call_sound]').prop('disabled', !settings.jingle_calls);
+        this.$('.sound input[type=radio][name=dialtone_sound]').prop('disabled', !settings.jingle_calls);
         this.$('.group-notifications input[type=checkbox]')
             .prop({checked: settings.notifications_group});
+        this.$('.jingle-calls input[type=checkbox]')
+            .prop({checked: settings.jingle_calls});
         this.$('.sound input[type=radio][name=group_sound]').prop('disabled', !settings.notifications_group)
         this.$('.sound input[type=radio][name=attention_sound]').prop('disabled', !settings.call_attention)
         this.$('.message-preview.private-preview input[type=checkbox]')
@@ -2560,6 +2565,15 @@ xabber.SettingsModalView = xabber.BasicView.extend({
         ev.preventDefault();
         this.$('.sound input[type=radio][name=group_sound]').prop('disabled', !value)
         $(ev.target).closest('.group-notifications').find('input').prop('checked', value);
+    },
+
+    setJingleCalls: function (ev) {
+        let value = !this.model.get('jingle_calls');
+        this.model.save('jingle_calls', value);
+        ev.preventDefault();
+        this.$('.sound input[type=radio][name=call_sound]').prop('disabled', !value)
+        this.$('.sound input[type=radio][name=dialtone_sound]').prop('disabled', !value)
+        $(ev.target).closest('.jingle-calls').find('input').prop('checked', value);
     },
 
     setPrivateMessagePreview: function (ev) {

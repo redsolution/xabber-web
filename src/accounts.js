@@ -3631,13 +3631,7 @@ xabber.AccountSettingsSingleModalView = xabber.AccountSettingsModalView.extend({
     },
 
     updateHeight: function () {
-        let height;
-        if (!this.$('.right-column').hasClass('hidden'))
-            height = this.$('.right-column').height();
-        else if (!this.parent.$('.left-column.main-left-column').hasClass('hidden'))
-            height = this.parent.$('.left-column.main-left-column').height();
-        this.ps_container.css('height', height + 'px');
-        this.updateScrollBar();
+        this.parent.updateHeight();
     },
 });
 

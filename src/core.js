@@ -291,6 +291,7 @@ let Xabber = Backbone.Model.extend({
             notifications: true,
             notifications_private: true,
             notifications_group: true,
+            jingle_calls: true,
             notifications_volume: 0.50,
             message_preview_private: false,
             message_preview_group: false,
