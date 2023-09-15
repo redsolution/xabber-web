@@ -222,7 +222,7 @@ var utils = {
     },
 
     isImageType: function(type) {
-        if (type.indexOf('image') > -1)
+        if (type.indexOf('image') > -1 && !(type.indexOf('application') > -1))
             return true;
         else
             return false;

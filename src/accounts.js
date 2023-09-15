@@ -3616,7 +3616,6 @@ xabber.AccountSettingsSingleModalView = xabber.AccountSettingsModalView.extend({
     },
 
     jumpToBlock: function (ev) {
-        console.log('123');
         this.parent.$('.left-column .settings-tabs-wrap.global-settings-tabs').addClass('hidden');
         this.jumpToBlockHandler(ev);
     },
@@ -3637,9 +3636,6 @@ xabber.AccountSettingsSingleModalView = xabber.AccountSettingsModalView.extend({
             height = this.$('.right-column').height();
         else if (!this.parent.$('.left-column.main-left-column').hasClass('hidden'))
             height = this.parent.$('.left-column.main-left-column').height();
-        console.log(this.parent.$('.left-column.main-left-column').height())
-        console.log(this.$('.right-column').height())
-        console.log(height)
         this.ps_container.css('height', height + 'px');
         this.updateScrollBar();
     },
