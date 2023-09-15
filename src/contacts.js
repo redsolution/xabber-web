@@ -8609,6 +8609,7 @@ xabber.Groups = Backbone.Collection.extend({
         this.account = options.account;
         this.on("change:id", this.sort, this);
         this.account.on('render_settings', this.render, this);
+        this.account.on('render_single_settings', this.renderSingleAccount, this);
     },
 
     comparator: function (a, b) {
@@ -8626,10 +8627,24 @@ xabber.Groups = Backbone.Collection.extend({
         group.acc_view = new xabber.AccountGroupView({model: group});
     },
 
+    onGroupAddedSingleAccount: function (group) {
+        group.acc_view = new xabber.AccountGroupView({model: group, single_account: this.single_account});
+    },
+
     render: function () {
         this.on("add", this.onGroupAdded, this);
         this.models.forEach((group) => {
             group.acc_view = new xabber.AccountGroupView({model: group});
+        });
+    },
+
+    renderSingleAccount: function (single_account) {
+        single_account.$('.groups').html('');
+        !this.rendered_once && this.on("add", this.onGroupAddedSingleAccount, this);
+        this.single_account = single_account
+        this.rendered_once = true
+        this.models.forEach((group) => {
+            group.acc_view = new xabber.AccountGroupView({model: group, single_account: single_account});
         });
     }
 });
@@ -9709,10 +9724,16 @@ xabber.AccountGroupView = xabber.BasicView.extend({
         "click": "showGroupSettings"
     },
 
-    _initialize: function (options) {
+    _initialize: function (options, attrs) {
         this.$('.group-name').text(this.model.get('name'));
         this.$('.group-members-count').text(this.model.get('counter').all);
         let index = this.model.collection.indexOf(this.model),
+            $parent_el;
+        if (options.single_account && options.single_account.model.get('jid') != this.model.account.get('jid'))
+            return;
+        if (options.single_account)
+            $parent_el = options.single_account.$('.groups');
+        else
             $parent_el = this.model.account.settings_account_modal.$('.groups');
         if (index === 0) {
             $parent_el.prepend(this.$el);

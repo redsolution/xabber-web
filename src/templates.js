@@ -93,6 +93,7 @@
     addTemplate('accounts.media_gallery_account');
     addTemplate('accounts.settings_left');
     addTemplate('accounts.settings_right');
+    addTemplate('accounts.single_account_settings_modal');
     addTemplate('accounts.account_settings_modal');
     addTemplate('accounts.existing_groupchat_item');
     addTemplate('accounts.resource');

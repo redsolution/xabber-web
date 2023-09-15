@@ -1,14 +1,17 @@
 <div class="background-overlay"></div>
 <div class="settings-panel">
     <div class="settings-transition-wrap">
-        <div class="left-column settings-column noselect">
+        <div class="left-column main-left-column settings-column noselect">
             <svg class="btn-add-account mdi mdi-24px mdi-svg-template" data-svgname="contact-add"></svg>
+            <div class="single-account-info-wrap account-settings-panel">
+                <div class="single-account-info"></div>
+            </div>
             <div class="accounts-info-wrap">
                 <div class="settings-panel-label">{[print(xabber.getString("settings__menu_item__xmpp_account"))]}</div>
                 <div class="settings-divider"></div>
                 <span class="no-accounts-tip">{[print(xabber.getString("settings__section_xmpp_accounts__text_no_accounts"))]}</span>
             </div>
-            <div class="settings-tabs-wrap">
+            <div class="settings-tabs-wrap global-settings-tabs">
                 <div class="settings-panel-label">{[print(xabber.getString("preferences"))]}</div>
                 <div class="settings-tab" data-block-name="background">
                     <div class="setting-icon-background">
@@ -68,7 +71,7 @@
             </div>
         </div>
 
-        <div class="right-column settings-column hidden noselect">
+        <div class="right-column main-right-column settings-column hidden noselect">
             <div class="settings-panel-head">
                 <i class="btn-back mdi mdi-24px mdi-arrow-left"></i>
                 <i class="btn-back-subsettings mdi mdi-24px mdi-arrow-left hidden"></i>
@@ -80,7 +83,7 @@
                 <div class="panel-content">
 
                     <div data-header='{[print(xabber.getString("category_interface"))]}' class="settings-block-wrap background">
-                        <div class="settings-tabs-wrap">
+                        <div class="settings-tabs-wrap global-settings-tabs">
                             <div class="settings-tab" data-subblock-parent-name="background" data-block-name="appearance">
                                 <div class="setting-icon-background">
                                     <svg class="mdi mdi-24px mdi-svg-template" data-svgname="account"></svg>
@@ -251,7 +254,7 @@
                     </div>
 
                     <div data-header='{[print(xabber.getString("settings__menu_item__notifications"))]}' class="settings-block-wrap notifications">
-                        <div class="settings-tabs-wrap">
+                        <div class="settings-tabs-wrap global-settings-tabs">
                             <div class="settings-tab" data-subblock-parent-name="notifications" data-block-name="web-notifications">
                                 <div class="setting-icon-background">
                                     <svg class="mdi mdi-24px mdi-svg-template" data-svgname="account"></svg>

@@ -714,10 +714,10 @@ xabber.VCardEditModalView = xabber.BasicView.extend({
     },
 
     render: function (options) {
+        this.$el.detach();
+        options.$el && options.$el.append(this.$el);
         if (options.$el && !this.is_rendered){
-            options.$el.append(this.$el);
             this.is_rendered = true;
-
             this.data.set('saving', false);
             this.setData();
             Materialize.updateTextFields();

@@ -18,9 +18,12 @@ xabber.FeatureView = xabber.BasicView.extend({
                 .append('<div class="supports"/>');
     },
 
-    _initialize: function () {
+    _initialize: function (options, attrs) {
         this.render();
-        this.$el.appendTo(this.model.collection.account.settings_account_modal.$('.capabilities'));
+        this.model.collection.account.settings_account_modal && this.$el.appendTo(this.model.collection.account.settings_account_modal.$('.capabilities'));
+        if (options.single_account && options.single_account.$('.capabilities').length){
+            this.$el.appendTo(options.single_account.$('.capabilities'));
+        }
         this.model.on("change", this.render, this);
         this.model.on("destroy", this.remove, this);
     },
@@ -39,6 +42,7 @@ xabber.ClientFeatures = Backbone.Collection.extend({
     initialize: function (models, options) {
         this.account = options.account;
         this.account.on('render_settings', this.render, this);
+        this.account.on('render_single_settings', this.renderSingleAccount, this);
         this.connection = this.account.connection;
         this.connection.disco.addIdentity(
             'client',
@@ -81,7 +85,14 @@ xabber.ClientFeatures = Backbone.Collection.extend({
         this.models.forEach((feature) => {
             let view = new xabber.FeatureView({model: feature});
         });
-    }
+    },
+
+    renderSingleAccount: function (single_account) {
+        single_account.$('.capabilities').html('');
+        this.models.forEach((feature) => {
+            let view = new xabber.FeatureView({model: feature, single_account: single_account});
+        });
+    },
 });
 
 xabber.ServerFeature = Backbone.Model.extend({

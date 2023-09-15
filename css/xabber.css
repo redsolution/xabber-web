@@ -6090,7 +6090,7 @@ input[type=text].simple-input-field:hover {
 
 .status-message-wrap .clear-input {
     position: absolute;
-    top: 14px;
+    top: 10px;
     right: 2px;
     color: #9E9E9E;
     cursor: pointer;
@@ -6106,7 +6106,12 @@ input[type=text].simple-input-field:hover {
     margin: 0 auto;
     text-align: center;
 }
-
+.change-status-modal .status-message-wrap{
+    margin-top: 16px;
+}
+.change-status-modal .status-message-wrap .static-label{
+    top: -18px;
+}
 /* ----------------- ADD CONTACT VIEW ------------------------ */
 
 .add-contact-modal.main-modal .modal-content {
@@ -11272,6 +11277,7 @@ input[type='range'].voice-message-volume:focus {
     font-size: 16px;
     text-transform: capitalize;
     line-height: 32px;
+    height: 32px;
 }
 
 .settings-panel-wrap .settings-panel .block-subheader {
@@ -11465,6 +11471,10 @@ input[type='range'].voice-message-volume:focus {
     border-radius: 50%;
     padding: 6px;
 }
+.settings-panel-wrap .settings-panel .settings-column .vcard .setting-icon-background{
+    background: transparent !important;
+    top: 22px;
+}
 .settings-panel-wrap .settings-panel .settings-column .settings-tab.disabled:not(.settings-deletion-button) .setting-icon-background{
     background: #999999 !important;
 }
@@ -11497,6 +11507,9 @@ input[type='range'].voice-message-volume:focus {
 }
 .settings-panel-wrap .settings-panel .settings-column .settings-tab[data-block-name="encryption"] .setting-icon-background{
     background: #FFC107;
+}
+.settings-panel-wrap .settings-panel .settings-column .settings-tab[data-block-name="devices"] .setting-icon-background{
+    background: #4CAF50;
 }
 .settings-panel-wrap .settings-panel .settings-column .settings-tab[data-block-name="appearance"] .setting-icon-background{
     background: #FF9800;
@@ -11614,6 +11627,13 @@ input[type='range'].voice-message-volume:focus {
     z-index: 1000;
 }
 
+.settings-panel-wrap .settings-panel .settings-column .color-picker-dropdown{
+    top: 28px !important;
+    left: unset !important;
+    right: 74px;
+    z-index: 2000;
+}
+
 .settings-panel-wrap .settings-panel .settings-column .btn-qr-code{
     color: #9E9E9E;
     position: absolute;
@@ -11724,28 +11744,31 @@ input[type='range'].voice-message-volume:focus {
 .settings-panel-wrap .settings-panel .settings-tabs-wrap{
     height: calc(100% - 176px) !important;
 }
+.settings-panel-wrap .settings-panel .single-account-info-wrap:not(.hidden) ~ .settings-tabs-wrap{
+    height: calc(100% - 592px) !important;
+}
 .account-settings-panel .settings-panel-wrap .settings-column .settings-tabs-wrap{
     height: unset !important;
 }
-.account-settings-panel .settings-panel-wrap .settings-column .devices-wrap .token-wrap{
+.settings-panel-wrap .settings-column .devices-wrap .token-wrap{
     height: 64px;
     padding: 10px 72px 0 72px !important;
     display: block;
     position: relative;
 }
-.account-settings-panel .settings-panel-wrap .settings-column .devices-wrap .token-wrap[data-trust="unknown"]{
+.settings-panel-wrap .settings-column .devices-wrap .token-wrap[data-trust="unknown"]{
     background: #FFF8E1;
 }
-.account-settings-panel .settings-panel-wrap .settings-column .devices-wrap .token-wrap[data-trust="error"] .device{
+.settings-panel-wrap .settings-column .devices-wrap .token-wrap[data-trust="error"] .device{
     color: #D32F2F;
 }
-.account-settings-panel .settings-panel-wrap .settings-column .devices-wrap .token-wrap[data-trust="error"] .token-icon-wrap{
+.settings-panel-wrap .settings-column .devices-wrap .token-wrap[data-trust="error"] .token-icon-wrap{
     background: #D32F2F;
 }
-.account-settings-panel .settings-panel-wrap .settings-column .devices-wrap .token-wrap[data-trust="error"] .token-icon-wrap path{
+.settings-panel-wrap .settings-column .devices-wrap .token-wrap[data-trust="error"] .token-icon-wrap path{
     fill: #FFF;
 }
-.account-settings-panel .settings-panel-wrap .settings-column .devices-wrap .token-wrap .token-icon-wrap{
+.settings-panel-wrap .settings-column .devices-wrap .token-wrap .token-icon-wrap{
     position: absolute;
     left: 22px;
     top: 14px;
@@ -11756,26 +11779,26 @@ input[type='range'].voice-message-volume:focus {
     padding: 6px;
     z-index: 1;
 }
-.account-settings-panel .settings-panel-wrap .settings-column .devices-wrap .token-wrap .token-icon-wrap .token-icon{
+.settings-panel-wrap .settings-column .devices-wrap .token-wrap .token-icon-wrap .token-icon{
     z-index: 2;
 }
 
-.account-settings-panel .settings-panel-wrap .settings-column .devices-wrap .token-wrap .token-icon-wrap path{
+.settings-panel-wrap .settings-column .devices-wrap .token-wrap .token-icon-wrap path{
     fill: #616161;
 }
 
-.account-settings-panel .settings-panel-wrap .settings-column .devices-wrap .token-wrap .token-client-wrap{
+.settings-panel-wrap .settings-column .devices-wrap .token-wrap .token-client-wrap{
     width: unset;
 }
 
-.account-settings-panel .settings-panel-wrap .settings-column .devices-wrap .token-wrap .device{
+.settings-panel-wrap .settings-column .devices-wrap .token-wrap .device{
     font-size: 16px;
     line-height: 24px;
     height: 24px;
     color: rgba(0, 0, 0, 0.87);
 }
 
-.account-settings-panel .settings-panel-wrap .settings-column .devices-wrap .token-wrap .ip-address{
+.settings-panel-wrap .settings-column .devices-wrap .token-wrap .ip-address{
     font-size: 13px;
     line-height: 16px;
     height: 16px;
@@ -11783,7 +11806,7 @@ input[type='range'].voice-message-volume:focus {
     width: unset;
 }
 
-.account-settings-panel .settings-panel-wrap .settings-column .devices-wrap .token-wrap .device-encryption{
+.settings-panel-wrap .settings-column .devices-wrap .token-wrap .device-encryption{
     position: absolute;
     top: 21px;
     right: 27px;
@@ -11791,15 +11814,15 @@ input[type='range'].voice-message-volume:focus {
     width: 24px;
 }
 
-.account-settings-panel .settings-panel-wrap .settings-column .devices-wrap .token-wrap .device-encryption:not(.active){
+.settings-panel-wrap .settings-column .devices-wrap .token-wrap .device-encryption:not(.active){
     display: none;
 }
 
-.account-settings-panel .settings-panel-wrap .settings-column .devices-wrap .token-wrap .device-encryption.is-own svg path{
+.settings-panel-wrap .settings-column .devices-wrap .token-wrap .device-encryption.is-own svg path{
     fill: #388E3C;
 }
 
-.account-settings-panel .settings-panel-wrap .settings-column .devices-wrap .token-wrap .btn-revoke-token{
+.settings-panel-wrap .settings-column .devices-wrap .token-wrap .btn-revoke-token{
     position: absolute;
     top: 21px;
     right: 72px;
@@ -11808,11 +11831,11 @@ input[type='range'].voice-message-volume:focus {
     display: none;
 }
 
-.account-settings-panel .settings-panel-wrap .settings-column .devices-wrap .token-wrap:hover .btn-revoke-token{
+.settings-panel-wrap .settings-column .devices-wrap .token-wrap:hover .btn-revoke-token{
     display: block;
 }
 
-.account-settings-panel .settings-panel-wrap .settings-column .devices-wrap .btn-revoke-all-tokens{
+.settings-panel-wrap .settings-column .devices-wrap .btn-revoke-all-tokens{
     height: 40px;
     color: #D32F2F;
     padding: 8px 72px;
@@ -11820,23 +11843,23 @@ input[type='range'].voice-message-volume:focus {
     cursor: pointer;
 }
 
-.account-settings-panel .settings-panel-wrap .settings-column .devices-wrap .btn-revoke-all-tokens:hover{
+.settings-panel-wrap .settings-column .devices-wrap .btn-revoke-all-tokens:hover{
     background-color: #f8f8f8;
 }
 
 .settings-panel-wrap .settings-panel .settings-deletion-button .setting-icon-background,
-.account-settings-panel .settings-panel-wrap .delete-account .setting-icon-background,
-.account-settings-panel .settings-panel-wrap .settings-column .devices-wrap .btn-revoke-all-tokens .mdi{
+.settings-panel-wrap .delete-account .setting-icon-background,
+.settings-panel-wrap .settings-column .devices-wrap .btn-revoke-all-tokens .mdi{
     position: absolute;
     top: 8px;
     left: 28px;
 }
 
-.account-settings-panel .settings-panel-wrap .settings-column .devices-wrap .btn-revoke-all-tokens .mdi path{
+.settings-panel-wrap .settings-column .devices-wrap .btn-revoke-all-tokens .mdi path{
     fill: #D32F2F;
 }
 .settings-panel-wrap .settings-panel .settings-deletion-button,
-.account-settings-panel .settings-panel-wrap .delete-account{
+.settings-panel-wrap .delete-account{
     cursor: pointer;
     height: 40px;
     padding: 8px 72px;
@@ -11845,8 +11868,8 @@ input[type='range'].voice-message-volume:focus {
     margin-bottom: 8px;
 }
 .settings-panel-wrap .settings-panel .settings-deletion-button .settings-block-name,
-.account-settings-panel .settings-panel-wrap .delete-account .settings-block-name,
-.account-settings-panel .settings-panel-wrap .settings-tab.delete-account .mdi{
+.settings-panel-wrap .delete-account .settings-block-name,
+.settings-panel-wrap .settings-tab.delete-account .mdi{
     color: #d32f2f;
 }
 .settings-panel-wrap .settings-panel .settings-deletion-button .mdi{
@@ -11857,7 +11880,7 @@ input[type='range'].voice-message-volume:focus {
     fill: #d32f2f;
 }
 .settings-panel-wrap .settings-panel .settings-deletion-button .setting-icon-background,
-.account-settings-panel .settings-panel-wrap .delete-account .setting-icon-background{
+.settings-panel-wrap .delete-account .setting-icon-background{
     position: absolute;
     top: 8px;
     left: 28px;
@@ -11973,7 +11996,19 @@ input[type='range'].voice-message-volume:focus {
     padding: 0;
 }
 .settings-panel-wrap .settings-panel .vcard-edit-wrap .info-wrap .details-icon{
-    color: #FFF
+    color: #9e9e9e
+}
+.settings-panel-wrap .settings-panel .encryption .btn-more{
+    right: 20px;
+    top: -50px;
+    z-index: 1000;
+}
+.settings-panel-wrap .settings-panel .single-account-info-wrap .left-column{
+    float: unset;
+}
+.settings-panel-wrap .settings-panel .single-account-info-wrap .settings-column .btn-add-account{
+    left: 24px;
+    top: 20px;
 }
 /* ---------------- XABBER SETTINGS --------------------- */
 

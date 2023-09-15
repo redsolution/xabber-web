@@ -2225,6 +2225,10 @@ xabber.AccountMediaGalleryView = xabber.BasicView.extend({
                 this.parent.$('.settings-tab[data-block-name="media-gallery"] .settings-block-label')
                     .text(xabber.getString("settings_account__storage_label", [utils.pretty_size(response.total.used), utils.pretty_size(response.quota)]))
             }
+            if (xabber.settings_modal_view.$('.settings-tab[data-block-name="media-gallery"] .settings-block-label').length){
+                xabber.settings_modal_view.$('.settings-tab[data-block-name="media-gallery"] .settings-block-label')
+                    .text(xabber.getString("settings_account__storage_label", [utils.pretty_size(response.total.used), utils.pretty_size(response.quota)]))
+            }
         });
     },
 
@@ -2795,12 +2799,11 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
         "change .main-info-wrap .circle-avatar input": "changeAvatar",
         "click .btn-choose-image": "chooseAvatar",
         "click .btn-back": "showSettings",
-        "click .btn-color-picker": "openColorsMenu",
         "click .btn-back-settings": "backToMenu",
         "click .btn-back-subsettings": "backToSubMenu",
         "click .btn-emoji-panel": "openEmojiPanel",
         "click .btn-selfie": "openWebcamPanel",
-        "click .settings-block-wrap.status .settings-subblock-wrap .status": "openChangeStatus",
+        "click .settings-tab[data-block-name='status']": "openChangeStatus",
         "click .settings-tabs-wrap .settings-tab:not(.delete-account):not(.settings-non-tab)": "jumpToBlock",
         "click .settings-tab.delete-account": "deleteAccount",
 
@@ -2812,7 +2815,8 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
         "click": "hideResources",
         "change .sync-account": "changeSyncSetting",
         "click .btn-delete-settings": "deleteSettings",
-        "change .color-scheme input[type=radio][name=account_color]": "changeColor",
+        "click .color-picker-button": "changeColor",
+        "click .btn-qr-code": "showQRCode",
         "click .token-wrap .btn-revoke-token": "revokeXToken",
         "click .devices-wrap .btn-revoke-all-tokens": "revokeAllXTokens",
         "click .btn-manage-devices": "openDevicesWindow",
@@ -2824,7 +2828,10 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
         "click .btn-purge-keys": "purgeKeys"
     },
 
-    _initialize: function () {
+    _initialize: function (options) {
+        if (options.forced_ps_container){
+            this.ps_container = options.forced_ps_container;
+        }
         this.status_field = new xabber.StatusMessageModalWidget({
             el: this.$('.status-wrap')[0],
             model: this.model
@@ -2955,6 +2962,10 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
     },
 
     jumpToBlock: function (ev) {
+        this.jumpToBlockHandler(ev);
+    },
+
+    jumpToBlockHandler: function (ev) {
         let $tab = $(ev.target).closest('.settings-tab'),
             $elem = this.$('.settings-block-wrap.' + $tab.data('block-name')),
             block_name = $tab.data('block-name');
@@ -2991,18 +3002,11 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
         this.updateHeight();
     },
 
-    openColorsMenu: function (ev) {
-        let $elem = this.$('.settings-block-wrap.color-scheme');
-        this.$('.settings-block-wrap').addClass('hidden');
-        this.$('.left-column').addClass('hidden');
-        this.$('.right-column').removeClass('hidden');
-        $elem.removeClass('hidden');
-        this.$('.settings-panel-head span.settings-panel-head-title').text($elem.attr('data-header'));
-        this.scrollToTop();
-        this.updateHeight();
+    backToMenu: function (ev) {
+        this.backToMenuHandler(ev);
     },
 
-    backToMenu: function (ev) {
+    backToMenuHandler: function (ev) {
         this.$('.left-column').removeClass('hidden');
         this.$('.right-column').addClass('hidden');
         this.scrollToTop();
@@ -3010,6 +3014,10 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
     },
 
     backToSubMenu: function (ev) {
+        this.backToSubMenuHandler(ev);
+    },
+
+    backToSubMenuHandler: function (ev) {
         let $tab = $(ev.target).closest('.btn-back-subsettings'),
             block_name = $tab.attr('data-subblock-parent-name'),
             $elem = this.$('.settings-block-wrap.' + block_name);
@@ -3113,12 +3121,12 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
         utils.images.getAvatarFromFile(file).done((image, hash, size) => {
             if (image) {
                 this.model.pubAvatar({base64: image, hash: hash, size: size, type: file.type, file: file}, () => {
-                        this.$('.circle-avatar').setAvatar(image, this.avatar_size);
-                        this.$('.circle-avatar').find('.preloader-wrap').removeClass('visible').find('.preloader-wrapper').removeClass('active');
-                    }, () => {
-                        this.$('.circle-avatar').find('.preloader-wrap').removeClass('visible').find('.preloader-wrapper').removeClass('active');
-                        utils.dialogs.error(xabber.getString("group_settings__error__wrong_image"));
-                    });
+                    this.$('.circle-avatar').setAvatar(image, this.avatar_size);
+                    this.$('.circle-avatar').find('.preloader-wrap').removeClass('visible').find('.preloader-wrapper').removeClass('active');
+                }, () => {
+                    this.$('.circle-avatar').find('.preloader-wrap').removeClass('visible').find('.preloader-wrapper').removeClass('active');
+                    utils.dialogs.error(xabber.getString("group_settings__error__wrong_image"));
+                });
             } else
                 utils.dialogs.error(xabber.getString("group_settings__error__wrong_image"));
         });
@@ -3211,6 +3219,7 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
         this.$('.orphaned-fingerprints-wrap').html("");
         this.$('.device-encryption-warning').addClass('hidden');
         this.$('.device-encryption-warning').attr('data-not-trusted-count', 0);
+        this.$('.settings-tab[data-block-name="devices"] .settings-block-label').text(xabber.getQuantityString("settings_account__devices_subheader_label", this.model.x_tokens_list.length));
         $(_.sortBy(this.model.x_tokens_list, '-last_auth')).each((idx, token) => {
             let pretty_token = {
                 resource_obj: undefined,
@@ -3364,6 +3373,7 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
         if (!this.model.omemo){
             this.$('.btn-manage-devices').addClass('hidden2');
         }
+        this.updateHeight();
     },
 
     updateEncryptedChatstates: function () {
@@ -3494,8 +3504,18 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
     },
 
     changeColor: function (ev) {
-        let value = ev.target.value;
+        let value = $(ev.target).closest('.color-picker-button').attr('data-color-value');
         this.model.settings.update_settings({color: value});
+        this.$el.attr('data-color', this.model.settings.get('color'));
+    },
+
+    showQRCode: function () {
+        let qrcode = new VanillaQR({
+            url: 'xmpp:' + this.model.get('jid'),
+            noBorder: true
+        });
+        utils.dialogs.ask(xabber.getString("dialog_show_qr_code__header"), null, {escape_button: true, canvas: qrcode.domElement, bottom_text: ('<div class="name">' + this.model.get('jid') + '</div>')}, { cancel_button_text: ' ', ok_button_text: ' '}, 'hidden').done((result) => {
+        });
     },
 
     openBlockWindow: function () {
@@ -3525,6 +3545,103 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
     deleteFilesFiltered: function (ev) {
         if (this.gallery_view)
             this.gallery_view.deleteFilesFiltered(ev);
+    },
+});
+
+xabber.AccountSettingsSingleModalView = xabber.AccountSettingsModalView.extend({
+    className: 'single-account-settings-panel-wrap',
+    template: templates.single_account_settings_modal,
+    // ps_selector: '.right-column',
+    // ps_settings: {
+    //     wheelPropagation: true
+    // },
+
+    render: function (options) {
+        this.$el.detach();
+        this.parent.$('.single-account-info-wrap').append(this.$el);
+        this.ps_container = this.parent.ps_container;
+        this.gallery_view.render();
+
+        this.$el.attr('data-color', this.model.settings.get('color'));
+        this.$('.circle-avatar.dropdown-button').dropdown({
+            inDuration: 100,
+            outDuration: 100,
+            constrainWidth: false,
+            hover: false,
+            alignment: 'left'
+        });
+        this.updateCSS();
+
+        this.updateEnabledOmemo();
+        this.updateEncryptedChatstates();
+        this.updateEnabled();
+        this.updateXTokens();
+        this.updateGroupsLabel();
+        this.updateView();
+        this.$('.main-resource .client').text(xabber.get('client_name'));
+        this.$('.main-resource .resource').text(this.model.resource);
+        this.$('.main-resource .priority').text(this.model.get('priority'));
+        this.$(`.color-scheme input[type=radio][name=account_color][value="${this.model.settings.get('color')}"]`)
+            .prop('checked', true);
+        let dropdown_settings = {
+            inDuration: 100,
+            outDuration: 100,
+            constrainWidth: false,
+            hover: false,
+            alignment: 'right'
+        };
+        this.$('.dropdown-button').dropdown(dropdown_settings);
+        this.$('.btn-delete-files-variants').dropdown({
+            inDuration: 100,
+            outDuration: 100,
+            hover: true,
+            belowOrigin: true,
+        });
+        this.$('.panel-content-wrap').removeClass('hidden');
+        if (this.ps_container.length) {
+            this.ps_container.perfectScrollbar(
+                _.extend(this.ps_settings || {}, xabber.ps_settings)
+            );
+        }
+        this.updateOmemoDevices;
+        this.$('.left-column').removeClass('hidden');
+        this.$('.right-column').addClass('hidden');
+        this.$('.btn-back-settings').removeClass('hidden');
+        this.$('.btn-back-subsettings').addClass('hidden');
+        this.updateHeight();
+        this.updateBlockedLabel();
+
+        this.parent.single_account_has_rendered = true;
+        return this;
+    },
+
+    jumpToBlock: function (ev) {
+        console.log('123');
+        this.parent.$('.left-column .settings-tabs-wrap.global-settings-tabs').addClass('hidden');
+        this.jumpToBlockHandler(ev);
+    },
+
+    backToMenu: function (ev) {
+        this.parent.$('.left-column .settings-tabs-wrap.global-settings-tabs').removeClass('hidden');
+        this.backToMenuHandler(ev);
+    },
+
+    backToSubMenu: function (ev) {
+        this.parent.$('.left-column .settings-tabs-wrap.global-settings-tabs').addClass('hidden');
+        this.backToSubMenuHandler(ev);
+    },
+
+    updateHeight: function () {
+        let height;
+        if (!this.$('.right-column').hasClass('hidden'))
+            height = this.$('.right-column').height();
+        else if (!this.parent.$('.left-column.main-left-column').hasClass('hidden'))
+            height = this.parent.$('.left-column.main-left-column').height();
+        console.log(this.parent.$('.left-column.main-left-column').height())
+        console.log(this.$('.right-column').height())
+        console.log(height)
+        this.ps_container.css('height', height + 'px');
+        this.updateScrollBar();
     },
 });
 
@@ -4300,6 +4417,9 @@ xabber.SettingsAccountsModalBlockView = xabber.BasicView.extend({
         this.model.on("add", this.updateOneInList, this);
         this.model.on("update_order", this.updateList, this);
         this.model.on("destroy", this.onAccountRemoved, this);
+        this.model.on("add", this.parent.updateAccounts, this.parent);
+        this.model.on("update_order", this.parent.updateAccounts, this.parent);
+        this.model.on("destroy", this.parent.updateAccounts, this.parent);
         xabber.api_account && xabber.api_account.on("change:connected", this.updateSyncState, this);
         this.$('.move-account-to-bottom')
             .on('move_xmpp_account', this.onMoveAccountToBottom.bind(this));
@@ -6394,6 +6514,8 @@ xabber.once("start", function () {
         storage_name: this.getStorageName() + '-accounts'
     });
     this.accounts.fetch();
+
+    this.trigger('accounts_ready');
 
     this.toolbar_view.addChild('accounts', this.ToolbarAccountsBlockView,
         {model: this.accounts, el: this.toolbar_view.$('.accounts')[0]});

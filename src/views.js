@@ -2240,7 +2240,7 @@ xabber.SettingsModalView = xabber.BasicView.extend({
         "click .background-overlay": "closeSettings",
         "click .btn-back": "backToMenu",
         "click .btn-back-subsettings": "backToSubMenu",
-        "click .settings-tabs-wrap .settings-tab:not(.delete-all-accounts)": "jumpToBlock",
+        "click .settings-tabs-wrap.global-settings-tabs .settings-tab:not(.delete-all-accounts)": "jumpToBlock",
         "click .btn-add-account": "showAddAccountView",
         "click .setting.idling label": "setIdling",
         "click .setting.notifications label": "setNotifications",
@@ -2272,7 +2272,7 @@ xabber.SettingsModalView = xabber.BasicView.extend({
         "click .settings-tab.delete-all-accounts": "deleteAllAccounts"
     },
 
-    _initialize: function () {
+    _initialize: function (options) {
         this.$('.xabber-info-wrap .version').text(xabber.get('version_number'));
         xabber.on('update_main_color', this.updateMainColor, this);
         this.model.on('change:language', this.updateLanguage, this);
@@ -2288,6 +2288,9 @@ xabber.SettingsModalView = xabber.BasicView.extend({
         this.model.on('change:sound_on_dialtone', this.updateSoundsLabel, this);
         this.model.on('change:sound_on_attention', this.updateSoundsLabel, this);
         this.ps_container.on("ps-scroll-y", this.onScrollY.bind(this));
+        xabber.once('accounts_ready',() => {
+            xabber.accounts.on("list_changed", this.updateAccounts, this);
+        })
     },
 
     render: function () {
@@ -2339,6 +2342,7 @@ xabber.SettingsModalView = xabber.BasicView.extend({
         let notifications_volume = !isNaN(settings.notifications_volume) ? settings.notifications_volume * 100 : 100;
         this.$(`#notifications_volume`).val(notifications_volume);
         this.$('.settings-panel-head span').text(this.$('.settings-block-wrap:not(.hidden)').attr('data-header'))
+        this.updateAccounts();
         this.updateAvatarLabel();
         this.updateSoundsLabel();
         this.updateDescription();
@@ -2359,6 +2363,43 @@ xabber.SettingsModalView = xabber.BasicView.extend({
         this.$('.settings-panel-head .description').addClass('hidden');
         this.updateHeight();
         return this;
+    },
+
+    updateAccounts: function () {
+        if (this.settings_single_account_modal){
+            this.settings_single_account_modal.removeChild('blocklist');
+            this.settings_single_account_modal.removeChild('account_password_view');
+            this.removeChild('single_account');
+        }
+        if (xabber.accounts.length === 1){
+            this.$('.accounts-info-wrap').addClass('hidden');
+            this.$('.btn-add-account').addClass('hidden');
+            this.$('.single-account-info-wrap').removeClass('hidden');
+            let first_account = xabber.accounts.models[0];
+            this.single_account_has_rendered = false;
+            this.settings_single_account_modal = this.addChild('single_account', xabber.AccountSettingsSingleModalView, {
+                model: first_account,
+                forced_ps_container: this.ps_container,
+                el: this.$('.single-account-info-wrap .single-account-info')[0]
+            });
+            if (!this.single_account_has_rendered){
+                this.settings_single_account_modal.show();
+            }
+            first_account.trigger('render_single_settings', this.settings_single_account_modal);
+            this.settings_single_account_modal.addChild('blocklist', xabber.BlockListView, {
+                account: first_account,
+                el: this.settings_single_account_modal.$('.blocklist-info')[0]
+            });
+            this.settings_single_account_modal.addChild('account_password_view', xabber.ChangeAccountPasswordView, {
+                model: first_account,
+                el: this.settings_single_account_modal.$('.change-password-container')[0]
+            });
+        } else {
+            this.$('.btn-add-account').removeClass('hidden');
+            this.$('.accounts-info-wrap').removeClass('hidden');
+            this.$('.single-account-info-wrap').addClass('hidden');
+        }
+        this.updateHeight();
     },
 
     updateMainColor: function () {
@@ -2431,10 +2472,10 @@ xabber.SettingsModalView = xabber.BasicView.extend({
 
     updateHeight: function () {
         let height;
-        if (!this.$('.left-column').hasClass('hidden'))
-            height = this.$('.left-column').height();
-        if (!this.$('.right-column').hasClass('hidden'))
-            height = this.$('.right-column').height();
+        if (!this.$('.left-column.main-left-column').hasClass('hidden'))
+            height = this.$('.left-column.main-left-column').height();
+        if (!this.$('.right-column.main-right-column').hasClass('hidden'))
+            height = this.$('.right-column.main-right-column').height();
         this.ps_container.css('height', height + 'px');
         setTimeout(() => {
             this.updateScrollBar();

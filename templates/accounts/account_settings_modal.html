@@ -5,7 +5,60 @@
             <div class="settings-account-head">
                 <i class="btn-back mdi mdi-24px mdi-arrow-left"></i>
                 <div class="name one-line"></div>
-                <svg class="btn-color-picker mdi mdi-24px mdi-svg-template" data-svgname="palette"></svg>
+                <svg class="btn-color-picker dropdown-button mdi mdi-24px mdi-svg-template" data-activates="color-picker-dropdown" data-svgname="palette"></svg>
+                <ul id="color-picker-dropdown" class="dropdown-content color-picker-dropdown bootstrap-dropdown noselect">
+                    <div class="property-variant color-picker-button" data-color-value="red">
+                        <span class="one-line text-color-red-700">{[print(xabber.getString("account_color_name_red"))]}</span>
+                    </div>
+                    <div class="property-variant color-picker-button" data-color-value="pink">
+                        <span class="one-line text-color-pink-700">{[print(xabber.getString("account_color_name_pink"))]}</span>
+                    </div>
+                    <div class="property-variant color-picker-button" data-color-value="purple">
+                        <span class="one-line text-color-purple-700">{[print(xabber.getString("account_color_name_purple"))]}</span>
+                    </div>
+                    <div class="property-variant color-picker-button" data-color-value="deep-purple">
+                        <span class="one-line text-color-deep-purple-700">{[print(xabber.getString("account_color_name_deep_purple").replace(/-/g, " "))]}</span>
+                    </div>
+                    <div class="property-variant color-picker-button" data-color-value="indigo">
+                        <span class="one-line text-color-indigo-700">{[print(xabber.getString("account_color_name_indigo"))]}</span>
+                    </div>
+                    <div class="property-variant color-picker-button" data-color-value="blue">
+                        <span class="one-line text-color-blue-700">{[print(xabber.getString("account_color_name_blue"))]}</span>
+                    </div>
+                    <div class="property-variant color-picker-button" data-color-value="light-blue">
+                        <span class="one-line text-color-light-blue-700">{[print(xabber.getString("account_color_name_light_blue").replace(/-/g, " "))]}</span>
+                    </div>
+                    <div class="property-variant color-picker-button" data-color-value="cyan">
+                        <span class="one-line text-color-cyan-700">{[print(xabber.getString("account_color_name_cyan"))]}</span>
+                    </div>
+                    <div class="property-variant color-picker-button" data-color-value="teal">
+                        <span class="one-line text-color-teal-700">{[print(xabber.getString("account_color_name_teal"))]}</span>
+                    </div>
+                    <div class="property-variant color-picker-button" data-color-value="green">
+                        <span class="one-line text-color-green-700">{[print(xabber.getString("account_color_name_green"))]}</span>
+                    </div>
+                    <div class="property-variant color-picker-button" data-color-value="light-green">
+                        <span class="one-line text-color-light-green-700">{[print(xabber.getString("account_color_name_light_green").replace(/-/g, " "))]}</span>
+                    </div>
+                    <div class="property-variant color-picker-button" data-color-value="lime">
+                        <span class="one-line text-color-lime-700">{[print(xabber.getString("account_color_name_lime"))]}</span>
+                    </div>
+                    <div class="property-variant color-picker-button" data-color-value="amber">
+                        <span class="one-line text-color-amber-700">{[print(xabber.getString("account_color_name_amber"))]}</span>
+                    </div>
+                    <div class="property-variant color-picker-button" data-color-value="orange">
+                        <span class="one-line text-color-orange-700">{[print(xabber.getString("account_color_name_orange"))]}</span>
+                    </div>
+                    <div class="property-variant color-picker-button" data-color-value="deep-orange">
+                        <span class="one-line text-color-deep-orange-700">{[print(xabber.getString("account_color_name_deep_orange").replace(/-/g, " "))]}</span>
+                    </div>
+                    <div class="property-variant color-picker-button" data-color-value="brown">
+                        <span class="one-line text-color-brown-700">{[print(xabber.getString("account_color_name_brown"))]}</span>
+                    </div>
+                    <div class="property-variant color-picker-button" data-color-value="blue-grey">
+                        <span class="one-line text-color-blue-grey-700">{[print(xabber.getString("account_color_name_blue_grey").replace(/-/g, " "))]}</span>
+                    </div>
+                </ul>
                 <svg class="btn-qr-code mdi mdi-24px mdi-svg-template" data-svgname="qrcode"></svg>
             </div>
             <div class="main-info-wrap account-main-info-wrap">
@@ -124,7 +177,7 @@
 
                     <div data-header='{[print(xabber.getString("settings_account__section_header_profile"))]}' class="settings-block-wrap profile">
                         <div class="settings-tabs-wrap">
-                            <div class="settings-tab" data-subblock-parent-name="profile" data-block-name="status">
+                            <div class="settings-tab settings-non-tab" data-subblock-parent-name="profile" data-block-name="status">
                                 <div class="setting-icon-background">
                                     <svg class="mdi mdi-24px mdi-svg-template" data-svgname="status-outline"></svg>
                                 </div>
@@ -351,11 +404,11 @@
                         </div>
                     </div>
 
-                    <div data-header='{[print(xabber.getString("account_server_info_description"))]}' class="settings-block-wrap encryption">
+                    <div data-header='{[print(xabber.getString("settings_account__encryption"))]}' class="settings-block-wrap encryption">
                         <div class="btn-more device-more-button dropdown-button" data-activates="device-omemo-actions">
                             <i class="mdi mdi-24px mdi-dots-vertical"></i>
                         </div>
-                        <ul id="device-omemo-actions" class="dropdown-content noselect">
+                        <ul id="device-omemo-actions" class="dropdown-content bootstrap-dropdown noselect">
                             <div class="property-variant btn-manage-devices">
                                 <span class="one-line">{[print(xabber.getString("omemo__settings__button_manage_devices"))]}</span>
                             </div>
