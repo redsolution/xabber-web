@@ -284,6 +284,7 @@
     addSvgTemplate('svg.play');
     addSvgTemplate('svg.video');
     addSvgTemplate('svg.cancel');
+    addSvgTemplate('svg.status');
     addSvgTemplate('svg.status-outline');
     addSvgTemplate('svg.birthday-outline');
     addSvgTemplate('svg.job-outline');

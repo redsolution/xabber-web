@@ -36,6 +36,7 @@ let badges_names = [
         'minus',
         'account-outline',
         'birthday-outline',
+        'status',
         'status-outline',
         'job-outline',
         'address-outline',

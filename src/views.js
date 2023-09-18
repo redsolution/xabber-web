@@ -1016,6 +1016,11 @@ xabber.ToolbarView = xabber.BasicView.extend({
             this.$('.toolbar-item:not(.toolbar-logo).settings').addClass('active');
             return;
         }
+        if (name === 'account_settings_modal'){
+            this.$('.toolbar-item:not(.toolbar-logo):not(.account-item)').removeClass('active unread');
+            this.$('.toolbar-item:not(.toolbar-logo).settings-modal').addClass('active');
+            return;
+        }
         if ((name === 'all-chats') &&
             (this.$('.toolbar-item:not(.toolbar-logo).all-chats').hasClass('active') ||
                 this.$('.toolbar-item:not(.toolbar-logo).chats').hasClass('active')||
@@ -2362,6 +2367,7 @@ xabber.SettingsModalView = xabber.BasicView.extend({
             hover: false
         });
         this.$('.left-column').removeClass('hidden');
+        this.$('.left-column .settings-tabs-wrap.global-settings-tabs').removeClass('hidden');
         this.$('.right-column').addClass('hidden');
         this.$('.btn-back').removeClass('hidden');
         this.$('.btn-back-subsettings').addClass('hidden');
