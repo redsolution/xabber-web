@@ -43,6 +43,7 @@ let badges_names = [
         'email-outline',
         'description-outline',
         'contact-add',
+        'check',
         'call-outline',
         'call',
         'search',

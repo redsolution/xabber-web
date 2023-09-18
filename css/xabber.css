@@ -11324,13 +11324,24 @@ input[type='range'].voice-message-volume:focus {
     top: 22px;
 }
 
-.settings-panel-wrap .settings-panel .capabilities-wrap,
-.settings-panel-wrap .settings-panel .groups-wrap{
+.settings-panel-wrap .settings-panel .capabilities-wrap{
     padding: 10px 48px 0 72px !important;
+}
+
+.settings-panel-wrap .settings-panel .capabilities-wrap .feature-check-icon{
+    position: absolute;
+    left: -40px;
+}
+
+.settings-panel-wrap .settings-panel .capabilities-wrap .feature-check-icon polygon{
+    fill: #43A047;
 }
 
 .settings-panel-wrap .settings-panel .groups-wrap{
     padding: 10px 48px 0 72px !important;
+}
+.settings-panel-wrap .settings-panel .groups .group:hover .group-members-count{
+    opacity: .6;
 }
 
 .settings-panel-wrap .settings-panel .xmpp-account {
@@ -11949,6 +11960,16 @@ input[type='range'].voice-message-volume:focus {
 .settings-panel-wrap .settings-panel .blocklist-tabs-wrap{
     min-width: unset;
     width: 100%;
+    padding: 0 20px 0 36px;
+}
+.settings-panel-wrap .settings-panel .blocked-contact{
+    padding: 8px 18px 8px 32px;
+}
+.settings-panel-wrap .settings-panel .blocked-contact .input-field.checkbox-field{
+    margin: 8px 32px 8px 2px;
+}
+.settings-panel-wrap .settings-panel .blocked-contact .checkbox-field label{
+    padding-left: 38px;
 }
 .settings-panel-wrap .settings-panel .device-encryption-warning{
     padding: 16px 32px 6px 72px;
@@ -12009,6 +12030,15 @@ input[type='range'].voice-message-volume:focus {
 .settings-panel-wrap .settings-panel .single-account-info-wrap .settings-column .btn-add-account{
     left: 24px;
     top: 20px;
+}
+.settings-panel-wrap .settings-panel .change-password-container .change-password-fields{
+    margin: 0;
+}
+.settings-panel-wrap .settings-panel .change-password-container .change-password-fields .input-field{
+    display: block;
+}
+.settings-panel-wrap .settings-panel .change-password-container .change-password-fields .input-field input{
+    width: calc(100% - 18px) !important;
 }
 /* ---------------- XABBER SETTINGS --------------------- */
 

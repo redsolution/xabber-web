@@ -14,8 +14,9 @@ xabber.ClientFeature = Backbone.Model.extend({
 xabber.FeatureView = xabber.BasicView.extend({
     className: 'client-feature',
     template: function () {
-        this.$el.append('<div class="feature-name one-line"/>')
-                .append('<div class="supports"/>');
+        this.$el.append('<div class="feature-check-icon mdi mdi-24px"/>')
+                .append('<div class="feature-name one-line"/>');
+        this.$('.feature-check-icon').append(env.templates.svg['check']());
     },
 
     _initialize: function (options, attrs) {
@@ -32,7 +33,7 @@ xabber.FeatureView = xabber.BasicView.extend({
         let name = this.model.get('verbose_name'),
             supports = this.model.get('supports');
         this.$('.feature-name').text(name);
-        this.$('.supports').text(supports ? xabber.getString("account_settings__server_info__status_available") : xabber.getString("account_settings__server_info__status_unavailable"))
+        this.$('.feature-check-icon').showIf(supports);
     }
 });
 
@@ -53,6 +54,8 @@ xabber.ClientFeatures = Backbone.Collection.extend({
         this.addFeature(Strophe.NS.LAST, 'XEP-0012: Last Activity');
         this.addFeature(Strophe.NS.VCARD, 'XEP-0054: vCard-temp');
         this.addFeature(Strophe.NS.RSM, 'XEP-0059: Result Set Management');
+        this.addFeature(Strophe.NS.PUBSUB, 'XEP-0060: Publish-Subscribe');
+        this.addFeature(Strophe.NS.REGISTER, 'XEP-0077: In-Band Registration');
         this.connection.disco.addFeature(Strophe.NS.CHATSTATES);
         this.addFeature(Strophe.NS.BLOCKING, 'XEP-0191: Blocking Command');
         this.addFeature(Strophe.NS.PING, 'XEP-0199: XMPP Ping');
@@ -64,13 +67,10 @@ xabber.ClientFeatures = Backbone.Collection.extend({
         this.addFeature(Strophe.NS.HTTP_UPLOAD, 'XEP-0363: HTTP File Upload');
         this.addFeature(Strophe.NS.SYNCHRONIZATION, 'XEP-SYNC: Client Synchronization');
         this.addFeature(Strophe.NS.AUTH_DEVICES, 'XEP-DEVICES: HOTP and Device Management');
-        this.addFeature(Strophe.NS.GEOLOC, 'XEP-0080: User Location');
-        this.addFeature(Strophe.NS.PUBSUB, 'XEP-0060: Publish-Subscribe');
         this.addFeature(Strophe.NS.ARCHIVE, 'XEP-ARCHIVED: Archived Chats');
         this.addFeature(Strophe.NS.DELIVERY, 'XEP-DELIVERY: Reliable message delivery');
         this.addFeature(Strophe.NS.GROUP_CHAT, 'XEP-GROUPS: Groups');
         this.addFeature(Strophe.NS.REWRITE, 'XEP-RETRACT: Message Delete and Rewrite');
-        this.addFeature(Strophe.NS.REGISTER, 'XEP-0077: In-Band Registration');
     },
 
     addFeature: function (namespace, verbose_name) {

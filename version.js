@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.3.4.8","version_description":"changed icon, fixed account settings not loading chats, fixed client settings hiding"}'
+'{"version_number":"2.3.4.9","version_description":"fixed change password view, blocked and list of capabilities changes, change password fields design  "}'
 )});

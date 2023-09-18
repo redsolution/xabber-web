@@ -700,19 +700,19 @@ xabber.Account = Backbone.Model.extend({
         },
 
         changePasswordCallback: function (status, condition) {
-            if (this.settings_right && this.settings_right.children && this.settings_right.children.account_password_view){
+            if (this.change_password_view){
                 if (status === Strophe.Status.REGISTERED) {
-                    this.settings_right.children.account_password_view.successFeedback();
+                    this.change_password_view.successFeedback();
                 } else if (status === Strophe.Status.CONFLICT
                     || status === Strophe.Status.NOTACCEPTABLE
                     || status === Strophe.Status.REGIFAIL) {
                     condition = condition ? ': ' + condition : '';
-                    this.settings_right.children.account_password_view.errorFeedback({password: xabber.getString("password_changed_fail") + condition});
+                    this.change_password_view.errorFeedback({password: xabber.getString("password_changed_fail") + condition});
                 } else if (status === Strophe.Status.AUTHFAIL) {
-                    this.settings_right.children.account_password_view.errorFeedback({old_password: xabber.getString("AUTHENTICATION_FAILED")});
+                    this.change_password_view.errorFeedback({old_password: xabber.getString("AUTHENTICATION_FAILED")});
                 } else if (status === Strophe.Status.CONNECTED) {
                     this.change_password_connection.register.fields.username = Strophe.getNodeFromJid(this.get('jid'));
-                    this.change_password_connection.register.fields.password = this.settings_right.children.account_password_view.$password_input.val().trim();
+                    this.change_password_connection.register.fields.password = this.change_password_view.$password_input.val().trim();
                     this.change_password_connection.register.submit();
                 } else if (status === Strophe.Status.DISCONNECTED) {
                     this.change_password_connection_manager = undefined;
@@ -5325,6 +5325,7 @@ xabber.ChangeAccountPasswordView = xabber.BasicView.extend({
         old_password = old_password.trim();
         this.authFeedback({password_confirm: xabber.getString("dialog_change_password__feedback__text_auth_with_pass")});
         if (!this.account.change_password_connection_manager) {
+            this.account.change_password_view = this;
             this.account.change_password_connection_manager = new Strophe.ConnectionManager(this.account.CONNECTION_URL);
             this.account.change_password_connection = this.account.change_password_connection_manager.connection;
             this.account.change_password_connection.account = this.account;
@@ -5339,6 +5340,7 @@ xabber.ChangeAccountPasswordView = xabber.BasicView.extend({
             .siblings('span.errors').text(options.old_password || '');
         this.$password_confirm_input.switchClass('invalid', options.password_confirm)
             .siblings('span.errors').text(options.password_confirm || '');
+        this.parent && this.parent.updateHeight();
     },
 
     errorFeedback: function (options) {
