@@ -4437,7 +4437,7 @@ xabber.SettingsAccountsModalBlockView = xabber.BasicView.extend({
             view = this.addChild(jid, xabber.AccountSettingsItemModalView, {model: account});
         let index = this.model.indexOf(account);
         if (index === 0)
-            this.$('.accounts-head-wrap').after(view.$el);
+            this.$('.no-accounts-tip').after(view.$el);
         else
             this.$('.xmpp-account').eq(index - 1).after(view.$el);
         this.updateHtml();

@@ -54,7 +54,7 @@ xabber.Contact = Backbone.Model.extend({
         this.set(attrs);
         this.onChangedGroupchat();
         this.domain = Strophe.getDomainFromJid(this.get('jid'));
-        !this.get('group_chat') && this.set('group_chat', _.contains(this.account.chat_settings.get('group_chat'), this.get('jid')));
+        !this.get('group_chat') && this.account && this.account.chat_settings && this.set('group_chat', _.contains(this.account.chat_settings.get('group_chat'), this.get('jid')));
         this.hash_id = env.b64_sha1(this.account.get('jid') + '-' + attrs.jid);
         this.resources = new xabber.ContactResources(null, {contact: this});
         this.on("update_avatar", this.updateAvatar, this);
