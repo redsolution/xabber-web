@@ -92,7 +92,6 @@ xabber.Account = Backbone.Model.extend({
             this.resources = new xabber.AccountResources(null, {account: this});
             this.password_view = new xabber.ChangePasswordView({model: this});
             this.vcard_edit = new xabber.VCardEditView({model: this});
-            this.vcard_edit_modal = new xabber.VCardEditModalView({model: this});
             this.updateColorScheme();
             this.settings.on("change:color", this.updateColorScheme, this);
             this.on("change:photo_hash", this.getVCard, this);
@@ -2112,7 +2111,8 @@ xabber.AccountVCardModalView = xabber.VCardView.extend({
     },
 
     showEditView: function ($el) {
-        this.model.vcard_edit_modal.show({$el: $el});
+        this.vcard_edit_modal = new xabber.VCardEditModalView({model: this.model});
+        this.vcard_edit_modal.show({$el: $el});
     }
 });
 

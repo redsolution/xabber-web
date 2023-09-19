@@ -286,10 +286,17 @@
     addSvgTemplate('svg.cancel');
     addSvgTemplate('svg.status');
     addSvgTemplate('svg.status-outline');
+    addSvgTemplate('svg.birthday');
     addSvgTemplate('svg.birthday-outline');
+    addSvgTemplate('svg.web');
+    addSvgTemplate('svg.xmpp');
+    addSvgTemplate('svg.job');
     addSvgTemplate('svg.job-outline');
+    addSvgTemplate('svg.address');
     addSvgTemplate('svg.address-outline');
+    addSvgTemplate('svg.email');
     addSvgTemplate('svg.email-outline');
+    addSvgTemplate('svg.description');
     addSvgTemplate('svg.description-outline');
     addSvgTemplate('svg.contact-add');
     addSvgTemplate('svg.check');
