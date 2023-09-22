@@ -313,6 +313,8 @@
     addSvgTemplate('svg.bell-sleep');
     addSvgTemplate('svg.bell-off');
     addSvgTemplate('svg.cancel');
+    addSvgTemplate('svg.trash');
+    addSvgTemplate('svg.client');
     addSvgTemplate('svg.client-outline');
     addSvgTemplate('svg.database-lock');
     addSvgTemplate('svg.index');

@@ -1,9 +1,10 @@
-<div class="token-wrap" data-token-uid="{{token_uid}}">
+<div class="token-wrap settings-tab" data-subblock-parent-name="devices" data-block-name="device-information" data-token-uid="{{token_uid}}">
     <div class="token-icon-wrap">
-        <svg class="mdi token-icon mdi-24px mdi-svg-template" data-svgname="device-web"></svg>
-    </div>
-    <div class="token-icon-wrap device-icon-phone hidden">
-        <svg class="mdi token-icon mdi-24px mdi-svg-template" data-svgname="device-cellphone"></svg>
+        {[if (device && (device.indexOf('Android') > -1 || device.indexOf('iOS') > -1)){]}
+            <svg class="mdi token-icon mdi-24px mdi-svg-template" data-svgname="device-cellphone"></svg>
+        {[} else {]}
+            <svg class="mdi token-icon mdi-24px mdi-svg-template" data-svgname="device-web"></svg>
+        {[}]}
     </div>
     <div class="token-client-wrap">
         <div class="device one-line">{{device}}</div>
@@ -12,5 +13,4 @@
     <div class="device-encryption one-line">
         <svg class="mdi mdi-24px mdi-svg-template" data-svgname="security"></svg>
     </div>
-    <i class="btn-revoke-token mdi mdi-24px mdi-close"></i>
 </div>

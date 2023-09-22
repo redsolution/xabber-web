@@ -1106,6 +1106,11 @@ xabber.Account = Backbone.Model.extend({
         },
 
         showSettingsModal: function () {
+            if (xabber.accounts.length === 1){
+                xabber.body.setScreen('settings-modal');
+                xabber.trigger('update_placeholder');
+                return;
+            }
             let has_modal_settings = !_.isUndefined(this.settings_account_modal);
             if (!has_modal_settings)
                 this.settings_account_modal = new xabber.AccountSettingsModalView({model: this});
@@ -1862,7 +1867,7 @@ xabber.AccountToolbarItemView = xabber.BasicView.extend({
         ev.stopPropagation();
         let is_single = $(ev.target).closest('.single-item').length;
         if (is_single){
-            this.model.showSettings();
+            this.model.showSettingsModal();
         }
         xabber.toolbar_view.$('.toolbar-item.account-item').removeClass('active');
         if (xabber.toolbar_view.data.get('account_filtering') != this.model.get('jid'))
@@ -1871,7 +1876,7 @@ xabber.AccountToolbarItemView = xabber.BasicView.extend({
     },
 
     showSettings: function () {
-        this.model.showSettings();
+        this.model.showSettingsModal();
     },
 });
 
@@ -2805,6 +2810,7 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
         "click .btn-selfie": "openWebcamPanel",
         "click .settings-tab[data-block-name='status']": "openChangeStatus",
         "click .settings-tabs-wrap .settings-tab:not(.delete-account):not(.settings-non-tab)": "jumpToBlock",
+        "click .tokens-wrap .settings-tab.token-wrap": "jumpToBlock",
         "click .settings-tab.delete-account": "deleteAccount",
 
         "change .enabled-state input": "setEnabled",
@@ -2817,7 +2823,7 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
         "click .btn-delete-settings": "deleteSettings",
         "click .color-picker-button": "changeColor",
         "click .btn-qr-code": "showQRCode",
-        "click .token-wrap .btn-revoke-token": "revokeXToken",
+        "click .btn-revoke-token": "revokeXToken",
         "click .devices-wrap .btn-revoke-all-tokens": "revokeAllXTokens",
         "click .btn-manage-devices": "openDevicesWindow",
         "click .btn-block": "openBlockWindow",
@@ -2966,6 +2972,9 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
     },
 
     jumpToBlockHandler: function (ev) {
+        if ($(ev.target).closest('.device-encryption').length || $(ev.target).closest('.btn-revoke-token').length)
+            return;
+
         let $tab = $(ev.target).closest('.settings-tab'),
             $elem = this.$('.settings-block-wrap.' + $tab.data('block-name')),
             block_name = $tab.data('block-name');
@@ -2991,6 +3000,10 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
         }
         if (block_name === 'vcard-tab'){
             this.vcard_view.showEditView(this.$('.vcard'));
+        }
+        if (block_name === 'device-information'){
+            $elem.attr('data-token-uid', $tab.attr('data-token-uid'));
+            this.updateDeviceInformation($tab.attr('data-token-uid'));
         }
         this.$('.btn-back-subsettings').attr('data-subblock-parent-name', '');
         if ($tab.closest('.right-column') && $tab.attr('data-subblock-parent-name')) {
@@ -3246,7 +3259,7 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
             if (this.model.omemo) {
                 !this.omemo_own_devices && (this.omemo_own_devices = new xabber.FingerprintsOwnDevices({model: this.model.omemo}));
                 let omemo_device_id = token.omemo_id ? token.omemo_id : Number(pretty_token.token_uid.slice(0,8));
-                this.omemo_own_devices.updateTrustDevice(Number(omemo_device_id), $token_html);
+                this.omemo_own_devices.updateTrustDevice(Number(omemo_device_id), $token_html, this);
             } else {
                 if (token.omemo_id){
                     $token_html.find('.device-encryption span').text(xabber.getString("settings_account__unverified_device"));
@@ -3265,7 +3278,59 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
             this.$('.btn-revoke-all-tokens').addClass('hidden');
         }
         this.$('.devices-wrap').removeClass('hidden')
+        !this._single_account  && this.$('.token-wrap').attr('data-subblock-parent-name', '');
         this.updateHeight();
+    },
+
+    updateDeviceInformation: function (token_uid) {
+        let token = this.model.x_tokens_list.find(item => (item.token_uid === token_uid));
+        this.$('.device-information-last-seen').showIf(pretty_datetime(token.last_auth)).find('.device-information-text').text(pretty_datetime(token.last_auth));
+        this.$('.device-information-device').showIf(token.device).find('.device-information-text').text(token.device);
+        this.$('.device-information-client').showIf(token.client).find('.device-information-text').text(token.client);
+        this.$('.device-information-ip').showIf(token.ip).find('.device-information-text').text(token.ip);
+        this.$('.device-information-expires').showIf(pretty_datetime(token.expire)).find('.device-information-text').text(pretty_datetime(token.expire));
+        this.$('.device-information-device-id').showIf(token.omemo_id).find('.device-information-text').text(token.omemo_id);
+        this.$('.device-information-security-label').showIf(token.omemo_id);
+        let resource_obj = this.model.resources.findWhere({ token_uid: token_uid }),
+            status_text;
+        if (resource_obj){
+            status_text = resource_obj.get('status_message') || resource_obj.get('status') && xabber.getString(resource_obj.get('status')) || xabber.getString("account_state_connected");
+        } else if (this.model.get('x_token').token_uid == token.token_uid){
+            status_text = this.model.get('status_message') || this.model.get('status') && xabber.getString(this.model.get('status')) || xabber.getString("account_state_connected")
+        } else
+            status_text = xabber.getString("offline");
+
+        this.$('.device-information-status .device-information-text').text(status_text);
+
+        if (this.model.get('x_token')) {
+            this.$('.btn-revoke-token').hideIf(this.model.get('x_token').token_uid == token.token_uid);
+        }
+        if (token.omemo_id && this.model.omemo){
+            let dfd = new $.Deferred(),
+                device = this.model.omemo.own_devices[token.omemo_id];
+            dfd.done((fing) => {
+                if (fing.match(/.{1,8}/g))
+                    fing = fing.match(/.{1,8}/g).join(" ");
+                this.$('.device-information-fingerprint').showIf(fing).find('.device-information-text').text(fing);
+            })
+            if (device.get('fingerprint')) {
+                dfd.resolve(device.get('fingerprint'));
+            } else if (device.get('ik')) {
+                device.set('fingerprint', device.generateFingerprint());
+                dfd.resolve(device.get('fingerprint'));
+            } else {
+                device.getBundle().then(({pk, spk, ik}) => {
+                    device.set('ik', utils.fromBase64toArrayBuffer(ik));
+                    let fingerprint = device.generateFingerprint();
+                    if (!device.get('fingerprint') || device.get('fingerprint') !== fingerprint)
+                        device.set('fingerprint', fingerprint);
+                    dfd.resolve(device.get('fingerprint'));
+                });
+            }
+        } else {
+            this.$('.device-information-fingerprint').addClass('hidden');
+        }
+        this.$('.settings-panel-head span.settings-panel-head-title').text(token.device);
     },
 
     openFingerprint: function (ev) {
@@ -3301,21 +3366,27 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
     },
 
     revokeXToken: function (ev) {
-        let $target = $(ev.target).closest('.token-wrap'),
-            token_uid = $target.data('token-uid');
-        this.model.revokeXToken([token_uid], () => {
-            if (this.model.get('x_token')){
-                if (this.model.get('x_token').token_uid === token_uid) {
-                    this.model.deleteAccount();
-                    return;
-                }
-                this.model.getAllXTokens(() => {
-                    this.$('.sessions-wrap').html("");
-                    if (this.model.x_tokens_list && this.model.x_tokens_list.length) {
-                        this.renderAllXTokens();
+        utils.dialogs.ask(xabber.getString("terminate_session_title"), null,
+            {}, { ok_button_text: xabber.getString("button_terminate")}).done((res) => {
+            if (!res)
+                return;
+            let $target = $(ev.target).closest('.settings-block-wrap.device-information'),
+                token_uid = $target.data('token-uid');
+            this.model.revokeXToken([token_uid], () => {
+                if (this.model.get('x_token')){
+                    if (this.model.get('x_token').token_uid === token_uid) {
+                        this.model.deleteAccount();
+                        return;
                     }
-                });
-            }
+                    this.model.getAllXTokens(() => {
+                        this.$('.sessions-wrap').html("");
+                        this.$('.btn-back-subsettings').length && this.backToSubMenu({target: this.$('.btn-back-subsettings')[0]})
+                        if (this.model.x_tokens_list && this.model.x_tokens_list.length) {
+                            this.renderAllXTokens();
+                        }
+                    });
+                }
+            });
         });
     },
 
@@ -3561,6 +3632,7 @@ xabber.AccountSettingsSingleModalView = xabber.AccountSettingsModalView.extend({
         this.parent.$('.single-account-info-wrap').append(this.$el);
         this.ps_container = this.parent.ps_container;
         this.gallery_view.render();
+        this._single_account = true;
 
         this.$el.attr('data-color', this.model.settings.get('color'));
         this.$('.circle-avatar.dropdown-button').dropdown({

@@ -137,7 +137,7 @@
                 </div>
             </div>
             <div class="settings-tabs-wrap">
-                <div class="settings-tab delete-account">
+                <div class="settings-tab settings-deletion-button delete-account">
                     <div class="setting-icon-background">
                         <i class="mdi mdi-24px mdi-logout-variant"></i>
                     </div>
@@ -442,6 +442,58 @@
                     </div>
 
                     <div data-header='{[print(xabber.getString("account_cloud_storage"))]}' class="settings-block-wrap media-gallery">
+                    </div>
+
+                    <div data-header='{[print(xabber.getString("settings_account__device_information"))]}' class="settings-block-wrap device-information">
+                        <div class="device-information-wrap">
+                            <div class="settings-panel-label">{[print(xabber.getString("settings_account__device_information"))]}</div>
+                            <div class="device-information-items-wrap device-information-basic">
+                                <div class="device-information-item device-information-status">
+                                    <svg class="mdi device-information-icon mdi-24px mdi-svg-template" data-svgname="status-outline"></svg>
+                                    <div class="device-information-label">{[print(xabber.getString("device__info__status__label"))]}</div>
+                                    <div class="device-information-text"></div>
+                                </div>
+                                <div class="device-information-item device-information-last-seen">
+                                    <svg class="mdi device-information-icon mdi-24px mdi-svg-template" data-svgname="device-web"></svg>
+                                    <div class="device-information-label">{[print(xabber.getString("device__info__status__label_last_seen"))]}</div>
+                                    <div class="device-information-text"></div>
+                                </div>
+                                <div class="device-information-item device-information-client">
+                                    <svg class="mdi device-information-icon mdi-24px mdi-svg-template" data-svgname="client-outline"></svg>
+                                    <div class="device-information-label">{[print(xabber.getString("device__info__client__label"))]}</div>
+                                    <div class="device-information-text"></div>
+                                </div>
+                                <div class="device-information-item device-information-ip">
+                                    <svg class="mdi device-information-icon mdi-24px mdi-svg-template" data-svgname="device-web"></svg>
+                                    <div class="device-information-label">{[print(xabber.getString("device__info__ip__label"))]}</div>
+                                    <div class="device-information-text"></div>
+                                </div>
+                                <div class="device-information-item device-information-expires">
+                                    <svg class="mdi device-information-icon mdi-24px mdi-svg-template" data-svgname="device-web"></svg>
+                                    <div class="device-information-label">{[print(xabber.getString("device__info__expire__label"))]}</div>
+                                    <div class="device-information-text"></div>
+                                </div>
+                            </div>
+                            <div class="settings-panel-label device-information-security-label">{[print(xabber.getString("settings__menu_item__security"))]}</div>
+                            <div class="device-information-items-wrap device-information-encryption">
+                                <div class="device-information-item device-information-device-id">
+                                    <svg class="mdi device-information-icon mdi-24px mdi-svg-template" data-svgname="device-web"></svg>
+                                    <div class="device-information-label">{[print(xabber.getString("settings_account__device_information_device_id"))]}</div>
+                                    <div class="device-information-text"></div>
+                                </div>
+                                <div class="device-information-item device-information-fingerprint hidden">
+                                    <svg class="mdi device-information-icon mdi-24px mdi-svg-template" data-svgname="device-web"></svg>
+                                    <div class="device-information-label">{[print(xabber.getString("omemo__dialog_fingerprints__fingerprint_label"))]}</div>
+                                    <div class="device-information-text device-information-fingerprint-text"></div>
+                                </div>
+                            </div>
+                            <div class="settings-tab btn-revoke-token settings-deletion-button">
+                                <div class="setting-icon-background">
+                                    <svg class="mdi device-information-icon mdi-24px mdi-svg-template" data-svgname="trash"></svg>
+                                </div>
+                                <div class="settings-block-name">{[print(xabber.getString("device__info__terminate_session__button"))]}</div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

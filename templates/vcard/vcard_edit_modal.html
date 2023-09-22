@@ -5,7 +5,7 @@
     <div class="input-label">{[print(xabber.getString("vcard_type_personal"))]}</div>
     <div class="info-wrap personal-info-wrap">
         <div class="setting-icon-background">
-            <svg class="details-icon mdi mdi-24px mdi-svg-template" data-svgname="fullname"></svg>
+            <svg class="details-icon mdi mdi-24px mdi-svg-template" data-svgname="fullname-outline"></svg>
         </div>
         <div class="input-field first-name">
             <input class="input-glow" id="{{view.cid}}-first-name" placeholder="{[print(xabber.getString('vcard_given_name'))]}" type="text" name="first_name">
@@ -24,7 +24,7 @@
     <div class="input-label">{[print(xabber.getString("vcard_nick_name"))]}</div>
     <div class="info-wrap nickname-info-wrap">
         <div class="setting-icon-background">
-            <svg class="details-icon mdi mdi-24px mdi-svg-template" data-svgname="account"></svg>
+            <svg class="details-icon mdi mdi-24px mdi-svg-template" data-svgname="account-outline"></svg>
         </div>
         <div class="input-field nickname">
             <input class="input-glow" id="{{view.cid}}-nickname" placeholder="{[print(xabber.getString('vcard_nick_name'))]}" type="text" name="nickname">
@@ -34,7 +34,7 @@
     <div class="input-label">{[print(xabber.getString("vcard_birth_date"))]}</div>
     <div class="info-wrap birthday-info-wrap">
         <div class="setting-icon-background">
-            <svg class="details-icon mdi mdi-24px mdi-svg-template" data-svgname="birthday"></svg>
+            <svg class="details-icon mdi mdi-24px mdi-svg-template" data-svgname="birthday-outline"></svg>
         </div>
         <div class="input-field birthday">
             <input class="input-glow" id="{{view.cid}}-birthday" placeholder="{[print(xabber.getString('vcard_birth_date_placeholder'))]}" type="text" class="datepicker">
@@ -44,7 +44,7 @@
     <div class="input-label">{[print(xabber.getString("vcard_job"))]}</div>
     <div class="info-wrap job-info-wrap">
         <div class="setting-icon-background">
-            <svg class="details-icon mdi mdi-24px mdi-svg-template" data-svgname="job"></svg>
+            <svg class="details-icon mdi mdi-24px mdi-svg-template" data-svgname="job-outline"></svg>
         </div>
         <div class="input-field org-name">
             <input class="input-glow" id="{{view.cid}}-org-name" placeholder="{[print(xabber.getString('vcard_organization'))]}" type="text" name="org_name">
@@ -81,7 +81,7 @@
     <div class="input-label">{[print(xabber.getString("vcard_telephone"))]}</div>
     <div class="info-wrap phone-info-wrap">
         <div class="setting-icon-background">
-            <svg class="details-icon mdi mdi-24px mdi-svg-template" data-svgname="call"></svg>
+            <svg class="details-icon mdi mdi-24px mdi-svg-template" data-svgname="call-outline"></svg>
         </div>
         <div class="input-field phone-work">
             <input class="input-glow" id="{{view.cid}}-phone-work" placeholder="{[print(xabber.getString('vcard_type_work'))]}" type="text" name="phone_work">
@@ -96,7 +96,7 @@
     <div class="input-label">{[print(xabber.getString("vcard_email"))]}</div>
     <div class="info-wrap email-info-wrap">
         <div class="setting-icon-background">
-            <svg class="details-icon mdi mdi-24px mdi-svg-template" data-svgname="email"></svg>
+            <svg class="details-icon mdi mdi-24px mdi-svg-template" data-svgname="email-outline"></svg>
         </div>
         <div class="input-field email-work">
             <input class="input-glow" id="{{view.cid}}-email-work" placeholder="{[print(xabber.getString('vcard_type_work'))]}" type="text" name="email_work">
@@ -109,7 +109,7 @@
     <div class="input-label">{[print(xabber.getString("vcard_home_address"))]}</div>
     <div class="info-wrap address-info-wrap">
         <div class="setting-icon-background">
-            <svg class="details-icon mdi mdi-24px mdi-svg-template" data-svgname="address"></svg>
+            <svg class="details-icon mdi mdi-24px mdi-svg-template" data-svgname="address-outline"></svg>
         </div>
         <div class="input-wrap address-wrap address-home-wrap">
             <div class="input-field pobox">
@@ -137,6 +137,9 @@
     </div>
     <div class="input-label">{[print(xabber.getString("vcard_work_address"))]}</div>
     <div class="info-wrap address-info-wrap">
+        <div class="setting-icon-background">
+            <svg class="details-icon mdi mdi-24px mdi-svg-template" data-svgname="address-outline"></svg>
+        </div>
         <div class="input-wrap address-wrap address-work-wrap">
             <div class="input-field pobox">
                 <input class="input-glow" id="{{view.cid}}-po-work-box" placeholder="{[print(xabber.getString('vcard_address_pobox'))]}" type="text" name="po_work_box">

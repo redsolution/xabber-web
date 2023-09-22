@@ -23,6 +23,8 @@ let badges_names = [
         'crosshairs-gps',
         'crosshairs-question',
         'crosshairs',
+        'trash',
+        'client',
         'client-outline',
         'database-lock',
         'index',

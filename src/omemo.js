@@ -457,7 +457,7 @@ xabber.FingerprintsOwnDevices = xabber.BasicView.extend({
         this.renderOwnDevices(device_id, is_own);
     },
 
-    updateTrustDevice: function (device_id, $container) {
+    updateTrustDevice: function (device_id, $container, context) {
         this.omemo.getMyDevices().then(() => {
             let device = this.model.own_devices[device_id];
             if (!device)
@@ -466,7 +466,7 @@ xabber.FingerprintsOwnDevices = xabber.BasicView.extend({
                 let f = device.generateFingerprint(),
                     fing = (this.omemo.get('fingerprints')[this.jid] || [])[device_id],
                     is_trusted = fing ? (fing.fingerprint != f ? 'error' : (fing.trusted ? 'trust' : 'ignore')) : 'unknown';
-                this.renderTrustOnFingerprint(is_trusted, $container);
+                this.renderTrustOnFingerprint(is_trusted, $container, context);
             }
             else {
                 this.account.getConnectionForIQ().omemo.getBundleInfo({jid: device.jid, id: device.id}, async (iq) => {
@@ -478,7 +478,7 @@ xabber.FingerprintsOwnDevices = xabber.BasicView.extend({
                         let f = device.generateFingerprint(),
                             fing = (this.omemo.get('fingerprints')[this.jid] || [])[device.id],
                             is_trusted = fing ? (fing.fingerprint != f ? 'error' : (fing.trusted ? 'trust' : 'ignore')) : 'unknown';
-                        this.renderTrustOnFingerprint(is_trusted, $container);
+                        this.renderTrustOnFingerprint(is_trusted, $container, context);
                     }
                 }, () => {
                 });
@@ -486,7 +486,7 @@ xabber.FingerprintsOwnDevices = xabber.BasicView.extend({
         });
     },
 
-    renderTrustOnFingerprint: function (is_trusted, $container) {
+    renderTrustOnFingerprint: function (is_trusted, $container, context) {
         $container.find('.device-encryption').attr('data-trust', is_trusted).addClass('active');
         $container.attr('data-trust', is_trusted);
         is_trusted === 'unknown' && $container.find('.device-encryption span').text(xabber.getString("settings_account__unverified_device"));
@@ -498,6 +498,7 @@ xabber.FingerprintsOwnDevices = xabber.BasicView.extend({
             $warning_container.find('.device-encryption-warning-label').html(xabber.getString("settings_account__encryption_warning_text", [untrusted_count]));
         }
         $container.find('.device-encryption .mdi-lock').removeClass('hidden');
+        context && context.updateHeight && context.updateHeight();
     },
 
     renderOwnDevices: function (device_id, is_own) {
