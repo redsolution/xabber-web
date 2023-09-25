@@ -2848,8 +2848,12 @@ $(document).ready(function(){
 
     var range_wrapper = '.range-field';
     $(document).on('change', range_type, function(e) {
-      var thumb = $(this).siblings('.thumb');
-      thumb.find('.value').html($(this).val());
+      var thumb = $(this).siblings('.thumb');//34
+        if ($(this).hasClass('materialize-timer')){
+            thumb.find('.value').html($(this).val() + 's');
+        } else {
+            thumb.find('.value').html($(this).val());
+        }
     });
 
     $(document).on('input mousedown touchstart', range_type, function(e) {
@@ -2863,7 +2867,11 @@ $(document).ready(function(){
       }
 
       // Set indicator value
-      thumb.find('.value').html($(this).val());
+        if ($(this).hasClass('materialize-timer')){
+            thumb.find('.value').html($(this).val() + 's');
+        } else {
+            thumb.find('.value').html($(this).val());
+        }
 
       range_mousedown = true;
       $(this).addClass('active');
@@ -2885,10 +2893,19 @@ $(document).ready(function(){
         else if (left > width) {
           left = width;
         }
+          if ($(this).hasClass('materialize-timer') && left < 10){
+              left = 10;
+          } else if ($(this).hasClass('materialize-timer') && left > (width - 8)){
+              left = width - 8;
+          }
         thumb.addClass('active').css('left', left);
       }
 
-      thumb.find('.value').html($(this).val());
+    if ($(this).hasClass('materialize-timer')){
+        thumb.find('.value').html($(this).val() + 's');
+    } else {
+        thumb.find('.value').html($(this).val());
+    }
     });
 
     $(document).on('mouseup touchend', range_wrapper, function() {
@@ -2917,8 +2934,19 @@ $(document).ready(function(){
         else if (left > width) {
           left = width;
         }
+        if (thumb.siblings(range_type).hasClass('materialize-timer') && left < 10){
+            left = 10;
+        } else if (thumb.siblings(range_type).hasClass('materialize-timer') && left > (width - 8)){
+            left = width - 8;
+        }
         thumb.addClass('active').css('left', left);
-        thumb.find('.value').html(thumb.siblings(range_type).val());
+
+
+          if (thumb.siblings(range_type).hasClass('materialize-timer')){
+              thumb.find('.value').html(thumb.siblings(range_type).val() + 's');
+          } else {
+              thumb.find('.value').html(thumb.siblings(range_type).val());
+          }
       }
     });
 

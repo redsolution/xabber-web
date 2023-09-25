@@ -352,6 +352,18 @@
     addSvgTemplate('svg.xabber-online');
     addSvgTemplate('svg.saved-messages');
     addSvgTemplate('svg.palette');
+    addSvgTemplate('svg.chat');
+    addSvgTemplate('svg.star-face');
+    addSvgTemplate('svg.alarm-bell');
+    addSvgTemplate('svg.id');
+    addSvgTemplate('svg.expires');
+    addSvgTemplate('svg.database');
+    addSvgTemplate('svg.lock');
+    addSvgTemplate('svg.lock-open');
+    addSvgTemplate('svg.lock-alert');
+    addSvgTemplate('svg.lock-check');
+    addSvgTemplate('svg.lock-cross');
+    addSvgTemplate('svg.lock-question');
     addSvgTemplate('svg.circles');
     addSvgTemplate('svg.translate');
     addSvgTemplate('svg.trash');

@@ -33,6 +33,7 @@ input[type="radio"].with-gap:checked+label:after {
 
 input[type="radio"].with-gap:disabled+label {
     color: #00000042 !important;
+    pointer-events: none;
 }
 
 input[type="radio"].with-gap:disabled:checked+label:before {
@@ -43,7 +44,6 @@ input[type="radio"].with-gap:disabled:checked+label:after {
     border-color: #00000042 !important;
     background-color: #00000042 !important;
 }
-
 .switch label .lever {
     margin: 0;
 }
@@ -110,6 +110,16 @@ input[type=checkbox] + label {
 input[type=checkbox].filled-in:not(:checked) + label:after {
     width: 18px;
     height: 18px;
+}
+
+input[type=checkbox].filled-in:disabled + label {
+    color: #00000042!important;
+    pointer-events: none;
+}
+
+input[type=checkbox].filled-in:disabled + label:after {
+    background-color: #bdbdbd !important;
+    border-color: #bdbdbd !important;
 }
 
 input[type=checkbox].groupchat-param.filled-in:not(:checked) + label:after {
@@ -10980,25 +10990,37 @@ input[type=range].voice-message-volume::-ms-thumb {
     }
 }
 
+input[type='range']::-moz-range-track {
+    -webkit-appearance: none;
+    margin-top: -1px;
+}
+
+input[type='range']::-moz-range-thumb {
+    width: 16px;
+    -webkit-appearance: none;
+    height:16px;
+    margin: -7px 0;
+}
+
 .settings-panel input[type=range] {
     overflow: visible !important;
-    -webkit-appearance: visible !important;
+    height: 4px;
 }
 
-input[type="range"]::-moz-range-progress {
-    background-color: #616161;
+input[type=range]::-moz-range-progress {
+    /*background-color: #616161;*/
 }
 
-input[type="range"]::-ms-fill-lower {
-    background-color: #616161;
+input[type=range]::-ms-fill-lower {
+    /*background-color: #616161;*/
 }
 
-input[type="range"]::-ms-fill-upper {
-    background-color: #E0E0E0;
+input[type=range]::-ms-fill-upper {
+    /*background-color: #E0E0E0;*/
 }
 
-input[type='range'].voice-message-volume:focus {
-    outline: none;
+input[type=range].voice-message-volume:focus {
+    /*outline: none;*/
 }
 
 .input-toolbar .last-emoticons {
@@ -11731,6 +11753,9 @@ input[type='range'].voice-message-volume:focus {
     height: 64px;
     padding: 10px 16px 0px 72px;
 }
+.settings-panel-wrap .settings-panel .settings-tab.settings-tab-big-icon:not(.token-wrap) .setting-icon-background {
+    padding: 2px;
+}
 
 .settings-panel-wrap .settings-panel .left-column .settings-tab:not(.settings-deletion-button):last-of-type {
     border-bottom: 1px solid #f5f5f5;
@@ -12049,18 +12074,48 @@ input[type='range'].voice-message-volume:focus {
     left: 24px;
     top: 20px;
 }
+.settings-panel-wrap .settings-panel .setting.connection-wrap{
+    padding: 0 !important;
+}
 .settings-panel-wrap .settings-panel .change-password-container .change-password-fields{
     margin: 0;
 }
-.settings-panel-wrap .settings-panel .change-password-container .change-password-fields .input-field{
+.settings-panel-wrap .settings-panel .change-password-container .change-password-fields .mdi{
+    position: absolute;
+    left: 32px;
+    top: 8px;
+}
+.settings-panel-wrap .settings-panel .change-password-container .change-password-fields .mdi path{
+    fill: #9e9e9e;
+}
+.settings-panel-wrap .settings-panel .change-password-container .change-password-fields .change-password-field{
     align-items: center;
+    position: relative;
+    margin-top: 8px;
+    display: flex;
+    padding: 0 16px 0 72px!important;
 }
-.settings-panel-wrap .settings-panel .change-password-container .change-password-fields .input-field input{
+.settings-panel-wrap .settings-panel .change-password-container .change-password-fields .change-password-field input{
     width: calc(100% - 18px) !important;
+    margin: 0;
 }
-.settings-panel-wrap .settings-panel .change-password-container .change-password-fields .input-field .errors{
+.settings-panel-wrap .settings-panel .change-password-container .change-password-fields .change-password-field .errors{
     line-height: 20px;
     overflow: visible;
+    width: 100%;
+    margin-left: 16px;
+    color: #f44336;
+    display: block;
+    min-height: 18px;
+    font-size: 12px;
+}
+.settings-panel-wrap .settings-panel .change-password-container .change-password-fields .change-password-field label{
+    position: absolute;
+    top: -16px;
+    left: 0;
+}
+.settings-panel-wrap .settings-panel .change-password-container .buttons-wrap{
+    padding: 8px 16px 0 72px;
 }
 .settings-panel-wrap .settings-panel .device-information-wrap{
     padding: 16px 0 8px;
@@ -12113,6 +12168,35 @@ input[type='range'].voice-message-volume:focus {
 }
 .settings-panel-wrap .settings-panel .device-information-wrap .btn-revoke-token .setting-icon-background{
     left: 32px;
+}
+.settings-panel-wrap .settings-panel .setting.idling-time{
+    padding: 10px 40% 24px 72px!important;
+    position: relative;
+}
+.settings-panel-wrap .settings-panel .setting.idling-time .range-field{
+    height: 32px;
+}
+.settings-panel-wrap .settings-panel .setting.idling-time span.thumb{
+    bottom: -14px;
+    margin: 0px 0 0 -12px !important;
+    height: 20px !important;
+    width: 30px !important;
+    background: none;
+    transform: none;
+    opacity: 1;
+    top: unset !important;
+    line-height: 20px;
+}
+.settings-panel-wrap .settings-panel .setting.idling-time span.thumb .value{
+    color: #616161;
+    font-size: 14px;
+    transform: none;
+    margin: 0;
+}
+.settings-panel-wrap .settings-panel .setting-clue{
+    padding: 10px 32px 48px 72px!important;
+    color: #9E9E9E;
+    font-size: 14px;
 }
 /* ---------------- XABBER SETTINGS --------------------- */
 

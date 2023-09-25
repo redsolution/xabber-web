@@ -2248,6 +2248,7 @@ xabber.SettingsModalView = xabber.BasicView.extend({
         "click .settings-tabs-wrap.global-settings-tabs .settings-tab:not(.delete-all-accounts)": "jumpToBlock",
         "click .btn-add-account": "showAddAccountView",
         "click .setting.idling label": "setIdling",
+        "change #idle_timeout": "setIdlingTimeout",
         "click .setting.notifications label": "setNotifications",
         "click .private-notifications label": "setPrivateNotifications",
         "click .group-notifications label": "setGroupNotifications",
@@ -2305,6 +2306,7 @@ xabber.SettingsModalView = xabber.BasicView.extend({
         this.$('.notifications input[type=checkbox]').prop({
             checked: settings.notifications && xabber._cache.get('notifications')
         });
+        this.$('.sound input[type=radio][name=group_sound]').prop('disabled', !settings.notifications_group)
         this.$('.private-notifications input[type=checkbox]')
             .prop({checked: settings.notifications_private});
         this.$('.sound input[type=radio][name=private_sound]').prop('disabled', !settings.notifications_private)
@@ -2317,9 +2319,9 @@ xabber.SettingsModalView = xabber.BasicView.extend({
         this.$('.sound input[type=radio][name=group_sound]').prop('disabled', !settings.notifications_group)
         this.$('.sound input[type=radio][name=attention_sound]').prop('disabled', !settings.call_attention)
         this.$('.message-preview.private-preview input[type=checkbox]')
-            .prop({checked: settings.message_preview_private});
+            .prop({checked: settings.message_preview_private}).prop('disabled', !(settings.notifications && xabber._cache.get('notifications') && settings.notifications_private));
         this.$('.message-preview.group-preview input[type=checkbox]')
-            .prop({checked: settings.message_preview_group});
+            .prop({checked: settings.message_preview_group}).prop('disabled', !(settings.notifications && xabber._cache.get('notifications') && settings.notifications_group));
         this.$('.call-attention input[type=checkbox]')
             .prop({checked: settings.call_attention});
         this.$('.load-media input[type=checkbox]')
@@ -2328,6 +2330,8 @@ xabber.SettingsModalView = xabber.BasicView.extend({
             .prop({checked: settings.typing_notifications});
         this.$('.idling input[type=checkbox]')
             .prop({checked: settings.idling});
+        this.$('#idle_timeout')
+            .val(settings.idling_time).prop('disabled', !settings.idling);
         this.$('.mapping-service input[type=checkbox]')
             .prop({checked: settings.mapping_service});
         let sound_private_value = settings.private_sound ? settings.sound_on_private_message : '';
@@ -2531,6 +2535,21 @@ xabber.SettingsModalView = xabber.BasicView.extend({
         this.model.save('idling', value);
         ev.preventDefault();
         $(ev.target).closest('.setting.idling').find('input').prop('checked', value);
+        this.$('#idle_timeout').prop('disabled', !value);
+    },
+
+    setIdlingTimeout: function (ev) {
+        let $target = $(ev.target),
+            value = $(ev.target).val();
+        value = parseInt(value);
+        if (_.isNaN(value)){
+            value = constants.IDLING_DEFAULT_TIMEOUT;
+        } else if (value < constants.IDLING_MINIMAL_TIMEOUT){
+            value = constants.IDLING_MINIMAL_TIMEOUT;
+        }
+        this.model.save('idling_time', value);
+        $target.val(value);
+        ev.preventDefault();
     },
 
     setNotifications: function (ev) {
@@ -2548,11 +2567,15 @@ xabber.SettingsModalView = xabber.BasicView.extend({
                     value = (permission === 'granted');
                     this.model.save('notifications', value ? value : this.model.get('notifications'));
                     $target.closest('.setting.notifications').find('input').prop('checked', value);
+                    this.$('.message-preview.private-preview input[type=checkbox]').prop('disabled', !(this.model.get('notifications') && xabber._cache.get('notifications') && this.model.get('notifications_private')));
+                    this.$('.message-preview.group-preview input[type=checkbox]').prop('disabled', !(this.model.get('notifications') && xabber._cache.get('notifications') && this.model.get('notifications_group')));
                 });
             } else {
                 value = !value;
                 this.model.save('notifications', value);
                 $target.closest('.setting.notifications').find('input').prop('checked', value);
+                this.$('.message-preview.private-preview input[type=checkbox]').prop('disabled', !(this.model.get('notifications') && xabber._cache.get('notifications') && this.model.get('notifications_private')));
+                this.$('.message-preview.group-preview input[type=checkbox]').prop('disabled', !(this.model.get('notifications') && xabber._cache.get('notifications') && this.model.get('notifications_group')));
             }
         }
     },
@@ -2562,6 +2585,7 @@ xabber.SettingsModalView = xabber.BasicView.extend({
         this.model.save('notifications_private', value);
         ev.preventDefault();
         this.$('.sound input[type=radio][name=private_sound]').prop('disabled', !value)
+        this.$('.message-preview.private-preview input[type=checkbox]').prop('disabled', !(this.model.get('notifications') && xabber._cache.get('notifications') && this.model.get('notifications_private')));
         $(ev.target).closest('.private-notifications').find('input').prop('checked', value);
     },
 
@@ -2570,6 +2594,7 @@ xabber.SettingsModalView = xabber.BasicView.extend({
         this.model.save('notifications_group', value);
         ev.preventDefault();
         this.$('.sound input[type=radio][name=group_sound]').prop('disabled', !value)
+        this.$('.message-preview.group-preview input[type=checkbox]').prop('disabled', !(this.model.get('notifications') && xabber._cache.get('notifications') && this.model.get('notifications_group')));
         $(ev.target).closest('.group-notifications').find('input').prop('checked', value);
     },
 
@@ -4430,23 +4455,6 @@ _.extend(xabber, {
             self.set('focused', ev.type === 'focus');
         });
 
-        let idle = new idleJs({
-            idle: 30000, // idle time in ms
-            events: ['mousemove', 'keydown', 'mousedown', 'touchstart', 'focus', 'blur'], // events that will trigger the idle resetter
-            onIdle: () => {
-                if (self._settings.get('idling'))
-                    self.set('idle', true);
-                else
-                    self.set('idle', false);
-            } , // callback function to be executed after idle time
-            onActive:() => {
-                self.set('idle', false);
-            }  , // callback function to be executed after back form idleness
-            keepTracking: true, // set it to false if you want to be notified only on the first idleness change
-            startAtIdle: false // set it to true if you want to start in the idle state
-        })
-        idle.start();
-
         $(window).on("resize", function (ev) {
             self.set({
                 width: window.innerWidth,
@@ -4462,19 +4470,47 @@ _.extend(xabber, {
         window.document.body.ondrop = (ev) => {
             ev.preventDefault();
         };
-    }
+    },
+
+
+    initIdleJS: function () {
+        if (this.idleJs)
+            this.idleJs.stop();
+        let self = this,
+            idling_time = self._settings.get('idling_time') * 1000
+
+        this.idleJs = new idleJs({
+            idle: self._settings.get('idling_time'), // idle time in ms
+            events: ['mousemove', 'keydown', 'mousedown', 'touchstart', 'focus', 'blur'], // events that will trigger the idle resetter
+            onIdle: () => {
+                if (self._settings.get('idling'))
+                    self.set('idle', true);
+                else
+                    self.set('idle', false);
+            } , // callback function to be executed after idle time
+            onActive:() => {
+                self.set('idle', false);
+            }  , // callback function to be executed after back form idleness
+            keepTracking: true, // set it to false if you want to be notified only on the first idleness change
+            startAtIdle: false // set it to true if you want to start in the idle state
+        })
+        this.idleJs.start();
+    },
 });
 
 xabber.once("start", function () {
     this.set('all_msg_counter', 0);
     this.on("change:all_msg_counter", this.onChangedAllMessageCounter, this);
     this.on("change:focused", this.onChangedFocusState, this);
+    this._settings.on("change:idling_time", this.initIdleJS, this);
     this.set({
         focused: window.document.hasFocus(),
         width: window.innerWidth,
         height: window.innerHeight
     });
     this.registerDOMEvents();
+    this.initIdleJS();
+
     Materialize.modalSettings = this.modal_settings;
 
     this.drag_manager = new this.DragManager();

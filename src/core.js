@@ -288,6 +288,7 @@ let Xabber = Backbone.Model.extend({
         defaults: {
             max_connection_retries: -1,
             idling: true,
+            idling_time: 'default',
             notifications: true,
             notifications_private: true,
             notifications_group: true,
@@ -381,6 +382,10 @@ let Xabber = Backbone.Model.extend({
                 this._settings.set("mapping_service", config.PRIVACY_MAPPING_SERVICE);
             else if (this._settings.get("mapping_service") === 'default')
                 this._settings.set("mapping_service", true);
+            if (this._settings.get("idling_time") === 'default' && config.IDLING_DEFAULT_TIMEOUT != null)
+                this._settings.set("idling_time", config.IDLING_DEFAULT_TIMEOUT);
+            else if (this._settings.get("idling_time") === 'default')
+                this._settings.set("idling_time", constants.IDLING_DEFAULT_TIMEOUT);
 
             window.xabber = this;
             _.extend(window, env);
@@ -405,6 +410,10 @@ let Xabber = Backbone.Model.extend({
                 constants.RECOMMENDED_DOMAIN = config.RECOMMENDED_DOMAIN;
             if (config.DOWNTIME_RECONNECTION_TIMEOUT)
                 constants.DOWNTIME_RECONNECTION_TIMEOUT = config.DOWNTIME_RECONNECTION_TIMEOUT;
+            if (config.IDLING_MINIMAL_TIMEOUT)
+                constants.IDLING_MINIMAL_TIMEOUT = config.IDLING_MINIMAL_TIMEOUT;
+            if (config.IDLING_MAXIMUM_TIMEOUT)
+                constants.IDLING_MAXIMUM_TIMEOUT = config.IDLING_MAXIMUM_TIMEOUT;
             if (config.PING_SENDING_INTERVAL)
                 constants.PING_SENDING_INTERVAL = config.PING_SENDING_INTERVAL;
             if (config.REGISTRATION_BUTTON != null)

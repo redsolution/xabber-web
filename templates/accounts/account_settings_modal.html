@@ -244,15 +244,23 @@
                             <div class="setting connection-wrap">
                                 <div class="change-password-container">
                                     <div class="change-password-fields">
-                                        <div class="input-field">
+                                        <div class="block-subheader">
+                                            <span class="block-name">{[print(xabber.getString("hint_old_pass"))]}</span>
+                                        </div>
+                                        <div class="change-password-field">
+                                            <svg class="mdi mdi-24px mdi-svg-template" data-svgname="key"></svg>
                                             <input class="input-glow account-glow" placeholder='{[print(xabber.getString("hint_old_pass"))]}' id="old_password" type="password" name="old_password">
                                             <span class="errors fixed"></span>
                                         </div>
-                                        <div class="input-field">
+                                        <div class="block-subheader">
+                                            <span class="block-name">{[print(xabber.getString("hint_new_pass"))]}</span>
+                                        </div>
+                                        <div class="change-password-field">
+                                            <svg class="mdi mdi-24px mdi-svg-template" data-svgname="key"></svg>
                                             <input class="input-glow account-glow" placeholder='{[print(xabber.getString("hint_new_pass"))]}' id="password" type="password" name="password">
                                             <span class="errors fixed"></span>
                                         </div>
-                                        <div class="input-field">
+                                        <div class="change-password-field">
                                             <input class="input-glow account-glow" placeholder='{[print(xabber.getString("hint_confirm_pass"))]}' id="password_confirm" type="password" name="password_confirm">
                                             <span class="errors fixed"></span>
                                         </div>
@@ -454,22 +462,22 @@
                                     <div class="device-information-text"></div>
                                 </div>
                                 <div class="device-information-item device-information-last-seen">
-                                    <svg class="mdi device-information-icon mdi-24px mdi-svg-template" data-svgname="device-web"></svg>
+                                    <svg class="mdi device-information-icon mdi-24px mdi-svg-template" data-svgname="history"></svg>
                                     <div class="device-information-label">{[print(xabber.getString("device__info__status__label_last_seen"))]}</div>
                                     <div class="device-information-text"></div>
                                 </div>
                                 <div class="device-information-item device-information-client">
-                                    <svg class="mdi device-information-icon mdi-24px mdi-svg-template" data-svgname="client-outline"></svg>
+                                    <svg class="mdi device-information-icon mdi-24px mdi-svg-template" data-svgname="id"></svg>
                                     <div class="device-information-label">{[print(xabber.getString("device__info__client__label"))]}</div>
                                     <div class="device-information-text"></div>
                                 </div>
                                 <div class="device-information-item device-information-ip">
-                                    <svg class="mdi device-information-icon mdi-24px mdi-svg-template" data-svgname="device-web"></svg>
+                                    <svg class="mdi device-information-icon mdi-24px mdi-svg-template" data-svgname="index"></svg>
                                     <div class="device-information-label">{[print(xabber.getString("device__info__ip__label"))]}</div>
                                     <div class="device-information-text"></div>
                                 </div>
                                 <div class="device-information-item device-information-expires">
-                                    <svg class="mdi device-information-icon mdi-24px mdi-svg-template" data-svgname="device-web"></svg>
+                                    <svg class="mdi device-information-icon mdi-24px mdi-svg-template" data-svgname="expires"></svg>
                                     <div class="device-information-label">{[print(xabber.getString("device__info__expire__label"))]}</div>
                                     <div class="device-information-text"></div>
                                 </div>
@@ -477,12 +485,12 @@
                             <div class="settings-panel-label device-information-security-label">{[print(xabber.getString("settings__menu_item__security"))]}</div>
                             <div class="device-information-items-wrap device-information-encryption">
                                 <div class="device-information-item device-information-device-id">
-                                    <svg class="mdi device-information-icon mdi-24px mdi-svg-template" data-svgname="device-web"></svg>
+                                    <svg class="mdi device-information-icon mdi-24px mdi-svg-template" data-svgname="information"></svg>
                                     <div class="device-information-label">{[print(xabber.getString("settings_account__device_information_device_id"))]}</div>
                                     <div class="device-information-text"></div>
                                 </div>
                                 <div class="device-information-item device-information-fingerprint hidden">
-                                    <svg class="mdi device-information-icon mdi-24px mdi-svg-template" data-svgname="device-web"></svg>
+                                    <svg class="mdi device-information-icon mdi-24px mdi-svg-template" data-svgname="lock"></svg>
                                     <div class="device-information-label">{[print(xabber.getString("omemo__dialog_fingerprints__fingerprint_label"))]}</div>
                                     <div class="device-information-text device-information-fingerprint-text"></div>
                                 </div>

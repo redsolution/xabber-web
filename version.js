@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.3.4.14","version_description":"changed vcard and account settings inputs glow to account color, changed block button in account settings, changed capabilities check icon, changed link-preview image position depending on its height and width, moved avatar position"}'
+'{"version_number":"2.3.4.15","version_description":"added idle timeout time input setting, added config for it, changed how password change looks, changed setting tabs icons, added disabling for message previews if desktop notifications are disabled, changed how idleJS is initialized, fixed sliders in firefox and changed thumb for it in idle timeout setting"}'
 )});

@@ -29,7 +29,7 @@
                 </div>
                 <div class="settings-tab disabled" data-block-name="data_storage">
                     <div class="setting-icon-background">
-                        <svg class="mdi mdi-24px mdi-svg-template" data-svgname="database-lock"></svg>
+                        <svg class="mdi mdi-24px mdi-svg-template" data-svgname="database"></svg>
                     </div>
                     <div class="settings-block-name one-line">{[print(xabber.getString("settings__menu_item__data_storage"))]}</div>
                     <div class="settings-block-label one-line">{[print(xabber.getString("settings__menu_item__data_storage_label"))]}</div>
@@ -86,21 +86,21 @@
                         <div class="settings-tabs-wrap global-settings-tabs">
                             <div class="settings-tab" data-subblock-parent-name="background" data-block-name="appearance">
                                 <div class="setting-icon-background">
-                                    <svg class="mdi mdi-24px mdi-svg-template" data-svgname="account"></svg>
+                                    <svg class="mdi mdi-24px mdi-svg-template" data-svgname="palette"></svg>
                                 </div>
                                 <div class="settings-block-name one-line">{[print(xabber.getString("settings__menu_item__appearance"))]}</div>
                                 <div class="settings-block-label one-line">{[print(xabber.getString("settings_account__appearance_label"))]}</div>
                             </div>
                             <div class="settings-tab" data-subblock-parent-name="background" data-block-name="chats">
                                 <div class="setting-icon-background">
-                                    <svg class="mdi mdi-24px mdi-svg-template" data-svgname="account"></svg>
+                                    <svg class="mdi mdi-24px mdi-svg-template" data-svgname="chat"></svg>
                                 </div>
                                 <div class="settings-block-name one-line">{[print(xabber.getString("chat_viewer"))]}</div>
                                 <div class="settings-block-label one-line">{[print(xabber.getString("settings_account__chats_label"))]}</div>
                             </div>
                             <div class="settings-tab" data-subblock-parent-name="background" data-block-name="avatars">
                                 <div class="setting-icon-background">
-                                    <svg class="mdi mdi-24px mdi-svg-template" data-svgname="account"></svg>
+                                    <svg class="mdi mdi-24px mdi-svg-template" data-svgname="star-face"></svg>
                                 </div>
                                 <div class="settings-block-name one-line">{[print(xabber.getString("avatars"))]}</div>
                                 <div class="settings-block-label one-line"></div>
@@ -211,6 +211,24 @@
                                     </form>
                                 </div>
                             </div>
+                            <div class="block-subheader">
+                                <span class="block-name">{[print(xabber.getString("settings__menu_item__idle_timeout"))]}</span>
+                            </div>
+                            <div class="setting idling checkbox-setting field-wrap">
+                                <div class="input-field  checkbox-field">
+                                    <input type="checkbox" class="filled-in" id="idling"/>
+                                    <label for="idling">{[print(xabber.getString("settings__section_notifications__toggle_idling"))]}</label>
+                                </div>
+                            </div>
+                            <div class="setting idling-time field-wrap">
+                                <div class="idling-time-input">
+                                    <p class="range-field">
+                                        <input class="materialize-timer" placeholder='{[print(constants.IDLING_DEFAULT_TIMEOUT)]}' id="idle_timeout" min="{[print(constants.IDLING_MINIMAL_TIMEOUT)]}" max="{[print(constants.IDLING_MAXIMUM_TIMEOUT)]}" value="{[print(xabber._settings.get('idling_time'))]}" type="range" name="idle_timeout">
+                                        <!--<span class="thumb"><span class="value">{[print(xabber._settings.get('idling_time'))]}s</span></span>-->
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="setting-clue">{[print(xabber.getString("settings__menu_item__idle_timeout_clue"))]}</div>
                         </div>
                     </div>
                     <div data-header='{[print(xabber.getString("avatars"))]}' class="settings-block-wrap avatars">
@@ -257,14 +275,14 @@
                         <div class="settings-tabs-wrap global-settings-tabs">
                             <div class="settings-tab" data-subblock-parent-name="notifications" data-block-name="web-notifications">
                                 <div class="setting-icon-background">
-                                    <svg class="mdi mdi-24px mdi-svg-template" data-svgname="account"></svg>
+                                    <svg class="mdi mdi-24px mdi-svg-template" data-svgname="client"></svg>
                                 </div>
                                 <div class="settings-block-name one-line">{[print(xabber.getString("settings__section_notifications__web_notifications"))]}</div>
                                 <div class="settings-block-label one-line">{[print(xabber.getString("settings__section_notifications__web_notifications_label"))]}</div>
                             </div>
                             <div class="settings-tab" data-subblock-parent-name="notifications" data-block-name="chats-notifications">
                                 <div class="setting-icon-background">
-                                    <svg class="mdi mdi-24px mdi-svg-template" data-svgname="account"></svg>
+                                    <svg class="mdi mdi-24px mdi-svg-template" data-svgname="chat"></svg>
                                 </div>
                                 <div class="settings-block-name one-line">{[print(xabber.getString("settings__section_notifications__private_chats"))]}</div>
                                 <div class="settings-block-label capitalized one-line"></div>
@@ -275,9 +293,9 @@
                                     </label>
                                 </div>
                             </div>
-                            <div class="settings-tab" data-subblock-parent-name="notifications" data-block-name="groupchats-notifications">
+                            <div class="settings-tab settings-tab-big-icon" data-subblock-parent-name="notifications" data-block-name="groupchats-notifications">
                                 <div class="setting-icon-background">
-                                    <svg class="mdi mdi-24px mdi-svg-template" data-svgname="account"></svg>
+                                    <svg class="mdi mdi-32px mdi-svg-template" data-svgname="group-public"></svg>
                                 </div>
                                 <div class="settings-block-name one-line">{[print(xabber.getString("settings__section_notifications__group_chats"))]}</div>
                                 <div class="settings-block-label capitalized one-line"></div>
@@ -290,7 +308,7 @@
                             </div>
                             <div class="settings-tab" data-subblock-parent-name="notifications" data-block-name="calls-notifications">
                                 <div class="setting-icon-background">
-                                    <svg class="mdi mdi-24px mdi-svg-template" data-svgname="account"></svg>
+                                    <svg class="mdi mdi-24px mdi-svg-template" data-svgname="call"></svg>
                                 </div>
                                 <div class="settings-block-name one-line">{[print(xabber.getString("settings__section_notifications__calls"))]}</div>
                                 <div class="settings-block-label capitalized one-line">{[print(xabber.getString("settings__section_notifications__calls_label"))]}</div>
@@ -303,7 +321,7 @@
                             </div>
                             <div class="settings-tab" data-subblock-parent-name="notifications" data-block-name="attention-calls">
                                 <div class="setting-icon-background">
-                                    <svg class="mdi mdi-24px mdi-svg-template" data-svgname="account"></svg>
+                                    <svg class="mdi mdi-24px mdi-svg-template" data-svgname="alarm-bell"></svg>
                                 </div>
                                 <div class="settings-block-name one-line">{[print(xabber.getString("settings__section_notifications__attention_calls"))]}</div>
                                 <div class="settings-block-label capitalized one-line"></div>
@@ -318,12 +336,6 @@
                     </div>
                     <div data-header='{[print(xabber.getString("settings__section_notifications__web_notifications"))]}' class="settings-block-wrap web-notifications">
                         <div class="settings-subblock-wrap">
-                            <div class="setting idling checkbox-setting field-wrap">
-                                <div class="input-field checkbox-field">
-                                    <input type="checkbox" class="filled-in" id="idling"/>
-                                    <label for="idling">{[print(xabber.getString("settings__section_notifications__toggle_idling"))]}</label>
-                                </div>
-                            </div>
                             <div class="setting notifications checkbox-setting field-wrap">
                                 <div class="input-field checkbox-field">
                                     <input type="checkbox" class="filled-in" id="notifications"/>
