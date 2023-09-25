@@ -67,6 +67,7 @@ let badges_names = [
         'cancel',
         'edit',
         'edit-outline',
+        'check-circle',
         'blocked-add',
         'information',
         'information-outline',

@@ -16,7 +16,7 @@ xabber.FeatureView = xabber.BasicView.extend({
     template: function () {
         this.$el.append('<div class="feature-check-icon mdi mdi-24px"/>')
                 .append('<div class="feature-name one-line"/>');
-        this.$('.feature-check-icon').append(env.templates.svg['check']());
+        this.$('.feature-check-icon').append(env.templates.svg['check-circle']());
     },
 
     _initialize: function (options, attrs) {
