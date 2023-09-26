@@ -4500,7 +4500,7 @@ _.extend(xabber, {
             idling_time = self._settings.get('idling_time') * 1000
 
         this.idleJs = new idleJs({
-            idle: self._settings.get('idling_time'), // idle time in ms
+            idle: idling_time, // idle time in ms
             events: ['mousemove', 'keydown', 'mousedown', 'touchstart', 'focus', 'blur'], // events that will trigger the idle resetter
             onIdle: () => {
                 if (self._settings.get('idling'))
