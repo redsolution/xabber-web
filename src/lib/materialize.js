@@ -2893,9 +2893,9 @@ $(document).ready(function(){
         else if (left > width) {
           left = width;
         }
-          if ($(this).hasClass('materialize-timer') && left < 10){
+          if ($(this).closest('.range-field-design').length && left < 10){
               left = 10;
-          } else if ($(this).hasClass('materialize-timer') && left > (width - 8)){
+          } else if ($(this).closest('.range-field-design').length && left > (width - 8)){
               left = width - 8;
           }
         thumb.addClass('active').css('left', left);
@@ -2934,9 +2934,9 @@ $(document).ready(function(){
         else if (left > width) {
           left = width;
         }
-        if (thumb.siblings(range_type).hasClass('materialize-timer') && left < 10){
+        if (thumb.closest('.range-field-design').length && left < 10){
             left = 10;
-        } else if (thumb.siblings(range_type).hasClass('materialize-timer') && left > (width - 8)){
+        } else if (thumb.closest('.range-field-design').length && left > (width - 8)){
             left = width - 8;
         }
         thumb.addClass('active').css('left', left);

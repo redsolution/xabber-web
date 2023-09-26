@@ -2022,8 +2022,8 @@ body {
 [data-main-color=indigo] input[type="radio"].with-gap:checked+label:after,
 [data-main-color=indigo] input[type=checkbox].filled-in:checked + label:after,
 [data-main-color=indigo] input[type=checkbox].groupchat-param.filled-in:checked + label:after {
-    background-color: #673AB7;
-    border-color: #673AB7;
+    background-color: #3F51B5;
+    border-color: #3F51B5;
 }
 [data-main-color=indigo] .settings-background .modal-content .upload-wrap.file-drop,
 [data-main-color=indigo] .details-panel .main-info .contact-name-input,
@@ -2033,11 +2033,11 @@ body {
 [data-main-color=indigo] .message-form .rich-textarea-wrap.file-drop,
 [data-main-color=indigo] .edit-rights .participant-details-item #edit-nickname,
 [data-main-color=indigo] input[type="radio"].with-gap:checked+label:before {
-    border-color: #673AB7;
+    border-color: #3F51B5;
 }
 [data-main-color=indigo] input:focus:not([readonly]):not([type=range]),
 [data-main-color=indigo] .modal .rich-textarea:focus {
-    box-shadow: 0 1px 0 0 #673AB7;
+    box-shadow: 0 1px 0 0 #3F51B5;
 }
 [data-main-color=indigo] .toolbar .toolbar-item:hover .toolbar-icon {
     color: #303F9F !important;
@@ -12173,12 +12173,13 @@ input[type=range].voice-message-volume:focus {
     padding: 10px 40% 24px 72px!important;
     position: relative;
 }
-.settings-panel-wrap .settings-panel .setting.idling-time .range-field{
+.settings-panel-wrap .settings-panel .range-field.range-field-design{
     height: 32px;
+    width: 200px;
 }
-.settings-panel-wrap .settings-panel .setting.idling-time span.thumb{
+.settings-panel-wrap .settings-panel .range-field.range-field-design span.thumb{
     bottom: -14px;
-    margin: 0px 0 0 -12px !important;
+    margin: 0px 0 0 -16px!important;
     height: 20px !important;
     width: 30px !important;
     background: none;
@@ -12186,17 +12187,81 @@ input[type=range].voice-message-volume:focus {
     opacity: 1;
     top: unset !important;
     line-height: 20px;
+    text-align: center;
 }
-.settings-panel-wrap .settings-panel .setting.idling-time span.thumb .value{
+.settings-panel-wrap .settings-panel .range-field.range-field-design span.thumb .value{
     color: #616161;
     font-size: 14px;
     transform: none;
     margin: 0;
 }
 .settings-panel-wrap .settings-panel .setting-clue{
-    padding: 10px 32px 48px 72px!important;
+    padding: 10px 32px 48px 72px !important;
     color: #9E9E9E;
     font-size: 14px;
+}
+.settings-panel-wrap .settings-panel .setting.settings-color-padding{
+    padding: 0 !important;
+    height: 64px;
+}
+.settings-panel-wrap .settings-panel .setting.settings-color-padding .selected-color-wrap{
+    display: block;
+    padding: 10px 16px 0 72px !important;
+}
+.settings-panel-wrap .settings-panel .setting.settings-color-padding .selected-color-item{
+    height: 24px;
+    width: 24px;
+    border-radius: 50%;
+    position: absolute;
+    left: 32px;
+    top: 20px;
+}
+.settings-panel-wrap .settings-panel .setting.settings-color-padding .selected-color-info{
+    margin: 0;
+}
+.settings-panel-wrap .settings-panel .setting.settings-color-padding .selected-color-name{
+    margin: 0;
+    margin-bottom: 4px;
+    line-height: 24px;
+    font-weight: 400;
+    color: rgba(0, 0, 0, 0.87);
+}
+.settings-panel-wrap .settings-panel .setting.settings-color-padding .selected-color-hex{
+    line-height: 16px;
+}
+.settings-panel-wrap .settings-panel .blur-setting,
+.settings-panel-wrap .settings-panel .vignetting-setting{
+    display: block;
+    margin-bottom: 12px;
+}
+.settings-panel-wrap .settings-panel .blur-setting form,
+.settings-panel-wrap .settings-panel .vignetting-setting form{
+    margin: 0 0 0 44px;
+    width: 200px;
+}
+.settings-panel-wrap .settings-panel .blur-setting form .disabled,
+.settings-panel-wrap .settings-panel .vignetting-setting form .disabled{
+    z-index: 1000;
+    height: calc(100% + 16px);
+}
+.settings-panel-wrap .settings-panel .setting.toolbar-main-color-setting{
+    padding: 0 16px 0 20px!important;
+}
+.settings-panel-wrap .settings-panel .setting.toolbar-main-color-setting .client-main-color-picker{
+}
+.settings-panel-wrap .settings-panel .setting.toolbar-main-color-setting .client-main-color-picker .colors-line{
+    display: flex;
+}
+.settings-panel-wrap .settings-panel .setting.toolbar-main-color-setting .client-main-color-picker .colors-line .client-main-color-item{
+    height: 32px;
+    width: 32px;
+    border-radius: 50%;
+    margin: 8px;
+    cursor: pointer;
+}
+.settings-panel-wrap .settings-panel .setting.toolbar-main-color-setting .client-main-color-picker .colors-line .client-main-color-item.chosen-client-color{
+    border: 3px solid #fff;
+    outline: 3px solid;
 }
 /* ---------------- XABBER SETTINGS --------------------- */
 
@@ -12209,6 +12274,7 @@ input[type=range].voice-message-volume:focus {
     -webkit-transition: background-color 100ms linear;
     -ms-transition: background-color 100ms linear;
     transition: background-color 100ms linear;
+    cursor: pointer;
 }
 
 .settings-panel .right-column {

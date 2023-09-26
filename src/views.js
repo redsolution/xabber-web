@@ -2271,7 +2271,7 @@ xabber.SettingsModalView = xabber.BasicView.extend({
         "change #blur_switch": "switchBlur",
         "change #vignetting_switch": "switchVignetting",
         "click .selected-color-wrap": "openColorPicker",
-        "click .current-main-color-wrap": "openMainColorPicker",
+        "click .client-main-color-item": "chooseMainColor",
         "change .background input[type=radio][name=background]": "setBackground",
         "click .current-background-wrap": "changeBackgroundImage",
         "change .hotkeys input[type=radio][name=hotkeys]": "setHotkeys",
@@ -2353,6 +2353,8 @@ xabber.SettingsModalView = xabber.BasicView.extend({
         (lang == xabber.get("default_language")) && (lang = 'default');
         this.$(`.languages-list input[type=radio][name=language][value="${lang}"]`)
             .prop('checked', true);
+        this.$(`.client-main-color-item`).removeClass('chosen-client-color');
+        this.$(`.client-main-color-item[data-value="${settings.main_color}"]`).addClass('chosen-client-color');
         let notifications_volume = !isNaN(settings.notifications_volume) ? settings.notifications_volume * 100 : 100;
         this.$(`#notifications_volume`).val(notifications_volume);
         this.$('.settings-panel-head span').text(this.$('.settings-block-wrap:not(.hidden)').attr('data-header'))
@@ -2377,6 +2379,7 @@ xabber.SettingsModalView = xabber.BasicView.extend({
         this.$('.btn-back-subsettings').addClass('hidden');
         this.$('.settings-panel-head .description').addClass('hidden');
         this.updateHeight();
+        this.updateSliders();
         return this;
     },
 
@@ -2419,7 +2422,6 @@ xabber.SettingsModalView = xabber.BasicView.extend({
 
     updateMainColor: function () {
         this.$('.toolbar-main-color-setting').attr('data-color', this.model.get('main_color'));
-        this.$('.toolbar-main-color-setting .color-name').text(xabber.getString(`account_color_name_${this.model.get('main_color').replace(/-/g, "_")}`).replace(/-/g, " "));
     },
 
     updateBackgroundSetting: function () {
@@ -2434,11 +2436,12 @@ xabber.SettingsModalView = xabber.BasicView.extend({
             vignetting_switched = appearance.vignetting !== false;
         this.$('#blur_switch')[0].checked = blur_switched;
         this.$('.blur-setting .disabled').switchClass('hidden', blur_switched);
-        this.$('#blur')[0].value = blur_switched ? appearance.blur : constants.BLUR_VALUE;
-
+        if (blur_switched)
+            this.$('#blur')[0].value = appearance.blur;
         this.$('#vignetting_switch')[0].checked = vignetting_switched;
         this.$('.vignetting-setting .disabled').switchClass('hidden', vignetting_switched);
-        this.$('#vignetting')[0].value = vignetting_switched ? appearance.vignetting : constants.VIGNETTING_VALUE;
+        if (vignetting_switched)
+            this.$('#vignetting')[0].value = appearance.vignetting;
         this.updateScrollBar();
     },
 
@@ -2495,6 +2498,22 @@ xabber.SettingsModalView = xabber.BasicView.extend({
         setTimeout(() => {
             this.updateScrollBar();
         }, 500)
+    },
+
+    updateSliders: function () {
+        this.$('.range-field.range-field-design').each((idx, item) => {
+            let $input = $(item).find('input'),
+                range_min = $input.attr('min'),
+                range_max = $input.attr('max'),
+                range_value = $input.val(),
+                left =  ((182 / (range_max - range_min)) * (range_value - range_min)) + 10;
+            $(item).find('span.thumb').css('left', left + 'px');
+            if ($input.hasClass('materialize-timer'))
+                $(item).find('span.value').text(range_value + 's');
+            else
+                $(item).find('span.value').text(range_value);
+        })
+
     },
 
     onScrollY: function () {
@@ -2718,10 +2737,12 @@ xabber.SettingsModalView = xabber.BasicView.extend({
         this.colorPicker.render();
     },
 
-    openMainColorPicker: function () {
-        if (!this.mainColorPicker)
-            this.mainColorPicker = new xabber.mainColorPicker({model: this.model});
-        this.mainColorPicker.render();
+    chooseMainColor: function (ev) {
+        let color = $(ev.target).closest('.client-main-color-item').attr('data-value');
+        this.model.save('main_color', color);
+        this.$(`.client-main-color-item`).removeClass('chosen-client-color');
+        this.$(`.client-main-color-item[data-value="${color}"]`).addClass('chosen-client-color');
+        xabber.trigger('update_main_color');
     },
 
     changeBlur: function () {
@@ -2751,9 +2772,8 @@ xabber.SettingsModalView = xabber.BasicView.extend({
     switchVignetting: function () {
         let is_switched = this.$('#vignetting_switch:checked').length,
             appearance = this.model.get('appearance'),
-            value = is_switched ? constants.VIGNETTING_VALUE : false;
+            value = is_switched ? this.$('#vignetting')[0].value : false;
         this.$('.vignetting-setting .disabled').switchClass('hidden', is_switched);
-        this.$('#vignetting')[0].value = constants.VIGNETTING_VALUE;
         this.model.save('appearance', _.extend(appearance, {vignetting: value}));
         xabber.body.updateBoxShadow(value);
     },
@@ -2761,9 +2781,8 @@ xabber.SettingsModalView = xabber.BasicView.extend({
     switchBlur: function () {
         let is_switched = this.$('#blur_switch:checked').length,
             appearance = this.model.get('appearance'),
-            value = is_switched ? constants.BLUR_VALUE : false;
+            value = is_switched ? this.$('#blur')[0].value : false;
         this.$('.blur-setting .disabled').switchClass('hidden', is_switched);
-        this.$('#blur')[0].value = constants.BLUR_VALUE;
         this.model.save('appearance', _.extend(appearance, {blur: value}));
         xabber.body.updateBlur(value);
     },
@@ -3885,6 +3904,7 @@ xabber.ColorPicker = xabber.BasicView.extend({
                 this.$el.detach();
                 this.data.set('visible', false);
                 xabber.settings_view.updateColor();
+                xabber.settings_modal_view.updateColor();
             }
         });
     }

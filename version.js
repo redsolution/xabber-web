@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.3.4.15","version_description":"added idle timeout time input setting, added config for it, changed how password change looks, changed setting tabs icons, added disabling for message previews if desktop notifications are disabled, changed how idleJS is initialized, fixed sliders in firefox and changed thumb for it in idle timeout setting"}'
+'{"version_number":"2.3.4.16","version_description":"appearance settings tab redesign"}'
 )});

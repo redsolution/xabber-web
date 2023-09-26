@@ -111,20 +111,61 @@
                     <div data-header='{[print(xabber.getString("settings__menu_item__appearance"))]}' class="settings-block-wrap appearance">
                         <div class="settings-subblock-wrap">
                             <div class="block-subheader">
-                                <span class="block-name">{[print(xabber.getString("settings__section_appearance__palette"))]}</span>
+                                <span class="block-name">{[print(xabber.getString("settings__section_appearance__header_main_color"))]}</span>
                             </div>
                             <div class="toolbar-main-color-setting-wrap">
-                                <div class="setting-name">{[print(xabber.getString("settings__section_appearance__header_main_color"))]}</div>
                                 <div class="setting toolbar-main-color-setting field-wrap">
-                                    <div class="current-main-color-wrap">
-                                        <div class="current-main-color ground-color-500"></div>
-                                        <div class="color-name"></div>
+                                    <div class="client-main-color-picker">
+                                        <div class="colors-line">
+                                            <div class="client-main-color-item ground-color-red-500 outline-color-red-500" data-value="red">
+                                            </div>
+                                            <div class="client-main-color-item ground-color-pink-500 outline-color-pink-500" data-value="pink">
+                                            </div>
+                                            <div class="client-main-color-item ground-color-purple-500 outline-color-purple-500" data-value="purple">
+                                            </div>
+                                            <div class="client-main-color-item ground-color-deep-purple-500 outline-color-deep-purple-500" data-value="deep-purple">
+                                            </div>
+                                            <div class="client-main-color-item ground-color-indigo-500 outline-color-indigo-500" data-value="indigo">
+                                            </div>
+                                        </div>
+                                        <div class="colors-line">
+                                            <div class="client-main-color-item ground-color-deep-orange-500 outline-color-deep-orange-500" data-value="deep-orange">
+                                            </div>
+                                            <div class="client-main-color-item ground-color-orange-500 outline-color-orange-500" data-value="orange">
+                                            </div>
+                                            <div class="client-main-color-item ground-color-cyan-500 outline-color-cyan-500" data-value="cyan">
+                                            </div>
+                                            <div class="client-main-color-item ground-color-light-blue-500 outline-color-light-blue-500" data-value="light-blue">
+                                            </div>
+                                            <div class="client-main-color-item ground-color-blue-500 outline-color-blue-500" data-value="blue">
+                                            </div>
+                                        </div>
+                                        <div class="colors-line">
+                                            <div class="client-main-color-item ground-color-amber-500 outline-color-amber-500" data-value="amber">
+                                            </div>
+                                            <div class="client-main-color-item ground-color-lime-500 outline-color-lime-500" data-value="lime">
+                                            </div>
+                                            <div class="client-main-color-item ground-color-teal-500 outline-color-teal-500" data-value="teal">
+                                            </div>
+                                            <div class="client-main-color-item ground-color-brown-500 outline-color-brown-500" data-value="brown">
+                                            </div>
+                                            <div class="client-main-color-item ground-color-blue-grey-500 outline-color-blue-grey-500" data-value="blue-grey">
+                                            </div>
+                                        </div>
+                                        <div class="colors-line">
+                                            <div class="client-main-color-item ground-color-light-green-500 outline-color-light-green-500" data-value="light-green">
+                                            </div>
+                                            <div class="client-main-color-item ground-color-green-500 outline-color-green-500" data-value="green">
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
+                            <div class="block-subheader">
+                                <span class="block-name">{[print(xabber.getString("settings__section_appearance__header_toolbar_icons_color"))]}</span>
+                            </div>
                             <div class="toolbar-color-setting-wrap">
-                                <div class="setting-name">{[print(xabber.getString("settings__section_appearance__header_toolbar_icons_color"))]}</div>
-                                <div class="setting toolbar-color-setting field-wrap">
+                                <div class="setting settings-color-padding toolbar-color-setting field-wrap">
                                     <div class="selected-color-wrap">
                                         <div class="selected-color-item"></div>
                                         <div class="selected-color-info">
@@ -135,10 +176,9 @@
                                 </div>
                             </div>
                             <div class="block-subheader">
-                                <span class="block-name">{[print(xabber.getString("account_settings_background"))]}</span>
+                                <span class="block-name">{[print(xabber.getString("settings__section_appearance__header_background"))]}</span>
                             </div>
                             <div class="background-setting-wrap">
-                                <div class="setting-name">{[print(xabber.getString("settings__section_appearance__header_background"))]}</div>
                                 <div class="setting background radio-button field-wrap">
                                     <div class="field radio-field clickable-field">
                                         <form action="#">
@@ -161,6 +201,11 @@
                                         <div class="current-background"></div>
                                     </div>
                                 </div>
+                            </div>
+                            <div class="block-subheader">
+                                <span class="block-name">{[print(xabber.getString("settings__section_appearance__header_background_effects"))]}</span>
+                            </div>
+                            <div class="background-setting-wrap">
                                 <div class="blur-setting-wrap">
                                     <div class="setting blur-setting checkbox-setting field-wrap">
                                         <div class="input-field checkbox-field">
@@ -169,8 +214,9 @@
                                         </div>
                                         <form action="#">
                                             <div class="disabled hidden"></div>
-                                            <p class="range-field">
+                                            <p class="range-field range-field-design">
                                                 <input type="range" id="blur" min="0" max="100" />
+                                                <span class="thumb"><span class="value"></span></span>
                                             </p>
                                         </form>
                                     </div>
@@ -183,8 +229,9 @@
                                         </div>
                                         <form action="#">
                                             <div class="disabled hidden"></div>
-                                            <p class="range-field">
+                                            <p class="range-field range-field-design">
                                                 <input type="range" id="vignetting" min="0" max="200" />
+                                                <span class="thumb"><span class="value"></span></span>
                                             </p>
                                         </form>
                                     </div>
@@ -222,9 +269,9 @@
                             </div>
                             <div class="setting idling-time field-wrap">
                                 <div class="idling-time-input">
-                                    <p class="range-field">
+                                    <p class="range-field range-field-design">
                                         <input class="materialize-timer" placeholder='{[print(constants.IDLING_DEFAULT_TIMEOUT)]}' id="idle_timeout" min="{[print(constants.IDLING_MINIMAL_TIMEOUT)]}" max="{[print(constants.IDLING_MAXIMUM_TIMEOUT)]}" value="{[print(xabber._settings.get('idling_time'))]}" type="range" name="idle_timeout">
-                                        <!--<span class="thumb"><span class="value">{[print(xabber._settings.get('idling_time'))]}s</span></span>-->
+                                        <span class="thumb"><span class="value"></span></span>
                                     </p>
                                 </div>
                             </div>
@@ -347,7 +394,7 @@
                                 <i class="mdi mdi-24px mdi-volume-low"></i>
                                 <form action="#">
                                     <div class="disabled hidden"></div>
-                                    <p class="range-field">
+                                    <p class="range-field range-field-design">
                                         <input type="range" id="notifications_volume" min="0" max="100" />
                                     </p>
                                 </form>
