@@ -6525,9 +6525,9 @@ input[type=range]::-webkit-slider-thumb {
   transition: .3s;
 }
 
-input[type=range]:focus::-webkit-slider-runnable-track {
-  background: #ccc;
-}
+/*input[type=range]:focus::-webkit-slider-runnable-track {*/
+  /*background: #ccc;*/
+/*}*/
 
 input[type=range] {
   /* fix for FF unable to apply focus style bug  */

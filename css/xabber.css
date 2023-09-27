@@ -12229,18 +12229,31 @@ input[type=range].voice-message-volume:focus {
 .settings-panel-wrap .settings-panel .setting.settings-color-padding .selected-color-hex{
     line-height: 16px;
 }
+.settings-panel-wrap .settings-panel .volume-setting-name{
+    line-height: 24px;
+    font-size: 16px;
+    margin: 0;
+    padding-top: 6px;
+}
+.settings-panel-wrap .settings-panel .volume-setting-name{
+    line-height: 24px;
+    font-size: 16px;
+    margin: 0;
+    padding-top: 6px;
+}
 .settings-panel-wrap .settings-panel .blur-setting,
 .settings-panel-wrap .settings-panel .vignetting-setting{
     display: block;
     margin-bottom: 12px;
 }
-.settings-panel-wrap .settings-panel .blur-setting form,
-.settings-panel-wrap .settings-panel .vignetting-setting form{
+.settings-panel-wrap .settings-panel .volume-setting form.range-form{
+    margin: 0;
+}
+.settings-panel-wrap .settings-panel form.range-form{
     margin: 0 0 0 44px;
     width: 200px;
 }
-.settings-panel-wrap .settings-panel .blur-setting form .disabled,
-.settings-panel-wrap .settings-panel .vignetting-setting form .disabled{
+.settings-panel-wrap .settings-panel form.range-form .disabled{
     z-index: 1000;
     height: calc(100% + 16px);
 }

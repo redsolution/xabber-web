@@ -212,7 +212,7 @@
                                             <input type="checkbox" class="filled-in" id="blur_switch"/>
                                             <label for="blur_switch">{[print(xabber.getString("settings__section_appearance__background__checkbox_blur"))]}</label>
                                         </div>
-                                        <form action="#">
+                                        <form class="range-form" action="#">
                                             <div class="disabled hidden"></div>
                                             <p class="range-field range-field-design">
                                                 <input type="range" id="blur" min="0" max="100" />
@@ -227,7 +227,7 @@
                                             <input type="checkbox" class="filled-in" id="vignetting_switch"/>
                                             <label for="vignetting_switch">{[print(xabber.getString("settings__section_appearance__background__checkbox_vignette"))]}</label>
                                         </div>
-                                        <form action="#">
+                                        <form class="range-form" action="#">
                                             <div class="disabled hidden"></div>
                                             <p class="range-field range-field-design">
                                                 <input type="range" id="vignetting" min="0" max="200" />
@@ -389,16 +389,15 @@
                                     <label for="notifications">{[print(xabber.getString("settings__section_notifications__toggle_desktop_notifications"))]}</label>
                                 </div>
                             </div>
-                            <div class="setting-name">{[print(xabber.getString("settings__section_notifications__volume"))]}</div>
+                            <div class="setting-name volume-setting-name">{[print(xabber.getString("settings__section_notifications__volume"))]}</div>
                             <div class="setting volume-setting">
-                                <i class="mdi mdi-24px mdi-volume-low"></i>
-                                <form action="#">
+                                <form class="range-form" action="#">
                                     <div class="disabled hidden"></div>
                                     <p class="range-field range-field-design">
                                         <input type="range" id="notifications_volume" min="0" max="100" />
+                                        <span style="display: none" class="thumb"><span class="value"></span></span>
                                     </p>
                                 </form>
-                                <i class="mdi mdi-24px mdi-volume-high"></i>
                             </div>
                         </div>
                     </div>
