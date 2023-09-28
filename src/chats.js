@@ -5569,7 +5569,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
             } else {
                 sound = xabber.settings.sound_on_group_message;
             }
-            xabber.playAudio(sound, false, xabber.settings.notifications_volume);
+            xabber.playAudio(sound, false, !xabber.settings.notifications_volume_enabled ? 0 : xabber.settings.notifications_volume);
         }
         else if (xabber.settings.private_sound && xabber.settings.notifications_private && !this.model.get('group_chat')) {
             let sound;
@@ -5578,7 +5578,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
             } else {
                 sound = xabber.settings.sound_on_private_message;
             }
-            xabber.playAudio(sound, false, xabber.settings.notifications_volume);
+            xabber.playAudio(sound, false, !xabber.settings.notifications_volume_enabled ? 0 : xabber.settings.notifications_volume);
         }
         xabber.recountAllMessageCounter();
     },

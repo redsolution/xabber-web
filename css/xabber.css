@@ -1512,7 +1512,7 @@ body {
     background-color: #F44336;
 }
 [data-main-color=red] .settings-background .library-wrap .image-item.active,
-[data-main-color=red] .new-version-description,
+[data-main-color=red] .client-text-color-500,
 [data-main-color=red] .modal-footer.extended .optional-button,
 [data-main-color=red] .btn-main,
 [data-main-color=red] input:focus:not([readonly]):not([type=checkbox]) + label,
@@ -1629,7 +1629,7 @@ body {
     background-color: #E91E63;
 }
 [data-main-color=pink] .settings-background .library-wrap .image-item.active,
-[data-main-color=pink] .new-version-description,
+[data-main-color=pink] .client-text-color-500,
 [data-main-color=pink] .modal-footer.extended .optional-button,
 [data-main-color=pink] .btn-main,
 [data-main-color=pink] input:focus:not([readonly]):not([type=checkbox]) + label,
@@ -1745,7 +1745,7 @@ body {
     background-color: #9C27B0;
 }
 [data-main-color=purple] .settings-background .library-wrap .image-item.active,
-[data-main-color=purple] .new-version-description,
+[data-main-color=purple] .client-text-color-500,
 [data-main-color=purple] .modal-footer.extended .optional-button,
 [data-main-color=purple] .btn-main,
 [data-main-color=purple] input:focus:not([readonly]):not([type=checkbox]) + label,
@@ -1860,7 +1860,7 @@ body {
     background-color: #673AB7;
 }
 [data-main-color=deep-purple] .settings-background .library-wrap .image-item.active,
-[data-main-color=deep-purple] .new-version-description,
+[data-main-color=deep-purple] .client-text-color-500,
 [data-main-color=deep-purple] .modal-footer.extended .optional-button,
 [data-main-color=deep-purple] .btn-main,
 [data-main-color=deep-purple] input:focus:not([readonly]):not([type=checkbox]) + label,
@@ -1976,7 +1976,7 @@ body {
     background-color: #3F51B5;
 }
 [data-main-color=indigo] .settings-background .library-wrap .image-item.active,
-[data-main-color=indigo] .new-version-description,
+[data-main-color=indigo] .client-text-color-500,
 [data-main-color=indigo] .modal-footer.extended .optional-button,
 [data-main-color=indigo] .btn-main,
 [data-main-color=indigo] input:focus:not([readonly]):not([type=checkbox]) + label,
@@ -2092,7 +2092,7 @@ body {
     background-color: #2196F3;
 }
 [data-main-color=blue] .settings-background .library-wrap .image-item.active,
-[data-main-color=blue] .new-version-description,
+[data-main-color=blue] .client-text-color-500,
 [data-main-color=blue] .modal-footer.extended .optional-button,
 [data-main-color=blue] .btn-main,
 [data-main-color=blue] input:focus:not([readonly]):not([type=checkbox]) + label,
@@ -2208,7 +2208,7 @@ body {
     background-color: #03A9F4;
 }
 [data-main-color=light-blue] .settings-background .library-wrap .image-item.active,
-[data-main-color=light-blue] .new-version-description,
+[data-main-color=light-blue] .client-text-color-500,
 [data-main-color=light-blue] .modal-footer.extended .optional-button,
 [data-main-color=light-blue] .btn-main,
 [data-main-color=light-blue] input:focus:not([readonly]):not([type=checkbox]) + label,
@@ -2324,7 +2324,7 @@ body {
     background-color: #00BCD4;
 }
 [data-main-color=cyan] .settings-background .library-wrap .image-item.active,
-[data-main-color=cyan] .new-version-description,
+[data-main-color=cyan] .client-text-color-500,
 [data-main-color=cyan] .modal-footer.extended .optional-button,
 [data-main-color=cyan] .btn-main,
 [data-main-color=cyan] input:focus:not([readonly]):not([type=checkbox]) + label,
@@ -2440,7 +2440,7 @@ body {
     background-color: #009688;
 }
 [data-main-color=teal] .settings-background .library-wrap .image-item.active,
-[data-main-color=teal] .new-version-description,
+[data-main-color=teal] .client-text-color-500,
 [data-main-color=teal] .modal-footer.extended .optional-button,
 [data-main-color=teal] .btn-main,
 [data-main-color=teal] input:focus:not([readonly]):not([type=checkbox]) + label,
@@ -2556,7 +2556,7 @@ body {
     background-color: #4CAF50;
 }
 [data-main-color=green] .settings-background .library-wrap .image-item.active,
-[data-main-color=green] .new-version-description,
+[data-main-color=green] .client-text-color-500,
 [data-main-color=green] .modal-footer.extended .optional-button,
 [data-main-color=green] .btn-main,
 [data-main-color=green] input:focus:not([readonly]):not([type=checkbox]) + label,
@@ -2672,7 +2672,7 @@ body {
     background-color: #8BC34A;
 }
 [data-main-color=light-green] .settings-background .library-wrap .image-item.active,
-[data-main-color=light-green] .new-version-description,
+[data-main-color=light-green] .client-text-color-500,
 [data-main-color=light-green] .modal-footer.extended .optional-button,
 [data-main-color=light-green] .btn-main,
 [data-main-color=light-green] input:focus:not([readonly]):not([type=checkbox]) + label,
@@ -2788,7 +2788,7 @@ body {
     background-color: #CDDC39;
 }
 [data-main-color=lime] .settings-background .library-wrap .image-item.active,
-[data-main-color=lime] .new-version-description,
+[data-main-color=lime] .client-text-color-500,
 [data-main-color=lime] .modal-footer.extended .optional-button,
 [data-main-color=lime] .btn-main,
 [data-main-color=lime] input:focus:not([readonly]):not([type=checkbox]) + label,
@@ -2904,7 +2904,7 @@ body {
     background-color: #FFC107;
 }
 [data-main-color=amber] .settings-background .library-wrap .image-item.active,
-[data-main-color=amber] .new-version-description,
+[data-main-color=amber] .client-text-color-500,
 [data-main-color=amber] .modal-footer.extended .optional-button,
 [data-main-color=amber] .btn-main,
 [data-main-color=amber] input:focus:not([readonly]):not([type=checkbox]) + label,
@@ -3020,7 +3020,7 @@ body {
     background-color: #FF9800;
 }
 [data-main-color=orange] .settings-background .library-wrap .image-item.active,
-[data-main-color=orange] .new-version-description,
+[data-main-color=orange] .client-text-color-500,
 [data-main-color=orange] .modal-footer.extended .optional-button,
 [data-main-color=orange] .btn-main,
 [data-main-color=orange] input:focus:not([readonly]):not([type=checkbox]) + label,
@@ -3136,7 +3136,7 @@ body {
     background-color: #FF5722;
 }
 [data-main-color=deep-orange] .settings-background .library-wrap .image-item.active,
-[data-main-color=deep-orange] .new-version-description,
+[data-main-color=deep-orange] .client-text-color-500,
 [data-main-color=deep-orange] .modal-footer.extended .optional-button,
 [data-main-color=deep-orange] .btn-main,
 [data-main-color=deep-orange] input:focus:not([readonly]):not([type=checkbox]) + label,
@@ -3252,7 +3252,7 @@ body {
     background-color: #795548;
 }
 [data-main-color=brown] .settings-background .library-wrap .image-item.active,
-[data-main-color=brown] .new-version-description,
+[data-main-color=brown] .client-text-color-500,
 [data-main-color=brown] .modal-footer.extended .optional-button,
 [data-main-color=brown] .btn-main,
 [data-main-color=brown] input:focus:not([readonly]):not([type=checkbox]) + label,
@@ -3369,7 +3369,7 @@ body {
     background-color: #607D8B;
 }
 [data-main-color=blue-grey] .settings-background .library-wrap .image-item.active,
-[data-main-color=blue-grey] .new-version-description,
+[data-main-color=blue-grey] .client-text-color-500,
 [data-main-color=blue-grey] .modal-footer.extended .optional-button,
 [data-main-color=blue-grey] .btn-main,
 [data-main-color=blue-grey] input:focus:not([readonly]):not([type=checkbox]) + label,
@@ -12327,6 +12327,30 @@ input[type=range].voice-message-volume:focus {
 }
 .settings-panel-wrap .settings-panel .radio-field label{
     color: #000000de !important;
+}
+.settings-panel-wrap .settings-panel .notifications-dependant.notifications-dependant-two-line{
+    height: 48px;
+}
+.settings-panel-wrap .settings-panel .notifications-dependant.notifications-dependant-two-line label{
+    color: #000000de !important;
+}
+.settings-panel-wrap .settings-panel .notifications-dependant.notifications-dependant-two-line label::after,
+.settings-panel-wrap .settings-panel .notifications-dependant.notifications-dependant-two-line label::before{
+    top: 14px;
+}
+.settings-panel-wrap .settings-panel .input-field .desktop-notifications-clue-wrap{
+    height: 24px;
+    color: #9e9e9e;
+    left: 35px;
+    font-size: 13px;
+    line-height: 24px;
+    position: absolute;
+    top: 24px;
+}
+.settings-panel-wrap .settings-panel .input-field .desktop-notifications-clue-wrap b{
+    text-decoration: underline;
+    cursor: pointer;
+    font-weigth: 400;
 }
 /* ---------------- XABBER SETTINGS --------------------- */
 

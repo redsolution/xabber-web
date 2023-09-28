@@ -2065,7 +2065,7 @@ xabber.SettingsView = xabber.BasicView.extend({
         let value = ev.target.value;
         if (value) {
             this.current_sound && this.current_sound.pause();
-            this.current_sound = xabber.playAudio(value, false, this.model.get('notifications_volume'));
+            this.current_sound = xabber.playAudio(value, false, !this.model.get('notifications_volume_enabled') ? 0 : this.model.get('notifications_volume'));
             this.model.save({private_sound: true, sound_on_private_message: value});
         } else {
             this.model.save('private_sound', false);
@@ -2076,7 +2076,7 @@ xabber.SettingsView = xabber.BasicView.extend({
         let value = ev.target.value;
         if (value) {
             this.current_sound && this.current_sound.pause();
-            this.current_sound = xabber.playAudio(value, false, this.model.get('notifications_volume'));
+            this.current_sound = xabber.playAudio(value, false, !this.model.get('notifications_volume_enabled') ? 0 : this.model.get('notifications_volume'));
             this.model.save({group_sound: true, sound_on_group_message: value});
         } else {
             this.model.save('group_sound', false);
@@ -2246,12 +2246,15 @@ xabber.SettingsModalView = xabber.BasicView.extend({
         "click .btn-back": "backToMenu",
         "click .btn-back-subsettings": "backToSubMenu",
         "click .settings-tabs-wrap.global-settings-tabs .settings-tab:not(.delete-all-accounts)": "jumpToBlock",
+        "click .desktop-notifications-clue-wrap b": "goToWebNotifications",
         "click .btn-add-account": "showAddAccountView",
         "click .setting.idling label": "setIdling",
         "change #idle_timeout": "setIdlingTimeout",
         "click .setting.notifications label": "setNotifications",
+        // "click .setting.volume-enable label": "setNotificationsVolumeEnabled",
         "click .private-notifications label": "setPrivateNotifications",
         "click .group-notifications label": "setGroupNotifications",
+        "click .notifications-lever label": "setNotifications",
         "click .jingle-calls label": "setJingleCalls",
         "click .setting.message-preview.private-preview label": "setPrivateMessagePreview",
         "click .setting.message-preview.group-preview label": "setGroupMessagePreview",
@@ -2306,6 +2309,9 @@ xabber.SettingsModalView = xabber.BasicView.extend({
         this.$('.notifications input[type=checkbox]').prop({
             checked: settings.notifications && xabber._cache.get('notifications')
         });
+        this.$('.notifications-lever input[type=checkbox]').prop({
+            checked: settings.notifications && xabber._cache.get('notifications')
+        });
         this.$('.sound input[type=radio][name=group_sound]').prop('disabled', !settings.notifications_group)
         this.$('.private-notifications input[type=checkbox]')
             .prop({checked: settings.notifications_private});
@@ -2322,6 +2328,8 @@ xabber.SettingsModalView = xabber.BasicView.extend({
             .prop({checked: settings.message_preview_private}).prop('disabled', !(settings.notifications && xabber._cache.get('notifications') && settings.notifications_private));
         this.$('.message-preview.group-preview input[type=checkbox]')
             .prop({checked: settings.message_preview_group}).prop('disabled', !(settings.notifications && xabber._cache.get('notifications') && settings.notifications_group));
+        this.$('.desktop-notifications-clue-wrap').hideIf(settings.notifications);
+        this.$('.notifications-dependant').switchClass('notifications-dependant-two-line', !settings.notifications);
         this.$('.call-attention input[type=checkbox]')
             .prop({checked: settings.call_attention});
         this.$('.load-media input[type=checkbox]')
@@ -2332,6 +2340,8 @@ xabber.SettingsModalView = xabber.BasicView.extend({
             .prop({checked: settings.idling});
         this.$('#idle_timeout')
             .val(settings.idling_time).prop('disabled', !settings.idling);
+        // this.$(`#notifications_volume_enable`)
+        //     .prop('checked', settings.notifications_volume_enabled);
         this.$('.mapping-service input[type=checkbox]')
             .prop({checked: settings.mapping_service});
         let sound_private_value = settings.private_sound ? settings.sound_on_private_message : '';
@@ -2357,6 +2367,8 @@ xabber.SettingsModalView = xabber.BasicView.extend({
         this.$(`.client-main-color-item[data-value="${settings.main_color}"]`).addClass('chosen-client-color');
         let notifications_volume = !isNaN(settings.notifications_volume) ? settings.notifications_volume * 100 : 100;
         this.$(`#notifications_volume`).val(notifications_volume);
+        // this.$('.volume-setting .disabled').switchClass('hidden', settings.notifications_volume_enabled);
+        // this.$('#notifications_volume').prop('disabled', !settings.notifications_volume_enabled);
         this.$('.settings-panel-head span').text(this.$('.settings-block-wrap:not(.hidden)').attr('data-header'))
         this.updateAccounts();
         this.updateAvatarLabel();
@@ -2378,6 +2390,7 @@ xabber.SettingsModalView = xabber.BasicView.extend({
         this.$('.btn-back').removeClass('hidden');
         this.$('.btn-back-subsettings').addClass('hidden');
         this.$('.settings-panel-head .description').addClass('hidden');
+        this.$('.desktop-notifications-clue-wrap b').addClass('client-text-color-500');
         this.updateHeight();
         this.updateSliders();
         return this;
@@ -2549,6 +2562,10 @@ xabber.SettingsModalView = xabber.BasicView.extend({
         this.updateHeight();
     },
 
+    goToWebNotifications: function (ev) {
+        this.$('.settings-tab[data-block-name="web-notifications"]').click();
+    },
+
     setIdling: function (ev) {
         let value = !this.model.get('idling');
         this.model.save('idling', value);
@@ -2571,9 +2588,17 @@ xabber.SettingsModalView = xabber.BasicView.extend({
         ev.preventDefault();
     },
 
+    setNotificationsVolumeEnabled: function (ev) {
+        ev.preventDefault();
+        let value = !this.model.get('notifications_volume_enabled');
+        this.model.save('notifications_volume_enabled', value);
+        this.$('#notifications_volume_enable').prop('checked', value);
+        this.$('.volume-setting .disabled').switchClass('hidden', value);
+        this.$('#notifications_volume').prop('disabled', !value);
+    },
+
     setNotifications: function (ev) {
-        let value = this.model.get('notifications'),
-            $target = $(ev.target);
+        let value = this.model.get('notifications');
         ev.preventDefault();
         if (value === null) {
             utils.callback_popup_message(xabber.getString("notifications__toast_notifications_not_supported"), 1500);
@@ -2585,16 +2610,22 @@ xabber.SettingsModalView = xabber.BasicView.extend({
                     xabber.notifications_placeholder && xabber.notifications_placeholder.close();
                     value = (permission === 'granted');
                     this.model.save('notifications', value ? value : this.model.get('notifications'));
-                    $target.closest('.setting.notifications').find('input').prop('checked', value);
+                    this.$('.setting.notifications input[type=checkbox]').prop('checked', value);
+                    this.$('.notifications-lever input[type=checkbox]').prop('checked', value);
                     this.$('.message-preview.private-preview input[type=checkbox]').prop('disabled', !(this.model.get('notifications') && xabber._cache.get('notifications') && this.model.get('notifications_private')));
                     this.$('.message-preview.group-preview input[type=checkbox]').prop('disabled', !(this.model.get('notifications') && xabber._cache.get('notifications') && this.model.get('notifications_group')));
+                    this.$('.desktop-notifications-clue-wrap').hideIf(value);
+                    this.$('.notifications-dependant').switchClass('notifications-dependant-two-line', !value);
                 });
             } else {
                 value = !value;
                 this.model.save('notifications', value);
-                $target.closest('.setting.notifications').find('input').prop('checked', value);
+                this.$('.setting.notifications input[type=checkbox]').prop('checked', value);
+                this.$('.notifications-lever input[type=checkbox]').prop('checked', value);
                 this.$('.message-preview.private-preview input[type=checkbox]').prop('disabled', !(this.model.get('notifications') && xabber._cache.get('notifications') && this.model.get('notifications_private')));
                 this.$('.message-preview.group-preview input[type=checkbox]').prop('disabled', !(this.model.get('notifications') && xabber._cache.get('notifications') && this.model.get('notifications_group')));
+                this.$('.desktop-notifications-clue-wrap').hideIf(value);
+                this.$('.notifications-dependant').switchClass('notifications-dependant-two-line', !value);
             }
         }
     },
@@ -2672,7 +2703,7 @@ xabber.SettingsModalView = xabber.BasicView.extend({
         let value = ev.target.value;
         if (value) {
             this.current_sound && this.current_sound.pause();
-            this.current_sound = xabber.playAudio(value, false, this.model.get('notifications_volume'));
+            this.current_sound = xabber.playAudio(value, false, !this.model.get('notifications_volume_enabled') ? 0 : this.model.get('notifications_volume'));
             this.model.save({private_sound: true, sound_on_private_message: value});
         } else {
             this.model.save('private_sound', false);
@@ -2683,7 +2714,7 @@ xabber.SettingsModalView = xabber.BasicView.extend({
         let value = ev.target.value;
         if (value) {
             this.current_sound && this.current_sound.pause();
-            this.current_sound = xabber.playAudio(value, false, this.model.get('notifications_volume'));
+            this.current_sound = xabber.playAudio(value, false, !this.model.get('notifications_volume_enabled') ? 0 : this.model.get('notifications_volume'));
             this.model.save({group_sound: true, sound_on_group_message: value});
         } else {
             this.model.save('group_sound', false);

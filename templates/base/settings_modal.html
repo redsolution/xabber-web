@@ -326,6 +326,12 @@
                                 </div>
                                 <div class="settings-block-name one-line">{[print(xabber.getString("settings__section_notifications__web_notifications"))]}</div>
                                 <div class="settings-block-label one-line">{[print(xabber.getString("settings__section_notifications__web_notifications_label"))]}</div>
+                                <div class="field notifications-lever clickable-field switch normal">
+                                    <label class="field-value">
+                                        <input type="checkbox">
+                                        <span class="lever"></span>
+                                    </label>
+                                </div>
                             </div>
                             <div class="settings-tab" data-subblock-parent-name="notifications" data-block-name="chats-notifications">
                                 <div class="setting-icon-background">
@@ -390,6 +396,12 @@
                                 </div>
                             </div>
                             <div class="setting-name volume-setting-name">{[print(xabber.getString("settings__section_notifications__volume"))]}</div>
+                            <!--<div class="setting volume-enable checkbox-setting field-wrap">-->
+                                <!--<div class="input-field checkbox-field">-->
+                                    <!--<input type="checkbox" class="filled-in" id="notifications_volume_enable"/>-->
+                                    <!--<label for="notifications_volume_enable">{[print(xabber.getString("settings__section_notifications__volume_enable"))]}</label>-->
+                                <!--</div>-->
+                            <!--</div>-->
                             <div class="setting volume-setting">
                                 <form class="range-form" action="#">
                                     <div class="disabled hidden"></div>
@@ -404,9 +416,12 @@
                     <div data-header='{[print(xabber.getString("settings__section_notifications__private_chats"))]}' class="settings-block-wrap chats-notifications">
                         <div class="settings-subblock-wrap">
                             <div class="setting message-preview checkbox-setting private-preview field-wrap">
-                                <div class="input-field checkbox-field">
+                                <div class="input-field notifications-dependant checkbox-field">
                                     <input type="checkbox" class="filled-in" id="preview_private"/>
                                     <label for="preview_private">{[print(xabber.getString("settings__section_notifications__toggle_message_preview"))]}</label>
+                                    <div class="desktop-notifications-clue-wrap">
+                                        {[print(xabber.getString("settings__section_notifications__desktop_notifications_clue"))]}
+                                    </div>
                                 </div>
                             </div>
                             <div class="setting-name header-setting">{[print(xabber.getString("settings__menu_item__sounds"))]}</div>
@@ -477,9 +492,12 @@
                     <div data-header='{[print(xabber.getString("settings__section_notifications__group_chats"))]}' class="settings-block-wrap groupchats-notifications">
                         <div class="settings-subblock-wrap">
                             <div class="setting message-preview checkbox-setting group-preview field-wrap">
-                                <div class="input-field checkbox-field">
+                                <div class="input-field notifications-dependant checkbox-field">
                                     <input type="checkbox" class="filled-in" id="preview_group"/>
                                     <label for="preview_group">{[print(xabber.getString("settings__section_notifications__toggle_message_preview"))]}</label>
+                                    <div class="desktop-notifications-clue-wrap">
+                                        {[print(xabber.getString("settings__section_notifications__desktop_notifications_clue"))]}
+                                    </div>
                                 </div>
                             </div>
                             <div class="setting-name header-setting">{[print(xabber.getString("settings__menu_item__sounds"))]}</div>

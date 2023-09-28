@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.3.4.19","version_description":"added omemo trust interface in device information tab, changed fingerprints modal font size for text, removed radiobutton onfocus font color change, changed checkbox disabled visuals"}'
+'{"version_number":"2.3.4.20","version_description":"added and hidden volume enabled button, added button to open tab with desktop notifications if it is disabled, changed notifications checkbox visuals when desktop notifications are disabled, added doubling checkbox lever for desktop notifications"}'
 )});

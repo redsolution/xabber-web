@@ -275,7 +275,7 @@ let Xabber = Backbone.Model.extend({
             return;
         let version_number = this.get('actual_version_number'),
             version_description = this.get('version_description');
-        utils.dialogs.common(this.getString("dialog_version_update__header", [constants.CLIENT_NAME]), `${this.getString("dialog_version_update__confirm_text__new_version", [version_number])}<div class="new-version-description">${version_description}</div>${this.getString("dialog_version_update__confirm_text__question_reload_page")}`,
+        utils.dialogs.common(this.getString("dialog_version_update__header", [constants.CLIENT_NAME]), `${this.getString("dialog_version_update__confirm_text__new_version", [version_number])}<div class="new-version-description client-text-color-500">${version_description}</div>${this.getString("dialog_version_update__confirm_text__question_reload_page")}`,
             {ok_button: {text: this.getString("dialog_version_update__button_reload")}, cancel_button: {text: this.getString("dialog_version_update__option_not_now")}}
         ).done((result) => {
             if (result) {
@@ -293,6 +293,7 @@ let Xabber = Backbone.Model.extend({
             notifications_private: true,
             notifications_group: true,
             jingle_calls: true,
+            notifications_volume_enabled: true,
             notifications_volume: 0.50,
             message_preview_private: false,
             message_preview_group: false,
