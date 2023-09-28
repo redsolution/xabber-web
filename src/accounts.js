@@ -2831,6 +2831,7 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
         "click .btn-deselect-blocked": "deselectBlocked",
         "click .btn-delete-files": "deleteFilesFiltered",
         "click .all-sessions .device-encryption.active": "openFingerprint",
+        "click .device-information-trust": "openFingerprintDevice",
         "click .btn-purge-keys": "purgeKeys"
     },
 
@@ -3259,7 +3260,12 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
             if (this.model.omemo) {
                 !this.omemo_own_devices && (this.omemo_own_devices = new xabber.FingerprintsOwnDevices({model: this.model.omemo}));
                 let omemo_device_id = token.omemo_id ? token.omemo_id : Number(pretty_token.token_uid.slice(0,8));
-                this.omemo_own_devices.updateTrustDevice(Number(omemo_device_id), $token_html, this);
+                this.omemo_own_devices.updateTrustDevice(Number(omemo_device_id), $token_html, this, () => {
+                    if (this.$(`.settings-block-wrap.device-information[data-token-uid="${pretty_token.token_uid}"]`).length
+                        && !this.$(`.settings-block-wrap.device-information[data-token-uid="${pretty_token.token_uid}"]`).hasClass('hidden')){
+                        this.updateDeviceInformation(pretty_token.token_uid);
+                    }
+                });
             } else {
                 if (token.omemo_id){
                     $token_html.find('.device-encryption span').text(xabber.getString("settings_account__unverified_device"));
@@ -3304,6 +3310,8 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
 
         if (this.model.get('x_token')) {
             this.$('.btn-revoke-token').hideIf(this.model.get('x_token').token_uid == token.token_uid);
+            this.$('.device-information-trust')
+                .switchClass('hidden', this.model.get('x_token').token_uid == token.token_uid)
         }
         if (token.omemo_id && this.model.omemo){
             let dfd = new $.Deferred(),
@@ -3312,6 +3320,19 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
                 if (fing.match(/.{1,8}/g))
                     fing = fing.match(/.{1,8}/g).join(" ");
                 this.$('.device-information-fingerprint').showIf(fing).find('.device-information-text').text(fing);
+
+                let $this_device = this.$(`.token-wrap[data-token-uid="${token_uid}"]`)
+
+                this.$('.device-information-trust').removeClass('hidden');
+                this.$('.device-information-trust-text').text($this_device.attr('data-trust-text'));
+                this.$('.device-information-trust').attr('data-trust', $this_device.attr('data-trust'));
+                this.$('.device-information-trust-text').attr('data-trust', $this_device.attr('data-trust'));
+                if (this.model.get('x_token') && this.model.get('x_token').token_uid == token.token_uid){
+                    this.$('.device-information-trust-text').text(xabber.getString("settings_account__omemo_enabled"));
+                    this.$('.device-information-trust').addClass('hidden');
+                    this.$('.device-information-trust').attr('data-trust', 'trust');
+                    this.$('.device-information-trust-text').attr('data-trust', 'trust');
+                }
             })
             if (device.get('fingerprint')) {
                 dfd.resolve(device.get('fingerprint'));
@@ -3329,6 +3350,10 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
             }
         } else {
             this.$('.device-information-fingerprint').addClass('hidden');
+            this.$('.device-information-trust').addClass('hidden');
+            this.$('.device-information-trust-text').text('');
+            this.$('.device-information-trust').attr('data-trust', '');
+            this.$('.device-information-trust-text').attr('data-trust', '');
         }
         this.$('.settings-panel-head span.settings-panel-head-title').text(token.device);
     },
@@ -3341,6 +3366,18 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
             let token = this.model.x_tokens_list.find(item => (item.token_uid === $target.closest('.token-wrap').attr('data-token-uid'))),
                 omemo_device_id = token && token.omemo_id ? token.omemo_id : Number($target.closest('.token-wrap').attr('data-token-uid').slice(0,8));
             this.omemo_own_devices.open(Number(omemo_device_id), is_own);
+        }
+    },
+
+    openFingerprintDevice: function (ev) {
+        if (this.model.omemo){
+            if ($(ev.target).closest('.device-information-trust.device-information-trust-own').length)
+                return;
+            let $target = $(ev.target).closest('.device-information');
+            !this.omemo_own_devices && (this.omemo_own_devices = new xabber.FingerprintsOwnDevices({model: this.model.omemo}));
+            let token = this.model.x_tokens_list.find(item => (item.token_uid === $target.attr('data-token-uid'))),
+                omemo_device_id = token && token.omemo_id ? token.omemo_id : Number($target.attr('data-token-uid').slice(0,8));
+            this.omemo_own_devices.open(Number(omemo_device_id), false);
         }
     },
 

@@ -118,7 +118,7 @@ input[type=checkbox].filled-in:disabled + label {
 }
 
 input[type=checkbox].filled-in:disabled + label:after {
-    background-color: #bdbdbd !important;
+    background-color: transparent !important;
     border-color: #bdbdbd !important;
 }
 
@@ -4888,9 +4888,9 @@ input[type=text].simple-input-field:hover {
 }
 .fingerprints-devices-wrap .fingerprints-content .fingerprint-content .device-fingerprints-part.fingerprint .label,
 .fingerprints-devices-wrap .fingerprints-content .fingerprint-content .device-fingerprints-part .device-id{
-    font-size: 10px;
+    font-size: 12px;
     line-height: 12px;
-    font-weight: 300;
+    font-weight: 400;
     margin-top: 8px;
     color: #9E9E9E;
 }
@@ -11712,6 +11712,7 @@ input[type=range].voice-message-volume:focus {
     top: 56px;
     left: 50%;
     transform: translate(-50%, 0);
+    cursor: pointer;
 }
 
 .settings-panel-wrap .settings-panel .main-info-wrap .picture-wrap .avatar-wrap .dropdown-content{
@@ -12130,6 +12131,7 @@ input[type=range].voice-message-volume:focus {
     position: relative;
     min-height: 36px;
     align-items: baseline;
+    margin-bottom: 6px;
 }
 .settings-panel-wrap .settings-panel .device-information-icon{
     position: absolute;
@@ -12166,8 +12168,55 @@ input[type=range].voice-message-volume:focus {
     right: unset;
     bottom: unset;
 }
+.settings-panel-wrap .settings-panel .device-information-trust .setting-icon-background,
 .settings-panel-wrap .settings-panel .device-information-wrap .btn-revoke-token .setting-icon-background{
-    left: 32px;
+    left: 32px !important;
+}
+.settings-panel-wrap .settings-panel .device-information-trust-text-wrap{
+    position: sticky;
+    top: 67px;
+    z-index: 2;
+}
+.settings-panel-wrap .settings-panel .device-information-trust-text-wrap .device-information-trust-text{
+    position: absolute;
+    top: -45px;
+    right: 20px;
+}
+.settings-panel-wrap .settings-panel .device-information-trust[data-trust="trust"] path{
+    fill: #388E3C;
+}
+.settings-panel-wrap .settings-panel .device-information-trust[data-trust="error"] path{
+    fill: #D32F2F;
+}
+.settings-panel-wrap .settings-panel .device-information-trust[data-trust="unknown"] path{
+    fill: #FFA000;
+}
+.settings-panel-wrap .settings-panel .device-information-trust[data-trust="ignore"] path{
+    fill: #9e9e9e;
+}
+.settings-panel-wrap .settings-panel .device-information-trust-text[data-trust="trust"]{
+    color: #388E3C;
+}
+.settings-panel-wrap .settings-panel .device-information-trust-text[data-trust="error"]{
+    color: #D32F2F;
+}
+.settings-panel-wrap .settings-panel .device-information-trust-text[data-trust="unknown"]{
+    color: #FFA000;
+}
+.settings-panel-wrap .settings-panel .device-information-trust-text[data-trust="ignore"]{
+    color: #9e9e9e;
+}
+.settings-panel-wrap .settings-panel .device-information-trust[data-trust="trust"] .settings-block-name{
+    color: #388E3C;
+}
+.settings-panel-wrap .settings-panel .device-information-trust[data-trust="error"] .settings-block-name{
+    color: #D32F2F;
+}
+.settings-panel-wrap .settings-panel .device-information-trust[data-trust="unknown"] .settings-block-name{
+    color: #FFA000;
+}
+.settings-panel-wrap .settings-panel .device-information-trust[data-trust="ignore"] .settings-block-name{
+    color: #9e9e9e;
 }
 .settings-panel-wrap .settings-panel .setting.idling-time{
     padding: 10px 40% 24px 72px!important;
@@ -12276,6 +12325,9 @@ input[type=range].voice-message-volume:focus {
     border: 3px solid #fff;
     outline: 3px solid;
 }
+.settings-panel-wrap .settings-panel .radio-field label{
+    color: #000000de !important;
+}
 /* ---------------- XABBER SETTINGS --------------------- */
 
 .settings-panel .left-column {
@@ -12287,7 +12339,6 @@ input[type=range].voice-message-volume:focus {
     -webkit-transition: background-color 100ms linear;
     -ms-transition: background-color 100ms linear;
     transition: background-color 100ms linear;
-    cursor: pointer;
 }
 
 .settings-panel .right-column {
