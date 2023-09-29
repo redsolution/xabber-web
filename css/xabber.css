@@ -11924,7 +11924,7 @@ input[type=range].voice-message-volume:focus {
 .settings-panel-wrap .settings-panel .settings-tab.settings-deletion-button .setting-icon-background,
 .settings-panel-wrap .delete-account .setting-icon-background{
     position: absolute;
-    top: 8px;
+    top: 7px;
     left: 28px;
     background: none !important;
     width: 24px;
@@ -12143,7 +12143,7 @@ input[type=range].voice-message-volume:focus {
     fill: #9e9e9e;
 }
 .settings-panel-wrap .settings-panel .device-information-label{
-    padding: 4px 0;
+    padding: 6px 0;
     width: 30%;
 }
 .settings-panel-wrap .settings-panel .device-information-text{
@@ -12217,6 +12217,15 @@ input[type=range].voice-message-volume:focus {
 }
 .settings-panel-wrap .settings-panel .device-information-trust[data-trust="ignore"] .settings-block-name{
     color: #9e9e9e;
+}
+.settings-panel-wrap .settings-panel .device-information-trust .device-information-icon{
+    display: none;
+}
+.settings-panel-wrap .settings-panel .device-information-trust[data-trust="trust"] .lock-check,
+.settings-panel-wrap .settings-panel .device-information-trust[data-trust="error"] .lock-alert,
+.settings-panel-wrap .settings-panel .device-information-trust[data-trust="unknown"] .lock-question,
+.settings-panel-wrap .settings-panel .device-information-trust[data-trust="ignore"] .lock-cross{
+    display: block;
 }
 .settings-panel-wrap .settings-panel .setting.idling-time{
     padding: 10px 40% 24px 72px!important;
