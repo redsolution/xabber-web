@@ -1098,7 +1098,7 @@ xabber.MessagesBase = Backbone.Collection.extend({
                     );
                 message_item && message_item.set('is_unread', false)
             });
-            if (rsm.complete){
+            if (rsm.complete && this.get('last_read_msg')){
                 let last_read_msg = this.messages.find(m => this.get('last_read_msg') && (m.get('stanza_id') === this.get('last_read_msg') || m.get('contact_stanza_id') === this.get('last_read_msg'))),
                     deferred = new $.Deferred();
                 deferred.done(() => {
@@ -1121,7 +1121,7 @@ xabber.MessagesBase = Backbone.Collection.extend({
                 }
             }
         }, (err) => {
-            console.log('error');
+            xabber.error('error');
         });
     },
 
@@ -4222,25 +4222,27 @@ xabber.ChatContentView = xabber.BasicView.extend({
 
         if (!(message.get('synced_from_server') || (message.get('is_archived') && !message.get('missed_msg')))) {
             if (message.get('missed_msg')){
-                let last_read_msg = this.model.messages.find(m => this.model.get('last_read_msg') && (m.get('stanza_id') === this.model.get('last_read_msg') || m.get('contact_stanza_id') === this.model.get('last_read_msg'))),
-                    deferred = new $.Deferred();
-                deferred.done(() => {
-                    if (last_read_msg && message.get('timestamp') > last_read_msg.get('timestamp')){
-                        message.set('is_unread', true);
-                        if (!xabber.get('focused')) {
-                            if (this.model.get('saved') || this.model.isMuted())
-                                message.set('muted', true);
+                if (this.model.get('last_read_msg')){
+                    let last_read_msg = this.model.messages.find(m => this.model.get('last_read_msg') && (m.get('stanza_id') === this.model.get('last_read_msg') || m.get('contact_stanza_id') === this.model.get('last_read_msg'))),
+                        deferred = new $.Deferred();
+                    deferred.done(() => {
+                        if (last_read_msg && message.get('timestamp') > last_read_msg.get('timestamp')){
+                            message.set('is_unread', true);
+                            if (!xabber.get('focused')) {
+                                if (this.model.get('saved') || this.model.isMuted())
+                                    message.set('muted', true);
+                            }
+                            this.model.setMessagesDisplayed(message.get('timestamp'));
                         }
-                        this.model.setMessagesDisplayed(message.get('timestamp'));
-                    }
-                });
-                if (!last_read_msg){
-                    this.contact.getMessageByStanzaId(this.model.get('last_read_msg'), ($message) => {
-                        last_read_msg = this.account.chats.receiveChatMessage($message, {is_archived: true});
-                        deferred.resolve();
                     });
-                } else {
-                    deferred.resolve();
+                    if (!last_read_msg){
+                        this.contact.getMessageByStanzaId(this.model.get('last_read_msg'), ($message) => {
+                            last_read_msg = this.account.chats.receiveChatMessage($message, {is_archived: true});
+                            deferred.resolve();
+                        });
+                    } else {
+                        deferred.resolve();
+                    }
                 }
             } else {
                 if (!(message.isSenderMe() || message.get('silent') || ((message.get('type') === 'system') && !message.get('auth_request')))) {

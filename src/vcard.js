@@ -860,8 +860,6 @@ xabber.VCardEditModalView = xabber.BasicView.extend({
     },
 
     keyUp: function () {
-        console.log(this);
-        console.log(this.$('.btn-vcard-save'));
         this.$('.btn-vcard-back').removeClass('hidden');
         this.$('.btn-vcard-save').removeClass('hidden');
     },

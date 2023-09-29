@@ -5675,7 +5675,9 @@ xabber.ParticipantPropertiesViewRight = xabber.BasicView.extend({
                     contact.pres('subscribe');
                 }, 500);
                 this.close();
-                this.account.chats.openChat(contact);
+                contact.set('in_roster', true);
+                contact.trigger("open_chat", contact);
+                contact.trigger('remove_invite', contact);
                 let chat = this.account.chats.getChat(contact);
                 chat.messages.createSystemMessage({
                     from_jid: group_jid,
