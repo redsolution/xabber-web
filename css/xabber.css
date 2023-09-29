@@ -12345,7 +12345,7 @@ input[type=range].voice-message-volume:focus {
 }
 .settings-panel-wrap .settings-panel .notifications-dependant.notifications-dependant-two-line label::after,
 .settings-panel-wrap .settings-panel .notifications-dependant.notifications-dependant-two-line label::before{
-    top: 14px;
+    top: 9px;
 }
 .settings-panel-wrap .settings-panel .input-field .desktop-notifications-clue-wrap{
     height: 24px;
@@ -12359,7 +12359,11 @@ input[type=range].voice-message-volume:focus {
 .settings-panel-wrap .settings-panel .input-field .desktop-notifications-clue-wrap b{
     text-decoration: underline;
     cursor: pointer;
-    font-weigth: 400;
+    font-weight: 400 !important;
+}
+.settings-panel-wrap .settings-panel .checkbox-field label{
+    margin-left: 4px;
+    padding-left: 31px;
 }
 /* ---------------- XABBER SETTINGS --------------------- */
 
