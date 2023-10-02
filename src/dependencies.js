@@ -19,6 +19,8 @@ import Recorder from 'opus-recorder';
 import encoderPath from 'opus-recorder/dist/encoderWorker.min.js';
 import VanillaQR from "VanillaQR";
 import idleJs from "idle-js";
+import backgroundImagesXml from "xml-loader!~/xmls/background-images.xml";
+import backgroundPatternsXml from "xml-loader!~/xmls/background-patterns.xml";
 import "~/css/color-scheme.css";
 import "~/css/materialdesignicons.css";
 import "~/css/materialize.css";
@@ -55,5 +57,7 @@ export default _.extend({
     sha256: sha256,
     VanillaQR: VanillaQR,
     magnificPopup: magnificPopup,
+    backgroundImagesXml: backgroundImagesXml,
+    backgroundPatternsXml: backgroundPatternsXml,
     Strophe: Strophe
 }, Strophe);

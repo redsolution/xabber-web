@@ -4018,41 +4018,33 @@ xabber.SetBackgroundView = xabber.BasicView.extend({
             callback && callback();
             return;
         }
-        let request = {
-            type: "GET",
-            contentType: "application/xml",
-            dataType: 'xml',
-            success: (data) => {
-                if (this.type == 'repeating-pattern') {
-                    this.onGetPatternsCallback(data);
-                } else {
-                    this.onGetImagesCallback(data);
-                }
-                callback && callback();
-            }
-        };
         if (this.type == 'repeating-pattern') {
-            request.url =  constants.ASSETS_URL_PREFIX + 'background-patterns.xml';
+            this.onGetPatternsCallback(env.backgroundPatternsXml)
         } else {
-            request.url = constants.ASSETS_URL_PREFIX + 'background-images.xml';
+            this.onGetImagesCallback(env.backgroundImagesXml);
         }
-        $.ajax(request);
+        callback && callback();
     },
 
     onGetPatternsCallback: function (data) {
+        if (!(data && data['background-patterns'] && data['background-patterns'].image))
+            return;
         let images = [];
-        $(data).find('image').each((idx, img) => {
-            images.push({thumbnail: $(img).text()});
+        data = data['background-patterns'].image;
+        data.forEach((item) => {
+            images.push({thumbnail: item});
         });
         this.model.patterns_library = images;
     },
 
     onGetImagesCallback: function (data) {
+        if (!(data && data['background-images'] && data['background-images'].image))
+            return;
         let images = [];
-        $(data).find('image').each((idx, img) => {
-            let $img = $(img),
-                thumbnail = $img.children('thumbnail').text(),
-                fs_img = $img.children('fullscreen-image').text();
+        data = data['background-images'].image;
+        data.forEach((item) => {
+            let thumbnail = item.thumbnail,
+                fs_img = item['fullscreen-image'];
             images.push({thumbnail, fs_img});
         });
         this.model.img_library = images;
@@ -4100,6 +4092,8 @@ xabber.SetBackgroundView = xabber.BasicView.extend({
     },
 
     loadMoreImages: function (count) {
+        if ((this.type == 'repeating-pattern' && !this.model.patterns_library) || (this.type == 'images' && !this.model.img_library))
+            return;
         !count && (count = 20);
         let current_count = this.$(`.image-item`).length;
         if (this.type == 'repeating-pattern' && current_count >= this.model.patterns_library.length || this.type == 'images' && current_count >= this.model.img_library.length)
