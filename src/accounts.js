@@ -1930,6 +1930,8 @@ xabber.ToolbarAccountsBlockView = xabber.BasicView.extend({
     onAccountRemoved: function (account) {
         this.removeChild(account.get('jid'));
         this.parent.updateScrollBar();
+        if (this.model.enabled.length === 1)
+            this.$el.find('.toolbar-item.account-item').addClass('single-item');
     }
 });
 
