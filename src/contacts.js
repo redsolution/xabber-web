@@ -9397,7 +9397,6 @@ xabber.AccountRosterLeftView = xabber.AccountRosterView.extend({
 xabber.BlockListView = xabber.BasicView.extend({
     avatar_size: constants.AVATAR_SIZES.CONTACT_BLOCKED_ITEM,
     events: {
-        "click .blocked-item": "onTabClick",
         "click .btn-reset-panel": "deselectParticipants",
         "click .btn-remove-selected": "actionSelectedParticipants",
         "click .blocked-contact input": "selectUnblock",
@@ -9409,22 +9408,12 @@ xabber.BlockListView = xabber.BasicView.extend({
         for (let jid in this.account.blocklist.list) {
             this.onContactAdded(this.account.blocklist.list[jid], false);
         };
-        this.$('.blocked-item:not(.hidden)').first().click().find('a').addClass('active');
-        this.hideTabs();
         this.account.contacts.on("add_to_blocklist", this.onContactAdded, this);
         this.account.contacts.on("remove_from_blocklist", this.onContactRemoved, this);
     },
 
     render: function (options) {
         this.deselectBlocked();
-        this.updateIndicator();
-        xabber.once("update_css", this.updateIndicator, this);
-    },
-
-    updateIndicator: function () {
-        this.$('.tabs .indicator').remove();
-        this.$('.tabs').tabs();
-        this.$('.indicator').addClass('ground-color-500');
     },
 
     selectUnblock: function (ev) {
@@ -9438,13 +9427,14 @@ xabber.BlockListView = xabber.BasicView.extend({
 
     updateUnblockButton: function () {
         let has_changes = this.$('.blocked-contact input:checked').length;
-        this.parent.$('.btn-unblock-selected').hideIf(!has_changes)
-        this.parent.$('.btn-deselect-blocked').hideIf(!has_changes)
-        this.parent.$('.btn-block').hideIf(has_changes)
+        this.$('.btn-unblock-selected').hideIf(!has_changes);
+        this.$('.btn-deselect-blocked').hideIf(!has_changes);
+        this.$('.btn-block').hideIf(has_changes);
     },
 
     unblockSelected: function (ev) {
-        let selected = this.$('.blocked-contact input:checked').closest('.blocked-contact');
+        let $current_tab = this.$('.settings-block-wrap:not(.hidden)'),
+            selected = $current_tab.find('.blocked-contact input:checked').closest('.blocked-contact');
         selected.each((index, item) => {
             this.unblockContactByJid($(item).attr('data-jid'))
         });
@@ -9459,66 +9449,36 @@ xabber.BlockListView = xabber.BasicView.extend({
         }
     },
 
-    onTabClick: function (ev) {
-        let tab = $(ev.target).closest('.blocked-item'),
-            tab_name = $(ev.target).closest('.blocked-item').attr('data-tab-name');
-        this.$('.blocked-item a').removeClass('active');
-        tab.find('a').addClass('active');
-        this.$('.blocked-items-container').addClass('hidden');
-        this.$('.' + tab_name).removeClass('hidden');
-        this.$('.blocked-contact input').prop('checked', false)
-        this.updateUnblockButton();
-        if (this.parent && this.parent.updateHeight){
-            this.parent.updateHeight();
-            setTimeout(() => {
-                this.parent.updateScrollBar();
-            }, 250)
-        }
-    },
-
-    hideTabs: function () {
-        this.$('.tabs').hideIf(this.$('.blocked-item:not(.hidden)').length === 1)
-    },
-
     hideEmptyContainers: function () {
         let tabs = this.$('.blocked-list:empty');
         tabs.each((idx, item) => {
-            let tab_name = $(item).closest('.blocked-items-container').addClass('hidden').attr('data-tab-name');
-            this.$('.' + tab_name).addClass('hidden').removeClass('tab');
+            let $tab = $(item).closest('.settings-block-wrap');
+            $tab.find('.placeholder').removeClass('hidden');
         });
-        if (this.$('.blocked-item.hidden .active').length){
-            this.$('.blocked-item:not(.hidden)').first().click().find('a').addClass('active');
-
-        }
-        this.hideTabs();
         this.updateUnblockButton();
-        this.updateIndicator();
     },
 
     onContactAdded: function (attrs) {
+        let rendered;
+        this.$('.blocked-contact').each((idx, item) => { //this construction avoids being destroyed by stupid domain and jid names in blocklist
+            ($(item).attr('data-jid') === attrs.jid) && (rendered = true);
+        });
+        if (rendered)
+            return;
         let tmp = templates.contact_blocked_item({jid: attrs.jid});
         if (attrs.resource) {
-            this.$('.invitations-item').removeClass('hidden').addClass('tab');
-            this.$('.blocked-invitations-wrap').find('.blocked-invitations').append(tmp);
+            this.$('.blocked-invitations').append(tmp);
+            this.$('.settings-tab[data-block-name="blocklist-invitations"]').removeClass('hidden');
+            this.$('.blocked-invitations-placeholder').addClass('hidden');
         }
         else if (attrs.domain) {
-            this.$('.domains-item').removeClass('hidden').addClass('tab');
-            let $domain_wrap = this.$('.blocked-domains-wrap'),
-                $desc = $domain_wrap.find('.blocked-item-description');
-            $domain_wrap.find('.blocked-domains').append(tmp);
-            $desc.text($desc.text() + ($desc.text() ? ', ' : "") + attrs.jid);
+            this.$('.blocked-domains').append(tmp);
+            this.$('.blocked-domains-placeholder').addClass('hidden');
         }
         else {
-            this.$('.contacts-item').removeClass('hidden').addClass('tab');
-            this.$('.blocked-contacts-wrap').find('.blocked-contacts').append(tmp);
-            let $desc = this.$('.blocked-contacts-wrap .blocked-item-description');
-            $desc.text($desc.text() + ($desc.text() ? ', ' : "") + attrs.jid);
+            this.$('.blocked-contacts').append(tmp);
+            this.$('.blocked-contacts-placeholder').addClass('hidden');
         }
-        this.$('.placeholder').addClass('hidden');
-        this.hideTabs();
-        this.updateIndicator();
-        if (this.$('.blocked-items-container.hidden').length === 3)
-            this.$('.blocked-list:not(:empty)').closest('.blocked-items-container').removeClass('hidden');
         if (this.parent && this.parent.updateHeight){
             this.parent.updateBlockedLabel();
             this.parent.updateHeight();
@@ -9526,19 +9486,13 @@ xabber.BlockListView = xabber.BasicView.extend({
                 this.parent.updateScrollBar();
             }, 250)
         }
+        this.updateTabsLabel();
     },
 
     onContactRemoved: function (jid) {
         let $elem = this.$(`.blocked-contact[data-jid="${jid}"]`);
-        let blocked_list = $elem.closest('.blocked-list'),
-            reg = new RegExp(('\\,\\s' + jid + '|' + jid + '\\,\\s' + '|' + jid)),
-            blocked_contacts_desc = $elem.closest('.blocked-contacts-wrap').showIf(blocked_list.children().length > 1).find('.blocked-item-description'),
-            blocked_domains_desc = $elem.closest('.blocked-domains-wrap').showIf(blocked_list.children().length > 1).find('.blocked-item-description');
-        $elem.closest('.blocked-invitations-wrap').showIf(blocked_list.children().length > 1);
-        blocked_contacts_desc.text(blocked_contacts_desc.text().replace(reg, ""));
-        blocked_domains_desc.text(blocked_domains_desc.text().replace(reg, ""));
         $elem.detach();
-        this.$('.placeholder').hideIf(this.account.blocklist.length());
+
         if (this.parent && this.parent.updateHeight){
             this.parent.updateBlockedLabel();
             this.parent.updateHeight();
@@ -9546,7 +9500,32 @@ xabber.BlockListView = xabber.BasicView.extend({
                 this.parent.updateScrollBar();
             }, 250)
         }
+        this.updateTabsLabel();
         this.hideEmptyContainers();
+    },
+
+    updateTabsLabel: function () {
+        if (!(this.account.blocklist && this.account.blocklist.list))
+            return;
+        let contacts, domains, invitations;
+        contacts = domains = invitations = 0;
+
+        for (let jid in this.account.blocklist.list) {
+            let item = this.account.blocklist.list[jid];
+            if (item.resource)
+                invitations++;
+            else if (item.domain)
+                domains++;
+            else
+                contacts++;
+        }
+
+        let contact_label_text = contacts === 0 ? xabber.getString("blocked_contacts_empty") : xabber.getQuantityString("blocked_contacts_number_tab_label", contacts),
+            domains_label_text = domains === 0 ? xabber.getString("blocked_domains_empty") : xabber.getQuantityString("blocked_domains_number", domains),
+            invitations_label_text = invitations === 0 ? xabber.getString("blocked_invitations_empty") : xabber.getQuantityString("blocked_invitations_number", invitations);
+        this.$('.settings-tab[data-block-name="blocklist-contacts"] .settings-block-label').text(contact_label_text);
+        this.$('.settings-tab[data-block-name="blocklist-domains"] .settings-block-label').text(domains_label_text);
+        this.$('.settings-tab[data-block-name="blocklist-invitations"] .settings-block-label').text(invitations_label_text);
     },
 });
 

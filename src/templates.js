@@ -253,6 +253,7 @@
     addSvgTemplate('svg.chevron-down');
     addSvgTemplate('svg.camera-retake');
     addSvgTemplate('svg.membership-outline');
+    addSvgTemplate('svg.invite');
     addSvgTemplate('svg.invite-outline');
     addSvgTemplate('svg.chevron-right-variant');
     addSvgTemplate('svg.chevron-left-variant');
@@ -351,6 +352,8 @@
     addSvgTemplate('svg.xabber-offline');
     addSvgTemplate('svg.xabber-online');
     addSvgTemplate('svg.saved-messages');
+    addSvgTemplate('svg.account-cancel');
+    addSvgTemplate('svg.web-cancel');
     addSvgTemplate('svg.palette');
     addSvgTemplate('svg.chat');
     addSvgTemplate('svg.star-face');
@@ -365,6 +368,7 @@
     addSvgTemplate('svg.lock-cross');
     addSvgTemplate('svg.lock-question');
     addSvgTemplate('svg.circles');
+    addSvgTemplate('svg.circles-outline');
     addSvgTemplate('svg.translate');
     addSvgTemplate('svg.trash');
     addSvgTemplate('svg.crosshairs-gps');

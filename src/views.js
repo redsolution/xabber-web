@@ -2419,7 +2419,7 @@ xabber.SettingsModalView = xabber.BasicView.extend({
             first_account.trigger('render_single_settings', this.settings_single_account_modal);
             this.settings_single_account_modal.addChild('blocklist', xabber.BlockListView, {
                 account: first_account,
-                el: this.settings_single_account_modal.$('.blocklist-info')[0]
+                el: this.settings_single_account_modal.$('.block-list-view-wrap')[0]
             });
             this.settings_single_account_modal.addChild('account_password_view', xabber.ChangeAccountPasswordView, {
                 model: first_account,
@@ -2551,12 +2551,17 @@ xabber.SettingsModalView = xabber.BasicView.extend({
     backToSubMenu: function (ev) {
         let $tab = $(ev.target).closest('.btn-back-subsettings'),
             block_name = $tab.attr('data-subblock-parent-name'),
-            $elem = this.$('.settings-block-wrap.' + block_name);
+            $elem = this.$('.settings-block-wrap.' + block_name),
+            elem_parent = $elem.attr('data-parent-block');
         this.$('.settings-block-wrap').addClass('hidden');
         $elem.removeClass('hidden');
         this.$('.settings-panel-head span.settings-panel-head-title').text($elem.attr('data-header'));
-        this.$('.btn-back').removeClass('hidden');
-        this.$('.btn-back-subsettings').addClass('hidden');
+        if (elem_parent) {
+            $tab.attr('data-subblock-parent-name', elem_parent)
+        } else {
+            this.$('.btn-back').removeClass('hidden');
+            this.$('.btn-back-subsettings').addClass('hidden');
+        }
         this.$('.settings-panel-head .description').addClass('hidden');
         this.scrollToTop();
         this.updateHeight();

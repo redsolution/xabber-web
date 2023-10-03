@@ -13,6 +13,8 @@ let badges_names = [
         'server'
     ],
     material_icons = [
+        'account-cancel',
+        'web-cancel',
         'palette',
         'chat',
         'star-face',
@@ -32,6 +34,7 @@ let badges_names = [
         'translate',
         'trash',
         'circles',
+        'circles-outline',
         'crosshairs-gps',
         'crosshairs-question',
         'crosshairs',
@@ -94,6 +97,7 @@ let badges_names = [
         'camera-retake',
         'chevron-down',
         'membership-outline',
+        'invite',
         'invite-outline',
         'chevron-right-variant',
         'chevron-left-variant',

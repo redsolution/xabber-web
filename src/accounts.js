@@ -1123,7 +1123,7 @@ xabber.Account = Backbone.Model.extend({
                 this.trigger('render_settings');
                 this.settings_account_modal.addChild('blocklist', xabber.BlockListView, {
                     account: this,
-                    el: this.settings_account_modal.$('.blocklist-info')[0]
+                    el: this.settings_account_modal.$('.block-list-view-wrap')[0]
                 });
                 this.settings_account_modal.addChild('account_password_view', xabber.ChangeAccountPasswordView, {
                     model: this,
@@ -2805,7 +2805,7 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
         "click .btn-choose-image": "chooseAvatar",
         "click .btn-back": "showSettings",
         "click .btn-back-settings": "backToMenu",
-        "click .btn-back-subsettings": "backToSubMenu",
+        "click .btn-back-subsettings-account": "backToSubMenu",
         "click .btn-emoji-panel": "openEmojiPanel",
         "click .btn-selfie": "openWebcamPanel",
         "click .settings-tab[data-block-name='status']": "openChangeStatus",
@@ -2932,7 +2932,7 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
         this.$('.left-column').removeClass('hidden');
         this.$('.right-column').addClass('hidden');
         this.$('.btn-back-settings').removeClass('hidden');
-        this.$('.btn-back-subsettings').addClass('hidden');
+        this.$('.btn-back-subsettings-account').addClass('hidden');
         this.updateHeight();
         this.updateBlockedLabel();
         return this;
@@ -2953,7 +2953,7 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
             return;
 
         let blocked_count = Object.keys(this.model.blocklist.list).length,
-            label_text = blocked_count === 0 ? xabber.getString("blocked_contacts_empty") : xabber.getQuantityString("blocked_contacts_number", blocked_count);
+            label_text = blocked_count === 0 ? xabber.getString("no_entries") : xabber.getQuantityString("entry_count", blocked_count);
         this.$('.settings-tab[data-block-name="blocklist"] .settings-block-label').text(label_text);
     },
 
@@ -3006,11 +3006,11 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
             $elem.attr('data-token-uid', $tab.attr('data-token-uid'));
             this.updateDeviceInformation($tab.attr('data-token-uid'));
         }
-        this.$('.btn-back-subsettings').attr('data-subblock-parent-name', '');
+        this.$('.btn-back-subsettings-account').attr('data-subblock-parent-name', '');
         if ($tab.closest('.right-column') && $tab.attr('data-subblock-parent-name')) {
             this.$('.btn-back-settings').addClass('hidden');
-            this.$('.btn-back-subsettings').removeClass('hidden');
-            this.$('.btn-back-subsettings').attr('data-subblock-parent-name', $tab.attr('data-subblock-parent-name'));
+            this.$('.btn-back-subsettings-account').removeClass('hidden');
+            this.$('.btn-back-subsettings-account').attr('data-subblock-parent-name', $tab.attr('data-subblock-parent-name'));
         }
         this.scrollToTop();
         this.updateHeight();
@@ -3032,9 +3032,10 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
     },
 
     backToSubMenuHandler: function (ev) {
-        let $tab = $(ev.target).closest('.btn-back-subsettings'),
+        let $tab = $(ev.target).closest('.btn-back-subsettings-account'),
             block_name = $tab.attr('data-subblock-parent-name'),
-            $elem = this.$('.settings-block-wrap.' + block_name);
+            $elem = this.$('.settings-block-wrap.' + block_name),
+            elem_parent = $elem.attr('data-parent-block');
         if (block_name){
             this.$('.media-gallery-button.btn-more').hideIf(block_name != 'media-gallery');
             this.$('.device-more-button.btn-more').hideIf(block_name != 'encryption');
@@ -3042,8 +3043,13 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
         this.$('.settings-block-wrap').addClass('hidden');
         $elem.removeClass('hidden');
         this.$('.settings-panel-head span.settings-panel-head-title').text($elem.attr('data-header'));
-        this.$('.btn-back-settings').removeClass('hidden');
-        this.$('.btn-back-subsettings').addClass('hidden');
+        if (elem_parent) {
+            $tab.attr('data-subblock-parent-name', elem_parent);
+            this.deselectBlocked();
+        } else {
+            this.$('.btn-back-settings').removeClass('hidden');
+            this.$('.btn-back-subsettings-account').addClass('hidden');
+        }
         this.scrollToTop();
         this.updateHeight();
     },
@@ -3417,7 +3423,7 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
                     }
                     this.model.getAllXTokens(() => {
                         this.$('.sessions-wrap').html("");
-                        this.$('.btn-back-subsettings').length && this.backToSubMenu({target: this.$('.btn-back-subsettings')[0]})
+                        this.$('.btn-back-subsettings-account').length && this.backToSubMenu({target: this.$('.btn-back-subsettings-account')[0]})
                         if (this.model.x_tokens_list && this.model.x_tokens_list.length) {
                             this.renderAllXTokens();
                         }
@@ -3716,7 +3722,7 @@ xabber.AccountSettingsSingleModalView = xabber.AccountSettingsModalView.extend({
         this.$('.left-column').removeClass('hidden');
         this.$('.right-column').addClass('hidden');
         this.$('.btn-back-settings').removeClass('hidden');
-        this.$('.btn-back-subsettings').addClass('hidden');
+        this.$('.btn-back-subsettings-account').addClass('hidden');
         this.updateHeight();
         this.updateBlockedLabel();
 

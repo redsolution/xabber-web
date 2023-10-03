@@ -149,7 +149,7 @@
         <div class="right-column settings-column noselect">
             <div class="settings-panel-head">
                 <i class="btn-back-settings mdi mdi-24px mdi-arrow-left"></i>
-                <i class="btn-back-subsettings mdi mdi-24px mdi-arrow-left hidden"></i>
+                <i class="btn-back-subsettings-account mdi mdi-24px mdi-arrow-left hidden"></i>
                 <span class="settings-panel-head-title">{[print(xabber.getString("account_editor"))]}</span>
                 <div class="btn-more media-gallery-button dropdown-button" data-activates="storage-actions">
                     <i class="mdi mdi-24px mdi-dots-vertical"></i>
@@ -202,12 +202,12 @@
                                 <div class="setting-icon-background">
                                     <svg class="mdi mdi-24px mdi-svg-template" data-svgname="cancel"></svg>
                                 </div>
-                                <div class="settings-block-name one-line">{[print(xabber.getString("settings_account__blocked_subheader"))]}</div>
+                                <div class="settings-block-name one-line">{[print(xabber.getString("block_list"))]}</div>
                                 <div class="settings-block-label one-line"></div>
                             </div>
                             <div class="settings-tab" data-subblock-parent-name="profile" data-block-name="circles-groups">
                                 <div class="setting-icon-background">
-                                    <svg class="mdi mdi-24px mdi-svg-template" data-svgname="circles"></svg>
+                                    <svg class="mdi mdi-24px mdi-svg-template" data-svgname="circles-outline"></svg>
                                 </div>
                                 <div class="settings-block-name one-line">{[print(xabber.getString("settings_account__section_header_circles"))]}</div>
                                 <div class="settings-block-label one-line"></div>
@@ -274,37 +274,91 @@
                             </div>
                         </div>
                     </div>
-                    <div data-header='{[print(xabber.getString("settings_account__blocked_subheader"))]}' class="settings-block-wrap blocklist">
+                    <div class="block-list-view-wrap">
+                        <div data-header='{[print(xabber.getString("block_list"))]}' data-parent-block="profile" class="settings-block-wrap blocklist">
+                            <div class="settings-subblock-wrap">
+                                <div class="blocklist-info">
+                                    <div class="blocklist-wrap">
+                                        <div class="buttons-wrap">
+                                            <svg class="mdi mdi-24px mdi-svg-template btn-block" data-svgname="blocked-add"></svg>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="settings-tabs-wrap">
+                                <div class="settings-tab" data-subblock-parent-name="blocklist" data-block-name="blocklist-contacts">
+                                    <div class="setting-icon-background">
+                                        <svg class="mdi mdi-24px mdi-svg-template" data-svgname="account-cancel"></svg>
+                                    </div>
+                                    <div class="settings-block-name one-line">{[print(xabber.getString("settings_account__blocked_contacts"))]}</div>
+                                    <div class="settings-block-label one-line"></div>
+                                </div>
+                                <div class="settings-tab" data-subblock-parent-name="blocklist" data-block-name="blocklist-domains">
+                                    <div class="setting-icon-background">
+                                        <svg class="mdi mdi-24px mdi-svg-template" data-svgname="web-cancel"></svg>
+                                    </div>
+                                    <div class="settings-block-name one-line">{[print(xabber.getString("settings_account__blocked_domains"))]}</div>
+                                    <div class="settings-block-label one-line"></div>
+                                </div>
+                                <div class="settings-tab hidden" data-subblock-parent-name="blocklist" data-block-name="blocklist-invitations">
+                                    <div class="setting-icon-background">
+                                        <svg class="mdi mdi-24px mdi-svg-template" data-svgname="invite"></svg>
+                                    </div>
+                                    <div class="settings-block-name one-line">{[print(xabber.getString("settings_account__blocked_invitations"))]}</div>
+                                    <div class="settings-block-label one-line"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div data-header='{[print(xabber.getString("settings_account__blocked_contacts"))]}' data-block-name="blocklist-contacts" class="settings-block-wrap blocklist-contacts">
+                            <div class="settings-subblock-wrap">
+                                <div class="blocklist-info">
+                                    <div class="blocklist-wrap">
+                                        <div class="buttons-wrap">
+                                            <svg class="mdi mdi-24px mdi-svg-template btn-block" data-svgname="blocked-add"></svg>
+                                            <button class="btn-deselect-blocked btn-flat btn-main   hidden">{[print(xabber.getString("cancel"))]}</button>
+                                            <button class="btn-unblock-selected btn-flat btn-main text-color-500  hidden">{[print(xabber.getString("unblock_selected"))]}</button>
+                                        </div>
+                                        <div class="blocked-items">
+                                            <div class="blocked-contacts-placeholder placeholder">{[print(xabber.getString("blocked_contacts_empty"))]}</div>
+                                            <div class="blocked-items-container blocked-contacts-wrap" data-tab-name="contacts-item">
+                                                <div class="blocked-contacts blocked-list"/>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div data-header='{[print(xabber.getString("settings_account__blocked_domains"))]}' data-block-name="blocklist-domains" class="settings-block-wrap blocklist-domains">
+                            <div class="settings-subblock-wrap">
+                                <div class="blocklist-info">
+                                    <div class="blocklist-wrap">
+                                        <div class="buttons-wrap">
+                                            <svg class="mdi mdi-24px mdi-svg-template btn-block" data-svgname="blocked-add"></svg>
+                                            <button class="btn-deselect-blocked btn-flat btn-main   hidden">{[print(xabber.getString("cancel"))]}</button>
+                                            <button class="btn-unblock-selected btn-flat btn-main text-color-500  hidden">{[print(xabber.getString("unblock_selected"))]}</button>
+                                        </div>
+                                        <div class="blocked-items">
+                                            <div class="blocked-domains-placeholder placeholder">{[print(xabber.getString("blocked_domains_empty"))]}</div></div>
+                                        <div class="blocked-items-container blocked-domains-wrap" data-tab-name="domains-item">
+                                            <div class="blocked-domains blocked-list"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div data-header='{[print(xabber.getString("settings_account__blocked_invitations"))]}' data-block-name="blocklist-invitations" class="settings-block-wrap blocklist-invitations">
                         <div class="settings-subblock-wrap">
                             <div class="blocklist-info">
                                 <div class="blocklist-wrap">
                                     <div class="buttons-wrap">
                                         <svg class="mdi mdi-24px mdi-svg-template btn-block" data-svgname="blocked-add"></svg>
-                                        <button class="btn-deselect-blocked btn-flat btn-main btn-dark ground-color-grey-100 hover-ground-color-grey-300 hidden">{[print(xabber.getString("cancel"))]}</button>
-                                        <button class="btn-unblock-selected btn-flat btn-main text-color-500 ground-color-grey-100 hover-ground-color-grey-300 hidden">{[print(xabber.getString("unblock_selected"))]}</button>
+                                        <button class="btn-deselect-blocked btn-flat btn-main   hidden">{[print(xabber.getString("cancel"))]}</button>
+                                        <button class="btn-unblock-selected btn-flat btn-main text-color-500  hidden">{[print(xabber.getString("unblock_selected"))]}</button>
                                     </div>
                                     <div class="blocked-items">
-                                        <div class="placeholder">{[print(xabber.getString("blocked_contacts_empty"))]}</div>
-                                        <div class="blocklist-tabs-wrap">
-                                            <ul class="tabs">
-                                                <li class="blocked-item contacts-item hidden" data-tab-name="blocked-contacts-wrap">
-                                                    <a class="text-color-700">{[print(xabber.getString("blocked_tabs_name__contacts"))]}</a>
-                                                </li>
-                                                <li class="blocked-item domains-item hidden" data-tab-name="blocked-domains-wrap">
-                                                    <a class="text-color-700">{[print(xabber.getString("blocked_tabs_name__domains"))]}</a>
-                                                </li>
-                                                <li class="blocked-item invitations-item hidden" data-tab-name="blocked-invitations-wrap">
-                                                    <a class="text-color-700">{[print(xabber.getString("blocked_tabs_name__invitations"))]}</a>
-                                                </li>
-                                            </ul>
-                                        </div>
-                                        <div class="blocked-items-container blocked-contacts-wrap hidden" data-tab-name="contacts-item">
-                                            <div class="blocked-contacts blocked-list"/>
-                                        </div>
-                                        <div class="blocked-items-container blocked-domains-wrap hidden" data-tab-name="domains-item">
-                                            <div class="blocked-domains blocked-list"/>
-                                        </div>
-                                        <div class="blocked-items-container blocked-invitations-wrap hidden" data-tab-name="invitations-item">
+                                        <div class="blocked-invitations-placeholder placeholder">{[print(xabber.getString("blocked_invitations_empty"))]}</div>
+                                        <div class="blocked-items-container blocked-invitations-wrap" data-tab-name="invitations-item">
                                             <div class="blocked-invitations blocked-list"/>
                                         </div>
                                     </div>
