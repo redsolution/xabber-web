@@ -6417,6 +6417,24 @@ xabber.ChatContentView = xabber.BasicView.extend({
                             }
                         }
                     });
+                }, (err_status) => {
+                    let response_text = err_status,
+                        file;
+                    message.get('files').length && (file = message.get('files')[0])
+                    if (file && !_.isUndefined(file.upload_id)){
+                        $message.find('div[data-upload-file-id="' + file.upload_id + '"] .circle-percent-text').text(response_text);
+                        $message.find('div[data-upload-file-id="' + file.upload_id + '"] .mdi-alert-circle').removeClass('hidden');
+                        $message.find('div[data-upload-file-id="' + file.upload_id + '"] .mdi-alert-circle').prop('title', response_text);
+                        $message.find('div[data-upload-file-id="' + file.upload_id + '"] .mdi-center-loading-indicator').addClass('hidden');
+                        $message.find('div[data-upload-file-id="' + file.upload_id + '"]').addClass('upload-error');
+                        $message.find('div[data-upload-file-id="' + file.upload_id + '"]').css({ 'border-color': '#EF9A9A'});
+                    }
+                    message.get('files').length && (message.get('files')[0].is_errored = true);
+                    is_error = true;
+                    $(xhr_requests).each((idx, request) => {
+                        request.abort();
+                    })
+                    self.onFileNotUploaded(message, $message, response_text);
                 });
             }
         }

@@ -1311,7 +1311,7 @@ xabber.Account = Backbone.Model.extend({
             }
         },
 
-        testGalleryTokenExpire: function(callback) {
+        testGalleryTokenExpire: function(callback, errback) {
             let currentTime = new Date(),
                 tokenExpireTime = new Date(this.get('gallery_token_expires'));
             if (this.get('gallery_auth')){
@@ -1321,7 +1321,7 @@ xabber.Account = Backbone.Model.extend({
                 callback && callback();
             }
             else if (this.server_features.get('media-gallery')){
-                this.initGalleryAuth(this.server_features.get('media-gallery'))
+                this.initGalleryAuth(this.server_features.get('media-gallery'), errback)
                 this.once('gallery_token_authenticated', callback)
             }
             else if (!this.server_features.get('media-gallery')){
@@ -1366,10 +1366,13 @@ xabber.Account = Backbone.Model.extend({
             }
         },
 
-        initGalleryAuth: function(gallery_feature) {
+        initGalleryAuth: function(gallery_feature, errback) {
             this.set('gallery_url', gallery_feature.get('from'));
             if (this.get('gallery_url') && !this.get('gallery_auth')) {
+                this.set('gallery_token', undefined);
+                this.set('gallery_token_expires', undefined);
                 this.set('gallery_auth', true)
+                this.gallery_iq_answered = false;
                 $.ajax({
                     type: 'POST',
                     url: this.get('gallery_url') + 'v1/account/xmpp_code_request/',
@@ -1379,15 +1382,20 @@ xabber.Account = Backbone.Model.extend({
                     success: (response) => {
                         if (response.request_id){
                             this.set('gallery_auth_request_code', response.request_id)
+                            this.gallery_auth_errback = errback;
                             if (this.gallery_code_requests.length){
                                 let verifying_code = this.gallery_code_requests.find(verifying_mess => (verifying_mess.id === this.get('gallery_auth_request_code')));
                                 if (verifying_code && verifying_code.code)
                                     this.onAuthCode(verifying_code.code)
                             }
+                            setTimeout(() => {
+                                if (!this.gallery_iq_answered)
+                                    this.handleCommonGalleryErrors({status: 500}, errback)
+                            }, 5000)
                         }
                     },
                     error: (response) => {
-                        this.handleCommonGalleryErrors(response)
+                        this.handleCommonGalleryErrors(response, errback)
                         this.set('gallery_auth', false)
                         this.gallery_code_requests = [];
                         console.log(response)
@@ -1399,7 +1407,8 @@ xabber.Account = Backbone.Model.extend({
         onAuthCode: function (confirm_code) {
             this.gallery_code_requests = [];
             this.set('gallery_auth_request_code', undefined);
-            if (confirm_code)
+            if (confirm_code) {
+                this.gallery_iq_answered = true;
                 $.ajax({
                     type: 'POST',
                     url: this.get('gallery_url') + 'v1/account/xmpp_auth/',
@@ -1420,6 +1429,7 @@ xabber.Account = Backbone.Model.extend({
                         console.log(response)
                     }
                 });
+            }
         },
 
         prepareFiles: function (files, callback) {
@@ -1437,14 +1447,27 @@ xabber.Account = Backbone.Model.extend({
             })
         },
 
-        handleCommonGalleryErrors: function (response) {
+        handleCommonGalleryErrors: function (response, errback) {
+            !errback && (errback = this.gallery_auth_errback);
+            this.gallery_auth_errback = undefined;
+            let err_text;
+            response && response.responseJSON && response.responseJSON.error && (err_text = response.responseJSON.error);
             if (response.status === 401){
                 if (this.server_features.get('media-gallery')){
-                    this.initGalleryAuth(this.server_features.get('media-gallery'))
+                    this.initGalleryAuth(this.server_features.get('media-gallery'), errback)
                 } else {
                     this.set('gallery_url', null);
                     this.set('gallery_token', null);
+                    errback && errback('No Media Gallery server feature');
                 }
+            } else if (response.status === 500) {
+                this.set('gallery_url', null);
+                this.set('gallery_token', null);
+                errback && errback(xabber.getString("media_gallery_server_error"));
+            } else {
+                this.set('gallery_url', null);
+                this.set('gallery_token', null);
+                errback && errback('Media Gallery error - ' + (err_text || response.status));
             }
         },
 
