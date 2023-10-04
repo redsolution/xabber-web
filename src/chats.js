@@ -3148,7 +3148,8 @@ xabber.ChatContentView = xabber.BasicView.extend({
         this.$el.on(wheel_ev, this.onMouseWheel.bind(this));
         this.ps_container.on("ps-scroll-up ps-scroll-down", this.onScroll.bind(this));
         this.ps_container.on("ps-scroll-y", this.onScrollY.bind(this));
-        this.model.on("change:active", this.onChangedActiveStatus, this);
+        this.model.on("change:active change:idle", this.onChangedActiveStatus, this);
+        xabber.on("change:idle change:focused", this.onChangedIdleStatus, this);
         this.model.on("load_last_history", this.loadLastHistory, this);
         this.model.on("get_missed_history", this.requestMissedMessages, this);
         this.model.messages.on("add", this.onMessage, this);
@@ -3277,8 +3278,16 @@ xabber.ChatContentView = xabber.BasicView.extend({
         }
     },
 
+    onChangedIdleStatus: function (ev) {
+        if (!this.model.get('active'))
+            return;
+        this.model.set('idle', xabber.get('idle') || !xabber.get('focused'))
+    },
+
     onChangedActiveStatus: function () {
         let active = this.model.get('active');
+        if (this.model.get('active') && this.model.get('idle'))
+            active = false;
         this.sendChatState(active ? 'active' : 'inactive');
         if (this.model.get('group_chat') && !this.contact.get('invitation')) {
             if (active){
