@@ -2299,7 +2299,7 @@ xabber.SettingsModalView = xabber.BasicView.extend({
         this.model.on('change:sound_on_attention', this.updateSoundsLabel, this);
         this.ps_container.on("ps-scroll-y", this.onScrollY.bind(this));
         xabber.once('accounts_ready',() => {
-            xabber.accounts.on("list_changed", this.updateAccounts, this);
+            xabber.accounts.on("list_changed add change:enabled destroy", this.updateAccounts, this);
         })
     },
 
@@ -2402,7 +2402,7 @@ xabber.SettingsModalView = xabber.BasicView.extend({
             this.settings_single_account_modal.removeChild('account_password_view');
             this.removeChild('single_account');
         }
-        if (xabber.accounts.length === 1){
+        if (xabber.accounts.length === 1 && xabber.accounts.enabled.length){
             this.$('.accounts-info-wrap').addClass('hidden');
             this.$('.btn-add-account').addClass('hidden');
             this.$('.single-account-info-wrap').removeClass('hidden');

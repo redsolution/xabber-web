@@ -1867,7 +1867,9 @@ xabber.AccountToolbarItemView = xabber.BasicView.extend({
         ev.stopPropagation();
         let is_single = $(ev.target).closest('.single-item').length;
         if (is_single){
-            this.model.showSettingsModal();
+            xabber.body.setScreen('settings-modal');
+            xabber.trigger('update_placeholder');
+            return;
         }
         xabber.toolbar_view.$('.toolbar-item.account-item').removeClass('active');
         if (xabber.toolbar_view.data.get('account_filtering') != this.model.get('jid'))
@@ -1876,7 +1878,8 @@ xabber.AccountToolbarItemView = xabber.BasicView.extend({
     },
 
     showSettings: function () {
-        this.model.showSettingsModal();
+        xabber.body.setScreen('settings-modal');
+        xabber.trigger('update_placeholder');
     },
 });
 
@@ -1898,6 +1901,7 @@ xabber.ToolbarAccountsBlockView = xabber.BasicView.extend({
             if (this.model.enabled.length === 1)
                 this.$el.find('.toolbar-item.account-item').addClass('single-item');
         });
+        this.$el.find('.toolbar-item.settings-modal').switchClass('hidden', this.model.enabled.length != 0);
         this.parent.updateScrollBar();
     },
 
@@ -1924,6 +1928,7 @@ xabber.ToolbarAccountsBlockView = xabber.BasicView.extend({
         this.$el.find('.single-item').removeClass('single-item');
         if (this.model.enabled.length === 1)
             this.$el.find('.toolbar-item.account-item').addClass('single-item');
+        this.$el.find('.toolbar-item.settings-modal').switchClass('hidden', this.model.enabled.length != 0);
         this.parent.updateScrollBar();
     },
 
@@ -1932,6 +1937,7 @@ xabber.ToolbarAccountsBlockView = xabber.BasicView.extend({
         this.parent.updateScrollBar();
         if (this.model.enabled.length === 1)
             this.$el.find('.toolbar-item.account-item').addClass('single-item');
+        this.$el.find('.toolbar-item.settings-modal').switchClass('hidden', this.model.enabled.length != 0);
     }
 });
 
@@ -3411,7 +3417,7 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
     },
 
     revokeXToken: function (ev) {
-        utils.dialogs.ask(xabber.getString("terminate_session_title"), null,
+        utils.dialogs.ask(xabber.getString("terminate_session_title"), xabber.getString("terminate_session_text"),
             {}, { ok_button_text: xabber.getString("button_terminate")}).done((res) => {
             if (!res)
                 return;
