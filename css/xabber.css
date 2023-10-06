@@ -11353,7 +11353,7 @@ input[type=range].voice-message-volume:focus {
     position: absolute;
     z-index: 1000;
     right: 32px;
-    top: 22px;
+    top: 24px;
 }
 
 .settings-panel-wrap .settings-panel .capabilities-wrap{
@@ -11441,18 +11441,18 @@ input[type=range].voice-message-volume:focus {
 }
 
 .settings-panel-wrap .settings-panel .switch .lever{
-    height: 8px;
+    height: 10px;
     width: 24px;
 }
 
 .settings-panel-wrap .settings-panel .switch .lever::after{
-    height: 12px;
-    width: 12px;
+    height: 14px;
     top: -2px;
+    width: 14px;
 }
 
 .settings-panel-wrap .settings-panel .switch label input[type=checkbox]:checked+.lever::after{
-    left: 13px;
+    left: 12px;
 }
 
 .settings-panel-wrap .settings-panel .accounts-info-wrap .settings-divider{
@@ -11701,7 +11701,7 @@ input[type=range].voice-message-volume:focus {
 
 .settings-panel-wrap .settings-panel .settings-column .enabled-state{
     position: absolute;
-    top: 22px;
+    top: 24px;
     right: 20px;
     z-index: 1000;
 }
