@@ -2916,6 +2916,13 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
         this.model.on("activate deactivate", this.updateView, this);
         this.model.on("change:auth_type", this.updateView, this);
         this.model.on("destroy", this.remove, this);
+        if (options && !options.single_account_modal) {
+            $(document).on("keyup.account_settings_modal", (ev) => {
+                if (ev.keyCode === constants.KEY_ESCAPE && this.data.get('visible') && !options.single_account_modal) {
+                    this.closeSettings();
+                }
+            });
+        }
     },
 
     render: function (options) {

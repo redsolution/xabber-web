@@ -2298,6 +2298,11 @@ xabber.SettingsModalView = xabber.BasicView.extend({
         this.model.on('change:sound_on_dialtone', this.updateSoundsLabel, this);
         this.model.on('change:sound_on_attention', this.updateSoundsLabel, this);
         this.ps_container.on("ps-scroll-y", this.onScrollY.bind(this));
+        $(document).on("keyup", (ev) => {
+            if (ev.keyCode === constants.KEY_ESCAPE && this.data.get('visible')) {
+                this.closeSettings();
+            }
+        });
         xabber.once('accounts_ready',() => {
             xabber.accounts.on("list_changed add change:enabled destroy", this.updateAccounts, this);
         })
@@ -2411,6 +2416,7 @@ xabber.SettingsModalView = xabber.BasicView.extend({
             this.settings_single_account_modal = this.addChild('single_account', xabber.AccountSettingsSingleModalView, {
                 model: first_account,
                 forced_ps_container: this.ps_container,
+                single_account_modal: true,
                 el: this.$('.single-account-info-wrap .single-account-info')[0]
             });
             if (!this.single_account_has_rendered){

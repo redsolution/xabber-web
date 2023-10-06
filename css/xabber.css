@@ -11440,19 +11440,19 @@ input[type=range].voice-message-volume:focus {
     right: 22px;
 }
 
-.settings-panel-wrap .settings-panel .xmpp-account .switch .lever{
-    /*height: 8px;*/
-    /*width: 24px;*/
+.settings-panel-wrap .settings-panel .switch .lever{
+    height: 8px;
+    width: 24px;
 }
 
-.settings-panel-wrap .settings-panel .xmpp-account .switch .lever::after{
-    /*height: 12px;*/
-    /*width: 12px;*/
-    /*top: -2px;*/
+.settings-panel-wrap .settings-panel .switch .lever::after{
+    height: 12px;
+    width: 12px;
+    top: -2px;
 }
 
-.settings-panel-wrap .settings-panel .xmpp-account .switch label input[type=checkbox]:checked+.lever::after{
-    /*left: 13px;*/
+.settings-panel-wrap .settings-panel .switch label input[type=checkbox]:checked+.lever::after{
+    left: 13px;
 }
 
 .settings-panel-wrap .settings-panel .accounts-info-wrap .settings-divider{
@@ -11678,7 +11678,7 @@ input[type=range].voice-message-volume:focus {
     color: #9E9E9E;
     position: absolute;
     top: 20px;
-    right: 102px;
+    right: 94px;
     cursor: pointer;
     z-index: 1000;
 }
@@ -11695,7 +11695,7 @@ input[type=range].voice-message-volume:focus {
     position: absolute;
     cursor: pointer;
     top: 20px;
-    right: 68px;
+    right: 60px;
     z-index: 1000;
 }
 
