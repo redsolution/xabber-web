@@ -11678,7 +11678,7 @@ input[type=range].voice-message-volume:focus {
     color: #9E9E9E;
     position: absolute;
     top: 20px;
-    right: 60px;
+    right: 102px;
     cursor: pointer;
     z-index: 1000;
 }
@@ -11695,6 +11695,13 @@ input[type=range].voice-message-volume:focus {
     position: absolute;
     cursor: pointer;
     top: 20px;
+    right: 68px;
+    z-index: 1000;
+}
+
+.settings-panel-wrap .settings-panel .settings-column .enabled-state{
+    position: absolute;
+    top: 22px;
     right: 20px;
     z-index: 1000;
 }

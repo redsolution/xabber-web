@@ -3530,10 +3530,13 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
         this.$('.btn-reconnect').switchClass('disabled', this.model.session.get('reconnecting'));
     },
 
-    setEnabled: function (ev) {
+    setEnabled: function (ev) {//34
         let enabled = this.$('.enabled-state input').prop('checked');
         this.model.save('enabled', enabled);
         enabled ? this.model.activate() : this.model.deactivate();
+        if (xabber.accounts.length !== 1){
+            this.showSettings();
+        }
     },
 
     setEnabledOmemo: function () {

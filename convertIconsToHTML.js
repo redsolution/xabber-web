@@ -46,6 +46,7 @@ let badges_names = [
         'bug',
         'cloud',
         'key',
+        'key-variant',
         'account',
         'alert-circle',
         'map-marker-outline',
