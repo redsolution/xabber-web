@@ -105,7 +105,7 @@ var constants = {
 
     TURN_SERVERS_LIST: [
         {
-            url: 'turn:numb.viagenie.ca',
+            urls: 'turn:numb.viagenie.ca',
             credential: 'muazkh',
             username: 'webrtc@live.com'
         },
