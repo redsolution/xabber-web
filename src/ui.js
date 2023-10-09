@@ -175,24 +175,9 @@ xabber.once("start", function () {
     });
 
     this.body.addScreen('settings-modal', {
-        blur_overlay: null,
-        toolbar: null,
-        main: {
-            left: { chats: null },
-            right: {
-                chat_head: null,
-                chat_body: null,
-                chat_body_placeholder: null,
-                chat_bottom: null,
-                chat_placeholder: null
-            },
-            right_contact: {},
-            placeholders: null
-        },
         main_overlay: {
             settings_modal: null,
         },
-        roster: null
     });
 
     this.body.addScreen('add_account', {

@@ -3149,7 +3149,7 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
     },
 
     closeSettings: function (ev) {
-        xabber.toolbar_view.showAllChats();
+        xabber.settings_modal_view.closeSettings();
     },
 
     openEmojiPanel: function () {

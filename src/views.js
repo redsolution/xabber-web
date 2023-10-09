@@ -218,12 +218,22 @@ xabber.NodeView = xabber.BasicView.extend({
             xabber.body.data.set('contact_details_view', null)
             return;
         }
-        _.each(this.children, function (view) {
-            view.hide();
-        });
-        this.$el.children().detach();
+        if (options.close_settings && this.children.main_overlay){
+            this.children.main_overlay.hide();
+            this.children.main_overlay.$el.detach();
+            return;
+        }
+        if (!(tree && tree.main_overlay)){
+            _.each(this.children, function (view) {
+                view.hide();
+            });
+        }
+        if (!(tree && tree.main_overlay))
+            this.$el.children().detach();
         tree = this.patchTree(tree, options) || tree;
         _.each(this.children, (view, name) => {
+            if (tree.main_overlay && (name != 'main_overlay'))
+                return;
             if (_.has(tree, name)) {
                 if (name !== 'login')
                     this.$el.append(view.$el);
@@ -923,6 +933,15 @@ xabber.Body = xabber.NodeView.extend({
             chat_item_view = this.screen.get('chat_item');
             if (chat_item_view && chat_item_view.content)
                 chat_item_view.content._prev_scrolltop = chat_item_view.content.getScrollTop() || chat_item_view.content._scrolltop;
+        }
+        if (name){
+            let tree = this.screen_map.get(name)
+            if (tree.main_overlay){
+                if (!this.screen.get('previous_screen'))
+                    new_attrs.previous_screen = {...this.screen.attributes};
+            } else {
+                new_attrs.previous_screen = undefined;
+            }
         }
         this.screen.set(_.extend(new_attrs, attrs), options);
     },
@@ -2543,7 +2562,13 @@ xabber.SettingsModalView = xabber.BasicView.extend({
     },
 
     closeSettings: function (ev) {
-        xabber.toolbar_view.showAllChats();
+        if (xabber.body.screen && xabber.body.screen.get('previous_screen')){
+            let previous_screen = xabber.body.screen.get('previous_screen');
+            previous_screen.close_settings = true;
+            xabber.body.setScreen(previous_screen.name, previous_screen);
+            xabber.body.screen.attributes.close_settings = undefined;
+        } else
+            xabber.toolbar_view.showAllChats();
     },
 
     backToMenu: function (ev) {
