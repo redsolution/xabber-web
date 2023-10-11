@@ -45,7 +45,7 @@
     "http-server": "^0.9.0",
     "i18next": "^19.8.9",
     "javascript-obfuscator": "^4.0.0",
-    "jquery": "~3.0.0",
+    "jquery": "~3.7.1",
     "js-sha256": "~0.9.0",
     "json-loader": "^0.5.7",
     "magnific-popup": ">0.0.0",

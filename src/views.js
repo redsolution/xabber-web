@@ -935,8 +935,8 @@ xabber.Body = xabber.NodeView.extend({
                 chat_item_view.content._prev_scrolltop = chat_item_view.content.getScrollTop() || chat_item_view.content._scrolltop;
         }
         if (name){
-            let tree = this.screen_map.get(name)
-            if (tree.main_overlay){
+            let tree = this.screen_map.get(name);
+            if (tree && tree.main_overlay){
                 if (!this.screen.get('previous_screen'))
                     new_attrs.previous_screen = {...this.screen.attributes};
             } else {
@@ -4409,11 +4409,11 @@ xabber.DragManager = Backbone.Model.extend({
 _.extend(xabber, {
     modal_settings: {
         open: {
-            in_duration: 50,
-            out_duration: 100,
+            in_duration: 10,
+            out_duration: 10,
             opacity: 0.4
         },
-        close: {out_duration: 100}
+        close: {out_duration: 10}
     },
 
     ps_settings: {

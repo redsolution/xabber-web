@@ -537,7 +537,7 @@ xabber.Account = Backbone.Model.extend({
                 }
                 this.createFastConnection();
                 this.session.set({connected: true, reconnected: false});
-            } else if (status === Strophe.Status.AUTHFAIL) {
+            } else if (status === Strophe.Status.AUTHFAIL || ((status === Strophe.Status.ERROR) && (condition === 'not-authorized'))) {
                 if ((this.get('auth_type') === 'x-token' || this.connection.x_token)){
                     if (this.session.get('conn_retries') <= 3 && $(elem).find('credentials-expired').length === 0)
                         this.reconnect(true);
@@ -636,7 +636,7 @@ xabber.Account = Backbone.Model.extend({
                 this.connection.connect_callback = this.connectionCallback.bind(this);
                 this.session.set({connected: true, reconnected: true,
                     reconnecting: false, conn_retries: 0});
-            } else if (status === Strophe.Status.AUTHFAIL) {
+            } else if (status === Strophe.Status.AUTHFAIL || ((status === Strophe.Status.ERROR) && (condition === 'not-authorized'))) {
                 if ((this.get('auth_type') === 'x-token' || this.connection.x_token)) {
                     if ($(elem).find('credentials-expired').length > 0)
                         this.onTokenRevoked();
@@ -716,6 +716,31 @@ xabber.Account = Backbone.Model.extend({
                 } else if (status === Strophe.Status.DISCONNECTED) {
                     this.change_password_connection_manager = undefined;
                     this.change_password_connection = undefined;
+                }
+            }
+        },
+
+        unregisterAccountCallback: function (status, condition) {
+            if (this.unregister_account_view){
+                if (status === Strophe.Status.REGISTERED) {
+                    this.unregister_account_view.close();
+                    this.trigger('deactivate', this);
+                    this.deleteAccount();
+                    xabber.settings_modal_view.closeSettings();
+                } else if (status === Strophe.Status.CONFLICT
+                    || status === Strophe.Status.NOTACCEPTABLE
+                    || status === Strophe.Status.REGIFAIL) {
+                    condition = condition ? ': ' + condition : '';
+                    this.unregister_account_view.errorFeedback({password: xabber.getString("account_unregister_failed") + condition});
+                    this.unregister_account_connection && this.unregister_account_connection.disconnect();
+                } else if (status === Strophe.Status.AUTHFAIL) {
+                    this.unregister_account_view.errorFeedback({password: xabber.getString("AUTHENTICATION_FAILED")});
+                    this.unregister_account_connection && this.unregister_account_connection.disconnect();
+                } else if (status === Strophe.Status.CONNECTED) {
+                    this.unregister_account_view.data.set('step', 1);
+                } else if (status === Strophe.Status.DISCONNECTED) {
+                    this.unregister_account_connection_manager = undefined;
+                    this.unregister_account_connection = undefined;
                 }
             }
         },
@@ -2843,6 +2868,7 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
         "click .settings-tabs-wrap .settings-tab:not(.delete-account):not(.settings-non-tab)": "jumpToBlock",
         "click .tokens-wrap .settings-tab.token-wrap": "jumpToBlock",
         "click .settings-tab.delete-account": "deleteAccount",
+        "click .settings-tab.unregister-account": "unregisterAccount",
 
         "change .enabled-state input": "setEnabled",
         "change .setting-send-chat-states input": "setTypingNotification",
@@ -3071,8 +3097,12 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
 
     backToSubMenuHandler: function (ev) {
         let $tab = $(ev.target).closest('.btn-back-subsettings-account'),
-            block_name = $tab.attr('data-subblock-parent-name'),
-            $elem = this.$('.settings-block-wrap.' + block_name),
+            block_name = $tab.attr('data-subblock-parent-name');
+        if (!block_name){
+            this.backToMenu(ev);
+            return;
+        }
+        let $elem = this.$('.settings-block-wrap.' + block_name),
             elem_parent = $elem.attr('data-parent-block');
         if (block_name){
             this.$('.media-gallery-button.btn-more').hideIf(block_name != 'media-gallery');
@@ -3200,14 +3230,8 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
     },
 
     deleteAccount: function () {
-        let dialog_options = [];
-        if (xabber.api_account && xabber.api_account.get('connected')) {
-            dialog_options = [{name: 'delete_settings',
-                checked: this.model.settings.get('to_sync'),
-                text: xabber.getString("dialog_delete_account__label_delete_synced_settings")}];
-        }
         utils.dialogs.ask(xabber.getString("settings_account__button_quit_account"), xabber.getString("dialog_quit_account__confirm"),
-            dialog_options, { ok_button_text: xabber.getString("button_quit")}).done((res) => {
+            [], { ok_button_text: xabber.getString("button_quit")}).done((res) => {
             if (!res)
                 return;
             if (res.delete_settings && xabber.api_account) {
@@ -3218,6 +3242,10 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
             }
             this.model.deleteAccount();
         });
+    },
+
+    unregisterAccount: function () {
+        xabber.trigger('unregister_account', this.model);
     },
 
 
@@ -6647,6 +6675,148 @@ xabber.AddAccountView = xabber.XmppLoginPanel.extend({
     }
 });
 
+
+xabber.UnregisterAccountView = xabber.XmppLoginPanel.extend({
+    className: 'modal main-modal unregister-account-modal',
+    template: templates.unregister_account,
+
+    events: {
+        "click .login-type": "changeLoginType",
+        "click .btn-log-in": "login",
+        "click .btn-submit-unregister": "submitUnregister",
+        "click .btn-cancel": "close",
+        "keyup input[name=jid]": "keyUpLogin",
+        "keyup input[name=password]": "keyUpLogin",
+        "keyup input[name=sign_in_domain]": "keyUpLogin",
+        "change input[type=checkbox]": "keyUpLogin",
+        "click .property-variant": "changePropertyValueAuth"
+    },
+
+    render: function (options) {
+        this.account = options.model;
+        this.$el.openModal({
+            ready: this.onRender.bind(this),
+            complete: this.close.bind(this)
+        });
+    },
+
+    onRender: function (options) {
+        this.authFeedback({});
+        this.data.set('step', 0);
+        this.$jid_input = this.$('input[name=jid]');
+        this.$password_input = this.$('input[name=password]');
+        this.$('input[type=checkbox]').prop('checked', false);
+        this.$jid_input.val('')
+        this.$password_input.val('')
+        this.keyUpLogin();
+        Materialize.updateTextFields();
+    },
+
+    keyUpLogin: function (ev) {
+        let checked_count = this.$('input[type=checkbox]:checked').length;
+        if(this.$password_input.val() && checked_count === 3){
+            this.$('.btn-log-in').prop('disabled', false);
+        } else {
+            this.$('.btn-log-in').prop('disabled', true);
+        }
+        if(this.$jid_input.val() && this.$jid_input.val() === this.account.get('jid')){
+            this.$('.btn-submit-unregister').prop('disabled', false);
+        } else {
+            this.$('.btn-submit-unregister').prop('disabled', true);
+        }
+        this.authFeedback({});
+    },
+
+    authFeedback: function (options) {
+        this.$jid_input.switchClass('invalid', options.jid);
+        this.$('.login-form-jid .login-jid-error').text(options.jid || '').showIf(options.jid);
+        this.$password_input.switchClass('invalid', options.password);
+        this.$('.login-form-jid .login-password-error').text(options.password || '').showIf(options.password);
+    },
+
+    unregisterAccount: function (callback, errback) {
+        let iq = $iq({
+            type: 'set',
+            to: this.connection.domain,
+            from: this.get('jid')
+        }).c('query', {xmlns:Strophe.NS.REGISTER}).c('remove');
+        this.sendIQFast(iq, (success) => {
+                callback & callback(success);
+            },
+            function (error) {
+                errback && errback(error);
+            });
+    },
+
+    login: function (callback, errback) {
+        this.submit()
+    },
+
+    submit: function () {
+        this.authFeedback({});
+        let password = this.$password_input.val();
+        if (!password)
+            return this.errorFeedback({password: xabber.getString("dialog_change_password__error__text_input_pass")});
+        this.authFeedback({password: xabber.getString("dialog_change_password__feedback__text_auth_with_pass")});
+        if (!this.account.unregister_account_connection_manager) {
+            this.account.unregister_account_view = this;
+            this.account.unregister_account_connection_manager = new Strophe.ConnectionManager(this.account.CONNECTION_URL);
+            this.account.unregister_account_connection = this.account.unregister_account_connection_manager.connection;
+            this.account.unregister_account_connection.account = this.account;
+            this.account.unregister_account_connection.register.connect_change_password(this.account.get('jid'), password, this.account.unregisterAccountCallback.bind(this.account))
+        }
+    },
+
+    submitUnregister: function () {
+        this.authFeedback({});
+        if (this.$jid_input.val() !== this.account.get('jid'))
+            return this.errorFeedback({jid: xabber.getString("settings_account__unregister_jid_mismatch")});
+        if (this.account && this.account.unregister_account_connection_manager && this.account.unregister_account_connection) {
+            this.account.unregister_account_connection.register.submit_unregister();
+        } else {
+            this.data.set('step', 0);
+            return this.errorFeedback({password: xabber.getString("settings_account__connection_broken")});
+        }
+    },
+
+    handleRegistrationStep: function () {
+        let step = this.data.get('step');
+        if (step === 0){
+            this.$('.login-form-step-wrap').removeClass('hidden');
+            this.$('.btn-log-in').removeClass('hidden');
+            this.$('.btn-submit-unregister').addClass('hidden');
+            this.$('.login-confirm-form-step-wrap').addClass('hidden');
+        } else if (step === 1) {
+            this.$('.login-form-step-wrap').addClass('hidden');
+            this.$('.btn-log-in').addClass('hidden');
+            this.$('.btn-submit-unregister').removeClass('hidden');
+            this.$('.login-confirm-form-step-wrap').removeClass('hidden');
+
+        }
+    },
+
+    endAuth: function () {
+    },
+
+    checkFeaturesStepper: function () {
+    },
+
+    onHide: function () {
+        this.$el.detach();
+        if (this.account && this.account.unregister_account_connection_manager && this.account.unregister_account_connection) {
+            this.account.unregister_account_connection.disconnect();
+        }
+    },
+
+    close: function () {
+        this.closeModal();
+    },
+
+    closeModal: function () {
+        this.$el.closeModal({ complete: this.hide.bind(this) });
+    }
+});
+
 xabber.once("start", function () {
     this.xmpp_login_panel = xabber.login_page.addChild('xmpp_login', this.XmppLoginPanel);
     this.account_settings = xabber.wide_panel.addChild('account_settings',
@@ -6677,6 +6847,12 @@ xabber.once("start", function () {
         if (!this.add_account_view)
             this.add_account_view = new this.AddAccountView();
         this.add_account_view.show();
+    }, this);
+
+    this.on("unregister_account", function (account) {
+        if (!this.unregister_account_view)
+            this.unregister_account_view = new this.UnregisterAccountView();
+        this.unregister_account_view.show({model: account});
     }, this);
 
     $(window).bind('beforeunload',function(){

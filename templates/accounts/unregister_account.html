@@ -1,0 +1,44 @@
+<div class="modal-content-wrap">
+    <div class="modal-header">
+        <span>{[print(xabber.getString("settings_account__delete_account_modal_title"))]}</span>
+    </div>
+    <div class="modal-content login-panel-form">
+        <div>{[print(xabber.getString("settings_account__delete_account_modal_text"))]}</div>
+
+        <div class="login-form-jid">
+            <div class="login-form-step-wrap">
+                <div class="input-field-wrap">
+                    <div class="input-field checkbox-field">
+                        <input type="checkbox" class="filled-in" id="confirm_unregister_1"/>
+                        <label for="confirm_unregister_1">{[print(xabber.getString("settings_account__checkbox_confirm_unregister_text_1"))]}</label>
+                    </div>
+                    <div class="input-field checkbox-field">
+                        <input type="checkbox" class="filled-in" id="confirm_unregister_2"/>
+                        <label for="confirm_unregister_2">{[print(xabber.getString("settings_account__checkbox_confirm_unregister_text_2"))]}</label>
+                    </div>
+                    <div class="input-field checkbox-field">
+                        <input type="checkbox" class="filled-in" id="confirm_unregister_3"/>
+                        <label for="confirm_unregister_3">{[print(xabber.getString("settings_account__checkbox_confirm_unregister_text_2"))]}</label>
+                    </div>
+                    <div class="input-field">
+                        <input id="password" placeholder='{[print(xabber.getString("hint_pass"))]}' type="password" name="password">
+                    </div>
+                </div>
+                <div class="login-form-step-error login-password-error hidden"></div>
+            </div>
+            <div class="login-confirm-form-step-wrap hidden">
+                <div class="input-field-wrap">
+                    <div class="input-field input-field-jid input-field-jid-borders">
+                        <input id="jid" placeholder='{[print(xabber.getString("hint_xmpp_id"))]}' type="text" name="jid">
+                    </div>
+                </div>
+                <div class="login-form-step-error login-jid-error hidden"></div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button disabled class="btn-flat btn-main btn-log-in">{[print(xabber.getString("delete"))]}</button>
+        <button disabled class="btn-flat btn-main btn-submit-unregister hidden">{[print(xabber.getString("delete"))]}</button>
+        <button class="btn-flat btn-main btn-dark btn-cancel">{[print(xabber.getString("cancel"))]}</button>
+    </div>
+</div>

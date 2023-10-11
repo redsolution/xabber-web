@@ -9408,6 +9408,7 @@ xabber.BlockListView = xabber.BasicView.extend({
         for (let jid in this.account.blocklist.list) {
             this.onContactAdded(this.account.blocklist.list[jid], false);
         };
+        this.updateTabsLabel();
         this.account.contacts.on("add_to_blocklist", this.onContactAdded, this);
         this.account.contacts.on("remove_from_blocklist", this.onContactRemoved, this);
     },

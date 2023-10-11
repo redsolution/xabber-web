@@ -424,6 +424,50 @@ Strophe.addConnectionPlugin('register', {
         }
 
         return false;
+    },
+
+    submit_unregister: function () {
+        var lang = xabber.settings.language;
+        (lang === 'default') && (lang = xabber.get('default_language'));
+        var i, name, query, fields, conn = this._connection;
+        query = $iq({type: "set", 'xml:lang': lang, id: uuid()}).c("query", {xmlns:Strophe.NS.REGISTER}).c('remove');
+
+        conn._addSysHandler(this._submit_unregister_cb.bind(this),
+            null, "iq", null, null);
+        conn.send(query);
+    },
+
+    _submit_unregister_cb: function (stanza) {
+        var i, error = null, conn = this._connection;
+
+        if (stanza.getAttribute("type") === "error") {
+            error = stanza.getElementsByTagName("error");
+            let error_text = stanza.getElementsByTagName("text");
+            if (error_text.length > 0)
+                error_text = error_text[0].innerHTML;
+            if (error.length !== 1) {
+                conn._changeConnectStatus(Strophe.Status.REGIFAIL, "unknown");
+                return false;
+            }
+
+            Strophe.info("Unregistration failed.");
+
+            // this is either 'conflict' or 'not-acceptable'
+            error = error[0].firstChild.tagName.toLowerCase();
+            if (error === 'conflict') {
+                conn._changeConnectStatus(Strophe.Status.CONFLICT, error, error_text);
+            } else if (error === 'not-acceptable') {
+                conn._changeConnectStatus(Strophe.Status.NOTACCEPTABLE, error, error_text);
+            } else {
+                conn._changeConnectStatus(Strophe.Status.REGIFAIL, error, error_text);
+            }
+        } else {
+            Strophe.info("Unregistration successful.");
+
+            conn._changeConnectStatus(Strophe.Status.REGISTERED, null);
+        }
+
+        return false;
     }
 });
 

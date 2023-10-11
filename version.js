@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.3.4.35","version_description":"changed modal settings rendering, now it only renders them and doesnt hide other containers and on closing set previous screen attributes and hides settings"}'
+'{"version_number":"2.3.4.36","version_description":"added delete account button and it handling, added connection stream error handling for not-authorized, upped jquery version, changed enable tumbler position in account settings, changed time for modal background fading, fixed blocklist label, fixed device information terminate back to menu, fixed emptytag html elements"}'
 )});
