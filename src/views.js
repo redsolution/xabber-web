@@ -957,6 +957,15 @@ xabber.Body = xabber.NodeView.extend({
         }
     },
 
+    showChatPlaceholder: function () {
+        try {
+            xabber.right_panel.$el.children().detach();
+            xabber.right_panel.$el.append(xabber.chat_placeholder.$el);
+        } catch (e) {
+            console.log(e)
+        }
+    },
+
     update: function () {
         let options = this.screen.attributes,
             tree = this.screen_map.get(options.name);

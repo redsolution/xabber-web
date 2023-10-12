@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.3.4.36","version_description":"added delete account button and it handling, added connection stream error handling for not-authorized, upped jquery version, changed enable tumbler position in account settings, changed time for modal background fading, fixed blocklist label, fixed device information terminate back to menu, fixed emptytag html elements"}'
+'{"version_number":"2.3.4.37","version_description":"show placeholder func on hiding active chat, modal settings opening on saved chat head click"}'
 )});
