@@ -732,9 +732,11 @@ xabber.Account = Backbone.Model.extend({
                     || status === Strophe.Status.REGIFAIL) {
                     condition = condition ? ': ' + condition : '';
                     this.unregister_account_view.errorFeedback({password: xabber.getString("account_unregister_failed") + condition});
+                    this.unregister_account_view.data.set('step', 0);
                     this.unregister_account_connection && this.unregister_account_connection.disconnect();
                 } else if (status === Strophe.Status.AUTHFAIL) {
                     this.unregister_account_view.errorFeedback({password: xabber.getString("AUTHENTICATION_FAILED")});
+                    this.unregister_account_view.data.set('step', 0);
                     this.unregister_account_connection && this.unregister_account_connection.disconnect();
                 } else if (status === Strophe.Status.CONNECTED) {
                     this.unregister_account_view.data.set('step', 1);
