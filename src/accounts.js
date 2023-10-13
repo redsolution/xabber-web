@@ -2531,7 +2531,7 @@ xabber.AccountMediaGalleryView = xabber.BasicView.extend({
                 this.$('.indicator').addClass('ground-color-500');
             }
         }
-        if (!response.items || !response.items.length){
+        if ((!response.items || !response.items.length) && this.$('.tabs .list-variant.tab a').length > 1){
             !this.$('.gallery-files').children('.gallery-file').length && this.$('.tabs .list-variant.tab a').first().click();
             return;
         }

@@ -1039,14 +1039,7 @@ xabber.ToolbarView = xabber.BasicView.extend({
     },
 
     onUpdatedScreen: function (name) {
-        if (name === 'account_settings'){
-            this.$('.toolbar-item:not(.toolbar-logo):not(.account-item)').removeClass('active unread');
-            this.$('.toolbar-item:not(.toolbar-logo).settings').addClass('active');
-            return;
-        }
-        if (name === 'account_settings_modal'){
-            this.$('.toolbar-item:not(.toolbar-logo):not(.account-item)').removeClass('active unread');
-            this.$('.toolbar-item:not(.toolbar-logo).settings-modal').addClass('active');
+        if (name === 'account_settings_modal' || name === 'settings-modal'){
             return;
         }
         if ((name === 'all-chats') &&

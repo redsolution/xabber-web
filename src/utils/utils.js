@@ -330,7 +330,7 @@ var utils = {
     },
 
     pretty_size: function (size) {
-        if (!size)
+        if (!size && size != 0)
             return "";
         if (_.isNaN(Number(size)))
             return size;
