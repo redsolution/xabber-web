@@ -2848,7 +2848,7 @@ $(document).ready(function(){
 
     var range_wrapper = '.range-field';
     $(document).on('change', range_type, function(e) {
-      var thumb = $(this).siblings('.thumb');//34
+      var thumb = $(this).siblings('.thumb');
         if ($(this).hasClass('materialize-timer')){
             thumb.find('.value').html($(this).val() + 's');
         } else {

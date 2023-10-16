@@ -8641,10 +8641,14 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
         view.updateActiveStatus();
         let scrolled_top = xabber.chats_view.getScrollTop();
         options.clear_search && this.clearSearch();
-        if (view.contact && !view.contact.get('in_roster') && (view.model.get('is_accepted') == false)) {
-            view.model.set('display', true);
-            view.model.set('active', true);
-            xabber.body.setScreen('all-chats', {right: 'group_invitation', contact: view.contact });
+        if (view.contact && !view.contact.get('in_roster')) {
+            if (view.model.get('is_accepted') == false){
+                view.model.set('display', true);
+                view.model.set('active', true);
+                xabber.body.setScreen('all-chats', {right: 'group_invitation', contact: view.contact });
+            } else if (view.model.get('is_accepted') == true && view.contact.invitation){
+                view.contact.invitation.join();
+            }
         }
         else {
             if (xabber.toolbar_view.$('.active').hasClass('contacts'))

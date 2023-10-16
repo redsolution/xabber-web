@@ -1,13 +1,13 @@
 <div class="participant-details-wrap">
     <div class="participant-details-info-wrap">
     </div>
+    <ul class="tabs participant-tabs bottom-block-tabs">
+        <li data-value="image" class="list-variant tab"><a class="text-color-700">{[print(xabber.getString("images"))]}</a></li>
+        <li data-value="video" class="list-variant tab"><a class="text-color-700">{[print(xabber.getString("videos"))]}</a></li>
+        <li data-value="files" class="list-variant tab"><a class="text-color-700">{[print(xabber.getString("files"))]}</a></li>
+        <li data-value="voice" class="list-variant tab"><a class="text-color-700">{[print(xabber.getString("vcard_type_voice"))]}</a></li>
+    </ul>
     <div class="bottom-block participant-bottom-block">
-        <ul class="tabs participant-tabs">
-            <li data-value="image" class="list-variant tab"><a class="text-color-700">{[print(xabber.getString("images"))]}</a></li>
-            <li data-value="video" class="list-variant tab"><a class="text-color-700">{[print(xabber.getString("videos"))]}</a></li>
-            <li data-value="files" class="list-variant tab"><a class="text-color-700">{[print(xabber.getString("files"))]}</a></li>
-            <li data-value="voice" class="list-variant tab"><a class="text-color-700">{[print(xabber.getString("vcard_type_voice"))]}</a></li>
-        </ul>
         <div class="block-wrap participants-details-media-wrap"></div>
     </div>
     <div class="participant-details-edit-wrap edit-wrap">

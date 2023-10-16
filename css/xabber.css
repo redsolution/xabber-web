@@ -1495,8 +1495,8 @@ body {
 [data-main-color=red] .recent-chats-panel .read-all-button,
 [data-main-color=red] .edit-rights .participant-details-item .buttons-wrap i,
 [data-main-color=red] .edit-rights .participant-details-item .buttons-wrap svg,
-[data-main-color=red] .details-panel .main-info .buttons-wrap .btn-leave,
-[data-main-color=red] .details-panel .main-info .buttons-wrap i,
+[data-main-color=red] .details-panel .buttons-wrap.sticky-details-wrap .btn-leave,
+[data-main-color=red] .details-panel .buttons-wrap.sticky-details-wrap i,
 [data-main-color=red] .settings-block-wrap input[type=range] + .thumb,
 [data-main-color=red] .switch label input[type=checkbox]:checked + .lever:after,
 [data-main-color=red] .btn-main-filled,
@@ -1520,10 +1520,10 @@ body {
 [data-main-color=red] input:focus:not([readonly]):not([type=checkbox]) + label,
 [data-main-color=red] .chat-location .ol-control a,
 [data-main-color=red] .chat-location .ol-control.ol-send button,
-[data-main-color=red] .details-panel-right .main-info .buttons-wrap i,
+[data-main-color=red] .details-panel-right .buttons-wrap.sticky-details-wrap i,
 [data-main-color=red] .details-panel-right .vcard .show-vcard,
 [data-main-color=red] .register-form.login-panel-form .register-form-step-wrap .register-form-step-error.available,
-[data-main-color=red] .details-panel-right .main-info .buttons-wrap .btn-leave-wrap .btn-leave .btn-name,
+[data-main-color=red] .details-panel-right .buttons-wrap.sticky-details-wrap .btn-leave-wrap .btn-leave .btn-name,
 [data-main-color=red] .toolbar .toolbar-item.active .toolbar-icon {
     color: #F44336;
 }
@@ -1612,8 +1612,8 @@ body {
 [data-main-color=pink] .recent-chats-panel .read-all-button,
 [data-main-color=pink] .edit-rights .participant-details-item .buttons-wrap i,
 [data-main-color=pink] .edit-rights .participant-details-item .buttons-wrap svg,
-[data-main-color=pink] .details-panel .main-info .buttons-wrap .btn-leave,
-[data-main-color=pink] .details-panel .main-info .buttons-wrap i,
+[data-main-color=pink] .details-panel .buttons-wrap.sticky-details-wrap .btn-leave,
+[data-main-color=pink] .details-panel .buttons-wrap.sticky-details-wrap i,
 [data-main-color=pink] .settings-block-wrap input[type=range] + .thumb,
 [data-main-color=pink] .switch label input[type=checkbox]:checked + .lever:after,
 [data-main-color=pink] .btn-main-filled,
@@ -1637,7 +1637,7 @@ body {
 [data-main-color=pink] input:focus:not([readonly]):not([type=checkbox]) + label,
 [data-main-color=pink] .chat-location .ol-control a,
 [data-main-color=pink] .chat-location .ol-control.ol-send button,
-[data-main-color=pink] .details-panel-right .main-info .buttons-wrap i,
+[data-main-color=pink] .details-panel-right .buttons-wrap.sticky-details-wrap i,
 [data-main-color=pink] .details-panel-right .vcard .show-vcard,
 [data-main-color=pink] .register-form.login-panel-form .register-form-step-wrap .register-form-step-error.available,
 [data-main-color=pink] .toolbar .toolbar-item.active .toolbar-icon {
@@ -1728,8 +1728,8 @@ body {
 [data-main-color=purple] .recent-chats-panel .read-all-button,
 [data-main-color=purple] .edit-rights .participant-details-item .buttons-wrap i,
 [data-main-color=purple] .edit-rights .participant-details-item .buttons-wrap svg,
-[data-main-color=purple] .details-panel .main-info .buttons-wrap .btn-leave,
-[data-main-color=purple] .details-panel .main-info .buttons-wrap i,
+[data-main-color=purple] .details-panel .buttons-wrap.sticky-details-wrap .btn-leave,
+[data-main-color=purple] .details-panel .buttons-wrap.sticky-details-wrap i,
 [data-main-color=purple] .settings-block-wrap input[type=range] + .thumb,
 [data-main-color=purple] .switch label input[type=checkbox]:checked + .lever:after,
 [data-main-color=purple] .btn-main-filled,
@@ -1753,7 +1753,7 @@ body {
 [data-main-color=purple] input:focus:not([readonly]):not([type=checkbox]) + label,
 [data-main-color=purple] .chat-location .ol-control a,
 [data-main-color=purple] .chat-location .ol-control.ol-send button,
-[data-main-color=purple] .details-panel-right .main-info .buttons-wrap i,
+[data-main-color=purple] .details-panel-right .buttons-wrap.sticky-details-wrap i,
 [data-main-color=purple] .details-panel-right .vcard .show-vcard,
 [data-main-color=purple] .register-form.login-panel-form .register-form-step-wrap .register-form-step-error.available,
 [data-main-color=purple] .toolbar .toolbar-item.active .toolbar-icon {
@@ -1844,8 +1844,8 @@ body {
 [data-main-color=deep-purple] .recent-chats-panel .read-all-button,
 [data-main-color=deep-purple] .edit-rights .participant-details-item .buttons-wrap i,
 [data-main-color=deep-purple] .edit-rights .participant-details-item .buttons-wrap svg,
-[data-main-color=deep-purple] .details-panel .main-info .buttons-wrap .btn-leave,
-[data-main-color=deep-purple] .details-panel .main-info .buttons-wrap i,
+[data-main-color=deep-purple] .details-panel .buttons-wrap.sticky-details-wrap .btn-leave,
+[data-main-color=deep-purple] .details-panel .buttons-wrap.sticky-details-wrap i,
 [data-main-color=deep-purple] .settings-block-wrap input[type=range] + .thumb,
 [data-main-color=deep-purple] .switch label input[type=checkbox]:checked + .lever:after,
 [data-main-color=deep-purple] .btn-main-filled,
@@ -1868,7 +1868,7 @@ body {
 [data-main-color=deep-purple] input:focus:not([readonly]):not([type=checkbox]) + label,
 [data-main-color=deep-purple] .chat-location .ol-control a,
 [data-main-color=deep-purple] .chat-location .ol-control.ol-send button,
-[data-main-color=deep-purple] .details-panel-right .main-info .buttons-wrap i,
+[data-main-color=deep-purple] .details-panel-right .buttons-wrap.sticky-details-wrap i,
 [data-main-color=deep-purple] .details-panel-right .vcard .show-vcard,
 [data-main-color=deep-purple] .register-form.login-panel-form .register-form-step-wrap .register-form-step-error.available,
 [data-main-color=deep-purple] .toolbar .toolbar-item.active .toolbar-icon {
@@ -1959,8 +1959,8 @@ body {
 [data-main-color=indigo] .recent-chats-panel .read-all-button,
 [data-main-color=indigo] .edit-rights .participant-details-item .buttons-wrap i,
 [data-main-color=indigo] .edit-rights .participant-details-item .buttons-wrap svg,
-[data-main-color=indigo] .details-panel .main-info .buttons-wrap .btn-leave,
-[data-main-color=indigo] .details-panel .main-info .buttons-wrap i,
+[data-main-color=indigo] .details-panel .buttons-wrap.sticky-details-wrap .btn-leave,
+[data-main-color=indigo] .details-panel .buttons-wrap.sticky-details-wrap i,
 [data-main-color=indigo] .settings-block-wrap input[type=range] + .thumb,
 [data-main-color=indigo] .switch label input[type=checkbox]:checked + .lever:after,
 [data-main-color=indigo] .btn-main-filled,
@@ -1984,7 +1984,7 @@ body {
 [data-main-color=indigo] input:focus:not([readonly]):not([type=checkbox]) + label,
 [data-main-color=indigo] .chat-location .ol-control a,
 [data-main-color=indigo] .chat-location .ol-control.ol-send button,
-[data-main-color=indigo] .details-panel-right .main-info .buttons-wrap i,
+[data-main-color=indigo] .details-panel-right .buttons-wrap.sticky-details-wrap i,
 [data-main-color=indigo] .details-panel-right .vcard .show-vcard,
 [data-main-color=indigo] .register-form.login-panel-form .register-form-step-wrap .register-form-step-error.available,
 [data-main-color=indigo] .toolbar .toolbar-item.active .toolbar-icon {
@@ -2075,8 +2075,8 @@ body {
 [data-main-color=blue] .recent-chats-panel .read-all-button,
 [data-main-color=blue] .edit-rights .participant-details-item .buttons-wrap i,
 [data-main-color=blue] .edit-rights .participant-details-item .buttons-wrap svg,
-[data-main-color=blue] .details-panel .main-info .buttons-wrap .btn-leave,
-[data-main-color=blue] .details-panel .main-info .buttons-wrap i,
+[data-main-color=blue] .details-panel .buttons-wrap.sticky-details-wrap .btn-leave,
+[data-main-color=blue] .details-panel .buttons-wrap.sticky-details-wrap i,
 [data-main-color=blue] .settings-block-wrap input[type=range] + .thumb,
 [data-main-color=blue] .switch label input[type=checkbox]:checked + .lever:after,
 [data-main-color=blue] .btn-main-filled,
@@ -2100,7 +2100,7 @@ body {
 [data-main-color=blue] input:focus:not([readonly]):not([type=checkbox]) + label,
 [data-main-color=blue] .chat-location .ol-control a,
 [data-main-color=blue] .chat-location .ol-control.ol-send button,
-[data-main-color=blue] .details-panel-right .main-info .buttons-wrap i,
+[data-main-color=blue] .details-panel-right .buttons-wrap.sticky-details-wrap i,
 [data-main-color=blue] .details-panel-right .vcard .show-vcard,
 [data-main-color=blue] .register-form.login-panel-form .register-form-step-wrap .register-form-step-error.available,
 [data-main-color=blue] .toolbar .toolbar-item.active .toolbar-icon {
@@ -2191,8 +2191,8 @@ body {
 [data-main-color=light-blue] .recent-chats-panel .read-all-button,
 [data-main-color=light-blue] .edit-rights .participant-details-item .buttons-wrap i,
 [data-main-color=light-blue] .edit-rights .participant-details-item .buttons-wrap svg,
-[data-main-color=light-blue] .details-panel .main-info .buttons-wrap .btn-leave,
-[data-main-color=light-blue] .details-panel .main-info .buttons-wrap i,
+[data-main-color=light-blue] .details-panel .buttons-wrap.sticky-details-wrap .btn-leave,
+[data-main-color=light-blue] .details-panel .buttons-wrap.sticky-details-wrap i,
 [data-main-color=light-blue] .settings-block-wrap input[type=range] + .thumb,
 [data-main-color=light-blue] .switch label input[type=checkbox]:checked + .lever:after,
 [data-main-color=light-blue] .btn-main-filled,
@@ -2216,7 +2216,7 @@ body {
 [data-main-color=light-blue] input:focus:not([readonly]):not([type=checkbox]) + label,
 [data-main-color=light-blue] .chat-location .ol-control a,
 [data-main-color=light-blue] .chat-location .ol-control.ol-send button,
-[data-main-color=light-blue] .details-panel-right .main-info .buttons-wrap i,
+[data-main-color=light-blue] .details-panel-right .buttons-wrap.sticky-details-wrap i,
 [data-main-color=light-blue] .details-panel-right .vcard .show-vcard,
 [data-main-color=light-blue] .register-form.login-panel-form .register-form-step-wrap .register-form-step-error.available,
 [data-main-color=light-blue] .toolbar .toolbar-item.active .toolbar-icon {
@@ -2307,8 +2307,8 @@ body {
 [data-main-color=cyan] .recent-chats-panel .read-all-button,
 [data-main-color=cyan] .edit-rights .participant-details-item .buttons-wrap i,
 [data-main-color=cyan] .edit-rights .participant-details-item .buttons-wrap svg,
-[data-main-color=cyan] .details-panel .main-info .buttons-wrap .btn-leave,
-[data-main-color=cyan] .details-panel .main-info .buttons-wrap i,
+[data-main-color=cyan] .details-panel .buttons-wrap.sticky-details-wrap .btn-leave,
+[data-main-color=cyan] .details-panel .buttons-wrap.sticky-details-wrap i,
 [data-main-color=cyan] .settings-block-wrap input[type=range] + .thumb,
 [data-main-color=cyan] .switch label input[type=checkbox]:checked + .lever:after,
 [data-main-color=cyan] .btn-main-filled,
@@ -2332,7 +2332,7 @@ body {
 [data-main-color=cyan] input:focus:not([readonly]):not([type=checkbox]) + label,
 [data-main-color=cyan] .chat-location .ol-control a,
 [data-main-color=cyan] .chat-location .ol-control.ol-send button,
-[data-main-color=cyan] .details-panel-right .main-info .buttons-wrap i,
+[data-main-color=cyan] .details-panel-right .buttons-wrap.sticky-details-wrap i,
 [data-main-color=cyan] .details-panel-right .vcard .show-vcard,
 [data-main-color=cyan] .register-form.login-panel-form .register-form-step-wrap .register-form-step-error.available,
 [data-main-color=cyan] .toolbar .toolbar-item.active .toolbar-icon {
@@ -2423,8 +2423,8 @@ body {
 [data-main-color=teal] .recent-chats-panel .read-all-button,
 [data-main-color=teal] .edit-rights .participant-details-item .buttons-wrap i,
 [data-main-color=teal] .edit-rights .participant-details-item .buttons-wrap svg,
-[data-main-color=teal] .details-panel .main-info .buttons-wrap .btn-leave,
-[data-main-color=teal] .details-panel .main-info .buttons-wrap i,
+[data-main-color=teal] .details-panel .buttons-wrap.sticky-details-wrap .btn-leave,
+[data-main-color=teal] .details-panel .buttons-wrap.sticky-details-wrap i,
 [data-main-color=teal] .settings-block-wrap input[type=range] + .thumb,
 [data-main-color=teal] .switch label input[type=checkbox]:checked + .lever:after,
 [data-main-color=teal] .btn-main-filled,
@@ -2448,7 +2448,7 @@ body {
 [data-main-color=teal] input:focus:not([readonly]):not([type=checkbox]) + label,
 [data-main-color=teal] .chat-location .ol-control a,
 [data-main-color=teal] .chat-location .ol-control.ol-send button,
-[data-main-color=teal] .details-panel-right .main-info .buttons-wrap i,
+[data-main-color=teal] .details-panel-right .buttons-wrap.sticky-details-wrap i,
 [data-main-color=teal] .details-panel-right .vcard .show-vcard,
 [data-main-color=teal] .register-form.login-panel-form .register-form-step-wrap .register-form-step-error.available,
 [data-main-color=teal] .toolbar .toolbar-item.active .toolbar-icon {
@@ -2539,8 +2539,8 @@ body {
 [data-main-color=green] .recent-chats-panel .read-all-button,
 [data-main-color=green] .edit-rights .participant-details-item .buttons-wrap i,
 [data-main-color=green] .edit-rights .participant-details-item .buttons-wrap svg,
-[data-main-color=green] .details-panel .main-info .buttons-wrap .btn-leave,
-[data-main-color=green] .details-panel .main-info .buttons-wrap i,
+[data-main-color=green] .details-panel .buttons-wrap.sticky-details-wrap .btn-leave,
+[data-main-color=green] .details-panel .buttons-wrap.sticky-details-wrap i,
 [data-main-color=green] .settings-block-wrap input[type=range] + .thumb,
 [data-main-color=green] .switch label input[type=checkbox]:checked + .lever:after,
 [data-main-color=green] .btn-main-filled,
@@ -2564,7 +2564,7 @@ body {
 [data-main-color=green] input:focus:not([readonly]):not([type=checkbox]) + label,
 [data-main-color=green] .chat-location .ol-control a,
 [data-main-color=green] .chat-location .ol-control.ol-send button,
-[data-main-color=green] .details-panel-right .main-info .buttons-wrap i,
+[data-main-color=green] .details-panel-right .buttons-wrap.sticky-details-wrap i,
 [data-main-color=green] .details-panel-right .vcard .show-vcard,
 [data-main-color=green] .register-form.login-panel-form .register-form-step-wrap .register-form-step-error.available,
 [data-main-color=green] .toolbar .toolbar-item.active .toolbar-icon {
@@ -2655,8 +2655,8 @@ body {
 [data-main-color=light-green] .recent-chats-panel .read-all-button,
 [data-main-color=light-green] .edit-rights .participant-details-item .buttons-wrap i,
 [data-main-color=light-green] .edit-rights .participant-details-item .buttons-wrap svg,
-[data-main-color=light-green] .details-panel .main-info .buttons-wrap .btn-leave,
-[data-main-color=light-green] .details-panel .main-info .buttons-wrap i,
+[data-main-color=light-green] .details-panel .buttons-wrap.sticky-details-wrap .btn-leave,
+[data-main-color=light-green] .details-panel .buttons-wrap.sticky-details-wrap i,
 [data-main-color=light-green] .settings-block-wrap input[type=range] + .thumb,
 [data-main-color=light-green] .switch label input[type=checkbox]:checked + .lever:after,
 [data-main-color=light-green] .btn-main-filled,
@@ -2680,7 +2680,7 @@ body {
 [data-main-color=light-green] input:focus:not([readonly]):not([type=checkbox]) + label,
 [data-main-color=light-green] .chat-location .ol-control a,
 [data-main-color=light-green] .chat-location .ol-control.ol-send button,
-[data-main-color=light-green] .details-panel-right .main-info .buttons-wrap i,
+[data-main-color=light-green] .details-panel-right .buttons-wrap.sticky-details-wrap i,
 [data-main-color=light-green] .details-panel-right .vcard .show-vcard,
 [data-main-color=light-green] .register-form.login-panel-form .register-form-step-wrap .register-form-step-error.available,
 [data-main-color=light-green] .toolbar .toolbar-item.active .toolbar-icon {
@@ -2771,8 +2771,8 @@ body {
 [data-main-color=lime] .recent-chats-panel .read-all-button,
 [data-main-color=lime] .edit-rights .participant-details-item .buttons-wrap i,
 [data-main-color=lime] .edit-rights .participant-details-item .buttons-wrap svg,
-[data-main-color=lime] .details-panel .main-info .buttons-wrap .btn-leave,
-[data-main-color=lime] .details-panel .main-info .buttons-wrap i,
+[data-main-color=lime] .details-panel .buttons-wrap.sticky-details-wrap .btn-leave,
+[data-main-color=lime] .details-panel .buttons-wrap.sticky-details-wrap i,
 [data-main-color=lime] .settings-block-wrap input[type=range] + .thumb,
 [data-main-color=lime] .switch label input[type=checkbox]:checked + .lever:after,
 [data-main-color=lime] .btn-main-filled,
@@ -2796,7 +2796,7 @@ body {
 [data-main-color=lime] input:focus:not([readonly]):not([type=checkbox]) + label,
 [data-main-color=lime] .chat-location .ol-control a,
 [data-main-color=lime] .chat-location .ol-control.ol-send button,
-[data-main-color=lime] .details-panel-right .main-info .buttons-wrap i,
+[data-main-color=lime] .details-panel-right .buttons-wrap.sticky-details-wrap i,
 [data-main-color=lime] .details-panel-right .vcard .show-vcard,
 [data-main-color=lime] .register-form.login-panel-form .register-form-step-wrap .register-form-step-error.available,
 [data-main-color=lime] .toolbar .toolbar-item.active .toolbar-icon {
@@ -2887,8 +2887,8 @@ body {
 [data-main-color=amber] .recent-chats-panel .read-all-button,
 [data-main-color=amber] .edit-rights .participant-details-item .buttons-wrap i,
 [data-main-color=amber] .edit-rights .participant-details-item .buttons-wrap svg,
-[data-main-color=amber] .details-panel .main-info .buttons-wrap .btn-leave,
-[data-main-color=amber] .details-panel .main-info .buttons-wrap i,
+[data-main-color=amber] .details-panel .buttons-wrap.sticky-details-wrap .btn-leave,
+[data-main-color=amber] .details-panel .buttons-wrap.sticky-details-wrap i,
 [data-main-color=amber] .settings-block-wrap input[type=range] + .thumb,
 [data-main-color=amber] .switch label input[type=checkbox]:checked + .lever:after,
 [data-main-color=amber] .btn-main-filled,
@@ -2912,7 +2912,7 @@ body {
 [data-main-color=amber] input:focus:not([readonly]):not([type=checkbox]) + label,
 [data-main-color=amber] .chat-location .ol-control a,
 [data-main-color=amber] .chat-location .ol-control.ol-send button,
-[data-main-color=amber] .details-panel-right .main-info .buttons-wrap i,
+[data-main-color=amber] .details-panel-right .buttons-wrap.sticky-details-wrap i,
 [data-main-color=amber] .details-panel-right .vcard .show-vcard,
 [data-main-color=amber] .register-form.login-panel-form .register-form-step-wrap .register-form-step-error.available,
 [data-main-color=amber] .toolbar .toolbar-item.active .toolbar-icon {
@@ -3003,8 +3003,8 @@ body {
 [data-main-color=orange] .recent-chats-panel .read-all-button,
 [data-main-color=orange] .edit-rights .participant-details-item .buttons-wrap i,
 [data-main-color=orange] .edit-rights .participant-details-item .buttons-wrap svg,
-[data-main-color=orange] .details-panel .main-info .buttons-wrap .btn-leave,
-[data-main-color=orange] .details-panel .main-info .buttons-wrap i,
+[data-main-color=orange] .details-panel .buttons-wrap.sticky-details-wrap .btn-leave,
+[data-main-color=orange] .details-panel .buttons-wrap.sticky-details-wrap i,
 [data-main-color=orange] .settings-block-wrap input[type=range] + .thumb,
 [data-main-color=orange] .switch label input[type=checkbox]:checked + .lever:after,
 [data-main-color=orange] .btn-main-filled,
@@ -3028,7 +3028,7 @@ body {
 [data-main-color=orange] input:focus:not([readonly]):not([type=checkbox]) + label,
 [data-main-color=orange] .chat-location .ol-control a,
 [data-main-color=orange] .chat-location .ol-control.ol-send button,
-[data-main-color=orange] .details-panel-right .main-info .buttons-wrap i,
+[data-main-color=orange] .details-panel-right .buttons-wrap.sticky-details-wrap i,
 [data-main-color=orange] .details-panel-right .vcard .show-vcard,
 [data-main-color=orange] .register-form.login-panel-form .register-form-step-wrap .register-form-step-error.available,
 [data-main-color=orange] .toolbar .toolbar-item.active .toolbar-icon {
@@ -3119,8 +3119,8 @@ body {
 [data-main-color=deep-orange] .recent-chats-panel .read-all-button,
 [data-main-color=deep-orange] .edit-rights .participant-details-item .buttons-wrap i,
 [data-main-color=deep-orange] .edit-rights .participant-details-item .buttons-wrap svg,
-[data-main-color=deep-orange] .details-panel .main-info .buttons-wrap .btn-leave,
-[data-main-color=deep-orange] .details-panel .main-info .buttons-wrap i,
+[data-main-color=deep-orange] .details-panel .buttons-wrap.sticky-details-wrap .btn-leave,
+[data-main-color=deep-orange] .details-panel .buttons-wrap.sticky-details-wrap i,
 [data-main-color=deep-orange] .settings-block-wrap input[type=range] + .thumb,
 [data-main-color=deep-orange] .switch label input[type=checkbox]:checked + .lever:after,
 [data-main-color=deep-orange] .btn-main-filled,
@@ -3144,7 +3144,7 @@ body {
 [data-main-color=deep-orange] input:focus:not([readonly]):not([type=checkbox]) + label,
 [data-main-color=deep-orange] .chat-location .ol-control a,
 [data-main-color=deep-orange] .chat-location .ol-control.ol-send button,
-[data-main-color=deep-orange] .details-panel-right .main-info .buttons-wrap i,
+[data-main-color=deep-orange] .details-panel-right .buttons-wrap.sticky-details-wrap i,
 [data-main-color=deep-orange] .details-panel-right .vcard .show-vcard,
 [data-main-color=deep-orange] .register-form.login-panel-form .register-form-step-wrap .register-form-step-error.available,
 [data-main-color=deep-orange] .toolbar .toolbar-item.active .toolbar-icon {
@@ -3235,8 +3235,8 @@ body {
 [data-main-color=brown] .recent-chats-panel .read-all-button,
 [data-main-color=brown] .edit-rights .participant-details-item .buttons-wrap i,
 [data-main-color=brown] .edit-rights .participant-details-item .buttons-wrap svg,
-[data-main-color=brown] .details-panel .main-info .buttons-wrap .btn-leave,
-[data-main-color=brown] .details-panel .main-info .buttons-wrap i,
+[data-main-color=brown] .details-panel .buttons-wrap.sticky-details-wrap .btn-leave,
+[data-main-color=brown] .details-panel .buttons-wrap.sticky-details-wrap i,
 [data-main-color=brown] .settings-block-wrap input[type=range] + .thumb,
 [data-main-color=brown] .switch label input[type=checkbox]:checked + .lever:after,
 [data-main-color=brown] .btn-main-filled,
@@ -3260,7 +3260,7 @@ body {
 [data-main-color=brown] input:focus:not([readonly]):not([type=checkbox]) + label,
 [data-main-color=brown] .chat-location .ol-control a,
 [data-main-color=brown] .chat-location .ol-control.ol-send button,
-[data-main-color=brown] .details-panel-right .main-info .buttons-wrap i,
+[data-main-color=brown] .details-panel-right .buttons-wrap.sticky-details-wrap i,
 [data-main-color=brown] .details-panel-right .vcard .show-vcard,
 [data-main-color=brown] .register-form.login-panel-form .register-form-step-wrap .register-form-step-error.available,
 [data-main-color=brown] .toolbar .toolbar-item.active .toolbar-icon {
@@ -3352,8 +3352,8 @@ body {
 [data-main-color=blue-grey] .recent-chats-panel .read-all-button,
 [data-main-color=blue-grey] .edit-rights .participant-details-item .buttons-wrap i,
 [data-main-color=blue-grey] .edit-rights .participant-details-item .buttons-wrap svg,
-[data-main-color=blue-grey] .details-panel .main-info .buttons-wrap .btn-leave,
-[data-main-color=blue-grey] .details-panel .main-info .buttons-wrap i,
+[data-main-color=blue-grey] .details-panel .buttons-wrap.sticky-details-wrap .btn-leave,
+[data-main-color=blue-grey] .details-panel .buttons-wrap.sticky-details-wrap i,
 [data-main-color=blue-grey] .settings-block-wrap input[type=range] + .thumb,
 [data-main-color=blue-grey] .switch label input[type=checkbox]:checked + .lever:after,
 [data-main-color=blue-grey] .btn-main-filled,
@@ -3377,7 +3377,7 @@ body {
 [data-main-color=blue-grey] input:focus:not([readonly]):not([type=checkbox]) + label,
 [data-main-color=blue-grey] .chat-location .ol-control a,
 [data-main-color=blue-grey] .chat-location .ol-control.ol-send button,
-[data-main-color=blue-grey] .details-panel-right .main-info .buttons-wrap i,
+[data-main-color=blue-grey] .details-panel-right .buttons-wrap.sticky-details-wrap i,
 [data-main-color=blue-grey] .details-panel-right .vcard .show-vcard,
 [data-main-color=blue-grey] .register-form.login-panel-form .register-form-step-wrap .register-form-step-error.available,
 [data-main-color=blue-grey] .toolbar .toolbar-item.active .toolbar-icon {
@@ -15721,15 +15721,18 @@ input[type=range].voice-message-volume:focus {
 
 /* ---------------------  GROUPCHAT DETAILS PANEL --------------------------- */
 
-.bottom-block .tabs {
+.tabs.bottom-block-tabs {
     margin: 0 36px;
     width: unset !important;
     cursor: pointer;
     overflow: hidden;
+    position: sticky;
+    top: 64px;
+    z-index: 999;
 }
 
 .details-panel-right .bottom-block,
-.details-panel-right .bottom-block .tabs,
+.details-panel-right .tabs.bottom-block-tabs,
 .details-panel-right .bottom-block .participants-wrap,
 .details-panel-right .bottom-block .participants-wrap .members-list-wrap,
 .details-panel-right .bottom-block .participants-wrap .members-list-wrap thead,
@@ -15782,7 +15785,7 @@ input[type=range].voice-message-volume:focus {
 .details-panel-right .edit-wrap .bottom-block{
 }
 
-.details-panel-right .edit-wrap .bottom-block .tabs{
+.details-panel-right .edit-wrap .tabs.bottom-block-tabs{
     min-height: 48px;
 }
 
@@ -15819,13 +15822,13 @@ input[type=range].voice-message-volume:focus {
     padding: 14px 7px 14px 72px !important;
 }
 
-.details-panel-right .bottom-block .tabs {
+.details-panel-right .tabs.bottom-block-tabs {
     margin: 0;
 }
 
 .blocked-items .tabs .tab,
 .details-panel .gallery-wrap .tabs .tab,
-.details-panel-right .bottom-block .tabs .tab{
+.details-panel-right .tabs.bottom-block-tabs .tab{
     font-weight: 500;
     padding: 0 8px;
     letter-spacing: 0.3px;
@@ -15835,7 +15838,7 @@ input[type=range].voice-message-volume:focus {
 
 .blocked-items .tabs .tab .text-color-700:not(.active),
 .details-panel .gallery-wrap .tabs .tab .text-color-700:not(.active),
-.details-panel-right .bottom-block .tabs .tab .text-color-700:not(.active){
+.details-panel-right .tabs.bottom-block-tabs .tab .text-color-700:not(.active){
     color: #9E9E9E !important;
 }
 
@@ -16802,26 +16805,6 @@ input[type=range].voice-message-volume:focus {
     display: none !important;
 }
 
-.details-panel-right .bottom-block.fixed-scroll {
-    padding-top: 48px;
-}
-
-.details-panel-right .bottom-block.fixed-scroll .tabs {
-    position: fixed;
-    z-index: 4;
-    top: 63px;
-    background: #ffffff;
-    width: inherit !important;
-}
-
-.details-panel-right .main-info .buttons-wrap.fixed-scroll{
-    margin-top: 0;
-    position: fixed;
-    top: 64px;
-    width: inherit;
-    z-index: 4;
-}
-
 .details-panel-right .main-info:not(.fixed-scroll) .block-name{
     opacity: 0;
     transition: opacity 0.1s ease-in;
@@ -16840,7 +16823,7 @@ input[type=range].voice-message-volume:focus {
 }
 .details-panel-right .edit-wrap .edit-bottom-block .block-name-panel,
 .details-panel-right .participant-details-item .block-header .block-name,
-.details-panel-right .main-info .block-name{
+.details-panel-right .block-name{
     position: absolute;
     top: 22px;
     left: 72px;
@@ -16869,18 +16852,8 @@ input[type=range].voice-message-volume:focus {
     cursor: pointer;
 }
 
-.details-panel-right .participant-details-item .block-header .btn-more.fade-out,
-.details-panel-right .participant-details-item .block-header .btn-save-user-rights.fade-out,
-.details-panel-right .participant-details-item .block-header .btn-edit-participant.fade-out,
-.details-panel-right .participant-details-item .block-header .block-name.fade-out,
-.details-panel-right .edit-wrap .edit-bottom-block .btn-add-block.fade-out,
-.details-panel-right .edit-wrap .edit-bottom-block .btn-invite.fade-out,
-.details-panel-right .edit-wrap .edit-bottom-block .block-name-panel.fade-out,
-.details-panel-right .restrictions-wrap .block-header .block-name.fade-out,
-.details-panel-right .participant-details-item .block-header .block-name.fade-out,
-.details-panel-right .edit-wrap .block-header .block-name.fade-out,
-.details-panel-right .main-info .block-name.fade-out{
-    opacity: 0;
+.fade-out{
+    opacity: 0 !important;
     transition: opacity 0.1s ease-in;
     pointer-events: none;
 }
@@ -16911,7 +16884,7 @@ input[type=range].voice-message-volume:focus {
 }
 
 .edit-rights .participant-details-item .buttons-wrap,
-.details-panel .main-info .buttons-wrap {
+.details-panel .buttons-wrap.sticky-details-wrap {
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -16919,17 +16892,26 @@ input[type=range].voice-message-volume:focus {
     margin: 0 auto;
 }
 .details-panel-right .participant-details-info-wrap .participant-details-item .buttons-wrap,
-.details-panel-right .main-info .buttons-wrap {
+.details-panel-right .buttons-wrap.sticky-details-wrap {
     display: flex;
     background-color: #fafafa;
     flex-direction: row;
-    align-items: center;
+    align-items: end;
     margin-top: 12px;
     width: 100%;
     height: 64px;
     justify-content: space-evenly;
     border-top: 1px solid #F5F5F5;
     border-bottom: 1px solid #F5F5F5;
+    position: sticky;
+    top: 64px;
+    z-index: 1000;
+}
+.details-panel-right .buttons-wrap.sticky-details-wrap.hidden,
+.details-panel-right .buttons-wrap.sticky-details-wrap.hidden2{
+    display: flex !important;
+    pointer-events: none;
+    opacity: 0;
 }
 
 .edit-rights .participant-details-item .btn-more {
@@ -16958,14 +16940,13 @@ input[type=range].voice-message-volume:focus {
 .details-panel-right .main-info .button-wrap {
     min-width: 64px;
     max-width: 96px;
-    padding-bottom: 8px;
     text-align: center;
 }
 
 .edit-rights .participant-details-item .buttons-wrap i,
 .edit-rights .participant-details-item .buttons-wrap svg,
-.details-panel .main-info .buttons-wrap .btn-leave,
-.details-panel .main-info .buttons-wrap i {
+.details-panel .buttons-wrap.sticky-details-wrap .btn-leave,
+.details-panel .buttons-wrap.sticky-details-wrap i {
     cursor: pointer;
     display: block;
     width: 48px;
@@ -16977,7 +16958,7 @@ input[type=range].voice-message-volume:focus {
     border-radius: 50%;
 }
 
-.details-panel-right .main-info .buttons-wrap i {
+.details-panel-right .buttons-wrap.sticky-details-wrap i {
     cursor: pointer;
     display: block;
     width: 48px;
@@ -16989,21 +16970,21 @@ input[type=range].voice-message-volume:focus {
     border-radius: 50%;
 }
 
-.details-panel-right .main-info .buttons-wrap .button-wrap.non-active .contact-btn,
-.details-panel-right .main-info .buttons-wrap .non-active .contact-btn path,
-.details-panel-right .main-info .buttons-wrap .non-active .btn-name,
-.details-panel-right .main-info .buttons-wrap .non-active i{
+.details-panel-right .buttons-wrap.sticky-details-wrap .button-wrap.non-active .contact-btn,
+.details-panel-right .buttons-wrap.sticky-details-wrap .non-active .contact-btn path,
+.details-panel-right .buttons-wrap.sticky-details-wrap .non-active .btn-name,
+.details-panel-right .buttons-wrap.sticky-details-wrap .non-active i{
     background-color: transparent !important;
     cursor: auto !important;
     color: #9E9E9E !important;
     fill: #9E9E9E !important;
 }
 
-.details-panel-right .main-info .buttons-wrap .btn-leave-wrap .btn-leave{
+.details-panel-right .buttons-wrap.sticky-details-wrap .btn-leave-wrap .btn-leave{
     background-color: transparent !important;
 }
 
-.details-panel-right .main-info .buttons-wrap .btn-leave-wrap .btn-leave{
+.details-panel-right .buttons-wrap.sticky-details-wrap .btn-leave-wrap .btn-leave{
     cursor: pointer;
     display: block;
     width: 48px;
@@ -17014,8 +16995,8 @@ input[type=range].voice-message-volume:focus {
     fill: #FFF;
     border-radius: 50%;
 }
-.details-panel-right .participant-details-info-wrap .participant-details-item .buttons-wrap .contact-btn,
-.details-panel-right .main-info .buttons-wrap .contact-btn {
+.details-panel-right .participant-details-info-wrap .participant-details-item .buttons-wrap.sticky-details-wrap .contact-btn,
+.details-panel-right .buttons-wrap.sticky-details-wrap .contact-btn {
     cursor: pointer;
     display: block;
     width: 48px;
@@ -17034,23 +17015,19 @@ input[type=range].voice-message-volume:focus {
     fill: #9E9E9E !important;
 }
 .details-panel-right .participant-details-info-wrap .participant-details-item .buttons-wrap .contact-btn svg,
-.details-panel-right .main-info .buttons-wrap .contact-btn svg {
+.details-panel-right .buttons-wrap.sticky-details-wrap .contact-btn svg {
     width: 24px;
     height: 24px;
     pointer-events: none;
     padding: 0 !important;
 }
-.details-panel-right .main-info .buttons-wrap .contact-mute-dropdown {
+.details-panel-right .buttons-wrap.sticky-details-wrap .contact-mute-dropdown {
     width: 176px !important;
     margin-top: 69px;
 }
-.details-panel-right .main-info .buttons-wrap.fixed-scroll .contact-mute-dropdown {
-    margin-top: 0 !important;
-    top: 64px !important;
-}
 
 .edit-rights .participant-details-item .buttons-wrap .btn-block-participant,
-.groupchat-details-panel .main-info .buttons-wrap svg {
+.groupchat-details-panel .buttons-wrap.sticky-details-wrap svg {
     padding: 12px !important;
     width: 48px;
     height: 48px;
@@ -17058,7 +17035,7 @@ input[type=range].voice-message-volume:focus {
 
 .edit-rights .participant-details-item .buttons-wrap .btn-kick-participant,
 .edit-rights .participant-details-item .buttons-wrap .btn-block-participant,
-.groupchat-details-panel .main-info .buttons-wrap .btn-leave {
+.groupchat-details-panel .buttons-wrap.sticky-details-wrap .btn-leave {
     background-color: #e0e0e0 !important;
     fill: #9e9e9e;
     color: #9e9e9e;

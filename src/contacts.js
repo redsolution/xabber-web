@@ -1560,7 +1560,7 @@ xabber.ContactDetailsView = xabber.BasicView.extend({
             hover: false,
             alignment: 'right'
         };
-        this.$('.main-info .dropdown-button').dropdown(dropdown_settings);
+        this.$('.dropdown-button').dropdown(dropdown_settings);
         this.updateSubscriptions();
         this.updateJingleButtons();
         this.updateStatusMsg();
@@ -1571,8 +1571,8 @@ xabber.ContactDetailsView = xabber.BasicView.extend({
 
     setButtonsWidth: function () {
         let widths = [];
-        this.$('.main-info .button-wrap').each((i, button) => {widths.push(button.clientWidth)});
-        this.$('.main-info .button-wrap').css('width', `${Math.max.apply(null, widths)}px`);
+        this.$('.button-wrap').each((i, button) => {widths.push(button.clientWidth)});
+        this.$('.button-wrap').css('width', `${Math.max.apply(null, widths)}px`);
     },
 
     onChangedVisibility: function () {
@@ -1805,7 +1805,7 @@ xabber.ContactDetailsViewRight = xabber.ContactDetailsView.extend({
         this.updateButtons();
         this.updateColorScheme();
         this.account.settings.on("change:color", this.updateColorScheme, this);
-        this.ps_container.on("ps-scroll-up ps-scroll-down", this.onScroll.bind(this));
+        this.ps_container.on("ps-scroll-y", this.onScroll.bind(this));
         this.model.on("change", this.update, this);
         this.chat.on("change:muted", this.updateNotifications, this);
         xabber.on("change:video", this.updateJingleButtons, this);
@@ -1881,13 +1881,9 @@ xabber.ContactDetailsViewRight = xabber.ContactDetailsView.extend({
 
     scrollToTopSmooth: function () {
         this.$('.header-buttons').attr( 'style', 'background-color: rgba(255,255,255,0) !important;');
-        this.$('.buttons-wrap.fixed-scroll').addClass('hidden2');
-        this.$('.main-info').removeClass('fixed-scroll');
-        this.$('.main-info .block-name').addClass('fade-out');
+        this.$('.header-buttons .block-name').addClass('fade-out');
         this.$('.btn-escape').removeClass('btn-top');
         this.$('.btn-escape i').addClass('mdi-close').removeClass('mdi-arrow-right');
-        this.$('.bottom-block:not(.edit-bottom-block) .tabs').removeClass('fixed-scroll');
-        this.$('.bottom-block:not(.edit-bottom-block) .participants-search-form').removeClass('fixed-scroll');
         this.$('.buttons-wrap').hideIf(false);
         this.$('.btn-edit').hideIf(false);
         this.$('.btn-qr-code').hideIf(false);
@@ -1901,8 +1897,8 @@ xabber.ContactDetailsViewRight = xabber.ContactDetailsView.extend({
 
     setButtonsWidth: function () {
         let widths = [];
-        this.$('.main-info .button-wrap').each((i, button) => {widths.push(button.clientWidth)});
-        this.$('.main-info .button-wrap').css('width', `${Math.max.apply(null, widths)}px`);
+        this.$('.button-wrap').each((i, button) => {widths.push(button.clientWidth)});
+        this.$('.button-wrap').css('width', `${Math.max.apply(null, widths)}px`);
     },
 
     onChangedVisibility: function () {
@@ -1947,42 +1943,31 @@ xabber.ContactDetailsViewRight = xabber.ContactDetailsView.extend({
 
         if(this.ps_container[0].scrollTop >= 250) {
             this.$('.header-buttons').attr('style', 'background-color: rgba(255,255,255,1) !important; -webkit-transition: none; -ms-transition: none;transition: none;');
-            this.$('.buttons-wrap.fixed-scroll').removeClass('hidden2');
-            this.$('.main-info').addClass('fixed-scroll');
             this.$('.main-info').css({width: xabber.right_contact_panel.$el.find('.details-panel-right').width()});
-            this.$('.main-info .block-name:not(.second-text)').removeClass('fade-out');
-            this.$('.main-info .block-name.second-text').addClass('fade-out');
+            this.$('.header-buttons .block-name:not(.second-text)').removeClass('fade-out');
+            this.$('.header-buttons .block-name.second-text').addClass('fade-out');
         }
         else if(this.ps_container[0].scrollTop >= 40) {
             this.$('.header-buttons').attr('style', 'background-color: rgba(255,255,255,0.5) !important;');
-            this.$('.main-info').removeClass('fixed-scroll');
-            this.$('.buttons-wrap.fixed-scroll').addClass('hidden2');
-            this.$('.main-info .block-name').addClass('fade-out');
+            this.$('.header-buttons .block-name').addClass('fade-out');
         }
         else{
             this.$('.header-buttons').attr( 'style', 'background-color: rgba(255,255,255,0) !important;');
-            this.$('.buttons-wrap.fixed-scroll').addClass('hidden2');
-            this.$('.main-info').removeClass('fixed-scroll');
-            this.$('.main-info .block-name').addClass('fade-out');
+            this.$('.header-buttons .block-name').addClass('fade-out');
         }
-        if (!this.$('.bottom-block:not(.edit-bottom-block)').hasClass('fixed-scroll') && bottom_block_scroll && bottom_block_scroll < 160
-            || this.$('.bottom-block:not(.edit-bottom-block)').hasClass('fixed-scroll') && bottom_block_scroll && bottom_block_scroll < 110) {
-            this.$('.bottom-block:not(.edit-bottom-block)').addClass('fixed-scroll');
+        if (!_.isUndefined(bottom_block_scroll) && bottom_block_scroll <= 160){
             this.$('.btn-escape').addClass('btn-top');
             this.$('.btn-escape i').addClass('mdi-arrow-right').removeClass('mdi-close');
-            this.$('.bottom-block:not(.edit-bottom-block) .participants-search-form').addClass('fixed-scroll');
             this.$('.buttons-wrap').hideIf(true);
             this.$('.btn-edit').hideIf(true);
             this.$('.btn-qr-code').hideIf(true);
-            this.$('.main-info .block-name:not(.second-text)').addClass('fade-out');
-            this.$('.main-info .block-name.second-text').removeClass('fade-out');
-            this.$('.main-info .block-name.second-text').text(this.$('.list-variant .active').text())
+            this.$('.header-buttons .block-name:not(.second-text)').addClass('fade-out');
+            this.$('.header-buttons .block-name.second-text').removeClass('fade-out');
+            this.$('.header-buttons .block-name.second-text').text(this.$('.list-variant .active').text())
         }
         else {
             this.$('.btn-escape').removeClass('btn-top');
             this.$('.btn-escape i').addClass('mdi-close').removeClass('mdi-arrow-right');
-            this.$('.bottom-block:not(.edit-bottom-block)').removeClass('fixed-scroll');
-            this.$('.bottom-block:not(.edit-bottom-block) .participants-search-form').removeClass('fixed-scroll');
             this.$('.buttons-wrap').hideIf(false);
             this.$('.btn-edit').hideIf(false);
             this.$('.btn-qr-code').hideIf(false);
@@ -2147,14 +2132,10 @@ xabber.ContactDetailsViewRight = xabber.ContactDetailsView.extend({
             list_name = $target.data('value');
         this.$('.tabs').animate({scrollLeft: $target.position().left}, 400);
         this.ps_container.animate(
-            {scrollTop: this.$('.bottom-block:not(.edit-bottom-block)').position().top + this.ps_container.scrollTop()-70},
+            {scrollTop: this.$('.bottom-block:not(.edit-bottom-block)').position().top + this.ps_container.scrollTop() - 120},
             200,
             () => {
                 this.onScroll();
-                this.ps_container.animate(
-                    {scrollTop: this.$('.bottom-block:not(.edit-bottom-block)').position().top + this.ps_container.scrollTop()-70},
-                    0,
-                );
         });
         this.$('.header-buttons .block-name.second-text').text($target.text())
         this.updateList(list_name);
@@ -2536,7 +2517,7 @@ xabber.GroupChatDetailsViewRight = xabber.BasicView.extend({
         this.updateStatus();
         this.updateAvatar();
         this.updateColorScheme();
-        this.ps_container.on("ps-scroll-up ps-scroll-down", this.onScroll.bind(this));
+        this.ps_container.on("ps-scroll-y", this.onScroll.bind(this));
         this.account.settings.on("change:color", this.updateColorScheme, this);
         this.model.on("change", this.update, this);
         this.chat.on("change:muted", this.updateNotifications, this);
@@ -2576,7 +2557,7 @@ xabber.GroupChatDetailsViewRight = xabber.BasicView.extend({
             alignment: 'right'
         };
         this.$('.select-users-list-wrap .dropdown-button').dropdown(dropdown_settings);
-        this.$('.main-info .dropdown-button').dropdown(dropdown_settings);
+        this.$('.dropdown-button').dropdown(dropdown_settings);
         this.onScroll();
         this.updateChilds();
         this.updateNotifications();
@@ -2655,8 +2636,8 @@ xabber.GroupChatDetailsViewRight = xabber.BasicView.extend({
 
     setButtonsWidth: function () {
         let widths = [];
-        this.$('.main-info .button-wrap').each((i, button) => {widths.push(button.clientWidth)});
-        this.$('.main-info .button-wrap').css('width', `${Math.max.apply(null, widths)}px`);
+        this.$('.button-wrap').each((i, button) => {widths.push(button.clientWidth)});
+        this.$('.button-wrap').css('width', `${Math.max.apply(null, widths)}px`);
     },
 
     updateButtons: function () {
@@ -2721,31 +2702,22 @@ xabber.GroupChatDetailsViewRight = xabber.BasicView.extend({
 
         if(this.ps_container[0].scrollTop >= 250) {
             this.$('.header-buttons').attr( 'style', 'background-color: rgba(255,255,255,1) !important; -webkit-transition: none; -ms-transition: none;transition: none;');
-            this.$('.buttons-wrap.fixed-scroll').removeClass('hidden2');
-            this.$('.main-info').addClass('fixed-scroll');
             this.$('.main-info').css({width: xabber.right_contact_panel.$el.find('.details-panel-right').width()});
             this.$('.header-buttons .block-name:not(.second-text)').removeClass('fade-out');
             this.$('.header-buttons .block-name.second-text').addClass('fade-out');
         }
         else if(this.ps_container[0].scrollTop >= 40) {
             this.$('.header-buttons').attr( 'style', 'background-color: rgba(255,255,255,0.5) !important;');
-            this.$('.main-info').removeClass('fixed-scroll');
-            this.$('.buttons-wrap.fixed-scroll').addClass('hidden2');
             this.$('.header-buttons .block-name').addClass('fade-out');
         }
         else{
             this.$('.header-buttons').attr( 'style', 'background-color: rgba(255,255,255,0) !important;');
-            this.$('.buttons-wrap.fixed-scroll').addClass('hidden2');
-            this.$('.main-info').removeClass('fixed-scroll');
             this.$('.header-buttons .block-name').addClass('fade-out');
         }
-        if (!this.$('.bottom-block:not(.edit-bottom-block):not(.participant-bottom-block)').hasClass('fixed-scroll') && bottom_block_scroll && bottom_block_scroll < 160
-            || this.$('.bottom-block:not(.edit-bottom-block):not(.participant-bottom-block)').hasClass('fixed-scroll') && bottom_block_scroll && bottom_block_scroll < 110) {
-            this.$('.bottom-block:not(.edit-bottom-block):not(.participant-bottom-block)').addClass('fixed-scroll');
+        if (!_.isUndefined(bottom_block_scroll) && bottom_block_scroll <= 160) {
             this.$('.btn-escape').addClass('btn-top');
             this.$('.btn-escape i').addClass('mdi-arrow-right').removeClass('mdi-close');
-            this.$('.bottom-block:not(.edit-bottom-block):not(.participant-bottom-block) .participants-search-form').addClass('fixed-scroll');
-            this.$('.main-info .buttons-wrap').hideIf(true);
+            this.$('.buttons-wrap').hideIf(true);
             this.$('.btn-edit').hideIf(true);
             this.$('.btn-qr-code').hideIf(true);
             this.$('.header-buttons .block-name:not(.second-text)').addClass('fade-out');
@@ -2755,9 +2727,7 @@ xabber.GroupChatDetailsViewRight = xabber.BasicView.extend({
         else {
             this.$('.btn-escape').removeClass('btn-top');
             this.$('.btn-escape i').addClass('mdi-close').removeClass('mdi-arrow-right');
-            this.$('.bottom-block:not(.edit-bottom-block):not(.participant-bottom-block)').removeClass('fixed-scroll');
-            this.$('.bottom-block:not(.edit-bottom-block):not(.participant-bottom-block) .participants-search-form').removeClass('fixed-scroll');
-            this.$('.main-info .buttons-wrap').hideIf(false);
+            this.$('.buttons-wrap').hideIf(false);
             this.$('.btn-edit').hideIf(false);
             this.$('.btn-qr-code').hideIf(false);
         }
@@ -2821,14 +2791,10 @@ xabber.GroupChatDetailsViewRight = xabber.BasicView.extend({
 
     scrollToTopSmooth: function () {
         this.$('.header-buttons').attr( 'style', 'background-color: rgba(255,255,255,0) !important;');
-        this.$('.buttons-wrap.fixed-scroll').addClass('hidden2');
-        this.$('.main-info').removeClass('fixed-scroll');
         this.$('.header-buttons .block-name').addClass('fade-out');
         this.$('.btn-escape').removeClass('btn-top');
         this.$('.btn-escape i').addClass('mdi-close').removeClass('mdi-arrow-right');
-        this.$('.bottom-block:not(.edit-bottom-block):not(.participant-bottom-block)').removeClass('fixed-scroll');
-        this.$('.bottom-block:not(.edit-bottom-block):not(.participant-bottom-block) .participants-search-form').removeClass('fixed-scroll');
-        this.$('.main-info .buttons-wrap').hideIf(false);
+        this.$('.buttons-wrap').hideIf(false);
         this.$('.btn-edit').hideIf(false);
         this.$('.btn-qr-code').hideIf(false);
         this.ps_container.animate(
@@ -2843,18 +2809,14 @@ xabber.GroupChatDetailsViewRight = xabber.BasicView.extend({
         let $target = $(ev.target).closest('.list-variant'),
             list_name = $target.data('value');
         if (list_name != 'blocked' && list_name != 'invitations') {
-            this.$('.main-info .header-buttons .block-name.second-text').text($target.text())
             this.$('.tabs').animate({scrollLeft: $target.position().left - 80}, 400);
             this.ps_container.animate(
-                {scrollTop: this.$('.bottom-block:not(.edit-bottom-block):not(.participant-bottom-block)').position().top + this.ps_container.scrollTop() - 70},
+                {scrollTop: this.$('.bottom-block:not(.edit-bottom-block):not(.participant-bottom-block)').position().top + this.ps_container.scrollTop() - 120},
                 400,
                 () => {
                     this.onScroll();
-                    this.ps_container.animate(
-                        {scrollTop: this.$('.bottom-block:not(.edit-bottom-block):not(.participant-bottom-block)').position().top + this.ps_container.scrollTop() - 70},
-                        0,
-                    );
                 });
+            this.$('.header-buttons .block-name.second-text').text($target.text())
         }
         this.updateList(list_name);
     },
@@ -3469,7 +3431,7 @@ xabber.MediaBaseView = xabber.BasicView.extend({
     },
 
     onUpdatedScreen: function () {
-        let block_height = xabber.body.$el.height() - 350;
+        let block_height = xabber.body.$el.height() - 320;
         this.$el.css('min-height', `${block_height}px`);
     },
 
@@ -4307,12 +4269,19 @@ xabber.ParticipantsViewRight = xabber.BasicView.extend({
         this.participants.on("participants_updated", this.onParticipantsUpdated, this);
         this.model.on("change:status_updated", this.updateParticipantsList, this);
         this.participant_properties_panel = this.addChild('participant_properties_panel', xabber.ParticipantPropertiesViewRight, {model: this.model, el: this.parent.$('.participant-view-wrap')[0], parent: this.parent});
+        xabber.on("update_screen", this.onUpdatedScreen, this);
+        xabber.on("update_layout", this.onUpdatedScreen, this);
     },
 
     _render: function () {
         this.$el.html(this.template()).addClass('request-waiting');
         this.updateParticipants();
         return this;
+    },
+
+    onUpdatedScreen: function () {
+        let block_height = xabber.body.$el.height() - 320;
+        this.$el.css('min-height', `${block_height}px`);
     },
 
     updateParticipants: function () {
@@ -5154,7 +5123,7 @@ xabber.ParticipantPropertiesViewRight = xabber.BasicView.extend({
                 _.extend(this.parent.ps_settings || {}, xabber.ps_settings)
             );
         }
-        this.ps_container.on("ps-scroll-up ps-scroll-down", this.onScroll.bind(this));
+        this.ps_container.on("ps-scroll-y", this.onScroll.bind(this));
         this.onScroll();
         this.participant_name_field = new xabber.ParticipantNameRightWidget({
             el: this.$('.edit-participant-name-wrap')[0],
@@ -5237,15 +5206,12 @@ xabber.ParticipantPropertiesViewRight = xabber.BasicView.extend({
             list_name = $target.data('value');
         this.$('.tabs').animate({scrollLeft: $target.position().left}, 400);
         this.ps_container.animate(
-            {scrollTop: this.$('.bottom-block').position().top + this.ps_container.scrollTop() - 70},
+            {scrollTop: this.$('.bottom-block').position().top + this.ps_container.scrollTop() - 120},
             400,
             () => {
                 this.onScroll();
-                this.ps_container.animate(
-                    {scrollTop: this.$('.bottom-block').position().top + this.ps_container.scrollTop() - 70},
-                    0,
-                );
             });
+        this.$('.block-header .block-name.second-text').text($target.text())
         this.updateList(list_name);
     },
 
@@ -5308,8 +5274,6 @@ xabber.ParticipantPropertiesViewRight = xabber.BasicView.extend({
         this.$('.block-name:not(.second-text)').removeClass('fade-out');
         this.$('.btn-back').removeClass('btn-top');
         this.$('.btn-back i').addClass('mdi-close').removeClass('mdi-arrow-right');
-        this.$('.bottom-block').removeClass('fixed-scroll');
-        this.$('.bottom-block .participants-search-form').removeClass('fixed-scroll');
         this.$('.buttons-wrap').hideIf(false);
         this.$('.btn-edit').hideIf(false);
         this.$('.btn-qr-code').hideIf(false);
@@ -5347,27 +5311,20 @@ xabber.ParticipantPropertiesViewRight = xabber.BasicView.extend({
         let bottom_block_scroll
         if (this.$('.bottom-block'))
             bottom_block_scroll = this.$('.bottom-block').get(0).getBoundingClientRect().top;
-        if (!this.$('.bottom-block').hasClass('fixed-scroll') && bottom_block_scroll && bottom_block_scroll < 160
-            || this.$('.bottom-block').hasClass('fixed-scroll') && bottom_block_scroll && bottom_block_scroll < 110) {
-            this.$('.bottom-block').addClass('fixed-scroll');
+        if (!_.isUndefined(bottom_block_scroll) && bottom_block_scroll <= 170) {
             this.$('.btn-back').addClass('btn-top');
-            this.$('.btn-back i').addClass('mdi-arrow-right').removeClass('mdi-close');
-            this.$('.bottom-block .participants-search-form').addClass('fixed-scroll');
-            this.$('.buttons-wrap').hideIf(true);
+            this.$('.participant-details-item .buttons-wrap').addClass('hidden2');
             this.$('.btn-edit').hideIf(true);
             this.$('.btn-qr-code').hideIf(true);
-            this.$('.header-buttons .block-name:not(.second-text)').addClass('fade-out');
-            this.$('.header-buttons .block-name.second-text').removeClass('fade-out');
-            this.$('.header-buttons .block-name.second-text').text(this.$('.tabs:not(.participant-tabs) .list-variant .active').text())
+            this.$('.btn-edit-participant').hideIf(true);
+            this.$('.block-header .block-name.second-text').text(this.$('.tabs .list-variant .active').text())
         }
         else {
             this.$('.btn-back').removeClass('btn-top');
-            this.$('.btn-back i').addClass('mdi-close').removeClass('mdi-arrow-right');
-            this.$('.bottom-block').removeClass('fixed-scroll');
-            this.$('.bottom-block .participants-search-form').removeClass('fixed-scroll');
-            this.$('.buttons-wrap').hideIf(false);
+            this.$('.participant-details-item .buttons-wrap').removeClass('hidden2');
             this.$('.btn-edit').hideIf(false);
             this.$('.btn-qr-code').hideIf(false);
+            this.$('.btn-edit-participant').hideIf(false);
         }
     },
 
