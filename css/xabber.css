@@ -1539,9 +1539,9 @@ body {
 [data-main-color=red] .settings-block-wrap.vcard textarea:focus,
 [data-main-color=red] .group-settings .input-field input:focus,
 [data-main-color=red] .dialog-options-wrap input:focus,
-[data-main-color=red] .input-glow:focus,
+[data-main-color=red] .input-glow:not(.invalid):focus,
 [data-main-color=red] .web-address input.url:focus,
-[data-main-color=red] .login-panel-form .input-field input:focus{
+[data-main-color=red] .login-panel-form .input-field input:not(.invalid):focus{
     border-color: #F44336 !important;
     box-shadow: 0px 0px 0px 0.175rem #FFCDD2 !important;
 }
@@ -1655,9 +1655,9 @@ body {
 [data-main-color=pink] .settings-block-wrap.vcard textarea:focus,
 [data-main-color=pink] .group-settings .input-field input:focus,
 [data-main-color=pink] .dialog-options-wrap input:focus,
-[data-main-color=pink] .input-glow:focus,
+[data-main-color=pink] .input-glow:not(.invalid):focus,
 [data-main-color=pink] .web-address input.url:focus,
-[data-main-color=pink] .login-panel-form .input-field input:focus{
+[data-main-color=pink] .login-panel-form .input-field input:not(.invalid):focus{
     border-color: #E91E63 !important;
     box-shadow: 0px 0px 0px 0.175rem #F8BBD0 !important;
 }
@@ -1771,9 +1771,9 @@ body {
 [data-main-color=purple] .settings-block-wrap.vcard textarea:focus,
 [data-main-color=purple] .group-settings .input-field input:focus,
 [data-main-color=purple] .dialog-options-wrap input:focus,
-[data-main-color=purple] .input-glow:focus,
+[data-main-color=purple] .input-glow:not(.invalid):focus,
 [data-main-color=purple] .web-address input.url:focus,
-[data-main-color=purple] .login-panel-form .input-field input:focus{
+[data-main-color=purple] .login-panel-form .input-field input:not(.invalid):focus{
     border-color: #9C27B0 !important;
     box-shadow: 0px 0px 0px 0.175rem #E1BEE7 !important;
 }
@@ -1886,9 +1886,9 @@ body {
 [data-main-color=deep-purple] .settings-block-wrap.vcard textarea:focus,
 [data-main-color=deep-purple] .group-settings .input-field input:focus,
 [data-main-color=deep-purple] .dialog-options-wrap input:focus,
-[data-main-color=deep-purple] .input-glow:focus,
+[data-main-color=deep-purple] .input-glow:not(.invalid):focus,
 [data-main-color=deep-purple] .web-address input.url:focus,
-[data-main-color=deep-purple] .login-panel-form .input-field input:focus{
+[data-main-color=deep-purple] .login-panel-form .input-field input:not(.invalid):focus{
     border-color: #673AB7 !important;
     box-shadow: 0px 0px 0px 0.175rem #D1C4E9 !important;
 }
@@ -2002,9 +2002,9 @@ body {
 [data-main-color=indigo] .settings-block-wrap.vcard textarea:focus,
 [data-main-color=indigo] .group-settings .input-field input:focus,
 [data-main-color=indigo] .dialog-options-wrap input:focus,
-[data-main-color=indigo] .input-glow:focus,
+[data-main-color=indigo] .input-glow:not(.invalid):focus,
 [data-main-color=indigo] .web-address input.url:focus,
-[data-main-color=indigo] .login-panel-form .input-field input:focus{
+[data-main-color=indigo] .login-panel-form .input-field input:not(.invalid):focus{
     border-color: #3F51B5 !important;
     box-shadow: 0px 0px 0px 0.175rem #C5CAE9 !important;
 }
@@ -2118,9 +2118,9 @@ body {
 [data-main-color=blue] .settings-block-wrap.vcard textarea:focus,
 [data-main-color=blue] .group-settings .input-field input:focus,
 [data-main-color=blue] .dialog-options-wrap input:focus,
-[data-main-color=blue] .input-glow:focus,
+[data-main-color=blue] .input-glow:not(.invalid):focus,
 [data-main-color=blue] .web-address input.url:focus,
-[data-main-color=blue] .login-panel-form .input-field input:focus{
+[data-main-color=blue] .login-panel-form .input-field input:not(.invalid):focus{
     border-color: #2196F3 !important;
     box-shadow: 0px 0px 0px 0.175rem #BBDEFB !important;
 }
@@ -2234,9 +2234,9 @@ body {
 [data-main-color=light-blue] .settings-block-wrap.vcard textarea:focus,
 [data-main-color=light-blue] .group-settings .input-field input:focus,
 [data-main-color=light-blue] .dialog-options-wrap input:focus,
-[data-main-color=light-blue] .input-glow:focus,
+[data-main-color=light-blue] .input-glow:not(.invalid):focus,
 [data-main-color=light-blue] .web-address input.url:focus,
-[data-main-color=light-blue] .login-panel-form .input-field input:focus{
+[data-main-color=light-blue] .login-panel-form .input-field input:not(.invalid):focus{
     border-color: #03A9F4 !important;
     box-shadow: 0px 0px 0px 0.175rem #B3E5FC !important;
 }
@@ -2350,9 +2350,9 @@ body {
 [data-main-color=cyan] .settings-block-wrap.vcard textarea:focus,
 [data-main-color=cyan] .group-settings .input-field input:focus,
 [data-main-color=cyan] .dialog-options-wrap input:focus,
-[data-main-color=cyan] .input-glow:focus,
+[data-main-color=cyan] .input-glow:not(.invalid):focus,
 [data-main-color=cyan] .web-address input.url:focus,
-[data-main-color=cyan] .login-panel-form .input-field input:focus{
+[data-main-color=cyan] .login-panel-form .input-field input:not(.invalid):focus{
     border-color: #00BCD4 !important;
     box-shadow: 0px 0px 0px 0.175rem #B2EBF2 !important;
 }
@@ -2466,9 +2466,9 @@ body {
 [data-main-color=teal] .settings-block-wrap.vcard textarea:focus,
 [data-main-color=teal] .group-settings .input-field input:focus,
 [data-main-color=teal] .dialog-options-wrap input:focus,
-[data-main-color=teal] .input-glow:focus,
+[data-main-color=teal] .input-glow:not(.invalid):focus,
 [data-main-color=teal] .web-address input.url:focus,
-[data-main-color=teal] .login-panel-form .input-field input:focus{
+[data-main-color=teal] .login-panel-form .input-field input:not(.invalid):focus{
     border-color: #009688 !important;
     box-shadow: 0px 0px 0px 0.175rem #B2DFDB !important;
 }
@@ -2582,9 +2582,9 @@ body {
 [data-main-color=green] .settings-block-wrap.vcard textarea:focus,
 [data-main-color=green] .group-settings .input-field input:focus,
 [data-main-color=green] .dialog-options-wrap input:focus,
-[data-main-color=green] .input-glow:focus,
+[data-main-color=green] .input-glow:not(.invalid):focus,
 [data-main-color=green] .web-address input.url:focus,
-[data-main-color=green] .login-panel-form .input-field input:focus{
+[data-main-color=green] .login-panel-form .input-field input:not(.invalid):focus{
     border-color: #4CAF50 !important;
     box-shadow: 0px 0px 0px 0.175rem #C8E6C9 !important;
 }
@@ -2698,9 +2698,9 @@ body {
 [data-main-color=light-green] .settings-block-wrap.vcard textarea:focus,
 [data-main-color=light-green] .group-settings .input-field input:focus,
 [data-main-color=light-green] .dialog-options-wrap input:focus,
-[data-main-color=light-green] .input-glow:focus,
+[data-main-color=light-green] .input-glow:not(.invalid):focus,
 [data-main-color=light-green] .web-address input.url:focus,
-[data-main-color=light-green] .login-panel-form .input-field input:focus{
+[data-main-color=light-green] .login-panel-form .input-field input:not(.invalid):focus{
     border-color: #8BC34A !important;
     box-shadow: 0px 0px 0px 0.175rem #DCEDC8 !important;
 }
@@ -2814,9 +2814,9 @@ body {
 [data-main-color=lime] .settings-block-wrap.vcard textarea:focus,
 [data-main-color=lime] .group-settings .input-field input:focus,
 [data-main-color=lime] .dialog-options-wrap input:focus,
-[data-main-color=lime] .input-glow:focus,
+[data-main-color=lime] .input-glow:not(.invalid):focus,
 [data-main-color=lime] .web-address input.url:focus,
-[data-main-color=lime] .login-panel-form .input-field input:focus{
+[data-main-color=lime] .login-panel-form .input-field input:not(.invalid):focus{
     border-color: #CDDC39 !important;
     box-shadow: 0px 0px 0px 0.175rem #F0F4C3 !important;
 }
@@ -2930,9 +2930,9 @@ body {
 [data-main-color=amber] .settings-block-wrap.vcard textarea:focus,
 [data-main-color=amber] .group-settings .input-field input:focus,
 [data-main-color=amber] .dialog-options-wrap input:focus,
-[data-main-color=amber] .input-glow:focus,
+[data-main-color=amber] .input-glow:not(.invalid):focus,
 [data-main-color=amber] .web-address input.url:focus,
-[data-main-color=amber] .login-panel-form .input-field input:focus{
+[data-main-color=amber] .login-panel-form .input-field input:not(.invalid):focus{
     border-color: #FFC107 !important;
     box-shadow: 0px 0px 0px 0.175rem #FFECB3 !important;
 }
@@ -3046,9 +3046,9 @@ body {
 [data-main-color=orange] .settings-block-wrap.vcard textarea:focus,
 [data-main-color=orange] .group-settings .input-field input:focus,
 [data-main-color=orange] .dialog-options-wrap input:focus,
-[data-main-color=orange] .input-glow:focus,
+[data-main-color=orange] .input-glow:not(.invalid):focus,
 [data-main-color=orange] .web-address input.url:focus,
-[data-main-color=orange] .login-panel-form .input-field input:focus{
+[data-main-color=orange] .login-panel-form .input-field input:not(.invalid):focus{
     border-color: #FF9800 !important;
     box-shadow: 0px 0px 0px 0.175rem #FFE0B2 !important;
 }
@@ -3162,9 +3162,9 @@ body {
 [data-main-color=deep-orange] .settings-block-wrap.vcard textarea:focus,
 [data-main-color=deep-orange] .group-settings .input-field input:focus,
 [data-main-color=deep-orange] .dialog-options-wrap input:focus,
-[data-main-color=deep-orange] .input-glow:focus,
+[data-main-color=deep-orange] .input-glow:not(.invalid):focus,
 [data-main-color=deep-orange] .web-address input.url:focus,
-[data-main-color=deep-orange] .login-panel-form .input-field input:focus{
+[data-main-color=deep-orange] .login-panel-form .input-field input:not(.invalid):focus{
     border-color: #FF5722 !important;
     box-shadow: 0px 0px 0px 0.175rem #FFCCBC !important;
 }
@@ -3278,9 +3278,9 @@ body {
 [data-main-color=brown] .settings-block-wrap.vcard textarea:focus,
 [data-main-color=brown] .group-settings .input-field input:focus,
 [data-main-color=brown] .dialog-options-wrap input:focus,
-[data-main-color=brown] .input-glow:focus,
+[data-main-color=brown] .input-glow:not(.invalid):focus,
 [data-main-color=brown] .web-address input.url:focus,
-[data-main-color=brown] .login-panel-form .input-field input:focus{
+[data-main-color=brown] .login-panel-form .input-field input:not(.invalid):focus{
     border-color: #795548 !important;
     box-shadow: 0px 0px 0px 0.175rem #D7CCC8 !important;
 }
@@ -3395,9 +3395,9 @@ body {
 [data-main-color=blue-grey] .settings-block-wrap.vcard textarea:focus,
 [data-main-color=blue-grey] .group-settings .input-field input:focus,
 [data-main-color=blue-grey] .dialog-options-wrap input:focus,
-[data-main-color=blue-grey] .input-glow:focus,
+[data-main-color=blue-grey] .input-glow:not(.invalid):focus,
 [data-main-color=blue-grey] .web-address input.url:focus,
-[data-main-color=blue-grey] .login-panel-form .input-field input:focus{
+[data-main-color=blue-grey] .login-panel-form .input-field input:not(.invalid):focus{
     border-color: #607D8B !important;
     box-shadow: 0px 0px 0px 0.175rem #CFD8DC !important;
 }
@@ -4330,7 +4330,14 @@ input[type=text].simple-input-field:hover {
 .add-contact-modal .input-field input.invalid,
 .login-panel-form .input-field input.invalid{
     border: 1px solid rgb(220, 53, 69) !important;
+    border-color: #dc3545 !important;
     box-shadow: none !important;
+}
+.input-glow-account.invalid:focus,
+.input-glow.invalid:focus,
+.add-contact-modal .input-field input.invalid:focus,
+.login-panel-form .input-field input.invalid:focus{
+    box-shadow: 0 0 0 0.175rem #FFCDD2 !important;
 }
 .login-panel-form .buttons-wrap{
     display: block;
@@ -12151,6 +12158,9 @@ input[type=range].voice-message-volume:focus {
     min-height: 18px;
     font-size: 12px;
 }
+.settings-panel-wrap .settings-panel .change-password-container .change-password-fields .change-password-field .errors.non-error{
+    color: rgba(0,0,0,.87);
+}
 .settings-panel-wrap .settings-panel .change-password-container .change-password-fields .change-password-field label{
     position: absolute;
     top: -16px;
@@ -12409,7 +12419,40 @@ input[type=range].voice-message-volume:focus {
 /* ---------------- XABBER DELETE ACCOUNT MODAL --------------------- */
 .main-modal.unregister-account-modal{
     height: fit-content;
-    width: 480px!important;
+    width: 640px !important;
+}
+.main-modal.unregister-account-modal .modal-description-text{
+    margin-bottom: 16px;
+}
+.main-modal.unregister-account-modal .checkbox-field label{
+    color: rgba(0,0,0,.87);
+}
+.main-modal.unregister-account-modal .input-field.password-field{
+    margin-top: 8px;
+    display: flex;
+}
+.main-modal.unregister-account-modal .input-field input#jid,
+.main-modal.unregister-account-modal .input-field.password-field input{
+    height: 44px !important;
+    width: 50% !important;
+    font-size: 1rem;
+    padding: 0 8px;
+    color: rgba(0,0,0,.87);
+}
+.main-modal.unregister-account-modal .input-field input#jid{
+    width: 100% !important;
+}
+.main-modal.unregister-account-modal .input-field.password-field .login-password-error{
+    color: #f44336;
+    font-size: 12px;
+    line-height: 44px;
+    margin-left: 16px;
+    min-height: 18px;
+    overflow: visible;
+    width: 50%;
+}
+.main-modal.unregister-account-modal .input-field.password-field .login-password-error.non-error{
+    color: rgba(0,0,0,.87);
 }
 .main-modal.unregister-account-modal .input-field-wrap{
     flex-direction: column;
@@ -12417,6 +12460,7 @@ input[type=range].voice-message-volume:focus {
 .main-modal.unregister-account-modal .modal-footer .btn-flat:disabled{
     opacity: .75;
     pointer-events: none;
+    color: #616161;
 }
 .main-modal.unregister-account-modal .input-field{
     height: 100%;

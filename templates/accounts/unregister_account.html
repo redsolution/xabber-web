@@ -1,9 +1,9 @@
 <div class="modal-content-wrap">
-    <div class="modal-header">
+    <div class="modal-header no-select">
         <span>{[print(xabber.getString("settings_account__delete_account_modal_title"))]}</span>
     </div>
     <div class="modal-content login-panel-form">
-        <div>{[print(xabber.getString("settings_account__delete_account_modal_text"))]}</div>
+        <div class="modal-description-text no-select">{[print(xabber.getString("settings_account__delete_account_modal_text"))]}</div>
 
         <div class="login-form-jid">
             <div class="login-form-step-wrap">
@@ -16,20 +16,16 @@
                         <input type="checkbox" class="filled-in" id="confirm_unregister_2"/>
                         <label for="confirm_unregister_2">{[print(xabber.getString("settings_account__checkbox_confirm_unregister_text_2"))]}</label>
                     </div>
-                    <div class="input-field checkbox-field">
-                        <input type="checkbox" class="filled-in" id="confirm_unregister_3"/>
-                        <label for="confirm_unregister_3">{[print(xabber.getString("settings_account__checkbox_confirm_unregister_text_2"))]}</label>
-                    </div>
-                    <div class="input-field">
-                        <input id="password" placeholder='{[print(xabber.getString("hint_pass"))]}' type="password" name="password">
+                    <div class="input-field password-field">
+                        <input id="password" placeholder='{[print(xabber.getString("settings_account__delete_account_modal_password_placeholder_text"))]}' type="password" name="password">
+                        <div class="login-form-step-error login-password-error"></div>
                     </div>
                 </div>
-                <div class="login-form-step-error login-password-error hidden"></div>
             </div>
             <div class="login-confirm-form-step-wrap hidden">
                 <div class="input-field-wrap">
                     <div class="input-field input-field-jid input-field-jid-borders">
-                        <input id="jid" placeholder='{[print(xabber.getString("hint_xmpp_id"))]}' type="text" name="jid">
+                        <input id="jid" type="text" name="jid">
                     </div>
                 </div>
                 <div class="login-form-step-error login-jid-error hidden"></div>

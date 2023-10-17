@@ -735,7 +735,7 @@ xabber.Account = Backbone.Model.extend({
                     this.unregister_account_view.data.set('step', 0);
                     this.unregister_account_connection && this.unregister_account_connection.disconnect();
                 } else if (status === Strophe.Status.AUTHFAIL) {
-                    this.unregister_account_view.errorFeedback({password: xabber.getString("AUTHENTICATION_FAILED")});
+                    this.unregister_account_view.errorFeedback({password: xabber.getString("wrong_password")});
                     this.unregister_account_view.data.set('step', 0);
                     this.unregister_account_connection && this.unregister_account_connection.disconnect();
                 } else if (status === Strophe.Status.CONNECTED) {
@@ -5509,7 +5509,7 @@ xabber.ChangeAccountPasswordView = xabber.BasicView.extend({
         if (password != password_confirm)
             return this.errorFeedback({password_confirm: xabber.getString("settings_account__alert_passwords_do_not_match")});
         old_password = old_password.trim();
-        this.authFeedback({password_confirm: xabber.getString("dialog_change_password__feedback__text_auth_with_pass")});
+        this.authFeedback({password_confirm: xabber.getString("dialog_change_password__feedback__text_auth_with_pass"), password_not_error: true});
         if (!this.account.change_password_connection_manager) {
             this.account.change_password_view = this;
             this.account.change_password_connection_manager = new Strophe.ConnectionManager(this.account.CONNECTION_URL);
@@ -5525,7 +5525,7 @@ xabber.ChangeAccountPasswordView = xabber.BasicView.extend({
         this.$old_password_input.switchClass('invalid', options.old_password)
             .siblings('span.errors').text(options.old_password || '');
         this.$password_confirm_input.switchClass('invalid', options.password_confirm)
-            .siblings('span.errors').text(options.password_confirm || '');
+            .siblings('span.errors').switchClass('non-error', options.password_not_error).text(options.password_confirm || '');
         this.parent && this.parent.updateHeight();
     },
 
@@ -6716,12 +6716,12 @@ xabber.UnregisterAccountView = xabber.XmppLoginPanel.extend({
 
     keyUpLogin: function (ev) {
         let checked_count = this.$('input[type=checkbox]:checked').length;
-        if(this.$password_input.val() && checked_count === 3){
+        if(this.$password_input.val() && checked_count === 2){
             this.$('.btn-log-in').prop('disabled', false);
         } else {
             this.$('.btn-log-in').prop('disabled', true);
         }
-        if(this.$jid_input.val() && this.$jid_input.val() === this.account.get('jid')){
+        if(this.$jid_input.val() && this.$jid_input.val() === `delete ${this.account.get('jid')} account`){
             this.$('.btn-submit-unregister').prop('disabled', false);
         } else {
             this.$('.btn-submit-unregister').prop('disabled', true);
@@ -6733,7 +6733,7 @@ xabber.UnregisterAccountView = xabber.XmppLoginPanel.extend({
         this.$jid_input.switchClass('invalid', options.jid);
         this.$('.login-form-jid .login-jid-error').text(options.jid || '').showIf(options.jid);
         this.$password_input.switchClass('invalid', options.password);
-        this.$('.login-form-jid .login-password-error').text(options.password || '').showIf(options.password);
+        this.$('.login-form-jid .login-password-error').switchClass('non-error', options.password_not_error).text(options.password || '');
     },
 
     unregisterAccount: function (callback, errback) {
@@ -6759,7 +6759,7 @@ xabber.UnregisterAccountView = xabber.XmppLoginPanel.extend({
         let password = this.$password_input.val();
         if (!password)
             return this.errorFeedback({password: xabber.getString("dialog_change_password__error__text_input_pass")});
-        this.authFeedback({password: xabber.getString("dialog_change_password__feedback__text_auth_with_pass")});
+        this.authFeedback({password: xabber.getString("dialog_change_password__feedback__text_auth_with_pass"), password_not_error: true});
         if (!this.account.unregister_account_connection_manager) {
             this.account.unregister_account_view = this;
             this.account.unregister_account_connection_manager = new Strophe.ConnectionManager(this.account.CONNECTION_URL);
@@ -6788,12 +6788,15 @@ xabber.UnregisterAccountView = xabber.XmppLoginPanel.extend({
             this.$('.btn-log-in').removeClass('hidden');
             this.$('.btn-submit-unregister').addClass('hidden');
             this.$('.login-confirm-form-step-wrap').addClass('hidden');
+            this.$('.modal-header span').text(xabber.getString('settings_account__delete_account_modal_title'));
+            this.$('.modal-description-text').text(xabber.getString('settings_account__delete_account_modal_text'));
         } else if (step === 1) {
             this.$('.login-form-step-wrap').addClass('hidden');
             this.$('.btn-log-in').addClass('hidden');
             this.$('.btn-submit-unregister').removeClass('hidden');
             this.$('.login-confirm-form-step-wrap').removeClass('hidden');
-
+            this.$('.modal-header span').text(xabber.getString('settings_account__confirm_delete_account_modal_title'));
+            this.$('.modal-description-text').html(xabber.getString('settings_account__confirm_delete_account_modal_text', [`<nobr>delete ${this.account.get('jid')} account</nobr>`]));
         }
     },
 
