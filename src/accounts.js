@@ -3049,6 +3049,10 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
             this.$('.media-gallery-button.btn-more').hideIf(block_name != 'media-gallery');
             this.$('.device-more-button.btn-more').hideIf(block_name != 'encryption');
         }
+        if (block_name === 'password'){
+            xabber.trigger('change_account_password', this.model);
+            return;
+        }
         this.$('.settings-block-wrap').addClass('hidden');
         this.$('.left-column').addClass('hidden');
         this.$('.right-column').removeClass('hidden');
@@ -5471,29 +5475,43 @@ xabber.ChangePasswordView = xabber.BasicView.extend({
 });
 
 xabber.ChangeAccountPasswordView = xabber.BasicView.extend({
+    className: 'modal main-modal change-account-password-modal',
+    template: templates.change_account_password,
     events: {
         "click .btn-change": "submit",
-        "click .btn-cancel": "render",
+        "click .btn-cancel": "close",
         "keyup input": "keyUp",
     },
 
-    _initialize: function () {
-        this.account = this.model
+    render: function (options) {
+        this.account = options.model;
+        this.$el.openModal({
+            ready: this.onRender.bind(this),
+            complete: this.close.bind(this)
+        });
+    },
+
+    onRender: function (options) {
+        this.$('.original-state').removeClass('hidden');
+        this.$('.success-state').addClass('hidden');
         this.$old_password_input = this.$('input[name=old_password]');
         this.$password_input = this.$('input[name=password]');
         this.$password_confirm_input = this.$('input[name=password_confirm]');
-        return this;
-    },
-
-    render: function (options) {
         this.authFeedback({});
         this.$password_input.val('');
         this.$password_confirm_input.val('');
         this.$old_password_input.val('').focus();
+        this.keyUp();
     },
 
     keyUp: function (ev) {
-        ev.keyCode === constants.KEY_ENTER && this.submit();
+        ev && ev.keyCode === constants.KEY_ENTER && this.submit();
+        if (this.$old_password_input.val() && this.$password_input.val() && this.$password_confirm_input.val()){
+            this.$('.btn-change').prop('disabled', false);
+        } else {
+            this.$('.btn-change').prop('disabled', true);
+        }
+        this.authFeedback({});
     },
 
     submit: function () {
@@ -5524,7 +5542,7 @@ xabber.ChangeAccountPasswordView = xabber.BasicView.extend({
             .siblings('span.errors').text(options.password || '');
         this.$old_password_input.switchClass('invalid', options.old_password)
             .siblings('span.errors').text(options.old_password || '');
-        this.$password_confirm_input.switchClass('invalid', options.password_confirm)
+        this.$password_confirm_input.switchClass('invalid', options.password_confirm && !options.password_not_error)
             .siblings('span.errors').switchClass('non-error', options.password_not_error).text(options.password_confirm || '');
         this.parent && this.parent.updateHeight();
     },
@@ -5538,8 +5556,24 @@ xabber.ChangeAccountPasswordView = xabber.BasicView.extend({
     successFeedback: function () {
         if (this.account.change_password_connection)
             this.account.change_password_connection.disconnect()
-        this.render();
+        this.$('.original-state').addClass('hidden');
+        this.$('.success-state').removeClass('hidden');
     },
+
+    onHide: function () {
+        this.$el.detach();
+        if (this.account && this.account.unregister_account_connection_manager && this.account.unregister_account_connection) {
+            this.account.unregister_account_connection.disconnect();
+        }
+    },
+
+    close: function () {
+        this.closeModal();
+    },
+
+    closeModal: function () {
+        this.$el.closeModal({ complete: this.hide.bind(this) });
+    }
 });
 
 xabber.AuthView = xabber.BasicView.extend({
@@ -6732,7 +6766,7 @@ xabber.UnregisterAccountView = xabber.XmppLoginPanel.extend({
     authFeedback: function (options) {
         this.$jid_input.switchClass('invalid', options.jid);
         this.$('.login-form-jid .login-jid-error').text(options.jid || '').showIf(options.jid);
-        this.$password_input.switchClass('invalid', options.password);
+        this.$password_input.switchClass('invalid', options.password && !options.password_not_error);
         this.$('.login-form-jid .login-password-error').switchClass('non-error', options.password_not_error).text(options.password || '');
     },
 
@@ -6805,21 +6839,6 @@ xabber.UnregisterAccountView = xabber.XmppLoginPanel.extend({
 
     checkFeaturesStepper: function () {
     },
-
-    onHide: function () {
-        this.$el.detach();
-        if (this.account && this.account.unregister_account_connection_manager && this.account.unregister_account_connection) {
-            this.account.unregister_account_connection.disconnect();
-        }
-    },
-
-    close: function () {
-        this.closeModal();
-    },
-
-    closeModal: function () {
-        this.$el.closeModal({ complete: this.hide.bind(this) });
-    }
 });
 
 xabber.once("start", function () {
@@ -6858,6 +6877,12 @@ xabber.once("start", function () {
         if (!this.unregister_account_view)
             this.unregister_account_view = new this.UnregisterAccountView();
         this.unregister_account_view.show({model: account});
+    }, this);
+
+    this.on("change_account_password", function (account) {
+        if (!this.change_account_password_view)
+            this.change_account_password_view = new this.ChangeAccountPasswordView();
+        this.change_account_password_view.show({model: account});
     }, this);
 
     $(window).bind('beforeunload',function(){

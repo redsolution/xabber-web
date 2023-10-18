@@ -89,6 +89,7 @@
     addTemplate('accounts.add_account');
     addTemplate('accounts.unregister_account');
     addTemplate('accounts.change_password');
+    addTemplate('accounts.change_account_password');
     addTemplate('accounts.toolbar_item');
     addTemplate('accounts.media_gallery_account_file');
     addTemplate('accounts.media_gallery_account');

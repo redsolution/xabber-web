@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.3.4.41","version_description":"changed delete account modal view, fixed invalid input glowing"}'
+'{"version_number":"2.3.4.42","version_description":"changed change password view, fixed opening chats that are not in roster"}'
 )});
