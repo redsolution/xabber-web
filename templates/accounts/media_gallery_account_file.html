@@ -15,7 +15,7 @@
             </div>
         {[}]}
         <div class="gallery-file-title one-line">
-            {{file.name}},  <span class="gallery-file-size">{{filesize}}</span> <span class="gallery-file-date">{{file.created_at}}</span>
+            {{file.name}},  <span class="gallery-file-size">{{filesize}}</span> <span class="gallery-file-date">{{created_at}}</span>
         </div>
         {[if (duration && file.media_type.includes('+voice')){]}
             <div class="gallery-voice-file-duration">
@@ -23,6 +23,10 @@
             </div>
         {[}]}
     {[}]}
+    <div class="input-field checkbox-field">
+        <input type="checkbox" class="filled-in"/>
+        <label></label>
+    </div>
     <div class="btn-more dropdown-button" data-activates="{{file.id}}-more">
         <i class="mdi mdi-24px mdi-dots-vertical"></i>
     </div>

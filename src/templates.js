@@ -253,6 +253,7 @@
     addSvgTemplate('svg.restrictions-outline');
     addSvgTemplate('svg.history');
     addSvgTemplate('svg.chevron-down');
+    addSvgTemplate('svg.camera');
     addSvgTemplate('svg.camera-retake');
     addSvgTemplate('svg.membership-outline');
     addSvgTemplate('svg.invite');

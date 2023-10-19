@@ -2425,7 +2425,6 @@ xabber.SettingsModalView = xabber.BasicView.extend({
     updateAccounts: function () {
         if (this.settings_single_account_modal){
             this.settings_single_account_modal.removeChild('blocklist');
-            this.settings_single_account_modal.removeChild('account_password_view');
             this.removeChild('single_account');
         }
         if (xabber.accounts.length === 1 && xabber.accounts.enabled.length){
@@ -2447,10 +2446,6 @@ xabber.SettingsModalView = xabber.BasicView.extend({
             this.settings_single_account_modal.addChild('blocklist', xabber.BlockListView, {
                 account: first_account,
                 el: this.settings_single_account_modal.$('.block-list-view-wrap')[0]
-            });
-            this.settings_single_account_modal.addChild('account_password_view', xabber.ChangeAccountPasswordView, {
-                model: first_account,
-                el: this.settings_single_account_modal.$('.change-password-container')[0]
             });
         } else {
             this.$('.btn-add-account').removeClass('hidden');

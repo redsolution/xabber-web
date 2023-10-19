@@ -14,41 +14,57 @@
             <div class="storage-label storage-label-voices"><div class="storage-label-icon"></div><div class="storage-label-text">{[print(xabber.getString("vcard_type_voice"))]}</div></div>
             <div class="storage-label storage-label-files"><div class="storage-label-icon"></div><div class="storage-label-text">{[print(xabber.getString("files"))]}</div></div>
         </div>
-        <div class="storage-usages">
-            <div class="storage-category-usage storage-usage-images">
-                {[print(xabber.getString("images"))]}<span class="storage-usage-amount"></span>
+    </div>
+    <div class="storage-usages">
+        <div class="settings-tab settings-non-tab storage-usage-images" data-media-type="image" data-header-text='{[print(xabber.getString("images"))]}'>
+            <div class="setting-icon-background">
+                <svg class="mdi mdi-24px mdi-svg-template" data-svgname="image"></svg>
             </div>
-            <div class="storage-category-usage storage-usage-videos">
-                {[print(xabber.getString("videos"))]}<span class="storage-usage-amount"></span>
+            <div class="settings-block-name one-line">{[print(xabber.getString("images"))]}</div>
+            <div class="settings-block-label one-line">{[print(xabber.getString("media_gallery_images_label"))]}</div>
+            <span class="storage-usage-amount"></span>
+        </div>
+        <div class="settings-tab settings-non-tab storage-usage-videos" data-media-type="video" data-header-text='{[print(xabber.getString("videos"))]}'>
+            <div class="setting-icon-background">
+                <svg class="mdi mdi-24px mdi-svg-template" data-svgname="file-video"></svg>
             </div>
-            <div class="storage-category-usage storage-usage-voices">
-                {[print(xabber.getString("vcard_type_voice"))]}<span class="storage-usage-amount"></span>
+            <div class="settings-block-name one-line">{[print(xabber.getString("videos"))]}</div>
+            <div class="settings-block-label one-line">{[print(xabber.getString("media_gallery_videos_label"))]}</div>
+            <span class="storage-usage-amount"></span>
+        </div>
+        <div class="settings-tab settings-non-tab storage-usage-voices" data-media-type="voice" data-header-text='{[print(xabber.getString("vcard_type_voice"))]}'>
+            <div class="setting-icon-background">
+                <svg class="mdi mdi-24px mdi-svg-template" data-svgname="file-audio"></svg>
             </div>
-            <div class="storage-category-usage storage-usage-files">
-                {[print(xabber.getString("files"))]}<span class="storage-usage-amount"></span>
+            <div class="settings-block-name one-line">{[print(xabber.getString("vcard_type_voice"))]}</div>
+            <div class="settings-block-label one-line">{[print(xabber.getString("media_gallery_voice_label"))]}</div>
+            <span class="storage-usage-amount"></span>
+        </div>
+        <div class="settings-tab settings-non-tab storage-usage-files" data-media-type="file" data-header-text='{[print(xabber.getString("files"))]}'>
+            <div class="setting-icon-background">
+                <svg class="mdi mdi-24px mdi-svg-template" data-svgname="file"></svg>
             </div>
+            <div class="settings-block-name one-line">{[print(xabber.getString("files"))]}</div>
+            <div class="settings-block-label one-line">{[print(xabber.getString("media_gallery_files_label"))]}</div>
+            <span class="storage-usage-amount"></span>
+        </div>
+        <div class="settings-tab settings-non-tab storage-usage-avatars" data-media-type="avatars" data-header-text='{[print(xabber.getString("avatars"))]}'>
+            <div class="setting-icon-background">
+                <svg class="mdi mdi-24px mdi-svg-template" data-svgname="camera"></svg>
+            </div>
+            <div class="settings-block-name one-line">{[print(xabber.getString("avatars"))]}</div>
+            <div class="settings-block-label one-line">{[print(xabber.getString("media_gallery_avatars_label"))]}</div>
+            <span class="storage-usage-amount"></span>
         </div>
     </div>
-    <ul class="tabs">
-        <li data-value="image" class="list-variant tab"><a class="text-color-700">{[print(xabber.getString("images"))]}</a></li>
-        <li data-value="video" class="list-variant tab"><a class="text-color-700">{[print(xabber.getString("videos"))]}</a></li>
-        <li data-value="file" class="list-variant tab"><a class="text-color-700">{[print(xabber.getString("files"))]}</a></li>
-        <li data-value="voice" class="list-variant tab"><a class="text-color-700">{[print(xabber.getString("vcard_type_voice"))]}</a></li>
-        <li data-value="avatars" class="list-variant tab"><a class="text-color-700">{[print(xabber.getString("avatars"))]}</a></li>
-    </ul>
-    <div class="list-managment-wrap">
-        <button class="btn-sorting dropdown-button btn-flat btn-main text-color-700 hover-ground-color-300" data-activates="storage-file-sorting">
-            {[print(xabber.getString("searching__search_panel__label_sort_by"))]}
-        </button>
+</div>
+<div class="media-gallery-items-wrap hidden">
+    <div class="gallery-sticky-buttons">
+        <i class="btn-back-gallery sticky-item mdi mdi-24px mdi-arrow-left"></i>
+        <i class="btn-close-selection sticky-item mdi mdi-24px mdi-close"></i>
+        <div class="sticky-item gallery-selection-head"></div>
+        <i class="btn-delete-selection sticky-item mdi mdi-24px mdi-delete"></i>
     </div>
-    <ul id="storage-file-sorting" class="dropdown-content bootstrap-dropdown noselect">
-        <div class="property-variant btn-gallery-sorting" data-value="-id">
-            <span class="one-line">{[print(xabber.getString("account_media_gallery_sorting_new"))]}</span>
-        </div>
-        <div class="property-variant btn-gallery-sorting" data-value="-size">
-            <span class="one-line">{[print(xabber.getString("account_media_gallery_sorting_size"))]}</span>
-        </div>
-    </ul>
     <div class="gallery-files zoom-gallery">
     </div>
 </div>

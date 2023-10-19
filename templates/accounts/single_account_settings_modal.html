@@ -129,12 +129,24 @@
         <i class="btn-back-settings mdi mdi-24px mdi-arrow-left"></i>
         <i class="btn-back-subsettings-account mdi mdi-24px mdi-arrow-left hidden"></i>
         <span class="settings-panel-head-title">{[print(xabber.getString("account_editor"))]}</span>
+        <i class="btn-sorting dropdown-button mdi mdi-24px mdi-sort hidden" data-activates="storage-file-sorting"></i>
+        <ul id="storage-file-sorting" class="dropdown-content bootstrap-dropdown noselect">
+            <div class="property-variant btn-gallery-sorting" data-value="-id">
+                <span class="one-line">{[print(xabber.getString("account_media_gallery_sorting_new"))]}</span>
+            </div>
+            <div class="property-variant btn-gallery-sorting" data-value="-size">
+                <span class="one-line">{[print(xabber.getString("account_media_gallery_sorting_size"))]}</span>
+            </div>
+        </ul>
         <div class="btn-more media-gallery-button dropdown-button" data-activates="storage-actions">
             <i class="mdi mdi-24px mdi-dots-vertical"></i>
         </div>
         <ul id="storage-actions" class="dropdown-content noselect">
             <div class="property-variant btn-delete-files-variants" data-activates="storage-delete-files">
                 <span class="one-line">{[print(xabber.getString("account_delete_files"))]}</span>
+            </div>
+            <div class="property-variant btn-select-files hidden">
+                <span class="one-line">{[print(xabber.getString("account_select_files"))]}</span>
             </div>
         </ul>
         <ul id="storage-delete-files" class="dropdown-content bootstrap-dropdown noselect">

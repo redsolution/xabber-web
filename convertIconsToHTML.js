@@ -95,6 +95,7 @@ let badges_names = [
         'index',
         'restrictions-outline',
         'history',
+        'camera',
         'camera-retake',
         'chevron-down',
         'membership-outline',
