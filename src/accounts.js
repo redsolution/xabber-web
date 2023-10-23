@@ -2337,7 +2337,7 @@ xabber.AccountMediaGalleryView = xabber.BasicView.extend({
     },
 
     showDeleteFilesView: function (ev) {
-        xabber.trigger('show_delete_files', this.account);
+        xabber.trigger('show_delete_files', {model: this.account, gallery_view: this});
     },
 
     sortFiles: function (ev) {
@@ -2682,6 +2682,7 @@ xabber.DeleteFilesFromGalleryView = xabber.BasicView.extend({
 
     render: function (options) {
         this.account = options.model;
+        this.gallery_view = options.gallery_view;
         this.$el.openModal({
             ready: this.onRender.bind(this),
             complete: this.close.bind(this)
@@ -2707,9 +2708,6 @@ xabber.DeleteFilesFromGalleryView = xabber.BasicView.extend({
         let $elem = $(ev.target),
             gallery;
 
-        this.account.settings_account_modal
-        && this.account.settings_account_modal.gallery_view
-        && (gallery = this.account.settings_account_modal.gallery_view);
         if ($elem.hasClass('uploaded-video')) {
             let $file = $elem.closest('.gallery-file'),
                 f_url = $file.attr('data-file');
@@ -2721,7 +2719,7 @@ xabber.DeleteFilesFromGalleryView = xabber.BasicView.extend({
             let $audio_elem = $elem.closest('.gallery-file'),
                 f_url = $audio_elem.attr('data-file');
             $audio_elem.find('.mdi-play').removeClass('audio-file-play');
-            $audio_elem[0].voice_message = gallery.renderVoiceMessage($audio_elem.find('.gallery-file-audio-container')[0], f_url);
+            $audio_elem[0].voice_message = this.gallery_view.renderVoiceMessage($audio_elem.find('.gallery-file-audio-container')[0], f_url);
             this.prev_audio_message && this.prev_audio_message.voice_message.pause();
             this.prev_audio_message = $audio_elem[0];
             return;
@@ -2885,8 +2883,7 @@ xabber.DeleteFilesFromGalleryView = xabber.BasicView.extend({
 
     onHide: function () {
         this.$el.detach();
-        this.account.settings_account_modal && this.account.settings_account_modal.gallery_view
-        && this.account.settings_account_modal.gallery_view.updateStorage();
+        this.gallery_view.updateStorage();
     },
 
     close: function () {
@@ -7120,10 +7117,10 @@ xabber.once("start", function () {
         this.change_account_password_view.show({model: account});
     }, this);
 
-    this.on("show_delete_files", function (account) {
+    this.on("show_delete_files", function (options) {
         if (!this.delete_files_view)
             this.delete_files_view = new this.DeleteFilesFromGalleryView();
-        this.delete_files_view.show({model: account});
+        this.delete_files_view.show(options);
     }, this);
 
     $(window).bind('beforeunload',function(){
