@@ -13583,6 +13583,103 @@ input[type=range].voice-message-volume:focus {
     background-color: #eee;
 }
 
+/* ----------------- GALLERY FILE DELETION -------------------- */
+.modal.delete-files-modal{
+    height: unset;
+    width: 300px;
+}
+.modal.delete-files-modal:not(.wide-deletion) .modal-content{
+    padding: 0;
+}
+.modal.delete-files-modal.wide-deletion{
+    height: 70%;
+    width: 60%;
+}
+.modal.delete-files-modal.wide-deletion .modal-content-wrap{
+    height: 100%;
+}
+.modal.delete-files-modal.wide-deletion .modal-content{
+    max-height: unset;
+    height: calc(100% - 112px);
+}
+.modal.delete-files-modal .preloader-wrapper{
+    position: absolute;
+    left: calc(50% - 8px);
+    top: calc(50% - 8px);
+}
+.modal.delete-files-modal .deletion-variants{
+    margin-bottom: 16px;
+}
+.modal.delete-files-modal .property-variant.btn-delete-files-percent{
+    cursor: pointer;
+    height: 40px;
+    margin-bottom: 4px;
+    margin-top: 4px;
+    padding: 8px 0 8px 56px;
+    position: relative;
+}
+.modal.delete-files-modal .property-variant.btn-delete-files-percent:hover{
+    background-color: rgba(0,0,0,.07)!important;
+}
+.modal.delete-files-modal .property-variant.btn-delete-files-percent .percent-icon{
+    position: absolute;
+    left: 16px;
+}
+.modal.delete-files-modal .property-variant.btn-delete-files-percent .percent-icon path{
+    fill: #9e9e9e;
+}
+.modal.delete-files-modal .property-variant.btn-delete-files-percent span{
+    color: rgba(0,0,0,.87);
+    font-size: 16px;
+    font-weight: 400;
+    height: 24px;
+    line-height: 24px;
+}
+.modal.delete-files-modal .delete-files-text{
+    margin: 8px 0;
+    font-size: 16px;
+    line-height: 24px;
+}
+.modal.delete-files-modal .setting-name{
+    margin: 4px 0 0 0px;
+    FONT-WEIGHT: 500;
+    color: rgba(0,0,0,.54);
+    font-size: 16px;
+    line-height: 32px;
+    text-transform: capitalize;
+}
+.modal.delete-files-modal .gallery-files{
+    padding: 8px 0 16px 14px;
+}
+.modal.delete-files-modal .gallery-files.grid{
+    padding: 8px 0 16px;
+}
+.modal.delete-files-modal .gallery-files:not(.grid) .gallery-file{
+    margin: 2px 0;
+}
+.modal.delete-files-modal .modal-content .media-gallery-delete-items-wrap .delete-files-preview-wrap .gallery-files .btn-more{
+    display: none;
+    position: absolute;
+    color: #80868b;
+    cursor: pointer;
+}
+.modal.delete-files-modal .modal-content .media-gallery-delete-items-wrap .delete-files-preview-wrap .gallery-files .btn-more i{
+    color: #80868b;
+}
+.modal.delete-files-modal .modal-content .media-gallery-delete-items-wrap .delete-files-preview-wrap .gallery-files.grid .btn-more{
+    display: none !important;
+}
+.modal.delete-files-modal .modal-content .media-gallery-delete-items-wrap .delete-files-preview-wrap .gallery-file:hover .btn-more{
+    display: block;
+}
+.modal.delete-files-modal .modal-content .media-gallery-delete-items-wrap .delete-files-preview-wrap .gallery-file .btn-delete{
+    display: none;
+}
+.modal.delete-files-modal .modal-content .media-gallery-delete-items-wrap .delete-files-preview-wrap .gallery-file .gallery-file-audio-container,
+.modal.delete-files-modal .modal-content .media-gallery-delete-items-wrap .delete-files-preview-wrap .gallery-file .gallery-file-title{
+    width: 55%;
+    min-width: 330px;
+}
 /* ----------------- GALLERY VIDEO MODAL -------------------- */
 
 .modal.gallery-video-modal{
@@ -14530,12 +14627,17 @@ input[type=range].voice-message-volume:focus {
     left: calc(50% - 8px);
     bottom: 16px;
 }
-.media-gallery-items-wrap .gallery-files .no-files{
+.media-gallery-items-wrap .no-files{
     position: absolute;
     left: 50%;
     top: 32px;
     transform: translate(-50%, 0);
     font-size: 18px;
+}
+.media-gallery-delete-items-wrap .preloader-wrapper{
+    position: absolute;
+    left: calc(50% - 8px);
+    top: calc(50% - 40px);
 }
 .gallery-files:not(.grid) {
     margin-top: 16px;
@@ -14550,7 +14652,6 @@ input[type=range].voice-message-volume:focus {
     height: 32px;
     width: 32px;
     left: -14px;
-    background: #e0e0e0;
     top: 7px;
 }
 .gallery-files.voice:not(.grid) .gallery-file .gallery-file-title{
@@ -14575,6 +14676,7 @@ input[type=range].voice-message-volume:focus {
 }
 .gallery-files:not(.grid) .gallery-file .gallery-file-placeholder-background{
     border-radius: 35px;
+    background: #e0e0e0;
     height: 32px;
     position: absolute;
     width: 32px;
@@ -14583,6 +14685,9 @@ input[type=range].voice-message-volume:focus {
 }
 .gallery-files:not(.grid) .gallery-file .gallery-file-placeholder-background svg{
     cursor: auto !important;
+}
+.gallery-files:not(.grid) .gallery-file .gallery-file-placeholder-background svg path{
+    fill: #757575;
 }
 .gallery-files:not(.grid) .gallery-file .gallery-file-audio-container.voice-message-rendering{
     background: #fff;
@@ -14613,6 +14718,7 @@ input[type=range].voice-message-volume:focus {
 }
 .details-panel-right .bottom-block .gallery-files:not(.grid) .gallery-file{
     padding: 0;
+    margin: 2px 0;
     height: 32px;
 }
 .details-panel-right .bottom-block .gallery-files:not(.grid) .gallery-file .gallery-file-title{
@@ -14780,8 +14886,9 @@ input[type=range].voice-message-volume:focus {
     width: 32px;
     text-align: center;
 }
-.gallery-files .gallery-file .gallery-file-placeholder-background .details-icon path{
-    fill: #9E9E9E;
+.delete-files-preview-wrap .gallery-files.voice .gallery-file .gallery-file-audio-container.voice-message-rendering,
+.delete-files-preview-wrap .gallery-files.voice .gallery-file .gallery-file-placeholder-background .details-icon{
+    z-index: 1;
 }
 .gallery-files .gallery-file .checkbox-field{
     position: absolute;

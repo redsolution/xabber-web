@@ -2179,7 +2179,8 @@ xabber.AccountMediaGalleryView = xabber.BasicView.extend({
         "click .gallery-file.gallery-avatar .btn-delete": "deleteAvatar",
         "click .gallery-file .checkbox-field": "selectFile",
         "click .btn-delete-selection": "deleteSelectedFiles",
-        "click .settings-tab": "onTabClick",
+        "click .settings-tab:not(.settings-deletion-button)": "onTabClick",
+        "click .show-deletion": "showDeleteFilesView",
         "click .btn-back-gallery": "backToMain",
         "click .gallery-file": "onClickFile",
         "click .btn-close-selection": "disableFilesSelect",
@@ -2292,9 +2293,9 @@ xabber.AccountMediaGalleryView = xabber.BasicView.extend({
         this.total_pages = 0;
         this.parent.$('.btn-back-settings').addClass('hidden');
         this.parent.$('.settings-panel-head-title').text(tab_header);
-        this.parent.$('.btn-delete-files-variants').addClass('hidden');
         this.parent.$('.btn-select-files').removeClass('hidden');
         this.parent.$('.btn-sorting').removeClass('hidden');
+        this.parent.$('.btn-more.media-gallery-button').removeClass('hidden');
         this.$('.gallery-wrap').addClass('hidden');
         this.$('.media-gallery-items-wrap').removeClass('hidden');
         this.$('.media-gallery-items-wrap').attr('data-value', file_type);
@@ -2310,10 +2311,10 @@ xabber.AccountMediaGalleryView = xabber.BasicView.extend({
 
     backToMain: function (ev) {
         this.parent.$('.btn-back-settings').removeClass('hidden');
-        this.parent.$('.btn-delete-files-variants').removeClass('hidden');
         this.parent.$('.btn-select-files').addClass('hidden');
         this.parent.$('.btn-sorting').addClass('hidden');
         this.parent.$('.settings-panel-head-title').text(xabber.getString("account_cloud_storage"));
+        this.parent.$('.btn-more.media-gallery-button').addClass('hidden');
         this.$('.gallery-wrap').removeClass('hidden');
         this.$('.media-gallery-items-wrap').addClass('hidden');
         this.updateStorage();
@@ -2333,6 +2334,10 @@ xabber.AccountMediaGalleryView = xabber.BasicView.extend({
             this.$('.gallery-files').html('');
             this.filterType('avatars');
         }
+    },
+
+    showDeleteFilesView: function (ev) {
+        xabber.trigger('show_delete_files', this.account);
     },
 
     sortFiles: function (ev) {
@@ -2524,7 +2529,14 @@ xabber.AccountMediaGalleryView = xabber.BasicView.extend({
         if (response.items && response.items.length){
             response.items.forEach((item) => {
                 item.thumbnail && item.thumbnail.url && (item.thumbnail = item.thumbnail.url);
-                let $gallery_file = $(templates.media_gallery_account_file({file: item, svg_icon: utils.file_type_icon_svg(item.media_type), filesize: utils.pretty_size(item.size), created_at: utils.pretty_date(item.created_at), duration: utils.pretty_duration(item.duration)}));
+                let $gallery_file = $(templates.media_gallery_account_file({
+                    file: item,
+                    svg_icon: utils.file_type_icon_svg(item.media_type),
+                    filesize: utils.pretty_size(item.size),
+                    created_at: utils.pretty_date(item.created_at),
+                    duration: utils.pretty_duration(item.duration),
+                    download_only: false,
+                }));
                 (response.type === 'avatars') && $gallery_file.addClass('gallery-avatar');
                 $gallery_file.appendTo(this.$('.gallery-files'));
                 $gallery_file.find('.uploaded-img').length && $gallery_file.find('.uploaded-img').magnificPopup({
@@ -2583,31 +2595,6 @@ xabber.AccountMediaGalleryView = xabber.BasicView.extend({
                     data: JSON.stringify({id: file_id}),
                     success: (response) => {
                         $target.detach();
-                    },
-                    error: (response) => {
-                        this.account.handleCommonGalleryErrors(response)
-                        console.log(response)
-                    }
-                });
-        });
-    },
-
-    deleteFilesFiltered: function (ev) {
-        this.account.testGalleryTokenExpire(() => {
-            let $target = $(ev.target).closest('.property-variant'),
-                days = $target.attr('data-date'),
-                date = new Date();
-            days && date.setDate(date.getDate() - days)
-            if (this.account.get('gallery_token') && this.account.get('gallery_url') && date && date.toISOString().split('T') && date.toISOString().split('T')[0])
-                $.ajax({
-                    type: 'DELETE',
-                    headers: {"Authorization": 'Bearer ' + this.account.get('gallery_token')},
-                    url: this.account.get('gallery_url') + 'v1/files/',
-                    dataType: 'json',
-                    contentType: "application/json",
-                    data: JSON.stringify({date_lte: date.toISOString().split('T')[0]}),
-                    success: (response) => {
-                        this.updateStorage(true);
                     },
                     error: (response) => {
                         this.account.handleCommonGalleryErrors(response)
@@ -2677,6 +2664,238 @@ xabber.AccountMediaGalleryView = xabber.BasicView.extend({
             $(target).val('')
         }
     },
+});
+
+xabber.DeleteFilesFromGalleryView = xabber.BasicView.extend({
+    className: 'modal main-modal delete-files-modal',
+    ps_selector: '.modal-content',
+    ps_settings: {
+        wheelPropagation: true
+    },
+    template: templates.delete_files_media_gallery,
+    events: {
+        "click .btn-confirm": "deleteFilesFiltered",
+        "click .btn-delete-files-percent": "deletePercent",
+        "click .btn-cancel": "close",
+        "click .gallery-file": "onClickFile",
+    },
+
+    render: function (options) {
+        this.account = options.model;
+        this.$el.openModal({
+            ready: this.onRender.bind(this),
+            complete: this.close.bind(this)
+        });
+    },
+
+    onRender: function (options) {
+        this.$el.removeClass('wide-deletion');
+        this.$('.media-gallery-delete-items-wrap').addClass('hidden');
+        this.$('.deletion-variants').removeClass('hidden');
+        this.$('.modal-footer').addClass('hidden');
+        this.$('.gallery-files').addClass('hidden');
+        this.$('.list-variant.tab').addClass('hidden');
+        this.$('.delete-files-preview-container').addClass('hidden');
+        this.$('.setting-name').addClass('hidden');
+        this.$('.delete-files-preview-wrap .gallery-files').html('');
+        this.$('.media-gallery-delete-items-wrap .no-files').addClass('hidden');
+        this.$('.modal-header').text(xabber.getString("media_gallery_delete_files"));
+        this.updateScrollBar();
+    },
+
+    onClickFile: function (ev) {
+        let $elem = $(ev.target),
+            gallery;
+
+        this.account.settings_account_modal
+        && this.account.settings_account_modal.gallery_view
+        && (gallery = this.account.settings_account_modal.gallery_view);
+        if ($elem.hasClass('uploaded-video')) {
+            let $file = $elem.closest('.gallery-file'),
+                f_url = $file.attr('data-file');
+
+            utils.dialogs.common('', '<video class="gallery-video-frame" controls autoplay=1 width="420" height="315" src="' + f_url +'"></video>', null, null, null, 'gallery-video-modal')
+            return;
+        }
+        if ($elem.hasClass('no-uploaded') || $elem.hasClass('gallery-audio-file-not-uploaded')) {
+            let $audio_elem = $elem.closest('.gallery-file'),
+                f_url = $audio_elem.attr('data-file');
+            $audio_elem.find('.mdi-play').removeClass('audio-file-play');
+            $audio_elem[0].voice_message = gallery.renderVoiceMessage($audio_elem.find('.gallery-file-audio-container')[0], f_url);
+            this.prev_audio_message && this.prev_audio_message.voice_message.pause();
+            this.prev_audio_message = $audio_elem[0];
+            return;
+        }
+
+        if ($elem.hasClass('mdi-play')) {
+            let $audio_elem = $elem.closest('.gallery-file');
+            this.prev_audio_message.voice_message.pause();
+            this.prev_audio_message = $audio_elem[0];
+            $audio_elem[0].voice_message.play();
+            return;
+        }
+
+        if ($elem.hasClass('mdi-pause')) {
+            this.prev_audio_message.voice_message.pause();
+            return;
+        }
+    },
+
+    deletePercent: function (ev) {
+        let $target = $(ev.target).closest('.btn-delete-files-percent'),
+            percent = $target.attr('data-value');
+        this.$el.addClass('wide-deletion');
+        this.$('.deletion-variants').addClass('hidden');
+        this.$('.modal-header').text(xabber.getString("media_gallery_delete_files_header"));
+        this.updateScrollBar();
+        let options = {percent: percent}
+        this.current_page_preview = 1
+        $(env.templates.contacts.preloader()).appendTo(this.$('.modal-content'))
+        this.getFilesForDeletion(options);
+    },
+
+    getFilesForDeletion: function (options) {
+        this.account.testGalleryTokenExpire(() => {
+            options && options.file && (options = {});
+            options = Object.assign({obj_per_page: 50, order_by: '-id'}, options);
+            if (this.account.get('gallery_token') && this.account.get('gallery_url')) {
+                $.ajax({
+                    type: 'GET',
+                    headers: {"Authorization": 'Bearer ' + this.account.get('gallery_token')},
+                    url: this.account.get('gallery_url') + 'v1/files/',
+                    dataType: 'json',
+                    contentType: "application/json",
+                    data: options,
+                    success: (response) => {
+                        console.log(response)
+                        let current_page = this.current_page_preview;
+                        if (current_page < response.total_pages){
+                            this.current_page_preview++;
+                            options.page = this.current_page_preview;
+                            this.getFilesForDeletion(options)
+                        } else {
+                            this.$('.preloader-wrapper').remove();
+                            this.$('.modal-footer').removeClass('hidden');
+                            this.$('.media-gallery-delete-items-wrap').removeClass('hidden');
+                            this.updateScrollBar();
+                        }
+                        this.renderForDeletion(response);
+                        if (current_page === 1 && response.items && response.items.length){
+                            this.date_lte_for_deletion = response.items[0].created_at;
+                        } else if (current_page === 1) {
+                            this.$('.media-gallery-delete-items-wrap .no-files').removeClass('hidden');
+                        }
+                    },
+                    error: (response) => {
+                        console.log(response)
+                        this.$('.preloader-wrapper').remove();
+                        this.$('.media-gallery-delete-items-wrap .no-files').removeClass('hidden');
+                        this.updateScrollBar();
+                    }
+                });
+            }
+        });
+    },
+
+    renderForDeletion: function (response) {
+        if (response.items && response.items.length){
+            response.items.forEach((item) => {
+                item.thumbnail && item.thumbnail.url && (item.thumbnail = item.thumbnail.url);
+                let $gallery_file = $(templates.media_gallery_account_file({
+                    file: item,
+                    svg_icon: utils.file_type_icon_svg(item.media_type),
+                    filesize: utils.pretty_size(item.size),
+                    created_at: utils.pretty_date(item.created_at),
+                    duration: utils.pretty_duration(item.duration),
+                    download_only: true,
+                }));
+                if (item.media_type && item.media_type.includes('image')){
+                    $gallery_file.appendTo(this.$('.gallery-files.delete-files-images'));
+                    this.$('.delete-files-images').removeClass('hidden');
+                } else if (item.media_type && item.media_type.includes('video')){
+                    $gallery_file.appendTo(this.$('.gallery-files.delete-files-videos'));
+                    this.$('.delete-files-videos').removeClass('hidden');
+                } else if (item.media_type && item.media_type.includes('+voice')){
+                    $gallery_file.appendTo(this.$('.gallery-files.delete-files-voices'));
+                    this.$('.delete-files-voices').removeClass('hidden');
+                } else {
+                    $gallery_file.appendTo(this.$('.gallery-files.delete-files-files'));
+                    this.$('.delete-files-files').removeClass('hidden');
+                }
+                $gallery_file.find('.uploaded-img').length && $gallery_file.find('.uploaded-img').magnificPopup({
+                    type: 'image',
+                    closeOnContentClick: true,
+                    fixedContentPos: true,
+                    mainClass: 'mfp-no-margins mfp-with-zoom',
+                    image: {
+                        verticalFit: true,
+                        titleSrc: function(item) {
+                            return '<a class="image-source-link" href="'+item.el.attr('src')+'" target="_blank">' + item.name + '</a>';
+                        }
+                    },
+                    zoom: {
+                        enabled: true,
+                        duration: 300
+                    }
+                });
+            });
+            let dropdown_settings = {
+                inDuration: 100,
+                outDuration: 100,
+                constrainWidth: false,
+                hover: false,
+                alignment: 'right'
+            };
+            this.$('.dropdown-button').dropdown(dropdown_settings)
+            this.$('.list-variant.tab:not(.hidden)').length && this.$('.list-variant.tab:not(.hidden)').first().click();
+            this.updateScrollBar();
+        }
+    },
+
+    deleteFilesFiltered: function (ev) {
+        if (!this.date_lte_for_deletion)
+            return
+
+        utils.dialogs.ask(xabber.getString("media_gallery_delete_files_confirm_delete_header"), xabber.getString("media_gallery_delete_files_confirm_delete_text"),
+            null, { ok_button_text: xabber.getString("delete")}).done((res) => {
+            if (!res)
+                return;
+            $(env.templates.contacts.preloader()).appendTo(this.$('.modal-footer'))
+            this.account.testGalleryTokenExpire(() => {
+                if (this.account.get('gallery_token') && this.account.get('gallery_url'))
+                    $.ajax({
+                        type: 'DELETE',
+                        headers: {"Authorization": 'Bearer ' + this.account.get('gallery_token')},
+                        url: this.account.get('gallery_url') + 'v1/files/',
+                        dataType: 'json',
+                        contentType: "application/json",
+                        data: JSON.stringify({date_lte: this.date_lte_for_deletion}),
+                        success: (response) => {
+                            console.log(response);
+                            this.close();
+                        },
+                        error: (response) => {
+                            this.account.handleCommonGalleryErrors(response)
+                            console.log(response)
+                        }
+                    });
+            });
+        });
+    },
+
+    onHide: function () {
+        this.$el.detach();
+        this.account.settings_account_modal && this.account.settings_account_modal.gallery_view
+        && this.account.settings_account_modal.gallery_view.updateStorage();
+    },
+
+    close: function () {
+        this.closeModal();
+    },
+
+    closeModal: function () {
+        this.$el.closeModal({ complete: this.hide.bind(this) });
+    }
 });
 
 xabber.AccountSettingsLeftView = xabber.BasicView.extend({
@@ -2918,7 +3137,6 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
         "click .btn-block": "openBlockWindow",
         "click .btn-unblock-selected": "unblockSelected",
         "click .btn-deselect-blocked": "deselectBlocked",
-        "click .btn-delete-files": "deleteFilesFiltered",
         "click .btn-gallery-sorting": "sortFiles",
         "click .btn-select-files": "enableFilesSelect",
         "click .all-sessions .device-encryption.active": "openFingerprint",
@@ -3014,12 +3232,6 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
             alignment: 'right'
         };
         this.$('.dropdown-button').dropdown(dropdown_settings);
-        this.$('.btn-delete-files-variants').dropdown({
-            inDuration: 100,
-            outDuration: 100,
-            hover: true,
-            belowOrigin: true,
-        });
         this.$('.panel-content-wrap').removeClass('hidden');
         if (this.ps_container.length) {
             this.ps_container.perfectScrollbar(
@@ -3080,7 +3292,6 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
             $elem = this.$('.settings-block-wrap.' + $tab.data('block-name')),
             block_name = $tab.data('block-name');
         if (block_name){
-            this.$('.media-gallery-button.btn-more').hideIf(block_name != 'media-gallery');
             this.$('.device-more-button.btn-more').hideIf(block_name != 'encryption');
         }
         if (block_name === 'password'){
@@ -3093,10 +3304,9 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
         $elem.removeClass('hidden');
         this.$('.settings-panel-head span.settings-panel-head-title').text($elem.attr('data-header'));
         if (block_name === 'media-gallery'){
-            this.$('.btn-more.media-gallery-button').removeClass('hidden');
-            this.gallery_view.$('.media-gallery-items-wrap').removeClass('select-items-state');
-            this.gallery_view.backToMain();
+            this.gallery_view.$('.media-gallery-items-wrap:not(.delete-files-preview-wrap)').removeClass('select-items-state');
             this.gallery_view.disableFilesSelect();
+            this.gallery_view.backToMain();
         }
         if (block_name === 'blocklist'){
             this.$('.blocklist-tabs-wrap .tabs .indicator').remove();
@@ -3145,7 +3355,6 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
         let $elem = this.$('.settings-block-wrap.' + block_name),
             elem_parent = $elem.attr('data-parent-block');
         if (block_name){
-            this.$('.media-gallery-button.btn-more').hideIf(block_name != 'media-gallery');
             this.$('.device-more-button.btn-more').hideIf(block_name != 'encryption');
         }
         this.$('.settings-block-wrap').addClass('hidden');
@@ -3765,11 +3974,6 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
             this.children.blocklist.deselectBlocked();
     },
 
-    deleteFilesFiltered: function (ev) {
-        if (this.gallery_view)
-            this.gallery_view.deleteFilesFiltered(ev);
-    },
-
     sortFiles: function (ev) {
         if (this.gallery_view)
             this.gallery_view.sortFiles(ev);
@@ -3825,12 +4029,6 @@ xabber.AccountSettingsSingleModalView = xabber.AccountSettingsModalView.extend({
             alignment: 'right'
         };
         this.$('.dropdown-button').dropdown(dropdown_settings);
-        this.$('.btn-delete-files-variants').dropdown({
-            inDuration: 100,
-            outDuration: 100,
-            hover: true,
-            belowOrigin: true,
-        });
         this.$('.panel-content-wrap').removeClass('hidden');
         if (this.ps_container.length) {
             this.ps_container.perfectScrollbar(
@@ -3890,7 +4088,6 @@ xabber.AccountSettingsRightView = xabber.BasicView.extend({
         "click .btn-block": "openBlockWindow",
         "click .btn-unblock-selected": "unblockSelected",
         "click .btn-deselect-blocked": "deselectBlocked",
-        "click .btn-delete-files": "deleteFilesFiltered",
         "click .all-sessions .device-encryption.active": "openFingerprint",
         "click .btn-purge-keys": "purgeKeys"
     },
@@ -3946,7 +4143,6 @@ xabber.AccountSettingsRightView = xabber.BasicView.extend({
             this.$('.settings-block-wrap.'+options.block_name).removeClass('hidden');
             this.$('.settings-panel-head span.settings-panel-head-title').text(this.$('.settings-block-wrap.'+options.block_name).attr('data-header'));
             this.$('.btn-block').switchClass('hidden2', options.block_name != 'blocklist-info');
-            this.$('.media-gallery-button.btn-more').hideIf(options.block_name != 'media-gallery');
             this.$('.device-more-button.btn-more').hideIf(options.block_name != 'tokens' || !this.model.settings.get('omemo'));
             let dropdown_settings = {
                 inDuration: 100,
@@ -4318,11 +4514,6 @@ xabber.AccountSettingsRightView = xabber.BasicView.extend({
     deselectBlocked: function () {
         if (this.children && this.children.blocklist)
             this.children.blocklist.deselectBlocked();
-    },
-
-    deleteFilesFiltered: function (ev) {
-        if (this.gallery_view)
-            this.gallery_view.deleteFilesFiltered(ev);
     },
 });
 
@@ -6927,6 +7118,12 @@ xabber.once("start", function () {
         if (!this.change_account_password_view)
             this.change_account_password_view = new this.ChangeAccountPasswordView();
         this.change_account_password_view.show({model: account});
+    }, this);
+
+    this.on("show_delete_files", function (account) {
+        if (!this.delete_files_view)
+            this.delete_files_view = new this.DeleteFilesFromGalleryView();
+        this.delete_files_view.show({model: account});
     }, this);
 
     $(window).bind('beforeunload',function(){

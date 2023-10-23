@@ -2153,7 +2153,7 @@ xabber.ChatItemView = xabber.BasicView.extend({
         this.model.set({timestamp: timestamp});
         if (this.model.get('group_chat'))
             msg_from = msg_user_info.nickname || msg_user_info.jid || (msg.isSenderMe() ? this.account.get('name') : msg.get('from_jid')) || "";
-        msg_from && (msg_from = $('<span class=text-color-700/>').text(msg_from + ': '));
+        msg_from && (msg_from = $('<span class="text-color-700"/>').text(msg_from + ': '));
         if (msg_files.length || msg_images.length || msg_locations.length) {
             let $colored_span = $('<span class="text-color-500"/>');
             if (msg.get('type') === 'file_upload') {

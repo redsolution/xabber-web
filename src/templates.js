@@ -93,6 +93,7 @@
     addTemplate('accounts.toolbar_item');
     addTemplate('accounts.media_gallery_account_file');
     addTemplate('accounts.media_gallery_account');
+    addTemplate('accounts.delete_files_media_gallery');
     addTemplate('accounts.settings_left');
     addTemplate('accounts.settings_right');
     addTemplate('accounts.single_account_settings_modal');

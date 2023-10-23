@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.3.4.43","version_description":"account media gallery redesign, added selecting files for deletion, fixed change password view opening on opening account settings, fixed contact details media layout"}'
+'{"version_number":"2.3.4.44","version_description":"added gallery file deletion by percent modal view, fixed gallery dropdown button appearance, fixed message author text indicator in last message"}'
 )});

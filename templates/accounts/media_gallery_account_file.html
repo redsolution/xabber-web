@@ -27,6 +27,13 @@
         <input type="checkbox" class="filled-in"/>
         <label></label>
     </div>
+    {[if (download_only){]}
+        <div class="btn-download btn-more">
+            <a class="one-line" target="_blank" rel="noopener noreferrer" href="{{file.file}}" download>
+                <i class="mdi mdi-24px mdi-download"></i>
+            </a>
+        </div>
+    {[} else {]}
     <div class="btn-more dropdown-button" data-activates="{{file.id}}-more">
         <i class="mdi mdi-24px mdi-dots-vertical"></i>
     </div>
@@ -40,4 +47,5 @@
             <span class="one-line">{[print(xabber.getString("delete"))]}</span>
         </div>
     </ul>
+    {[}]}
 </div>
