@@ -1109,23 +1109,7 @@ xabber.Account = Backbone.Model.extend({
         },
 
         showSettings: function (right, block_name) {
-            let has_settings_right = !_.isUndefined(this.settings_right);
-            if (!this.settings_left)
-                this.settings_left = new xabber.AccountSettingsLeftView({model: this});
-            if (!has_settings_right)
-                this.settings_right = new xabber.AccountSettingsRightView({model: this});
-            this.updateColorScheme();
-            xabber.body.setScreen('account_settings', {
-                account: this, right: right, block_name: block_name
-            });
-            this.trigger('open_settings');
-            if (!has_settings_right) {
-                this.trigger('render_settings');
-                this.settings_right.addChild('blocklist', xabber.BlockListView, {
-                    account: this,
-                    el: this.settings_right.$('.blocklist-info')[0]
-                });
-            }
+            this.showSettingsModal();
         },
 
         showSettingsModal: function () {
@@ -1190,7 +1174,9 @@ xabber.Account = Backbone.Model.extend({
         deleteAccount: function (show_settings, dont_change_screen) {
             this.show_settings_after_delete = show_settings;
             this.dont_change_screen_after_delete = dont_change_screen;
-            !dont_change_screen && xabber.body.setScreen('all_chats', {right_contact: ''});
+            let screen = xabber.body.screen;
+            if (screen.get('account') && screen.get('account') === this && screen.get('name') === 'account_settings_modal')
+                this.show_settings_after_delete = true;
             if (this.get('x_token'))
                 this.revokeXToken([this.get('x_token').token_uid]);
             this.session.set('delete', true);
@@ -1785,12 +1771,10 @@ xabber.Accounts = Backbone.CollectionWithStorage.extend({
             if (no_accounts) {
                 xabber.body.setScreen('login');
             } else if (account.show_settings_after_delete) {
-                xabber.body.setScreen('settings');
+                xabber.body.setScreen('settings-modal');
             } else if (account.dont_change_screen_after_delete) {
                 return;
             } else {
-                xabber.body.setScreen('all-chats');
-                xabber.chats_view.showAllChats();
             }
         }
     },
@@ -3003,7 +2987,7 @@ xabber.AccountSettingsLeftView = xabber.BasicView.extend({
     },
 
     showSettings: function () {
-        xabber.body.setScreen('settings');
+        xabber.body.setScreen('settings-modal');
         xabber.trigger('update_placeholder');
     },
 
@@ -3087,7 +3071,7 @@ xabber.AccountSettingsLeftView = xabber.BasicView.extend({
                 else
                     xabber.api_account.delete_settings(this.model.get('jid'));
             }
-            this.model.deleteAccount();
+            this.model.deleteAccount(true);
         });
     }
 });
@@ -3484,7 +3468,7 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
                 else
                     xabber.api_account.delete_settings(this.model.get('jid'));
             }
-            this.model.deleteAccount();
+            this.model.deleteAccount(true);
         });
     },
 
@@ -3724,11 +3708,11 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
             if (!res)
                 return;
             let $target = $(ev.target).closest('.settings-block-wrap.device-information'),
-                token_uid = $target.data('token-uid');
+                token_uid = $target.attr('data-token-uid');
             this.model.revokeXToken([token_uid], () => {
                 if (this.model.get('x_token')){
                     if (this.model.get('x_token').token_uid === token_uid) {
-                        this.model.deleteAccount();
+                        this.model.deleteAccount(true);
                         return;
                     }
                     this.model.getAllXTokens(() => {
@@ -4289,7 +4273,7 @@ xabber.AccountSettingsRightView = xabber.BasicView.extend({
         this.model.revokeXToken([token_uid], () => {
             if (this.model.get('x_token')){
                 if (this.model.get('x_token').token_uid === token_uid) {
-                    this.model.deleteAccount();
+                    this.model.deleteAccount(true);
                     return;
                 }
                 this.model.getAllXTokens(() => {

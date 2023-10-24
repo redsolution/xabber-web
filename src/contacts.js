@@ -8328,7 +8328,8 @@ xabber.Group = Backbone.Model.extend({
     },
 
     showSettings: function () {
-        this.settings_view.show();
+        xabber.body.setScreen('settings-modal');
+        xabber.trigger('update_placeholder');
     }
 });
 

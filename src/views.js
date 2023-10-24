@@ -1151,7 +1151,7 @@ xabber.ToolbarView = xabber.BasicView.extend({
     },
 
     showSettings: function () {
-        xabber.body.setScreen('settings');
+        xabber.body.setScreen('settings-modal');
         xabber.trigger('update_placeholder');
     },
 
