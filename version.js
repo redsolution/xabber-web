@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.3.4.48","version_description":"fixed gallery select files button appearing outside of gallery tab"}'
+'{"version_number":"2.3.4.49","version_description":"fixed editing messages with files, added custom invisible background overlay for dropdowns, fixed chat information block z index, paddings for free up space modal view"}'
 )});

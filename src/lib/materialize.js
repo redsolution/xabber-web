@@ -588,6 +588,18 @@ if ($) {
         left: leftPosition
       });
 
+        // custom invisible overlay for dropdowns
+        if (!activates.find('.lean-overlay').length && !options.hover){
+            $overlay = $('<div class="lean-overlay"></div>');
+            $overlay.css('z-index', '-1');
+            $overlay.css('display', 'block');
+            $overlay.css('position', 'fixed');
+            $overlay.css('opacity', 0);
+            activates.append($overlay);
+            $overlay.click(function() {
+                $overlay.detach();
+            });
+        }
 
       // Show dropdown
       activates.stop(true, true).css('opacity', 0)

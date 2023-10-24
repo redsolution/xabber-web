@@ -9069,6 +9069,7 @@ input[type=text].simple-input-field:hover {
     max-width: 100%;
     width: min-content;
     text-align: center;
+    z-index: 1;
 }
 
 .chat-notification.encryption-warning {
@@ -13616,7 +13617,7 @@ input[type=range].voice-message-volume:focus {
     height: 40px;
     margin-bottom: 4px;
     margin-top: 4px;
-    padding: 8px 0 8px 56px;
+    padding: 8px 0 8px 72px;
     position: relative;
 }
 .modal.delete-files-modal .property-variant.btn-delete-files-percent:hover{
@@ -13624,7 +13625,7 @@ input[type=range].voice-message-volume:focus {
 }
 .modal.delete-files-modal .property-variant.btn-delete-files-percent .percent-icon{
     position: absolute;
-    left: 16px;
+    left: 32px;
 }
 .modal.delete-files-modal .property-variant.btn-delete-files-percent .percent-icon path{
     fill: #9e9e9e;

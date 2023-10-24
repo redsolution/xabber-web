@@ -12571,20 +12571,24 @@ xabber.ChatBottomView = xabber.BasicView.extend({
                     dfd.resolve();
                 }
             });
-            attached_files.forEach((file) => {
-                utils.tryReadingFile(file).then(()=> {
-                    files_count++;
-                    if (attached_files.length === files_count) {
-                        file_check_dfd.resolve();
-                    }
-                }, ()=> {
-                    failed_files = failed_files.concat([file]);
-                    files_count++;
-                    if (attached_files.length === files_count) {
-                        file_check_dfd.resolve();
-                    }
+            if (!this.edit_message) {
+                attached_files.forEach((file) => {
+                    utils.tryReadingFile(file).then(()=> {
+                        files_count++;
+                        if (attached_files.length === files_count) {
+                            file_check_dfd.resolve();
+                        }
+                    }, ()=> {
+                        failed_files = failed_files.concat([file]);
+                        files_count++;
+                        if (attached_files.length === files_count) {
+                            file_check_dfd.resolve();
+                        }
+                    });
                 });
-            });
+            } else {
+                file_check_dfd.resolve();
+            }
         } else {
             dfd.resolve();
         }
