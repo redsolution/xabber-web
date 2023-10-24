@@ -1484,8 +1484,6 @@ xabber.Account = Backbone.Model.extend({
                 this.set('gallery_token', null);
                 errback && errback(xabber.getString("media_gallery_server_error"));
             } else {
-                this.set('gallery_url', null);
-                this.set('gallery_token', null);
                 errback && errback('Media Gallery error - ' + (err_text || response.status));
             }
         },

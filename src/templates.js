@@ -374,6 +374,14 @@
     addSvgTemplate('svg.lock-question');
     addSvgTemplate('svg.circles');
     addSvgTemplate('svg.circles-outline');
+    addSvgTemplate('svg.circle-slice-1');
+    addSvgTemplate('svg.circle-slice-2');
+    addSvgTemplate('svg.circle-slice-3');
+    addSvgTemplate('svg.circle-slice-4');
+    addSvgTemplate('svg.circle-slice-5');
+    addSvgTemplate('svg.circle-slice-6');
+    addSvgTemplate('svg.circle-slice-7');
+    addSvgTemplate('svg.circle-slice-8');
     addSvgTemplate('svg.translate');
     addSvgTemplate('svg.trash');
     addSvgTemplate('svg.crosshairs-gps');

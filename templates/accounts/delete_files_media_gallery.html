@@ -3,43 +3,44 @@
         <span>{[print(xabber.getString("media_gallery_delete_files_header"))]}</span>
     </div>
     <div class="modal-content">
-        <div class="deletion-variants">
+        <div class="deletion-variants no-select">
+            <div class="delete-files-text-info">{[print(xabber.getString("media_gallery_delete_files_info_text"))]}</div>
             <div class="property-variant btn-delete-files-percent" data-value="15">
-                <svg class="percent-icon mdi mdi-24px mdi-svg-template" data-svgname="trash"></svg>
+                <svg class="percent-icon mdi mdi-24px mdi-svg-template" data-svgname="circle-slice-1"></svg>
                 <span class="one-line">{[print(xabber.getString("media_gallery_delete_files_button_15_percent"))]}</span>
             </div>
             <div class="property-variant btn-delete-files-percent" data-value="25">
-                <svg class="percent-icon mdi mdi-24px mdi-svg-template" data-svgname="trash"></svg>
+                <svg class="percent-icon mdi mdi-24px mdi-svg-template" data-svgname="circle-slice-2"></svg>
                 <span class="one-line">{[print(xabber.getString("media_gallery_delete_files_button_25_percent"))]}</span>
             </div>
             <div class="property-variant btn-delete-files-percent" data-value="50">
-                <svg class="percent-icon mdi mdi-24px mdi-svg-template" data-svgname="trash"></svg>
+                <svg class="percent-icon mdi mdi-24px mdi-svg-template" data-svgname="circle-slice-4"></svg>
                 <span class="one-line">{[print(xabber.getString("media_gallery_delete_files_button_50_percent"))]}</span>
             </div>
             <div class="property-variant btn-delete-files-percent" data-value="100">
-                <svg class="percent-icon mdi mdi-24px mdi-svg-template" data-svgname="trash"></svg>
+                <svg class="percent-icon mdi mdi-24px mdi-svg-template" data-svgname="circle-slice-8"></svg>
                 <span class="one-line">{[print(xabber.getString("media_gallery_delete_files_button_100_percent"))]}</span>
             </div>
         </div>
         <div class="media-gallery-delete-items-wrap hidden">
             <div class="delete-files-preview-wrap media-gallery-items-wrap">
-                <div class="delete-files-text">{[print(xabber.getString("media_gallery_delete_files_preview_text"))]}</div>
-                <div data-value="image" class="setting-name header-setting delete-files-images">
+                <div class="delete-files-text no-select">{[print(xabber.getString("media_gallery_delete_files_preview_text"))]}</div>
+                <div data-value="image" class="setting-name header-setting no-select delete-files-images">
                     {[print(xabber.getString("images"))]}
                 </div>
                 <div class="gallery-files gallery-preview-image hidden grid delete-files-images delete-files-preview-container zoom-gallery">
                 </div>
-                <div data-value="video" class="setting-name header-setting delete-files-videos">
+                <div data-value="video" class="setting-name header-setting no-select delete-files-videos">
                     {[print(xabber.getString("videos"))]}
                 </div>
                 <div class="gallery-files gallery-preview-video hidden grid delete-files-videos delete-files-preview-container zoom-gallery">
                 </div>
-                <div data-value="voice" class="setting-name header-setting delete-files-voices">
+                <div data-value="voice" class="setting-name header-setting no-select delete-files-voices">
                     {[print(xabber.getString("vcard_type_voice"))]}
                 </div>
                 <div class="gallery-files gallery-preview-file hidden voice delete-files-voices delete-files-preview-container zoom-gallery">
                 </div>
-                <div data-value="file" class="setting-name header-setting delete-files-files">
+                <div data-value="file" class="setting-name header-setting no-select delete-files-files">
                     {[print(xabber.getString("files"))]}
                 </div>
                 <div class="gallery-files gallery-preview-voice hidden file delete-files-files delete-files-preview-container zoom-gallery">

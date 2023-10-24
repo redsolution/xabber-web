@@ -13586,14 +13586,15 @@ input[type=range].voice-message-volume:focus {
 /* ----------------- GALLERY FILE DELETION -------------------- */
 .modal.delete-files-modal{
     height: unset;
-    width: 300px;
+    width: 35% !important;
+    min-width: 300px;
 }
 .modal.delete-files-modal:not(.wide-deletion) .modal-content{
     padding: 0;
 }
 .modal.delete-files-modal.wide-deletion{
     height: 70%;
-    width: 60%;
+    width: 60% !important;
 }
 .modal.delete-files-modal.wide-deletion .modal-content-wrap{
     height: 100%;
@@ -13635,10 +13636,14 @@ input[type=range].voice-message-volume:focus {
     height: 24px;
     line-height: 24px;
 }
+.modal.delete-files-modal .delete-files-text-info,
 .modal.delete-files-modal .delete-files-text{
     margin: 8px 0;
     font-size: 16px;
     line-height: 24px;
+}
+.modal.delete-files-modal .delete-files-text-info{
+    padding: 0 0 0 24px;
 }
 .modal.delete-files-modal .setting-name{
     margin: 4px 0 0 0px;

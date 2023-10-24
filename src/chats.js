@@ -11923,6 +11923,7 @@ xabber.ChatBottomView = xabber.BasicView.extend({
         if ($rich_textarea.getTextFromRichTextarea().replace(/\n$/, "") && !this.view.chat_state && !this.view.edit_message && xabber.settings.typing_notifications)
             this.view.sendChatState('composing');
         this.focusOnInput();
+        this.displaySend();
         xabber.chat_body.updateHeight();
     },
 
