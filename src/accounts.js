@@ -3224,6 +3224,7 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
         this.$('.btn-back-subsettings-account').addClass('hidden');
         this.$('.btn-sorting').addClass('hidden');
         this.$('.settings-panel-head-title').removeClass('hidden');
+        this.$('.media-gallery-button.btn-more').addClass('hidden');
         this.updateHeight();
         this.updateBlockedLabel();
         return this;
@@ -3272,6 +3273,9 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
             block_name = $tab.data('block-name');
         if (block_name){
             this.$('.device-more-button.btn-more').hideIf(block_name != 'encryption');
+            if (block_name != 'media-gallery'){
+                this.$('.media-gallery-button.btn-more').addClass('hidden');
+            }
         }
         if (block_name === 'password'){
             xabber.trigger('change_account_password', this.model);
