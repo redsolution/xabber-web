@@ -7057,6 +7057,21 @@ xabber.UnregisterAccountView = xabber.XmppLoginPanel.extend({
 
     checkFeaturesStepper: function () {
     },
+
+    onHide: function () {
+        this.$el.detach();
+        if (this.account && this.account.unregister_account_connection_manager && this.account.unregister_account_connection) {
+            this.account.unregister_account_connection.disconnect();
+        }
+    },
+
+    close: function () {
+        this.closeModal();
+    },
+
+    closeModal: function () {
+        this.$el.closeModal({ complete: this.hide.bind(this) });
+    }
 });
 
 xabber.once("start", function () {
