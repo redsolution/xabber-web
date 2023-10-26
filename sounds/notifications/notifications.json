@@ -1,0 +1,59 @@
+{
+  "_beep_a": {
+    "not_selectable" : true,
+    "path": "./_beep_a",
+    "name": "Auth request sound"
+  },
+  "beep_positive": {
+    "path": "./beep_positive",
+    "name": "Beep positive"
+  },
+  "beep_up": {
+    "path": "./beep_up",
+    "name": "Default beep"
+  },
+  "bleep": {
+    "path": "./bleep",
+    "name": "Bleep"
+  },
+    "cellular_click": {
+    "path": "./cellular_click",
+    "name": "Cellular click"
+  },
+  "computer_chime": {
+    "path": "./computer_chime",
+    "name": "Computer chime"
+  },
+  "ether": {
+    "path": "./ether",
+    "name": "Ether"
+  },
+  "good_chime": {
+    "path": "./good_chime",
+    "name": "Good chime"
+  },
+  "mono_u": {
+    "path": "./mono_u",
+    "name": "Mono u"
+  },
+  "pixel_beep": {
+    "path": "./pixel_beep",
+    "name": "Pixel beep"
+  },
+  "plop": {
+    "path": "./plop",
+    "name": "Plop"
+  },
+  "pop": {
+    "path": "./pop",
+    "name": "Pop"
+  },
+  "retro_game": {
+    "path": "./retro_game",
+    "name": "Retro game"
+  },
+  "tiny_noize": {
+    "path": "./tiny_noize",
+    "name": "Tiny noize"
+  }
+}

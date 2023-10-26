@@ -309,11 +309,12 @@ let Xabber = Backbone.Model.extend({
             load_media: 'default',
             typing_notifications: 'default',
             mapping_service: 'default',
-            sound_on_call: 'call',
-            sound_on_dialtone: 'call',
-            sound_on_connection: 'connecting',
+            sound_on_call: 'marching-band-dave-girtsman',
+            sound_on_dialtone: 'marching-band-dave-girtsman',
+            sound_on_connection: '_alien-bomb-timer',
             sound_on_attention: 'attention',
-            sound_on_auth_request: 'beep_a',
+            sound_on_auth_request: '_beep_a',
+            sound_on_call_busy: '_phone_busy',
             hotkeys: 'enter',
             avatar_shape: 'circle',
             language: 'default',
@@ -443,26 +444,6 @@ let Xabber = Backbone.Model.extend({
             constants.FAVICON_MESSAGE = constants.ASSETS_URL_PREFIX + constants.FAVICON_MESSAGE;
             constants.BACKGROUND_IMAGE = constants.ASSETS_URL_PREFIX + constants.BACKGROUND_IMAGE;
 
-            constants.SOUNDS = {
-                beep_up: constants.ASSETS_URL_PREFIX + constants.SOUNDS.beep_up,
-                tiny_noize: constants.ASSETS_URL_PREFIX + constants.SOUNDS.tiny_noize,
-                retro_game: constants.ASSETS_URL_PREFIX + constants.SOUNDS.retro_game,
-                pixel_beep: constants.ASSETS_URL_PREFIX + constants.SOUNDS.pixel_beep,
-                beep_positive: constants.ASSETS_URL_PREFIX + constants.SOUNDS.beep_positive,
-                good_chime: constants.ASSETS_URL_PREFIX + constants.SOUNDS.good_chime,
-                cellular_click: constants.ASSETS_URL_PREFIX + constants.SOUNDS.cellular_click,
-                bleep: constants.ASSETS_URL_PREFIX + constants.SOUNDS.bleep,
-                mono_u: constants.ASSETS_URL_PREFIX + constants.SOUNDS.mono_u,
-                plop: constants.ASSETS_URL_PREFIX + constants.SOUNDS.plop,
-                ether: constants.ASSETS_URL_PREFIX + constants.SOUNDS.ether,
-                pop: constants.ASSETS_URL_PREFIX + constants.SOUNDS.pop,
-                computer_chime: constants.ASSETS_URL_PREFIX + constants.SOUNDS.computer_chime,
-                beep_a: constants.ASSETS_URL_PREFIX + constants.SOUNDS.beep_a,
-                call: constants.ASSETS_URL_PREFIX + constants.SOUNDS.call,
-                connecting: constants.ASSETS_URL_PREFIX + constants.SOUNDS.connecting,
-                busy: constants.ASSETS_URL_PREFIX + constants.SOUNDS.busy,
-                attention: constants.ASSETS_URL_PREFIX + constants.SOUNDS.attention,
-            };
 
             constants.CLIENT_LOGO = constants.ASSETS_URL_PREFIX + constants.CLIENT_LOGO;
             constants.TOOLBAR_LOGO = constants.ASSETS_URL_PREFIX + constants.TOOLBAR_LOGO;

@@ -50,6 +50,7 @@ module.exports = {
             "xabber-version": "~/version",
             "xabber-dependencies": "~/src/dependencies",
             "xabber-templates": "~/src/templates",
+            "xabber-sounds": "~/src/sounds",
             "xabber-constants": "~/src/constants",
             "xabber-utils": "~/src/utils/utils",
             "xabber-textarea-utils": "~/src/utils/textarea",
@@ -98,6 +99,10 @@ module.exports = {
             {
                 test: /\.css$/i,
                 use: [MiniCssExtractPlugin.loader, "css-loader"],
+            },
+            {
+                test: /\.mp3$/i,
+                type: 'asset/resource',
             },
             {
                 test: /encoderWorker\.min\.js$/,

@@ -2332,6 +2332,7 @@ xabber.SettingsModalView = xabber.BasicView.extend({
     render: function () {
         let settings = this.model.attributes,
             lang = settings.language;
+        this.updateSounds();
         this.$('.notifications input[type=checkbox]').prop({
             checked: settings.notifications && xabber._cache.get('notifications')
         });
@@ -2548,6 +2549,86 @@ xabber.SettingsModalView = xabber.BasicView.extend({
             else
                 $(item).find('span.value').text(range_value);
         })
+
+    },
+
+    updateSounds: function () {
+
+        this.$('.notification-field').html('<form action="#"></form>');
+
+        sounds.notifications.forEach((item,idx) => {
+            if (!item.not_selectable){
+                let element = $(templates.setting_sound_radio_input({
+                    input_name: 'private_sound',
+                    input_id: `${this.cid}-private-sound-${item.file_name}`,
+                    label: item.name,
+                    value: item.file_name,
+                }));
+                this.$('.notification-field:not(.group-notification-field)').append(element);
+                let group_element = $(templates.setting_sound_radio_input({
+                    input_name: 'group_sound',
+                    input_id: `${this.cid}-group-sound-${item.file_name}`,
+                    label: item.name,
+                    value: item.file_name,
+                }));
+                this.$('.group-notification-field').append(group_element);
+            }
+        });
+
+        let element_no_sound = $(templates.setting_sound_radio_input({
+            input_name: 'private_sound',
+            input_id: `${this.cid}-private-sound-no`,
+            label: 'No sound',
+            value: '',
+        }));
+        this.$('.notification-field:not(.group-notification-field)').prepend(element_no_sound);
+
+        let group_element_no_sound = $(templates.setting_sound_radio_input({
+            input_name: 'group_sound',
+            input_id: `${this.cid}-group-sound-no`,
+            label: 'No sound',
+            value: '',
+        }));
+        this.$('.group-notification-field').prepend(group_element_no_sound);
+
+        this.$('.dialtone-field').html('<form action="#"></form>');
+        sounds.dialtones.forEach((item,idx) => {
+            if (!item.not_selectable){
+                let element = $(templates.setting_sound_radio_input({
+                    input_name: 'dialtone_sound',
+                    input_id: `${this.cid}-dialtone-sound-${item.file_name}`,
+                    label: item.name,
+                    value: item.file_name,
+                }));
+                this.$('.dialtone-field').append(element);
+            }
+        });
+
+        this.$('.ringtone-field').html('<form action="#"></form>');
+        sounds.ringtones.forEach((item,idx) => {
+            if (!item.not_selectable){
+                let element = $(templates.setting_sound_radio_input({
+                    input_name: 'call_sound',
+                    input_id: `${this.cid}-call-sound-${item.file_name}`,
+                    label: item.name,
+                    value: item.file_name,
+                }));
+                this.$('.ringtone-field').append(element);
+            }
+        });
+
+        this.$('.attention-field').html('<form action="#"></form>');
+        sounds.attention.forEach((item,idx) => {
+            if (!item.not_selectable){
+                let element = $(templates.setting_sound_radio_input({
+                    input_name: 'attention_sound',
+                    input_id: `${this.cid}-attention-sound-${item.file_name}`,
+                    label: item.name,
+                    value: item.file_name,
+                }));
+                this.$('.attention-field').append(element);
+            }
+        });
 
     },
 
@@ -4508,9 +4589,9 @@ _.extend(xabber, {
         if (!((volume || volume === 0) && !isNaN(volume)))
             volume = 1;
         loop = loop || false;
-        let filename = constants.SOUNDS[name];
+        let filename = sounds.all_sounds.find(item => item.file_name === name);
         if (filename) {
-            let audio = new window.Audio(filename);
+            let audio = new window.Audio(filename.audio);
             audio.loop = loop;
             audio.volume = volume;
             audio.play();

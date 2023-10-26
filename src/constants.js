@@ -185,26 +185,6 @@ var constants = {
         OMEMO_ENABLE_SETTING: 182
     },
 
-    SOUNDS: {
-        beep_up: 'assets/sounds/beep_up.ogg',
-        tiny_noize: 'assets/sounds/tiny_noize.ogg',
-        retro_game: 'assets/sounds/retro_game.ogg',
-        pixel_beep: 'assets/sounds/pixel_beep.ogg',
-        beep_positive: 'assets/sounds/beep_positive.ogg',
-        good_chime: 'assets/sounds/good_chime.ogg',
-        cellular_click: 'assets/sounds/cellular_click.ogg',
-        bleep: 'assets/sounds/bleep.ogg',
-        mono_u: 'assets/sounds/mono_u.ogg',
-        plop: 'assets/sounds/plop.ogg',
-        ether: 'assets/sounds/ether.ogg',
-        pop: 'assets/sounds/pop.ogg',
-        computer_chime: 'assets/sounds/computer_chime.ogg',
-        beep_a: 'assets/sounds/beep_a.ogg',
-        call: 'assets/sounds/marching-band-dave-girtsman.mp3',
-        connecting: 'assets/sounds/alien-bomb-timer.wav',
-        busy: 'assets/sounds/phone_busy.wav',
-        attention: 'assets/sounds/attention.wav'
-    },
 
     SYNC_WAY_DATA: {
         no: {
