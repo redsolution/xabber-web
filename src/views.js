@@ -2646,8 +2646,34 @@ xabber.SettingsModalView = xabber.BasicView.extend({
 
         this.$('.languages-list').append(default_element);
 
+        if (window.navigator.language !== 'en' ){
+            let second_lang = xabber.get("default_language") === 'en' ? window.navigator.language : 'en',
+                second_prog, second_prog_text,
+                second_locale = Object.keys(client_translation_progress)
+                    .find(key => !second_lang.indexOf(key)) || constants.languages_another_locales[second_lang] && Object.keys(client_translation_progress)
+                    .find(key => !constants.languages_another_locales[second_lang].indexOf(key)); // < - check for locales that differ in names
+
+            if (second_locale) {
+                second_prog = client_translation_progress[second_locale];
+                second_prog_text = (second_prog == 100) ? xabber.getString("settings__section_interface_language__translation_progress_fully")
+                    : xabber.getString("settings__section_interface_language__translation_progress", [`${second_prog}%`]);
+
+                let second_element = $(templates.setting_language_radio_input({
+                    input_name: 'language',
+                    input_id: `${this.cid}-${second_lang}`,
+                    label: constants.languages[second_lang],
+                    value: 'default',
+                    progress: {
+                        text: second_prog_text
+                    },
+                }));
+                this.$('.languages-list').append(second_element);
+            }
+        }
+
+
         for (let lang in constants.languages) {
-            if (!lang || lang == xabber.get("default_language"))
+            if (!lang || lang == xabber.get("default_language") || lang == window.navigator.language)
                 continue;
 
             let locale = Object.keys(client_translation_progress)

@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.3.4.53","version_description":"fixed messages unread collection not being reset on scroll to bottom"}'
+'{"version_number":"2.3.4.54","version_description":"added dynamic second language item in select language setting"}'
 )});
