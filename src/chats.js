@@ -1157,6 +1157,7 @@ xabber.MessagesBase = Backbone.Collection.extend({
     resetUnread: function () {
         let unread = this.get('unread');
         if (unread > 0) {
+            this.messages_unread && this.messages_unread.reset();
             this.set('unread', 0);
             xabber.recountAllMessageCounter(unread);
             xabber.toolbar_view.recountAllMessageCounter(unread);
