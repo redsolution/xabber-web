@@ -328,7 +328,6 @@ var constants = {
 
     languages: {
         "en": "English",
-        "": "Montenegrin (Latin)", // ????????
         "ar-SA": "العربية",
         "az-AZ": "Azərbaycanca",
         "be-BY": "Беларуская",

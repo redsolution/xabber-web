@@ -497,22 +497,6 @@
                     <div data-header='{[print(xabber.getString("settings__menu_item__interface_language"))]}'  class="settings-block-wrap interface_language hidden">
                         <div class="setting radio-button interface-language-setting">
                             <div class="languages-list field radio-field clickable-field">
-                                <form action="#">
-                                    <div class="language-item">
-                                        <input class="with-gap" name="language" value="default" type="radio" id="{{view.cid}}-default" />
-                                        <label for="{{view.cid}}-default">{[print(xabber.getString("settings__languages_list___item_default", [languages[xabber.get("default_language") || 'en']]))]}</label>
-                                    </div>
-                                    {[if (window.navigator.language.indexOf(xabber.get("default_language")) < 0) {]}
-                                    {[}]}
-                                    {[for (let lang in constants.languages) { if (!lang || lang == xabber.get("default_language")) continue;]}
-                                    <div class="language-item">
-                                        <input class="with-gap" name="language" value="{{lang}}" type="radio" id="{{view.cid}}-{{lang}}" />
-                                        <label for="{{view.cid}}-{{lang}}">{[print(constants.languages[lang]);]}</label>
-                                        {[let locale = Object.keys(client_translation_progress).find(key => !lang.indexOf(key)) || constants.languages_another_locales[lang] && Object.keys(client_translation_progress).find(key => !constants.languages_another_locales[lang].indexOf(key));]}
-                                        {[if (locale) { let progress = client_translation_progress[locale];]}<div class="translation-progress">{[print((progress == 100) ? xabber.getString("settings__section_interface_language__translation_progress_fully") : xabber.getString("settings__section_interface_language__translation_progress", [`${progress}%`]))]}</div>{[}]}
-                                    </div>
-                                    {[}]}
-                                </form>
                             </div>
                         </div>
                     </div>

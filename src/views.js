@@ -2333,6 +2333,7 @@ xabber.SettingsModalView = xabber.BasicView.extend({
         let settings = this.model.attributes,
             lang = settings.language;
         this.updateSounds();
+        this.updateLanguages();
         this.$('.notifications input[type=checkbox]').prop({
             checked: settings.notifications && xabber._cache.get('notifications')
         });
@@ -2558,14 +2559,14 @@ xabber.SettingsModalView = xabber.BasicView.extend({
 
         sounds.notifications.forEach((item,idx) => {
             if (!item.not_selectable){
-                let element = $(templates.setting_sound_radio_input({
+                let element = $(templates.setting_radio_input({
                     input_name: 'private_sound',
                     input_id: `${this.cid}-private-sound-${item.file_name}`,
                     label: item.name,
                     value: item.file_name,
                 }));
                 this.$('.notification-field:not(.group-notification-field)').append(element);
-                let group_element = $(templates.setting_sound_radio_input({
+                let group_element = $(templates.setting_radio_input({
                     input_name: 'group_sound',
                     input_id: `${this.cid}-group-sound-${item.file_name}`,
                     label: item.name,
@@ -2575,7 +2576,7 @@ xabber.SettingsModalView = xabber.BasicView.extend({
             }
         });
 
-        let element_no_sound = $(templates.setting_sound_radio_input({
+        let element_no_sound = $(templates.setting_radio_input({
             input_name: 'private_sound',
             input_id: `${this.cid}-private-sound-no`,
             label: 'No sound',
@@ -2583,7 +2584,7 @@ xabber.SettingsModalView = xabber.BasicView.extend({
         }));
         this.$('.notification-field:not(.group-notification-field)').prepend(element_no_sound);
 
-        let group_element_no_sound = $(templates.setting_sound_radio_input({
+        let group_element_no_sound = $(templates.setting_radio_input({
             input_name: 'group_sound',
             input_id: `${this.cid}-group-sound-no`,
             label: 'No sound',
@@ -2594,7 +2595,7 @@ xabber.SettingsModalView = xabber.BasicView.extend({
         this.$('.dialtone-field').html('<form action="#"></form>');
         sounds.dialtones.forEach((item,idx) => {
             if (!item.not_selectable){
-                let element = $(templates.setting_sound_radio_input({
+                let element = $(templates.setting_radio_input({
                     input_name: 'dialtone_sound',
                     input_id: `${this.cid}-dialtone-sound-${item.file_name}`,
                     label: item.name,
@@ -2607,7 +2608,7 @@ xabber.SettingsModalView = xabber.BasicView.extend({
         this.$('.ringtone-field').html('<form action="#"></form>');
         sounds.ringtones.forEach((item,idx) => {
             if (!item.not_selectable){
-                let element = $(templates.setting_sound_radio_input({
+                let element = $(templates.setting_radio_input({
                     input_name: 'call_sound',
                     input_id: `${this.cid}-call-sound-${item.file_name}`,
                     label: item.name,
@@ -2620,7 +2621,7 @@ xabber.SettingsModalView = xabber.BasicView.extend({
         this.$('.attention-field').html('<form action="#"></form>');
         sounds.attention.forEach((item,idx) => {
             if (!item.not_selectable){
-                let element = $(templates.setting_sound_radio_input({
+                let element = $(templates.setting_radio_input({
                     input_name: 'attention_sound',
                     input_id: `${this.cid}-attention-sound-${item.file_name}`,
                     label: item.name,
@@ -2630,6 +2631,46 @@ xabber.SettingsModalView = xabber.BasicView.extend({
             }
         });
 
+    },
+
+    updateLanguages: function () {
+        this.$('.languages-list').html('<form action="#"></form>');
+
+        let default_element = $(templates.setting_language_radio_input({
+            input_name: 'language',
+            input_id: `${this.cid}-default`,
+            label: xabber.getString("settings__languages_list___item_default", [constants.languages[xabber.get("default_language") || 'en']]),
+            value: 'default',
+            progress: {},
+        }));
+
+        this.$('.languages-list').append(default_element);
+
+        for (let lang in constants.languages) {
+            if (!lang || lang == xabber.get("default_language"))
+                continue;
+
+            let locale = Object.keys(client_translation_progress)
+                .find(key => !lang.indexOf(key)) || constants.languages_another_locales[lang] && Object.keys(client_translation_progress)
+                .find(key => !constants.languages_another_locales[lang].indexOf(key)); // < - check for locales that differ in names
+
+            if (locale) {
+                let progress = client_translation_progress[locale],
+                    progress_text = (progress == 100) ? xabber.getString("settings__section_interface_language__translation_progress_fully")
+                        : xabber.getString("settings__section_interface_language__translation_progress", [`${progress}%`]);
+
+                let element = $(templates.setting_language_radio_input({
+                    input_name: 'language',
+                    input_id: `${this.cid}-${lang}`,
+                    label: constants.languages[lang],
+                    value: lang,
+                    progress: {
+                        text: progress_text
+                    },
+                }));
+                this.$('.languages-list').append(element);
+            }
+        }
     },
 
     onScrollY: function () {
@@ -2948,8 +2989,28 @@ xabber.SettingsModalView = xabber.BasicView.extend({
     },
 
     changeLanguage: function (ev) {
-        let value = ev.target.value;
-        utils.dialogs.ask(xabber.getString("settings__dialog_change_language__header"), xabber.getString("settings__dialog_change_language__confirm"), null, { ok_button_text: xabber.getString("settings__dialog_change_language__button_change")}).done((result) => {
+        let value = ev.target.value,
+            locale = Object.keys(client_translation_progress).find(key => !value.indexOf(key)) || constants.languages_another_locales[value] && Object.keys(client_translation_progress).find(key => !constants.languages_another_locales[value].indexOf(key)),
+            progress = client_translation_progress[locale],
+            platform_text;
+
+        (value == 'default') && (progress = 100);
+
+        if (progress == 100) {
+            platform_text = xabber.getString("settings__interface_language__change_language_text_full_translation",
+                [constants.SHORT_CLIENT_NAME, `<a target="_blank" href='${xabber.getString("settings__section_interface_language__text_description___link")}'>${xabber.getString("settings__section_interface_language__text_description__text_link")}</a>`, constants.SHORT_CLIENT_NAME]);
+        } else if (progress == 0) {
+            platform_text = xabber.getString("settings__interface_language__change_language_text_no_translation",
+                [constants.SHORT_CLIENT_NAME, `<a target="_blank" href='${xabber.getString("settings__section_interface_language__text_description___link")}'>${xabber.getString("settings__section_interface_language__text_description__text_link")}</a>`, constants.EMAIL_FOR_JOIN_TRANSLATION,  constants.SHORT_CLIENT_NAME]);
+        } else {
+            platform_text = xabber.getString("settings__interface_language__change_language_text_partial_translation",
+                [constants.SHORT_CLIENT_NAME, `<a target="_blank" href='${xabber.getString("settings__section_interface_language__text_description___link")}'>${xabber.getString("settings__section_interface_language__text_description__text_link")}</a>`, constants.SHORT_CLIENT_NAME]);
+        }
+        utils.dialogs.ask(xabber.getString("settings__dialog_change_language__header"),
+            `${xabber.getString("settings__dialog_change_language__confirm")} \n\n${platform_text}`,
+            {modal_class: 'change-language-modal', no_dialog_options: true},
+            { ok_button_text: xabber.getString("settings__dialog_change_language__button_change")}).done((result) => {
+
             if (result) {
                 this.model.save('language', value);
                 window.location.reload(true);
@@ -2973,9 +3034,16 @@ xabber.SettingsModalView = xabber.BasicView.extend({
     },
 
     updateDescription: function () {
-        let lang = window.navigator.language,
-            progress = Object.keys(client_translation_progress).find(key => !lang.indexOf(key)) || constants.languages_another_locales[lang] && Object.keys(client_translation_progress).find(key => !constants.languages_another_locales[lang].indexOf(key));
+
+        if (!xabber.settings.language)
+            return;
+
+        let lang = xabber.settings.language,
+            locale = Object.keys(client_translation_progress).find(key => !lang.indexOf(key)) || constants.languages_another_locales[lang] && Object.keys(client_translation_progress).find(key => !constants.languages_another_locales[lang].indexOf(key)),
+            progress = client_translation_progress[locale];
+
         (lang == 'default' || !lang.indexOf('en')) && (progress = 100);
+
         if (!_.isUndefined(progress)) {
             let progress_text, platform_text;
             if (progress == 100) {

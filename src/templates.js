@@ -71,7 +71,8 @@
     addTemplate('base.toolbar');
     addTemplate('base.settings');
     addTemplate('base.settings_modal');
-    addTemplate('base.setting_sound_radio_input');
+    addTemplate('base.setting_radio_input');
+    addTemplate('base.setting_language_radio_input');
     addTemplate('base.about');
     addTemplate('base.omemo_enable');
     addTemplate('base.backgrounds_gallery');

@@ -13584,6 +13584,12 @@ input[type=range].voice-message-volume:focus {
     background-color: #eee;
 }
 
+/* ----------------- CHANGE LANGUAGE DIALOG -------------------- */
+
+.modal.dialog-modal.change-language-modal {
+    width: 35%;
+}
+
 /* ----------------- GALLERY FILE DELETION -------------------- */
 .modal.delete-files-modal{
     height: unset;
