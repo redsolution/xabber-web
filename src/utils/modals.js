@@ -129,8 +129,11 @@ export default {
     dialogs: {
         common: function (header, text, buttons, dialog_options, flag, modal_class) {
             var dialog = new Modal(function () {
-                buttons || (buttons = {});
                 dialog_options || (dialog_options = []);
+                let options = dialog_options || [];
+                buttons || (buttons = {});
+                if (typeof dialog_options === "object")
+                    options = [];
                 var ok_button = buttons.ok_button,
                     cancel_button = buttons.cancel_button,
                     optional_buttons = (buttons.optional_buttons || []).reverse();
@@ -142,7 +145,7 @@ export default {
                     ok_button: ok_button,
                     cancel_button: cancel_button,
                     optional_buttons: optional_buttons,
-                    dialog_options: dialog_options,
+                    dialog_options: options,
                     flag: flag || "",
                     modal_class: modal_class || ""
                 });

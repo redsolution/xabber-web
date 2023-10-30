@@ -2662,7 +2662,7 @@ xabber.SettingsModalView = xabber.BasicView.extend({
                     input_name: 'language',
                     input_id: `${this.cid}-${second_lang}`,
                     label: constants.languages[second_lang],
-                    value: 'default',
+                    value: second_lang,
                     progress: {
                         text: second_prog_text
                     },
@@ -3022,19 +3022,27 @@ xabber.SettingsModalView = xabber.BasicView.extend({
 
         (value == 'default') && (progress = 100);
 
-        if (progress == 100) {
+        if (progress == 100 && ((xabber.get("default_language") === 'en' && value === 'default') || value === 'en')) {
+            platform_text = xabber.getString("settings__dialog_change_language__confirm");
+        } else if (progress == 100) {
             platform_text = xabber.getString("settings__interface_language__change_language_text_full_translation",
-                [constants.SHORT_CLIENT_NAME, `<a target="_blank" href='${xabber.getString("settings__section_interface_language__text_description___link")}'>${xabber.getString("settings__section_interface_language__text_description__text_link")}</a>`, constants.SHORT_CLIENT_NAME]);
+                [constants.SHORT_CLIENT_NAME, constants.SHORT_CLIENT_NAME, `<a target="_blank" href='${xabber.getString("settings__section_interface_language__text_description___link")}'>${xabber.getString("settings__section_interface_language__text_description__text_link")}</a>`, constants.SHORT_CLIENT_NAME]);
         } else if (progress == 0) {
             platform_text = xabber.getString("settings__interface_language__change_language_text_no_translation",
-                [constants.SHORT_CLIENT_NAME, `<a target="_blank" href='${xabber.getString("settings__section_interface_language__text_description___link")}'>${xabber.getString("settings__section_interface_language__text_description__text_link")}</a>`, constants.EMAIL_FOR_JOIN_TRANSLATION,  constants.SHORT_CLIENT_NAME]);
+                [constants.SHORT_CLIENT_NAME, constants.SHORT_CLIENT_NAME, `<a target="_blank" href='${xabber.getString("settings__section_interface_language__text_description___link")}'>${xabber.getString("settings__section_interface_language__text_description__text_link")}</a>`, constants.SHORT_CLIENT_NAME]);
         } else {
             platform_text = xabber.getString("settings__interface_language__change_language_text_partial_translation",
-                [constants.SHORT_CLIENT_NAME, `<a target="_blank" href='${xabber.getString("settings__section_interface_language__text_description___link")}'>${xabber.getString("settings__section_interface_language__text_description__text_link")}</a>`, constants.SHORT_CLIENT_NAME]);
+                [constants.SHORT_CLIENT_NAME, constants.SHORT_CLIENT_NAME, constants.SHORT_CLIENT_NAME, `<a target="_blank" href='${xabber.getString("settings__section_interface_language__text_description___link")}'>${xabber.getString("settings__section_interface_language__text_description__text_link")}</a>`]);
+        }
+        let modal_classes = ['change-language-modal'], inverted_buttons;
+        if (progress == 0){
+            modal_classes.push('change-language-modal-no-ok');
+        } else if (progress != 0 && progress < 70){
+            inverted_buttons = true;
         }
         utils.dialogs.ask(xabber.getString("settings__dialog_change_language__header"),
-            `${xabber.getString("settings__dialog_change_language__confirm")} \n\n${platform_text}`,
-            {modal_class: 'change-language-modal', no_dialog_options: true},
+            platform_text,
+            {modal_class: modal_classes, no_dialog_options: true, inverted_buttons: inverted_buttons},
             { ok_button_text: xabber.getString("settings__dialog_change_language__button_change")}).done((result) => {
 
             if (result) {
@@ -3072,18 +3080,22 @@ xabber.SettingsModalView = xabber.BasicView.extend({
 
         if (!_.isUndefined(progress)) {
             let progress_text, platform_text;
-            if (progress == 100) {
-                progress_text = xabber.getString("settings__interface_language__text_description_full_translation", [constants.SHORT_CLIENT_NAME, constants.SHORT_CLIENT_NAME]);
+            if (progress == 100 && ((xabber.get("default_language") === 'en' && lang === 'default') || lang === 'en')) {
+                progress_text = xabber.getString("settings__interface_language__text_description_full_translation_english", [constants.SHORT_CLIENT_NAME, constants.SHORT_CLIENT_NAME]);
+                platform_text = xabber.getString("settings__interface_language__text_description_full_translation_english_platform",
+                    [constants.SHORT_CLIENT_NAME, constants.EMAIL_FOR_JOIN_TRANSLATION, `<a target="_blank" href='${xabber.getString("settings__section_interface_language__text_description___link")}'>${xabber.getString("settings__section_interface_language__text_description__text_link")}</a>`, constants.SHORT_CLIENT_NAME]);
+            } else if (progress == 100) {
+                progress_text = xabber.getString("settings__interface_language__text_description_full_translation", [constants.SHORT_CLIENT_NAME]);
                 platform_text = xabber.getString("settings__interface_language__text_description_full_translation_platform",
-                    [`<a target="_blank" href='${xabber.getString("settings__section_interface_language__text_description___link")}'>${xabber.getString("settings__section_interface_language__text_description__text_link")}</a>`]);
+                    [`<a target="_blank" href='${xabber.getString("settings__section_interface_language__text_description___link")}'>${xabber.getString("settings__section_interface_language__text_description__text_link")}</a>`, constants.SHORT_CLIENT_NAME]);
             } else if (progress == 0) {
-                progress_text = xabber.getString("settings__section_interface_language__text_description_no_translations", [constants.SHORT_CLIENT_NAME, constants.SHORT_CLIENT_NAME]);
+                progress_text = xabber.getString("settings__section_interface_language__text_description_no_translations", [constants.SHORT_CLIENT_NAME]);
                 platform_text = xabber.getString("settings__interface_language__text_description_no_translation_platform",
                         [`<a target="_blank" href='${xabber.getString("settings__section_interface_language__text_description___link")}'>${xabber.getString("settings__section_interface_language__text_description__text_link")}</a>`]);
             } else {
-                progress_text = xabber.getString("settings__interface_language__text_description_unfull_translation", [constants.SHORT_CLIENT_NAME, constants.SHORT_CLIENT_NAME]);
+                progress_text = xabber.getString("settings__interface_language__text_description_unfull_translation", [constants.SHORT_CLIENT_NAME]);
                 platform_text = xabber.getString("settings__section_interface_language__text_description_translation_platform",
-                    [`<a target="_blank" href='${xabber.getString("settings__section_interface_language__text_description___link")}'>${xabber.getString("settings__section_interface_language__text_description__text_link")}</a>`, constants.EMAIL_FOR_JOIN_TRANSLATION]);
+                    [`<a target="_blank" href='${xabber.getString("settings__section_interface_language__text_description___link")}'>${xabber.getString("settings__section_interface_language__text_description__text_link")}</a>`, constants.SHORT_CLIENT_NAME]);
             }
             this.$('.description').html(`${progress_text}<br><br>${platform_text}`);
         }

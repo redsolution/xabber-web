@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.3.4.54","version_description":"added dynamic second language item in select language setting"}'
+'{"version_number":"2.3.4.55","version_description":"changed modal dialog options forming, changed translations in change language form, changed translations text size and line height"}'
 )});
