@@ -10709,6 +10709,7 @@ img.fwd-img-preview {
     font-size: 1rem;
     padding: 8px 12px 0 12px;
     width: 100%;
+    pointer-events: none;
 }
 
 .message-form .input-message .scrollbar-cover {
