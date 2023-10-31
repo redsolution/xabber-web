@@ -376,13 +376,13 @@ xabber.APIAccount = Backbone.ModelWithStorage.extend({
 
     onSocialLogin: function (data, textStatus, request) {
         this.save({token: data.token, connected: true});
-        xabber.body.setScreen('settings-modal');
+        xabber.body.setScreen('settings-modal', {account_block_name: null});
         this.ready.resolve();
     },
 
     onSocialLoginFailed: function (response, status) {
         this.save('connected', false);
-        xabber.body.setScreen('settings-modal');
+        xabber.body.setScreen('settings-modal', {account_block_name: null});
         utils.dialogs.error(xabber.getString("xabber_account__login__error_auth_failed"));
         this.ready.resolve();
     },

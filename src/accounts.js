@@ -1109,12 +1109,12 @@ xabber.Account = Backbone.Model.extend({
         },
 
         showSettings: function (right, block_name) {
-            this.showSettingsModal();
+            this.showSettingsModal(block_name);
         },
 
-        showSettingsModal: function () {
+        showSettingsModal: function (block_name) {
             if (xabber.accounts.length === 1){
-                xabber.body.setScreen('settings-modal');
+                xabber.body.setScreen('settings-modal', {account_block_name: block_name});
                 xabber.trigger('update_placeholder');
                 return;
             }
@@ -1123,7 +1123,7 @@ xabber.Account = Backbone.Model.extend({
                 this.settings_account_modal = new xabber.AccountSettingsModalView({model: this});
             this.updateColorScheme();
             xabber.body.setScreen('account_settings_modal', {
-                account: this
+                account: this, block_name: block_name
             });
             this.trigger('open_settings');
             if (!has_modal_settings) {
@@ -1772,7 +1772,7 @@ xabber.Accounts = Backbone.CollectionWithStorage.extend({
             if (no_accounts) {
                 xabber.body.setScreen('login');
             } else if (account.show_settings_after_delete) {
-                xabber.body.setScreen('settings-modal');
+                xabber.body.setScreen('settings-modal', {account_block_name: null});
             } else if (account.dont_change_screen_after_delete) {
                 return;
             } else {
@@ -1892,7 +1892,7 @@ xabber.AccountToolbarItemView = xabber.BasicView.extend({
         ev.stopPropagation();
         let is_single = $(ev.target).closest('.single-item').length;
         if (is_single){
-            xabber.body.setScreen('settings-modal');
+            xabber.body.setScreen('settings-modal', {account_block_name: null});
             xabber.trigger('update_placeholder');
             return;
         }
@@ -1903,7 +1903,7 @@ xabber.AccountToolbarItemView = xabber.BasicView.extend({
     },
 
     showSettings: function () {
-        xabber.body.setScreen('settings-modal');
+        xabber.body.setScreen('settings-modal', {account_block_name: null});
         xabber.trigger('update_placeholder');
     },
 });
@@ -2992,7 +2992,7 @@ xabber.AccountSettingsLeftView = xabber.BasicView.extend({
     },
 
     showSettings: function () {
-        xabber.body.setScreen('settings-modal');
+        xabber.body.setScreen('settings-modal', {account_block_name: null});
         xabber.trigger('update_placeholder');
     },
 
@@ -3045,7 +3045,7 @@ xabber.AccountSettingsLeftView = xabber.BasicView.extend({
 
     jumpToBlock: function (ev) {
         let $tab = $(ev.target).closest('.settings-tab'),
-            block_name = $tab.data('block-name');
+            block_name = $tab.attr('data-block-name');
         if (block_name === 'vcard_edit'){
             this.model.showSettings(block_name, 'vcard');
             this.$('.settings-tab').removeClass('active');
@@ -3232,6 +3232,11 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
         this.$('.media-gallery-button.btn-more').addClass('hidden');
         this.updateHeight();
         this.updateBlockedLabel();
+        if (options && options.block_name) {
+            let $elem = this.$(`.settings-tab[data-block-name="${options.block_name}"]`);
+            if ($elem.length)
+                this.jumpToBlock({target: $elem[0]});
+        }
         return this;
     },
 
@@ -3274,8 +3279,8 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
             return;
 
         let $tab = $(ev.target).closest('.settings-tab'),
-            $elem = this.$('.settings-block-wrap.' + $tab.data('block-name')),
-            block_name = $tab.data('block-name');
+            $elem = this.$('.settings-block-wrap.' + $tab.attr('data-block-name')),
+            block_name = $tab.attr('data-block-name');
         if (block_name){
             this.$('.device-more-button.btn-more').hideIf(block_name != 'encryption');
             if (block_name != 'media-gallery'){
@@ -3411,7 +3416,7 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
     },
 
     showSettings: function () {
-        xabber.body.setScreen('settings-modal');
+        xabber.body.setScreen('settings-modal', {account_block_name: null});
         xabber.trigger('update_placeholder');
     },
 
@@ -3981,7 +3986,9 @@ xabber.AccountSettingsSingleModalView = xabber.AccountSettingsModalView.extend({
     //     wheelPropagation: true
     // },
 
-    render: function (options) {
+    render: function (view, options, args) {
+        if (!_.isNull(view))
+            return;
         this.$el.detach();
         this.parent.$('.single-account-info-wrap').append(this.$el);
         this.ps_container = this.parent.ps_container;
@@ -4030,6 +4037,11 @@ xabber.AccountSettingsSingleModalView = xabber.AccountSettingsModalView.extend({
         this.$('.btn-back-subsettings-account').addClass('hidden');
         this.updateHeight();
         this.updateBlockedLabel();
+        if (options && options.account_block_name) {
+            let $elem = this.$(`.settings-tab[data-block-name="${options.account_block_name}"]`);
+            if ($elem.length)
+                this.jumpToBlock({target: $elem[0]});
+        }
 
         this.parent.single_account_has_rendered = true;
         return this;

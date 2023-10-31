@@ -11422,7 +11422,7 @@ xabber.ChatBottomView = xabber.BasicView.extend({
     openDevicesWindow: function () {
         if (this.account.omemo) {
             if (this.$el.attr('data-trust') !== undefined) {
-                this.account.showSettings(null, 'tokens');
+                this.account.showSettings(null, 'devices');
             } else if (this.$el.attr('data-contact-trust') !== undefined) {
                 let peer = this.account.omemo.getPeer(this.contact.get('jid'));
                 peer.fingerprints.open();

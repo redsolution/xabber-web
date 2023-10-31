@@ -1151,12 +1151,12 @@ xabber.ToolbarView = xabber.BasicView.extend({
     },
 
     showSettings: function () {
-        xabber.body.setScreen('settings-modal');
+        xabber.body.setScreen('settings-modal', {account_block_name: null});
         xabber.trigger('update_placeholder');
     },
 
     showSettingsModal: function () {
-        xabber.body.setScreen('settings-modal');
+        xabber.body.setScreen('settings-modal', {account_block_name: null});
         xabber.trigger('update_placeholder');
     },
 
@@ -1979,8 +1979,8 @@ xabber.SettingsView = xabber.BasicView.extend({
 
     jumpToBlock: function (ev) {
         let $tab = $(ev.target).closest('.settings-tab'),
-            $elem = this.$('.settings-block-wrap.' + $tab.data('block-name'));
-        this.$('.btn-add-account').hideIf($tab.data('block-name') != 'xmpp-accounts')
+            $elem = this.$('.settings-block-wrap.' + $tab.attr('data-block-name'));
+        this.$('.btn-add-account').hideIf($tab.attr('data-block-name') != 'xmpp-accounts')
         if ($tab.hasClass('link-button')) {
             $tab.parent().siblings().removeClass('active');
             this.scrollTo(0);
@@ -2329,7 +2329,7 @@ xabber.SettingsModalView = xabber.BasicView.extend({
         })
     },
 
-    render: function () {
+    render: function (options) {
         let settings = this.model.attributes,
             lang = settings.language;
         this.updateSounds();
@@ -2398,7 +2398,6 @@ xabber.SettingsModalView = xabber.BasicView.extend({
         // this.$('.volume-setting .disabled').switchClass('hidden', settings.notifications_volume_enabled);
         // this.$('#notifications_volume').prop('disabled', !settings.notifications_volume_enabled);
         this.$('.settings-panel-head span').text(this.$('.settings-block-wrap:not(.hidden)').attr('data-header'))
-        this.updateAccounts();
         this.updateAvatarLabel();
         this.updateSoundsLabel();
         this.updateDescription();
@@ -2419,12 +2418,18 @@ xabber.SettingsModalView = xabber.BasicView.extend({
         this.$('.btn-back-subsettings').addClass('hidden');
         this.$('.settings-panel-head .description').addClass('hidden');
         this.$('.desktop-notifications-clue-wrap b').addClass('client-text-color-500');
+        this.updateAccounts(options);
         this.updateHeight();
         this.updateSliders();
+        if (options && options.block_name) {
+            let $elem = this.$(`.settings-tab[data-block-name="${options.block_name}"]`);
+            if ($elem.length)
+                this.jumpToBlock({target: $elem[0]});
+        }
         return this;
     },
 
-    updateAccounts: function () {
+    updateAccounts: function (options) {
         if (this.settings_single_account_modal){
             this.settings_single_account_modal.removeChild('blocklist');
             this.removeChild('single_account');
@@ -2442,7 +2447,7 @@ xabber.SettingsModalView = xabber.BasicView.extend({
                 el: this.$('.single-account-info-wrap .single-account-info')[0]
             });
             if (!this.single_account_has_rendered){
-                this.settings_single_account_modal.show();
+                this.settings_single_account_modal.show(null, options);
             }
             first_account.trigger('render_single_settings', this.settings_single_account_modal);
             this.settings_single_account_modal.addChild('blocklist', xabber.BlockListView, {
@@ -2500,7 +2505,7 @@ xabber.SettingsModalView = xabber.BasicView.extend({
         if ($(ev.target).closest('.switch').length)
             return;
         let $tab = $(ev.target).closest('.settings-tab'),
-            $elem = this.$('.settings-block-wrap.' + $tab.data('block-name'));
+            $elem = this.$('.settings-block-wrap.' + $tab.attr('data-block-name'));
         if ($tab.hasClass('link-button')) {
             $tab.parent().siblings().removeClass('active');
             this.scrollTo(0);
@@ -2517,7 +2522,7 @@ xabber.SettingsModalView = xabber.BasicView.extend({
             this.$('.btn-back-subsettings').removeClass('hidden');
             this.$('.btn-back-subsettings').attr('data-subblock-parent-name', $tab.attr('data-subblock-parent-name'));
         }
-        if ($tab.data('block-name') === 'interface_language')
+        if ($tab.attr('data-block-name') === 'interface_language')
             this.$('.settings-panel-head .description').removeClass('hidden');
         else
             this.$('.settings-panel-head .description').addClass('hidden');
