@@ -2242,15 +2242,15 @@ xabber.SettingsView = xabber.BasicView.extend({
             if (progress == 100) {
                 progress_text = xabber.getString("settings__interface_language__text_description_full_translation", [constants.SHORT_CLIENT_NAME, constants.SHORT_CLIENT_NAME]);
                 platform_text = xabber.getString("settings__interface_language__text_description_full_translation_platform",
-                    [`<a target="_blank" href='${xabber.getString("settings__section_interface_language__text_description___link")}'>${xabber.getString("settings__section_interface_language__text_description__text_link")}</a>`]);
+                    [`<a target="_blank" href='${constants.PROJECT_CROWDIN_URL}'>${xabber.getString("settings__section_interface_language__text_description__text_link")}</a>`]);
             } else if (progress == 0) {
                 progress_text = xabber.getString("settings__section_interface_language__text_description_no_translations", [constants.SHORT_CLIENT_NAME, constants.SHORT_CLIENT_NAME]);
                 platform_text = xabber.getString("settings__interface_language__text_description_no_translation_platform",
-                        [`<a target="_blank" href='${xabber.getString("settings__section_interface_language__text_description___link")}'>${xabber.getString("settings__section_interface_language__text_description__text_link")}</a>`]);
+                        [`<a target="_blank" href='${constants.PROJECT_CROWDIN_URL}'>${xabber.getString("settings__section_interface_language__text_description__text_link")}</a>`]);
             } else {
                 progress_text = xabber.getString("settings__interface_language__text_description_unfull_translation", [constants.SHORT_CLIENT_NAME, constants.SHORT_CLIENT_NAME]);
                 platform_text = xabber.getString("settings__section_interface_language__text_description_translation_platform",
-                    [`<a target="_blank" href='${xabber.getString("settings__section_interface_language__text_description___link")}'>${xabber.getString("settings__section_interface_language__text_description__text_link")}</a>`, constants.EMAIL_FOR_JOIN_TRANSLATION]);
+                    [`<a target="_blank" href='${constants.PROJECT_CROWDIN_URL}'>${xabber.getString("settings__section_interface_language__text_description__text_link")}</a>`, constants.EMAIL_FOR_JOIN_TRANSLATION]);
             }
             this.$('.description').html(`${progress_text}<br><br>${platform_text}`);
         }
@@ -3031,13 +3031,15 @@ xabber.SettingsModalView = xabber.BasicView.extend({
             platform_text = xabber.getString("settings__dialog_change_language__confirm");
         } else if (progress == 100) {
             platform_text = xabber.getString("settings__interface_language__change_language_text_full_translation",
-                [constants.SHORT_CLIENT_NAME, constants.SHORT_CLIENT_NAME, `<a target="_blank" href='${xabber.getString("settings__section_interface_language__text_description___link")}'>${xabber.getString("settings__section_interface_language__text_description__text_link")}</a>`, constants.SHORT_CLIENT_NAME]);
+                [constants.SHORT_CLIENT_NAME, `<a target="_blank" href='${constants.PROJECT_CROWDIN_URL}'>${xabber.getString("settings__section_interface_language__text_description__text_translations")}</a>`, constants.SHORT_CLIENT_NAME, ])
+             + '\n\n' +xabber.getString("settings__dialog_change_language__confirm");
         } else if (progress == 0) {
             platform_text = xabber.getString("settings__interface_language__change_language_text_no_translation",
-                [constants.SHORT_CLIENT_NAME, constants.SHORT_CLIENT_NAME, `<a target="_blank" href='${xabber.getString("settings__section_interface_language__text_description___link")}'>${xabber.getString("settings__section_interface_language__text_description__text_link")}</a>`, constants.SHORT_CLIENT_NAME]);
+                [constants.SHORT_CLIENT_NAME, `<a target="_blank" href='${constants.PROJECT_CROWDIN_URL}'>${xabber.getString("settings__section_interface_language__text_description__text_translation")}</a>`]);
         } else {
             platform_text = xabber.getString("settings__interface_language__change_language_text_partial_translation",
-                [constants.SHORT_CLIENT_NAME, constants.SHORT_CLIENT_NAME, constants.SHORT_CLIENT_NAME, `<a target="_blank" href='${xabber.getString("settings__section_interface_language__text_description___link")}'>${xabber.getString("settings__section_interface_language__text_description__text_link")}</a>`]);
+                [constants.SHORT_CLIENT_NAME, `<a target="_blank" href='${constants.PROJECT_CROWDIN_URL}'>${xabber.getString("settings__section_interface_language__text_description__text_translation_team")}</a>`, constants.SHORT_CLIENT_NAME])
+                + '\n\n' +xabber.getString("settings__dialog_change_language__confirm");
         }
         let modal_classes = ['change-language-modal'], inverted_buttons;
         if (progress == 0){
@@ -3086,22 +3088,16 @@ xabber.SettingsModalView = xabber.BasicView.extend({
         if (!_.isUndefined(progress)) {
             let progress_text, platform_text;
             if (progress == 100 && ((xabber.get("default_language") === 'en' && lang === 'default') || lang === 'en')) {
-                progress_text = xabber.getString("settings__interface_language__text_description_full_translation_english", [constants.SHORT_CLIENT_NAME, constants.SHORT_CLIENT_NAME]);
-                platform_text = xabber.getString("settings__interface_language__text_description_full_translation_english_platform",
-                    [constants.SHORT_CLIENT_NAME, constants.EMAIL_FOR_JOIN_TRANSLATION, `<a target="_blank" href='${xabber.getString("settings__section_interface_language__text_description___link")}'>${xabber.getString("settings__section_interface_language__text_description__text_link")}</a>`, constants.SHORT_CLIENT_NAME]);
+                progress_text = xabber.getString("settings__interface_language__text_description_full_translation_english", [constants.SHORT_CLIENT_NAME, constants.EMAIL_FOR_JOIN_TRANSLATION, constants.SHORT_CLIENT_NAME]);
             } else if (progress == 100) {
-                progress_text = xabber.getString("settings__interface_language__text_description_full_translation", [constants.SHORT_CLIENT_NAME]);
-                platform_text = xabber.getString("settings__interface_language__text_description_full_translation_platform",
-                    [`<a target="_blank" href='${xabber.getString("settings__section_interface_language__text_description___link")}'>${xabber.getString("settings__section_interface_language__text_description__text_link")}</a>`, constants.SHORT_CLIENT_NAME]);
+                progress_text = xabber.getString("settings__interface_language__text_description_full_translation", [constants.SHORT_CLIENT_NAME, constants.SHORT_CLIENT_NAME]);
             } else if (progress == 0) {
                 progress_text = xabber.getString("settings__section_interface_language__text_description_no_translations", [constants.SHORT_CLIENT_NAME]);
-                platform_text = xabber.getString("settings__interface_language__text_description_no_translation_platform",
-                        [`<a target="_blank" href='${xabber.getString("settings__section_interface_language__text_description___link")}'>${xabber.getString("settings__section_interface_language__text_description__text_link")}</a>`]);
             } else {
                 progress_text = xabber.getString("settings__interface_language__text_description_unfull_translation", [constants.SHORT_CLIENT_NAME]);
-                platform_text = xabber.getString("settings__section_interface_language__text_description_translation_platform",
-                    [`<a target="_blank" href='${xabber.getString("settings__section_interface_language__text_description___link")}'>${xabber.getString("settings__section_interface_language__text_description__text_link")}</a>`, constants.SHORT_CLIENT_NAME]);
             }
+            platform_text = xabber.getString("settings__interface_language__text_description_platform",
+                [constants.SHORT_CLIENT_NAME, `<a target="_blank" href='${constants.PROJECT_CROWDIN_URL}'>${xabber.getString("settings__section_interface_language__text_description__text_link")}</a>`]);
             this.$('.description').html(`${progress_text}<br><br>${platform_text}`);
         }
     },
