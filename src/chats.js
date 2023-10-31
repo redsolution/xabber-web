@@ -6178,16 +6178,15 @@ xabber.ChatContentView = xabber.BasicView.extend({
                 _pending_time += 10;
             }, 10000);
 
-            let formData = new FormData();
+            let formData = new FormData(),
+                metadata = {};
+            file.duration && (metadata.duration = file.duration);
+            file.width && (metadata.width = file.width);
+            file.height && (metadata.height = file.height);
             formData.append('file', file, file.name);
-            if (file.duration)
-                formData.append('duration', file.duration);
+            formData.append('metadata', JSON.stringify(metadata));
             if (file.size)
                 formData.append('size', file.size);
-            if (file.width)
-                formData.append('width', file.width);
-            if (file.height)
-                formData.append('height', file.height);
             if (file.voice)
                 formData.append('media_type', file.type + '+voice');
             else
@@ -7599,6 +7598,10 @@ xabber.AccountChats = xabber.ChatsBase.extend({
         options = options || {};
         _.isUndefined(options.clear_search) && (options.clear_search = true);
         let chat = this.getChat(contact, options.encrypted && 'encrypted');
+        if (options && options.force_opened_state){
+            chat.set('opened', true);
+            chat.set('timestamp', Date.now());
+        }
         chat.trigger('open', {clear_search: options.clear_search, right_force_close: options.right_force_close});
     },
 

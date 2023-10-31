@@ -9926,7 +9926,7 @@ xabber.AddContactView = xabber.BasicView.extend({
                 contact.pres('subscribe');
             }, 500);
             contact.trigger('presence', contact, 'subscribe_from');
-            contact.trigger("open_chat", contact, {right_force_close: true});
+            contact.trigger("open_chat", contact, {right_force_close: true, force_opened_state: true});
             this.close();
         }
     },

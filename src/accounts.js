@@ -1521,10 +1521,11 @@ xabber.Account = Backbone.Model.extend({
         uploadFile: function (file, callback, errback) {
             this.testGalleryTokenExpire(() => {
                 if (this.get('gallery_token') && this.get('gallery_url')) {
-                    let formData = new FormData();
+                    let formData = new FormData(),
+                        metadata = {};
+                    file.duration && (metadata.duration = file.duration);
                     formData.append('file', file, file.name);
-                    if (file.duration)
-                        formData.append('duration', file.duration);
+                    formData.append('metadata', JSON.stringify(metadata));
                     if (file.size)
                         formData.append('size', file.size);
                     if (file.voice)
@@ -2511,12 +2512,14 @@ xabber.AccountMediaGalleryView = xabber.BasicView.extend({
         if (response.items && response.items.length){
             response.items.forEach((item) => {
                 item.thumbnail && item.thumbnail.url && (item.thumbnail = item.thumbnail.url);
+                let duration;
+                item.metadata && item.metadata.duration && (duration = utils.pretty_duration(item.metadata.duration));
                 let $gallery_file = $(templates.media_gallery_account_file({
                     file: item,
                     svg_icon: utils.file_type_icon_svg(item.media_type),
                     filesize: utils.pretty_size(item.size),
                     created_at: utils.pretty_date(item.created_at),
-                    duration: utils.pretty_duration(item.duration),
+                    duration: duration,
                     download_only: false,
                 }));
                 (response.type === 'avatars') && $gallery_file.addClass('gallery-avatar');
@@ -2781,12 +2784,14 @@ xabber.DeleteFilesFromGalleryView = xabber.BasicView.extend({
         if (response.items && response.items.length){
             response.items.forEach((item) => {
                 item.thumbnail && item.thumbnail.url && (item.thumbnail = item.thumbnail.url);
+                let duration;
+                item.metadata && item.metadata.duration && (duration = utils.pretty_duration(item.metadata.duration));
                 let $gallery_file = $(templates.media_gallery_account_file({
                     file: item,
                     svg_icon: utils.file_type_icon_svg(item.media_type),
                     filesize: utils.pretty_size(item.size),
                     created_at: utils.pretty_date(item.created_at),
-                    duration: utils.pretty_duration(item.duration),
+                    duration: duration,
                     download_only: true,
                 }));
                 if (item.media_type && item.media_type.includes('image')){
