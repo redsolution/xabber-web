@@ -6658,6 +6658,11 @@ xabber.ChatContentView = xabber.BasicView.extend({
         video.pretty_size = utils.pretty_size(video.size)
         let video_attrs = {video_src: video.sources[0], thumbnail: video.thumbnail, video_id: idx},
             $video_wrap_template = $(templates.messages.video(video_attrs));
+        if (video.thumbnail){
+            setTimeout(() => {
+                $video_wrap_template.append($(`<img class="plyr-video-poster" src="${video.thumbnail}" onerror="this.style.display='none'">`))
+            }, 1000);
+        }
         return $video_wrap_template;
     },
 

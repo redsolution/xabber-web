@@ -2651,7 +2651,7 @@ xabber.SettingsModalView = xabber.BasicView.extend({
 
         this.$('.languages-list').append(default_element);
 
-        if (window.navigator.language !== 'en' ){
+        if (!window.navigator.language.includes('en')){
             let second_lang = xabber.get("default_language") === 'en' ? window.navigator.language : 'en',
                 second_prog, second_prog_text,
                 second_locale = Object.keys(client_translation_progress)

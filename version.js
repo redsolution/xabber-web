@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.3.4.58","version_description":"added specific block opening when opening settings"}'
+'{"version_number":"2.3.4.59","version_description":"added timeout for video poster in chat, fixed english locale in change language tab"}'
 )});

@@ -18893,6 +18893,7 @@ input[type=range].voice-message-volume:focus {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    position: absolute;
 }
 .chat-message .plyr-video-container .plyr-video-play{
     position: absolute;
@@ -18906,6 +18907,7 @@ input[type=range].voice-message-volume:focus {
     border-radius: 50%;
     opacity: 0.9;
     transition: all .3s ease, opacity .4s ease-in-out,transform .4s ease-in-out;
+    z-index: 2;
 }
 .chat-message .plyr-video-container .plyr-video-play polygon{
     fill: #fff;
