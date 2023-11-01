@@ -3701,7 +3701,7 @@ input[type=text].simple-input-field:hover {
     transition: opacity .4s;
 }
 
-.toolbar .account-item .show-account-settings {
+.toolbar .account-item .filter-chats {
     padding: 8px 12px;
     border-radius: 18px;
     display: flex;

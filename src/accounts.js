@@ -1844,8 +1844,8 @@ xabber.AccountToolbarItemView = xabber.BasicView.extend({
     avatar_size: constants.AVATAR_SIZES.TOOLBAR_ACCOUNT_ITEM,
 
     events: {
-        'click .account-item-avatar-wrap': 'filterChats',
-        'click .show-account-settings': 'showSettings'
+        'click .filter-chats': 'filterChats',
+        'click .account-item-avatar-wrap': 'showSettings'
     },
 
     _initialize: function () {
