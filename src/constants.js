@@ -412,7 +412,6 @@ var constants = {
     PERSONAL_AREA_URL: {},
 
     XABBER_ACCOUNT_URL: 'https://www.xabber.com/account',
-    API_SERVICE_URL: 'https://api.xabber.com/api/v2',
     USE_SOCIAL_AUTH: true,
     REGISTER_XMPP_ACCOUNT: true,
     REGISTER_XMPP_ACCOUNT_URL: 'https://www.xabber.com/account/auth/signup/',

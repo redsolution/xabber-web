@@ -7020,7 +7020,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
                     if (from_jid == from_id)
                         return;
                     let contact = this.account.contacts.mergeContact(from_jid);
-                    contact.showDetails();
+                    contact && contact.showDetailsRight('all-chats', {encrypted: this.model.get('encrypted')});
                 }
                 return;
             }
@@ -7041,7 +7041,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
                     this.contact && this.contact.showDetailsRight('all-chats', {encrypted: this.model.get('encrypted')});
                 } else {
                     let contact = this.account.contacts.mergeContact(from_jid);
-                    contact.showDetails();
+                    contact && contact.showDetailsRight('all-chats', {encrypted: this.model.get('encrypted')});
                 }
                 return;
             }
@@ -7062,7 +7062,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
                         this.contact && this.contact.showDetailsRight('all-chats', {encrypted: this.model.get('encrypted')});
                     } else {
                         let contact = this.account.contacts.mergeContact(member_id);
-                        contact.showDetails();
+                        contact && contact.showDetailsRight('all-chats', {encrypted: this.model.get('encrypted')});
                     }
                 }
                 return;
@@ -7935,20 +7935,6 @@ xabber.AccountChats = xabber.ChatsBase.extend({
             });
             chat.item_view.updateLastMessage();
         }
-        if ($message.find(`confirm[xmlns="${Strophe.NS.HTTP_AUTH}"]`).length) {
-            let code =  $message.find('confirm').attr('id');
-            if (($message.attr('from') == this.account.xabber_auth.api_jid) && ($message.attr('id') == this.account.xabber_auth.request_id)) {
-                this.account.verifyXabberAccount(code, (data) => {
-                    if (xabber.api_account && this.account.get('auto_login_xa')) {
-                        xabber.api_account.save('token', data);
-                        xabber.api_account.login_by_token();
-                    }
-                });
-            }
-            else {
-                return this.receiveChatMessage(message);
-            }
-        }
         return;
     },
 
@@ -8133,8 +8119,6 @@ xabber.AccountChats = xabber.ChatsBase.extend({
                         }
                     });
                 }
-                if (contact.details_view && contact.details_view.isVisible())
-                    contact.trigger('update_participants');
             }
         }
         if (chat.contact.get('group_chat') && options.carbon_direction === 'sent' && !$message.children(`[xmlns="${Strophe.NS.CHAT_MARKERS}"]`).length)
@@ -8446,7 +8430,7 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
         if (options.right === undefined)
             this.active_chat = null;
         this.$('.chat-list-wrap').switchClass('with-padding', xabber.toolbar_view.$('.toolbar-item:not(.toolbar-logo).unread').length);
-        if (options.right !== 'chat' && options.right !== 'contact_details' && !options.no_unread && options.right !== 'searched_messages' && options.right !== 'message_context' && options.right !== 'participant_messages' || options.clear_search) {
+        if (options.right !== 'chat' && !options.no_unread && options.right !== 'searched_messages' && options.right !== 'message_context' && options.right !== 'participant_messages' || options.clear_search) {
             this.clearSearch();
             if (xabber.toolbar_view.$('.active').hasClass('all-chats') && !xabber.toolbar_view.data.get('account_filtering')) {
                 this.showAllChats();
@@ -9791,7 +9775,6 @@ xabber.InvitationPanelView = xabber.SearchView.extend({
         "click .circle-avatar": "showContactDetailsRight",
         "click .contact-status-message.resource-hover": "showContactResources",
         "click .contact-status-message.members-hover": "showMembersDetails",
-        "click .btn-contact-details": "showContactDetails",
         "click .btn-clear-history": "clearHistory",
         "click .btn-invite-users": "inviteUsers",
         "click .btn-delete-chat": "deleteChat",
@@ -9947,10 +9930,6 @@ xabber.InvitationPanelView = xabber.SearchView.extend({
 
     renderSearchPanel: function () {
         this.contact.showDetailsRight('all-chats', {type: 'search'});
-    },
-
-    showContactDetails: function () {
-        this.contact.showDetails('all-chats');
     },
 
     showContactDetailsRight: function () {
@@ -11446,7 +11425,6 @@ xabber.ChatBottomView = xabber.BasicView.extend({
     },
 
     onClickBottom: function (ev) {
-        (this.$el.hasClass('chat-bottom-blocked-wrap') && !$(ev.target).closest('.message-actions-panel').length) && this.contact.showDetails(xabber.body.screen.get('name'));
         if ($(ev.target).closest('.ql-editor.rich-textarea').length) {
             if (!this.quill.getText().trim().length) {
                 if (++this.click_counter === 3) {

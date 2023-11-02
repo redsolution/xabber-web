@@ -46,8 +46,6 @@ xabber.Account = Backbone.Model.extend({
                 this.settings = xabber.account_settings_list.create({
                     jid: _attrs.jid,
                     timestamp: utils.now(),
-                    auto_login_xa: this.get('auto_login_xa'),
-                    to_sync: xabber.api_account && xabber.api_account.get('sync_all')
                 });
             }
             let settings = _.clone(this.settings.attributes);
@@ -91,7 +89,6 @@ xabber.Account = Backbone.Model.extend({
             this.dfd_presence = new $.Deferred();
             this.resources = new xabber.AccountResources(null, {account: this});
             this.password_view = new xabber.ChangePasswordView({model: this});
-            this.vcard_edit = new xabber.VCardEditView({model: this});
             this.updateColorScheme();
             this.settings.on("change:color", this.updateColorScheme, this);
             this.on("change:photo_hash", this.getVCard, this);
@@ -107,19 +104,9 @@ xabber.Account = Backbone.Model.extend({
                 xabber.info(xml);
             };
             this.once("start", this.start, this);
-            if (xabber.api_account)
-                xabber.api_account.on("settings_result", function (result) {
-                    if (result && this.settings.get('token')) {
-                        this.save({auth_type: 'token'});
-                    }
-                    this.trigger('start');
-                }, this);
-            else
-                xabber.on("bind_xmpp_accounts", () => {
-                    if (this.settings.get('token'))
-                        this.save({auth_type: 'token'});
-                    this.trigger('start');
-                }, this);
+            xabber.on("start_accounts", () => {
+                this.trigger('start');
+            }, this);
         },
 
         start: function () {
@@ -378,20 +365,6 @@ xabber.Account = Backbone.Model.extend({
             return this.connection.authenticated;
         },
 
-        verifyXabberAccount: function (code, callback) {
-            let request = {
-                type: 'POST',
-                url: constants.API_SERVICE_URL + '/accounts/xmpp_auth/',
-                contentType: "application/json",
-                dataType: 'json',
-                data: JSON.stringify({ code: code, jid: this.connection.jid}),
-                success: function (data, textStatus, jqXHR) {
-                    callback && callback(data.token);
-                }
-            };
-            $.ajax(request);
-        },
-
         createFastConnection: function () {
             let jid = this.get('jid'),
                 auth_type = this.conn_manager.auth_type,
@@ -557,64 +530,6 @@ xabber.Account = Backbone.Model.extend({
                     ready_to_send: false,
                 });
             }
-        },
-
-        connectXabberAccount: function () {
-            let iq_private_storage = $iq({type: 'get'}).c('query', {xmlns: Strophe.NS.PRIVATE_STORAGE}).c('storage', {xmlns:'xabber:options'});
-            this.sendIQFast(iq_private_storage, (iq) => {
-                if (($(iq).find('option').attr('type') == 'bind') && ($(iq).find('option').text() == 1)) {
-                    this.authXabberAccount();
-                }
-            });
-        },
-
-        authXabberAccount: function (callback) {
-            this.requestPassword((data) => {
-                this.xabber_auth = { api_jid: data.api_jid, request_id: data.request_id };
-                if (this.code_requests.length > 0) {
-                    let verifying_code = this.code_requests.find(verifying_mess => (verifying_mess.jid === this.xabber_auth.api_jid && verifying_mess.id === this.xabber_auth.request_id));
-                    if (verifying_code) {
-                        let idx_verifying_code = this.code_requests.indexOf(verifying_code);
-                        (idx_verifying_code > -1) && this.code_requests.splice(idx_verifying_code, 1);
-                        this.verifyXabberAccount(verifying_code.code, (data) => {
-                            this._waiting_code = false;
-                            let iq_send_auth_mark = $iq({type: 'set'})
-                                .c('query', {xmlns: Strophe.NS.PRIVATE_STORAGE})
-                                .c('storage', {xmlns:'xabber:options'})
-                                .c('option', {type: 'bind'}).t(1);
-                            if (xabber.api_account) {
-                                xabber.api_account.save('token', data);
-                                xabber.api_account.login_by_token();
-                            }
-                            this.sendIQFast(iq_send_auth_mark);
-                            callback && callback();
-                        });
-                    }
-                    if (this.code_requests.length) {
-                        let msg_attrs = {
-                            from_jid: this.code_requests[0].jid,
-                            message: xabber.getString("xmpp_confirm__text_message__verification_code_is", [Number(this.code_requests[0].code)]),
-                            is_archived: false
-                        };
-                        this.createMessageFromIQ(msg_attrs);
-                    }
-                }
-            });
-        },
-
-        requestPassword: function(callback) {
-            let request = {
-                type: 'POST',
-                url: constants.API_SERVICE_URL + '/accounts/xmpp_code_request/',
-                contentType: "application/json",
-                dataType: 'json',
-                data: JSON.stringify({ jid: this.connection.jid, type: 'iq'}),
-                success: function (data, textStatus, jqXHR) {
-                    callback && callback(data);
-                }
-            };
-            this._waiting_code = true;
-            $.ajax(request);
         },
 
         reconnectionCallback: function (status, condition, elem) {
@@ -835,10 +750,6 @@ xabber.Account = Backbone.Model.extend({
         },
 
         onTokenRevoked: function () {
-            if (xabber.api_account && xabber.api_account.get('xmpp_binding') === this.get('jid')) {
-                xabber.trigger('quit_accounts');
-                return;
-            }
             if (!this.auth_view) {
                 utils.dialogs.error(xabber.getString("connection__error__text_token_invalidated", [this.get('jid')]));
             }
@@ -1138,12 +1049,7 @@ xabber.Account = Backbone.Model.extend({
 
         updateColorScheme: function () {
             let color = this.settings.get('color');
-            this.settings_left && this.settings_left.$el.attr('data-color', color);
             this.settings_account_modal && this.settings_account_modal.$el.attr('data-color', color);
-            if (this.settings_right) {
-                this.settings_right.$el.attr('data-color', color);
-            }
-            this.vcard_edit.$el.attr('data-color', color);
         },
 
         revokeXToken: function (token_uid, callback) {
@@ -1181,8 +1087,6 @@ xabber.Account = Backbone.Model.extend({
                 this.revokeXToken([this.get('x_token').token_uid]);
             this.session.set('delete', true);
             this.deactivate();
-            if (xabber.api_account && xabber.api_account.get('xmpp_binding') === this.get('jid'))
-                xabber.trigger('quit_accounts');
         },
 
         activate: function () {
@@ -1720,13 +1624,9 @@ xabber.Accounts = Backbone.CollectionWithStorage.extend({
         xabber.on("quit", this.onQuit, this);
         xabber.on("quit_accounts", this.onQuitAccounts, this);
         this.settings_list.on("add_settings", this.onSettingsAdded, this);
-        xabber.api_account && xabber.api_account.on("settings_result", function (result) {
-            result && this.trigger('update_order');
-        }, this);
     },
 
     onQuit: function () {
-        xabber.api_account && xabber.api_account.revoke_token();
         _.each(_.clone(this.models), function (account) {
             account.deleteAccount();
             account.password_view.closeModal();
@@ -1736,7 +1636,6 @@ xabber.Accounts = Backbone.CollectionWithStorage.extend({
     },
 
     onQuitAccounts: function () {
-        xabber.api_account && xabber.api_account.revoke_token();
         _.each(_.clone(this.models), function (account) {
             if (account.settings.get('to_sync')) {
                 account.deleteAccount();
@@ -1768,7 +1667,7 @@ xabber.Accounts = Backbone.CollectionWithStorage.extend({
 
     onDestroy: function (account) {
         if (!account.get('is_new')) {
-            let no_accounts = !(this.length || xabber.api_account && xabber.api_account.get('connected'));
+            let no_accounts = !(this.length);
             if (no_accounts) {
                 xabber.body.setScreen('login');
             } else if (account.show_settings_after_delete) {
@@ -1831,10 +1730,6 @@ xabber.Accounts = Backbone.CollectionWithStorage.extend({
             acc.settings.save({order: index + 1});
         });
         this.trigger('update_order');
-        if (xabber.api_account && xabber.api_account.get('connected')) {
-            this.settings_list.order_timestamp.save('timestamp', utils.now());
-            xabber.api_account.synchronize_order_settings();
-        }
     }
 });
 
@@ -2103,29 +1998,6 @@ xabber.AccountResourcesView = xabber.ResourcesView.extend({
             this.$('.resource-wrap').eq(index).after(view.$el);
         }
         this.updateScrollBar();
-    }
-});
-
-xabber.AccountVCardView = xabber.VCardView.extend({
-    events: {
-        "click .btn-vcard-refresh": "refresh",
-        "click .btn-vcard-edit": "showEditView",
-        "click .details-icon": "onClickIcon"
-    },
-
-    __initialize: function () {
-        this.updateButtons();
-        this.model.on("activate deactivate", this.updateButtons, this);
-    },
-
-    updateButtons: function () {
-        let connected = this.model.isConnected();
-        this.$('.btn-vcard-edit').showIf(connected);
-        this.$('.btn-vcard-refresh').showIf(connected);
-    },
-
-    showEditView: function () {
-        this.model.showSettings('vcard_edit');
     }
 });
 
@@ -2882,205 +2754,6 @@ xabber.DeleteFilesFromGalleryView = xabber.BasicView.extend({
     }
 });
 
-xabber.AccountSettingsLeftView = xabber.BasicView.extend({
-    className: 'account-settings-left-wrap',
-    template: templates.settings_left,
-    ps_selector: '.settings-tabs-wrap',
-    ps_settings: {
-        wheelPropagation: true
-    },
-    avatar_size: constants.AVATAR_SIZES.ACCOUNT_SETTINGS_LEFT,
-
-    events: {
-        "change .main-info-wrap .circle-avatar input": "changeAvatar",
-        "click .btn-choose-image": "chooseAvatar",
-        "click .btn-back": "showSettings",
-        "click .btn-emoji-panel": "openEmojiPanel",
-        "click .btn-selfie": "openWebcamPanel",
-        "click .main-info-wrap .status": "openChangeStatus",
-        "click .settings-tabs-wrap .settings-tab": "jumpToBlock",
-        "click .settings-tab.delete-account": "deleteAccount"
-    },
-
-    _initialize: function () {
-        this.status_field = new xabber.StatusMessageWidget({
-            el: this.$('.status-wrap')[0],
-            model: this.model
-        });
-        this.updateName();
-        this.updateStatus();
-        this.updateAvatar();
-        this.updateBlocks();
-        this.model.on("change:name", this.updateName, this);
-        this.model.on("change:status_updated", this.updateStatus, this);
-        this.model.on("change:image", this.updateAvatar, this);
-        this.model.on("change:gallery_token", this.updateGallery, this);
-        this.model.on("activate deactivate", this.updateBlocks, this);
-        this.model.on("destroy", this.remove, this);
-    },
-
-    render: function (options) {
-        !options.block_name && (options.block_name = 'connection')
-        this.$el.switchClass('vcard-edit', options.right == 'vcard_edit');
-        this.$('.settings-tab[data-block-name="tokens"]').hideIf(this.model.get('auth_type') !== 'x-token');
-        this.$('.settings-tab').removeClass('active');
-        this.$(`.settings-tab[data-block-name="${options.block_name}"]`).addClass('active');
-        this.$('.circle-avatar.dropdown-button').dropdown({
-            inDuration: 100,
-            outDuration: 100,
-            constrainWidth: false,
-            hover: false,
-            alignment: 'left'
-        });
-
-        this.updateCSS();
-        return this;
-    },
-
-    updateName: function () {
-        this.$('.name').text(this.model.get('name'));
-        this.updateNameCSS();
-    },
-
-    updateStatus: function () {
-        this.$('.main-info-wrap .status').attr('data-status', this.model.get('status'));
-    },
-
-    updateAvatar: function () {
-        let image = this.model.cached_image;
-        this.$('.circle-avatar').setAvatar(image, this.avatar_size);
-    },
-
-    updateBlocks: function () {
-        let connected = this.model.isConnected();
-        this.$('.main-info-wrap').switchClass('disconnected', !connected);
-        // this.$('.settings-tab[data-block-name="xmpp-resources"]').showIf(connected);
-        this.$('.settings-tab[data-block-name="server-info"]').showIf(connected);
-        this.$('.settings-tab[data-block-name="blocklist"]').showIf(connected);
-        this.$('.settings-tab[data-block-name="groups-info"]').showIf(connected);
-        this.updateGallery();
-        this.updateScrollBar();
-    },
-
-    updateGallery: function () {
-        let connected = this.model.isConnected();
-        this.$('.settings-tab[data-block-name="media-gallery"]').showIf(connected && this.model.get('gallery_token'));
-    },
-
-    updateNameCSS: function () {
-        if (!this.isVisible())
-            return;
-        let $name = this.$('.name');
-        $name.removeAttr('style');
-        let wrap_width = this.$('.name-wrap').width(),
-            width = $name.width(),
-            font_size = 22;
-        while (width > wrap_width && font_size > 12) {
-            $name.css({'font-size': font_size});
-            width = $name.width();
-            font_size -= 2;
-        }
-        $name.css({'margin-left': (wrap_width - width) / 2});
-    },
-
-    chooseAvatar: function () {
-        if (this.model.get('gallery_token') && this.model.get('gallery_url')) {
-            let avatar_view = new xabber.SetAvatarView();
-            avatar_view.render({model: this.model});
-        } else
-            this.$('.main-info-wrap .circle-avatar input').click();
-    },
-
-    showSettings: function () {
-        xabber.body.setScreen('settings-modal', {account_block_name: null});
-        xabber.trigger('update_placeholder');
-    },
-
-    openEmojiPanel: function () {
-        let emoji_panel_view = new xabber.EmojiProfileImageView();
-        emoji_panel_view.open({model: this.model});
-    },
-
-    openWebcamPanel: function () {
-        let webcam_panel_view = new xabber.WebcamProfileImageView();
-        webcam_panel_view.open({model: this.model});
-    },
-
-    changeAvatar: function (ev) {
-        let field = ev.target;
-        if (!field.files.length)
-            return;
-        let file = field.files[0];
-        field.value = '';
-        if (file.size > constants.MAX_AVATAR_FILE_SIZE && !(this.model.get('gallery_token') && this.model.get('gallery_url'))) {
-            utils.dialogs.error(xabber.getString("group_settings__error__avatar_too_large"));
-            return;
-        } else if (!file.type.startsWith('image')) {
-            utils.dialogs.error(xabber.getString("group_settings__error__wrong_image"));
-            return;
-        }
-        this.$('.circle-avatar').find('.preloader-wrap').addClass('visible').find('.preloader-wrapper').addClass('active');
-        utils.images.getAvatarFromFile(file).done((image, hash, size) => {
-            if (image) {
-                this.model.pubAvatar({base64: image, hash: hash, size: size, type: file.type, file: file}, () => {
-                        this.$('.circle-avatar').setAvatar(image, this.avatar_size);
-                        this.$('.circle-avatar').find('.preloader-wrap').removeClass('visible').find('.preloader-wrapper').removeClass('active');
-                    }, () => {
-                        this.$('.circle-avatar').find('.preloader-wrap').removeClass('visible').find('.preloader-wrapper').removeClass('active');
-                        utils.dialogs.error(xabber.getString("group_settings__error__wrong_image"));
-                    });
-            } else
-                utils.dialogs.error(xabber.getString("group_settings__error__wrong_image"));
-        });
-    },
-
-    updateCSS: function () {
-        this.updateNameCSS();
-    },
-
-    openChangeStatus: function () {
-        !xabber.change_status_view && (xabber.change_status_view = new xabber.ChangeStatusView());
-        xabber.change_status_view.open(this.model);
-    },
-
-    jumpToBlock: function (ev) {
-        let $tab = $(ev.target).closest('.settings-tab'),
-            block_name = $tab.attr('data-block-name');
-        if (block_name === 'vcard_edit'){
-            this.model.showSettings(block_name, 'vcard');
-            this.$('.settings-tab').removeClass('active');
-            $tab.addClass('active');
-        }
-        else if (block_name === 'media-gallery'){
-            this.model.showSettings(null, block_name);
-            this.model.settings_right.gallery_view.$('.tabs .list-variant:not(.hidden)').first().click();
-        }
-        else
-            this.model.showSettings(null, block_name);
-    },
-
-    deleteAccount: function () {
-        let dialog_options = [];
-        if (xabber.api_account && xabber.api_account.get('connected')) {
-            dialog_options = [{name: 'delete_settings',
-                checked: this.model.settings.get('to_sync'),
-                text: xabber.getString("dialog_delete_account__label_delete_synced_settings")}];
-        }
-        utils.dialogs.ask(xabber.getString("settings_account__button_quit_account"), xabber.getString("dialog_quit_account__confirm"),
-            dialog_options, { ok_button_text: xabber.getString("button_quit")}).done((res) => {
-            if (!res)
-                return;
-            if (res.delete_settings && xabber.api_account) {
-                if (xabber.api_account.get('xmpp_binding') === this.model.get('jid'))
-                    xabber.api_account._call_method('DELETE', '/accounts/current/client-settings/', {jid: this.model.get('jid')});
-                else
-                    xabber.api_account.delete_settings(this.model.get('jid'));
-            }
-            this.model.deleteAccount(true);
-        });
-    }
-});
-
 xabber.AccountSettingsModalView = xabber.BasicView.extend({
     className: 'settings-panel-wrap',
     template: templates.account_settings_modal,
@@ -3476,12 +3149,6 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
             [], { ok_button_text: xabber.getString("button_quit")}).done((res) => {
             if (!res)
                 return;
-            if (res.delete_settings && xabber.api_account) {
-                if (xabber.api_account.get('xmpp_binding') === this.model.get('jid'))
-                    xabber.api_account._call_method('DELETE', '/accounts/current/client-settings/', {jid: this.model.get('jid')});
-                else
-                    xabber.api_account.delete_settings(this.model.get('jid'));
-            }
             this.model.deleteAccount(true);
         });
     },
@@ -3525,7 +3192,6 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
     },
 
     updateSynchronizationBlock: function () {
-        this.$('.xabber-account-features-wrap').showIf(xabber.api_account && xabber.api_account.get('connected'));
         this.updateSyncState();
         this.updateSyncOption();
         this.updateDelSettingsButton();
@@ -3909,7 +3575,6 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
         settings.save('to_sync', to_sync);
         if (to_sync) {
             settings.update_timestamp();
-            xabber.api_account && xabber.api_account.synchronize_main_settings();
         }
     },
 
@@ -3923,7 +3588,6 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
                 } else if (!this.model.settings.get('to_sync')) {
                     this.model.deleteAccount(true);
                 }
-                xabber.api_account && xabber.api_account.delete_settings(this.model.get('jid'));
             }
         });
     },
@@ -4067,456 +3731,6 @@ xabber.AccountSettingsSingleModalView = xabber.AccountSettingsModalView.extend({
     },
 });
 
-xabber.AccountSettingsRightView = xabber.BasicView.extend({
-    className: 'account-settings-right-wrap',
-    template: templates.settings_right,
-    ps_selector: '.panel-content',
-
-    events: {
-        "change .enabled-state input": "setEnabled",
-        "change .setting-send-chat-states input": "setTypingNotification",
-        "change .setting-use-omemo input": "setEnabledOmemo",
-        "click .btn-change-password": "showPasswordView",
-        "click .btn-reconnect": "reconnect",
-        "click": "hideResources",
-        "change .sync-account": "changeSyncSetting",
-        "click .btn-delete-settings": "deleteSettings",
-        "change .color-scheme input[type=radio][name=account_color]": "changeColor",
-        "click .token-wrap .btn-revoke-token": "revokeXToken",
-        "click .tokens .btn-revoke-all-tokens": "revokeAllXTokens",
-        "click .btn-manage-devices": "openDevicesWindow",
-        "click .btn-block": "openBlockWindow",
-        "click .btn-unblock-selected": "unblockSelected",
-        "click .btn-deselect-blocked": "deselectBlocked",
-        "click .all-sessions .device-encryption.active": "openFingerprint",
-        "click .btn-purge-keys": "purgeKeys"
-    },
-
-    _initialize: function () {
-        // this.resources_view = this.addChild('resources', xabber.AccountResourcesView,
-        //     {model: this.model.resources, el: this.$('.xmpp-resources')[0]});
-        this.vcard_view = this.addChild('vcard', xabber.AccountVCardView,
-            {model: this.model, el: this.$('.vcard')[0]});
-        this.gallery_view = this.addChild('media-gallery', xabber.AccountMediaGalleryView,
-            {model: this.model, el: this.$('.media-gallery')[0]});
-        this.$('.account-name .value').text(this.model.get('jid'));
-        this.updateStatus();
-        this.updateView();
-        this.showConnectionStatus();
-        this.updateSynchronizationBlock();
-
-        this.model.resources.on("change", this.updateXTokens, this);
-        this.model.resources.on("add", this.updateXTokens, this);
-        this.model.resources.on("destroy", this.updateXTokens, this);
-        this.model.session.on("change:reconnecting", this.updateReconnectButton, this);
-        this.model.session.on("change:conn_feedback", this.showConnectionStatus, this);
-        this.model.settings.on("change:to_sync", this.updateSyncOption, this);
-        this.model.settings.on("change:deleted", this.updateDelSettingsButton, this);
-        this.model.settings.on("change:to_sync change:synced", this.updateSyncState, this);
-        xabber.api_account && xabber.api_account.on("change:connected", this.updateSynchronizationBlock, this);
-        this.model.on("change:enabled", this.updateEnabled, this);
-        this.model.on("update_omemo_devices", this.updateOmemoDevices, this);
-        this.model.on('trusting_updated', this.updateOmemoDevices, this);
-        this.model.on('trusting_updated', this.updateXTokens, this);
-        this.model.settings.on("change:omemo", this.updateEnabledOmemo, this);
-        this.model.settings.on("change:encrypted_chatstates", this.updateEncryptedChatstates, this);
-        this.model.on("change:status_updated", this.updateStatus, this);
-        this.model.on("activate deactivate", this.updateView, this);
-        this.model.on("change:auth_type", this.updateView, this);
-        this.model.on("destroy", this.remove, this);
-    },
-
-    render: function (options) {
-        !options.block_name && (options.block_name = 'connection')
-        this.updateEnabledOmemo();
-        this.updateEncryptedChatstates();
-        this.updateEnabled();
-        this.updateXTokens();
-        this.updateView();
-        this.$('.main-resource .client').text(xabber.get('client_name'));
-        this.$('.main-resource .resource').text(this.model.resource);
-        this.$('.main-resource .priority').text(this.model.get('priority'));
-        this.$(`.color-scheme input[type=radio][name=account_color][value="${this.model.settings.get('color')}"]`)
-            .prop('checked', true);
-        if (options.block_name){
-            this.$('.settings-block-wrap').addClass('hidden');
-            this.$('.settings-block-wrap.'+options.block_name).removeClass('hidden');
-            this.$('.settings-panel-head span.settings-panel-head-title').text(this.$('.settings-block-wrap.'+options.block_name).attr('data-header'));
-            this.$('.btn-block').switchClass('hidden2', options.block_name != 'blocklist-info');
-            this.$('.device-more-button.btn-more').hideIf(options.block_name != 'tokens' || !this.model.settings.get('omemo'));
-            let dropdown_settings = {
-                inDuration: 100,
-                outDuration: 100,
-                constrainWidth: false,
-                hover: false,
-                alignment: 'right'
-            };
-            this.$('.dropdown-button').dropdown(dropdown_settings);
-            if (options.block_name === 'media-gallery') {
-                this.$('.btn-delete-files-variants').dropdown({
-                    inDuration: 100,
-                    outDuration: 100,
-                    hover: true,
-                    belowOrigin: true,
-                });
-            }
-        }
-        this.scrollToChild(this.$('.settings-block-wrap.'+options.block_name));
-        this.$('.panel-content-wrap').removeClass('hidden');
-        if (this.ps_container.length) {
-            this.ps_container.perfectScrollbar(
-                _.extend(this.ps_settings || {}, xabber.ps_settings)
-            );
-        }
-        this.updateOmemoDevices;
-        return this;
-    },
-
-    updateStatus: function () {
-        let account = this.model,
-            status = account.get('status'),
-            status_message = account.getStatusMessage();
-        this.$('.main-resource .status').attr('data-status', status);
-        this.$('.main-resource .status-message').text(status_message);
-    },
-
-    updateOmemoDevices: function () {
-        if (this.model.omemo && this.model.omemo.store){
-            let identity_key = this.model.omemo.store.get('identityKey');
-            if (identity_key){
-                this.$('.btn-manage-devices').removeClass('hidden2');
-            } else {
-                this.model.omemo.store.once('change:identityKey', () => {
-                    this.$('.btn-manage-devices').removeClass('hidden2');
-                }, this);
-            }
-        }
-        else
-            this.$('.btn-manage-devices').addClass('hidden2');
-    },
-
-    updateView: function () {
-        let connected = this.model.isConnected();
-        this.$('.connection-wrap .buttons-wrap .btn-change-password').hideIf(this.model.get('auth_type') === 'x-token');
-        this.$('.connection-wrap .buttons-wrap .btn-reconnect').hideIf(this.model.get('auth_type') === 'x-token');
-        this.updateScrollBar();
-    },
-
-    updateSynchronizationBlock: function () {
-        this.$('.xabber-account-features-wrap').showIf(xabber.api_account && xabber.api_account.get('connected'));
-        this.updateSyncState();
-        this.updateSyncOption();
-        this.updateDelSettingsButton();
-    },
-
-    showResources: function (ev) {
-        this.$(`.token-resource-wrap`).hideIf(true)
-        let resource_id = $(ev.target).attr('data-resource-id');
-        this.$(`.token-resource-wrap[data-resource-id="${resource_id}"]`).hideIf(false)
-    },
-
-    hideResources: function (ev) {
-        if (!($(ev.target).hasClass('last-auth') && $(ev.target).hasClass('resource') || $(ev.target).closest(".token-resource-wrap").length > 0))
-            this.$(`.token-resource-wrap`).hideIf(true)
-    },
-
-    renderAllXTokens: function () {
-        this.$('.panel-content-wrap .tokens .sessions-wrap').html("");
-        this.$('.panel-content-wrap .tokens .orphaned-fingerprints-wrap').html("");
-        $(_.sortBy(this.model.x_tokens_list, '-last_auth')).each((idx, token) => {
-            let pretty_token = {
-                resource_obj: undefined,
-                client: token.client,
-                device: token.device,
-                token_uid: token.token_uid,
-                ip: token.ip,
-                last_auth: pretty_datetime_date(token.last_auth),
-                expire: pretty_datetime(token.expire)
-            };
-            let resource_obj = this.model.resources.findWhere({ token_uid: token.token_uid });
-            if (resource_obj)
-                pretty_token.resource_obj = resource_obj.toJSON();
-            if (this.model.get('x_token')) {
-                if (this.model.get('x_token').token_uid == token.token_uid) {
-                    pretty_token.is_omemo = this.model.omemo ? true : false
-                    let $cur_token_html = $(templates.current_token_item(pretty_token));
-                    this.$('.panel-content-wrap .tokens .current-session').append($cur_token_html);
-                    return;
-                }
-            }
-            let $token_html = $(templates.token_item(pretty_token));
-            this.$('.panel-content-wrap .tokens .all-sessions').append($token_html);
-            if (this.model.omemo) {
-                !this.omemo_own_devices && (this.omemo_own_devices = new xabber.FingerprintsOwnDevices({model: this.model.omemo}));
-                let omemo_device_id = token.omemo_id ? token.omemo_id : Number(pretty_token.token_uid.slice(0,8));
-                this.omemo_own_devices.updateTrustDevice(Number(omemo_device_id), $token_html);
-            } else {
-                if (token.omemo_id){
-                    $token_html.find('.device-encryption span').text(xabber.getString("settings_account__unverified_device"));
-                    $token_html.find('.device-encryption .mdi-lock').removeClass('hidden');
-                }
-            }
-        });
-        if (this.$('.panel-content-wrap .tokens .all-sessions').children().length)
-            this.$('.panel-content-wrap .tokens .all-sessions-wrap').removeClass('hidden');
-        else
-            this.$('.panel-content-wrap .tokens .all-sessions-wrap').addClass('hidden');
-    },
-
-    openFingerprint: function (ev) {
-        if (this.model.omemo){
-            let $target = $(ev.target).closest('.device-encryption'),
-                is_own = $target.hasClass('is-own');
-            !this.omemo_own_devices && (this.omemo_own_devices = new xabber.FingerprintsOwnDevices({model: this.model.omemo}));
-            let token = this.model.x_tokens_list.find(item => (item.token_uid === $target.closest('.token-wrap').attr('data-token-uid'))),
-                omemo_device_id = token && token.omemo_id ? token.omemo_id : Number($target.closest('.token-wrap').attr('data-token-uid').slice(0,8));
-            this.omemo_own_devices.open(Number(omemo_device_id), is_own);
-        }
-    },
-
-    updateXTokens: function () {
-        if (this.model.get('auth_type') !== 'x-token') {
-            this.$('.panel-content-wrap .tokens').addClass('hidden');
-            this.$('.panel-content-wrap .tokens .sessions-wrap').children().html("");
-            return;
-        }
-        this.model.getAllXTokens(() => {
-            this.$('.panel-content-wrap .tokens .sessions-wrap').html("");
-            if (this.model.x_tokens_list && this.model.x_tokens_list.length) {
-                this.renderAllXTokens();
-            }
-        });
-    },
-
-    revokeXToken: function (ev) {
-        let $target = $(ev.target).closest('.token-wrap'),
-            token_uid = $target.data('token-uid');
-        this.model.revokeXToken([token_uid], () => {
-            if (this.model.get('x_token')){
-                if (this.model.get('x_token').token_uid === token_uid) {
-                    this.model.deleteAccount(true);
-                    return;
-                }
-                this.model.getAllXTokens(() => {
-                    this.$('.panel-content-wrap .tokens .sessions-wrap').html("");
-                    if (this.model.x_tokens_list && this.model.x_tokens_list.length) {
-                        this.renderAllXTokens();
-                    }
-                });
-            }
-        });
-    },
-
-    revokeAllXTokens: function () {
-        utils.dialogs.ask(xabber.getString("settings_account__dialog_terminate_sessions__header"), xabber.getString("terminate_all_sessions_title"), null, { ok_button_text: xabber.getString("button_terminate")}).done((result) => {
-            if (result && this.model.x_tokens_list)
-                this.model.revokeAllXTokens(() => {
-                    this.model.getAllXTokens(() => {
-                        this.$('.panel-content-wrap .tokens .sessions-wrap').html("");
-                        if (this.model.x_tokens_list && this.model.x_tokens_list.length) {
-                            this.renderAllXTokens();
-                        }
-                    });
-                });
-        });
-    },
-
-    updateSyncState: function () {
-        let state;
-        if (!this.model.settings.get('to_sync'))
-            state = 'off';
-        else
-            state = this.model.settings.get('synced') ? 'yes' : 'no';
-        this.$('.sync-status').text(xabber.getString(constants.SYNCED_STATUS_DATA[state].tip));
-        let mdiclass = constants.SYNCED_STATUS_DATA[state].icon,
-            $sync_icon = this.$('.sync-status-icon');
-        $sync_icon.removeClass($sync_icon.attr('data-mdiclass'))
-            .attr('data-mdiclass', mdiclass).addClass(mdiclass);
-    },
-
-    updateSyncOption: function () {
-        this.$('.sync-account').prop('checked', this.model.settings.get('to_sync'));
-    },
-
-    updateDelSettingsButton: function () {
-        this.$('.btn-delete-settings').hideIf(this.model.settings.get('deleted'));
-    },
-
-    updateEnabled: function () {
-        let enabled = this.model.get('enabled');
-        this.$('.enabled-state input[type=checkbox]').prop('checked', enabled);
-    },
-
-    updateEnabledOmemo: function () {
-        let enabled = this.model.settings.get('omemo'), has_keys = false;
-        if (_.isUndefined(enabled))
-            enabled = false;
-        if (enabled && this.model.omemo_enable_view)
-            this.model.omemo_enable_view.close();
-        this.$('.setting-use-omemo input[type=checkbox]').prop('checked', enabled);
-        this.$('.omemo-settings-wrap .setting-wrap:not(.omemo-enable)').switchClass('hidden', !enabled);
-        this.$('.device-more-button').switchClass('hidden', !enabled);
-        if (!this.model.omemo){
-            this.$('.btn-manage-devices').addClass('hidden2');
-        }
-    },
-
-    updateEncryptedChatstates: function () {
-        let enabled = this.model.settings.get('encrypted_chatstates');
-        this.$('.setting-send-chat-states input[type=checkbox]').prop('checked', enabled);
-    },
-
-    updateReconnectButton: function () {
-        this.$('.btn-reconnect').switchClass('disabled', this.model.session.get('reconnecting'));
-    },
-
-    setEnabled: function (ev) {
-        let enabled = this.$('.enabled-state input').prop('checked');
-        this.model.save('enabled', enabled);
-        enabled ? this.model.activate() : this.model.deactivate();
-    },
-
-    setEnabledOmemo: function () {
-        let enabled = this.$('.setting-use-omemo input').prop('checked');
-        this.model.settings.save('omemo', enabled);
-        this.$('.omemo-settings-wrap .setting-wrap:not(.omemo-enable)').switchClass('hidden', !enabled);
-        if (enabled)
-            this.initOmemo();
-        else
-            this.destroyOmemo();
-    },
-
-    setTypingNotification: function () {
-        let enabled = this.$('.setting-send-chat-states input').prop('checked');
-        this.model.settings.save('encrypted_chatstates', enabled);
-    },
-
-    initOmemo: function () {
-        this.model.omemo = new xabber.Omemo({id: 'omemo'}, {
-            account: this.model,
-            storage_name: xabber.getStorageName() + '-omemo-settings-' + this.model.get('jid'),
-            fetch: 'before'
-        });
-        setTimeout(() => {
-            this.model.omemo.onConnected();
-            this.updateXTokens();
-        }, 1000);
-    },
-
-    destroyOmemo: function () {
-        this.model.omemo.destroy();
-        this.model.omemo = undefined;
-        this.updateXTokens();
-    },
-
-    openDevicesWindow: function () {
-        if (this.model.omemo) {
-            !this.omemo_devices && (this.omemo_devices = new xabber.Fingerprints({model: this.model.omemo}));
-            this.omemo_devices.open();
-        }
-        else
-            utils.dialogs.error(xabber.getString("omemo__chat__placeholder_encryption_disabled"));
-    },
-
-    purgeKeys: function () {
-        utils.dialogs.ask(xabber.getString('omemo__dialog_purge_keys__header'), xabber.getString('omemo__dialog_purge_keys__text'),
-            null, { ok_button_text: xabber.getString('omemo__dialog_purge_keys__button_purge_keys')}).done((result) => {
-            if (result) {
-                if (this.model.omemo) {
-                    let device_id = this.model.omemo.get('device_id');
-                    this.model.omemo.save('prekeys', {});
-                    this.model.omemo.bundle && (this.model.omemo.bundle.preKeys = []);
-                    if (this.model.omemo.own_devices[device_id]) {
-                        this.model.omemo.own_devices[device_id].preKeys = [];
-                        this.model.omemo.own_devices[device_id].set({ik: null, fingerprint: null});
-                    }
-                    this.model.getConnectionForIQ().omemo.removeItemFromNode(`${Strophe.NS.OMEMO}:bundles`, device_id);
-                } else {
-                    let omemo = new xabber.Omemo({id: 'omemo'}, {
-                        account: this.model,
-                        storage_name: xabber.getStorageName() + '-omemo-settings-' + this.model.get('jid'),
-                        fetch: 'before'
-                    });
-                    omemo.save('prekeys', {});
-                    this.model.getConnectionForIQ().omemo.removeItemFromNode(`${Strophe.NS.OMEMO}:bundles`, omemo.get('device_id'));
-                    omemo.destroy();
-                }
-            }
-        });
-    },
-
-    showConnectionStatus: function () {
-        this.$('.conn-status').text(this.model.session.get('conn_feedback'));
-    },
-
-    showPasswordView: function () {
-        this.model.password_view.show();
-    },
-
-    reconnect: function () {
-        if (this.model.session.get('reconnecting'))
-            return;
-        this.model.save('enabled', true);
-        if (this.model.connection.connected)
-            this.model.connection.disconnect();
-        else
-            this.model.connect();
-    },
-
-    changeSyncSetting: function (ev) {
-        let to_sync = $(ev.target).prop('checked'),
-            settings = this.model.settings;
-        settings.save('to_sync', to_sync);
-        if (to_sync) {
-            settings.update_timestamp();
-            xabber.api_account && xabber.api_account.synchronize_main_settings();
-        }
-    },
-
-    deleteSettings: function () {
-        utils.dialogs.ask(xabber.getString("progress_title_delete_settings"), xabber.getString("delete_settings_summary"),
-            [{name: 'delete_account', checked: this.model.settings.get('to_sync'),
-                text: xabber.getString("delete_settings__optional_button__delete_synced_account")}],{ ok_button_text: xabber.getString("delete")}).done((res) => {
-            if (res) {
-                if (!res.delete_account) {
-                    this.model.settings.save('to_sync', false);
-                } else if (!this.model.settings.get('to_sync')) {
-                    this.model.deleteAccount(true);
-                }
-                xabber.api_account && xabber.api_account.delete_settings(this.model.get('jid'));
-            }
-        });
-    },
-
-    changeColor: function (ev) {
-        let value = ev.target.value;
-        this.model.settings.update_settings({color: value});
-    },
-
-    openBlockWindow: function () {
-        utils.dialogs.ask_enter_value(xabber.getString("dialog_block_xmpp_address__text"), null, {modal_class: 'account-add-blocked', input_placeholder_value: xabber.getString("dialog_block_xmpp_address__hint_address")}, { ok_button_text: xabber.getString("contact_bar_block")}).done((result) => {
-            if (result) {
-                let contact = this.model.contacts.get(result);
-                if (contact)
-                    contact.block();
-                else {
-                    this.model.contacts.blockContact(result);
-                }
-            }
-        });
-    },
-
-    unblockSelected: function () {
-        if (this.children && this.children.blocklist)
-            this.children.blocklist.unblockSelected();
-    },
-
-    deselectBlocked: function () {
-        if (this.children && this.children.blocklist)
-            this.children.blocklist.deselectBlocked();
-    },
-});
-
 xabber.StatusMessageWidget = xabber.InputWidget.extend({
     field_name: 'status-message',
     placeholder: 'Set custom status',
@@ -4561,78 +3775,6 @@ xabber.StatusMessageModalWidget = xabber.InputWidget.extend({
 
     setValue: function (value) {
         this.model.setStatus(null, value);
-    }
-});
-
-xabber.AccountSettingsItemView = xabber.BasicView.extend({
-    className: 'xmpp-account draggable droppable',
-    template: templates.global_settings_item,
-    avatar_size: constants.AVATAR_SIZES.SETTINGS_ACCOUNT_ITEM,
-
-    events: {
-        "click .account-info-wrap": "showSettings",
-        "change .enabled-state input": "setEnabled",
-    },
-
-    _initialize: function () {
-        this.$('.jid').text(this.model.get('jid'));
-        this.updateEnabled();
-        this.updateAvatar();
-        this.updateColorScheme();
-        this.updateSyncState();
-        this.showConnectionStatus();
-        this.model.on("change:enabled", this.updateEnabled, this);
-        this.model.settings.on("change:omemo", this.updateEnabledOmemo, this);
-        this.model.on("change:image", this.updateAvatar, this);
-        this.model.settings.on("change:color", this.updateColorScheme, this);
-        this.model.session.on("change:conn_feedback", this.showConnectionStatus, this);
-        this.$el.on('drag_to', this.onDragTo.bind(this));
-        this.$('.move-account-to-this')
-            .on('move_xmpp_account', this.onMoveAccount.bind(this));
-        this.model.settings.on("change:to_sync", this.updateSyncState, this);
-    },
-
-    updateAvatar: function () {
-        let image = this.model.cached_image;
-        this.$('.circle-avatar').setAvatar(image, this.avatar_size);
-    },
-
-    updateColorScheme: function () {
-        this.$el.attr('data-color', this.model.settings.get('color'));
-    },
-
-    showConnectionStatus: function () {
-        this.$('.conn-status').text(this.model.session.get('conn_feedback'));
-    },
-
-    updateEnabled: function () {
-        let enabled = this.model.get('enabled');
-        this.$el.switchClass('disabled', !enabled);
-        this.$('.enabled-state input[type=checkbox]').prop('checked', enabled);
-    },
-
-    setEnabled: function (ev) {
-        let enabled = this.$('.enabled-state input').prop('checked');
-        this.model.save('enabled', enabled);
-        enabled ? this.model.activate() : this.model.deactivate();
-    },
-
-    onDragTo: function (ev, drop_elem) {
-        drop_elem && $(drop_elem).trigger('move_xmpp_account', this.model);
-    },
-
-    onMoveAccount: function (ev, account) {
-        this.model.collection.moveBefore(account, this.model);
-    },
-
-    updateSyncState: function () {
-        let connected = xabber.api_account && xabber.api_account.get('connected');
-        this.$('.sync-marker-wrap').showIf(connected);
-        this.$el.find('.sync-marker').showIf(this.model.settings.get('to_sync'));
-    },
-
-    showSettings: function () {
-        this.model.showSettings();
     }
 });
 
@@ -4722,9 +3864,6 @@ xabber.AccountSettingsItemModalView = xabber.BasicView.extend({
     },
 
     updateSyncState: function () {
-        let connected = xabber.api_account && xabber.api_account.get('connected');
-        this.$('.sync-marker-wrap').showIf(connected);
-        this.$el.find('.sync-marker').showIf(this.model.settings.get('to_sync'));
     },
 
     showSettings: function () {
@@ -4751,80 +3890,6 @@ xabber.AccountSettingsItemModalView = xabber.BasicView.extend({
     }
 });
 
-xabber.SettingsAccountsBlockView = xabber.BasicView.extend({
-    _initialize: function () {
-        this.updateList();
-        this.updateSyncState();
-        this.model.on("add", this.updateOneInList, this);
-        this.model.on("update_order", this.updateList, this);
-        this.model.on("destroy", this.onAccountRemoved, this);
-        xabber.api_account && xabber.api_account.on("change:connected", this.updateSyncState, this);
-        this.$('.move-account-to-bottom')
-            .on('move_xmpp_account', this.onMoveAccountToBottom.bind(this));
-    },
-
-    updateList: function () {
-        _.each(this.children, function (view) { view.detach(); });
-        this.model.each((account) => {
-            let jid = account.get('jid'), view = this.child(jid);
-            if (!view) {
-                view = this.addChild(jid, xabber.AccountSettingsItemView, {model: account});
-            }
-            this.$('.no-accounts-tip').before(view.$el);
-        });
-        this.updateHtml();
-        this.parent.updateScrollBar();
-    },
-
-    updateOneInList: function (account) {
-        let jid = account.get('jid'),
-            view = this.child(jid);
-        if (view)
-            view.$el.detach();
-        else
-            view = this.addChild(jid, xabber.AccountSettingsItemView, {model: account});
-        let index = this.model.indexOf(account);
-        if (index === 0)
-            this.$('.accounts-head-wrap').after(view.$el);
-        else
-            this.$('.xmpp-account').eq(index - 1).after(view.$el);
-        this.updateHtml();
-        this.parent.updateScrollBar();
-    },
-
-    onAccountRemoved: function (account) {
-        this.removeChild(account.get('jid'));
-        this.updateHtml();
-        this.parent.updateScrollBar();
-    },
-
-    render: function () {
-        this.updateHtml();
-        _.each(this.children, function (view) {
-            view.updateEnabled();
-        });
-    },
-
-    updateHtml: function () {
-        this.$('.no-accounts-tip').hideIf(this.model.length);
-        this.$('.accounts-head-wrap').showIf(this.model.length);
-        this.parent.$('.settings-tab[data-block-name="xmpp-accounts"] .settings-block-name')
-            .text(this.model.length === 1 ? xabber.getString("account") : xabber.getString("settings__menu_item__xmpp_account") );
-    },
-
-    updateSyncState: function () {
-        let connected = xabber.api_account && xabber.api_account.get('connected');
-        this.$('.sync-head').showIf(connected);
-        this.$('.sync-marker-wrap').showIf(connected);
-        this.$('.sync-head').hideIf(!connected);
-        this.$('.sync-marker-wrap').hideIf(!connected);
-    },
-
-    onMoveAccountToBottom: function (ev, account) {
-        this.model.moveToBottom(account);
-    }
-});
-
 xabber.SettingsAccountsModalBlockView = xabber.BasicView.extend({
     _initialize: function () {
         this.updateList();
@@ -4835,7 +3900,6 @@ xabber.SettingsAccountsModalBlockView = xabber.BasicView.extend({
         this.model.on("add", this.parent.updateAccounts, this.parent);
         this.model.on("update_order", this.parent.updateAccounts, this.parent);
         this.model.on("destroy", this.parent.updateAccounts, this.parent);
-        xabber.api_account && xabber.api_account.on("change:connected", this.updateSyncState, this);
         this.$('.move-account-to-bottom')
             .on('move_xmpp_account', this.onMoveAccountToBottom.bind(this));
     },
@@ -4887,11 +3951,6 @@ xabber.SettingsAccountsModalBlockView = xabber.BasicView.extend({
     },
 
     updateSyncState: function () {
-        let connected = xabber.api_account && xabber.api_account.get('connected');
-        this.$('.sync-head').showIf(connected);
-        this.$('.sync-marker-wrap').showIf(connected);
-        this.$('.sync-head').hideIf(!connected);
-        this.$('.sync-marker-wrap').hideIf(!connected);
     },
 
     onMoveAccountToBottom: function (ev, account) {
@@ -7093,14 +6152,8 @@ xabber.UnregisterAccountView = xabber.XmppLoginPanel.extend({
 
 xabber.once("start", function () {
     this.xmpp_login_panel = xabber.login_page.addChild('xmpp_login', this.XmppLoginPanel);
-    this.account_settings = xabber.wide_panel.addChild('account_settings',
-        this.NodeView, {classlist: 'settings-panel account-settings-panel'});
     this.account_settings_modal = xabber.main_overlay_panel.addChild('account_settings_modal',
         this.Container, {classlist: 'account-settings-panel'});
-    this.acc_settings_left = xabber.account_settings.addChild('left',
-        this.Container, {classlist: 'account-settings-left-container'});
-    this.acc_settings_right = xabber.account_settings.addChild('right',
-        this.Container, {classlist: 'account-settings-right-container'});
 
     this.accounts = new this.Accounts(null, {
         storage_name: this.getStorageName() + '-accounts'
@@ -7111,8 +6164,6 @@ xabber.once("start", function () {
 
     this.toolbar_view.addChild('accounts', this.ToolbarAccountsBlockView,
         {model: this.accounts, el: this.toolbar_view.$('.accounts')[0]});
-    this.settings_view.addChild('accounts', this.SettingsAccountsBlockView,
-        {model: this.accounts, el: this.settings_view.$('.xmpp-accounts')[0]});
     this.settings_modal_view.addChild('accounts_modal', this.SettingsAccountsModalBlockView,
         {model: this.accounts, el: this.settings_modal_view.$('.accounts-info-wrap')[0]});
 

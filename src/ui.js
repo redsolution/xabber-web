@@ -18,8 +18,6 @@ xabber.once("start", function () {
         if (ev.keyCode === constants.KEY_ESCAPE && !xabber.body.screen.get('right_contact')) {
             if (xabber.body.$el.siblings('#modals').children('.open').length)
                 return;
-            if (attrs.name === 'all-chats' && attrs.right === 'contact_details')
-                attrs.contact.trigger('open_chat', attrs.contact);
         }
         if (attrs.chat_item && (attrs.name === 'mentions' || attrs.name === 'contacts' || attrs.name === 'all-chats') && (attrs.right === 'chat' || attrs.right === 'participant_messages' || attrs.right === 'message_context' || attrs.right === 'searched_messages')) {
             if (window.$('.message-actions-panel').length && !window.$('.message-actions-panel').hasClass('hidden')) {
@@ -164,16 +162,6 @@ xabber.once("start", function () {
         login: { xmpp_login: null }
     });
 
-    this.body.addScreen('settings', {
-        blur_overlay: null,
-        toolbar: null,
-        main: {
-            wide: { settings: null },
-            placeholders: null
-        },
-        roster: null
-    });
-
     this.body.addScreen('settings-modal', {
         main_overlay: {
             settings_modal: null,
@@ -196,40 +184,13 @@ xabber.once("start", function () {
         roster: null
     });
 
-    let path_acc_settings_left = new this.ViewPath('account.settings_left'),
-        path_acc_settings_right = new this.ViewPath('account.settings_right'),
-        path_acc_settings_modal = new this.ViewPath('account.settings_account_modal'),
-        path_acc_vcard_edit = new this.ViewPath('account.vcard_edit');
-
-    this.body.addScreen('account_settings', {
-        blur_overlay: null,
-        toolbar: null,
-        main: {
-            wide: {
-                account_settings: {
-                    left: path_acc_settings_left,
-                    right: path_acc_settings_right
-                }
-            },
-            placeholders: null
-        },
-        roster: null
-    });
+    let path_acc_settings_modal = new this.ViewPath('account.settings_account_modal');
 
     this.body.addScreen('account_settings_modal', {
         main_overlay: {
             account_settings_modal: path_acc_settings_modal
         },
     });
-
-    this.account_settings.patchTree = function (tree, options) {
-        if (options.right === 'vcard_edit') {
-            return {
-                left: path_acc_settings_left,
-                right: path_acc_vcard_edit
-            };
-        }
-    };
 
 
     let path_chat_head = new this.ViewPath('chat_item.content.head'),
@@ -238,7 +199,6 @@ xabber.once("start", function () {
         path_chat_bottom = new this.ViewPath('chat_item.content.bottom'),
         path_group_invitation = new this.ViewPath('contact.invitation'),
         path_enable_view = new this.ViewPath('omemo_item.account.omemo_enable_view'),
-        path_contact_details = new this.ViewPath('contact.details_view'),
         path_contact_details_right = new this.ViewPath('contact.details_view_right'),
         path_contact_details_right_encrypted = new this.ViewPath('contact.details_view_right_encrypted'),
         path_participant_messages = new this.ViewPath('model.messages_view'),
@@ -313,9 +273,6 @@ xabber.once("start", function () {
         if (options.right === 'group_invitation') {
             return { details: path_group_invitation };
         }
-        if (options.right === 'contact_details') {
-            return { details: path_contact_details };
-        }
         if (options.details_content === 'participants')
             return { details_content: path_details_participants };
         if (options.chat_item) {
@@ -348,23 +305,11 @@ xabber.once("start", function () {
     this.body.setScreen('blank');
 
     // initial synchronization
-    if (this.api_account) {
-        this.api_account.once("settings_result", function (result) {
-            if (result === null && !this.accounts.length) {
-                this.body.setScreen('login');
-            } else if (this.body.isScreen('blank')) {
-                this.body.setScreen('all-chats');
-            }
-        }, this);
-
-        this.api_account.ready.then(this.api_account.start.bind(this.api_account));
-    } else {
-        if (!this.accounts.length)
-            this.body.setScreen('login');
-        else if (this.body.isScreen('blank'))
-            this.body.setScreen('all-chats');
-        xabber.trigger("bind_xmpp_accounts");
-    }
+    if (!this.accounts.length)
+        this.body.setScreen('login');
+    else if (this.body.isScreen('blank'))
+        this.body.setScreen('all-chats');
+    xabber.trigger("start_accounts");
 
 }, xabber);
 

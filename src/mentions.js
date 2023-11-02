@@ -136,7 +136,7 @@ xabber.MentionsView = xabber.SearchPanelView.extend({
             this.active_mention.model.set('active', false);
             this.active_mention = null;
         }
-        (options.right !== 'chat' && options.right !== 'contact_details' && options.right !== 'message_context' && options.right !== 'participant_messages' || options.clear_search && options.right === 'chat') && this.clearSearch();
+        (options.right !== 'chat' && options.right !== 'message_context' && options.right !== 'participant_messages' || options.clear_search && options.right === 'chat') && this.clearSearch();
     },
 
     onMentionAdded: function (mention) {

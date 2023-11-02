@@ -79,14 +79,6 @@
     addTemplate('base.color_picker');
     addTemplate('base.color_scheme');
 
-    addTemplate('api_service.xabber_login');
-    addTemplate('api_service.xabber_login_by_email');
-    addTemplate('api_service.add_xabber_account');
-    addTemplate('api_service.xabber_account');
-    addTemplate('api_service.linked_email_item');
-    addTemplate('api_service.sync_settings');
-    addTemplate('api_service.sync_settings_account_item');
-
     addTemplate('accounts.xmpp_login');
     addTemplate('accounts.add_account');
     addTemplate('accounts.unregister_account');
@@ -96,8 +88,6 @@
     addTemplate('accounts.media_gallery_account_file');
     addTemplate('accounts.media_gallery_account');
     addTemplate('accounts.delete_files_media_gallery');
-    addTemplate('accounts.settings_left');
-    addTemplate('accounts.settings_right');
     addTemplate('accounts.single_account_settings_modal');
     addTemplate('accounts.account_settings_modal');
     addTemplate('accounts.existing_groupchat_item');
@@ -107,12 +97,9 @@
     addTemplate('accounts.emoji_panel');
     addTemplate('accounts.emoji_picker');
     addTemplate('accounts.emoji_picker_tabs');
-    addTemplate('accounts.global_settings_item');
     addTemplate('accounts.global_settings_item_modal');
     addTemplate('accounts.change_status');
-    addTemplate('accounts.token_item');
     addTemplate('accounts.token_item_modal');
-    addTemplate('accounts.current_token_item');
     addTemplate('accounts.current_token_item_modal');
     addTemplate('accounts.audio_file_waveform');
     addTemplate('accounts.avatars_gallery');
@@ -120,7 +107,6 @@
 
     addTemplate('vcard.vcard');
     addTemplate('vcard.vcard_modal');
-    addTemplate('vcard.vcard_edit');
     addTemplate('vcard.vcard_edit_modal');
     addTemplate('vcard.vcard_right');
 
@@ -139,7 +125,6 @@
     addTemplate('contacts.contact_right_item');
     addTemplate('contacts.contact_left_item');
     addTemplate('contacts.contact_blocked_item');
-    addTemplate('contacts.contact_details');
     addTemplate('contacts.contact_details_right');
     addTemplate('contacts.roster_settings');
     addTemplate('contacts.group_settings');

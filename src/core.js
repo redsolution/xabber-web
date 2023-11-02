@@ -349,7 +349,6 @@ let Xabber = Backbone.Model.extend({
                 'REGISTER_XMPP_ACCOUNT',
                 'REGISTER_XMPP_ACCOUNT_URL',
                 'REGISTER_XMPP_ACCOUNT_TEXT',
-                'API_SERVICE_URL',
                 'USE_SOCIAL_AUTH',
                 'CONTAINER',
                 'CHECK_VERSION',
