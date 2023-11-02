@@ -11264,13 +11264,13 @@ input[type=range].voice-message-volume:focus {
     color: #616161;
     font-size: 14px;
     right: 0;
-    width: 50%;
-    padding: 0 24px;
+    width: calc(50% + 16px);
+    padding-right: 24px;
     position: absolute;
     top: calc(100% + 8px);
 }
-.settings-panel-wrap .settings-panel .settings-panel-head .description a{
-    font-size: 12px;
+.settings-panel-wrap .settings-panel .settings-panel-head .description a:not(.email-link){
+    /*font-size: 12px;*/
 }
 .settings-panel-wrap .settings-panel .account-color {
     height: unset;

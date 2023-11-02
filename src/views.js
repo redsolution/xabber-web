@@ -2665,7 +2665,7 @@ xabber.SettingsModalView = xabber.BasicView.extend({
         if (!_.isUndefined(progress)) {
             let progress_text, platform_text;
             if (progress == 100 && ((xabber.get("default_language") === 'en' && lang === 'default') || lang === 'en')) {
-                progress_text = xabber.getString("settings__interface_language__text_description_full_translation_english", [constants.SHORT_CLIENT_NAME, constants.EMAIL_FOR_JOIN_TRANSLATION, constants.SHORT_CLIENT_NAME]);
+                progress_text = xabber.getString("settings__interface_language__text_description_full_translation_english", [constants.SHORT_CLIENT_NAME, `<a target="_blank" class="email-link" href='mailto:${constants.EMAIL_FOR_JOIN_TRANSLATION}'>${constants.EMAIL_FOR_JOIN_TRANSLATION}</a>`, constants.SHORT_CLIENT_NAME]);
             } else if (progress == 100) {
                 progress_text = xabber.getString("settings__interface_language__text_description_full_translation", [constants.SHORT_CLIENT_NAME, constants.SHORT_CLIENT_NAME]);
             } else if (progress == 0) {
