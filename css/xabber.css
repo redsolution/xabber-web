@@ -6325,9 +6325,12 @@ input[type=text].simple-input-field:hover {
     min-height: 100px;
     border: 1px solid #f5f5f5;
     border-radius: 0.25rem;
-    z-index: 1;
+    z-index: 999;
     background: #fafafa;
     padding: 0 5px;
+}
+.details-panel-right .groups-block-wrap .groups-wrap:hover{
+    display: block !important;
 }
 .details-panel-right .groups-block-wrap .groups-wrap.empty-groups-wrap{
     display: none !important;
@@ -6345,6 +6348,9 @@ input[type=text].simple-input-field:hover {
 .add-contact-modal .input-field.checkbox-field{
     width: fit-content !important;
     margin: 0;
+}
+.details-panel-right .groups-block-wrap .groups-wrap .checkbox-list .input-field.checkbox-field{
+    cursor:pointer;
 }
 .details-panel-right .groups-block-wrap .groups-wrap .checkbox-list .new-group-field-wrap .new-group-checkbox,
 .add-contact-modal .input-field.checkbox-field.new-group-checkbox{
@@ -11257,10 +11263,14 @@ input[type=range].voice-message-volume:focus {
 .settings-panel-wrap .settings-panel .settings-panel-head .description {
     color: #616161;
     font-size: 14px;
-    left: 60%;
+    right: 0;
+    width: 50%;
     padding: 0 24px;
     position: absolute;
     top: calc(100% + 8px);
+}
+.settings-panel-wrap .settings-panel .settings-panel-head .description a{
+    font-size: 12px;
 }
 .settings-panel-wrap .settings-panel .account-color {
     height: unset;
@@ -16019,6 +16029,7 @@ input[type=range].voice-message-volume:focus {
     line-height: 24px;
     font-size: 14px;
     letter-spacing: 0.15px;
+    position: absolute;
 }
 
 .details-panel-right .groups .group {
@@ -16034,7 +16045,7 @@ input[type=range].voice-message-volume:focus {
     cursor: pointer;
     transition: all .15s ease-in;
 }
-.details-panel-right .groups-block-wrap .groups-wrap .checkbox-list .input-field.checkbox-field label:hover,
+.details-panel-right .groups-block-wrap .groups-wrap .checkbox-list .input-field.checkbox-field:hover label,
 .details-panel-right .groups .group:hover {
     color: #757575;
 }
@@ -16130,7 +16141,7 @@ input[type=range].voice-message-volume:focus {
     overflow: hidden;
     position: sticky;
     top: 64px;
-    z-index: 999;
+    z-index: 998;
 }
 
 .details-panel-right .bottom-block,
@@ -17681,7 +17692,7 @@ input[type=range].voice-message-volume:focus {
 .contact-details-panel .panel-content {
     width: 100%;
     min-height: 200px;
-    overflow: hidden;
+    overflow: visible;
 }
 
 .details-panel-right .groupchat-details-panel .panel-content,

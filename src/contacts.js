@@ -6819,7 +6819,7 @@ xabber.ContactEditGroupsView = xabber.BasicView.extend({
     template: templates.groups,
     events: {
         'click .group': 'removeGroup',
-        'click .existing-group-field label': 'editGroup',
+        'click .existing-group-field': 'editGroup',
         'change .new-group-name input': 'checkNewGroup',
         'keyup .new-group-name input': 'checkNewGroup',
         'click .new-group-checkbox': 'addNewGroup',
@@ -6884,12 +6884,10 @@ xabber.ContactEditGroupsView = xabber.BasicView.extend({
     onUpdate: function (ev) {
         if (this._update_template){
             this.render(this, {on_add: true});
-            this.$('.new-group-name input').addClass('visible');
             this.$('.new-group-name input').focus();
         }
         else{
             this.render();
-            this.$('.new-group-name input').addClass('visible');
         }
 
     },
@@ -6917,8 +6915,8 @@ xabber.ContactEditGroupsView = xabber.BasicView.extend({
 
     editGroup: function (ev) {
         clearTimeout(this._hide_timeout)
-        let $target = $(ev.target),
-            $input = $target.siblings('input'),
+        let $target = $(ev.target).closest('.input-field'),
+            $input = $target.find('input'),
             checked = !$input.prop('checked'),
             group_name = $input.attr('data-groupname'),
             groups = _.clone(this.model.get('groups')),
@@ -6966,7 +6964,6 @@ xabber.ContactEditGroupsView = xabber.BasicView.extend({
         if (this.$('.new-group-name input').val())
             this.addNewGroup();
         this._hide_timeout = setTimeout(() => {
-            this.$('.new-group-name input').removeClass('visible');
             this.$('.groups-wrap').hideIf(true)
             this.$('.new-group-name input').val('')
         }, 100)

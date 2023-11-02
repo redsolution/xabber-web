@@ -2674,7 +2674,7 @@ xabber.SettingsModalView = xabber.BasicView.extend({
                 progress_text = xabber.getString("settings__interface_language__text_description_unfull_translation", [constants.SHORT_CLIENT_NAME]);
             }
             platform_text = xabber.getString("settings__interface_language__text_description_platform",
-                [constants.SHORT_CLIENT_NAME, `<a target="_blank" href='${constants.PROJECT_CROWDIN_URL}'>${xabber.getString("settings__section_interface_language__text_description__text_link")}</a>`]);
+                [constants.SHORT_CLIENT_NAME, `<a target="_blank" href='${constants.PROJECT_CROWDIN_URL}'>${constants.PROJECT_CROWDIN_URL}</a>`]);
             this.$('.description').html(`${progress_text}<br><br>${platform_text}`);
         }
     },
