@@ -482,8 +482,9 @@ xabber.Account = Backbone.Model.extend({
             this.session.set({conn_status: status, conn_condition: condition});
             if ((status === Strophe.Status.ERROR) && (condition === 'conflict') && !this.session.get('delete')) {
                 this.onConnectionConflict();
-            }
-            if (status === Strophe.Status.CONNECTED) {
+            } else if (status === Strophe.Status.ERROR && (condition === 'policy-violation')) {
+                this.onAuthFailed(condition);
+            } else if (status === Strophe.Status.CONNECTED) {
                 this.session.set('on_token_revoked', false);
                 if (this.connection.x_token) {
                     this.save({
@@ -549,8 +550,14 @@ xabber.Account = Backbone.Model.extend({
                 }
                 this.createFastConnection();
                 this.connection.connect_callback = this.connectionCallback.bind(this);
-                this.session.set({connected: true, reconnected: true,
-                    reconnecting: false, conn_retries: 0});
+                this.session.set({
+                    connected: true,
+                    reconnected: true,
+                    reconnecting: false,
+                    conn_retries: 0
+                });
+            } else if (status === Strophe.Status.ERROR && (condition === 'policy-violation')) {
+                this.onAuthFailed(condition);
             } else if (status === Strophe.Status.AUTHFAIL || ((status === Strophe.Status.ERROR) && (condition === 'not-authorized'))) {
                 if ((this.get('auth_type') === 'x-token' || this.connection.x_token)) {
                     if ($(elem).find('credentials-expired').length > 0)
@@ -698,10 +705,39 @@ xabber.Account = Backbone.Model.extend({
             }
         },
 
-        onAuthFailed: function () {
-            if (!this.auth_view){
+        onAuthFailed: function (text) {
+            if (!this.auth_view && !text){
                 utils.dialogs.error(xabber.getString("connection__error__text_authentication_failed", [this.get('jid')]));
                 this.password_view.show();
+            } else if (text){
+                if (this.auth_view)
+                    return;
+                this.session.set({
+                    connected: false,
+                    ready_to_send: false,
+                    no_reconnect: true
+                });
+                let dialog_text = xabber.getString("XMPP_EXCEPTION") + ": " + text;
+                utils.dialogs.ask_extended(xabber.getString("error"), xabber.getString("modal_policy_violation_text"),
+                    {modal_class: 'modal-policy-violation', no_dialog_options: true, quoted_text: text, cancel_button_main: true},
+                    {
+                        ok_button_text: xabber.getString("disable_account"),
+                        cancel_button_text: xabber.getString("account_settings"),
+                        optional_button: 'account-reconnect',
+                        optional_button_text: xabber.getString("account_reconnect")
+                    }).done((res) => {
+                    if (res){
+                        if (res === 'account-reconnect')
+                            this.reconnect();
+                        else {
+                            this.save('enabled', false);
+                            this.deactivate()
+                        }
+                    } else {
+                        this.showSettingsModal();
+                    }
+                });
+                return;
             }
             this.session.set({
                 auth_failed: true,

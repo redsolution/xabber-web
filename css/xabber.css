@@ -18118,6 +18118,16 @@ input[type=range].voice-message-volume:focus {
     overflow: hidden;
 }
 
+.dialog-modal .dialog-quoted-text {
+    font-size: 14px;
+    white-space: pre-wrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    border-left: 2px solid #e0e0e0;
+    padding: 0 0 0 8px;
+    margin-bottom: 8px;
+}
+
 .dialog-modal .dialog-text .link {
     word-break: break-all;
 }

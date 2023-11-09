@@ -18,8 +18,6 @@ Strophe.log = function (log_level, msg) {
         console.info('Strophe log: ');
         console.info(msg);
     }
-    if (msg && msg.includes && msg.includes('policy-violation') && log_level === Strophe.LogLevel.ERROR)
-        utils.dialogs.error(msg);
 };
 
 Strophe.addConnectionPlugin('register', {

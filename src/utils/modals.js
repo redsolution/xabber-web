@@ -158,6 +158,13 @@ export default {
             if (dialog_options.no_dialog_options) {
                 dialog.$modal.find('.dialog-options-wrap').html('');
             }
+
+            if (dialog_options.quoted_text) {
+                dialog.$modal.find('.modal-content').append(`<div class="dialog-quoted-text">${dialog_options.quoted_text}</div>`);
+            }
+            if (dialog_options.cancel_button_main) {
+                dialog.$modal.find('.cancel-button').removeClass('btn-dark');
+            }
             if (dialog_options.inverted_buttons) {
                 dialog.$modal.find('.dialog-options-wrap').html('');
                 dialog.$modal.find('.cancel-button').removeClass('btn-dark');
@@ -249,12 +256,13 @@ export default {
         },
 
         ask_extended: function (header, text, dialog_options, buttons) {
-            var ok_text, optional_button;
+            var ok_text, cancel_text, optional_button;
             if (buttons) {
                 ok_text = buttons.ok_button_text;
+                cancel_text = buttons.cancel_button_text;
                 optional_button = (buttons.optional_button) ? [{value: buttons.optional_button, name: buttons.optional_button_text}] : false;
             }
-            return this.common(header, text, {ok_button: {text: ok_text}, cancel_button: true, optional_buttons: optional_button}, dialog_options, 'extended');
+            return this.common(header, text, {ok_button: {text: ok_text}, cancel_button: {text: cancel_text}, optional_buttons: optional_button}, dialog_options, 'extended');
         },
 
         ask_enter_value: function (header, text, dialog_options, buttons) {
