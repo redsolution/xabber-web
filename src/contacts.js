@@ -6874,10 +6874,13 @@ xabber.ContactEditGroupsView = xabber.BasicView.extend({
 
         }
         this.$el.showIf(this.model.get('in_roster'));
-        if (args && args.on_add)
+        if (args && args.on_add) {
             this.$('.groups-wrap').hideIf(false)
+            this.$('.input-field input').focus();
+        }
         else
             this.$('.groups-wrap').hideIf(true)
+        this._update_template = false;
         this.parent.updateScrollBar();
     },
 
@@ -6978,6 +6981,7 @@ xabber.ContactEditGroupsView = xabber.BasicView.extend({
             groups.push(name);
         }
         this.model.pushInRoster({groups: groups});
+        this._update_template = true
     }
 });
 
@@ -9642,8 +9646,6 @@ xabber.once("start", function () {
     this._roster_settings = new this.RosterSettings({id: 'roster-settings'},
         {storage_name: this.getStorageName(), fetch: 'after'});
     this.settings.roster = this._roster_settings.attributes;
-    this.roster_settings_view = xabber.settings_modal_view.addChild(
-        'roster_settings', this.RosterSettingsView, {model: this._roster_settings});
     this.contacts_view = this.left_panel.addChild('contacts', this.RosterLeftView,
         {model: this.accounts});
     this.contact_container = this.right_panel.addChild('details', this.Container);
