@@ -207,7 +207,7 @@ xabber.BasicView = Backbone.View.extend({
         let scrollTop = this.ps_container[0].scrollTop,
             scrollHeight = this.ps_container[0].scrollHeight,
             offsetHeight = this.ps_container[0].offsetHeight;
-        return scrollHeight === scrollTop + offsetHeight;
+        return (scrollHeight - (scrollTop + offsetHeight)) < 10;
     }
 });
 

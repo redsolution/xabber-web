@@ -359,6 +359,7 @@ xabber.Fingerprints = xabber.BasicView.extend({
             device.is_session_initiated = false;
             device.preKeys = null;
             this.account.trigger('trusting_updated');
+            this.account.trigger('device_trusted', device.id, this.jid);
         }
     },
 
@@ -1441,6 +1442,9 @@ xabber.Omemo = Backbone.ModelWithStorage.extend({
             if (Strophe.getBareJidFromJid($msg.attr('from')) != this.account.get('jid') && options.carbon_copied && options.carbon_direction && options.carbon_direction === 'sent')
                 return;
 
+            let device_id = $message.find(`encrypted[xmlns="${Strophe.NS.OMEMO}"] header`).attr('sid');
+            options.device_id = device_id;
+
             if (cached_msg) {
                 if (!options.replaced) {
                     options.encrypted = true;
@@ -1450,6 +1454,21 @@ xabber.Omemo = Backbone.ModelWithStorage.extend({
                         $message.find(`encrypted[xmlns="${Strophe.NS.OMEMO}"]`).replaceWith(cached_msg);
                         if (options.gallery && deferred)
                             deferred.resolve($message, options);
+
+                        if (!options.not_verified_device){
+                            let peer = this.getPeer(contact.get('jid')),
+                                device = peer.devices[device_id];
+                            if (device && device.get('fingerprint')) {
+                                let trusted = this.isTrusted(contact.get('jid'), device.id, device.get('fingerprint'));
+                                if (_.isUndefined(trusted)){
+                                    options.not_verified_device = device_id;
+                                    options.not_verified_device_no_device = false;
+                                }
+                            } else if (Strophe.getBareJidFromJid($msg.attr('from')) != this.account.get('jid')){
+                                options.not_verified_device = device_id;
+                                options.not_verified_device_no_device = true;
+                            }
+                        }
                         this.account.chats.receiveChatMessage($message[0], options);
                     });
                     return;
@@ -1508,6 +1527,21 @@ xabber.Omemo = Backbone.ModelWithStorage.extend({
                         deferred.resolve($message, options);
                     else if (options.gallery && deferred)
                         deferred.reject();
+
+                    if (!options.not_verified_device){
+                        let peer = this.getPeer(contact.get('jid')),
+                            device = peer.devices[device_id];
+                        if (device && device.get('fingerprint')) {
+                            let trusted = this.isTrusted(contact.get('jid'), device.id, device.get('fingerprint'));
+                            if (_.isUndefined(trusted)){
+                                options.not_verified_device = device_id;
+                                options.not_verified_device_no_device = false;
+                            }
+                        } else if (Strophe.getBareJidFromJid($msg.attr('from')) != this.account.get('jid')){
+                            options.not_verified_device = device_id;
+                            options.not_verified_device_no_device = true;
+                        }
+                    }
                     this.account.chats.receiveChatMessage($message[0], options);
                 }).catch((e) => {
                     if (e.name === 'MessageCounterError')//for capturing double decryption of same message
@@ -1625,7 +1659,7 @@ xabber.Omemo = Backbone.ModelWithStorage.extend({
                 dfd = new $.Deferred(), counter = 0, unverified_counter = 0;
             dfd.done((t) => {
                 let trust = t === null ? 'error' : (t === undefined ? 'none' : t);
-                contact.trigger('update_trusted', trust);
+                contact.trigger('update_trusted', trust, peer);
                 resolve({trust: trust, unverified_counter: unverified_counter});
             });
             if (Object.keys(peer.devices).length) {

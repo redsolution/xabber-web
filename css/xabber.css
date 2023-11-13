@@ -8854,8 +8854,7 @@ input[type=text].simple-input-field:hover {
 
 .chat-message {
     max-width: 768px;
-    transform: translate(-50%, 0);
-    left: 50%;
+    margin: 0 auto;
     position: relative;
     min-height: 44px;
     width: 100%;
@@ -8889,8 +8888,9 @@ input[type=text].simple-input-field:hover {
     background-position: 0px 0, 2px 2px;
 }
 
+.chat-message.encrypted.not-verified,
 .chat-message.encrypted.not-decrypted {
-    z-index: 1;
+    /*z-index: 1;*/
 }
 
 .chat-bottom-wrap[data-contact-trust=true],
@@ -9642,39 +9642,92 @@ img.fwd-img-preview {
     top: 11px;
 }
 
+.chat-message.not-verified-previously .msg-delivering-state,
+.chat-message.not-verified .msg-delivering-state,
+.chat-message.not-existing-device .msg-delivering-state,
 .chat-message.not-decrypted .msg-delivering-state {
     display: none;
 }
 
-.chat-message.not-decrypted .not-decrypted-icon {
-    left: 2px;
-    position: absolute;
-    top: 11px;
-    width: 14px;
-    height: 14px;
-    display: flex;
+.chat-message .not-decrypted-icon{
+    display: none;
 }
 
+.chat-message .not-decrypted-icon .mdi,
+.chat-message .dropdown-content .not-verified-previously-tooltip-text,
+.chat-message .dropdown-content .not-decrypted-tooltip-text,
+.chat-message .dropdown-content .not-existing-device-tooltip-text,
+.chat-message .dropdown-content .not-verified-tooltip-text,
+.chat-message .dropdown-content .btn-manage-devices{
+    display: none;
+}
+
+.chat-message.not-decrypted .not-decrypted-icon .mdi.not-decrypted-icon-svg,
+.chat-message.not-verified .not-decrypted-icon .mdi.not-verified-icon-svg,
+.chat-message.not-existing-device .not-decrypted-icon .mdi.not-verified-icon-svg,
+.chat-message.not-verified-previously .not-decrypted-icon .mdi.not-verified-icon-svg,
+.chat-message.not-verified-previously .dropdown-content .not-verified-previously-tooltip-text,
+.chat-message.not-existing-device .dropdown-content .not-existing-device-tooltip-text,
+.chat-message.not-decrypted .dropdown-content .not-decrypted-tooltip-text,
+.chat-message.not-verified .dropdown-content .not-verified-tooltip-text,
+.chat-message.not-verified .dropdown-content .btn-manage-devices{
+    display: block;
+}
+
+.chat-message.not-existing-device .not-decrypted-icon ,
+.chat-message.not-verified-previously .not-decrypted-icon ,
+.chat-message.not-verified .not-decrypted-icon ,
+.chat-message.not-decrypted .not-decrypted-icon {
+    display: flex;
+    height: 24px;
+    left: -3px;
+    position: absolute;
+    top: 6px;
+    width: 24px;
+    padding: 5px;
+    display: block;
+}
+
+.chat-message.not-existing-device .not-decrypted-icon svg,
+.chat-message.not-verified-previously .not-decrypted-icon svg,
+.chat-message.not-verified .not-decrypted-icon svg,
 .chat-message.not-decrypted .not-decrypted-icon svg{
     pointer-events: none;
 }
 
+.chat-message.not-verified-previously .not-decrypted-icon svg path,
+.chat-message.not-existing-device .not-decrypted-icon svg path,
+.chat-message.not-verified .not-decrypted-icon svg path,
 .chat-message.not-decrypted .not-decrypted-icon svg path{
-    fill: #9e9e9e;
+    fill: #ffb300;
 }
 
+.chat-message.not-verified-previously .not-decrypted-tooltip,
+.chat-message.not-existing-device .not-decrypted-tooltip,
+.chat-message.not-verified .not-decrypted-tooltip,
 .chat-message.not-decrypted .not-decrypted-tooltip {
     background-clip: padding-box;
     background-color: #fff;
-    border: 1px solid rgba(0,0,0,.15);
+    border: 1px solid rgba(0, 0, 0, .15);
     border-radius: 0.25rem;
     color: #212529;
     font-size: 1rem;
     list-style: none;
     padding: 0.5rem 1.5rem;
     text-align: left;
-    top: -10px!important;
+    top: -10px !important;
     width: 350px !important;
+    z-index: 2;
+}
+.chat-message.not-verified .not-verified-tooltip-text{
+    margin-bottom: 56px;
+}
+.chat-message.not-verified .not-decrypted-tooltip .btn-manage-devices{
+    position: absolute;
+    bottom: 16px;
+    left: 50%;
+    transform: translate(-50%, 0);
+    font-weight: 500;
 }
 
 .chat-message .retry-send-message {

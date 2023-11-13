@@ -267,6 +267,9 @@ xabber.MessagesBase = Backbone.Collection.extend({
                 is_unread_archived: options.is_unread_archived,
                 is_between_anchors: options.is_between_anchors,
                 not_encrypted: options.not_encrypted || null,
+                not_verified_device: options.not_verified_device || null,
+                not_verified_device_no_device: options.not_verified_device_no_device || null,
+                device_id: options.device_id || null,
             },
             mentions = [], blockquotes = [], markups = [], mutable_content = [], files = [], images = [], videos = [], locations = [], link_references = [];
 
@@ -3118,6 +3121,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
         "click .back-to-unread:not(.back-to-bottom)": "scrollToUnreadWithButton",
         "click .btn-retry-send-message": "retrySendMessage",
         "click .btn-delete-message": "removeFileErrorMessage",
+        "click .btn-manage-devices": "openDevicesWindow",
         "click .encryption-warning": "openDevicesWindow"
     },
 
@@ -3166,10 +3170,12 @@ xabber.ChatContentView = xabber.BasicView.extend({
             this.contact.on("change:subscription", this.onSubscriptionChange, this);
             this.contact.on("change:group_chat", this.updateGroupChat, this);
             this.contact.on("remove_from_blocklist", this.loadLastHistory, this);
+            this.contact.on("update_trusted", this.updateMsgsMissingDevices, this);
             this.account.contacts.on("change:name", this.updateName, this);
             this.account.contacts.on("change:image", this.updateAvatar, this);
         }
         this.account.on("change", this.updateMyInfo, this);
+        this.account.on("device_trusted", this.updateMsgsDeviceTrusting, this);
         this.account.settings.on("change:color", this.updateContentColorScheme, this);
         xabber.on('plyr_player_updated', this.onUpdatePlyr, this);
         this.account.dfd_presence.done(() => {
@@ -3217,6 +3223,30 @@ xabber.ChatContentView = xabber.BasicView.extend({
         if (_.has(changed, 'name')) this.updateMyName();
         if (_.has(changed, 'status')) this.updateMyStatus();
         if (_.has(changed, 'image')) this.updateMyAvatar();
+    },
+
+    updateMsgsDeviceTrusting: function (device_id, jid) {
+        if (!this.model.get('encrypted') || !device_id || !this.contact || this.contact.get('jid') !== jid )
+            return;
+        this.$(`.not-decrypted-icon[data-device-id="${device_id}"]`).each((idx, item) => {
+            let $msg = $(item).closest('.chat-message');
+            $msg.removeClass('not-verified');
+            $msg.addClass('not-verified-previously');
+        })
+    },
+
+    updateMsgsMissingDevices: function (trust, peer) {
+        if (!this.model.get('encrypted') || !peer || !this.contact)
+            return;
+
+        this.$(`.chat-message:not(.not-existing-device)`).each((idx, item) => {
+            let $item = $(item);
+            if ($item.attr('data-device-id') && !peer.devices[$item.attr('data-device-id')] && $item.attr('data-from') != this.account.get('jid')){
+                $item.hasClass('not-verified') && $item.addClass('not-verified-previously');
+                $item.removeClass('not-verified');
+                $item.addClass('not-existing-device');
+            }
+        })
     },
 
     updateContentColorScheme: function () {
@@ -4821,6 +4851,9 @@ xabber.ChatContentView = xabber.BasicView.extend({
         });
         attrs.encrypted = attrs.encrypted || this.model.get('encrypted');
         attrs.not_encrypted = attrs.not_encrypted || null;
+        attrs.not_verified_device = attrs.not_verified_device || null;
+        attrs.not_verified_device_no_device = attrs.not_verified_device_no_device || null;
+        attrs.device_id = attrs.device_id || null;
 
         if (attrs.type === 'system') {
             let tpl_name = attrs.invite ? 'group_request' : 'system';
@@ -4837,6 +4870,8 @@ xabber.ChatContentView = xabber.BasicView.extend({
             attrs.is_unread && 'unread-message',
             attrs.is_unread && 'unread-message-background',
             attrs.not_encrypted && 'not-decrypted',
+            attrs.not_verified_device && !attrs.not_verified_device_no_device && 'not-verified',
+            attrs.not_verified_device_no_device && 'not-existing-device',
             attrs.forwarded_message && 'forwarding',
             (attrs.encrypted || this.model.get('encrypted')) ? 'encrypted' : ""
         ];
@@ -6939,6 +6974,8 @@ xabber.ChatContentView = xabber.BasicView.extend({
 
     onClickMessage: function (ev) {
         let $elem = $(ev.target);
+        if ($elem.closest('.dropdown-content').length)
+            return;
         if ($elem.hasClass('file-link-download')) {
             ev.preventDefault();
             let msg = this.model.messages.get($elem.closest('.chat-message').data('uniqueid')) || this.account.context_messages.get($elem.closest('.chat-message').data('uniqueid')),
@@ -12346,6 +12383,8 @@ xabber.ChatBottomView = xabber.BasicView.extend({
     },
 
     renderLastEmoticons: function () {
+        if (!this.account.chat_settings)
+            return;
         let cached_last_emoji = this.account.chat_settings.getLastEmoji(),
             $last_emoticons = this.$('.last-emoticons').empty(), emoji;
         if (cached_last_emoji.length < 7) {

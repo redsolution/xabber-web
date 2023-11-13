@@ -1,4 +1,12 @@
-<div class="chat-message main {{classlist}}"  {[if (avatar_id) {]} data-avatar="{{avatar_id}}" {[}]} {[if (avatar_url) {]} data-avatar-url="{{avatar_url}}" {[}]} data-time="{{timestamp}}" data-uniqueid="{{unique_id}}" {[if (from_id) {]} data-from-id="{{from_id}}" {[}]} data-from="{{from_jid}}">
+<div class="chat-message main {{classlist}}"
+     {[if (avatar_id) {]} data-avatar="{{avatar_id}}" {[}]}
+     {[if (avatar_url) {]} data-avatar-url="{{avatar_url}}" {[}]}
+     data-time="{{timestamp}}"
+     data-uniqueid="{{unique_id}}"
+     {[if (from_id) {]} data-from-id="{{from_id}}" {[}]}
+     data-from="{{from_jid}}"
+     {[if (device_id) {]} data-device-id="{{device_id}}" {[}]}
+>
     <div class="left-side noselect">
         <div class="circle-avatar"></div>
     </div>
@@ -17,7 +25,7 @@
     </div>
 
     <div class="right-side noselect">
-        <div class="msg-time selectable-text" title="{{time}}">{{short_time}}</div>
+        <div class="msg-time selectable-text" title="{{time}}{[ if (device_id) {]}&#013;{[print(xabber.getString('omemo__dialog_fingerprints__label_device_id'))]}: {{device_id}}{[}]}">{{short_time}}</div>
         <div class="edited-info one-line hidden"></div>
         {[ if (is_sender) { ]}
             <i class="msg-delivering-state mdi mdi-14px" data-state="{{state}}" title="{{verbose_state}}" data-activates="retry-send-msg-{{msgid}}"></i>
@@ -25,14 +33,17 @@
                 <div class="msg-retry-dropdown-btn active-ground-color-600 btn-retry-send-message">{[print(xabber.getString("chat_screen__message__button_retry_send"))]}</div>
             </div>
         {[ } ]}
-        {[ if (not_encrypted) { ]}
-            <div class="not-decrypted-icon mdi-14px" title="{[print(xabber.getString('omemo__not_decrypted_message_title'))]}" data-activates="not-decrypted-tooltip-{{msgid}}">
-                <svg class="mdi mdi-14px mdi-svg-template" data-svgname="information"></svg>
-            </div>
-            <div id="not-decrypted-tooltip-{{msgid}}" class="dropdown-content not-decrypted-tooltip noselect">
-                <span class="not-decrypted-tooltip-text">{[print(xabber.getString("omemo__not_decrypted_message_tooltip"))]}</span>
-            </div>
-        {[ } ]}
+        <div class="not-decrypted-icon mdi-14px" title="{[print(xabber.getString('omemo__not_verified_message_title'))]}" {[ if (not_verified_device) { ]}data-device-id="{{not_verified_device}}" {[ } ]} data-activates="not-verified-tooltip-{{msgid}}">
+            <svg class="mdi mdi-14px mdi-svg-template not-verified-icon-svg" data-svgname="alert-circle"></svg>
+            <svg class="mdi mdi-14px mdi-svg-template not-decrypted-icon-svg" data-svgname="information"></svg>
+        </div>
+        <div id="not-verified-tooltip-{{msgid}}" class="dropdown-content not-decrypted-tooltip noselect">
+            <div class="not-existing-device-tooltip-text">{[print(xabber.getString("omemo__not_existing_device_message_tooltip"))]}</div>
+            <div class="not-decrypted-tooltip-text">{[print(xabber.getString("omemo__not_decrypted_message_tooltip"))]}</div>
+            <div class="not-verified-tooltip-text">{[print(xabber.getString("omemo__not_verified_message_tooltip"))]}</div>
+            <button class="btn-manage-devices btn-flat btn-main text-color-700">{[print(xabber.getString("omemo__alert_new_device__button_manage_devices"))]}</button>
+            <div class="not-verified-previously-tooltip-text">{[print(xabber.getString("omemo__not_verified_previously_message_tooltip"))]}</div>
+        </div>
         <div class="msg-copy-link" title='{[print(xabber.getString("action_copy_link"))]}'><i class="mdi mdi-link-variant" data-image="{{is_image}}"></i></div>
         <div class="msg-copy-location"  title='{[print(xabber.getString("action_copy_location"))]}'><div class="msg-copy-location-content" data-location="false"></div></div>
     </div>
