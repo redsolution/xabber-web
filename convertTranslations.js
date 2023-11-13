@@ -73,5 +73,8 @@ convertTranslationsToJSON();
 console.log('Translations converted.....');
 convertStringsToJSON();
 console.log('Strings converted.....');
+fs.rmSync('./translations/languages', { recursive: true, force: true });
+fs.rmSync('./translations/values', { recursive: true, force: true });
+console.log('Temporary directories were removed.....');
 
 fs.writeFileSync(`translations/en.js`, `typeof define === "function" && define(() => { return ${JSON.stringify(json)};});`);
