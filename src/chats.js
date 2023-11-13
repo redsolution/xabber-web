@@ -5537,6 +5537,13 @@ xabber.ChatContentView = xabber.BasicView.extend({
         if ($msg.find('.plyr-video-container').length) {
             this.initPlyrEmbedPlayer($msg, msg);
         }
+        ($msg.find('.not-decrypted-icon').length) && $msg.find('.not-decrypted-icon').dropdown({
+            inDuration: 100,
+            outDuration: 100,
+            constrainWidth: false,
+            hover: false,
+            alignment: 'right'
+        });
         let $prev_msg = $msg.prevAll('.chat-message').first();
         if (!$prev_msg.length) {
             this.getDateIndicator($msg.data('time')).insertBefore($msg);
@@ -5582,14 +5589,6 @@ xabber.ChatContentView = xabber.BasicView.extend({
                 }
             });
         }
-
-        ($msg.find('.not-decrypted-icon').length) && $msg.find('.not-decrypted-icon').dropdown({
-            inDuration: 100,
-            outDuration: 100,
-            constrainWidth: false,
-            hover: false,
-            alignment: 'right'
-        });
     },
 
     notifyMessage: function (message) {
@@ -6974,7 +6973,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
 
     onClickMessage: function (ev) {
         let $elem = $(ev.target);
-        if ($elem.closest('.dropdown-content').length)
+        if ($elem.hasClass('not-decrypted-icon') || $elem.closest('.dropdown-content').length || $elem.closest('.not-decrypted-icon').length)
             return;
         if ($elem.hasClass('file-link-download')) {
             ev.preventDefault();
@@ -6994,7 +6993,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
             } else
                 xabber.openWindow($elem.attr('href'));
         }
-        if ($elem.hasClass('msg-delivering-state') || $elem.hasClass('not-decrypted-icon') || $elem.hasClass('not-decrypted-tooltip') || $elem.hasClass('audio-control-panel') || $elem.hasClass('voice-msg-current-time') || $elem.hasClass('voice-msg-total-time')) {
+        if ($elem.hasClass('msg-delivering-state') ||  $elem.hasClass('not-decrypted-tooltip') || $elem.hasClass('audio-control-panel') || $elem.hasClass('voice-msg-current-time') || $elem.hasClass('voice-msg-total-time')) {
             return;
         }
         if ($elem.closest(".plyr-video-container").length > 0) {

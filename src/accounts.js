@@ -1664,11 +1664,11 @@ xabber.Accounts = Backbone.CollectionWithStorage.extend({
 
     onQuit: function () {
         _.each(_.clone(this.models), function (account) {
-            account.deleteAccount();
+            account.deleteAccount(true);
             account.password_view.closeModal();
             utils.modals.clear_queue();
         });
-        !this.models.length && xabber.body.setScreen('login');
+        !this.models.length && xabber.body.setScreen('login', {chat_item: null});
     },
 
     onQuitAccounts: function () {
