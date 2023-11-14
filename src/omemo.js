@@ -1904,7 +1904,7 @@ xabber.Omemo = Backbone.ModelWithStorage.extend({
         if (!this.account)
             return;
         let bundle = this.bundle,
-            removed_pk = this.bundle.preKeys.find(p => p.keyId === id && !p.signature);
+            removed_pk = this.bundle.preKeys.find(p => p && p.keyId === id && !p.signature);
         if (!removed_pk)
             return;
         let pubKey = utils.ArrayBuffertoBase64(removed_pk.keyPair.pubKey),
