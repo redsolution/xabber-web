@@ -132,8 +132,9 @@ export default {
                 dialog_options || (dialog_options = []);
                 let options = dialog_options || [];
                 buttons || (buttons = {});
-                if (typeof dialog_options === "object")
+                if (typeof(dialog_options) === "object" && !Array.isArray(dialog_options)){
                     options = [];
+                }
                 var ok_button = buttons.ok_button,
                     cancel_button = buttons.cancel_button,
                     optional_buttons = (buttons.optional_buttons || []).reverse();
