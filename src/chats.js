@@ -3121,7 +3121,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
         "click .back-to-unread:not(.back-to-bottom)": "scrollToUnreadWithButton",
         "click .btn-retry-send-message": "retrySendMessage",
         "click .btn-delete-message": "removeFileErrorMessage",
-        "click .btn-manage-devices": "openDevicesWindow",
+        "click .not-decrypted-tooltip .btn-manage-devices": "openDevicesWindow",
         "click .encryption-warning": "openDevicesWindow"
     },
 
