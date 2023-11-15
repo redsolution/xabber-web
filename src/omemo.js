@@ -1914,13 +1914,34 @@ xabber.Omemo = Backbone.ModelWithStorage.extend({
         bundle.preKeys.splice(idx, 1);
         this.own_used_prekeys.put({id, key});
         this.prekeys.remove(id);
-        if (bundle.preKeys.length && bundle.preKeys.length < constants.MIN_PREKEYS_COUNT) {
-            let missing_keys = constants.PREKEYS_COUNT - bundle.preKeys.length,
-                last_id = _.sortBy(bundle.preKeys, 'keyId')[bundle.preKeys.length - 1].keyId,
-                counter = 0;
+
+        let prekeys_id_list = Object.keys(this.prekeys.getAll()),
+            prekeys_length = prekeys_id_list.length;
+
+        if (prekeys_length && prekeys_length < constants.MIN_PREKEYS_COUNT) {
+            let missing_keys = constants.PREKEYS_COUNT - prekeys_length,
+                last_id,
+                counter = 0,
+                used_last_id = 0;
+
+            last_id = Number(prekeys_id_list[prekeys_length - 1]);
+            if (last_id === NaN)
+                xabber.error('last_id is NaN!')
+
+            if (!_.isEmpty(this.own_used_prekeys.getAll())){
+                let used_prekeys_id_list = Object.keys(this.own_used_prekeys.getAll());
+
+                used_last_id = used_prekeys_id_list[used_prekeys_id_list.length - 1];
+                used_last_id = Number(used_last_id);
+
+                if (used_last_id && (used_last_id > last_id)){
+                    last_id = used_last_id;
+                }
+            }
             for (let i = ++last_id; i < (last_id + missing_keys); i++){
+                xabber.error(i);
                 await this.bundle.generatePreKey(i).then((prekey) => {
-                    bundle.preKeys[i] = prekey;
+                    bundle.preKeys.push(prekey);
                     counter++;
                     if (counter === missing_keys)
                         this.account.omemo.publishBundle();
@@ -1960,6 +1981,7 @@ xabber.Omemo = Backbone.ModelWithStorage.extend({
         let spk = this.bundle.preKeys.find(pk => pk.signature),
             ik = await this.store.getIdentityKeyPair(),
             pks = this.bundle.preKeys;
+        xabber.error(pks);
         if (!spk || !ik) {
             this.set('resend_bundle', true);
             this.set('device_attrs', device_attrs);

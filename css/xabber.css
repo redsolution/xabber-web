@@ -9699,7 +9699,7 @@ img.fwd-img-preview {
 .chat-message.not-existing-device .not-decrypted-icon svg path,
 .chat-message.not-verified .not-decrypted-icon svg path,
 .chat-message.not-decrypted .not-decrypted-icon svg path{
-    fill: #ffb300;
+    fill: #FFA000;
 }
 
 .chat-message.not-verified-previously .not-decrypted-tooltip,
