@@ -4917,6 +4917,9 @@ xabber.ChatContentView = xabber.BasicView.extend({
         if (attrs.hasOwnProperty('encrypted')){
             if (attrs.hasOwnProperty('submitted_here')){
                 $message.attr('data-trust', true);
+                if (attrs.hasOwnProperty('is_contact_trusted')){
+                    $message.attr('data-trust', attrs.is_contact_trusted);
+                }
             } else if (attrs.hasOwnProperty('is_trusted')){
                 $message.attr('data-trust', attrs.is_trusted);
             } else {
@@ -5989,7 +5992,12 @@ xabber.ChatContentView = xabber.BasicView.extend({
             this.contact.getMyInfo(() => {
                 _dfd_info.resolve();
             });
-        else
+        else if (this.model.get('encrypted')){
+            this.account.omemo.checkContactFingerprints(this.contact).then((obj) => {
+                attrs.is_contact_trusted = obj.trust;
+                _dfd_info.resolve();
+            });
+        } else
             _dfd_info.resolve();
     },
 

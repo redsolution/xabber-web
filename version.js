@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.3.4.71","version_description":"fixed putting new prekeys to bundle prekeys, fixed getting correct prekeys last id for generation of new ones, fixed current prekeys counting when generating new ones"}'
+'{"version_number":"2.3.4.72","version_description":"added new ringtones, fixed encrypted message background when sending them with files to unverified contact"}'
 )});

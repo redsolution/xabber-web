@@ -3,5 +3,15 @@
     "selectable" : true,
     "path": "./marching-band-dave-girtsman",
     "name": "Phone Call"
+  },
+  "future-synth": {
+    "selectable" : true,
+    "path": "./future-synth",
+    "name": "Future Synth"
+  },
+  "retro-chiptune": {
+    "selectable" : true,
+    "path": "./retro-chiptune",
+    "name": "Retro Chiptune"
   }
 }
