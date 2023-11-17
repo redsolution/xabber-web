@@ -1998,9 +1998,9 @@ xabber.GroupChatDetailsViewRight = xabber.BasicView.extend({
         "click .btn-escape.btn-top": "scrollToTopSmooth",
         "click .btn-clear-history": "retractAllMessages",
         "change .circle-avatar input": "changeAvatar",
-        "click .btn-choose-image": "chooseAvatar",
-        "click .btn-selfie": "makeSelfie",
-        "click .btn-emoji-panel": "makeEmojiAvatar",
+        "click .description-edit-wrap .btn-choose-image": "chooseAvatar",
+        "click .description-edit-wrap .btn-selfie": "makeSelfie",
+        "click .description-edit-wrap .btn-emoji-panel": "makeEmojiAvatar",
         "click .tabs:not(.participant-tabs) .list-variant": "changeList",
         "click .edit-pictured-buttons .list-variant": "changeList"
     },
