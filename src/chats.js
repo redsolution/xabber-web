@@ -8715,14 +8715,15 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
                     view.contact.showDetailsRight('all-chats', {right_saved: false});
             }
             if (!view.model.get('loading_unread_history')){
-                let current_scrolling = view.content.getScrollTop() || view.content._scrolltop;
+                let current_scrolling = view.content.getScrollTop() || view.content._scrolltop,
+                    scrolled_to_bottom = view.content.isScrolledToBottom();
                 xabber.body.setScreen((options.screen || 'all-chats'), {
                     right: 'chat',
                     clear_search: options.clear_search,
                     chat_item: view,
                     blocked: view.model.get('blocked')
                 },{right_contact_save: options.right_contact_save, right_force_close: options.right_force_close} );
-                view.content.scrollTo(current_scrolling);
+                !scrolled_to_bottom && view.content.scrollTo(current_scrolling);
             } else {
                 xabber.body.setScreen((options.screen || 'all-chats'), {
                     right: 'chat',

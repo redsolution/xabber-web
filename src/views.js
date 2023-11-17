@@ -2289,6 +2289,7 @@ xabber.SettingsModalView = xabber.BasicView.extend({
     },
 
     closeSettings: function (ev) {
+        this.current_sound && this.current_sound.pause();
         if (xabber.body.screen && xabber.body.screen.get('previous_screen')){
             let previous_screen = xabber.body.screen.get('previous_screen');
             previous_screen.close_settings = true;
@@ -2299,14 +2300,16 @@ xabber.SettingsModalView = xabber.BasicView.extend({
     },
 
     backToMenu: function (ev) {
+        this.current_sound && this.current_sound.pause();
         this.$('.left-column').removeClass('hidden');
         this.$('.right-column').addClass('hidden');
-        this.$('.settings-panel-head .description').addClass('hidden');
+        this.$('.settings-panel-head .description').addClass('hidden');x
         this.scrollToTop();
         this.updateHeight();
     },
 
     backToSubMenu: function (ev) {
+        this.current_sound && this.current_sound.pause();
         let $tab = $(ev.target).closest('.btn-back-subsettings'),
             block_name = $tab.attr('data-subblock-parent-name'),
             $elem = this.$('.settings-block-wrap.' + block_name),
