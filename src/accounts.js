@@ -4103,7 +4103,7 @@ xabber.SetAvatarView = xabber.BasicView.extend({
         "click .library-wrap .image-item": "setActiveImage",
         'change input[type="file"]': "onFileInputChanged",
         'keyup input.url': "onInputChanged",
-        "click .btn-add": "addAvatar",
+        "click .btn-add": "addAvatarSelecter",
         "click .btn-cancel": "close"
     },
 
@@ -4113,6 +4113,9 @@ xabber.SetAvatarView = xabber.BasicView.extend({
 
     render: function (options) {
         this.model = options.model;
+        this.contact = options.contact;
+        this.participant = options.participant;
+        this.parent = options.parent;
         this.createLibrary();
         this.$('.menu-btn').removeClass('active');
         this.$('.menu-btn[data-screen-name="library"]').addClass('active');
@@ -4281,6 +4284,14 @@ xabber.SetAvatarView = xabber.BasicView.extend({
         }
     },
 
+    addAvatarSelecter: function () {
+        if (this.contact){
+            this.addNotOwnAvatar();
+        } else {
+            this.addAvatar();
+        }
+    },
+
     addAvatar: function () {
         if (this.$('.btn-add').hasClass('non-active'))
             return;
@@ -4301,6 +4312,63 @@ xabber.SetAvatarView = xabber.BasicView.extend({
                         this.model.pubAvatar({base64: image, hash: hash, size: size, type: img.type, file: img}, () => {
                             this.close();
                             this.model.trigger('update_avatar_list');
+                        }, () => {
+                            utils.dialogs.error(xabber.getString("group_settings__error__wrong_image"));
+                        });
+                    } else
+                        utils.dialogs.error(xabber.getString("group_settings__error__wrong_image"));
+                });
+            }
+        });
+        this.$('.modal-preloader-wrap').html(env.templates.contacts.preloader());
+        this.$('.btn-add').addClass('hidden-disabled');
+
+        if ($active_screen.attr('data-screen') == 'library') {
+            image = this.current_items[$active_screen.find('div.active').attr('data-id')]
+            image.uploaded = true;
+            dfd.resolve(image, true);
+        }
+        else if ($active_screen.attr('data-screen') == 'web-address') {
+            image = $active_screen.find('img:not(.hidden)')[0].src;
+            this.createFileFromURL(image).then((file) => {
+                dfd.resolve(file);
+            }, (e) => {
+                this.$('.preloader-wrapper').remove();
+                this.$('.btn-add').removeClass('hidden-disabled');
+                utils.dialogs.error(xabber.getString("group_settings__error__wrong_image"));
+            })
+        } else
+            dfd.resolve(this.current_file);
+    },
+
+    addNotOwnAvatar: function () {
+        if (this.$('.btn-add').hasClass('non-active'))
+            return;
+        let image, dfd = new $.Deferred(), $active_screen = this.$('.screen-wrap:not(.hidden)'),
+            participant_node = '';
+        if (this.participant && this.participant.get('id')){
+            participant_node = '#' + this.participant.get('id');
+        }
+        dfd.done((img, img_from_gallery) => {
+            if (img_from_gallery){
+                image.type = image.media_type;
+                this.contact.pubAvatar(image, participant_node, () => {
+                    this.current_items = [];
+                    this.close();
+                    if (this.parent && this.participant) {
+                        this.parent.updateMemberAvatar(this.participant, true);
+                    }
+                }, () => {
+                    utils.dialogs.error(xabber.getString("group_settings__error__wrong_image"));
+                });
+            } else {
+                utils.images.getAvatarFromFile(img).done((image, hash, size) => {
+                    if (image) {
+                        this.contact.pubAvatar({base64: image, hash: hash, size: size, type: img.type, file: img}, participant_node, () => {
+                            this.close();
+                            if (this.parent && this.participant) {
+                                this.parent.updateMemberAvatar(this.participant, true);
+                            }
                         }, () => {
                             utils.dialogs.error(xabber.getString("group_settings__error__wrong_image"));
                         });
@@ -4354,12 +4422,15 @@ xabber.WebcamProfileImageView = xabber.BasicView.extend({
     template: templates.webcam_panel,
 
     events: {
-        "click .btn-save": "saveAvatar",
+        "click .btn-save": "addAvatarSelecter",
         "click .btn-cancel": "close",
     },
 
     open: function (options) {
         this.account = options.model;
+        this.contact = options.contact;
+        this.participant = options.participant;
+        this.parent = options.parent;
         this.registration = options.registration;
         this.registration_view = options.registration_view;
 
@@ -4480,6 +4551,14 @@ xabber.WebcamProfileImageView = xabber.BasicView.extend({
         }
     },
 
+    addAvatarSelecter: function (ev) {
+        if (this.contact){
+            this.saveNotOwnAvatar();
+        } else {
+            this.saveAvatar();
+        }
+    },
+
 
     saveAvatar: function () {
         let blob = Images.getBlobImage(this.canvas.toDataURL('image/png').replace(/^data:image\/(png|gif|jpg|webp|jpeg);base64,/, '')),
@@ -4506,6 +4585,31 @@ xabber.WebcamProfileImageView = xabber.BasicView.extend({
             }
         }
     },
+
+    saveNotOwnAvatar: function () {
+        let blob = Images.getBlobImage(this.canvas.toDataURL('image/png').replace(/^data:image\/(png|gif|jpg|webp|jpeg);base64,/, '')),
+            file = new File([blob], "avatar.png", {
+                type: "image/png",
+            }),
+            participant_node = '';
+        if (this.participant && this.participant.get('id')){
+            participant_node = '#' + this.participant.get('id');
+        }
+        file.base64 = this.canvas.toDataURL('image/png').replace(/^data:image\/(png|gif|jpg|webp|jpeg);base64,/, '');
+        if (file && file.base64) {
+            this.$('.modal-preloader-wrap').html(env.templates.contacts.preloader());
+            this.$('.btn-save').addClass('hidden-disabled');
+            this.$('.circle-icon').addClass('disabled');
+            this.contact.pubAvatar(file, participant_node, () => {
+                this.close();
+                if (this.parent && this.participant) {
+                    this.parent.updateMemberAvatar(this.participant, true);
+                }
+            }, () => {
+                utils.dialogs.error(xabber.getString("group_settings__error__wrong_image"));
+            });
+        }
+    },
 });
 
 xabber.EmojiProfileImageView = xabber.BasicView.extend({
@@ -4516,12 +4620,15 @@ xabber.EmojiProfileImageView = xabber.BasicView.extend({
         "click .profile-image-background-color": "changeColor",
         "click .avatar-wrap": "openEmojiPicker",
         "click .close-modal": "close",
-        "click .btn-save": "saveAvatar",
+        "click .btn-save": "addAvatarSelecter",
         "click .btn-cancel": "close",
     },
 
     open: function (options) {
         this.account = options.model;
+        this.contact = options.contact;
+        this.participant = options.participant;
+        this.parent = options.parent;
         this.registration = options.registration;
         this.registration_view = options.registration_view;
         this.emoji_panel_view = this.addChild('emoji_picker_panel', xabber.EmojiPickerView,{})
@@ -4559,6 +4666,14 @@ xabber.EmojiProfileImageView = xabber.BasicView.extend({
         this.$('.circle-avatar').addClass('ground-color-' + color + '-100');
     },
 
+    addAvatarSelecter: function (ev) {
+        if (this.contact){
+            this.saveNotOwnAvatar();
+        } else {
+            this.saveAvatar();
+        }
+    },
+
     saveAvatar: function (ev) {
         if (this.registration && this.registration_view){
             let blob = Images.getDefaultAvatar(this.$('.chosen-emoji').data('value') ,this.$('.circle-avatar').css( "background-color" ), "bold 96px sans-serif", 176, 176),
@@ -4591,6 +4706,30 @@ xabber.EmojiProfileImageView = xabber.BasicView.extend({
                     utils.dialogs.error(xabber.getString("group_settings__error__wrong_image"));
                 });
             }
+        }
+    },
+
+    saveNotOwnAvatar: function (ev) {
+        let blob = Images.getBlobImage(Images.getDefaultAvatar(this.$('.chosen-emoji').data('value') ,this.$('.circle-avatar').css( "background-color" ), "bold 96px sans-serif", 176, 176)),
+            file = new File([blob], "avatar.png", {
+                type: "image/png",
+            }),
+            participant_node = '';
+        if (this.participant && this.participant.get('id')){
+            participant_node = '#' + this.participant.get('id');
+        }
+        file.base64 = blob;
+        if (file && file.base64) {
+            this.$('.modal-preloader-wrap').html(env.templates.contacts.preloader());
+            this.$('.btn-save').addClass('hidden-disabled');
+            this.contact.pubAvatar(file, participant_node, () => {
+                this.close();
+                if (this.parent && this.participant) {
+                    this.parent.updateMemberAvatar(this.participant, true);
+                }
+            }, () => {
+                utils.dialogs.error(xabber.getString("group_settings__error__wrong_image"));
+            });
         }
     },
 });

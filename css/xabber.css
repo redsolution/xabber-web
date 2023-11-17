@@ -13833,7 +13833,6 @@ input[type=range].voice-message-volume:focus {
     z-index: 1000;
     display: none;
     float: left;
-    min-width: 264px;
     padding: 0.5rem 0;
     margin: 0.125rem 0 0;
     font-size: 1rem;
@@ -16131,6 +16130,13 @@ input[type=range].voice-message-volume:focus {
     background-color: #FFF;
     opacity: 0.8;
     display: none;
+}
+.groupchat-details-panel .profile-image-dropdown.dropdown-content.bootstrap-dropdown {
+    left: 0!important;
+    top: 0!important;
+}
+.groupchat-details-panel .profile-image-dropdown.dropdown-content.bootstrap-dropdown .property-variant{
+    padding: 0.25rem 1.5rem;
 }
 
 .vcard-edit .circle-avatar .set-groupchat-avatar {

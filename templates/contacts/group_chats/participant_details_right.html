@@ -13,8 +13,8 @@
     <div class="participant-details-edit-wrap edit-wrap">
         <div class="main-info">
             <div class="avatar-wrap">
-                <div class="circle-avatar">
-                    <input title='{[print(xabber.getString("groupchat_member_edit_change_avatar"))]}' type="file"/>
+                <div class="circle-avatar dropdown-button" data-activates="{{view.cid}}-participant-image">
+                    <input class="hidden" title='{[print(xabber.getString("groupchat_member_edit_change_avatar"))]}' type="file"/>
                     <svg class="set-groupchat-avatar" viewBox="0 0 24 24">
                         <path d="M4,4H7L9,2H15L17,4H20A2,2 0 0,1 22,6V18A2,2 0 0,1 20,20H4A2,2 0 0,1 2,18V6A2,2 0 0,1 4,4M12,7A5,5 0 0,0 7,12A5,5 0 0,0 12,17A5,5 0 0,0 17,12A5,5 0 0,0 12,7M12,9A3,3 0 0,1 15,12A3,3 0 0,1 12,15A3,3 0 0,1 9,12A3,3 0 0,1 12,9Z" />
                     </svg>
@@ -34,7 +34,17 @@
                         </div>
                     </div>
                 </div>
-                <div class="set-groupchat-avatar-text">{[print(xabber.getString("groupchat_set_avatar"))]}</div>
+                <div id="{{view.cid}}-participant-image" class="profile-image-dropdown bootstrap-dropdown dropdown-content noselect">
+                    <div class="btn-emoji-panel property-variant">
+                        {[print(xabber.getString("account_emoji_profile_image_button"))]}
+                    </div>
+                    <div class="btn-selfie property-variant">
+                        {[print(xabber.getString("account_webcam_profile_image_button"))]}
+                    </div>
+                    <div class="btn-choose-image property-variant">
+                        {[print(xabber.getString("account_profile_image_button"))]}
+                    </div>
+                </div>
             </div>
         </div>
         <div class="participant-details-edit-inputs">

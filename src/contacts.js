@@ -377,28 +377,74 @@ xabber.Contact = Backbone.Model.extend({
     },
 
     pubAvatar: function (image, node, callback, errback) {
-        let avatar_hash = sha1(image.base64),
-            iq_pub_data = $iq({type: 'set', to: this.get('jid') })
-                .c('pubsub', {xmlns: Strophe.NS.PUBSUB})
-                .c('publish', {node: Strophe.NS.PUBSUB_AVATAR_DATA + node})
-                .c('item', {id: avatar_hash})
-                .c('data', {xmlns: Strophe.NS.PUBSUB_AVATAR_DATA}).t(image.base64),
-            iq_pub_metadata = $iq({type: 'set', to: this.get('jid') })
-                .c('pubsub', {xmlns: Strophe.NS.PUBSUB})
-                .c('publish', {node: Strophe.NS.PUBSUB_AVATAR_METADATA + node})
-                .c('item', {id: avatar_hash})
-                .c('metadata', {xmlns: Strophe.NS.PUBSUB_AVATAR_METADATA})
-                .c('info', {bytes: image.size, id: avatar_hash, type: image.type});
-        this.account.sendIQFast(iq_pub_data, () => {
+        let dfd = new $.Deferred();
+
+        dfd.done((data, http_avatar) => {
+            if (http_avatar) {
+                let avatar_hash = data.hash || image.hash || sha1(image.base64),
+                    iq_pub_metadata = $iq({type: 'set', to: this.get('jid') })
+                        .c('pubsub', {xmlns: Strophe.NS.PUBSUB})
+                        .c('publish', {node: Strophe.NS.PUBSUB_AVATAR_METADATA + node})
+                        .c('item', {id: avatar_hash})
+                        .c('metadata', {xmlns: Strophe.NS.PUBSUB_AVATAR_METADATA})
+                        .c('info', {bytes: data.size, id: avatar_hash, type: data.type, url: data.file});
+                data.thumbnails && data.thumbnails.forEach((thumbnail) => {
+                    iq_pub_metadata.c('thumbnail', {
+                        xmlns: Strophe.NS.PUBSUB_AVATAR_METADATA_THUMBNAIL,
+                        url: thumbnail.url,
+                        width: thumbnail.width,
+                        height: thumbnail.height,
+                    }).up()
+                })
                 this.account.sendIQFast(iq_pub_metadata, () => {
                         callback && callback(avatar_hash);
                     },
                     function (data_error) {
                         errback && errback(data_error);
                     });
-            }, (data_error) => {
-                errback && errback(data_error);
+            }
+            else {
+                let avatar_hash = image.hash || sha1(image.base64),
+                    iq_pub_data = $iq({type: 'set', to: this.get('jid') })
+                        .c('pubsub', {xmlns: Strophe.NS.PUBSUB})
+                        .c('publish', {node: Strophe.NS.PUBSUB_AVATAR_DATA + node})
+                        .c('item', {id: avatar_hash})
+                        .c('data', {xmlns: Strophe.NS.PUBSUB_AVATAR_DATA}).t(data),
+                    iq_pub_metadata = $iq({type: 'set', to: this.get('jid') })
+                        .c('pubsub', {xmlns: Strophe.NS.PUBSUB})
+                        .c('publish', {node: Strophe.NS.PUBSUB_AVATAR_METADATA + node})
+                        .c('item', {id: avatar_hash})
+                        .c('metadata', {xmlns: Strophe.NS.PUBSUB_AVATAR_METADATA})
+                        .c('info', {bytes: image.size, id: avatar_hash, type: image.type});
+                this.account.sendIQFast(iq_pub_data, () => {
+                        this.account.sendIQFast(iq_pub_metadata, () => {
+                                callback && callback(avatar_hash);
+                            },
+                            function (data_error) {
+                                errback && errback(data_error);
+                            });
+                    },
+                    (data_error) => {
+                        errback && errback(data_error);
+                    });
+            }
+        });
+        if (image.uploaded){
+            dfd.resolve(image, true)
+        }
+        else if (this.account.get('gallery_token') && this.account.get('gallery_url') && !image.generated && !image.uploaded){
+            let file = image.name ? image : image.file;
+            this.account.uploadAvatar(file, (res) => {
+                if (res.thumbnails && res.thumbnails.length || res.file){
+                    res.type = file.type;
+                    dfd.resolve(res, true)
+                } else
+                    dfd.resolve(image.base64)
+            }, (res) => {
+                dfd.resolve(image.base64)
             });
+        } else
+            dfd.resolve(image.base64)
     },
 
     getLastSeenStatus: function(iq) {
@@ -997,7 +1043,7 @@ xabber.Contact = Backbone.Model.extend({
             this.set('name', this.get('roster_name'));
     },
 
-    showDetails: function (screen) {//34
+    showDetails: function (screen) {
         if (!this.details_view)
             this.details_view = (this.get('group_chat')) ? new xabber.GroupChatDetailsView({model: this}) : new xabber.ContactDetailsView({model: this});
         screen || (screen = 'contacts');
@@ -1952,6 +1998,9 @@ xabber.GroupChatDetailsViewRight = xabber.BasicView.extend({
         "click .btn-escape.btn-top": "scrollToTopSmooth",
         "click .btn-clear-history": "retractAllMessages",
         "change .circle-avatar input": "changeAvatar",
+        "click .btn-choose-image": "chooseAvatar",
+        "click .btn-selfie": "makeSelfie",
+        "click .btn-emoji-panel": "makeEmojiAvatar",
         "click .tabs:not(.participant-tabs) .list-variant": "changeList",
         "click .edit-pictured-buttons .list-variant": "changeList"
     },
@@ -2021,6 +2070,7 @@ xabber.GroupChatDetailsViewRight = xabber.BasicView.extend({
             alignment: 'right'
         };
         this.$('.select-users-list-wrap .dropdown-button').dropdown(dropdown_settings);
+        this.$('.circle-avatar.dropdown-button').dropdown(dropdown_settings);
         this.$('.dropdown-button').dropdown(dropdown_settings);
         this.onScroll();
         this.updateChilds();
@@ -2364,6 +2414,30 @@ xabber.GroupChatDetailsViewRight = xabber.BasicView.extend({
 
     openChat: function (ev) {
         this.model.showDetailsRight('all-chats');
+    },
+
+    chooseAvatar: function () {
+        if (this.account.get('gallery_token') && this.account.get('gallery_url')) {
+            let avatar_view = new xabber.SetAvatarView();
+            avatar_view.render({model: this.account, contact: this.model, parent: this});
+        } else
+            this.$('.circle-avatar input').click();
+    },
+
+    makeSelfie: function () {
+        if (this.account.get('gallery_token') && this.account.get('gallery_url')) {
+            let webcam_panel_view = new xabber.WebcamProfileImageView();
+            webcam_panel_view.open({model: this.account, contact: this.model, parent: this});
+        } else
+            this.$('.circle-avatar input').click();
+    },
+
+    makeEmojiAvatar: function () {
+        if (this.account.get('gallery_token') && this.account.get('gallery_url')) {
+            let emoji_panel_view = new xabber.EmojiProfileImageView();
+            emoji_panel_view.open({model: this.account, contact: this.model, parent: this});
+        } else
+            this.$('.circle-avatar input').click();
     },
 
     changeAvatar: function (ev) {
@@ -4493,6 +4567,9 @@ xabber.ParticipantPropertiesViewRight = xabber.BasicView.extend({
         "click .btn-chat-participant": "getPrivateChat",
         "click .property-variant": "changeTimerValue",
         "click .set-groupchat-avatar-text": "clickAvatarInput",
+        "click .btn-choose-image": "chooseAvatar",
+        "click .btn-selfie": "makeSelfie",
+        "click .btn-emoji-panel": "makeEmojiAvatar",
         "keydown .rich-textarea": "checkKeydown",
         "keyup .rich-textarea": "checkKeyup",
         "click .list-variant": "changeList"
@@ -4524,6 +4601,7 @@ xabber.ParticipantPropertiesViewRight = xabber.BasicView.extend({
             alignment: 'left'
         };
         this.$('.select-timer .dropdown-button').dropdown(dropdown_settings);
+        this.$('.circle-avatar.dropdown-button').dropdown(dropdown_settings);
         this.$('.participant-details-item .dropdown-button').dropdown(_.extend(dropdown_settings, {alignment: 'right'}));
     },
 
@@ -4788,7 +4866,7 @@ xabber.ParticipantPropertiesViewRight = xabber.BasicView.extend({
             this.$('.participant-details-item .buttons-wrap').removeClass('hidden2');
             this.$('.btn-edit').hideIf(false);
             this.$('.btn-qr-code').hideIf(false);
-            this.$('.btn-edit-participant').hideIf(false);
+            this.$('.participant-details-edit-wrap').hasClass('hidden') && this.$('.btn-edit-participant').hideIf(false);
         }
     },
 
@@ -4796,14 +4874,14 @@ xabber.ParticipantPropertiesViewRight = xabber.BasicView.extend({
         this.$('.circle-avatar input').click();
     },
 
-    updateMemberAvatar: function (member) {
+    updateMemberAvatar: function (member, url_forced) {
         let participant_id = member.get('id'),
             $avatar = this.$(`.circle-avatar`);
         member.image = Images.getDefaultAvatar(member.get('nickname') || member.get('jid') || participant_id);
         $avatar.setAvatar(member.image, this.member_details_avatar_size);
         $avatar.removeClass('changed');
         if (member.get('avatar')) {
-            if (this.account.chat_settings.getHashAvatar(participant_id) == member.get('avatar') && (this.account.chat_settings.getB64Avatar(participant_id)))
+            if (this.account.chat_settings.getHashAvatar(participant_id) == member.get('avatar') && (this.account.chat_settings.getB64Avatar(participant_id)) && !url_forced)
                 $avatar.setAvatar(this.account.chat_settings.getB64Avatar(participant_id), this.member_details_avatar_size);
             else {
                 if (member.get('avatar_url')){
@@ -4834,6 +4912,30 @@ xabber.ParticipantPropertiesViewRight = xabber.BasicView.extend({
             xabber.body.setScreen('all-chats', {right: 'participant_messages', model: chat});
             this.open(this.participant, this.data_form);
         });
+    },
+
+    chooseAvatar: function () {
+        if (this.account.get('gallery_token') && this.account.get('gallery_url')) {
+            let avatar_view = new xabber.SetAvatarView();
+            avatar_view.render({model: this.account, contact: this.contact, participant: this.participant, parent: this});
+        } else
+            this.clickAvatarInput();
+    },
+
+    makeSelfie: function () {
+        if (this.account.get('gallery_token') && this.account.get('gallery_url')) {
+            let webcam_panel_view = new xabber.WebcamProfileImageView();
+            webcam_panel_view.open({model: this.account, contact: this.contact, participant: this.participant, parent: this});
+        } else
+            this.clickAvatarInput();
+    },
+
+    makeEmojiAvatar: function () {
+        if (this.account.get('gallery_token') && this.account.get('gallery_url')) {
+            let emoji_panel_view = new xabber.EmojiProfileImageView();
+            emoji_panel_view.open({model: this.account, contact: this.contact, participant: this.participant, parent: this});
+        } else
+            this.clickAvatarInput();
     },
 
     changeAvatar: function (ev) {
@@ -7172,6 +7274,7 @@ xabber.GroupEditView = xabber.BasicView.extend({
             alignment: 'right'
         };
         this.$('.property-dropdown').dropdown(dropdown_settings);
+        this.$('.circle-avatar.dropdown-button').dropdown(dropdown_settings);
         // this.name_field = new xabber.ContactNameRightWidget({
         //     el: this.$('.name-wrap')[0],
         //     model: this.model
