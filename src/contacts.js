@@ -4590,6 +4590,7 @@ xabber.ParticipantPropertiesViewRight = xabber.BasicView.extend({
         if (!participant) return;
         this.participant = participant;
         this.participant.on("change:badge", this.onBadgeUpdated, this);
+        this.participant.on("change:avatar_url", this.updateMemberAvatar, this);
         this.data_form = data_form;
         this.render();
         this.updateSaveButton();

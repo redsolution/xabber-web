@@ -4725,7 +4725,8 @@ xabber.EmojiProfileImageView = xabber.BasicView.extend({
             this.contact.pubAvatar(file, participant_node, () => {
                 this.close();
                 if (this.parent && this.participant) {
-                    this.parent.updateMemberAvatar(this.participant, true);
+                    if (this.participant.get('jid') === this.account.get('jid'))
+                        this.parent.updateMemberAvatar(this.participant, true);
                 }
             }, () => {
                 utils.dialogs.error(xabber.getString("group_settings__error__wrong_image"));

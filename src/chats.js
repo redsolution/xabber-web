@@ -7727,7 +7727,9 @@ xabber.AccountChats = xabber.ChatsBase.extend({
                                 }
                                 let participant = contact.participants && contact.participants.get(member_id);
                                 if (participant) {
+                                    let avatar_url = $message.find('info').attr('url');
                                     participant.set({avatar: photo_id, b64_avatar: new_avatar});
+                                    avatar_url && participant.set('avatar_url', avatar_url);
                                     this.account.groupchat_settings.updateParticipant(contact.get('jid'), participant.attributes);
                                 }
                             }, () => {
