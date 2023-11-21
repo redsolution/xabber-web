@@ -14,6 +14,10 @@
     <div class="error hidden">{[print(xabber.getString("placeholder_no_matches"))]}</div>
 </div>
 <div class="modal-footer">
+    <div class="invitation-reason-wrap hidden">
+        <textarea class="text-field textarea-glow input-glow account-glow" type="text" cols="10" rows="5" placeholder='{[print(xabber.getString("invitation_text_placeholder"))]}' id="invitation_text" name="invitation_text"></textarea>
+    </div>
+    <button class="btn-flat btn-main btn-invitation-reason">{[print(xabber.getString("Invitation_reason_button_text"))]}</button>
     <button class="btn-flat btn-main btn-add"><span class="counter hidden"></span>{[print(xabber.getString("groupchat_invite"))]}</button>
     <button class="btn-flat btn-dark btn-main btn-cancel">{[print(xabber.getString("cancel"))]}</button>
     <span class="errors"></span>

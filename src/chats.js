@@ -9258,6 +9258,8 @@ xabber.InvitationPanelView = xabber.SearchView.extend({
         this.account = account;
         this.contact = contact;
         this.clearPanel();
+        this.$(`textarea[name="invitation_text"]`).val('');
+        this.$('.invitation-reason-wrap').addClass('hidden');
         xabber.contacts_view.$(`.account-roster-wrap[data-jid="${this.account.get('jid')}"] .roster-group`).each((idx, item) => {
             let group_node = $(item).clone();
             $(group_node).find('.list-item').each((i, list_item) => {
@@ -9325,6 +9327,12 @@ xabber.InvitationPanelView = xabber.SearchView.extend({
         this.clearSearch();
     },
 
+    showReasonWrap: function () {
+        this.$('.invitation-reason-wrap').switchClass('hidden');
+        if (this.$('.invitation-reason-wrap').hasClass('hidden'))
+            this.$(`textarea[name="invitation_text"]`).val('');
+    },
+
     registerClickEvents: function () {
         this.$('.btn-cancel').click(() => {
             this.close();
@@ -9332,13 +9340,22 @@ xabber.InvitationPanelView = xabber.SearchView.extend({
         this.$('.btn-add').click(() => {
             this.addSelectedUsers();
         });
+        this.$('.btn-invitation-reason').click(() => {
+            this.showReasonWrap();
+        });
     },
 
     addUser: function (ev) {
         let $target = $(ev.target).closest('.list-item'),
             contact_jid = $target.attr('data-jid');
-        $target.toggleClass('click-selected');
         let itemIdx = this.selected_contacts.indexOf(contact_jid);
+        if (!$target.hasClass('click-selected') && itemIdx > -1){
+            this.$(`.list-item[data-jid="${contact_jid}"]`).removeClass('click-selected');
+            this.selected_contacts.splice(itemIdx, 1);
+            this.updateCounter();
+            return;
+        }
+        $target.toggleClass('click-selected');
         if (itemIdx > -1)
             this.selected_contacts.splice(itemIdx, 1);
         else
@@ -9347,11 +9364,15 @@ xabber.InvitationPanelView = xabber.SearchView.extend({
     },
 
     sendInvite: function (contact_jid, callback, errback) {
+        let reason_text = (this.contact.get('group_info').privacy === 'incognito') ? xabber.getString("groupchat__incognito_group__text_invitation") : xabber.getString("groupchat__public_group__text_invitation", [contact_jid]);
+        if (this.$(`textarea[name="invitation_text"]`).val()){
+            reason_text = reason_text + '\n\n' + this.$(`textarea[name="invitation_text"]`).val();
+        }
         let iq = $iq({type: 'set', to: (this.contact.get('full_jid') || this.contact.get('jid'))})
                 .c('invite', {xmlns: `${Strophe.NS.GROUP_CHAT}#invite`})
                 .c('jid').t(contact_jid).up()
                 .c('send').t('false').up()
-                .c('reason').t((this.contact.get('group_info').privacy === 'incognito') ? xabber.getString("groupchat__incognito_group__text_invitation") : xabber.getString("groupchat__public_group__text_invitation", [contact_jid]));
+                .c('reason').t(reason_text);
         this.account.sendIQFast(iq, () => {
             this.sendInviteMessage(contact_jid);
             this.close();
@@ -9374,13 +9395,17 @@ xabber.InvitationPanelView = xabber.SearchView.extend({
     },
 
     sendInviteMessage: function(jid_to) {
+        let reason_text = (this.contact.get('group_info').privacy === 'incognito') ? xabber.getString("groupchat__incognito_group__text_invitation") : xabber.getString("groupchat__public_group__text_invitation", [jid_to]);
+        if (this.$(`textarea[name="invitation_text"]`).val()){
+            reason_text = reason_text + '\n\n' + this.$(`textarea[name="invitation_text"]`).val();
+        }
         let body = xabber.getString("groupchat_legacy_invitation_body", [this.contact.get('jid')]),
             stanza = $msg({
                 to: jid_to,
                 type: 'chat',
                 id: uuid()
             }).c('invite', {xmlns: `${Strophe.NS.GROUP_CHAT}#invite`, jid: this.contact.get('jid')})
-                .c('reason').t((this.contact.get('group_info').privacy === 'incognito') ? xabber.getString("groupchat__incognito_group__text_invitation") : xabber.getString("groupchat__public_group__text_invitation", [jid_to])).up().up()
+                .c('reason').t(reason_text).up().up()
                 .c('x', {xmlns: Strophe.NS.GROUP_CHAT})
                 .c('privacy').t(this.contact.get('group_info').privacy).up().up()
                 .c('body').t(body).up();

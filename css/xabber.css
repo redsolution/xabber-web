@@ -6623,6 +6623,10 @@ input[type=text].simple-input-field:hover {
     line-height: 3rem;
 }
 
+.add-user-group-chat .modal-content{
+    min-height: 200px;
+}
+
 .add-user-group-chat .group-head:hover {
     background-color: transparent;
 }
@@ -17961,6 +17965,10 @@ input[type=range].voice-message-volume:focus {
     position: relative !important;
     top: 0px;
 }
+
+.right-panel-wrap .invitation-view .panel-content .msg-text{
+    white-space: pre-wrap;
+}
 .right-panel-wrap .omemo-enable-view .panel-footer,
 .right-panel-wrap .invitation-view .panel-footer {
     position: relative !important;
@@ -19364,6 +19372,11 @@ input[type=range].voice-message-volume:focus {
     right: 16px;
 }
 
+.add-user-group-chat .modal-footer {
+    position: relative;
+    height: 64px;
+}
+
 .add-user-group-chat .modal-footer .btn-add .counter {
     margin-right: 4px;
     opacity: 0.7;
@@ -19372,6 +19385,32 @@ input[type=range].voice-message-volume:focus {
 .add-user-group-chat .modal-footer .btn-flat {
     margin: 0 10px;
     min-width:  50px;
+}
+
+.add-user-group-chat .modal-footer .btn-invitation-reason {
+    position: absolute;
+}
+.add-user-group-chat .modal-footer .invitation-reason-wrap {
+    position: absolute;
+    width: 100%;
+    bottom: 100%;
+    left: 0;
+    padding: 8px 24px;
+    background: #FFF;
+    padding-bottom: 0;
+}
+.add-user-group-chat .modal-footer .invitation-reason-wrap textarea{
+    padding: 8px !important;
+    resize: none;
+    height: 100px;
+}
+.add-user-group-chat .modal-footer input {
+    position: absolute;
+    width: 50% !important;
+}
+
+.add-user-group-chat .modal-footer button {
+    margin-top: 8px !important;
 }
 
 /* ----------------- PERMISSIONS AND RESTRICTIONS VIEW ---------------- */
