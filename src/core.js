@@ -447,22 +447,6 @@ let Xabber = Backbone.Model.extend({
             constants.CLIENT_LOGO = constants.ASSETS_URL_PREFIX + constants.CLIENT_LOGO;
             constants.TOOLBAR_LOGO = constants.ASSETS_URL_PREFIX + constants.TOOLBAR_LOGO;
 
-            if (utils.isMobile.any()) {
-                let ios_msg = this.getString("warning__client_not_support_ios_browser", [constants.CLIENT_NAME]),
-                    android_msg = this.getString("warning__client_not_support_android_browser"),
-                    any_mobile_msg = this.getString("warning__client_not_support_mobile", [constants.CLIENT_NAME]),
-                    msg;
-                if (utils.isMobile.iOS()) {
-                    msg = ios_msg;
-                } else if (utils.isMobile.Android()) {
-                    msg = any_mobile_msg + android_msg;
-                } else {
-                    msg = any_mobile_msg;
-                }
-                utils.dialogs.error(msg);
-                this.check_config.resolve(false);
-                return;
-            }
             if (!constants.CONNECTION_URL) {
                 utils.dialogs.error(this.getString("client_error__missing_connection_url"));
                 this.check_config.resolve(false);

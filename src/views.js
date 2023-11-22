@@ -1219,6 +1219,7 @@ xabber.ToolbarView = xabber.BasicView.extend({
         this.data.set('msg_counter', unread_messages.msgs);
         this.data.set('group_msg_counter', unread_messages.group_msgs);
         this.data.set('mentions_counter', unread_messages.mentions);
+        xabber.recountAllMessageCounter();
     },
 
     onChangedMessageCounter: function () {
@@ -4248,7 +4249,9 @@ _.extend(xabber, {
     },
 
     recountAllMessageCounter: function () {
-        this.set('all_msg_counter', this.setAllMessageCounter());
+        if (!this.get('focused')) {
+            this.set('all_msg_counter', this.setAllMessageCounter());
+        }
     },
 
     resetMessageCounter: function () {
