@@ -2106,7 +2106,11 @@ xabber.AccountMediaGalleryView = xabber.BasicView.extend({
         if (persentScrolled > 0.8 && !this.loading_files && (this.current_page < this.total_pages)){
             this.current_page++;
             this.current_options.page = this.current_page;
-            this.getFiles(this.current_options)
+            if (this.current_options.type === 'avatars'){
+                this.getAvatars(this.current_options)
+            } else {
+                this.getFiles(this.current_options)
+            }
         }
     },
 
