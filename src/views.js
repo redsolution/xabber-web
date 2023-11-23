@@ -2309,7 +2309,7 @@ xabber.SettingsModalView = xabber.BasicView.extend({
         this.current_sound && this.current_sound.pause();
         this.$('.left-column').removeClass('hidden');
         this.$('.right-column').addClass('hidden');
-        this.$('.settings-panel-head .description').addClass('hidden');x
+        this.$('.settings-panel-head .description').addClass('hidden');
         this.scrollToTop();
         this.updateHeight();
     },

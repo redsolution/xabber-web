@@ -1353,7 +1353,7 @@ xabber.MessagesBase = Backbone.Collection.extend({
                 return message;
             if (xabber.current_voip_call && xabber.current_voip_call.get('session_id') === $jingle_msg_reject.attr('id')) {
                 xabber.stopAudio(xabber.current_voip_call.audio_notifiation);
-                let busy_audio = xabber.playAudio(xabber.settings.sound_on_dialtone);
+                let busy_audio = xabber.playAudio(xabber.settings.sound_on_call_busy);
                 setTimeout(() => {
                     xabber.stopAudio(busy_audio);
                 }, 1500);
