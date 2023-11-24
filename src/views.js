@@ -1493,8 +1493,17 @@ xabber.JingleMessageView = xabber.BasicView.extend({
         this.model.set('audio', !this.model.get('audio'));
     },
 
-    onDestroy: function () {
-        this.updateStatusText(xabber.getString(this.model.get('status') == 'device_busy' ? "dialog_jingle_message__status_device_busy" : this.model.get('status') == 'busy' ? "dialog_jingle_message__status_busy" : "dialog_jingle_message__status_disconnected"));
+    onDestroy: function (status) {
+        let status_text;
+        if (this.model.get('status') == 'device_busy')
+            status_text = 'dialog_jingle_message__status_device_busy';
+        else if (this.model.get('status') == 'busy')
+            status_text = 'dialog_jingle_message__status_busy';
+        else if (this.model.get('status') == 'accepted_another_device')
+            status_text = 'dialog_jingle_message__status_another_device_accepted';
+        else
+            status_text = 'dialog_jingle_message__status_disconnected';
+        this.updateStatusText(xabber.getString(status_text));
         setTimeout(() => {
             this.close();
             this.$el.detach();

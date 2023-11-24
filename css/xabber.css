@@ -6853,8 +6853,12 @@ input[type=text].simple-input-field:hover {
 }
 
 .jingle-message-view[data-state=busy],
-.jingle-message-view[data-state=device_busy] {
+.jingle-message-view[data-state=device_busy],
+.jingle-message-view[data-state=accepted_another_device] {
     background-color: rgba(239, 108, 0, .6);
+}
+.jingle-message-view[data-state=accepted_another_device] .buttons-wrap{
+    display: none;
 }
 
 .jingle-message-view .call-header {
@@ -6908,6 +6912,7 @@ input[type=text].simple-input-field:hover {
     top: 16px;
     right: 16px;
     border-radius: 8px;
+    z-index: 1000;
 }
 
 .jingle-message-view.collapsed .webrtc-local-video {

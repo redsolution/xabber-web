@@ -1247,7 +1247,7 @@ xabber.MessagesBase = Backbone.Collection.extend({
     endCall: function (status) {
         status && xabber.current_voip_call.set('status', status);
         xabber.trigger('update_jingle_button');
-        xabber.current_voip_call.destroy();
+        xabber.current_voip_call.destroy(status);
         xabber.current_voip_call = null;
         xabber.trigger('update_jingle_button');
     },
@@ -1309,7 +1309,7 @@ xabber.MessagesBase = Backbone.Collection.extend({
                 return;
             if (xabber.current_voip_call && xabber.current_voip_call.get('session_id') === $jingle_msg_accept.attr('id')) {
                 if (carbon_copied)
-                    this.endCall();
+                    this.endCall('accepted_another_device');
                 else {
                     !xabber.current_voip_call.get('state') && xabber.current_voip_call.set('state', constants.JINGLE_MSG_ACCEPT);
                     xabber.trigger('update_jingle_button');
