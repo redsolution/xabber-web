@@ -1337,30 +1337,10 @@ xabber.JingleMessageView = xabber.BasicView.extend({
     },
 
     setFullScreen: function () {
-        let video = this.$el.find('.webrtc-remote-video')[0],
-            local_video = this.$el.find('.webrtc-local-video')[0],
-            buttons = this.$el.find('.buttons-panel')[0];
-        if (!video)
-            return;
-        if (video.requestFullScreen) {
-            video.requestFullScreen();
-            local_video.requestFullScreen();
-            buttons.requestFullScreen();
-        }
-        else if (video.webkitRequestFullScreen) {
-            video.webkitRequestFullScreen();
-            local_video.webkitRequestFullScreen();
-            buttons.webkitRequestFullScreen();
-        }
-        else if (video.mozRequestFullScreen) {
-            video.mozRequestFullScreen();
-            local_video.mozRequestFullScreen();
-            buttons.mozRequestFullScreen();
-        }
-        else if (video.msRequestFullScreen) {
-            video.msRequestFullScreen();
-            local_video.msRequestFullScreen();
-            buttons.msRequestFullScreen();
+        if (document.fullscreenElement) {
+            document.exitFullscreen();
+        } else if(this.$el.length) {
+            this.$el[0].requestFullscreen();
         }
     },
 
