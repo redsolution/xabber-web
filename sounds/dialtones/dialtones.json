@@ -1,14 +1,4 @@
 {
-  "_phone_busy": {
-    "not_selectable" : true,
-    "path": "./_phone_busy",
-    "name": "Phone busy"
-  },
-  "_alien-bomb-timer": {
-    "not_selectable" : true,
-    "path": "./_alien-bomb-timer",
-    "name": "Call connection"
-  },
   "marching-band-dave-girtsman": {
     "path": "./marching-band-dave-girtsman",
     "name": "Phone Call"

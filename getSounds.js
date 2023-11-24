@@ -1,7 +1,7 @@
 let sounds_dirs = [
         'attention',
         'dialtones',
-        'interface',
+        'system',
         'notifications',
         'ringtones',
     ],

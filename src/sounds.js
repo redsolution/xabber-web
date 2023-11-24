@@ -61,26 +61,26 @@
         notifications.push(notification);
     });
 
-    let interface_json = require('~/sounds/interface/interface.json'),
-        interface_sound_list = [];
+    let system_json = require('~/sounds/system/system.json'),
+        system_sound_list = [];
 
 
-    Object.keys(interface_json).forEach(item => {
-        let audio = require(`~/sounds/interface/${item}/${item}.mp3`),
-            interface_item = {
+    Object.keys(system_json).forEach(item => {
+        let audio = require(`~/sounds/system/${item}/${item}.mp3`),
+            system_item = {
                 file_name: item,
-                name: interface_json[item].name,
+                name: system_json[item].name,
                 audio: audio,
-                not_selectable: interface_json[item].not_selectable,
+                not_selectable: system_json[item].not_selectable,
         };
-        interface_sound_list.push(interface_item);
+        system_sound_list.push(system_item);
     });
 
     sounds.attention = attention;
     sounds.ringtones = ringtones;
     sounds.dialtones = dialtones;
     sounds.notifications = notifications;
-    sounds.interface = interface_sound_list;
-    sounds.all_sounds = attention.concat(ringtones).concat(dialtones).concat(notifications).concat(interface_sound_list);
+    sounds.system = system_sound_list;
+    sounds.all_sounds = attention.concat(ringtones).concat(dialtones).concat(notifications).concat(system_sound_list);
 
     export default sounds;

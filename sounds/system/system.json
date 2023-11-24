@@ -1,0 +1,17 @@
+{
+  "_auth_request": {
+    "not_selectable" : true,
+    "path": "./_auth_request",
+    "name": "Auth request sound"
+  },
+  "_phone_busy": {
+    "not_selectable" : true,
+    "path": "./_phone_busy",
+    "name": "Phone busy"
+  },
+  "_call_connecting": {
+    "not_selectable" : true,
+    "path": "./_call_connecting",
+    "name": "Call connection"
+  }
+}

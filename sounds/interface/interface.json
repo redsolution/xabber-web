@@ -1,7 +1,0 @@
-{
-  "_beep_a": {
-    "not_selectable" : true,
-    "path": "./_beep_a",
-    "name": "Auth request sound"
-  }
-}
