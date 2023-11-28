@@ -10667,19 +10667,6 @@ img.fwd-img-preview {
     cursor: pointer;
 }
 
-.message-input-panel .uploading-emoticons {
-    width: 100%;
-    height: 100%;
-    position: absolute;
-    top: 0;
-    left: 0;
-    background-color: #FFF;
-    z-index: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
 .input-widget-wrap .emoticons-panel .emoji-wrap,
 .edit-badge .emoticons-panel .emoji-wrap,
 .message-input-panel .emoticons-panel .emoji-wrap {
@@ -20037,49 +20024,33 @@ ul.restrictions-list-content>li {
 /* -------------- EMOJI ------------- */
 
 .sprite-smiles_and_people {
-    background-image: url(../assets/images/emoji/spritesheet0.png);
-    background-repeat: no-repeat;
     display: block;
 }
 
 .sprite-body_and_clothes {
-    background-image: url(../assets/images/emoji/spritesheet1.png);
-    background-repeat: no-repeat;
     display: block;
 }
 
 .sprite-animals_and_nature {
-    background-image: url(../assets/images/emoji/spritesheet2.png);
-    background-repeat: no-repeat;
     display: block;
 }
 
 .sprite-food_and_drinks {
-    background-image: url(../assets/images/emoji/spritesheet3.png);
-    background-repeat: no-repeat;
     display: block;
 }
 
 .sprite-travel_and_places {
-    background-image: url(../assets/images/emoji/spritesheet4.png);
-    background-repeat: no-repeat;
     display: block;
 }
 
 .sprite-events {
-    background-image: url(../assets/images/emoji/spritesheet5.png);
-    background-repeat: no-repeat;
     display: block;
 }
 
 .sprite-objects {
-    background-image: url(../assets/images/emoji/spritesheet6.png);
-    background-repeat: no-repeat;
     display: block;
 }
 
 .sprite-signs {
-    background-image: url(../assets/images/emoji/spritesheet7.png);
-    background-repeat: no-repeat;
     display: block;
 }
