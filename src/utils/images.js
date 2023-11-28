@@ -83,7 +83,7 @@ var getDefaultAvatar = function (name, color, font, width, height) {
     ctx.textAlign = "center";
     if (font){
         ctx.textBaseline = 'ideographic';
-        ctx.fillText(_name, width/2 || 128, (height/2 + height *0.28) || 160);
+        ctx.fillText(_name, width/2 || 128, (height/2 + height *0.33) || 160);
     }
     else
         ctx.fillText(first_letter.toUpperCase()+second_letter.toUpperCase(), 128, 160);

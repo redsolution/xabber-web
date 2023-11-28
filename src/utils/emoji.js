@@ -49,24 +49,10 @@ var emoji_regexp = /(\u00a9|\u00ae|[\u2000-\u3300]|\ud83c[\ud000-\udfff]|\ud83d[
 
 String.prototype.emojify = function (options) {
     options || (options = {});
-    var sprite = options.sprite,
-        tag_name = sprite ? (options.tag_name || 'span') : 'img',
-        emoji_size = options.emoji_size || 20,
-        href = options.href ? ` href="#${options.href}" ` :"",
+    let emoji_size = options.emoji_size || 20,
         title = options.title ? ` title="${options.title}" ` :"";
     return this.replace(emoji_regexp, function (emoji) {
-        let data = emoji_data[emoji],
-            emoji_code = data && Number(data.code).toString(16);
-        if (data) {
-            (emoji_code.length < 4) && (emoji_code = "0".repeat(4 - emoji_code.length) + emoji_code);
-            let img_src = tag_name === 'img' ? (sprite ? ' src="'+ constants.ASSETS_URL_PREFIX + 'assets/images/emoji/blank.gif"' : '  src="' + constants.ASSETS_URL_PREFIX + 'assets/images/emoji/svg32/emoji_u' + emoji_code + '.svg"') : '';
-            return '<' + tag_name + img_src + href + title + ' class="emoji emoji-w' + emoji_size +
-                (sprite ? (' sprite-' + sprite + '" style="background-position: ' + '-' + (emoji_size * data.x) + 'px ' + '-' + (emoji_size * data.y) + 'px;" ') : '" ') +
-                'alt="' + emoji + '" ' +
-                'data-emoji="' + emoji + '"/>';
-        }
-        else
-            return emoji;
+        return `<span ${title} class="emoji emoji-w${emoji_size}" data-emoji="${emoji}"><span class="positioned-emoji">${emoji}</span></span>`;
     });
 };
 
@@ -95,6 +81,8 @@ String.prototype.replaceEmoji = function () {
 $.fn.emojify = function (selector, options) {
     this.find(selector).each(function () {
         var text = $(this).html();
+        if ($(`<div>${text}</div>`).find('.positioned-emoji').length)
+            return;
         $(this).html(text.emojify(options));
     });
     return this;

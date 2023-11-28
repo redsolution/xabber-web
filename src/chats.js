@@ -4463,7 +4463,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
             index = this.model.messages.indexOf(message);
         if (index === 0) {
             $message.prependTo(this.$('.chat-content'));
-        } else {
+        } else if (this.model.messages.models.length && this.model.messages.models[index - 1]) {
             let $prev_message = this.$(`.chat-message[data-uniqueid="${this.model.messages.models[index - 1].get('unique_id')}"]`);
             if (!$prev_message.length) {
                 $prev_message = this.addMessage(this.model.messages.models[index - 1]);
@@ -7536,30 +7536,6 @@ xabber.Chats = xabber.ChatsBase.extend({
         Mention.tagName = 'mention';
         Mention.prototype.optimize = function () {};
 
-        class QuillEmoji extends Image {
-            static create(value) {
-                if (typeof value == 'string') {
-                    let emoji = $(value.emojify({tag_name: 'img'}))[0];
-                    emoji.style.display = 'none';
-                    emoji.onload = function () {
-                        this.style.display = 'unset';
-                    };
-                    return emoji;
-                } else {
-                    return value;
-                }
-            }
-
-            static value(domNode) {
-                return domNode;
-            }
-        }
-        QuillEmoji.blotName = 'emoji';
-        QuillEmoji.className = 'emoji';
-        QuillEmoji.tagName = 'img';
-        QuillEmoji.prototype.optimize = function () {};
-
-        Quill.register(QuillEmoji);
         Quill.register(Mention);
     }
 });
@@ -11317,12 +11293,6 @@ xabber.ChatBottomView = xabber.BasicView.extend({
             });
             $emoji_list_wrap.appendTo($emoji_panel);
             $emoji_panel.siblings('.emoji-menu').append(Emoji.all[emoji_list][0].emojify({href: emoji_list, title: xabber.getString(constants.EMOJI_LIST_NAME(emoji_list)), tag_name: 'a', emoji_size: 20}));
-            let img = new Image();
-            img.onload = () => {
-                onloaded_sprites++;
-                (onloaded_sprites === all_sprites) && $emoji_panel_wrap.find('.uploading-emoticons').detach();
-            };
-            img.src = constants.ASSETS_URL_PREFIX + 'assets/images/emoji/spritesheet' + i++ + '.png';
         }
         let window_onclick = function (ev) {
             if ($(ev.target).closest('.emoticons-panel-wrap').length || $(ev.target).closest('.insert-emoticon').length)
@@ -11962,7 +11932,7 @@ xabber.ChatBottomView = xabber.BasicView.extend({
                         if (item == ' ')
                             arr_text.splice(idx, 1, '&nbsp');
                     });
-                    text = "<p>" + arr_text.join("").emojify({tag_name: 'span'}) + "</p>";
+                    text = "<p>" + arr_text.join("") + "</p>";
                     let range = window.getSelection().getRangeAt(0);
                     range.insertNode($('<div>' + text + '</div>')[0]);
                 }
@@ -11976,7 +11946,7 @@ xabber.ChatBottomView = xabber.BasicView.extend({
                     if (item == ' ')
                         arr_text.splice(idx, 1, '&nbsp');
                 });
-                text = "<p>" + arr_text.join("").emojify({tag_name: 'span'}) + "</p>";
+                text = "<p>" + arr_text.join("") + "</p>";
                 let range = window.getSelection().getRangeAt(0);
                 range.insertNode($('<div>' + text + '</div>')[0]);
             }
@@ -12409,7 +12379,7 @@ xabber.ChatBottomView = xabber.BasicView.extend({
         if (!this.edit_message)
             this.displaySend();
         (!this.view.chat_state && xabber.settings.typing_notifications) && this.view.sendChatState('composing');
-        this.quill.insertEmbed(caret_idx, 'emoji', emoji);
+        this.quill.insertText(caret_idx++, emoji);
         if (this.quill.getFormat(caret_idx, 1).mention) {
             this.quill.formatText(caret_idx, 1, 'mention', false);
         }
@@ -12439,8 +12409,8 @@ xabber.ChatBottomView = xabber.BasicView.extend({
             if (ev.button) {
                 return;
             }
-            let $target = $(ev.target).closest('.emoji-wrap').find('.emoji');
-            this.typeEmoticon($target.data('emoji'));
+            let $target_text = $(ev.target).closest('.emoji-wrap').text();
+            this.typeEmoticon($target_text);
         });
     },
 

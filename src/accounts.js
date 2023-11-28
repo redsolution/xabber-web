@@ -4680,7 +4680,7 @@ xabber.EmojiProfileImageView = xabber.BasicView.extend({
 
     saveAvatar: function (ev) {
         if (this.registration && this.registration_view){
-            let blob = Images.getDefaultAvatar(this.$('.chosen-emoji').data('value') ,this.$('.circle-avatar').css( "background-color" ), "bold 96px sans-serif", 176, 176),
+            let blob = Images.getDefaultAvatar(this.$('.chosen-emoji').data('value') ,this.$('.circle-avatar').css( "background-color" ), "bold 96px NotoColorEmoji", 176, 176),
                 file = new File([blob], "avatar.png", {
                     type: "image/png",
                 });
@@ -4696,7 +4696,7 @@ xabber.EmojiProfileImageView = xabber.BasicView.extend({
                 this.close();
             }
         } else {
-            let blob = Images.getBlobImage(Images.getDefaultAvatar(this.$('.chosen-emoji').data('value') ,this.$('.circle-avatar').css( "background-color" ), "bold 96px sans-serif", 176, 176)),
+            let blob = Images.getBlobImage(Images.getDefaultAvatar(this.$('.chosen-emoji').data('value') ,this.$('.circle-avatar').css( "background-color" ), "bold 96px NotoColorEmoji", 176, 176)),
                 file = new File([blob], "avatar.png", {
                     type: "image/png",
                 });
@@ -4714,7 +4714,7 @@ xabber.EmojiProfileImageView = xabber.BasicView.extend({
     },
 
     saveNotOwnAvatar: function (ev) {
-        let blob = Images.getBlobImage(Images.getDefaultAvatar(this.$('.chosen-emoji').data('value') ,this.$('.circle-avatar').css( "background-color" ), "bold 96px sans-serif", 176, 176)),
+        let blob = Images.getBlobImage(Images.getDefaultAvatar(this.$('.chosen-emoji').data('value') ,this.$('.circle-avatar').css( "background-color" ), "bold 96px NotoColorEmoji", 176, 176)),
             file = new File([blob], "avatar.png", {
                 type: "image/png",
             }),

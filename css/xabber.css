@@ -1,5 +1,8 @@
 /* -------------- COMMON CLASSES ---------------- */
-
+@font-face {
+    font-family: 'NotoColorEmoji';
+    src: url("../assets/fonts/notocolor/NotoColorEmoji-Regular.ttf?#iefix") format('truetype');
+}
 /* ---- Materialize CSS override ---- */
 
 input[type=text][readonly] {
@@ -732,7 +735,7 @@ button.btn-float-left {
 }
 
 .rich-textarea {
-    font-family: "Roboto", sans-serif;
+    font-family: "Roboto", 'NotoColorEmoji', sans-serif;
     overflow-y: hidden;
     padding: 1.6rem 0;
     resize: none;
@@ -13466,6 +13469,7 @@ input[type=range].voice-message-volume:focus {
     width: 176px;
     text-align: center;
     color: #000000;
+    /*font-family: 'NotoColorEmoji';*/
 }
 .main-modal.emoji-panel .emoji-profile-image .circle-icon {
     bottom: 4px;
@@ -13542,6 +13546,7 @@ input[type=range].voice-message-volume:focus {
     font-size: 29px;
     text-align: center;
     cursor: pointer;
+    /*font-family: 'NotoColorEmoji';*/
 }
 .main-modal.emoji-panel .emoji-picker-wrap .emojis-tab .ps-scrollbar-y-rail{
     top: 48px !important;
@@ -15780,6 +15785,7 @@ input[type=range].voice-message-volume:focus {
     margin: 0 !important;
     color: #212529;
     box-shadow: none;
+    /*font-family: 'NotoColorEmoji';*/
 }
 .details-panel-right .edit-wrap .contact-name-wrap .contact-name-input {
     width: calc(100% - 16px) !important;
@@ -18331,39 +18337,60 @@ input[type=range].voice-message-volume:focus {
     border: none !important;
 }
 
+.positioned-emoji {
+    position: absolute;
+    left: 50%;
+    transform: translate(-50%, 0);
+    font-family: 'NotoColorEmoji';
+}
+
 .emoji-w12 {
     width: 12px;
     height: 12px;
+    line-height: 12px;
+    font-size: 10px;
 }
 
 .emoji-w14 {
     width: 14px;
     height: 14px;
+    line-height: 14px;
+    font-size: 12px;
 }
 
 .emoji-w16 {
     width: 16px;
     height: 16px;
+    line-height: 16px;
+    font-size: 13px;
 }
 
 .emoji-w18 {
     width: 18px;
     height: 18px;
+    line-height: 18px;
+    font-size: 14px;
 }
 
 .emoji-w20 {
     width: 20px;
     height: 20px;
+    line-height: 20px;
+    font-size: 16px;
 }
 
 .emoji-w22 {
     width: 22px;
     height: 22px;
+    line-height: 22px;
+    font-size: 18px;
 }
 
 .emoji-w24 {
     width: 24px;
     height: 24px;
+    line-height: 24px;
+    font-size: 19px;
 }
 
 .emoji-w24.sprite-smiles_and_people,
@@ -18389,26 +18416,29 @@ input[type=range].voice-message-volume:focus {
 .emoji-w25 {
     width: 25px;
     height: 25px;
+    line-height: 25px;
+    font-size: 20px;
 }
 
 .emoji-w32 {
     width: 32px;
     height: 32px;
+    line-height: 32px;
+    font-size: 26px;
 }
 
 .emoji-w44 {
     width: 44px;
     height: 44px;
+    line-height: 44px;
+    font-size: 36px;
 }
 
 .emoji-w56 {
     width: 56px;
     height: 56px;
-}
-
-.emoji-w22 {
-    width: 22px;
-    height: 22px;
+    line-height: 56px;
+    font-size: 45px;
 }
 
 /* ------------------ ROSTER SETTINGS -------------------- */
