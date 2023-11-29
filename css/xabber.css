@@ -1,7 +1,7 @@
 /* -------------- COMMON CLASSES ---------------- */
 @font-face {
     font-family: 'NotoColorEmoji';
-    src: url("../assets/fonts/notocolor/NotoColorEmoji-Regular.ttf?#iefix") format('truetype');
+    src: url("../assets/fonts/notocolor/NotoColorEmoji.ttf?#emjfnt") format('truetype');
 }
 /* ---- Materialize CSS override ---- */
 
