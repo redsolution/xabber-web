@@ -440,7 +440,25 @@ var constants = {
     DEVELOPER_URL: 'https://redsolution.com',
     CLIENT_GITHUB_URL: 'https://github.com/redsolution/xabber-web',
     PROJECT_CROWDIN_URL: 'https://crowdin.com/project/xabber',
-    CLIENT_LICENSE_GITHUB_URL: 'https://github.com/redsolution/xabber-web/blob/master/LICENSE'
+    CLIENT_LICENSE_GITHUB_URL: 'https://github.com/redsolution/xabber-web/blob/master/LICENSE',
+    DEFAULT_EMOJI_FONT: 'notoColor',
+
+    EMOJI_FONTS_LIST: {
+        notoColor: {
+            name: 'NotoColorEmoji',
+            value: 'notoColor',
+            url: '../assets/fonts/notocolor/NotoColorEmoji-Regular.ttf',
+            hint: 'Placeholder hint',
+            order: 0
+
+        },
+        system: {
+            name: 'system',
+            value: 'system',
+            is_system: 'true',
+            order: 1
+        }
+    },
 };
 
 constants.JINGLE_MSG_STATE = {};

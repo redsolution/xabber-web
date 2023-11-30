@@ -79,7 +79,7 @@ var getDefaultAvatar = function (name, color, font, width, height) {
     ctx.fillStyle = color || getAccountColor(name);//COLORS[color_index];
     ctx.fill();
     ctx.font = font || "bold 100px sans-serif";
-    ctx.fillStyle = "#FFF";
+    ctx.fillStyle = font ? '#000' : "#FFF";
     ctx.textAlign = "center";
     if (font){
         ctx.textBaseline = 'ideographic';

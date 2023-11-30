@@ -105,6 +105,13 @@
                                 <div class="settings-block-name one-line">{[print(xabber.getString("avatars"))]}</div>
                                 <div class="settings-block-label one-line"></div>
                             </div>
+                            <div class="settings-tab" data-subblock-parent-name="background" data-block-name="emoji_font">
+                                <div class="setting-icon-background">
+                                    <svg class="mdi mdi-24px mdi-svg-template" data-svgname="star-face"></svg>
+                                </div>
+                                <div class="settings-block-name one-line">{[print(xabber.getString("settings__menu_item__emoji_font"))]}</div>
+                                <div class="settings-block-label one-line">{[print(xabber.getString("settings__menu_item__emoji_font_label"))]}</div>
+                            </div>
                         </div>
                     </div>
 
@@ -313,6 +320,78 @@
                                             <label for="{{view.cid}}-star">{[print(xabber.getString("settings__section_appearance__avatars_star"))]}</label>
                                         </p>
                                     </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div data-header='{[print(xabber.getString("settings__menu_item__emoji_font_header"))]}' class="settings-block-wrap emoji_font hidden">
+                        <div class="settings-subblock-wrap contact-list">
+                            <div class="setting emoji-font radio-button">
+                                <div class="emoji-fonts-list field radio-field clickable-field">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="emojis-preview no-select">
+                            <div class="emoji-preview">😀</div>
+                            <div class="emoji-preview">😁</div>
+                            <div class="emoji-preview">😂</div>
+                            <div class="emoji-preview">😋</div>
+                            <div class="emoji-preview">😎</div>
+                            <div class="emoji-preview">😃</div>
+                            <div class="emoji-preview">😄</div>
+
+                            <div class="emoji-preview">🐱</div>
+                            <div class="emoji-preview">🐭</div>
+                            <div class="emoji-preview">🐛</div>
+                            <div class="emoji-preview">🕸</div>
+                            <div class="emoji-preview">🕷</div>
+                            <div class="emoji-preview">🐢</div>
+                            <div class="emoji-preview">🐑</div>
+
+                            <div class="emoji-preview">🍏</div>
+                            <div class="emoji-preview">🍜</div>
+                            <div class="emoji-preview">🍈</div>
+                            <div class="emoji-preview">🍕</div>
+                            <div class="emoji-preview">🥢</div>
+                            <div class="emoji-preview">🍰</div>
+                            <div class="emoji-preview">☕️</div>
+
+                            <div class="emoji-preview">🏋️‍♂️</div>
+                            <div class="emoji-preview">🏏</div>
+                            <div class="emoji-preview">🏉</div>
+                            <div class="emoji-preview">🥇</div>
+                            <div class="emoji-preview">🎬</div>
+                            <div class="emoji-preview">⚽️</div>
+                            <div class="emoji-preview">🎸</div>
+
+                            <div class="emoji-preview">🚗</div>
+                            <div class="emoji-preview">🏎</div>
+                            <div class="emoji-preview">🎡</div>
+                            <div class="emoji-preview">⛴</div>
+                            <div class="emoji-preview">🏛</div>
+                            <div class="emoji-preview">🏝</div>
+                            <div class="emoji-preview">🗿</div>
+
+                            <div class="emoji-preview">🖱</div>
+                            <div class="emoji-preview">📡</div>
+                            <div class="emoji-preview">🎁</div>
+                            <div class="emoji-preview">📬</div>
+                            <div class="emoji-preview">⏰</div>
+                            <div class="emoji-preview">📹</div>
+                            <div class="emoji-preview">📱</div>
+                        </div>
+                        <div class="preloader-wrap hidden">
+                            <div class="preloader-wrapper preloader-20px active ">
+                                <div class="spinner-layer">
+                                    <div class="circle-clipper left">
+                                        <div class="circle"></div>
+                                    </div>
+                                    <div class="gap-patch">
+                                        <div class="circle"></div>
+                                    </div>
+                                    <div class="circle-clipper right">
+                                        <div class="circle"></div>
+                                    </div>
                                 </div>
                             </div>
                         </div>

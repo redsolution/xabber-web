@@ -303,6 +303,7 @@ let Xabber = Backbone.Model.extend({
             side_panel: {theme: 'dark', blur: false, transparency: 50},
             appearance: {blur: 0, vignetting: 0, color: '#E0E0E0'},
             main_color: 'default',
+            emoji_font: 'default',
             sound_on_private_message: 'beep_up',
             sound_on_group_message: 'beep_up',
             call_attention: true,
@@ -425,6 +426,11 @@ let Xabber = Backbone.Model.extend({
                 constants.LOGIN_CUSTOM_DOMAIN = config.LOGIN_CUSTOM_DOMAIN;
             if (config.SHORT_CLIENT_DESCRIPTION)
                 constants.SHORT_CLIENT_DESCRIPTION = config.SHORT_CLIENT_DESCRIPTION;
+            if (config.DEFAULT_EMOJI_FONT)
+                constants.DEFAULT_EMOJI_FONT = config.DEFAULT_EMOJI_FONT;
+            if (config.EMOJI_FONTS_LIST && _.isObject(config.EMOJI_FONTS_LIST) && Object.keys(config.EMOJI_FONTS_LIST).length)
+                constants.EMOJI_FONTS_LIST = config.EMOJI_FONTS_LIST;
+            (this._settings.get("emoji_font") == 'default') && this._settings.set("emoji_font", constants.DEFAULT_EMOJI_FONT);
 
             if (config.CLIENT_NAME && !config.SHORT_CLIENT_NAME)
                 constants.SHORT_CLIENT_NAME = config.CLIENT_NAME;
@@ -468,9 +474,25 @@ let Xabber = Backbone.Model.extend({
             }
 
             this.requestNotifications().done(function (granted) {
-                self._cache.save('notifications', granted);
-                self._cache.save('endpoint_key', undefined);
-                self.check_config.resolve(true);
+                let emoji_dfd = new $.Deferred();
+                emoji_dfd.done(() => {
+                    self._cache.save('notifications', granted);
+                    self._cache.save('endpoint_key', undefined);
+                    self.check_config.resolve(true);
+                })
+                if (self._settings.get("emoji_font") === 'system' || !Object.keys(constants.EMOJI_FONTS_LIST).length)
+                    emoji_dfd.resolve();
+                else {
+                    let emoji_obj = constants.EMOJI_FONTS_LIST[self._settings.get("emoji_font")],
+                        emoji_url;
+                    if (emoji_obj.url) {
+                        emoji_url = emoji_obj.url;
+                        self.loadEmojiFont(emoji_url, emoji_dfd);
+                    }
+                    else {
+                        emoji_dfd.resolve();
+                    }
+                }
             });
         });
     },
