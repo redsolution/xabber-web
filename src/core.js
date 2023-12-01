@@ -485,7 +485,7 @@ let Xabber = Backbone.Model.extend({
                 else {
                     let emoji_obj = constants.EMOJI_FONTS_LIST[self._settings.get("emoji_font")],
                         emoji_url;
-                    if (emoji_obj.url) {
+                    if (emoji_obj && emoji_obj.url) {
                         emoji_url = emoji_obj.url;
                         self.loadEmojiFont(emoji_url, emoji_dfd);
                     }

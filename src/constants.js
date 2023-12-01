@@ -449,6 +449,7 @@ var constants = {
             value: 'notoColor',
             url: '../assets/fonts/notocolor/NotoColorEmoji-Regular.ttf',
             hint: 'Placeholder hint',
+            attribution_text: 'Copyright 2021 Google Inc. All Rights Reserved.',
             order: 0
 
         },

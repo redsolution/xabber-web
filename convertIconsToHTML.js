@@ -22,6 +22,7 @@ let badges_names = [
         'id',
         'expires',
         'database',
+        'download',
         'lock',
         'lock-open',
         'lock-alert',

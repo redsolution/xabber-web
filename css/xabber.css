@@ -11271,13 +11271,13 @@ input[type=range].voice-message-volume:focus {
     height: unset;
     left: 50%;
     max-height: 80%;
-    max-width: 600px;
-    min-width: 400px;
+    max-width: 650px;
+    min-width: 550px;
     position: absolute;
     top: 15%;
     transform: translate(-50%);
     transition: height .1s;
-    width: 50%;
+    width: 85%;
 }
 
 .settings-panel-wrap .settings-panel .ps-scrollbar-y-rail {
@@ -13336,19 +13336,19 @@ input[type=range].voice-message-volume:focus {
     color: #9e9e9e;
     font-size: 12px;
     padding-left: 44px;
+    max-width: 40%;
 }
 
 .settings-block-wrap.emoji_font .emojis-preview {
-    bottom: 20%;
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
-    height: 156px;
-    left: unset;
+    height: 204px;
+    left: 50%;
     position: absolute;
-    right: 24px;
     text-align: center;
-    width: 200px;
+    transform: translate(-50%);
+    width: 239px;
 }
 
 .settings-block-wrap.emoji_font .emoji-preview {
@@ -13357,21 +13357,66 @@ input[type=range].voice-message-volume:focus {
     line-height: 26px;
     text-align: center;
     width: 26px;
+    margin: 4px;
 }
 
 .settings-block-wrap.emoji_font .preloader-wrap {
-    height: 156px;
-    left: unset;
+    top: 24px;
+    padding: 0 101px;
     position: absolute;
-    right: 24px;
-    bottom: 20%;
-    width: 200px;
-    padding: 54px 75px;
+    width: 100%;
 }
 
 .settings-block-wrap.emoji_font .preloader-wrap .preloader-wrapper{
     width: 48px;
     height: 48px;
+}
+
+.settings-block-wrap.emoji_font .emoji-font-field{
+}
+.settings-block-wrap.emoji_font label{
+    margin-bottom: -10px;
+}
+
+.settings-block-wrap.emoji_font .emoji-font-information-wrap{
+    top: 8px;
+    position: absolute;
+    width: 250px;
+    height: 300px;
+    right: 16px;
+}
+
+.settings-block-wrap.emoji_font .emoji-font-attribution-text{
+    color: #9e9e9e;
+    font-size: 12px;
+    left: 50%;
+    position: absolute;
+    top: 224px;
+    transform: translate(-50%);
+    width: 240px;
+    text-align: center;
+}
+
+.settings-block-wrap.emoji_font .emoji-font-external-url-text{
+    font-size: 14px;
+    left: 50%;
+    position: absolute;
+    text-align: center;
+    top: 80px;
+    transform: translate(-50%);
+    width: 200px;
+}
+
+.settings-block-wrap.emoji_font .emoji-font-external-url-button{
+    position: absolute;
+    left: 101px;
+    top: 24px;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background-color: #e0e0e0;
+    cursor: pointer;
+    padding: 12px;
 }
 
 /* ----------------- COLOR PICKER -------------------- */

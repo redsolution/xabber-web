@@ -354,6 +354,7 @@
     addSvgTemplate('svg.id');
     addSvgTemplate('svg.expires');
     addSvgTemplate('svg.database');
+    addSvgTemplate('svg.download');
     addSvgTemplate('svg.lock');
     addSvgTemplate('svg.lock-open');
     addSvgTemplate('svg.lock-alert');

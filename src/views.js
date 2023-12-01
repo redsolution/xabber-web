@@ -1860,6 +1860,7 @@ xabber.SettingsModalView = xabber.BasicView.extend({
         "change .sound input[type=radio][name=attention_sound]": "setAttentionSound",
         "change .languages-list input[type=radio][name=language]": "changeLanguage",
         "change .emoji-fonts-list input[type=radio][name=emoji_font]": "changeEmojiFont",
+        "click .emoji-font-external-url-button": "loadExternalEmojiFont",
         "change #vignetting": "changeVignetting",
         "change #blur": "changeBlur",
         "change #notifications_volume": "changeNotificationsVolume",
@@ -2678,25 +2679,55 @@ xabber.SettingsModalView = xabber.BasicView.extend({
             emoji_font = constants.EMOJI_FONTS_LIST[value],
             font_load_dfd = new $.Deferred();
 
+        if (!emoji_font){
+            $(ev.target).closest('.emoji-font-field').detach();
+            utils.dialogs.error(xabber.getString("settings__menu_item__emoji_font_chosen_does_not_exist"));
+            return
+        }
         font_load_dfd.done(() => {
             this.$('.emoji_font .preloader-wrap').addClass('hidden');
             this.$('.emoji_font .emojis-preview').removeClass('hidden');
+            this.$('.emoji_font .emoji-font-external-url-text').addClass('hidden');
+            this.$('.emoji_font .emoji-font-external-url-button').addClass('hidden');
             this.model.save('emoji_font', value);
         });
+        this.load_emoji_dfd = new $.Deferred();
+        this.load_emoji_dfd.done(() => {
+            this.$('.emoji_font .emoji-font-external-url-text').addClass('hidden');
+            this.$('.emoji_font .emoji-font-external-url-button').addClass('hidden');
+            this.$('.emoji_font .preloader-wrap').removeClass('hidden');
+            let emoji_url = emoji_font.is_system ? emoji_font.value : emoji_font.url;
+            this.load_emoji_dfd = null;
+            xabber.loadEmojiFont(emoji_url, font_load_dfd);
+        });
 
-        this.$('.emoji_font .preloader-wrap').removeClass('hidden');
         this.$('.emoji_font .emojis-preview').addClass('hidden');
+        this.$('.emoji_font .emoji-font-attribution-text').addClass('hidden');
 
-        let emoji_url = emoji_font.is_system ? emoji_font.value : emoji_font.url;
+        if (emoji_font.is_outside_url){
+            this.$('.emoji_font .emoji-font-external-url-text').removeClass('hidden');
+            this.$('.emoji_font .emoji-font-external-url-button').removeClass('hidden');
+        } else {
+            this.load_emoji_dfd.resolve();
+        }
+    },
 
-        xabber.loadEmojiFont(emoji_url, font_load_dfd);
+    loadExternalEmojiFont: function (ev) {
+        this.load_emoji_dfd && this.load_emoji_dfd.resolve();
     },
 
     updateEmojiFontLabel: function () {
-        let label = constants.EMOJI_FONTS_LIST[this.model.get('emoji_font')].name;
+        if (!constants.EMOJI_FONTS_LIST[this.model.get('emoji_font')]) {
+            this.$('.settings-tab[data-block-name="emoji_font"] .settings-block-label').text(xabber.getString("settings__menu_item__emoji_font_chosen_does_not_exist"))
+            return;
+        }
+        let label = constants.EMOJI_FONTS_LIST[this.model.get('emoji_font')].name,
+            attribution_text = constants.EMOJI_FONTS_LIST[this.model.get('emoji_font')].attribution_text;
         if (label === 'system')
             label = xabber.getString("settings__menu_item__emoji_font_system");
         this.$('.settings-tab[data-block-name="emoji_font"] .settings-block-label').text(label);
+        this.$('.emoji-font-attribution-text').switchClass('hidden', !attribution_text);
+        this.$('.emoji-font-attribution-text').text(attribution_text);
     },
 
     updateLanguage: function () {
