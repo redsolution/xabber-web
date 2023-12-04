@@ -448,17 +448,11 @@ var constants = {
             name: 'NotoColorEmoji',
             value: 'notoColor',
             url: '../assets/fonts/notocolor/NotoColorEmoji-Regular.ttf',
-            hint: 'Placeholder hint',
+            hint: 'Locally stored NotoColorEmoji font, size is 23MB',
             attribution_text: 'Copyright 2021 Google Inc. All Rights Reserved.',
             order: 0
 
         },
-        system: {
-            name: 'system',
-            value: 'system',
-            is_system: 'true',
-            order: 1
-        }
     },
 };
 

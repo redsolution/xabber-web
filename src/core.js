@@ -428,7 +428,7 @@ let Xabber = Backbone.Model.extend({
                 constants.SHORT_CLIENT_DESCRIPTION = config.SHORT_CLIENT_DESCRIPTION;
             if (config.DEFAULT_EMOJI_FONT)
                 constants.DEFAULT_EMOJI_FONT = config.DEFAULT_EMOJI_FONT;
-            if (config.EMOJI_FONTS_LIST && _.isObject(config.EMOJI_FONTS_LIST) && Object.keys(config.EMOJI_FONTS_LIST).length)
+            if (config.EMOJI_FONTS_LIST && _.isObject(config.EMOJI_FONTS_LIST))
                 constants.EMOJI_FONTS_LIST = config.EMOJI_FONTS_LIST;
             (this._settings.get("emoji_font") == 'default') && this._settings.set("emoji_font", constants.DEFAULT_EMOJI_FONT);
 

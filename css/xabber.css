@@ -13397,6 +13397,7 @@ input[type=range].voice-message-volume:focus {
     text-align: center;
 }
 
+.settings-block-wrap.emoji_font .emoji-font-download-text,
 .settings-block-wrap.emoji_font .emoji-font-external-url-text{
     font-size: 14px;
     left: 50%;
