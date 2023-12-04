@@ -2684,12 +2684,19 @@ xabber.SettingsModalView = xabber.BasicView.extend({
             utils.dialogs.error(xabber.getString("settings__menu_item__emoji_font_chosen_does_not_exist"));
             return
         }
-        font_load_dfd.done(() => {
+        font_load_dfd.done((response) => {
             this.$('.emoji_font .preloader-wrap').addClass('hidden');
             this.$('.emoji_font .emojis-preview').removeClass('hidden');
             this.$('.emoji_font .emoji-font-external-url-text').addClass('hidden');
             this.$('.emoji_font .emoji-font-external-url-button').addClass('hidden');
-            this.model.save('emoji_font', value);
+            if (response.error){
+                this.$('.emoji_font .emoji-font-attribution-text').addClass('hidden');
+                this.$(`.emoji-fonts-list input[type=radio][name=emoji_font][value="${this.model.get('emoji_font')}"]`)
+                    .prop('checked', true);
+                $(ev.target).prop('disabled', true);
+            } else {
+                this.model.save('emoji_font', value);
+            }
         });
         this.load_emoji_dfd = new $.Deferred();
         this.load_emoji_dfd.done(() => {
@@ -4326,15 +4333,15 @@ _.extend(xabber, {
             emoji_font.load().then((loaded_face) => {
                 document.fonts.add(loaded_face);
                 $(constants.CONTAINER_ELEMENT).addClass('custom-emoji-font');
-                dfd && dfd.resolve();
+                dfd && dfd.resolve({});
             }).catch((error) => {
-                utils.dialogs.error(error);
+                utils.dialogs.error(xabber.getString("settings__menu_item__emoji_font_error_loading") + error);
                 $(constants.CONTAINER_ELEMENT).removeClass('custom-emoji-font');
-                dfd && dfd.resolve();
+                dfd && dfd.resolve({error: true});
             });
         } else if (url === 'system'){
             $(constants.CONTAINER_ELEMENT).removeClass('custom-emoji-font');
-            dfd && dfd.resolve();
+            dfd && dfd.resolve({});
         }
     },
 
