@@ -2699,6 +2699,7 @@ xabber.SettingsModalView = xabber.BasicView.extend({
         this.load_emoji_external_dfd.done(() => {
 
             this.font_load_dfd = new $.Deferred();
+            this.currently_loaded_font_value = value;
 
             this.font_load_dfd.done((response) => {
                 if (this.emoji_load_date !== current_time)
@@ -2712,6 +2713,7 @@ xabber.SettingsModalView = xabber.BasicView.extend({
                     .prop('disabled', false);
 
                 this.font_load_dfd = null;
+                this.currently_loaded_font_value = null;
                 if (response && response.error){
                     this.$('.emoji_font .emoji-font-attribution-text').addClass('hidden');
                     this.$(`.emoji-fonts-list input[type=radio][name=emoji_font][value="${this.model.get('emoji_font')}"]`)
@@ -2751,12 +2753,12 @@ xabber.SettingsModalView = xabber.BasicView.extend({
     },
 
     updateEmojiFontLabel: function () {
-        if (!constants.EMOJI_FONTS_LIST[this.model.get('emoji_font')]) {
+        if (!constants.EMOJI_FONTS_LIST[this.model.get('emoji_font')] && this.model.get('emoji_font') !== 'system') {
             this.$('.settings-tab[data-block-name="emoji_font"] .settings-block-label').text(xabber.getString("settings__menu_item__emoji_font_chosen_does_not_exist"))
             return;
         }
-        let label = constants.EMOJI_FONTS_LIST[this.model.get('emoji_font')].name,
-            attribution_text = constants.EMOJI_FONTS_LIST[this.model.get('emoji_font')].attribution_text;
+        let label = this.model.get('emoji_font') === 'system' ? 'system' : constants.EMOJI_FONTS_LIST[this.model.get('emoji_font')].name,
+            attribution_text = this.model.get('emoji_font') === 'system' ? '' : constants.EMOJI_FONTS_LIST[this.model.get('emoji_font')].attribution_text;
         if (label === 'system')
             label = xabber.getString("settings__menu_item__emoji_font_system");
         this.$('.settings-tab[data-block-name="emoji_font"] .settings-block-label').text(label);
@@ -2771,13 +2773,15 @@ xabber.SettingsModalView = xabber.BasicView.extend({
         this.$('.emoji_font .preloader-wrap').addClass('hidden');
         this.$('.emoji_font .emoji-font-download-text').addClass('hidden');
         this.$('.emoji_font .emojis-preview').removeClass('hidden');
-        if (this.font_load_dfd){
+        if (this.font_load_dfd && this.currently_loaded_font_value){
             this.$('.emoji_font .emojis-preview').addClass('hidden');
             this.$('.emoji-font-attribution-text').addClass('hidden');
             this.$('.emoji_font .preloader-wrap').removeClass('hidden');
             this.$('.emoji_font .emoji-font-download-text').removeClass('hidden');
             this.$(`.emoji-fonts-list input[type=radio][name=emoji_font]`)
                 .prop('disabled', true);
+            this.$(`.emoji-fonts-list input[type=radio][name=emoji_font][value="${this.currently_loaded_font_value}"]`)
+                .prop('checked', true);
         }
     },
 
