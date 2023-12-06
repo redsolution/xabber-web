@@ -2734,6 +2734,7 @@ xabber.SettingsModalView = xabber.BasicView.extend({
                 .prop('disabled', true);
             this.emoji_load_date = Date.now();
             current_time = this.emoji_load_date;
+            this.$('.settings-tab[data-block-name="emoji_font"] .settings-block-label').text(xabber.getString("settings__menu_item__emoji_font_downloading_text"));
             xabber.loadEmojiFont(emoji_url, this.font_load_dfd);
         });
 
@@ -2782,6 +2783,7 @@ xabber.SettingsModalView = xabber.BasicView.extend({
                 .prop('disabled', true);
             this.$(`.emoji-fonts-list input[type=radio][name=emoji_font][value="${this.currently_loaded_font_value}"]`)
                 .prop('checked', true);
+            this.$('.settings-tab[data-block-name="emoji_font"] .settings-block-label').text(xabber.getString("settings__menu_item__emoji_font_downloading_text"));
         }
     },
 
