@@ -7839,6 +7839,8 @@ define("xabber-chats", function () {
                         arr_text.forEach((item, idx) => {
                             if (item == '\n')
                                 arr_text.splice(idx, 1, '<br>');
+                            if (item == ' ')
+                                arr_text.splice(idx, 1, '&nbsp;');
                         });
                         text = "<p>" + arr_text.join("").emojify({tag_name: 'span'}) + "</p>";
                         window.document.execCommand('insertHTML', false, text);
@@ -7851,7 +7853,7 @@ define("xabber-chats", function () {
                         if (item == '\n')
                             arr_text.splice(idx, 1, '<br>');
                         if (item == ' ')
-                            arr_text.splice(idx, 1, '&nbsp');
+                            arr_text.splice(idx, 1, '&nbsp;');
                     });
                     text = "<p>" + arr_text.join("").emojify({tag_name: 'span'}) + "</p>";
                     window.document.execCommand('insertHTML', false, text);
