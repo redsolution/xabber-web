@@ -3008,7 +3008,7 @@ xabber.MediaBaseView = xabber.BasicView.extend({
             let cached_messages = this.account.omemo.cached_messages.getMessages(this.contact);
 
             for (let [key, value] of Object.entries(cached_messages)) {
-                let msg_items = this.contact.getFilesFromStanza($(value), {cached_message: true, cached_stanza_id: key});
+                let msg_items = this.contact.getFilesFromStanza($(value.envelope), {cached_message: true, cached_stanza_id: key});
                 if (msg_items.length)
                     this.temporary_items = this.temporary_items.concat(msg_items);
             }
@@ -8576,6 +8576,7 @@ xabber.Roster = xabber.ContactsBase.extend({
         }
         unread_msgs_count && (options.is_unread = true);
         options.delay = message.children('time');
+        (unread_msgs_count == 0) && (options.sync_timestamp = chat_timestamp);
         message.length && (msg = this.account.chats.receiveChatMessage(message, options));
         if (!(encrypted && !this.account.omemo)){
             chat.messages_unread.reset();

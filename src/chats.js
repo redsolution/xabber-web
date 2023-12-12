@@ -86,7 +86,37 @@ xabber.Message = Backbone.Model.extend({
             return this.collection.account.get('jid') === this.get('from_jid');
         else
             false;
-    }
+    },
+
+    handleEphemeralMessage: function () {
+        if (this.collection.account.omemo){
+            this.collection.account.omemo.cached_messages.putMessage(this.collection.chat.contact, this.get('stanza_id'), {ephemeral_removed: true});
+        }
+        if (!this.collection.chat.item_view.content)
+            this.collection.chat.item_view.content = new xabber.ChatContentView({chat_item: this.collection.chat.item_view});
+        this.collection.chat.item_view.content.removeMessage(this);
+    },
+
+    checkEphemeralTimer: function () {//34
+        if (this.get('ethemeral_removed') || !this.get('displayed_time'))
+            return;
+
+        let date = this.get('displayed_time');
+
+        let msgDate = new Date(date),
+            currentDate = new Date(),
+            seconds = (currentDate.getTime() - msgDate.getTime()) / 1000;
+
+        let time_difference = this.get('ephemeral_timer') - seconds;
+        clearTimeout(this.ephemeral_timeout);
+        if (time_difference <= 0){
+            this.handleEphemeralMessage();
+        } else {
+            this.ephemeral_timeout = setTimeout(() => {
+                this.handleEphemeralMessage();
+            }, (time_difference * 1000))
+        }
+    },
 });
 
 xabber.MessagesBase = Backbone.Collection.extend({
@@ -120,6 +150,22 @@ xabber.MessagesBase = Backbone.Collection.extend({
     initialize: function (models, options) {
         this.chat = options.chat;
         this.account = options.account;
+    },
+
+    checkEphemeralTimers: function (models, options) {
+        let displayed_time,
+            ephemeral_msgs = this.filter(msg => msg.get('ephemeral_timer'));
+        ephemeral_msgs.reverse().forEach((msg) => {
+            if (msg.get('is_unread') || (msg.isSenderMe() && msg.get('state') !== constants.MSG_DISPLAYED))
+                return;
+            if (msg.get('displayed_time') && !msg.get('dynamic_displayed_time'))
+                displayed_time = msg.get('displayed_time');
+            else if (displayed_time){
+                msg.set('dynamic_displayed_time', true)
+                msg.set('displayed_time', displayed_time);
+            }
+            msg.checkEphemeralTimer();
+        });
     },
 
     createInvitationFromStanza: function ($message, options) {
@@ -250,8 +296,20 @@ xabber.MessagesBase = Backbone.Collection.extend({
             options.forwarded_message = message.get('forwarded_message');
         }
 
-        if (message && !options.replaced && !options.context_message && !options.is_unread_archived && !options.searched_message && !options.pinned_message && !options.participant_message && !options.echo_msg && !options.is_searched)
+        if (message && !options.replaced && !options.context_message && !options.is_unread_archived && !options.searched_message && !options.pinned_message && !options.participant_message && !options.echo_msg && !options.is_searched) {
+            if ($message.find('[xmlns="' + Strophe.NS.EPHEMERAL + '"]').length && !$message.find('[xmlns="' + Strophe.NS.EPHEMERAL + '"]').closest('system-message').length && options.encrypted){//34
+                message.set('ephemeral_timer', $message.find('[xmlns="' + Strophe.NS.EPHEMERAL + '"]').attr('timer'));
+                options.sync_timestamp && message.set('displayed_time', options.sync_timestamp)
+                if (this.chat.contact){
+                    let cached_msg = this.account.omemo.cached_messages.getMessage(this.chat.contact, $message.find(`stanza-id[by="${this.account.get('jid')}"]`).attr('id'));
+                    if (cached_msg && cached_msg.envelope && cached_msg.displayed_time){
+                        message.set('displayed_time', cached_msg.displayed_time)
+                    }
+                }
+                message.collection.checkEphemeralTimers();
+            }
             return message;
+        }
 
         let attrs = {
                 xml: options.xml || $message[0],
@@ -502,10 +560,24 @@ xabber.MessagesBase = Backbone.Collection.extend({
             return message;
         }
 
+        if ($message.find('[xmlns="' + Strophe.NS.EPHEMERAL + '"]').length && !$message.find('[xmlns="' + Strophe.NS.EPHEMERAL + '"]').closest('system-message').length && options.encrypted) {//34
+            attrs.ephemeral_timer = $message.find('[xmlns="' + Strophe.NS.EPHEMERAL + '"]').attr('timer');
+            options.sync_timestamp && (attrs.displayed_time = options.sync_timestamp);
+            if (this.chat.contact){
+                let cached_msg = this.account.omemo.cached_messages.getMessage(this.chat.contact, $message.find(`stanza-id[by="${this.account.get('jid')}"]`).attr('id'));
+                if (cached_msg && cached_msg.envelope && cached_msg.displayed_time){
+                    attrs.displayed_time = cached_msg.displayed_time;
+                }
+            }
+        }
+
         message = this.create(attrs);
 
         (options.encrypted && options.is_unread) && message.set('is_unread', true);
 
+        if ($message.find('[xmlns="' + Strophe.NS.EPHEMERAL + '"]').length && !$message.find('[xmlns="' + Strophe.NS.EPHEMERAL + '"]').closest('system-message').length && options.encrypted){//34
+            message.collection.checkEphemeralTimers();
+        }
         return message;
     },
 
@@ -1540,7 +1612,7 @@ xabber.MessagesBase = Backbone.Collection.extend({
         this.account.sendMsg($delivery_msg);
     },
 
-    sendMarker: function (msg_id, status, stanza_id, contact_stanza_id) {
+    sendMarker: function (msg_id, status, stanza_id, contact_stanza_id, is_ephemeral) {
         status || (status = 'displayed');
         let stanza = $msg({
             to: this.get('jid'),
@@ -1552,6 +1624,9 @@ xabber.MessagesBase = Backbone.Collection.extend({
         });
         stanza_id && stanza.c('stanza-id', {xmlns: 'urn:xmpp:sid:0', id: stanza_id, by: this.account.get('jid')}).up();
         (!this.get('saved') && contact_stanza_id) && stanza.c('stanza-id', {xmlns: 'urn:xmpp:sid:0', id: contact_stanza_id, by: this.contact.get('jid')}).up();
+        is_ephemeral && stanza.up().c('store', {xmlns: Strophe.NS.HINTS});
+        is_ephemeral && stanza.up().c('encryption', {xmlns: Strophe.NS.EXPLICIT_MESSAGE_ENCRYPTION, namespace: Strophe.NS.OMEMO});
+        is_ephemeral && stanza.up().c('conversation', {xmlns: Strophe.NS.SYNCHRONIZATION, type: Strophe.NS.OMEMO, jid: this.contact.get('jid')});
         this.account.sendMsg(stanza);
     },
 
@@ -1567,6 +1642,13 @@ xabber.MessagesBase = Backbone.Collection.extend({
         if (!msg) {
             let enc_chat =  this.account.chats.get(`${this.id}:encrypted`),
                 enc_msg = enc_chat && enc_chat.messages.find(m => marked_stanza_id && (m.get('stanza_id') === marked_stanza_id || m.get('contact_stanza_id') === marked_stanza_id) || m.get('msgid') === marked_msg_id);
+            if (!enc_msg && this.account.omemo){
+                let cached_msg = this.account.omemo.cached_messages.getMessage(this.contact, marked_stanza_id);
+                if (cached_msg && cached_msg.envelope && !cached_msg.displayed_time){
+                    cached_msg.displayed_time = $message.find('time').attr('stamp');
+                    cached_msg && this.account.omemo.cached_messages.putMessage(this.contact, marked_stanza_id, cached_msg);
+                }
+            }
             if (enc_msg)
                 enc_chat.receiveMarker($message, tag, carbon_copied);
             return;
@@ -1596,6 +1678,10 @@ xabber.MessagesBase = Backbone.Collection.extend({
             }
         } else {
             msg.set('is_unread', false);
+            if ($message.find('time').length && msg.get('ephemeral_timer')) {
+                msg.set('displayed_time', $message.find('time').attr('stamp'));
+                msg.collection.checkEphemeralTimers();
+            }
         }
     },
 
@@ -1616,7 +1702,13 @@ xabber.MessagesBase = Backbone.Collection.extend({
             let chat =  this.account.chats.get(this.id + ':encrypted');
             chat && (undelivered_messages = chat.messages.filter(message => message.isSenderMe() && (message.get('timestamp') <= timestamp) && (message.get('state') > constants.MSG_PENDING) && (message.get('state') < constants.MSG_DISPLAYED)));
         }
-        undelivered_messages.forEach(message => message.set('state', constants.MSG_DISPLAYED));
+        undelivered_messages.forEach(message => {
+            message.set('state', constants.MSG_DISPLAYED);
+            if (message.get('ephemeral_timer')){
+                message.set('displayed_time', Date.now());
+                message.collection.checkEphemeralTimers();
+            }
+        });
     },
 
     receiveCarbonsMarker: function ($marker) {
@@ -3434,7 +3526,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
     readMessage: function (last_visible_msg, $last_visible_msg, is_context) {
         clearTimeout(this._read_last_message_timeout);
         this._read_last_message_timeout = setTimeout(() => {
-            this.model.sendMarker(last_visible_msg.get('msgid'), 'displayed', last_visible_msg.get('stanza_id'), last_visible_msg.get('contact_stanza_id'));
+            this.model.sendMarker(last_visible_msg.get('msgid'), 'displayed', last_visible_msg.get('stanza_id'), last_visible_msg.get('contact_stanza_id'), last_visible_msg.get('encrypted') && last_visible_msg.get('ephemeral_timer'));
             this.model.set('last_read_msg', last_visible_msg.get('stanza_id'));
             this.model.set('prev_last_read_msg', last_visible_msg.get('stanza_id'));
 
@@ -3489,7 +3581,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
         let unread_messages = _.clone(this.model.messages_unread.models);
         if (unread_messages.length) {
             let msg = unread_messages[unread_messages.length - 1];
-            this.model.sendMarker(msg.get('msgid'), 'displayed', msg.get('stanza_id'), msg.get('contact_stanza_id'));
+            this.model.sendMarker(msg.get('msgid'), 'displayed', msg.get('stanza_id'), msg.get('contact_stanza_id'), msg.get('encrypted') && msg.get('ephemeral_timer'));
             this.model.set('last_read_msg', msg.get('stanza_id'));
             this.model.set('prev_last_read_msg', msg.get('stanza_id'));
         }
@@ -3502,7 +3594,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
         });
         if (this.model.last_message && this.model.last_message.get('is_unread') && !unread_messages.length){
             let msg = this.model.last_message;
-            this.model.sendMarker(msg.get('msgid'), 'displayed', msg.get('stanza_id'), msg.get('contact_stanza_id'));
+            this.model.sendMarker(msg.get('msgid'), 'displayed', msg.get('stanza_id'), msg.get('contact_stanza_id'), msg.get('encrypted') && msg.get('ephemeral_timer'));
             msg.set('is_unread', false);
             msg.get('stanza_id') && this.model.set('last_read_msg', msg.get('stanza_id'));
             msg.get('stanza_id') && this.model.set('prev_last_read_msg', msg.get('stanza_id'));
@@ -3511,7 +3603,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
             let messages = _.clone(this.model.messages.models),
                 msg = messages[messages.length - 2];
             if (msg && msg.get('is_unread')) {
-                this.model.sendMarker(msg.get('msgid'), 'displayed', msg.get('stanza_id'), msg.get('contact_stanza_id'));
+                this.model.sendMarker(msg.get('msgid'), 'displayed', msg.get('stanza_id'), msg.get('contact_stanza_id'), msg.get('encrypted') && msg.get('ephemeral_timer'));
                 msg.set('is_unread', false);
                 msg.get('stanza_id') && this.model.set('last_read_msg', msg.get('stanza_id'));
                 msg.get('stanza_id') && this.model.set('prev_last_read_msg', msg.get('stanza_id'));
@@ -5364,7 +5456,9 @@ xabber.ChatContentView = xabber.BasicView.extend({
                 $message.find('.chat-msg-content').text(msg_text)
         }
         message.set('msg_player_audios', audio_player_list);
-        return $message.hyperlinkify({selector: '.chat-text-content', embed_video: true}).emojify('.chat-text-content', {tag_name: 'div', emoji_size: utils.emoji_size(emoji)}).emojify('.chat-msg-author-badge', {emoji_size: 16});
+        $message = $message.hyperlinkify({selector: '.chat-text-content', embed_video: true}).emojify('.chat-text-content', {tag_name: 'div', emoji_size: utils.emoji_size(emoji)}).emojify('.chat-msg-author-badge', {emoji_size: 16});
+        message.set('msg_el', $message);
+        return $message;
     },
 
     getDateIndicator: function (date) {
@@ -6841,6 +6935,10 @@ xabber.ChatContentView = xabber.BasicView.extend({
             this.model.recountUnread();
             if (!message.get('muted')) {
                 xabber.recountAllMessageCounter();
+            }
+            if (message.get('ephemeral_timer')) {
+                message.set('displayed_time', new Date());
+                message.collection.checkEphemeralTimers();
             }
         }
     },
@@ -12979,7 +13077,7 @@ xabber.ChatBottomView = xabber.BasicView.extend({
             $message.c('from', {jid: this.account.get('jid')}).up().up()
             this.account.omemo.encrypt(this.contact, $message).then((msg) => {
                 iq.cnode(msg.message.tree());
-                this.account.omemo.cached_messages.putMessage(this.contact, stanza_id, decrypted_msg);
+                this.account.omemo.cached_messages.putMessage(this.contact, stanza_id, {envelope: decrypted_msg});
                 this.account.sendIQFast(iq);
             });
         } else {

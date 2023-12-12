@@ -1288,7 +1288,7 @@ xabber.Omemo = Backbone.ModelWithStorage.extend({
             origin_id = $msg.children('origin-id').attr('id'),
             plaintext = Strophe.serialize($msg.children('envelope')[0]) || "";
 
-        origin_id && this.cached_messages.putMessage(contact, origin_id, plaintext);
+        origin_id && this.cached_messages.putMessage(contact, origin_id, {envelope: plaintext});
 
         return peer.encrypt(plaintext).then((encryptedMessage) => {
 
@@ -1444,14 +1444,19 @@ xabber.Omemo = Backbone.ModelWithStorage.extend({
 
             let device_id = $message.find(`encrypted[xmlns="${Strophe.NS.OMEMO}"] header`).attr('sid');
             options.device_id = device_id;
+            if (cached_msg && cached_msg.ephemeral_removed)
+                return;
 
-            if (cached_msg) {
+            if (cached_msg && cached_msg.envelope) {
                 if (!options.replaced) {
                     options.encrypted = true;
                     this.getTrusted($message).then((is_trusted) => {
                         options.is_trusted = is_trusted;
                         $message.find('body').remove();
-                        $message.find(`encrypted[xmlns="${Strophe.NS.OMEMO}"]`).replaceWith(cached_msg);
+                        $message.find(`encrypted[xmlns="${Strophe.NS.OMEMO}"]`).replaceWith(cached_msg.envelope);
+                        if ($message.find('displayed-time').length){
+                            options.displayed_time = $message.find('displayed-time').attr('stamp');
+                        }
                         if (options.gallery && deferred)
                             deferred.resolve($message, options);
 
@@ -1492,7 +1497,7 @@ xabber.Omemo = Backbone.ModelWithStorage.extend({
                 this.decrypt(message.children('replace').children('message'), options).then((decrypted_msg) => {
                     if (decrypted_msg) {
                         options.encrypted = true;
-                        stanza_id && this.cached_messages.putMessage(contact, stanza_id, decrypted_msg);
+                        stanza_id && this.cached_messages.putMessage(contact, stanza_id, {envelope: decrypted_msg});
                         $message.find('body').remove();
                         $message.find(`encrypted[xmlns="${Strophe.NS.OMEMO}"]`).replaceWith(decrypted_msg);
                         let chat = this.account.chats.getChat(contact, 'encrypted');
@@ -1511,7 +1516,7 @@ xabber.Omemo = Backbone.ModelWithStorage.extend({
                 }).then((decrypted_msg) => {
                     if (decrypted_msg) {
                         options.encrypted = true;
-                        stanza_id && this.cached_messages.putMessage(contact, stanza_id, decrypted_msg);
+                        stanza_id && this.cached_messages.putMessage(contact, stanza_id, {envelope: decrypted_msg});
                         $message.find('body').remove();
                     }
                     else {
