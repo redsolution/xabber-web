@@ -358,6 +358,41 @@ var utils = {
             return (Math.trunc(duration/60) + ":" + ((duration%60 < 10) ? ("0" + (duration%60)) : duration%60));
     },
 
+    pretty_duration_ephemeral_timer: function (timer) {
+        let text = '';
+        console.log(timer);
+        switch (timer) {
+            case '5':
+                text = '5s';
+                break;
+            case '10':
+                text = '10s';
+                break;
+            case '15':
+                text = '15s';
+                break;
+            case '30':
+                text = '30s';
+                break;
+            case '60':
+                text = '1m';
+                break;
+            case '300':
+                text = '5m';
+                break;
+            case '600':
+                text = '10m';
+                break;
+            case '900':
+                text = '15m';
+                break;
+            default:
+                text = '';
+                break;
+        }
+        return text;
+    },
+
     pretty_name: function (name) {
         return name ? (name[0].toUpperCase() + name.replace(/-/,' ').substr(1).toLowerCase()) : "";
     },

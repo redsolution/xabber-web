@@ -8617,6 +8617,16 @@ input[type=text].simple-input-field:hover {
     width: fit-content!important;
     overflow: hidden;
 }
+.chat-tools-wrap .ephemeral-timer-dropdown-content {
+    left: initial !important;
+    right: 100.5% !important;
+    min-width: 200px !important;
+    width: fit-content!important;
+    overflow: hidden;
+    top: 0px!important;
+    height: 450px !important;
+    max-height: unset !important;
+}
 
 .xabber-account-menu {
     top: 0px !important;
@@ -9654,6 +9664,17 @@ img.fwd-img-preview {
     top: 11px;
 }
 
+.chat-message .ephemeral-timer-msg-time {
+    font-size: 9px;
+    height: 14px;
+    left: 18px;
+    line-height: 14px;
+    position: absolute;
+    text-align: center;
+    top: 22px;
+    width: 50px;
+}
+
 .chat-message.not-verified-previously .msg-delivering-state,
 .chat-message.not-verified .msg-delivering-state,
 .chat-message.not-existing-device .msg-delivering-state,
@@ -9746,7 +9767,7 @@ img.fwd-img-preview {
     width: fit-content !important;
     min-width: 64px !important;
     top: -10px !important;
-    z-index: 0;
+    z-index: 1;
     padding: 0.5rem 0;
     font-size: 1rem;
     color: #212529;
@@ -10870,6 +10891,17 @@ img.fwd-img-preview {
     height: 48px;
     padding: 8px;
     float: right;
+}
+
+.send-area .ephemeral-timer-time {
+    bottom: 48px;
+    left: 21px;
+    position: absolute;
+    text-align: center;
+    width: 24px;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
 }
 
 .send-area .attach i {
