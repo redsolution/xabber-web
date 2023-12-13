@@ -6352,8 +6352,10 @@ xabber.ChatContentView = xabber.BasicView.extend({
                 else {
                     if ((msg_files_count - cancelled_files_count) == 0) {
                         message.set('files', []);
-                        self.bottom.setEditedMessageAttachments(message, true);
-                        self.bottom.setRedactedUploadMessage(message);
+                        if (self.model.get('encrypted')){
+                            self.bottom.setEditedMessageAttachments(message, true);
+                            self.bottom.setRedactedUploadMessage(message);
+                        }
                         self.removeMessage($message);
                     } else {
                         xhr.is_cancelled = true;
@@ -6419,8 +6421,10 @@ xabber.ChatContentView = xabber.BasicView.extend({
                         return;
                     if ((msg_files_count - cancelled_files_count) == 0 && xhr_status === 0){
                         message.set('files', []);
-                        self.bottom.setEditedMessageAttachments(message, true);
-                        self.bottom.setRedactedUploadMessage(message);
+                        if (self.model.get('encrypted')){
+                            self.bottom.setEditedMessageAttachments(message, true);
+                            self.bottom.setRedactedUploadMessage(message);
+                        }
                         self.removeMessage($message);
                     } else {
                         let response_text, error_status;
@@ -6470,8 +6474,10 @@ xabber.ChatContentView = xabber.BasicView.extend({
                         };
                         (xhr_status === 0) && (message.get('files')[idx] = null);
                         if (!message.get('files').filter((element) => { return element != null}).length && !message.get('message')){
-                            self.bottom.setEditedMessageAttachments(message, true);
-                            self.bottom.setRedactedUploadMessage(message);
+                            if (self.model.get('encrypted')){
+                                self.bottom.setEditedMessageAttachments(message, true);
+                                self.bottom.setRedactedUploadMessage(message);
+                            }
                             self.removeMessage($message);
                             return;
                         }
@@ -6836,8 +6842,10 @@ xabber.ChatContentView = xabber.BasicView.extend({
             if (this.account.get('gallery_token') && this.account.get('gallery_url'))
                 this.bottom.deleteFilesFromMessages([message]);
             $message.find('.edit-upload').one("click",() => {
-                this.bottom.setEditedMessageAttachments(message, true);
-                this.bottom.setRedactedUploadMessage(message);
+                if (this.model.get('encrypted')){
+                    this.bottom.setEditedMessageAttachments(message, true);
+                    this.bottom.setRedactedUploadMessage(message);
+                }
                 this.removeMessage($message);
             });
             $message.find('.repeat-upload').one("click",() => {
@@ -11491,6 +11499,7 @@ xabber.ChatBottomView = xabber.BasicView.extend({
         this.content_view = (this.view.data.get('visible') ? this.view : this.model.messages_view) || this.view;
         this.messages_arr = this.content_view.$el.hasClass('participant-messages-wrap') && this.account.participant_messages || this.content_view.$el.hasClass('messages-context-wrap') && this.account.context_messages || this.model.messages;
         this.renderLastEmoticons();
+        this.$('.edit-message-wrap').hideIf(this.model.get('encrypted'));
         this.$('.attach-file').showIf(http_upload);
         this.$('.attach-location').showIf(xabber.settings.mapping_service);
         this.$('.attach-media').showIf(this.account.get('gallery_token') && this.account.get('gallery_url'));
@@ -11938,7 +11947,7 @@ xabber.ChatBottomView = xabber.BasicView.extend({
             this.setDefaultPlaceholder();
         }
         if (ev.keyCode === constants.KEY_ARROW_UP) {
-            if (!text) {
+            if (!text && !this.model.get('encrypted')) {
                 let $msg = this.view.$(`.chat-message[data-from="${this.account.get('jid')}"]`).last();
                 (!$msg.length && this.contact.participants) && ($msg = this.view.$(`.chat-message[data-from="${this.contact.participants.find(m => m.get('jid') === this.account.get('jid')).get('id')}"]`).last());
                 let edit_msg = this.messages_arr.get($msg.data('uniqueid'));
@@ -13139,7 +13148,7 @@ xabber.ChatBottomView = xabber.BasicView.extend({
     },
 
     showEditPanel: function () {
-        if (!this.model.get('active'))
+        if (!this.model.get('active') || this.model.get('encrypted'))
             return;
         if (this.$('.edit-message-wrap').hasClass('non-active'))
             return;
