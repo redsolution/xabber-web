@@ -8872,6 +8872,9 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
                 ){
                     view.model.set('show_new_unread', false);
                     view.model._wait_load_unread_history = new $.Deferred();
+                    setTimeout(() => {
+                        view.model._wait_load_unread_history.resolve();
+                    }, 10000)
                     view.content._no_scrolling_event = true;
                     view.content.loadUnreadHistory();
                 } else if (view.model.messages.length < 20)
