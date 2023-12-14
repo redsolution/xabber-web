@@ -58,6 +58,9 @@ let Xabber = Backbone.Model.extend({
         this.on("quit", this.onQuit, this);
         this._version_interval = setInterval(this.readActualVersion.bind(this), 600000);
 
+        window.onerror = (msg, url, line, col, error) => {
+            utils.dialogs.error(msg + '\n' + url + '\n' + line + ':' + col + '\n' + error);
+        };
         window.ononline = () => {
             this.disconnectWhenConnecting();
         };
