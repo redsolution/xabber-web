@@ -132,10 +132,17 @@ $.fn.hyperlinkify = function (options) {
                     html_concat += options.decode_uri ? decodeURI(x) : getHyperLink(x);
                 } else {
                     for (i = 0; i < list.length; i++) {
-                        if (options.decode_uri)
-                            x = x.replace(list[i], decodeURI(list[i]));
-                        else
-                            x = x.replaceAll(new RegExp(`(\\s|^)(${list[i].replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`,"g"), '$1' + getHyperLink(list[i]));
+                            if (options.decode_uri) {
+                                try {
+                                    x = x.replace(list[i], decodeURI(list[i]));
+                                } catch (e) {
+                                    console.log(list[i])
+                                    console.error(e)
+                                    x = x.replaceAll(new RegExp(`(\\s|^)(${list[i].replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`,"g"), '$1' + getHyperLink(list[i]));
+                                }
+                            }
+                            else
+                                x = x.replaceAll(new RegExp(`(\\s|^)(${list[i].replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`,"g"), '$1' + getHyperLink(list[i]));
                     }
                     html_concat += x;
                 }
@@ -360,7 +367,6 @@ var utils = {
 
     pretty_duration_ephemeral_timer: function (timer) {
         let text = '';
-        console.log(timer);
         switch (timer) {
             case '5':
                 text = '5s';
