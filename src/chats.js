@@ -622,6 +622,70 @@ xabber.MessagesBase = Backbone.Collection.extend({
     }
 });
 
+
+xabber.EphemeralTimerSelector = xabber.BasicView.extend({
+    className: 'modal main-modal change-ephemeral-timer-modal',
+    ps_selector: '.modal-content',
+    ps_settings: {
+        wheelPropagation: true
+    },
+    template: templates.ephemeral_timer_selector,
+
+    events: {
+        "click .btn-set-ephemeral-timer": "changeTimer",
+    },
+
+    render: function (options) {
+        this.model = options.model;
+        this.account = options.account;
+        this.updateColorScheme();
+        this.updateScrollBar();
+        if (this.model.get('chat_ephemeral_timer')){
+            this.updateSelectedTimer();
+        }
+        this.$el.openModal({
+            ready: this.onRender.bind(this),
+            complete: this.close.bind(this)
+        });
+    },
+
+    updateColorScheme: function () {
+        this.$el.attr('data-color', this.account.settings.get('color'));
+    },
+
+    onRender: function (options) {
+        if (this.model.get('chat_ephemeral_timer')){
+            this.scrollToChildPlus(this.$(`.btn-set-ephemeral-timer.selected`), -45);
+        }
+
+    },
+
+    updateSelectedTimer: function () {
+        let $el = this.$(`.btn-set-ephemeral-timer[data-value="${this.model.get('chat_ephemeral_timer')}"`);
+        this.$(`.btn-set-ephemeral-timer`).removeClass('selected');
+        $el.addClass('selected');
+    },
+
+    changeTimer: function (ev) {
+        let $el = $(ev.target).closest('.btn-set-ephemeral-timer');
+        this.$(`.btn-set-ephemeral-timer`).removeClass('selected');
+        $el.addClass('selected')
+        this.model.set('chat_ephemeral_timer', $el.attr('data-value'));
+    },
+
+    onHide: function () {
+        this.$el.detach();
+    },
+
+    close: function () {
+        this.closeModal();
+    },
+
+    closeModal: function () {
+        this.$el.closeModal({ complete: this.hide.bind(this) });
+    }
+});
+
   xabber.JingleMessage = Backbone.Model.extend({
       defaults: {
           duration: 0,
@@ -1320,6 +1384,11 @@ xabber.MessagesBase = Backbone.Collection.extend({
         xabber.trigger('update_jingle_button');
         if (xabber.body.screen.get('name') === 'all-chats' && !xabber.body.screen.get('right') && this.item_view)
             this.item_view.open();
+    },
+
+    showEphemeralTimerSelector: function (full_jid, session_id) {
+        this.ephemeral_timer_selector = new xabber.EphemeralTimerSelector();
+        this.ephemeral_timer_selector.show({model: this, account: this.account});
     },
 
     endCall: function (status) {
@@ -11252,7 +11321,7 @@ xabber.ChatBottomView = xabber.BasicView.extend({
         "click .preview-preloader-container .preview-cancel-preloader": "stopLoadingLinkReference",
         "click .message-reference-preview-item-file .mdi-close": "removeFileSnippet",
         "click .btn-manage-devices": "openDevicesWindow",
-        "click .btn-set-ephemeral-timer": "setEphemeralTimer",
+        "click .ephemeral-timer-time": "showEphemeralTimerSelector",
     },
 
     _initialize: function (options) {
@@ -11525,8 +11594,8 @@ xabber.ChatBottomView = xabber.BasicView.extend({
         (Math.max.apply(null, widths) !== 0) && this.$('.message-actions-panel .button-wrap').css('width', `${Math.max.apply(null, widths)}px`);
     },
 
-    setEphemeralTimer: function (ev) {
-        this.model.setEphemeralTimer(ev);
+    showEphemeralTimerSelector: function () {
+        this.model.showEphemeralTimerSelector();
     },
 
     updateEncrypted: function () {

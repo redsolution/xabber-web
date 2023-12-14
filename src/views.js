@@ -178,6 +178,15 @@ xabber.BasicView = Backbone.View.extend({
         this.scrollTo(scrollTop);
     },
 
+    scrollToChildPlus: function ($child, plus_scroll) {
+        let scrollTop = _.reduce($child.prevAll(), function (sum, el) {
+            return sum + el.offsetHeight + 2;
+        }, 0);
+        plus_scroll = plus_scroll || 0;
+
+        this.scrollTo(scrollTop + plus_scroll);
+    },
+
     getScrollTop: function () {
         return this.ps_container[0].scrollTop;
     },

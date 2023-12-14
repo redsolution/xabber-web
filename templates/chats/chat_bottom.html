@@ -68,18 +68,7 @@
         <div class="send-area">
             <i class="send-message mdi mdi-32px mdi-send text-color-700 hover-text-color-500 hidden"></i>
             <i class="mdi mdi-32px mdi-microphone attach-voice-message text-color-700 hover-text-color-500"></i>
-            <div class="ephemeral-timer-time text-color-700" data-activates="select-ephemeral-timer-bottom-{{view.cid}}"></div>
-            <div id="select-ephemeral-timer-bottom-{{view.cid}}" class="dropdown-content bootstrap-dropdown noselect">
-                <div data-value="" class="property-variant btn-set-ephemeral-timer">{[print(xabber.getString("ephemeral_timer_none"))]}</div>
-                <div data-value="5" class="property-variant btn-set-ephemeral-timer">{[print(xabber.getString("ephemeral_timer_5"))]}</div>
-                <div data-value="10" class="property-variant btn-set-ephemeral-timer">{[print(xabber.getString("ephemeral_timer_10"))]}</div>
-                <div data-value="15" class="property-variant btn-set-ephemeral-timer">{[print(xabber.getString("ephemeral_timer_15"))]}</div>
-                <div data-value="30" class="property-variant btn-set-ephemeral-timer">{[print(xabber.getString("ephemeral_timer_30"))]}</div>
-                <div data-value="60" class="property-variant btn-set-ephemeral-timer">{[print(xabber.getString("ephemeral_timer_60"))]}</div>
-                <div data-value="300" class="property-variant btn-set-ephemeral-timer">{[print(xabber.getString("ephemeral_timer_300"))]}</div>
-                <div data-value="600" class="property-variant btn-set-ephemeral-timer">{[print(xabber.getString("ephemeral_timer_600"))]}</div>
-                <div data-value="900" class="property-variant btn-set-ephemeral-timer">{[print(xabber.getString("ephemeral_timer_900"))]}</div>
-            </div>
+            <div class="ephemeral-timer-time text-color-700"></div>
         </div>
     </div>
     <div class="blocked-msg hidden">{[print(xabber.getString("chat_bottom__placeholder__blocked"))]}</div>

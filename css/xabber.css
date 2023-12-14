@@ -12540,6 +12540,26 @@ input[type=range].voice-message-volume:focus {
 .main-modal.unregister-account-modal .input-field input{
     width: calc(100% - 33px);
 }
+/* ---------------- XABBER SET EPHEMERAL TIMER MODAL --------------------- */
+.main-modal.change-ephemeral-timer-modal{
+    height: 360px;
+}
+.main-modal.change-ephemeral-timer-modal .modal-content-wrap{
+    height: 100%;
+}
+.main-modal.change-ephemeral-timer-modal .modal-content{
+    height: calc(100% - 56px);
+    padding: 0;
+}
+.main-modal.change-ephemeral-timer-modal .modal-content .btn-set-ephemeral-timer{
+    font-size: 16px;
+    padding: 4px 0 4px 32px;
+    cursor: pointer;
+}
+.main-modal.change-ephemeral-timer-modal .modal-content .btn-set-ephemeral-timer:hover,
+.main-modal.change-ephemeral-timer-modal .modal-content .btn-set-ephemeral-timer.selected{
+    background-color: rgba(0,0,0,.07)!important;
+}
 
 /* ---------------- XABBER CHANGE ACCOUNT PASSWORD MODAL --------------------- */
 .main-modal.change-account-password-modal{

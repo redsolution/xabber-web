@@ -226,6 +226,7 @@
     addTemplate('chats.group_chats.mention_item');
     addTemplate('chats.encryption_warning');
     addTemplate('chats.content_encryption_warning');
+    addTemplate('chats.ephemeral_timer_selector');
 
 
     addTemplate('mentions.mentions_panel');
