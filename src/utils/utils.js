@@ -100,7 +100,9 @@ var getHyperLink = function (url) {
     try {
         url = decodeURI(url);
     }
-    catch (e) {}
+    catch (e) {
+        return url;
+    }
     return "<a target='_blank' class='msg-hyperlink' href='"+prot+escaped_url + "'>"+url+"</a>";
 };
 
@@ -138,7 +140,6 @@ $.fn.hyperlinkify = function (options) {
                                 } catch (e) {
                                     console.log(list[i])
                                     console.error(e)
-                                    x = x.replaceAll(new RegExp(`(\\s|^)(${list[i].replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`,"g"), '$1' + getHyperLink(list[i]));
                                 }
                             }
                             else
