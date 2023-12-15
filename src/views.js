@@ -4384,21 +4384,52 @@ _.extend(xabber, {
     },
 
     loadEmojiFont: function (url, dfd) {
+        xabber.error('loading Font!');
         if (url && url !== 'system') {
             let FontName = "EmojiFont",
                 FontURL = url,
-                emoji_font = new FontFace(FontName, `url(${FontURL})`);
+                emoji_font = new FontFace(FontName, `url(${FontURL})`),
+                font_loaded;
 
-            emoji_font.load().then((loaded_face) => {
-                document.fonts.add(loaded_face);
+            let load_check_interval = setInterval(() => {
+                console.log('status - ' + emoji_font.status);
+                if (emoji_font.status == 'loaded' || emoji_font.status == 'error'){
+                    clearInterval(load_check_interval);
+                    if (emoji_font.status == 'loaded' && !font_loaded){
+                        font_loaded = true;
+                        console.log('loaded - interval');
+                        document.fonts.add(emoji_font);
+                        $(constants.CONTAINER_ELEMENT).addClass('custom-emoji-font');
+                        dfd && dfd.resolve({});
+                    } else if (emoji_font.status == 'error' && !font_loaded) {
+                        font_loaded = true;
+                        console.log('error - interval');
+                        utils.dialogs.error(xabber.getString("settings__menu_item__emoji_font_error_loading"));
+                        $(constants.CONTAINER_ELEMENT).removeClass('custom-emoji-font');
+                        dfd && dfd.resolve({error: true});
+                    }
+                }
+            }, 1000);
+
+            emoji_font.load().then(() => {
+                console.log('loaded');
+                if (font_loaded)
+                    return;
+                font_loaded = true;
+                document.fonts.add(emoji_font);
                 $(constants.CONTAINER_ELEMENT).addClass('custom-emoji-font');
                 dfd && dfd.resolve({});
             }).catch((error) => {
+                console.log('error');
+                if (font_loaded)
+                    return;
+                font_loaded = true;
                 utils.dialogs.error(xabber.getString("settings__menu_item__emoji_font_error_loading") + error);
                 $(constants.CONTAINER_ELEMENT).removeClass('custom-emoji-font');
                 dfd && dfd.resolve({error: true});
             });
         } else if (url === 'system'){
+            console.log('system font');
             $(constants.CONTAINER_ELEMENT).removeClass('custom-emoji-font');
             dfd && dfd.resolve({});
         }

@@ -8,19 +8,26 @@ let constants = env.constants,
     xabber_i18next = env.xabber_i18next,
     xabber_i18next_sprintf = env.xabber_i18next_sprintf,
     uuid = env.uuid,
-    utils = env.utils,
+    utils = env.utils;
+
+let bc;
+try {
     bc = new BroadcastChannel("xabber-web");
+} catch (e) {
+    console.log(e);
+}
+if (bc){
+    bc.onmessage = (event) => {
+        if (event.data === `1` && !bc.disabled_client) {
+            bc.postMessage(`2`);
+        }
+        if (event.data === `2`) {
+            bc.disabled_client = true
+        }
+    };
 
-bc.onmessage = (event) => {
-    if (event.data === `1` && !bc.disabled_client) {
-        bc.postMessage(`2`);
-    }
-    if (event.data === `2`) {
-        bc.disabled_client = true
-    }
-};
-
-bc.postMessage(`1`);
+    bc.postMessage(`1`);
+}
 
 let Xabber = Backbone.Model.extend({
     defaults: {
@@ -461,7 +468,7 @@ let Xabber = Backbone.Model.extend({
                 this.check_config.resolve(false);
                 return;
             }
-            if (bc.disabled_client){
+            if (bc && bc.disabled_client){
                 utils.dialogs.error(this.getString("client_error__another_tab_active"));
                 this.check_config.resolve(false);
                 return;
