@@ -12127,20 +12127,23 @@ xabber.ChatBottomView = xabber.BasicView.extend({
     },
 
     onPaste: function (ev) {
-        ev.preventDefault();
         let $rich_textarea = $(ev.target),
             clipboard_data = ev.clipboardData;
-        if (clipboard_data) {
-            if (clipboard_data.files.length > 0) {
+        // if (clipboard_data) {
+            if (clipboard_data && clipboard_data.files.length > 0) {
+                console.log('true');
+                ev.preventDefault();
                 let image_from_clipboard = clipboard_data.files[clipboard_data.files.length - 1],
                     blob_image = window.URL.createObjectURL(new Blob([image_from_clipboard])),
                     options = { blob_image_from_clipboard: blob_image};
                 this.view.addFileMessage([image_from_clipboard]);
                 this.focusOnInput();
             }
-            else if (clipboard_data.items.length > 0) {
+            else if (clipboard_data && clipboard_data.items.length > 0) {
                 let image_from_clipboard = clipboard_data.items[clipboard_data.items.length - 1];
                 if (image_from_clipboard.kind === 'file') {
+                    console.log('true');
+                    ev.preventDefault();
                     let blob = image_from_clipboard.getAsFile(),
                         reader = new FileReader(), deferred = new $.Deferred();
                     reader.onload = function(event){
@@ -12154,39 +12157,39 @@ xabber.ChatBottomView = xabber.BasicView.extend({
                     });
                     reader.readAsDataURL(blob);
                 }
-                else {
-                    let text = _.escape(clipboard_data.getData('text')),
-                        arr_text = Array.from(text);
-                    arr_text.forEach((item, idx) => {
-                        if (item == '\n')
-                            arr_text.splice(idx, 1, '</p><p>');
-                        if (item == ' ')
-                            arr_text.splice(idx, 1, '&nbsp');
-                    });
-                    text = "<p>" + arr_text.join("") + "</p>";
-                    let range = window.getSelection().getRangeAt(0);
-                    range.insertNode($('<div>' + text + '</div>')[0]);
-                }
+                // else {
+                //     let text = _.escape(clipboard_data.getData('text')),
+                //         arr_text = Array.from(text);
+                //     arr_text.forEach((item, idx) => {
+                //         if (item == '\n')
+                //             arr_text.splice(idx, 1, '</p><p>');
+                //         if (item == ' ')
+                //             arr_text.splice(idx, 1, '&nbsp');
+                //     });
+                //     text = "<p>" + arr_text.join("") + "</p>";
+                //     let range = window.getSelection().getRangeAt(0);
+                //     range.insertNode($('<div>' + text + '</div>')[0]);
+                // }
             }
-            else {
-                let text = _.escape(clipboard_data.getData('text')),
-                    arr_text = Array.from(text);
-                arr_text.forEach((item, idx) => {
-                    if (item == '\n')
-                        arr_text.splice(idx, 1, '</p><p>');
-                    if (item == ' ')
-                        arr_text.splice(idx, 1, '&nbsp');
-                });
-                text = "<p>" + arr_text.join("") + "</p>";
-                let range = window.getSelection().getRangeAt(0);
-                range.insertNode($('<div>' + text + '</div>')[0]);
-            }
-        }
-        if ($rich_textarea.getTextFromRichTextarea().replace(/\n$/, "") && !this.view.chat_state && !this.view.edit_message && xabber.settings.typing_notifications)
-            this.view.sendChatState('composing');
-        this.focusOnInput();
-        this.displaySend();
-        xabber.chat_body.updateHeight();
+            // else {
+            //     let text = _.escape(clipboard_data.getData('text')),
+            //         arr_text = Array.from(text);
+            //     arr_text.forEach((item, idx) => {
+            //         if (item == '\n')
+            //             arr_text.splice(idx, 1, '</p><p>');
+            //         if (item == ' ')
+            //             arr_text.splice(idx, 1, '&nbsp');
+            //     });
+            //     text = "<p>" + arr_text.join("") + "</p>";
+            //     let range = window.getSelection().getRangeAt(0);
+            //     range.insertNode($('<div>' + text + '</div>')[0]);
+            // }
+        // }
+        // if ($rich_textarea.getTextFromRichTextarea().replace(/\n$/, "") && !this.view.chat_state && !this.view.edit_message && xabber.settings.typing_notifications)
+        //     this.view.sendChatState('composing');
+        // this.focusOnInput();
+        // this.displaySend();
+        // xabber.chat_body.updateHeight();
     },
 
     onFileInputChanged: function (ev) {

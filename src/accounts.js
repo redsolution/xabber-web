@@ -469,6 +469,8 @@ xabber.Account = Backbone.Model.extend({
                 this.connFeedback(xabber.getString("application_state_connecting"));
                 this.restoreStatus();
                 this.connection.reset();
+                console.log('started reconnecting');
+                utils.callback_popup_message('started reconnecting', 3000);
                 this.conn_manager.reconnect(this.reconnectionCallback.bind(this));
             }, timeout);
         },
@@ -540,6 +542,8 @@ xabber.Account = Backbone.Model.extend({
             }
             this.session.set({conn_status: status, conn_condition: condition});
             if (status === Strophe.Status.CONNECTED) {
+                console.log('reconnected main connection');
+                utils.callback_popup_message(`reconnected main connection , conn_retries: ${this.session.get('conn_retries')}`, 5000);
                 this.session.set('on_token_revoked', false);
                 if (this.connection.x_token) {
                     this.save({
@@ -577,6 +581,8 @@ xabber.Account = Backbone.Model.extend({
                     this._main_interval_worker.terminate();
                 let max_retries = xabber.settings.max_connection_retries;
                 if (max_retries === -1 || this.session.get('conn_retries') < max_retries) {
+                    console.log(`started another reconnecting, conn_retries: ${this.session.get('conn_retries')},status: ${status} ,condition: ${condition} `);
+                    utils.callback_popup_message(`started another reconnecting, conn_retries: ${this.session.get('conn_retries')},status: ${status} ,condition: ${condition} `, 3000);
                     this.reconnect();
                 } else {
                     this.connFeedback(xabber.getString("connection__error__connection_lost"));
