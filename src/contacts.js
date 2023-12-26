@@ -994,8 +994,6 @@ xabber.Contact = Backbone.Model.extend({
             let participant_info = this.participants.get(message.get('user_info')),
                 participant_nickname = participant_info && participant_info.get('nickname') ? participant_info.get('nickname') : null;
             let user_info = message.get('user_info') || {},
-                chat_content = this.account.chats.get(this.hash_id).item_view.content,
-                is_scrolled = chat_content.isScrolledToBottom(),
                 msg_author = participant_nickname || user_info.nickname || message.get('from_jid') || user_info.id,
                 pinned_msg = {
                     author: msg_author,
@@ -1004,13 +1002,18 @@ xabber.Contact = Backbone.Model.extend({
                     fwd_author: fwd_msg_author
                 },
                 pinned_msg_html = $(templates.group_chats.pinned_message(pinned_msg));
+            let chat_content = this.account.chats.get(this.hash_id);
+            if (chat_content && chat_content.item_view && chat_content.item_view.content){
+                chat_content = chat_content.item_view.content;
+                let is_scrolled = chat_content.isScrolledToBottom();
+                if (is_scrolled)
+                    chat_content.scrollToBottom();
+            }
             pinned_msg_elem.html(pinned_msg_html).emojify('.chat-msg-content', {emoji_size: 18});
             let height_pinned_msg = pinned_msg_elem.height();
             pinned_msg_elem.siblings('.chat-content').css({
                 'height': 'calc(100% - ' + height_pinned_msg + 'px)'
             });
-            if (is_scrolled)
-                chat_content.scrollToBottom();
             pinned_msg_elem.attr('data-uniqueid', message.get('unique_id'));
         }
     },

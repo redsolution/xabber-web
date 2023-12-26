@@ -2,7 +2,7 @@
     {[if (file.media_type && (file.media_type.includes('image') || file.media_type.includes('video'))){]}
         <img class="{[if (file.media_type.includes('video')){]}uploaded-video{[} else {]}uploaded-img popup-img{[}]}" data-mfp-src="{{file.file}}" src="{{file.thumbnail}}" {[if (file.media_type && file.media_type.includes('image')){]}onerror="this.src = '{{file.file}}'; this.onerror = null;" {[}]}>
     {[} else {]}
-        {[if (svg_icon == 'file-audio' && file.media_type.includes('+voice')){]}
+        {[if (svg_icon == 'file-audio' && file.context === 'voice'){]}
             <div class="gallery-file-placeholder-background gallery-audio-file-not-uploaded">
                 <i class="details-icon mdi mdi-play no-uploaded"></i>
             </div>
@@ -17,7 +17,7 @@
         <div class="gallery-file-title one-line">
             {{file.name}},  <span class="gallery-file-size">{{filesize}}</span> <span class="gallery-file-date">{{created_at}}</span>
         </div>
-        {[if (duration && file.media_type.includes('+voice')){]}
+        {[if (duration && file.context === 'voice'){]}
             <div class="gallery-voice-file-duration">
                 0:00 / <span class="gallery-voice-file-total-duration">{{duration}}</span>
             </div>

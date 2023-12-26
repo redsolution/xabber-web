@@ -6403,8 +6403,10 @@ xabber.ChatContentView = xabber.BasicView.extend({
             formData.append('metadata', JSON.stringify(metadata));
             if (file.size)
                 formData.append('size', file.size);
-            if (file.voice)
+            if (file.voice){
                 formData.append('media_type', file.type + '+voice');
+                formData.append('context', 'voice');
+            }
             else
                 formData.append('media_type', file.type);
             clearInterval(_interval);

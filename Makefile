@@ -13,6 +13,9 @@ deps-install: npm-ready
 httpserver: npm-ready
 	./node_modules/.bin/http-server -p 8000
 
+httpsserver:
+	./node_modules/http-server/bin/http-server -S -p 8001
+
 minify: npm-ready
 	npm run-script build
 

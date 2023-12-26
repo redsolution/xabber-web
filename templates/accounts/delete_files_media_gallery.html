@@ -25,6 +25,11 @@
         <div class="media-gallery-delete-items-wrap hidden">
             <div class="delete-files-preview-wrap media-gallery-items-wrap">
                 <div class="delete-files-text no-select">{[print(xabber.getString("media_gallery_delete_files_preview_text"))]}</div>
+                <div data-value="avatar" class="setting-name header-setting no-select delete-files-avatars">
+                    {[print(xabber.getString("avatars"))]}
+                </div>
+                <div class="gallery-files gallery-preview-image hidden grid delete-files-avatars delete-files-preview-container zoom-gallery">
+                </div>
                 <div data-value="image" class="setting-name header-setting no-select delete-files-images">
                     {[print(xabber.getString("images"))]}
                 </div>

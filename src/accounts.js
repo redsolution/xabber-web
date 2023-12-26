@@ -1474,8 +1474,10 @@ xabber.Account = Backbone.Model.extend({
                     formData.append('metadata', JSON.stringify(metadata));
                     if (file.size)
                         formData.append('size', file.size);
-                    if (file.voice)
+                    if (file.voice){
                         formData.append('media_type', file.type + '+voice');
+                        formData.append('context', 'voice');
+                    }
                     else
                         formData.append('media_type', file.type);
                     $.ajax({
@@ -1507,10 +1509,11 @@ xabber.Account = Backbone.Model.extend({
                     let formData = new FormData();
                     formData.append('file', file, file.name);
                     formData.append('media_type', file.type);
+                    formData.append('context', 'avatar');
                     $.ajax({
                         type: 'POST',
                         headers: {"Authorization": 'Bearer ' + this.get('gallery_token')},
-                        url: this.get('gallery_url') + 'v1/avatar/upload/',
+                        url: this.get('gallery_url') + 'v1/files/upload/',
                         data: formData,
                         contentType: false,
                         processData: false,
@@ -1530,14 +1533,15 @@ xabber.Account = Backbone.Model.extend({
 
         deleteFile: function (file_id, callback, errback) {
             this.testGalleryTokenExpire(() => {
-                if (this.get('gallery_token') && this.get('gallery_url') && file_id)
+                if (this.get('gallery_token') && this.get('gallery_url') && file_id){
+                    let options = {id: file_id, contexts: ['file', 'voice']};
                     $.ajax({
                         type: 'DELETE',
                         headers: {"Authorization": 'Bearer ' + this.get('gallery_token')},
                         url: this.get('gallery_url') + 'v1/files/',
                         dataType: 'json',
                         contentType: "application/json",
-                        data: JSON.stringify({id: file_id}),
+                        data: JSON.stringify(options),
                         success: (response) => {
                             console.log(response)
                             callback && callback(response)
@@ -1548,6 +1552,7 @@ xabber.Account = Backbone.Model.extend({
                             errback && errback(response)
                         }
                     });
+                }
             });
         },
 
@@ -2362,6 +2367,10 @@ xabber.AccountMediaGalleryView = xabber.BasicView.extend({
                 if (this.loading_files && this.current_rendered_type === options.type && !options.page)
                     return;
                 this.current_rendered_type = options.type;
+                if (options.type === 'voice'){
+                    options.contexts = 'voice';
+                    delete options.type;
+                }
                 this.loading_files = true
                 $(env.templates.contacts.preloader()).appendTo(this.$('.gallery-files'))
                 $.ajax({
@@ -2372,7 +2381,10 @@ xabber.AccountMediaGalleryView = xabber.BasicView.extend({
                     contentType: "application/json",
                     data: options,
                     success: (response) => {
-                        response.type = options.type
+                        if (options.type)
+                            response.type = options.type;
+                        else if (options.contexts)
+                            response.type = options.contexts;
                         this.renderFiles(response)
                         this.loading_files = false
                     },
@@ -2391,22 +2403,23 @@ xabber.AccountMediaGalleryView = xabber.BasicView.extend({
     getAvatars: function (options) {
         this.account.testGalleryTokenExpire(() => {
             options && options.file && (options = {});
-            options = Object.assign({obj_per_page: 50, order_by: '-id', type: "avatars"}, options);
+            options = Object.assign({obj_per_page: 50, order_by: '-id', type: "avatars", contexts: "avatar"}, options);
             if (this.account.get('gallery_token') && this.account.get('gallery_url')) {
                 if (this.loading_files && this.current_rendered_type === options.type && !options.page)
                     return;
                 this.current_rendered_type = options.type;
                 this.loading_files = true
+                delete options.type;
                 $(env.templates.contacts.preloader()).appendTo(this.$('.gallery-files'))
                 $.ajax({
                     type: 'GET',
                     headers: {"Authorization": 'Bearer ' + this.account.get('gallery_token')},
-                    url: this.account.get('gallery_url') + 'v1/avatar/',
+                    url: this.account.get('gallery_url') + 'v1/files/',
                     dataType: 'json',
                     contentType: "application/json",
                     data: options,
                     success: (response) => {
-                        response.type = options.type
+                        response.type = 'avatars';
                         this.renderFiles(response)
                         this.loading_files = false
                     },
@@ -2492,10 +2505,10 @@ xabber.AccountMediaGalleryView = xabber.BasicView.extend({
                 $.ajax({
                     type: 'DELETE',
                     headers: {"Authorization": 'Bearer ' + this.account.get('gallery_token')},
-                    url: this.account.get('gallery_url') + 'v1/avatar/',
+                    url: this.account.get('gallery_url') + 'v1/files/',
                     dataType: 'json',
                     contentType: "application/json",
-                    data: JSON.stringify({id: file_id}),
+                    data: JSON.stringify({id: file_id, contexts: ['avatar']}),
                     success: (response) => {
                         $target.detach();
                     },
@@ -2586,6 +2599,7 @@ xabber.DeleteFilesFromGalleryView = xabber.BasicView.extend({
     render: function (options) {
         this.account = options.model;
         this.gallery_view = options.gallery_view;
+        this.delete_percent = null;
         this.$el.openModal({
             ready: this.onRender.bind(this),
             complete: this.close.bind(this)
@@ -2649,21 +2663,22 @@ xabber.DeleteFilesFromGalleryView = xabber.BasicView.extend({
         this.$('.deletion-variants').addClass('hidden');
         this.$('.modal-header').text(xabber.getString("media_gallery_delete_files_header"));
         this.updateScrollBar();
-        let options = {percent: percent}
+        this.delete_percent = percent;
         this.current_page_preview = 1
         $(env.templates.contacts.preloader()).appendTo(this.$('.modal-content'))
-        this.getFilesForDeletion(options);
+        this.getFilesForDeletion();
     },
 
     getFilesForDeletion: function (options) {
         this.account.testGalleryTokenExpire(() => {
             options && options.file && (options = {});
-            options = Object.assign({obj_per_page: 50, order_by: '-id'}, options);
+            !options && (options = {});
+            options = Object.assign({obj_per_page: 50}, options);
             if (this.account.get('gallery_token') && this.account.get('gallery_url')) {
                 $.ajax({
                     type: 'GET',
                     headers: {"Authorization": 'Bearer ' + this.account.get('gallery_token')},
-                    url: this.account.get('gallery_url') + 'v1/files/',
+                    url: this.account.get('gallery_url') + 'v1/files/percent/' + this.delete_percent + '/',
                     dataType: 'json',
                     contentType: "application/json",
                     data: options,
@@ -2682,8 +2697,7 @@ xabber.DeleteFilesFromGalleryView = xabber.BasicView.extend({
                         }
                         this.renderForDeletion(response);
                         if (current_page === 1 && response.items && response.items.length){
-                            this.date_lte_for_deletion = response.items[0].created_at;
-                        } else if (current_page === 1) {
+                        } else if (current_page === 1 && response.items) {
                             this.$('.media-gallery-delete-items-wrap .no-files').removeClass('hidden');
                         }
                     },
@@ -2702,6 +2716,7 @@ xabber.DeleteFilesFromGalleryView = xabber.BasicView.extend({
         if (response.items && response.items.length){
             response.items.forEach((item) => {
                 item.thumbnail && item.thumbnail.url && (item.thumbnail = item.thumbnail.url);
+                item.is_avatar = Boolean(item.context === 'avatar');
                 let duration;
                 item.metadata && item.metadata.duration && (duration = utils.pretty_duration(item.metadata.duration));
                 let $gallery_file = $(templates.media_gallery_account_file({
@@ -2712,13 +2727,16 @@ xabber.DeleteFilesFromGalleryView = xabber.BasicView.extend({
                     duration: duration,
                     download_only: true,
                 }));
-                if (item.media_type && item.media_type.includes('image')){
+                if (item.is_avatar) {
+                    $gallery_file.appendTo(this.$('.gallery-files.delete-files-avatars'));
+                    this.$('.delete-files-avatars').removeClass('hidden');
+                } else if (item.media_type && item.media_type.includes('image')){
                     $gallery_file.appendTo(this.$('.gallery-files.delete-files-images'));
                     this.$('.delete-files-images').removeClass('hidden');
                 } else if (item.media_type && item.media_type.includes('video')){
                     $gallery_file.appendTo(this.$('.gallery-files.delete-files-videos'));
                     this.$('.delete-files-videos').removeClass('hidden');
-                } else if (item.media_type && item.media_type.includes('+voice')){
+                } else if (item.media_type && item.context === 'voice'){
                     $gallery_file.appendTo(this.$('.gallery-files.delete-files-voices'));
                     this.$('.delete-files-voices').removeClass('hidden');
                 } else {
@@ -2756,7 +2774,7 @@ xabber.DeleteFilesFromGalleryView = xabber.BasicView.extend({
     },
 
     deleteFilesFiltered: function (ev) {
-        if (!this.date_lte_for_deletion)
+        if (!this.delete_percent)
             return
 
         utils.dialogs.ask(xabber.getString("media_gallery_delete_files_confirm_delete_header"), xabber.getString("media_gallery_delete_files_confirm_delete_text"),
@@ -2769,10 +2787,10 @@ xabber.DeleteFilesFromGalleryView = xabber.BasicView.extend({
                     $.ajax({
                         type: 'DELETE',
                         headers: {"Authorization": 'Bearer ' + this.account.get('gallery_token')},
-                        url: this.account.get('gallery_url') + 'v1/files/',
+                        url: this.account.get('gallery_url') + 'v1/files/percent/' + this.delete_percent + '/' ,
                         dataType: 'json',
                         contentType: "application/json",
-                        data: JSON.stringify({date_lte: this.date_lte_for_deletion}),
+                        data: JSON.stringify({}),
                         success: (response) => {
                             console.log(response);
                             this.close();
@@ -4216,13 +4234,13 @@ xabber.SetAvatarView = xabber.BasicView.extend({
 
     createLibrary: function () {
         this.model.testGalleryTokenExpire(() => {
-            let options = {order_by: '-id'};
+            let options = {order_by: '-id', contexts: 'avatar'};
             if (this.model.get('gallery_token') && this.model.get('gallery_url')) {
                 this.$('.library-wrap').html(env.templates.contacts.preloader())
                 $.ajax({
                     type: 'GET',
                     headers: {"Authorization": 'Bearer ' + this.model.get('gallery_token')},
-                    url: this.model.get('gallery_url') + 'v1/avatar/',
+                    url: this.model.get('gallery_url') + 'v1/files/',
                     dataType: 'json',
                     contentType: "application/json",
                     data: options,
