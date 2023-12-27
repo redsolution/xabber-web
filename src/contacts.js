@@ -8693,9 +8693,10 @@ xabber.Roster = xabber.ContactsBase.extend({
     },
 
     onRosterIQ: function (iq) {
-        let new_roster_version = $(iq).children('query').attr('ver');
+        let new_roster_version = $(iq).children('query').attr('ver'),
+            iq_type = $(iq).attr('type');
         $(iq).children('query').find('item').each((idx, item) => {
-            this.onRosterItem(item);
+            this.onRosterItem(item, iq_type);
         });
         if (iq.getAttribute('type') === 'set') {
             this.account.onSetIQResult(iq);
@@ -8713,8 +8714,8 @@ xabber.Roster = xabber.ContactsBase.extend({
         return true;
     },
 
-    onRosterItem: function (item) {
-        let jid = item.getAttribute('jid');
+    onRosterItem: function (item, iq_type) {
+        let jid = item.getAttribute('jid'), to_send_available;
         if (jid === this.account.get('jid'))
             return;
         let contact = this.contacts.mergeContact(jid),
@@ -8751,9 +8752,14 @@ xabber.Roster = xabber.ContactsBase.extend({
         if (subscription === 'both') {
             attrs.subscription_request_out = false;
             attrs.subscription_request_in = false;
+            if (iq_type === 'set')
+                to_send_available = true;
         }
-        if (subscription === 'from')
+        if (subscription === 'from') {
             attrs.subscription_request_in = false;
+            if (iq_type === 'set')
+                to_send_available = true;
+        }
         if (subscription === 'to')
             attrs.subscription_request_out = false;
         if (ask === 'subscribe')
@@ -8764,6 +8770,9 @@ xabber.Roster = xabber.ContactsBase.extend({
         this.account.server_features.get(Strophe.NS.SUBSCRIPTION_PREAPPROVAL) && (attrs.subscription_preapproved = subscription_preapproved ? true : subscription_preapproved);
         contact.set(attrs);
         contact.updateCachedInfo();
+        if (to_send_available){
+            this.account.sendPresence();
+        }
     }
 });
 
