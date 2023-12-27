@@ -2594,6 +2594,7 @@ xabber.DeleteFilesFromGalleryView = xabber.BasicView.extend({
         "click .btn-delete-files-percent": "deletePercent",
         "click .btn-cancel": "close",
         "click .gallery-file": "onClickFile",
+        "change #delete_avatars": "onChangeCheckbox",
     },
 
     render: function (options) {
@@ -2618,6 +2619,10 @@ xabber.DeleteFilesFromGalleryView = xabber.BasicView.extend({
         this.$('.delete-files-preview-wrap .gallery-files').html('');
         this.$('.media-gallery-delete-items-wrap .no-files').addClass('hidden');
         this.$('.modal-header').text(xabber.getString("media_gallery_delete_files"));
+        this.$('.delete-avatars-checkbox input').prop('checked', false);
+        this.$('.btn-confirm').prop('disabled', false);
+        this.$('.delete-avatars-checkbox').addClass('hidden');
+        this.$('.delete-avatars-checkbox').addClass('hidden2');
         this.updateScrollBar();
     },
 
@@ -2656,6 +2661,17 @@ xabber.DeleteFilesFromGalleryView = xabber.BasicView.extend({
         }
     },
 
+    onChangeCheckbox: function (ev) {
+        let $elem = $(ev.target);
+        this.delete_avatars = $elem.prop('checked');
+        this.$('.delete-files-avatars').switchClass('hidden', !$elem.prop('checked'));
+        if (!this.has_files) {
+            this.$('.media-gallery-delete-items-wrap .no-files').switchClass('hidden', $elem.prop('checked'));
+            this.$('.delete-files-text').switchClass('hidden', !$elem.prop('checked'));
+            this.$('.btn-confirm').prop('disabled', !$elem.prop('checked'));
+        }
+    },
+
     deletePercent: function (ev) {
         let $target = $(ev.target).closest('.btn-delete-files-percent'),
             percent = $target.attr('data-value');
@@ -2663,7 +2679,9 @@ xabber.DeleteFilesFromGalleryView = xabber.BasicView.extend({
         this.$('.deletion-variants').addClass('hidden');
         this.$('.modal-header').text(xabber.getString("media_gallery_delete_files_header"));
         this.updateScrollBar();
+        this.delete_avatars = false;
         this.delete_percent = percent;
+        this.has_files = false;
         this.current_page_preview = 1
         $(env.templates.contacts.preloader()).appendTo(this.$('.modal-content'))
         this.getFilesForDeletion();
@@ -2675,13 +2693,21 @@ xabber.DeleteFilesFromGalleryView = xabber.BasicView.extend({
             !options && (options = {});
             options = Object.assign({obj_per_page: 50}, options);
             if (this.account.get('gallery_token') && this.account.get('gallery_url')) {
+                let url;
+                if (this.delete_percent === '100'){
+                    url = this.account.get('gallery_url') + 'v1/files/';
+                    options.contexts = ['file', 'avatar', 'voice'];
+                } else {
+                    url = this.account.get('gallery_url') + 'v1/files/percent/' + this.delete_percent + '/';
+                }
                 $.ajax({
                     type: 'GET',
                     headers: {"Authorization": 'Bearer ' + this.account.get('gallery_token')},
-                    url: this.account.get('gallery_url') + 'v1/files/percent/' + this.delete_percent + '/',
+                    url: url,
                     dataType: 'json',
                     contentType: "application/json",
                     data: options,
+                    traditional: true,
                     success: (response) => {
                         console.log(response)
                         let current_page = this.current_page_preview;
@@ -2693,18 +2719,30 @@ xabber.DeleteFilesFromGalleryView = xabber.BasicView.extend({
                             this.$('.preloader-wrapper').remove();
                             this.$('.modal-footer').removeClass('hidden');
                             this.$('.media-gallery-delete-items-wrap').removeClass('hidden');
+                            if (this.delete_percent === '100'){
+                                this.$('.delete-avatars-checkbox').removeClass('hidden');
+                            }
                             this.updateScrollBar();
                         }
                         this.renderForDeletion(response);
                         if (current_page === 1 && response.items && response.items.length){
+                            if (!this.has_files) {
+                                this.$('.media-gallery-delete-items-wrap .no-files').removeClass('hidden');
+                                this.$('.delete-files-text').addClass('hidden');
+                                this.$('.btn-confirm').prop('disabled', true);
+                            }
                         } else if (current_page === 1 && response.items) {
                             this.$('.media-gallery-delete-items-wrap .no-files').removeClass('hidden');
+                            this.$('.delete-files-text').addClass('hidden');
+                            this.$('.btn-confirm').prop('disabled', true);
                         }
                     },
                     error: (response) => {
                         console.log(response)
                         this.$('.preloader-wrapper').remove();
                         this.$('.media-gallery-delete-items-wrap .no-files').removeClass('hidden');
+                        this.$('.delete-files-text').addClass('hidden');
+                        this.$('.btn-confirm').prop('disabled', true);
                         this.updateScrollBar();
                     }
                 });
@@ -2727,9 +2765,17 @@ xabber.DeleteFilesFromGalleryView = xabber.BasicView.extend({
                     duration: duration,
                     download_only: true,
                 }));
+                if (!item.is_avatar){
+                    this.has_files = true;
+                }
                 if (item.is_avatar) {
                     $gallery_file.appendTo(this.$('.gallery-files.delete-files-avatars'));
-                    this.$('.delete-files-avatars').removeClass('hidden');
+                    if (this.delete_percent !== '100')
+                        this.$('.delete-files-avatars').removeClass('hidden');
+                    else {
+                        this.$('.delete-avatars-checkbox').removeClass('hidden2');// сделать чтобы рисовало no files если при 100% есть только аватары и скрывалось появлялось на нажатие чекбокса,
+
+                    }
                 } else if (item.media_type && item.media_type.includes('image')){
                     $gallery_file.appendTo(this.$('.gallery-files.delete-files-images'));
                     this.$('.delete-files-images').removeClass('hidden');
@@ -2783,23 +2829,35 @@ xabber.DeleteFilesFromGalleryView = xabber.BasicView.extend({
                 return;
             $(env.templates.contacts.preloader()).appendTo(this.$('.modal-footer'))
             this.account.testGalleryTokenExpire(() => {
-                if (this.account.get('gallery_token') && this.account.get('gallery_url'))
+                if (this.account.get('gallery_token') && this.account.get('gallery_url')){
+                    let options = {}, url;
+                    if (this.delete_percent === '100'){
+                        url = this.account.get('gallery_url') + 'v1/files/';
+                        if (this.delete_avatars)
+                            options.contexts = ['file', 'avatar', 'voice'];
+                        else
+                            options.contexts = ['file', 'voice'];
+                    } else {
+                        url = this.account.get('gallery_url') + 'v1/files/percent/' + this.delete_percent + '/';
+                    }
                     $.ajax({
                         type: 'DELETE',
                         headers: {"Authorization": 'Bearer ' + this.account.get('gallery_token')},
-                        url: this.account.get('gallery_url') + 'v1/files/percent/' + this.delete_percent + '/' ,
+                        url: url ,
                         dataType: 'json',
                         contentType: "application/json",
-                        data: JSON.stringify({}),
+                        data: JSON.stringify(options),
                         success: (response) => {
                             console.log(response);
                             this.close();
                         },
                         error: (response) => {
                             this.account.handleCommonGalleryErrors(response)
+                            this.close();
                             console.log(response)
                         }
                     });
+                }
             });
         });
     },

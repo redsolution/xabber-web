@@ -13906,6 +13906,25 @@ input[type=range].voice-message-volume:focus {
     width: 55%;
     min-width: 330px;
 }
+.modal.delete-files-modal .delete-avatars-checkbox{
+    position: absolute;
+    bottom: 4px;
+}
+.modal.delete-files-modal .delete-avatars-checkbox label{
+    color: rgba(0,0,0,.87);
+}
+.modal.delete-files-modal .no-files{
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+.modal.delete-files-modal button:disabled{
+    opacity: 0.5;
+}
+.modal.delete-files-modal button:hover:disabled{
+    background: none;
+}
 /* ----------------- GALLERY VIDEO MODAL -------------------- */
 
 .modal.gallery-video-modal{

@@ -975,26 +975,34 @@ xabber.EphemeralTimerSelector = xabber.BasicView.extend({
       },
 
       createAudioStream: function () {
-          navigator.mediaDevices.getUserMedia({audio: true}).then((media_stream) => {
-              this.local_stream = media_stream;
-              this.$local_video[0].srcObject = media_stream;
-              let video_track = this.initVideoTrack();
-              this.local_stream.addTrack(video_track);
-              this.conn.addTrack(video_track, this.local_stream);
-              media_stream.getAudioTracks().forEach(track => this.conn.addTrack(track, this.local_stream));
-          });
+          try {
+              navigator.mediaDevices.getUserMedia({audio: true}).then((media_stream) => {
+                  this.local_stream = media_stream;
+                  this.$local_video[0].srcObject = media_stream;
+                  let video_track = this.initVideoTrack();
+                  this.local_stream.addTrack(video_track);
+                  this.conn.addTrack(video_track, this.local_stream);
+                  media_stream.getAudioTracks().forEach(track => this.conn.addTrack(track, this.local_stream));
+              });
+          } catch (e) {
+              utils.dialogs.error(e);
+          }
       },
 
       createVideoStream: function () {
-          navigator.mediaDevices.getUserMedia({video: true}).then((media_stream) => {
-              this.$local_video[0].srcObject = media_stream;
-              media_stream.getVideoTracks().forEach((track) => {
-                  this.local_stream.addTrack(track);
-                  this.conn.addTrack(track, this.local_stream);
-                  this.conn.getSenders().find(sender => !sender.track || sender.track && sender.track.kind === 'video').replaceTrack(track);
+          try {
+              navigator.mediaDevices.getUserMedia({video: true}).then((media_stream) => {
+                  this.$local_video[0].srcObject = media_stream;
+                  media_stream.getVideoTracks().forEach((track) => {
+                      this.local_stream.addTrack(track);
+                      this.conn.addTrack(track, this.local_stream);
+                      this.conn.getSenders().find(sender => !sender.track || sender.track && sender.track.kind === 'video').replaceTrack(track);
+                  });
               });
-          });
-      },
+          } catch (e) {
+                  utils.dialogs.error(e);
+              }
+          },
 
       stopTracks: function () {
           this.local_stream && this.local_stream.getTracks().forEach((track) => {
