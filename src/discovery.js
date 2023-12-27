@@ -48,7 +48,7 @@ xabber.ClientFeatures = Backbone.Collection.extend({
         this.connection.disco.addIdentity(
             'client',
             'web',
-            xabber.get('client_name'),
+            constants.CLIENT_NAME,
             'en'
         );
         this.addFeature(Strophe.NS.LAST, 'XEP-0012: Last Activity');

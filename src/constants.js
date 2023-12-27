@@ -413,6 +413,7 @@ var constants = {
 
     XABBER_ACCOUNT_URL: 'https://www.xabber.com/account',
     USE_SOCIAL_AUTH: true,
+    USE_TAB_SIGNALS: true,
     REGISTER_XMPP_ACCOUNT: true,
     REGISTER_XMPP_ACCOUNT_URL: 'https://www.xabber.com/account/auth/signup/',
     CHECK_VERSION: true,
@@ -429,6 +430,7 @@ var constants = {
 
     MAIN_COLOR: 'red',
     CLIENT_NAME: 'Xabber for Web',
+    CLIENT_RESOURCE: 'xabber-web',
     SHORT_CLIENT_NAME: 'Xabber',
     SHORT_CLIENT_DESCRIPTION: 'World’s best XMPP experience',
     CLIENT_LOGO: 'assets/images/xabber-logo-96.png',

@@ -414,7 +414,7 @@ xabber.Account = Backbone.Model.extend({
             let jid = this.get('jid'),
                 auth_type = this.get('auth_type'),
                 password;
-            jid += '/xabber-web-' + xabber.get('client_id');
+            jid += '/' + constants.CLIENT_RESOURCE + '-' + xabber.get('client_id');
             this.connection.x_token = this.get('x_token');
             this.connection.counter = this.get('hotp_counter');
             this.connection.account = this;
@@ -2998,7 +2998,7 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
         this.updateXTokens();
         this.updateGroupsLabel();
         this.updateView();
-        this.$('.main-resource .client').text(xabber.get('client_name'));
+        this.$('.main-resource .client').text(constants.CLIENT_NAME);
         this.$('.main-resource .resource').text(this.model.resource);
         this.$('.main-resource .priority').text(this.model.get('priority'));
         this.$(`.color-scheme input[type=radio][name=account_color][value="${this.model.settings.get('color')}"]`)
@@ -3812,7 +3812,7 @@ xabber.AccountSettingsSingleModalView = xabber.AccountSettingsModalView.extend({
         this.updateXTokens();
         this.updateGroupsLabel();
         this.updateView();
-        this.$('.main-resource .client').text(xabber.get('client_name'));
+        this.$('.main-resource .client').text(constants.CLIENT_NAME);
         this.$('.main-resource .resource').text(this.model.resource);
         this.$('.main-resource .priority').text(this.model.get('priority'));
         this.$(`.color-scheme input[type=radio][name=account_color][value="${this.model.settings.get('color')}"]`)

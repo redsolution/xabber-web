@@ -10,24 +10,6 @@ let constants = env.constants,
     uuid = env.uuid,
     utils = env.utils;
 
-let bc;
-try {
-    bc = new BroadcastChannel("xabber-web");
-} catch (e) {
-    console.log(e);
-}
-if (bc){
-    bc.onmessage = (event) => {
-        if (event.data === `1` && !bc.disabled_client) {
-            bc.postMessage(`2`);
-        }
-        if (event.data === `2`) {
-            bc.disabled_client = true
-        }
-    };
-
-    bc.postMessage(`1`);
-}
 
 let Xabber = Backbone.Model.extend({
     defaults: {
@@ -36,7 +18,7 @@ let Xabber = Backbone.Model.extend({
         audio: false,
         video: false,
         client_id: uuid().substring(0, 8),
-        client_name: 'Xabber for Web'
+        // client_name: 'Xabber for Web 1'
     },
 
     initialize: function () {
@@ -361,6 +343,8 @@ let Xabber = Backbone.Model.extend({
                 'REGISTER_XMPP_ACCOUNT_URL',
                 'REGISTER_XMPP_ACCOUNT_TEXT',
                 'USE_SOCIAL_AUTH',
+                'USE_TAB_SIGNALS',
+                'CLIENT_RESOURCE',
                 'CONTAINER',
                 'CHECK_VERSION',
                 'DEFAULT_LOGIN_SCREEN',
@@ -467,6 +451,26 @@ let Xabber = Backbone.Model.extend({
                 utils.dialogs.error(this.getString("client_error__missing_connection_url"));
                 this.check_config.resolve(false);
                 return;
+            }
+            let bc;
+            if (constants.USE_TAB_SIGNALS){
+                try {
+                    bc = new BroadcastChannel("xabber-web");
+                } catch (e) {
+                    console.log(e);
+                }
+                if (bc){
+                    bc.onmessage = (event) => {
+                        if (event.data === `1` && !bc.disabled_client) {
+                            bc.postMessage(`2`);
+                        }
+                        if (event.data === `2`) {
+                            bc.disabled_client = true
+                        }
+                    };
+
+                    bc.postMessage(`1`);
+                }
             }
             if (bc && bc.disabled_client){
                 utils.dialogs.error(this.getString("client_error__another_tab_active"));
