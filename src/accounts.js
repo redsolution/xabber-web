@@ -3333,9 +3333,9 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
     renderAllXTokens: function () {
         this.$('.sessions-wrap').html("");
         this.$('.orphaned-fingerprints-wrap').html("");
-        this.$('.device-encryption-warning').addClass('hidden');
         this.$('.device-encryption-warning').attr('data-not-trusted-count', 0);
         this.$('.settings-tab[data-block-name="devices"] .settings-block-label').text(xabber.getQuantityString("settings_account__devices_subheader_label", this.model.x_tokens_list.length));
+        let devices_count = this.model.x_tokens_list.length, handled_devices = 0;
         $(_.sortBy(this.model.x_tokens_list, '-last_auth')).each((idx, token) => {
             let pretty_token = {
                 resource_obj: undefined,
@@ -3354,6 +3354,11 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
                     pretty_token.is_omemo = this.model.omemo ? true : false
                     let $cur_token_html = $(templates.current_token_item_modal(pretty_token));
                     this.$('.current-session').append($cur_token_html);
+                    handled_devices++;
+                    if (handled_devices === devices_count){
+                        if (!_.isUndefined(this.$('.device-encryption-warning').attr('data-not-trusted-count')))
+                            this.$('.device-encryption-warning').switchClass('hidden', this.$('.device-encryption-warning').attr('data-not-trusted-count') === '0');
+                    }
                     return;
                 }
             }
@@ -3367,11 +3372,21 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
                         && !this.$(`.settings-block-wrap.device-information[data-token-uid="${pretty_token.token_uid}"]`).hasClass('hidden')){
                         this.updateDeviceInformation(pretty_token.token_uid);
                     }
+                    handled_devices++;
+                    if (handled_devices === devices_count){
+                        if (!_.isUndefined(this.$('.device-encryption-warning').attr('data-not-trusted-count')))
+                            this.$('.device-encryption-warning').switchClass('hidden', this.$('.device-encryption-warning').attr('data-not-trusted-count') === '0');
+                    }
                 });
             } else {
                 if (token.omemo_id){
                     $token_html.find('.device-encryption span').text(xabber.getString("settings_account__unverified_device"));
                     $token_html.find('.device-encryption .mdi-lock').removeClass('hidden');
+                }
+                handled_devices++;
+                if (handled_devices === devices_count){
+                    if (!_.isUndefined(this.$('.device-encryption-warning').attr('data-not-trusted-count')))
+                        this.$('.device-encryption-warning').switchClass('hidden', this.$('.device-encryption-warning').attr('data-not-trusted-count') === '0');
                 }
             }
         });
