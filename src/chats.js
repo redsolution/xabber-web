@@ -6049,7 +6049,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
             }, 1000);
         }
         else {
-            let _pending_time = 5, was_reconnecting;
+            let _pending_time = 5, was_reconnecting, has_reconnected;
             if (!(this.account.connection.authenticated && !this.account.connection.disconnecting && this.account.session.get('connected') && this.account.session.get('ready_to_send') && this.account.get('status') !== 'offline'))
                 was_reconnecting = true;
             if (this.account.session.get('reconnecting'))
@@ -6058,11 +6058,13 @@ xabber.ChatContentView = xabber.BasicView.extend({
                 console.log('change reconnecting');
                 console.log(this.account.session.get('reconnecting'));
                 was_reconnecting = true;
-            })
+            });
+            this.account.session.once('change:reconnected', () => {
+                _pending_time = 5;
+                console.log('change reconnected ');
+                has_reconnected = true;
+            });
             let _interval = setInterval(() => {
-                console.log(was_reconnecting);
-                if (was_reconnecting)
-                    clearInterval(_interval);
                 if (_pending_time >= 8 && message.get('state') === constants.MSG_PENDING && !was_reconnecting){
                     console.log('ping on message pending');
                     this.account.connection.ping.ping(this.account.get('jid'), () => {},  () => {
@@ -6075,6 +6077,10 @@ xabber.ChatContentView = xabber.BasicView.extend({
                             console.log('ping was sent and got no result after 2 seconds, but didnt reconnect because last stanza time was: ' + downtime + ' sec')
                         }
                     }, 2000);
+                }
+                if (was_reconnecting && has_reconnected && (_pending_time > 10)){
+                    message.set('state', constants.MSG_ERROR);
+                    clearInterval(_interval);
                 }
                 if (((this.account.last_stanza_timestamp < msg_sending_timestamp) && (_pending_time > 40) && (message.get('state') === constants.MSG_PENDING) || (_pending_time > 40)) && !was_reconnecting) {
                     message.set('state', constants.MSG_ERROR);
