@@ -271,7 +271,7 @@ xabber.MessagesBase = Backbone.Collection.extend({
             unique_id = origin_id || options.stanza_id || archive_id || msgid;
             message = this.get(unique_id);
         }
-        if (!message){
+        if (!message && this.chat && this.chat.get('saved')){
             message = this.findWhere({'origin_id': origin_id});
         }
         if (options.replaced) {
