@@ -4097,8 +4097,15 @@ xabber.ChatContentView = xabber.BasicView.extend({
                     setTimeout(() => {
                         this.model._wait_load_unread_history.resolve();
                     }, 1000);
-                } else
+                } else{
                     this.model._wait_load_unread_history.resolve();
+                }
+            }
+            if (options.unread_history_first && !messages.length){
+                this.loadPreviousHistory();
+                this.model.set('const_unread', 0);
+                this.model.set('unread', 0);
+                this.model._wait_load_unread_history.resolve();
             }
         }, (err) => {
             if (options.previous_history) {
@@ -13207,7 +13214,7 @@ xabber.ChatBottomView = xabber.BasicView.extend({
         }
         mutable_refs && mutable_refs.length && this.edit_message.set({mutable_content: mutable_refs});
         if (!(Strophe.xmlunescape(forwarded_body) + text)){
-            this.deleteMessages(null, [this.edit_message]);
+            this.deleteMessages(null, [this.edit_message], true);
             return;
         }
         $message.c('body').t(Strophe.xmlunescape(forwarded_body) + text).up();
@@ -13251,7 +13258,7 @@ xabber.ChatBottomView = xabber.BasicView.extend({
         this.setEditedMessage(edit_msg);
     },
 
-    deleteMessages: function (ev, messages) {
+    deleteMessages: function (ev, messages, on_rewrite) {
         if (!this.model.get('active'))
             return;
         let $msgs = this.content_view.$('.chat-message.selected'),
@@ -13285,7 +13292,7 @@ xabber.ChatBottomView = xabber.BasicView.extend({
                     messages && messages.length && this.unsetForwardedMessages();
                 });
             });
-            if (!this.model.get('group_chat') && !this.model.get('saved') && my_msgs == $msgs.length && this.contact && this.contact.domain){
+            if (!this.model.get('group_chat') && !this.model.get('saved') && ((my_msgs == $msgs.length) || on_rewrite) && this.contact && this.contact.domain){
                 if (this.contact.get('server_has_rewrite')){
                     dialog_options = [{
                         name: 'symmetric_deletion',
