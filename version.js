@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.3.4.107","version_description":"fixed messages merging by origin_id if it is not saved messages chat"}'
+'{"version_number":"2.3.4.108","version_description":"fixed retry message on msg error not having proper attributes for groupchats, fixed pending stanzas sending timing after reconnection, fixed dfd_presence not working after first resolve, added presence sending fallback if synchronisation is not enabled, fixed pending msg sending check for groupchats, fixed reconnected trigger for msg callback after reconnection"}'
 )});

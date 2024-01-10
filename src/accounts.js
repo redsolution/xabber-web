@@ -823,6 +823,7 @@ xabber.Account = Backbone.Model.extend({
             this.domain = Strophe.getDomainFromJid(this.jid);
             this.trigger('activate', this);
             this.session.get('no_reconnect') && this.session.set('no_reconnect', false);
+            this.dfd_presence = new $.Deferred();
             this.afterConnected();
             _.each(this._after_connected_plugins, (plugin) => {
                 plugin.call(this);
@@ -860,6 +861,7 @@ xabber.Account = Backbone.Model.extend({
 
         onReconnected: function () {
             this.connFeedback(xabber.getString("account_state_connected"));
+            this.dfd_presence = new $.Deferred();
             this.afterConnected();
             _.each(this._after_reconnected_plugins, (plugin) => {
                 plugin.call(this);
@@ -908,7 +910,7 @@ xabber.Account = Backbone.Model.extend({
                 console.log(item)
                 let msg = this.messages.get(item.unique_id), msg_iq;
                 msg && (msg_iq = msg.get('xml'));
-                if (msg.collection && msg.collection.chat && msg.collection.chat.get('group_chat'))
+                if (msg && msg.collection && msg.collection.chat && msg.collection.chat.get('group_chat'))
                     $(msg_iq).append("<retry to='" + msg.collection.chat.get('jid') + "' xmlns='" + Strophe.NS.DELIVERY + "'/>");
                 else
                     $(msg_iq).append("<retry xmlns='" + Strophe.NS.DELIVERY + "'/>");

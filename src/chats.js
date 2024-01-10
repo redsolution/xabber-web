@@ -5998,7 +5998,10 @@ xabber.ChatContentView = xabber.BasicView.extend({
             .c('origin-id', {id: msg_id, xmlns: 'urn:xmpp:sid:0'}).up();
         message.set({xml: $(stanza.tree()).clone()[0]});
         if (message.get('state') === constants.MSG_ERROR) {
-            stanza.c('retry', {xmlns: Strophe.NS.DELIVERY}).up();
+            if (this.model.get('group_chat')){
+                stanza.c('retry', {xmlns: Strophe.NS.DELIVERY, to: this.model.get('jid')}).up();
+            } else
+                stanza.c('retry', {xmlns: Strophe.NS.DELIVERY}).up();
             message.set('state', constants.MSG_PENDING);
         }
         if (stanza.toString().length >= constants.STANZA_MAX_SIZE) {
@@ -6065,11 +6068,11 @@ xabber.ChatContentView = xabber.BasicView.extend({
                 console.log('change reconnecting');
                 console.log(this.account.session.get('reconnecting'));
                 was_reconnecting = true;
-            });
-            this.account.session.once('change:reconnected', () => {
-                _pending_time = 5;
-                console.log('change reconnected ');
-                has_reconnected = true;
+                this.account.session.once('change:reconnected', () => {
+                    _pending_time = 5;
+                    console.log('change reconnected ');
+                    has_reconnected = true;
+                });
             });
             let _interval = setInterval(() => {
                 if (_pending_time >= 8 && message.get('state') === constants.MSG_PENDING && !was_reconnecting){

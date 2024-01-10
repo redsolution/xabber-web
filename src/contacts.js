@@ -8641,6 +8641,7 @@ xabber.Roster = xabber.ContactsBase.extend({
                 });
                 if (!is_last_sync){
                     this.account.sendPresence();
+                    this.account.dfd_presence.resolve();
                     let saved_chat = this.account.chats.getSavedChat();
                     saved_chat.set('opened', true);
                     saved_chat.item_view.updateLastMessage();
@@ -8688,7 +8689,6 @@ xabber.Roster = xabber.ContactsBase.extend({
         let iq = $iq({type: 'get'}).c('query', {xmlns: Strophe.NS.ROSTER, ver: this.roster_version});
         this.account.sendIQFast(iq, (iq) => {
             this.onRosterIQ(iq);
-            this.account.dfd_presence.resolve();
         });
     },
 
@@ -9731,6 +9731,8 @@ xabber.Account.addInitPlugin(function () {
                 }
                 else {
                     this.roster.getRoster();
+                    this.sendPresence();
+                    this.dfd_presence.resolve();
                 }
                 this.blocklist.getFromServer();
             });
