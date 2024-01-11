@@ -1031,6 +1031,7 @@ xabber.ToolbarView = xabber.BasicView.extend({
         this.data.set({group_msg_counter: 0});
         this.data.set({all_msg_counter: 0});
         this.data.set({mentions_counter: 0});
+        xabber.trigger('toolbar_initialized');
     },
 
     render: function () {
