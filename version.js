@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.3.4.108","version_description":"fixed retry message on msg error not having proper attributes for groupchats, fixed pending stanzas sending timing after reconnection, fixed dfd_presence not working after first resolve, added presence sending fallback if synchronisation is not enabled, fixed pending msg sending check for groupchats, fixed reconnected trigger for msg callback after reconnection"}'
+'{"version_number":"2.3.4.109","version_description":"changed behaviour on empty unread messages archive request, now it scrolls to bottom as on scroll-to-bottom click"}'
 )});

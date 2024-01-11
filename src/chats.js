@@ -4102,9 +4102,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
                 }
             }
             if (options.unread_history_first && !messages.length){
-                this.loadPreviousHistory();
-                this.model.set('const_unread', 0);
-                this.model.set('unread', 0);
+                this.backToBottom();
                 this.model._wait_load_unread_history.resolve();
             }
         }, (err) => {
