@@ -1031,7 +1031,6 @@ xabber.ToolbarView = xabber.BasicView.extend({
         this.data.set({group_msg_counter: 0});
         this.data.set({all_msg_counter: 0});
         this.data.set({mentions_counter: 0});
-        xabber.trigger('toolbar_initialized');
     },
 
     render: function () {
@@ -4576,6 +4575,7 @@ xabber.once("start", function () {
 
     this.toolbar_view = this.body.addChild('toolbar', this.ToolbarView);
     this.settings.appearance.color && this.toolbar_view.updateColor(this.settings.appearance.color);
+    xabber.trigger('toolbar_initialized');
 
     this.blur_overlay = this.body.addChild('blur_overlay', this.NodeView, {
         classlist: 'blur-overlay'});
