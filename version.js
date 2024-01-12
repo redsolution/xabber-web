@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.3.4.111","version_description":"made that all synced chat are shown except encrypted if encryption is not enabled, added mechanism to show synced encrypted chats if encryption is enabled"}'
+'{"version_number":"2.3.4.112","version_description":"fixed that dead single account view were sending additional stanza requests for devices on new resource, fixed wrong timing of sending presence after auth"}'
 )});

@@ -217,6 +217,16 @@ xabber.BasicView = Backbone.View.extend({
             scrollHeight = this.ps_container[0].scrollHeight,
             offsetHeight = this.ps_container[0].offsetHeight;
         return (scrollHeight - (scrollTop + offsetHeight)) < 10;
+    },
+
+    destroyView: function() {
+        this.data.set('removed', true);
+        // COMPLETELY UNBIND THE VIEW
+        this.undelegateEvents();
+        this.$el.removeData().unbind();
+        // Remove view from DOM
+        this.remove();
+        Backbone.View.prototype.remove.call(this);
     }
 });
 
@@ -2020,6 +2030,8 @@ xabber.SettingsModalView = xabber.BasicView.extend({
         if (this.settings_single_account_modal){
             this.settings_single_account_modal.removeChild('blocklist');
             this.removeChild('single_account');
+            this.settings_single_account_modal.destroyView();
+            this.settings_single_account_modal = undefined;
         }
         if (xabber.accounts.length === 1 && xabber.accounts.enabled.length){
             this.$('.accounts-info-wrap').addClass('hidden');

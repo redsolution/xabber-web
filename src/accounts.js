@@ -3506,6 +3506,8 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
     },
 
     updateXTokens: function () {
+        if (this.data.get('removed'))
+            return;
         if (this.model.get('auth_type') !== 'x-token') {
             this.$('.tokens').addClass('hidden');
             this.$('.sessions-wrap').children().html("");
@@ -5997,7 +5999,6 @@ xabber.XmppLoginPanel = xabber.AuthView.extend({
         this.data.set('registration', false);
         this.data.set('authentication', false);
         xabber.body.setScreen('all-chats', {right: null});
-        this.account.sendPresence();
         this.account.trigger('ready_to_get_roster');
         this.account.auth_view = null;
     },
@@ -6199,7 +6200,6 @@ xabber.AddAccountView = xabber.XmppLoginPanel.extend({
     endAuth: function () {
         this.account.save('is_new', undefined);
         this.data.set('authentication', false);
-        this.account.sendPresence();
         this.account.trigger('ready_to_get_roster');
         this.account.auth_view = null;
         this.closeModal();

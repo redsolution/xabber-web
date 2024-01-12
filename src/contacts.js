@@ -8648,8 +8648,6 @@ xabber.Roster = xabber.ContactsBase.extend({
                     timestamp: sync_timestamp,
                 });
                 if (!is_last_sync){
-                    this.account.sendPresence();
-                    this.account.dfd_presence.resolve();
                     let saved_chat = this.account.chats.getSavedChat();
                     saved_chat.set('opened', true);
                     saved_chat.item_view.updateLastMessage();
@@ -8658,6 +8656,8 @@ xabber.Roster = xabber.ContactsBase.extend({
                         if (retract_version > this.account.retraction_version)
                             this.account.retraction_version = retract_version;
                     })
+                    this.account.sendPresence();
+                    this.account.dfd_presence.resolve();
                     this.account.get('first_sync') && this.syncFromServer({stamp: this.account.get('first_sync'), max: constants.SYNCHRONIZATION_RSM_MAX, last_version_sync: true}, true);
                 }
             });
