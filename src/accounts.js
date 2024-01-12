@@ -1667,6 +1667,7 @@ xabber.Accounts = Backbone.CollectionWithStorage.extend({
         this.on("add", this.onAdd, this);
         this.on("destroy", this.onDestroy, this);
         this.on("change:enabled", this.getEnabledList, this);
+        this.on("change:omemo_enabled", this.onOmemoChanged, this);
         this.on("update_order", this.onUpdatedOrder, this);
         this.on("add destroy activate deactivate", this.onListChanged, this);
         this.on("destroy deactivate", this.onAccountDisconnected, this);
@@ -1707,6 +1708,10 @@ xabber.Accounts = Backbone.CollectionWithStorage.extend({
         this.getEnabledList();
         this.getConnectedList();
         this.trigger('list_changed', this);
+    },
+
+    onOmemoChanged: function (account) {
+        this.trigger('omemo_changed', account);
     },
 
     onAdd: function (account) {

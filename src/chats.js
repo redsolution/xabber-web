@@ -8658,6 +8658,7 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
         this.model.on("change:const_unread", this.onChangedReadStatus, this);
         this.model.on("change:timestamp", this.updateChatPosition, this);
         xabber.accounts.on("list_changed", this.updateLeftIndicator, this);
+        xabber.accounts.on("omemo_changed", this.updateAccountEncryptedChats, this);
         let wheel_ev = this.defineMouseWheelEvent();
         this.$el.on(wheel_ev, this.onMouseWheel.bind(this));
         this.ps_container.on("ps-scroll-y", this.onScrollY.bind(this));
@@ -8796,8 +8797,24 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
         }
     },
 
+    updateAccountEncryptedChats: function (account) {
+        let enc_chats = account.chats.filter(chat => chat.get('encrypted'))
+        enc_chats.forEach((item) => {
+            let view = this.child(item.id);
+            if (view){
+                view.$el.switchClass('hidden', !account.get('omemo_enabled'));
+                if (account.get('omemo_enabled'))
+                    account.omemo.checkContactFingerprints(item.contact);
+            }
+        });
+    },
+
     replaceChatItem: function (item, chats, pinned_chats) {
         let view = this.child(item.id);
+        if (item.get('encrypted') && item.account && !item.account.omemo)
+            view.$el.addClass('hidden');
+        else if (item.get('encrypted') && item.account && item.account.omemo)
+            view.$el.removeClass('hidden');
         if (view && item.get('pinned') && item.get('pinned') !== '0' && pinned_chats ){
             pinned_chats = pinned_chats.sort((a, b) => (a.get('pinned') > b.get('pinned')) ? 1 : -1)
             let index = pinned_chats.indexOf(item);
@@ -8812,7 +8829,7 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
                 $chat_item.after(view.$el);
             }
         }
-        else if (view && (item.get('timestamp') || item.get('saved'))) {
+        else if (view) {
             view.$el.detach();
             let index = chats.indexOf(item);
             if (index === 0) {

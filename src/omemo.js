@@ -1148,6 +1148,7 @@ xabber.Omemo = Backbone.ModelWithStorage.extend({
         this.connection = this.account.connection;
         this.registerMessageHandler();
         this.addDevice();
+        this.account.set("omemo_enabled", true);
     },
 
     getMyDevices: async function () {

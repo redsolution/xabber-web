@@ -8540,8 +8540,9 @@ xabber.Roster = xabber.ContactsBase.extend({
                 this.account.groupchat_settings.resetParticipantsList(contact.get('jid'));
             }
         }
-        else
+        else{
             contact && contact.set('sync_deleted', false);
+        }
         if (current_call.length) {
             let $jingle_message = current_call.children('message'),
                 full_jid = $jingle_message.attr('from'),
@@ -8602,6 +8603,13 @@ xabber.Roster = xabber.ContactsBase.extend({
                 }
             }
             chat.set('first_archive_id', msg.get('stanza_id'));
+        } else if (message.length && !msg){
+            chat.set('timestamp', chat_timestamp);
+            if (!(Number(last_delivered_msg) || Number(last_displayed_msg) || Number(last_read_msg))
+                && !chat.item_view.content && !chat.get('group_chat')){
+                chat.item_view.content = new xabber.ChatContentView({chat_item: chat.item_view});
+            }
+            chat.item_view.updateEmptyChat();
         }
         if (presence.length)
             contact && contact.handlePresence(presence[0]);
