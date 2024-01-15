@@ -1921,7 +1921,7 @@ xabber.EphemeralTimerSelector = xabber.BasicView.extend({
         });
     },
 
-    retractMessagesByUser: function (user_id) {
+    retractMessagesByUser: function (user_id, callback, errback) {
         let iq_retraction = $iq({type: 'set', to: this.contact.get('full_jid') || this.contact.get('jid')})
             .c('retract-user', {
                 id: user_id,
@@ -1934,9 +1934,11 @@ xabber.EphemeralTimerSelector = xabber.BasicView.extend({
             $(user_msgs).each((idx, msg) => {
                 this.item_view.content.removeMessage(msg);
             });
+            callback && callback();
         }, (error) => {
             if ($(error).find('not-allowed').length)
                 utils.dialogs.error(xabber.getString("groupchat_you_have_no_permissions_to_do_it"));
+            errback && errback();
         });
     },
 
@@ -3131,7 +3133,7 @@ xabber.ChatItemView = xabber.BasicView.extend({
               if (result) {
                   if (this.member_id) {
                       this.chat_content.model.retractMessagesByUser(this.member_id, () => {
-                          this.emptyChat();
+                          this.openChat();
                       });
                   }
               }
