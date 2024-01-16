@@ -748,6 +748,52 @@ _.extend(Strophe.Websocket.prototype, {
             this._conn._data = [];
         }
     },
+
+    _onOpen: function() {
+        Strophe.info("Websocket open");
+        var start = this._buildStream();
+        this._conn.xmlOutput(start.tree());
+
+        var startString = Strophe.serialize(start);
+        this._conn.rawOutput(startString);
+        this.socket.send(startString);
+        this._conn.openCheckTimeout = setTimeout(() => { // check of that open was sent but was not received from server
+            if (this._conn.open_received) {
+                return;
+            } else {
+                console.log('disconnected on open not being received')
+                this._conn.disconnect();
+                return;
+            }
+        }, 5000)
+    },
+
+    _handleStreamStart: function(message) {
+        var error = false;
+
+        // Check for errors in the <open /> tag
+        var ns = message.getAttribute("xmlns");
+        if (typeof ns !== "string") {
+            error = "Missing xmlns in <open />";
+        } else if (ns !== Strophe.NS.FRAMING) {
+            error = "Wrong xmlns in <open />: " + ns;
+        }
+
+        var ver = message.getAttribute("version");
+        if (typeof ver !== "string") {
+            error = "Missing version in <open />";
+        } else if (ver !== "1.0") {
+            error = "Wrong version in <open />: " + ver;
+        }
+
+        if (error) {
+            this._conn._changeConnectStatus(Strophe.Status.CONNFAIL, error);
+            this._conn._doDisconnect();
+            return false;
+        }
+        clearTimeout(this._conn.openCheckTimeout);
+        return true;
+    },
 });
 
 Strophe.xmlunescape = function (text) {

@@ -523,6 +523,7 @@ xabber.Account = Backbone.Model.extend({
                 else
                     this.onAuthFailed();
             } else if (status === Strophe.Status.DISCONNECTED) {
+                this.connection && clearTimeout(this.connection.openCheckTimeout);
                 if (this.session.get('on_token_revoked'))
                     return;
                 this.connection.flush();
@@ -574,6 +575,7 @@ xabber.Account = Backbone.Model.extend({
                 else
                     this.onAuthFailed();
             } else if (status === Strophe.Status.DISCONNECTED) {
+                this.connection && clearTimeout(this.connection.openCheckTimeout);
                 if (this.session.get('on_token_revoked'))
                     return;
                 this.connection.flush();
@@ -642,6 +644,7 @@ xabber.Account = Backbone.Model.extend({
                     this.change_password_connection.register.fields.password = this.change_password_view.$password_input.val().trim();
                     this.change_password_connection.register.submit();
                 } else if (status === Strophe.Status.DISCONNECTED) {
+                    this.change_password_connection && clearTimeout(this.change_password_connection.openCheckTimeout);
                     this.change_password_connection_manager = undefined;
                     this.change_password_connection = undefined;
                 }
@@ -669,6 +672,7 @@ xabber.Account = Backbone.Model.extend({
                 } else if (status === Strophe.Status.CONNECTED) {
                     this.unregister_account_view.data.set('step', 1);
                 } else if (status === Strophe.Status.DISCONNECTED) {
+                    this.unregister_account_connection && clearTimeout(this.unregister_account_connection.openCheckTimeout);
                     this.unregister_account_connection_manager = undefined;
                     this.unregister_account_connection = undefined;
                 }
@@ -846,6 +850,7 @@ xabber.Account = Backbone.Model.extend({
                     plugin.call(this);
                 });
             } else if (status === Strophe.Status.AUTHFAIL || status === Strophe.Status.DISCONNECTED) {
+                this.fast_connection && clearTimeout(this.fast_connection.openCheckTimeout);
                 if (this._fast_interval_worker)
                     this._fast_interval_worker.terminate();
                 this.fast_conn_manager = undefined;
@@ -5615,6 +5620,7 @@ xabber.XmppLoginPanel = xabber.AuthView.extend({
                     }
                 }, 10000);
         } else if (status === Strophe.Status.DISCONNECTED) {
+            this.auth_connection && clearTimeout(this.auth_connection.openCheckTimeout);
             if (this.auth_connection && this.auth_connection._no_response) {
                 this.registerFeedback({jid: xabber.getString("account_add__alert_invalid_domain")});
                 this.$('.btn-next').prop('disabled', true);
