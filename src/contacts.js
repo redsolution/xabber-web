@@ -362,7 +362,7 @@ xabber.Contact = Backbone.Model.extend({
     },
 
     getAvatar: function (avatar, node, callback, errback) {
-        let jid = this.get('group_chat') ? this.get('full_jid') : this.get('jid'),
+        let jid = this.get('jid'),
             iq_request_avatar = $iq({type: 'get', to: jid})
             .c('pubsub', {xmlns: Strophe.NS.PUBSUB})
             .c('items', {node: node})
