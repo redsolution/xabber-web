@@ -8582,11 +8582,6 @@ xabber.Roster = xabber.ContactsBase.extend({
         options.delay = message.children('time');
         (unread_msgs_count == 0) && (options.sync_timestamp = chat_timestamp);
         message.length && (msg = this.account.chats.receiveChatMessage(message, options));
-        if (!(encrypted && !this.account.omemo)){
-            chat.messages_unread.reset();
-            chat.set('unread', 0);
-            chat.set('const_unread', unread_msgs_count);
-        }
         if (msg) {
             if (!msg.get('is_unread') && $unread_messages.attr('count') > 0 && !msg.isSenderMe() && !(msg.get('type') === 'system') && ($unread_messages.attr('after') < msg.get('stanza_id') || $unread_messages.attr('after') < msg.get('contact_stanza_id')))//TODO: change to timestamp checking
                 msg.set('is_unread', true);
@@ -8610,6 +8605,26 @@ xabber.Roster = xabber.ContactsBase.extend({
                 chat.item_view.content = new xabber.ChatContentView({chat_item: chat.item_view});
             }
             chat.item_view.updateEmptyChat();
+        }
+        if (!(encrypted && !this.account.omemo)){
+            let last_read_msg_item = chat.messages.get(last_read_msg);
+            if (last_read_msg_item && unread_msgs_count){
+                let unread_msgs = chat.messages.filter(m => m.get('timestamp') > last_read_msg_item.get('timestamp') && !m.isSenderMe());
+                unread_msgs.forEach(message => message.set('is_unread', true));
+                let readen_unread_msgs = chat.messages.filter(m => m.get('timestamp') > last_read_msg_item.get('timestamp') && !m.isSenderMe() && m.get('was_readen')),
+                    last_readen_unread_msg = readen_unread_msgs[readen_unread_msgs.length - 1];
+                readen_unread_msgs.forEach((message) => {
+                    message.set('is_unread', false);
+                });
+                unread_msgs_count = unread_msgs_count - readen_unread_msgs.length;
+                (unread_msgs_count < 0) && (unread_msgs_count = 0);
+                if (last_readen_unread_msg){
+                    chat.sendMarker(last_readen_unread_msg.get('msgid'), 'displayed', last_readen_unread_msg.get('stanza_id'), last_readen_unread_msg.get('contact_stanza_id'), last_readen_unread_msg.get('encrypted') && last_readen_unread_msg.get('ephemeral_timer'), true)
+                }
+            }
+            chat.messages_unread.reset();
+            chat.set('unread', 0);
+            chat.set('const_unread', unread_msgs_count);
         }
         if (presence.length)
             contact && contact.handlePresence(presence[0]);

@@ -1229,6 +1229,7 @@ xabber.EphemeralTimerSelector = xabber.BasicView.extend({
                 let read_count = Number(rsm.count) + 1;
                 read_count = this.get('const_unread') - read_count;
                 (read_count < 0) && (read_count = 0);
+                this.set('unread', 0);
                 this.set('const_unread', read_count);
             }
             if (!rsm.complete && (rsm.count > messages.length)){
@@ -1695,7 +1696,7 @@ xabber.EphemeralTimerSelector = xabber.BasicView.extend({
         this.account.sendMsg($delivery_msg);
     },
 
-    sendMarker: function (msg_id, status, stanza_id, contact_stanza_id, is_ephemeral) {
+    sendMarker: function (msg_id, status, stanza_id, contact_stanza_id, is_ephemeral, send_pending) {
         status || (status = 'displayed');
         let stanza = $msg({
             to: this.get('jid'),
@@ -1710,6 +1711,7 @@ xabber.EphemeralTimerSelector = xabber.BasicView.extend({
         is_ephemeral && stanza.up().c('store', {xmlns: Strophe.NS.HINTS});
         is_ephemeral && stanza.up().c('encryption', {xmlns: Strophe.NS.EXPLICIT_MESSAGE_ENCRYPTION, namespace: Strophe.NS.OMEMO});
         is_ephemeral && stanza.up().c('conversation', {xmlns: Strophe.NS.SYNCHRONIZATION, type: Strophe.NS.OMEMO, jid: this.contact.get('jid')});
+        send_pending && this.account._pending_stanzas.push({stanza: stanza});
         this.account.sendMsg(stanza);
     },
 
@@ -2718,9 +2720,12 @@ xabber.ChatItemView = xabber.BasicView.extend({
           let is_unread = message.get('is_unread'),
               $msg = this.$(`.chat-message[data-uniqueid="${message.get("unique_id")}"]`);
           if (is_unread) {
+              if (message.get('was_readen'))
+                  return;
               $msg.addClass('unread-message');
               $msg.addClass('unread-message-background');
           } else {
+              message.set('was_readen', true);
               $msg.removeClass('unread-message');
               setTimeout(() => {
                   $msg.removeClass('unread-message-background');
@@ -3644,6 +3649,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
             });
             read_count = this.model.get('const_unread') - read_count;
             (read_count < 0) && (read_count = 0);
+            this.model.set('unread', 0);
             this.model.set('const_unread', read_count);
         } else {
             let unread_messages = _.clone(this.model.messages_unread.models);
@@ -7036,12 +7042,15 @@ xabber.ChatContentView = xabber.BasicView.extend({
         if (is_unread) {
             if (!is_unread_archived && !is_synced && !is_missed_msg)
                 this.model.messages_unread.add(message);
-            $msg.addClass('unread-message');
-            $msg.addClass('unread-message-background');
+            if (!message.get('was_readen')){
+                $msg.addClass('unread-message');
+                $msg.addClass('unread-message-background');
+            }
             this.model.recountUnread();
         } else {
             if ((!is_unread_archived && !is_synced && !is_missed_msg) || this.model.messages_unread.indexOf(message) > -1)
                 this.model.messages_unread.remove(message);
+            message.set('was_readen', true);
             $msg.removeClass('unread-message');
             setTimeout(() => {
                 $msg.removeClass('unread-message-background');
