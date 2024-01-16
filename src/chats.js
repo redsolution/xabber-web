@@ -8908,7 +8908,7 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
                 this.updateScreenAllChats();
             if (!view.model.get('history_loaded')) {
                 if (
-                    (view.model.get('const_unread') || view.model.get('unread'))
+                    (view.model.get('const_unread'))
                     && view.model.get('last_read_msg') &&
                     (!view.content._prev_scrolltop || (view.content._prev_scrolltop && view.content._is_scrolled_bottom) || (view.model.get('show_new_unread') === true))
                     && !view.model.get('loading_unread_history') && !options.force_bottom && xabber.body.screen.get('chat_item') !== view
@@ -8935,14 +8935,21 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
             }
             if (!view.model.get('loading_unread_history')){
                 let current_scrolling = view.content.getScrollTop() || view.content._scrolltop,
-                    scrolled_to_bottom = view.content.isScrolledToBottom();
+                    scrolled_to_bottom = view.content.isScrolledToBottom(),
+                    unread_scroll = (!view.content._prev_scrolltop || (view.content._prev_scrolltop && view.content._is_scrolled_bottom));
                 xabber.body.setScreen((options.screen || 'all-chats'), {
                     right: 'chat',
                     clear_search: options.clear_search,
                     chat_item: view,
                     blocked: view.model.get('blocked')
                 },{right_contact_save: options.right_contact_save, right_force_close: options.right_force_close} );
-                !scrolled_to_bottom && view.content.scrollTo(current_scrolling);
+                if (view.model.get('unread') && unread_scroll) {
+                    view.content.scrollToUnread();
+                    view.content._long_reading_timeout = true;
+                    view.content._no_scrolling_event = false;
+                    view.content.onScroll();
+                }
+                (!scrolled_to_bottom || !unread_scroll) && current_scrolling && view.content.scrollTo(current_scrolling);
             } else {
                 xabber.body.setScreen((options.screen || 'all-chats'), {
                     right: 'chat',
