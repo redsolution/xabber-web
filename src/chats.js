@@ -412,8 +412,7 @@ xabber.MessagesBase = Backbone.Collection.extend({
                         description: $file.children('desc').text(),
                         height: $file.children('height').text(),
                         width: $file.children('width').text(),
-                        thumbnail: $file.children('thumbnail-uri').text(),
-                        id: $file.children('gallery-id').text(),
+                        thumbnail: $file.children(`thumbnail[xmlns="${Strophe.NS.PUBSUB_AVATAR_METADATA_THUMBNAIL}"]`).attr('uri'),
                         voice: type === 'voice',
                         sources: sources
                     };
@@ -5944,8 +5943,10 @@ xabber.ChatContentView = xabber.BasicView.extend({
                 file.voice && stanza.c('voice-message', {xmlns: Strophe.NS.VOICE_MESSAGE});
                 stanza.c('file-sharing', {xmlns: Strophe.NS.FILES}).c('file');
                 file.type && stanza.c('media-type').t(file.type).up();
-                file['id'] && stanza.c('gallery-id').t(file['id']).up();
-                file.thumbnail && stanza.c('thumbnail-uri').t(file.thumbnail).up();
+                file.thumbnail && stanza.c('thumbnail', {
+                    xmlns: Strophe.NS.PUBSUB_AVATAR_METADATA_THUMBNAIL,
+                    uri: file.thumbnail
+                }).up();
                 file.created && stanza.c('created').t(file.created).up();
                 file.name && stanza.c('name').t(file.name).up();
                 file.size && stanza.c('size').t(file.size).up();
@@ -13199,8 +13200,10 @@ xabber.ChatBottomView = xabber.BasicView.extend({
                 file.voice && $message.c('voice-message', {xmlns: Strophe.NS.VOICE_MESSAGE});
                 $message.c('file-sharing', {xmlns: Strophe.NS.FILES}).c('file');
                 file.type && $message.c('media-type').t(file.type).up();
-                file['id'] && $message.c('gallery-id').t(file['id']).up();
-                file.thumbnail && $message.c('thumbnail-uri').t(file.thumbnail).up();
+                file.thumbnail && stanza.c('thumbnail', {
+                    xmlns: Strophe.NS.PUBSUB_AVATAR_METADATA_THUMBNAIL,
+                    uri: file.thumbnail
+                }).up();
                 file.created && $message.c('created').t(file.created).up();
                 file.name && $message.c('name').t(file.name).up();
                 file.size && $message.c('size').t(file.size).up();
@@ -13377,24 +13380,24 @@ xabber.ChatBottomView = xabber.BasicView.extend({
             if (!item.isSenderMe())
                 return;
             item.get('files') && _.isArray(item.get('files')) && item.get('files').forEach((item) => {
-                item && item.id && this.account.deleteFile(item.id,(response) => {
-                    item.id = null;
+                item && item.sources && item.sources.length && this.account.deleteFileByUrl(item.sources[0],(response) => {
+                    item.sources = null;
                 }, (err) => {
-                    item.id = null;
+                    item.sources = null;
                 });
             });
             item.get('images') && _.isArray(item.get('images')) && item.get('images').forEach((item) => {
-                item && item.id && this.account.deleteFile(item.id,(response) => {
-                    item.id = null;
+                item && item.sources && item.sources.length && this.account.deleteFileByUrl(item.sources[0],(response) => {
+                    item.sources = null;
                 }, (err) => {
-                    item.id = null;
+                    item.sources = null;
                 });
             });
             item.get('videos') && _.isArray(item.get('videos')) && item.get('videos').forEach((item) => {
-                item && item.id && this.account.deleteFile(item.id,(response) => {
-                    item.id = null;
+                item && item.sources && item.sources.length && this.account.deleteFileByUrl(item.sources[0],(response) => {
+                    item.sources = null;
                 }, (err) => {
-                    item.id = null;
+                    item.sources = null;
                 });
             });
         });

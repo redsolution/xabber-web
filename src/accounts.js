@@ -1563,6 +1563,31 @@ xabber.Account = Backbone.Model.extend({
             });
         },
 
+        deleteFileByUrl: function (file_url, callback, errback) {
+            this.testGalleryTokenExpire(() => {
+                if (this.get('gallery_token') && this.get('gallery_url') && file_url){
+                    let options = {file: file_url, contexts: ['file', 'voice']};
+                    $.ajax({
+                        type: 'DELETE',
+                        headers: {"Authorization": 'Bearer ' + this.get('gallery_token')},
+                        url: this.get('gallery_url') + 'v1/files/',
+                        dataType: 'json',
+                        contentType: "application/json",
+                        data: JSON.stringify(options),
+                        success: (response) => {
+                            console.log(response)
+                            callback && callback(response)
+                        },
+                        error: (response) => {
+                            this.handleCommonGalleryErrors(response)
+                            console.log(response)
+                            errback && errback(response)
+                        }
+                    });
+                }
+            });
+        },
+
         getOpenGraphData: function (url, callback, errback) {
             this.testGalleryTokenExpire(() => {
                 if (this.get('gallery_token') && this.get('gallery_url'))
