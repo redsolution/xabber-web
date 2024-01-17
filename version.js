@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.3.4.118","version_description":"changed file thumbnail sending in reference, changed files deletion on message deletion"}'
+'{"version_number":"2.3.4.119","version_description":"fixed IDB transactions after deleting it, fixed errors when deleting account right after loging in"}'
 )});

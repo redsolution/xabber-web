@@ -6007,7 +6007,7 @@ xabber.Participants = Backbone.Collection.extend({
     initialize: function (models, options) {
         this.contact = options.contact;
         this.account = this.contact.account;
-        this.version = this.account.groupchat_settings.getParticipantsListVersion(this.contact.get('jid'));
+        this.account.groupchat_settings && (this.version = this.account.groupchat_settings.getParticipantsListVersion(this.contact.get('jid')));
         this.getCachedParticipants();
         this.contact.on("update_participants", this.updateParticipants, this);
         this.on("change:nickname", this.sort, this);
@@ -6018,7 +6018,7 @@ xabber.Participants = Backbone.Collection.extend({
     },
 
     getCachedParticipants: function () {
-        this.account.groupchat_settings.getParticipantsList(this.contact.get('jid')).forEach((participant) => {
+        this.account.groupchat_settings && this.account.groupchat_settings.getParticipantsList(this.contact.get('jid')).forEach((participant) => {
             this.mergeParticipant(participant);
         });
     },
@@ -8431,7 +8431,7 @@ xabber.Roster = xabber.ContactsBase.extend({
     },
 
     syncConversation: function (iq, request_with_stamp, item, is_first_sync, cached_conversations) {
-        if (!$(item).length){
+        if (!$(item).length || !this.account || this.account.session.get('delete')){
             return;
         }
         if (!iq)
@@ -8510,7 +8510,7 @@ xabber.Roster = xabber.ContactsBase.extend({
                     chat.set('muted', false);
                 else
                     chat.set('muted', $item.attr('mute'));
-                this.account.chat_settings.updateMutedList(contact.get('jid'), $item.attr('mute'));
+                this.account.chat_settings && this.account.chat_settings.updateMutedList(contact.get('jid'), $item.attr('mute'));
                 if (contact.details_view_right)
                     contact.details_view_right.updateNotifications();
             } else {

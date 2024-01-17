@@ -28,6 +28,7 @@
         this.version = options.version || 1;
         this.name = options.name;
         var request = indexedDB.open(this.name, this.version);
+        this.closed = false;
         request.onupgradeneeded = function() {
             let db = request.result;
             this.createStore(db);
@@ -48,7 +49,7 @@
 
     _.extend(IndexedDB.prototype, {
         put: function(objStoreName, obj,callback) {
-            if (!this.db) {
+            if (!this.db || this.closed) {
                 callback && callback(false);
                 return;
             }
@@ -63,7 +64,7 @@
         },
 
         get_all: function (objStoreName, value, callback) {
-            if (!this.db) {
+            if (!this.db || this.closed) {
                 callback && callback(null);
                 return;
             }
@@ -84,7 +85,7 @@
         },
 
         get: function (objStoreName, value, callback) {
-            if (!this.db) {
+            if (!this.db || this.closed) {
                 callback && callback(null);
                 return;
             }
@@ -101,7 +102,7 @@
         },
 
         remove: function (objStoreName, value, callback) {
-            if (!this.db) {
+            if (!this.db || this.closed) {
                 callback && callback(false);
                 return;
             }
@@ -116,7 +117,7 @@
         },
 
         clear_database: function (objStoreName, callback) {
-            if (!this.db) {
+            if (!this.db || this.closed) {
                 callback && callback(false);
                 return;
             }
@@ -135,6 +136,7 @@
                 callback && callback(false);
                 return;
             }
+            this.closed = true;
             this.db.close();
             let db_deleter = indexedDB.deleteDatabase(this.name);
             db_deleter.onsuccess = function () {

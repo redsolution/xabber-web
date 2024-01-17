@@ -10326,7 +10326,7 @@ xabber.InvitationPanelView = xabber.SearchView.extend({
         this.$('.btn-archive-chat .mdi').switchClass('mdi-package-down', is_archived);
         if (this.model.item_view && archived){
             !this.model.messages.length && this.model.item_view.updateLastMessage();
-            this.account.chat_settings.updateArchiveChatsList(this.contact.get('jid'), archived);
+            this.account.chat_settings && this.account.chat_settings.updateArchiveChatsList(this.contact.get('jid'), archived);
             if (this.model.get('active')) {
                 xabber.chats_view.updateScreenAllChats();
             }

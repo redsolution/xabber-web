@@ -6067,12 +6067,14 @@ xabber.XmppLoginPanel = xabber.AuthView.extend({
                 this.$(`.login-step.credentials-step .preloader-wrapper`).removeClass('active').removeClass('visible');
                 this.$(`.login-step.credentials-step .mdi`).hideIf(false).removeClass('mdi-alert-circle').addClass('mdi-checkbox-marked-circle');
                 setTimeout(() => {
-                    if (constants.TRUSTED_DOMAINS.indexOf(this.account.connection.domain) > -1){
-                        this.endAuth();
-                    } else {
-                        this.stepped_auth_complete = true
-                        if (this.first_features_received)
-                            this.successFeedback();
+                    if (this.account && this.account.connection){
+                        if (constants.TRUSTED_DOMAINS.indexOf(this.account.connection.domain) > -1){
+                            this.endAuth();
+                        } else {
+                            this.stepped_auth_complete = true
+                            if (this.first_features_received)
+                                this.successFeedback();
+                        }
                     }
                 },timeout_timer)
             },timeout_timer)
