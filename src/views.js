@@ -2785,7 +2785,7 @@ xabber.SettingsModalView = xabber.BasicView.extend({
             label = xabber.getString("settings__menu_item__emoji_font_system");
         this.$('.settings-tab[data-block-name="emoji_font"] .settings-block-label').text(label);
         this.$('.emoji-font-attribution-text').switchClass('hidden', !attribution_text);
-        this.$('.emoji-font-attribution-text').text(attribution_text);
+        this.$('.emoji-font-attribution-text').html(attribution_text);
         this.$(`.emoji-fonts-list input[type=radio][name=emoji_font][value="${this.model.get('emoji_font')}"]`)
             .prop('checked', true);
         this.$(`.emoji-fonts-list input[type=radio][name=emoji_font]`)
