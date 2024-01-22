@@ -1872,6 +1872,7 @@ xabber.SettingsModalView = xabber.BasicView.extend({
         "click .setting.load-media label": "setLoadMedia",
         "click .setting.typing-notifications label": "setTypingNotifications",
         "click .setting.mapping-service label": "setMappingService",
+        "click .setting.desktop-autostart label": "setDesktopAutostart",
         "change .sound input[type=radio][name=private_sound]": "setPrivateSound",
         "change .sound input[type=radio][name=group_sound]": "setGroupSound",
         "change .sound input[type=radio][name=call_sound]": "setCallSound",
@@ -1966,6 +1967,12 @@ xabber.SettingsModalView = xabber.BasicView.extend({
         //     .prop('checked', settings.notifications_volume_enabled);
         this.$('.mapping-service input[type=checkbox]')
             .prop({checked: settings.mapping_service});
+        if (constants.DESKTOP_AUTOSTART_OPTION) {
+            this.$('.desktop-autostart input[type=checkbox]')
+                .prop({checked: settings.desktop_autostart});
+        } else {
+            this.$('.desktop-autostart').remove();
+        }
         let sound_private_value = settings.private_sound ? settings.sound_on_private_message : '';
         this.$(`.sound input[type=radio][name=private_sound][value="${sound_private_value}"]`)
                 .prop('checked', true);
@@ -2524,6 +2531,13 @@ xabber.SettingsModalView = xabber.BasicView.extend({
         this.model.save('mapping_service', value);
         ev.preventDefault();
         $(ev.target).closest('.setting.mapping-service').find('input').prop('checked', value);
+    },
+
+    setDesktopAutostart: function (ev) {
+        let value = !this.model.get('desktop_autostart');
+        this.model.save('desktop_autostart', value);
+        ev.preventDefault();
+        $(ev.target).closest('.setting.desktop-autostart').find('input').prop('checked', value);
     },
 
     setPrivateSound: function (ev) {
@@ -4561,6 +4575,17 @@ _.extend(xabber, {
         })
         this.idleJs.start();
     },
+
+
+    autostartHandler: function () {
+        if (!constants.DESKTOP_AUTOSTART_OPTION)
+            return;
+        if (!window.electronAPI || !window.electronAPI.autostartHandler)
+            return;
+        let desktop_autostart = this._settings.get('desktop_autostart');
+
+        window.electronAPI.autostartHandler(Boolean(desktop_autostart));
+    },
 });
 
 xabber.once("start", function () {
@@ -4568,6 +4593,7 @@ xabber.once("start", function () {
     this.on("change:all_msg_counter", this.onChangedAllMessageCounter, this);
     this.on("change:focused", this.onChangedFocusState, this);
     this._settings.on("change:idling_time", this.initIdleJS, this);
+    this._settings.on("change:desktop_autostart", this.autostartHandler, this);
     this.set({
         focused: window.document.hasFocus(),
         width: window.innerWidth,
@@ -4575,6 +4601,7 @@ xabber.once("start", function () {
     });
     this.registerDOMEvents();
     this.initIdleJS();
+    this.autostartHandler();
 
     Materialize.modalSettings = this.modal_settings;
 

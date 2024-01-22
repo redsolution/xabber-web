@@ -417,6 +417,7 @@ var constants = {
     REGISTER_XMPP_ACCOUNT: true,
     REGISTER_XMPP_ACCOUNT_URL: 'https://www.xabber.com/account/auth/signup/',
     CHECK_VERSION: true,
+    DESKTOP_AUTOSTART_OPTION: false,
     DEFAULT_LOGIN_SCREEN: 'xmpp',
 
     GCM_SENDER_ID: '868637702480',
