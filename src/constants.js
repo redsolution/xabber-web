@@ -451,10 +451,9 @@ var constants = {
             name: 'NotoColorEmoji',
             value: 'notoColor',
             url: '../assets/fonts/notocolor/NotoColorEmoji-Regular.ttf',
-            hint: 'Locally stored NotoColorEmoji font, size is 23MB',
-            attribution_text: 'Copyright 2021 Google Inc. All Rights Reserved.',
+            hint: `23 MiB download from ${window.location.hostname}`,
+            attribution_text: '<p>Noto Emoji (Stands for No Tofu) is an <a href="https://github.com/googlefonts/noto-emoji" target="_blank">open source</a> emoji library developed by <a href="https://google.com/" target="_blank">Google</a>.</p><p>Version: 2.042</p><p>License: <a href="https://github.com/googlefonts/noto-emoji/blob/main/fonts/LICENSE" target="_blank">SIL Open Font License 1.1</a></p>',
             order: 0
-
         },
     },
 };
