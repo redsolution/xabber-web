@@ -565,7 +565,7 @@ button.btn-float-left {
 }
 
 .main-modal.add-account-modal {
-    width: 480px !important;
+    width: 580px !important;
     height: 400px;
 }
 
@@ -3736,7 +3736,7 @@ input[type=text].simple-input-field:hover {
 .login-panel {
     position: relative;
     height: 548px;
-    width: 560px;
+    width: 640px;
     top: 50%;
     margin: 0 auto;
     background: #FFF;
@@ -3825,7 +3825,7 @@ input[type=text].simple-input-field:hover {
 }
 .register-form.login-panel-form,
 .xmpp-login-form.login-panel-form {
-    width: 480px;
+    width: 560px;
     padding: 0;
     height: 468px;
     position: relative;
@@ -3870,7 +3870,7 @@ input[type=text].simple-input-field:hover {
 .login-panel-form .register-form-step-wrap {
     position: absolute;
     top: 248px;
-    width: 480px;
+    width: 560px;
 }
 .login-panel-form.xmpp-login-form .register-form-step-wrap {
     top: 184px;
@@ -4112,7 +4112,7 @@ input[type=text].simple-input-field:hover {
 .login-panel-form.xmpp-login-form .input-field-wrap {
     flex-direction: column;
     align-items: center;
-    width: 480px;
+    width: 560px;
     margin-left: auto;
     margin-right: auto;
 }
@@ -4124,7 +4124,7 @@ input[type=text].simple-input-field:hover {
     margin-bottom: 0;
 }
 .login-panel-form.xmpp-login-form .input-field-wrap .input-field input{
-    width: 445px;
+    width: calc(100% - 35px);
 }
 .login-panel-form.xmpp-login-form .input-field-wrap .input-field input#jid{
     width: 100%;
@@ -4201,6 +4201,13 @@ input[type=text].simple-input-field:hover {
     padding: 8px 18px 10px 10px;
     margin: 0;
 }
+.login-panel-form .login-form-jid .xmpp-server-dropdown-wrap .select-auth-xmpp-server .input-group-chat-domain input,
+.login-panel-form .register-form-jid .xmpp-server-dropdown-wrap .select-xmpp-server .input-group-chat-domain input,
+.login-panel-form .register-form-jid .xmpp-server-dropdown-wrap .select-xmpp-server .xmpp-server-item-wrap .field-jid,
+.login-panel-form .login-form-jid .xmpp-server-dropdown-wrap .select-auth-xmpp-server .xmpp-server-item-wrap .field-jid{
+    width: 252px;
+    padding: 8px 22px 10px 14px;
+}
 .add-group-chat-modal .property-field .xmpp-server-item-wrap .field-jid{
     line-height: calc(3rem - 18px);
     width: 200px;
@@ -4208,7 +4215,7 @@ input[type=text].simple-input-field:hover {
 }
 .login-panel-form .login-form-jid .xmpp-server-dropdown-wrap .select-auth-xmpp-server .input-group-chat-domain input,
 .login-panel-form .register-form-jid .xmpp-server-dropdown-wrap .select-xmpp-server .input-group-chat-domain input{
-    width: 184px !important;
+    width: 214px !important;
 }
 .add-group-chat-modal .property-field .select-xmpp-server .input-group-chat-domain input#new_chat_domain{
     border-radius: 0 4px 4px 0;
@@ -4326,7 +4333,7 @@ input[type=text].simple-input-field:hover {
 }
 .login-panel-form .register-form-jid .input-field input{
     border-radius: 4px 0px 0px 4px;
-    width: 181px;
+    width: 223px;
 }
 .input-glow-account.invalid,
 .input-glow.invalid,
