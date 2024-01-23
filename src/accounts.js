@@ -6144,6 +6144,8 @@ xabber.XmppLoginPanel = xabber.AuthView.extend({
     successRegistrationFeedback: function () {
         this.$jid_input.prop('disabled', false);
         this.$password_input.prop('disabled', false)
+        if (this.auth_connection)
+            this.auth_connection.disconnect()
         this.account.trigger('start');
     },
 });
