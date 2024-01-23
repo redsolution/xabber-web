@@ -6416,7 +6416,7 @@ xabber.UnregisterAccountView = xabber.XmppLoginPanel.extend({
 
     submitUnregister: function () {
         this.authFeedback({});
-        if (this.$jid_input.val() !== this.account.get('jid'))
+        if (this.$jid_input.val() !== `delete ${this.account.get('jid')} account`)
             return this.errorFeedback({jid: xabber.getString("settings_account__unregister_jid_mismatch")});
         if (this.account && this.account.unregister_account_connection_manager && this.account.unregister_account_connection) {
             this.account.unregister_account_connection.register.submit_unregister();
