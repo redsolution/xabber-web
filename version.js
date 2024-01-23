@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.3.4.128","version_description":"added registration connection closing on starting account after registration"}'
+'{"version_number":"2.3.4.129","version_description":"fixed login panel materialize bug"}'
 )});

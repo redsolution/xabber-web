@@ -5398,7 +5398,6 @@ xabber.XmppLoginPanel = xabber.AuthView.extend({
         this.stepped_auth_complete = false;
         this.authFeedback({});
         this.registerFeedback({});
-        Materialize.updateTextFields();
         this.$('.btn-go-back').hideIf(false);
         this.$('.btn-skip').hideIf(true)
         this.$nickname_input.val('');
@@ -5432,6 +5431,7 @@ xabber.XmppLoginPanel = xabber.AuthView.extend({
             this.data.set('step', 2)
         else if (xabber.url_params.anchor == 'signin')
             this.data.set('step', 0)
+        Materialize.updateTextFields();
     },
 
     openButtonsMenu: function () {
