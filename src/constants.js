@@ -444,7 +444,7 @@ var constants = {
     CLIENT_GITHUB_URL: 'https://github.com/redsolution/xabber-web',
     PROJECT_CROWDIN_URL: 'https://crowdin.com/project/xabber',
     CLIENT_LICENSE_GITHUB_URL: 'https://github.com/redsolution/xabber-web/blob/master/LICENSE',
-    DEFAULT_EMOJI_FONT: 'notoColor',
+    DEFAULT_EMOJI_FONT: 'system',
 
 };
 
@@ -477,7 +477,7 @@ constants.EMOJI_FONTS_LIST = {
     notoColor: {
         name: 'NotoColorEmoji',
         value: 'notoColor',
-        url: `${constants.ASSETS_URL_PREFIX}assets/fonts/notocolor/NotoColorEmoji-Regular.ttf`,
+        url: `assets/fonts/notocolor/NotoColorEmoji-Regular.ttf`,
         hint: `23 MiB download from ${window.location.hostname}`,
         attribution_text: '<p>Noto Emoji (Stands for No Tofu) is an <a href="https://github.com/googlefonts/noto-emoji" target="_blank">open source</a> emoji library developed by <a href="https://google.com/" target="_blank">Google</a>.</p><p>Version: 2.042</p><p>License: <a href="https://github.com/googlefonts/noto-emoji/blob/main/fonts/LICENSE" target="_blank">SIL Open Font License 1.1</a></p>',
         order: 0
