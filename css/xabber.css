@@ -14722,6 +14722,7 @@ input[type=range].voice-message-volume:focus {
     display: flex;
     overflow: hidden;
 }
+.details-panel .gallery-storage-wrap .storage-progress-bar .storage-progress-avatars,
 .details-panel .gallery-storage-wrap .storage-progress-bar .storage-progress-images,
 .details-panel .gallery-storage-wrap .storage-progress-bar .storage-progress-videos,
 .details-panel .gallery-storage-wrap .storage-progress-bar .storage-progress-voices,
@@ -14744,6 +14745,10 @@ input[type=range].voice-message-volume:focus {
 .details-panel .gallery-storage-wrap .storage-labels .storage-label-files .storage-label-icon,
 .details-panel .gallery-storage-wrap .storage-progress-bar .storage-progress-files{
     background: #64d964;
+}
+.details-panel .gallery-storage-wrap .storage-labels .storage-label-avatars .storage-label-icon,
+.details-panel .gallery-storage-wrap .storage-progress-bar .storage-progress-avatars{
+    background: #9c27b0;
 }
 .details-panel .gallery-storage-wrap .storage-labels{
     display: flex;

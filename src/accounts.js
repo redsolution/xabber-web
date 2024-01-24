@@ -2169,6 +2169,7 @@ xabber.AccountMediaGalleryView = xabber.BasicView.extend({
             this.$('.gallery-manage-storage').hideIf(!(response.total && response.total.used))
             this.$('.storage-usage').html(used_storage + xabber.getString("of") + utils.pretty_size(response.quota))
             this.$('.storage-usage-images').hideIf(!(response.images && response.images.used))
+            this.$('.storage-label-images').hideIf(!(response.images && response.images.used))
             this.$('.storage-usage-images .storage-usage-amount').html(utils.pretty_size(response.images.used))
             this.$('.storage-label-videos').hideIf(!(response.videos && response.videos.used))
             this.$('.storage-usage-videos').hideIf(!(response.videos && response.videos.used))
@@ -2179,6 +2180,9 @@ xabber.AccountMediaGalleryView = xabber.BasicView.extend({
             this.$('.storage-label-files').hideIf(!(response.files && response.files.used))
             this.$('.storage-usage-files').hideIf(!(response.files && response.files.used))
             this.$('.storage-usage-files .storage-usage-amount').html(utils.pretty_size(response.files.used))
+            this.$('.storage-label-avatars').hideIf(!(response.avatars && response.avatars.used))
+            this.$('.storage-usage-avatars .storage-usage-amount').html(utils.pretty_size(response.avatars.used))
+
             if (response.images){
                 this.$('.storage-progress-images').css('width', ((response.images.used/response.quota) * 100).toFixed(2) + '%')
             }
@@ -2190,6 +2194,9 @@ xabber.AccountMediaGalleryView = xabber.BasicView.extend({
             }
             if (response.files){
                 this.$('.storage-progress-files').css('width', ((response.files.used/response.quota) * 100).toFixed(2) + '%')
+            }
+            if (response.avatars){
+                this.$('.storage-progress-avatars').css('width', ((response.avatars.used/response.quota) * 100).toFixed(2) + '%')
             }
             if (this.parent){
                 this.parent.$('.settings-tab[data-block-name="media-gallery"] .settings-block-label')
