@@ -458,11 +458,13 @@ xabber.FingerprintsOwnDevices = xabber.BasicView.extend({
         this.renderOwnDevices(device_id, is_own);
     },
 
-    updateTrustDevice: function (device_id, $container, context, callback) {
+    updateTrustDevice: function (device_id, $container, context, callback, no_omemo_callback) {
         this.omemo.getMyDevices().then(() => {
             let device = this.model.own_devices[device_id];
-            if (!device)
+            if (!device){
+                no_omemo_callback && no_omemo_callback()
                 return;
+            }
             if (device.get('ik')) {
                 let f = device.generateFingerprint(),
                     fing = (this.omemo.get('fingerprints')[this.jid] || [])[device_id],

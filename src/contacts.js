@@ -9029,9 +9029,9 @@ xabber.BlockListView = xabber.BasicView.extend({
             return;
         let tmp = templates.contact_blocked_item({jid: attrs.jid});
         if (attrs.resource) {
-            this.$('.blocked-invitations').append(tmp);
-            this.$('.settings-tab[data-block-name="blocklist-invitations"]').removeClass('hidden');
-            this.$('.blocked-invitations-placeholder').addClass('hidden');
+            this.parent.$('.blocked-invitations').append(tmp);
+            this.parent.$('.settings-tab[data-block-name="blocklist-invitations"]').removeClass('hidden');
+            this.parent.$('.blocked-invitations-placeholder').addClass('hidden');
         }
         else if (attrs.domain) {
             this.$('.blocked-domains').append(tmp);

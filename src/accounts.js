@@ -3401,7 +3401,7 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
                     handled_devices++;
                     if (handled_devices === devices_count){
                         if (!_.isUndefined(this.$('.device-encryption-warning').attr('data-not-trusted-count')))
-                            this.$('.device-encryption-warning').switchClass('hidden', this.$('.device-encryption-warning').attr('data-not-trusted-count') === '0');
+                            this.$('.device-encryption-warning').switchClass('hidden', this.$('.device-encryption-warning').attr('data-not-trusted-count') == '0');
                     }
                     return;
                 }
@@ -3419,7 +3419,13 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
                     handled_devices++;
                     if (handled_devices === devices_count){
                         if (!_.isUndefined(this.$('.device-encryption-warning').attr('data-not-trusted-count')))
-                            this.$('.device-encryption-warning').switchClass('hidden', this.$('.device-encryption-warning').attr('data-not-trusted-count') === '0');
+                            this.$('.device-encryption-warning').switchClass('hidden', this.$('.device-encryption-warning').attr('data-not-trusted-count') == '0');
+                    }
+                }, () => {
+                    handled_devices++;
+                    if (handled_devices === devices_count){
+                        if (!_.isUndefined(this.$('.device-encryption-warning').attr('data-not-trusted-count')))
+                            this.$('.device-encryption-warning').switchClass('hidden', this.$('.device-encryption-warning').attr('data-not-trusted-count') == '0');
                     }
                 });
             } else {
@@ -3430,7 +3436,7 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
                 handled_devices++;
                 if (handled_devices === devices_count){
                     if (!_.isUndefined(this.$('.device-encryption-warning').attr('data-not-trusted-count')))
-                        this.$('.device-encryption-warning').switchClass('hidden', this.$('.device-encryption-warning').attr('data-not-trusted-count') === '0');
+                        this.$('.device-encryption-warning').switchClass('hidden', this.$('.device-encryption-warning').attr('data-not-trusted-count') == '0');
                 }
             }
         });
