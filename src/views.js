@@ -1873,6 +1873,7 @@ xabber.SettingsModalView = xabber.BasicView.extend({
         "click .setting.typing-notifications label": "setTypingNotifications",
         "click .setting.mapping-service label": "setMappingService",
         "click .setting.desktop-autostart label": "setDesktopAutostart",
+        "click .setting.reconnection-popup-log label": "setReconnectionLogs",
         "change .sound input[type=radio][name=private_sound]": "setPrivateSound",
         "change .sound input[type=radio][name=group_sound]": "setGroupSound",
         "change .sound input[type=radio][name=call_sound]": "setCallSound",
@@ -1967,6 +1968,8 @@ xabber.SettingsModalView = xabber.BasicView.extend({
         //     .prop('checked', settings.notifications_volume_enabled);
         this.$('.mapping-service input[type=checkbox]')
             .prop({checked: settings.mapping_service});
+        this.$('.reconnection-popup-log input[type=checkbox]')
+            .prop({checked: settings.reconnection_logs});
         if (constants.DESKTOP_AUTOSTART_OPTION) {
             this.$('.desktop-autostart input[type=checkbox]')
                 .prop({checked: settings.desktop_autostart});
@@ -2538,6 +2541,13 @@ xabber.SettingsModalView = xabber.BasicView.extend({
         this.model.save('desktop_autostart', value);
         ev.preventDefault();
         $(ev.target).closest('.setting.desktop-autostart').find('input').prop('checked', value);
+    },
+
+    setReconnectionLogs: function (ev) {
+        let value = !this.model.get('reconnection_logs');
+        this.model.save('reconnection_logs', value);
+        ev.preventDefault();
+        $(ev.target).closest('.setting.reconnection-popup-log').find('input').prop('checked', value);
     },
 
     setPrivateSound: function (ev) {

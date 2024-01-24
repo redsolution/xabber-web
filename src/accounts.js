@@ -470,7 +470,7 @@ xabber.Account = Backbone.Model.extend({
                 this.restoreStatus();
                 this.connection.reset();
                 console.log('started reconnecting');
-                // utils.callback_popup_message('started reconnecting', 3000);
+                xabber._settings.get('reconnection_logs') && utils.callback_popup_message('started reconnecting', 3000);
                 this.conn_manager.reconnect(this.reconnectionCallback.bind(this));
             }, timeout);
         },
@@ -544,7 +544,7 @@ xabber.Account = Backbone.Model.extend({
             this.session.set({conn_status: status, conn_condition: condition});
             if (status === Strophe.Status.CONNECTED) {
                 console.log('reconnected main connection');
-                // utils.callback_popup_message(`reconnected main connection , conn_retries: ${this.session.get('conn_retries')}`, 5000);
+                xabber._settings.get('reconnection_logs') && utils.callback_popup_message(`reconnected main connection , conn_retries: ${this.session.get('conn_retries')}`, 5000);
                 this.session.set('on_token_revoked', false);
                 if (this.connection.x_token) {
                     this.save({
@@ -584,7 +584,7 @@ xabber.Account = Backbone.Model.extend({
                 let max_retries = xabber.settings.max_connection_retries;
                 if (max_retries === -1 || this.session.get('conn_retries') < max_retries) {
                     console.log(`started another reconnecting, conn_retries: ${this.session.get('conn_retries')},status: ${status} ,condition: ${condition} `);
-                    // utils.callback_popup_message(`started another reconnecting, conn_retries: ${this.session.get('conn_retries')},status: ${status} ,condition: ${condition} `, 3000);
+                    xabber._settings.get('reconnection_logs') && utils.callback_popup_message(`started another reconnecting, conn_retries: ${this.session.get('conn_retries')},status: ${status} ,condition: ${condition} `, 3000);
                     this.reconnect();
                 } else {
                     this.connFeedback(xabber.getString("connection__error__connection_lost"));
@@ -2170,18 +2170,18 @@ xabber.AccountMediaGalleryView = xabber.BasicView.extend({
             this.$('.storage-usage').html(used_storage + xabber.getString("of") + utils.pretty_size(response.quota))
             this.$('.storage-usage-images').hideIf(!(response.images && response.images.used))
             this.$('.storage-label-images').hideIf(!(response.images && response.images.used))
-            this.$('.storage-usage-images .storage-usage-amount').html(utils.pretty_size(response.images.used))
+            response.images && !_.isUndefined(response.images.used) && this.$('.storage-usage-images .storage-usage-amount').html(utils.pretty_size(response.images.used))
             this.$('.storage-label-videos').hideIf(!(response.videos && response.videos.used))
             this.$('.storage-usage-videos').hideIf(!(response.videos && response.videos.used))
-            this.$('.storage-usage-videos .storage-usage-amount').html(utils.pretty_size(response.videos.used))
+            response.videos && !_.isUndefined(response.videos.used) && this.$('.storage-usage-videos .storage-usage-amount').html(utils.pretty_size(response.videos.used))
             this.$('.storage-label-voices').hideIf(!(response.voices && response.voices.used))
             this.$('.storage-usage-voices').hideIf(!(response.voices && response.voices.used))
-            this.$('.storage-usage-voices .storage-usage-amount').html(utils.pretty_size(response.voices.used))
+            response.voices && !_.isUndefined(response.voices.used) && this.$('.storage-usage-voices .storage-usage-amount').html(utils.pretty_size(response.voices.used))
             this.$('.storage-label-files').hideIf(!(response.files && response.files.used))
             this.$('.storage-usage-files').hideIf(!(response.files && response.files.used))
-            this.$('.storage-usage-files .storage-usage-amount').html(utils.pretty_size(response.files.used))
+            response.files && !_.isUndefined(response.files.used) && this.$('.storage-usage-files .storage-usage-amount').html(utils.pretty_size(response.files.used))
             this.$('.storage-label-avatars').hideIf(!(response.avatars && response.avatars.used))
-            this.$('.storage-usage-avatars .storage-usage-amount').html(utils.pretty_size(response.avatars.used))
+            response.avatars && !_.isUndefined(response.avatars.used) && this.$('.storage-usage-avatars .storage-usage-amount').html(utils.pretty_size(response.avatars.used))
 
             if (response.images){
                 this.$('.storage-progress-images').css('width', ((response.images.used/response.quota) * 100).toFixed(2) + '%')

@@ -48,7 +48,7 @@
                     <div class="settings-block-name one-line">{[print(xabber.getString("settings__menu_item__connection"))]}</div>
                     <div class="settings-block-label one-line">{[print(xabber.getString("settings__menu_item__connection_label"))]}</div>
                 </div>
-                <div class="settings-tab disabled" data-block-name="debug">
+                <div class="settings-tab" data-block-name="debug">
                     <div class="setting-icon-background">
                         <svg class="mdi mdi-24px mdi-svg-template" data-svgname="bug"></svg>
                     </div>
@@ -590,6 +590,15 @@
                     <div data-header='{[print(xabber.getString("settings__menu_item__interface_language"))]}'  class="settings-block-wrap interface_language hidden">
                         <div class="setting radio-button interface-language-setting">
                             <div class="languages-list field radio-field clickable-field">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div data-header='{[print(xabber.getString("settings__menu_item__debug"))]}'  class="settings-block-wrap debug hidden">
+                        <div class="setting reconnection-popup-log checkbox-setting field-wrap">
+                            <div class="input-field checkbox-field">
+                                <input type="checkbox" class="filled-in" id="reconnection-popup-log"/>
+                                <label for="reconnection-popup-log">{[print(xabber.getString("settings__section_debug__reconnect_log"))]}</label>
                             </div>
                         </div>
                     </div>

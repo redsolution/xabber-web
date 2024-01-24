@@ -221,10 +221,10 @@ xabber.Account.addConnPlugin(function () {
             if (!navigator.onLine){
                 console.log('navigator: ' + navigator.onLine)
                 console.log('this.connection.connected: ' + this.connection.connected)
-                // utils.callback_popup_message('this.connection.connected: ' + this.connection.connected, 2000);
+                xabber._settings.get('reconnection_logs') && utils.callback_popup_message('this.connection.connected: ' + this.connection.connected, 2000);
             }
             console.log('downtime main to disconnect: ' + downtime);
-            // utils.callback_popup_message('downtime main to disconnect: ' + downtime, 2000);
+            xabber._settings.get('reconnection_logs') && utils.callback_popup_message('downtime main to disconnect: ' + downtime, 2000);
             console.log(this.connection.connected);
             if (this.connection.connected)
                 this.connection.disconnect();
@@ -270,10 +270,10 @@ xabber.Account.addFastConnPlugin(function () {
             if (!navigator.onLine){
                 console.log('navigator: ' + navigator.onLine)
                 console.log('this.connection.connected: ' + this.fast_connection.connected)
-                // utils.callback_popup_message('this.connection.connected: ' + this.fast_connection.connected, 2000);
+                xabber._settings.get('reconnection_logs') && utils.callback_popup_message('this.connection.connected: ' + this.fast_connection.connected, 2000);
             }
             console.log('downtime fast to disconnect: ' + downtime);
-            // utils.callback_popup_message('downtime fast to disconnect: ' + downtime, 2000);
+            xabber._settings.get('reconnection_logs') && utils.callback_popup_message('downtime fast to disconnect: ' + downtime, 2000);
             console.log(this.fast_connection.connected);
             if (this.fast_connection.connected)
                 this.fast_connection.disconnect();

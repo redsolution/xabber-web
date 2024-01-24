@@ -9373,12 +9373,18 @@ xabber.AddContactView = xabber.BasicView.extend({
     },
 
     stepForward: function () {
-        let jid = this.$('input[name=username]').val().trim();
-        this.$el.append($(templates.preloader()))
-        this.$('.btn-add').addClass('hidden-disabled')
-        this.$('input[name=contact_name]').val('');
         if (this.account.connection && this.account.connection.connected) {
+            let jid = this.$('input[name=username]').val().trim();
+            this.$el.append($(templates.preloader()))
+            this.$('.btn-add').addClass('hidden-disabled');
+            let timeout = setTimeout(() => {
+                this.$('.preloader-wrapper').remove();
+                this.$('.btn-add').removeClass('hidden-disabled');
+                this.addContact()
+            }, 4000);
+
             this.account.getConnectionForIQ().vcard.get(jid, (vcard) => {
+                    clearTimeout(timeout);
                     let username = vcard.username ? vcard.username : vcard.fullname ? vcard.fullname : ''
                     username && this.$('input[name=contact_name]').val(username);
                     this.$('.preloader-wrapper').remove();
@@ -9386,11 +9392,17 @@ xabber.AddContactView = xabber.BasicView.extend({
                     this.addContact()
                 },
                 (err) => {
+                    clearTimeout(timeout);
                     this.$('.preloader-wrapper').remove();
                     this.$('.btn-add').removeClass('hidden-disabled');
                     this.$('input[name=username]').addClass('invalid')
                         .siblings('.errors').text($(err).find('error text').text());
                 });
+        } else {
+            this.$('.preloader-wrapper').remove();
+            this.$('.btn-add').removeClass('hidden-disabled');
+            this.$('input[name=username]').addClass('invalid')
+                .siblings('.errors').text(xabber.getString("NOT_CONNECTED"));
         }
     },
 
