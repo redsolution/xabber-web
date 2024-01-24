@@ -470,7 +470,7 @@ xabber.Account = Backbone.Model.extend({
                 this.restoreStatus();
                 this.connection.reset();
                 console.log('started reconnecting');
-                utils.callback_popup_message('started reconnecting', 3000);
+                // utils.callback_popup_message('started reconnecting', 3000);
                 this.conn_manager.reconnect(this.reconnectionCallback.bind(this));
             }, timeout);
         },
@@ -544,7 +544,7 @@ xabber.Account = Backbone.Model.extend({
             this.session.set({conn_status: status, conn_condition: condition});
             if (status === Strophe.Status.CONNECTED) {
                 console.log('reconnected main connection');
-                utils.callback_popup_message(`reconnected main connection , conn_retries: ${this.session.get('conn_retries')}`, 5000);
+                // utils.callback_popup_message(`reconnected main connection , conn_retries: ${this.session.get('conn_retries')}`, 5000);
                 this.session.set('on_token_revoked', false);
                 if (this.connection.x_token) {
                     this.save({
@@ -584,7 +584,7 @@ xabber.Account = Backbone.Model.extend({
                 let max_retries = xabber.settings.max_connection_retries;
                 if (max_retries === -1 || this.session.get('conn_retries') < max_retries) {
                     console.log(`started another reconnecting, conn_retries: ${this.session.get('conn_retries')},status: ${status} ,condition: ${condition} `);
-                    utils.callback_popup_message(`started another reconnecting, conn_retries: ${this.session.get('conn_retries')},status: ${status} ,condition: ${condition} `, 3000);
+                    // utils.callback_popup_message(`started another reconnecting, conn_retries: ${this.session.get('conn_retries')},status: ${status} ,condition: ${condition} `, 3000);
                     this.reconnect();
                 } else {
                     this.connFeedback(xabber.getString("connection__error__connection_lost"));
@@ -4815,28 +4815,23 @@ xabber.EmojiProfileImageView = xabber.BasicView.extend({
     },
 
     saveAvatar: function (ev) {
+        let b64Image = Images.getDefaultAvatar(this.$('.chosen-emoji').data('value') ,this.$('.circle-avatar').css( "background-color" ), "96px EmojiFont", 176, 176),
+            blob = Images.getBlobImage(b64Image),
+            file = new File([blob], "avatar.png", {
+                type: "image/png",
+            });
+        file.base64 = blob;
         if (this.registration && this.registration_view){
-            let blob = Images.getDefaultAvatar(this.$('.chosen-emoji').data('value') ,this.$('.circle-avatar').css( "background-color" ), "96px EmojiFont", 176, 176),
-                file = new File([blob], "avatar.png", {
-                    type: "image/png",
-                });
-            file.generated = true;
-            file.base64 = blob;
             if (file && file.base64) {
                 this.registration_view.avatar = file;
                 this.registration_view.$('.btn-next').prop('disabled', false);
                 this.registration_view.$('.circle-avatar').addClass('changed');
-                this.registration_view.$('.circle-avatar').setAvatar(blob, this.member_details_avatar_size);
+                this.registration_view.$('.circle-avatar').setAvatar(b64Image, this.member_details_avatar_size);
                 xabber._settings.save('main_color', this.$('.circle-avatar').attr('data-value'));
                 xabber.trigger('update_main_color');
                 this.close();
             }
         } else {
-            let blob = Images.getBlobImage(Images.getDefaultAvatar(this.$('.chosen-emoji').data('value') ,this.$('.circle-avatar').css( "background-color" ), "96px EmojiFont", 176, 176)),
-                file = new File([blob], "avatar.png", {
-                    type: "image/png",
-                });
-            file.base64 = blob;
             if (file && file.base64) {
                 this.$('.modal-preloader-wrap').html(env.templates.contacts.preloader());
                 this.$('.btn-save').addClass('hidden-disabled');
@@ -5783,6 +5778,8 @@ xabber.XmppLoginPanel = xabber.AuthView.extend({
             this.$('.register-form-password').hideIf(true);
             this.$('.register-form-picture').hideIf(false);
             this.$('.btn-next').prop('disabled', true);
+            this.account.set('deferred_auth', true);
+            this.account.trigger('start');
         }
         else if (step >= 7){
             if(this.avatar)
@@ -6029,7 +6026,7 @@ xabber.XmppLoginPanel = xabber.AuthView.extend({
         this.account.save('is_new', undefined);
         this.data.set('registration', false);
         this.data.set('authentication', false);
-        xabber.body.setScreen('all-chats', {right: null});
+        !this.account.get('deferred_auth') && xabber.body.setScreen('all-chats', {right: null});
         this.account.trigger('ready_to_get_roster');
         this.account.auth_view = null;
     },
@@ -6143,10 +6140,11 @@ xabber.XmppLoginPanel = xabber.AuthView.extend({
 
     successRegistrationFeedback: function () {
         this.$jid_input.prop('disabled', false);
-        this.$password_input.prop('disabled', false)
+        this.$password_input.prop('disabled', false);
         if (this.auth_connection)
-            this.auth_connection.disconnect()
-        this.account.trigger('start');
+            this.auth_connection.disconnect();
+        this.account.set('deferred_auth', false);
+        xabber.toolbar_view.showAllChats()
     },
 });
 
