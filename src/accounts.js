@@ -5791,8 +5791,14 @@ xabber.XmppLoginPanel = xabber.AuthView.extend({
             this.$('.register-form-password').hideIf(true);
             this.$('.register-form-picture').hideIf(false);
             this.$('.btn-next').prop('disabled', true);
+            if (this.auth_connection)
+                this.auth_connection.disconnect();
+            if (this.account.connection && this.account.connection.register && this.account.connection.register._connection)
+                this.account.connection.register._connection.disconnect();
             this.account.set('deferred_auth', true);
-            this.account.trigger('start');
+            setTimeout(() => {
+                this.account.trigger('start');
+            }, 1000)
         }
         else if (step >= 7){
             if(this.avatar)
@@ -6154,8 +6160,6 @@ xabber.XmppLoginPanel = xabber.AuthView.extend({
     successRegistrationFeedback: function () {
         this.$jid_input.prop('disabled', false);
         this.$password_input.prop('disabled', false);
-        if (this.auth_connection)
-            this.auth_connection.disconnect();
         this.account.set('deferred_auth', false);
         xabber.toolbar_view.showAllChats()
     },
