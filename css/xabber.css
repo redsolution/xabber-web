@@ -8589,6 +8589,7 @@ input[type=text].simple-input-field:hover {
 .chat-tools-wrap .btn-delete-chat,
 .chat-tools-wrap .btn-call-attention,
 .chat-tools-wrap .btn-invite-users,
+.chat-tools-wrap .btn-export-chat,
 .chat-tools-wrap .btn-contact-details {
     box-shadow: 0px -1px 1px 0 rgba(0,0,0,.1);
 }
@@ -13817,6 +13818,87 @@ input[type=range].voice-message-volume:focus {
     display: none;
 }
 
+/* ----------------- EXPORT HISTORY MODAL -------------------- */
+.modal.export-history-modal{
+    height: 427px;
+    width: 600px !important;
+}
+.modal.export-history-modal .modal-content-wrap{
+    height: 100%;
+}
+.modal.export-history-modal .modal-content-wrap .modal-content{
+    height: calc( 100% - 112px);
+}
+.modal.export-history-modal .modal-content-wrap .modal-content .export-chat-area{
+    height: 70%;
+    overflow-y: scroll;
+}
+.modal.export-history-modal .modal-content-wrap .modal-content .export-history-progress-bar{
+    align-items: center;
+    background: radial-gradient(closest-side,#fff 94%,#00000000 95% 100%),conic-gradient(#BDBDBD 0%,#F5F5F5 0);
+    border-radius: 50%;
+    display: flex;
+    height: 200px;
+    justify-content: center;
+    width: 200px;
+    position: absolute;
+    left: 50%;
+    top: 16px;
+    transform: translate(-50%, 0);
+    cursor: pointer;
+}
+.modal.export-history-modal .modal-content-wrap .modal-content .export-history-progress-bar:hover{
+    box-shadow: 0px 0px 20px #EEEEEE;
+}
+.modal.export-history-modal .modal-content-wrap .modal-content .export-history-progress-bar .export-history-msg-count{
+    text-align: center;
+    padding: 0 19px;
+    font-size: 14px;
+}
+.modal.export-history-modal .modal-content-wrap .modal-content .export-history-progress-bar.history-loading:hover .export-history-msg-count{
+    display: none;
+}
+.modal.export-history-modal .modal-content-wrap .modal-content .export-history-progress-bar .mdi-stop{
+    display: none;
+    color: #bdbdbd;
+}
+.modal.export-history-modal .modal-content-wrap .modal-content .export-history-progress-bar.history-loading:hover .mdi-stop{
+    display: block;
+}
+.modal.export-history-modal .modal-content-wrap .modal-content .file-format-choice{
+    position: absolute;
+    top: 232px;
+    display: flex;
+    align-items: baseline;
+}
+.modal.export-history-modal .modal-content-wrap .modal-content .file-format-choice .file-format-choice-label{
+}
+.modal.export-history-modal .modal-content-wrap .modal-content .file-format-choice .radio-field form{
+    display: flex;
+}
+.modal.export-history-modal .modal-content-wrap .modal-content .file-format-choice .radio-field form label{
+    color: rgba(0,0,0,.87);
+}
+.modal.export-history-modal .modal-content-wrap .modal-content .date-format-choice{
+    position: absolute;
+    top: 265px;
+    display: flex;
+    align-items: baseline;
+}
+.modal.export-history-modal .modal-content-wrap .modal-content .date-format-choice .date-format-choice-label{
+}
+.modal.export-history-modal .modal-content-wrap .modal-content .date-format-choice .radio-field form{
+    display: flex;
+}
+.modal.export-history-modal .modal-content-wrap .modal-content .date-format-choice .radio-field form label{
+    color: rgba(0,0,0,.87);
+}
+.modal.export-history-modal .btn-confirm:disabled{
+    opacity: 0.6;
+}
+.modal.export-history-modal .btn-confirm:hover:disabled{
+    background: transparent;
+}
 /* ----------------- GALLERY FILE DELETION -------------------- */
 .modal.delete-files-modal{
     height: unset;

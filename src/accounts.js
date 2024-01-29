@@ -6526,6 +6526,12 @@ xabber.once("start", function () {
         this.delete_files_view.show(options);
     }, this);
 
+    this.on("show_export_messages", function (options) {
+        if (!this.export_history_view)
+            this.export_history_view = new this.ExportChatHistoryView();
+        this.export_history_view.show(options);
+    }, this);
+
     $(window).bind('beforeunload',function(){
         xabber.current_voip_call && xabber.current_voip_call.reject();
         return;

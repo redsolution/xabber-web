@@ -10095,6 +10095,7 @@ xabber.InvitationPanelView = xabber.SearchView.extend({
         "click .btn-chat-pin": "pinChat",
         "click .btn-archive-chat": "archiveChat",
         "click .btn-call-attention": "callAttention",
+        "click .btn-export-chat": "exportChat",
         "click .btn-search-messages": "renderSearchPanel",
         "click .btn-jingle-message": "sendJingleMessage",
         "click .btn-mute-dropdown": "muteChat",
@@ -10312,6 +10313,10 @@ xabber.InvitationPanelView = xabber.SearchView.extend({
             from_jid: this.account.get('jid'),
             message: xabber.getString("action_attention_called")
         });
+    },
+
+    exportChat: function (ev) {
+          xabber.trigger('show_export_messages', {model: this.model, account: this.account, content: this.content});
     },
 
 
@@ -13656,6 +13661,194 @@ xabber.ChatSettings = Backbone.ModelWithStorage.extend({
         let result = this.getAvatarInfoById(id);
         if (result)
             return result.avatar_hash;
+    }
+});
+
+
+xabber.ExportChatHistoryView = xabber.BasicView.extend({
+    className: 'modal main-modal export-history-modal',
+    ps_selector: '.modal-content',
+    ps_settings: {
+        wheelPropagation: true
+    },
+    template: templates.export_history,
+    events: {
+        "click .btn-cancel": "close",
+        "click .export-history-progress-bar": "startLoad",
+        "click .btn-confirm": "exportFile",
+    },
+
+    render: function (options) {
+        this.model = options.model;
+        this.contact = this.model.contact;
+        this.account = options.account;
+        this.content = options.content;
+        this.messages_list = [];
+        this.$('.btn-confirm').prop('disabled', true);
+        this.$('.export-history-progress-bar').removeClass('history-loading');
+        this.$el.openModal({
+            ready: this.onRender.bind(this),
+            complete: this.close.bind(this)
+        });
+    },
+
+    onRender: function (options) {
+        this.updateScrollBar();
+        this.$('.export-history-progress-bar').css('background', `radial-gradient(closest-side,#fff 94%,#00000000 95% 100%),conic-gradient(#BDBDBD ${0}%,#F5F5F5 0)`)
+        this.$(`input[type=radio][name=file_format][value="txt"]`)
+            .prop('checked', true);
+        this.$(`input[type=radio][name=date_format][value="iso"]`)
+            .prop('checked', true);
+        this.$('.export-history-msg-count').text(xabber.getString("export_history_start_load"))
+    },
+
+    startLoad: function (options) {
+        if (this.is_loading){
+            this.history_export_stoped = true;
+            this.is_loading = false;
+            this.$('.btn-confirm').prop('disabled', false);
+            this.$('.export-history-progress-bar').removeClass('history-loading');
+        } else {
+            this.$('.btn-confirm').prop('disabled', true);
+            this.$('.export-history-progress-bar').addClass('history-loading');
+            this.history_last_id = '';
+            this.history_export_loaded = false;
+            this.history_export_stoped = false;
+            this.loaded_messages = 0;
+            this.messages_list = [];
+            this.load_limit = 50;
+            this.is_loading = true;
+            let loading_id = uuid();
+            this.loading_id = loading_id;
+            this.$('.export-history-msg-count').text(xabber.getString("placeholder_loading"))
+            this.getMessageArchive(loading_id);
+        }
+    },
+
+    getMessageArchive: function (loading_id) {
+        let query = {
+            fast: true,
+            max: this.load_limit || 50,
+            after: this.history_last_id
+        };
+        !this.history_last_id && delete(query.after);
+        let account = this.model.account, counter = 0;
+        this.content.MAMRequest(query, (success, messages, rsm) => {
+            this.all_messages_count = rsm.count
+            if (loading_id !== this.loading_id || this.history_export_stoped)
+                return;
+            if (rsm.count == 0){
+                this.is_loading = false;
+                this.$('.export-history-msg-count').text(xabber.getString("no_messages"))
+            }
+            rsm.first && (this.history_last_id = rsm.last);
+
+            if ((messages.length < query.max) && success) {
+                this.history_export_loaded = true;
+            }
+            _.each(messages, (message) => {
+                this.handleMessage(message)
+                this.loaded_messages++;
+            });
+
+            this.$('.export-history-progress-bar').css('background', `radial-gradient(closest-side,#fff 94%,#00000000 95% 100%),conic-gradient(#BDBDBD ${(this.loaded_messages/rsm.count * 100)}%,#F5F5F5 0)`)
+            this.$('.export-history-msg-count').text(xabber.getString("export_history_msg_count", [this.loaded_messages, this.all_messages_count]))
+
+            if (!this.history_export_loaded && !this.history_export_stoped) {
+                this.getMessageArchive(loading_id);
+            } else {
+                this.is_loading = false;
+                this.$('.btn-confirm').prop('disabled', false);
+                this.$('.export-history-progress-bar').removeClass('history-loading');
+            }
+        }, (err) => {
+        });
+    },
+
+    handleMessage: function (message) {
+        let $message = $(message),
+            $mam = $message.find(`result[xmlns="${Strophe.NS.MAM}"]`);
+        if ($mam.length && $mam.children('forwarded').length) {
+            $message = $mam.children('forwarded').children('message');
+            let body = $message.children('body').text(),
+                timestamp = $message.children('time').attr('stamp'),
+                author;
+            if ($message.children(`x[xmlns="${Strophe.NS.GROUP_CHAT}"]`).length) {
+                let $group_chat = $message.children(`x[xmlns="${Strophe.NS.GROUP_CHAT}"]`);
+                author = $group_chat.find('jid').text();
+            } else {
+                author = Strophe.getBareJidFromJid($message.attr('from'));
+            }
+
+            this.messages_list.push([timestamp, author, body])
+        } else
+            return;
+    },
+
+    exportFile: function () {
+        if (this.messages_list.length == this.all_messages_count){
+            this.exportFileChoosing()
+        } else {
+            utils.dialogs.ask(xabber.getString("warning"), xabber.getString("export_history_not_loaded_text")).done((result) => {
+                if (result) {
+                    this.exportFileChoosing()
+                }
+            });
+        }
+    },
+
+    exportFileChoosing: function () {
+        let dfd = $
+        let chosen_format = this.$('input[name=file_format]:checked').val();
+        if (chosen_format == 'txt'){
+            this.getFile();
+        } else if (chosen_format == 'csv') {
+            this.getFileCSV()
+        }
+    },
+
+    getFileCSV: function () {
+        let time_format = utils.getDateFormat(this.$('input[name=date_format]:checked').val()) + ' HH:mm:ss',
+            content = this.messages_list.map((e) => {return `[${utils.pretty_datetime(e[0], time_format)}], ${e[1]},"${e[2].replaceAll('"', '""').replaceAll('#', '\#')}\n\n"`;}).join("\n");
+
+        content = "Time, Author, Message\n" + content;
+
+        let link = document.createElement("a");
+
+        let file = new Blob([content], { type: 'text/csv' });
+
+        link.href = URL.createObjectURL(file);
+        link.download = `${this.model.get('jid')}.csv`;
+
+        link.click();
+    },
+
+    getFile: function () {
+        let time_format = utils.getDateFormat(this.$('input[name=date_format]:checked').val()) + ' HH:mm:ss',
+            content = this.messages_list.map((e) => {return `[${utils.pretty_datetime(e[0], time_format)}] ${e[1]}:\n ${e[2]}\n\n`;}).join("");
+
+        let link = document.createElement("a");
+
+        let file = new Blob([content], { type: 'text/plain' });
+
+        link.href = URL.createObjectURL(file);
+        link.download = `${this.model.get('jid')}.txt`;
+        link.click();
+        URL.revokeObjectURL(link.href);
+    },
+
+
+    onHide: function () {
+        this.$el.detach();
+    },
+
+    close: function () {
+        this.closeModal();
+        this.history_export_stoped = true;
+    },
+
+    closeModal: function () {
+        this.$el.closeModal({ complete: this.hide.bind(this) });
     }
 });
 

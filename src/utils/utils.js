@@ -175,6 +175,18 @@ var utils = {
         return Math.floor(moment.now() / 1000);
     },
 
+    getDateFormat: function (date_format) {
+        let final_format;
+        if (date_format === 'iso'){
+            final_format = 'YYYY-MM-DD';
+        } else if (date_format === 'eur') {
+            final_format = 'DD.MM.YYYY';
+        } else if (date_format === 'usa') {
+            final_format = 'MM/DD/YYYY';
+        }
+        return final_format;
+    },
+
     pretty_time: function (timestamp) {
         var datetime = timestamp ? moment(timestamp) : moment();
         return datetime.format('HH:mm:ss');
