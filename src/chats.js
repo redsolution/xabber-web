@@ -4146,17 +4146,22 @@ xabber.ChatContentView = xabber.BasicView.extend({
         this.getMessageArchive(query, {last_history: true});
     },
 
-    loadPreviousHistory: function () {
+    loadPreviousHistory: function (no_before) {
         if (this.contact) {
             if (!xabber.settings.load_history || (!this.contact.get('subscription') || this.contact.get('subscription') !== 'both') && this.contact.get('group_chat')) {
                 return;
             }
         }
+        let before = this.model.get('first_archive_id') || '';
+        if (no_before)
+            before = '';
         this.getMessageArchive({
                 fast: true,
                 max: xabber.settings.mam_messages_limit,
-                before: this.model.get('first_archive_id') || '' },
-            {previous_history: true
+                before: before
+            },
+            {
+                previous_history: true
             });
     },
 
@@ -8129,6 +8134,39 @@ xabber.AccountChats = xabber.ChatsBase.extend({
                         chat.item_view.content.updatePinnedMessage();
                     }
                 chat && chat.item_view.updateLastMessage(chat.last_message);
+            }
+        }
+
+        if ($message.find(`invalidate[xmlns="${Strophe.NS.REWRITE}#notify"]`).length) {
+            !contact && (contact = this.account.contacts.get($message.find('invalidate').attr('conversation'))) && (chat = this.account.chats.getChat(contact));
+            if ($message.find('invalidate').attr('conversation') === this.account.get('jid'))
+                chat = this.getSavedChat();
+            if (!chat)
+                return;
+            let retraction_version = $message.find('invalidate').attr('version');
+            chat.retraction_version = retraction_version;
+            if (chat.item_view && !chat.item_view.content)
+                chat.item_view.content = new xabber.ChatContentView({chat_item: chat.item_view});
+            let all_messages = chat.messages.models;
+            $(all_messages).each((idx, msg) => {
+                chat.item_view.content.removeMessage(msg);
+            });
+            chat.set('first_archive_id', undefined);
+            chat.set('history_loaded', false);
+            chat.item_view.updateEmptyChat();
+            let timeout = 0;
+            let loadPreviousAfterInvalidate = setInterval(() => {
+                timeout++;
+                if (!chat.item_view.content._loading_history){
+                    clearInterval(loadPreviousAfterInvalidate);
+                    chat.item_view.content.loadPreviousHistory(true);
+                } else if (timeout > 30) {
+                    clearInterval(loadPreviousAfterInvalidate);
+                }
+            }, 1000)
+            if (!chat.item_view.content._loading_history){
+                clearInterval(loadPreviousAfterInvalidate);
+                chat.item_view.content.loadPreviousHistory(true);
             }
         }
         if ($message.find('retract-message').length) {

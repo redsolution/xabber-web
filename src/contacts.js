@@ -8587,7 +8587,7 @@ xabber.Roster = xabber.ContactsBase.extend({
             if(!(is_invite || encrypted && this.account.omemo)) {
                 if (msg.isSenderMe() && msg.get('stanza_id') == last_displayed_msg)
                     msg.set('state', constants.MSG_DISPLAYED);
-                else if (msg.isSenderMe() && msg.get('stanza_id') == last_delivered_msg)
+                else if (msg.isSenderMe())
                     msg.set('state', constants.MSG_DELIVERED);
                 this.account.messages.add(msg);
                 if ((chat.last_message && (msg.get('timestamp') > chat.last_message.get('timestamp'))) || !chat.last_message){
