@@ -8837,14 +8837,11 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
     onChangedReadStatus: function (item) {
         let view = this.child(item.id),
             active_toolbar = xabber.toolbar_view.$('.active');
+        this.updateChatPosition(item);
         if (!view)
             return;
         if (!active_toolbar.hasClass('unread') || (active_toolbar.hasClass('unread') && (item.get('unread') || item.get('const_unread'))))
             return;
-        view.detach();
-        if (!this.$('.chat-item').length && active_toolbar.hasClass('unread')) {
-            active_toolbar.click();
-        }
     },
 
     updateAccountEncryptedChats: function (account) {
