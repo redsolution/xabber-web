@@ -488,6 +488,11 @@ xabber.Account = Backbone.Model.extend({
                 this.onAuthFailed(condition);
             } else if (status === Strophe.Status.CONNECTED) {
                 this.session.set('on_token_revoked', false);
+                if (this._revoke_on_connect){
+                    this.session.set({connected: true, reconnected: false});
+                    this._revoke_on_connect.resolve();
+                    return;
+                }
                 if (this.connection.x_token) {
                     this.save({
                         auth_type: 'x-token',
@@ -4067,8 +4072,19 @@ xabber.AccountSettingsItemModalView = xabber.BasicView.extend({
                     optional_button_text: xabber.getString("settings_account__button_quit_account")
                 }).done((res) => {
                     if (res){
-                        if (res === 'delete-account')
-                            this.model.deleteAccount(null, true);
+                        if (res === 'delete-account'){
+                            this.model._revoke_on_connect = $.Deferred();
+                            let revoke_timeout = setTimeout(() => {
+                                this.model._revoke_on_connect.resolve();
+                            }, 5000);
+                            this.model._revoke_on_connect.done(() => {
+                                clearTimeout(revoke_timeout);
+                                this.model._revoke_on_connect = undefined;
+                                this.model.deleteAccount(null, true);
+                            })
+                            this.model.save('enabled', true);
+                            this.model.activate();
+                        }
                         else {
                             this.model.save('enabled', true);
                             this.model.activate();
