@@ -1410,7 +1410,8 @@ xabber.EphemeralTimerSelector = xabber.BasicView.extend({
     getAllMessageRetractions: function () {
         if (!this.contact.get('group_chat'))
             return;
-        let retractions_query = $iq({type: 'get', to: this.contact.get('jid')})
+        let jid = this.contact.get('full_jid') || this.contact.get('jid');
+        let retractions_query = $iq({type: 'get', to: jid})
             .c('query', {xmlns: Strophe.NS.REWRITE, version: this.retraction_version});
         this.account.sendIQ(retractions_query);
     },
@@ -13190,12 +13191,13 @@ xabber.ChatBottomView = xabber.BasicView.extend({
             link_references = text_markups.link_references || [],
             blockquotes = text_markups.blockquotes || [],
             mentions = text_markups.mentions || [],
-            iq = $iq({type: 'set', to: (this.contact && this.contact.get('group_chat')) ? this.contact.get('jid') : this.account.get('jid')}).c('replace', {
+            iq = $iq({type: 'set', to: (this.contact && this.contact.get('group_chat')) ? this.contact.get('full_jid') : this.account.get('jid')}).c('replace', {
                 xmlns: Strophe.NS.REWRITE,
                 type: this.model.get('sync_type') ? this.model.get('sync_type') : this.model.getConversationType(this.model),
                 id: stanza_id
             }),
             $message = $build('message').attrs({xmlns: undefined});
+        $message.c('markable').attrs({'xmlns': Strophe.NS.CHAT_MARKERS}).up();
         forward_ref && forward_ref.forEach((fwd, idx) => {
             let fwd_msg = this.edit_message.get('forwarded_message')[idx],
                 gc_length = groupchat_ref && (groupchat_ref.start + groupchat_ref.end);

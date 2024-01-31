@@ -144,12 +144,12 @@ xabber.DiscoveringView = xabber.BasicView.extend({
             let $item = $(item);
             if (($item.attr('category') === 'conference') && ($item.attr('type') === 'server')) {
                 let jid = $(stanza).attr('from');
-                this.getChatsFromSever(jid);
+                this.getChatsFromServer(jid);
             }
         });
     },
 
-    getChatsFromSever: function (jid) {
+    getChatsFromServer: function (jid) {
         let iq = $iq({type: 'get', to: jid}).c('query', {xmlns: Strophe.NS.DISCO_ITEMS, node: Strophe.NS.GROUP_CHAT});
         this.account.sendIQFast(iq, (stanza) => {
             this.$('.chats-list').html("");

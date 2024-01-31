@@ -305,6 +305,7 @@ xabber.Contact = Backbone.Model.extend({
             xabber.error("removed contact became groupchat")
         }
         if (this.get('group_chat')) {
+            this.set('full_jid', this.get('jid') + '/Group');
             this.updateCounters();
             this.participants = new xabber.Participants(null, {contact: this});
         }
