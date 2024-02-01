@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.3.4.139","version_description":"fixed group full jid attribute setting when contact becomes groupchat, changed iq to attribute to full jid for groupchat in getting msg retractions and msg replace, added markable tag to msg replace stanza, fixed typo func name "}'
+'{"version_number":"2.3.4.140","version_description":"fixed retract-message not sending conversation attr, fixed encrypted chat last message showing message retracted when there are loaded msgs that can be shown,  fixed parsing of files from stanza"}'
 )});

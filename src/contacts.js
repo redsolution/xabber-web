@@ -908,7 +908,7 @@ xabber.Contact = Backbone.Model.extend({
                         size: $file.children('size').text(),
                         uniqueid: $message.attr('id') || cached_stanza_id ,
                         created_at: $file.children('created').text(),
-                        thumbnail: $file.children(`thumbnail[xmlns="${Strophe.NS.PUBSUB_AVATAR_METADATA_THUMBNAIL}`).attr('uri'),
+                        thumbnail: $file.children(`thumbnail[xmlns="${Strophe.NS.PUBSUB_AVATAR_METADATA_THUMBNAIL}"]`).attr('uri'),
                         media_type: $file.children('media-type').text(),
                         duration: $file.children('duration').text(),
                         description: $file.children('desc').text(),
@@ -8599,12 +8599,14 @@ xabber.Roster = xabber.ContactsBase.extend({
             }
             chat.set('first_archive_id', msg.get('stanza_id'));
         } else if (message.length && !msg){
-            chat.set('timestamp', chat_timestamp);
-            if (!(Number(last_delivered_msg) || Number(last_displayed_msg) || Number(last_read_msg))
-                && !chat.item_view.content && !chat.get('group_chat')){
-                chat.item_view.content = new xabber.ChatContentView({chat_item: chat.item_view});
+            if (!(chat.messages && chat.messages.length)){
+                chat.set('timestamp', chat_timestamp);
+                if (!(Number(last_delivered_msg) || Number(last_displayed_msg) || Number(last_read_msg))
+                    && !chat.item_view.content && !chat.get('group_chat')){
+                    chat.item_view.content = new xabber.ChatContentView({chat_item: chat.item_view});
+                }
+                chat.item_view.updateEmptyChat();
             }
-            chat.item_view.updateEmptyChat();
         }
         if (!(encrypted && !this.account.omemo)){
             let last_read_msg_item = chat.messages.get(last_read_msg);
