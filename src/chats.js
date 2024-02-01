@@ -1954,7 +1954,6 @@ xabber.EphemeralTimerSelector = xabber.BasicView.extend({
                 symmetric: symmetric
         };
         retract_attrs.conversation = this.get('jid');
-        this.get('encrypted') && (retract_attrs.type = 'encrypted');
         iq_retraction.c('retract-all', retract_attrs);
         this.account.sendIQFast(iq_retraction, (iq_response) => {
             let all_messages = this.messages.models;
