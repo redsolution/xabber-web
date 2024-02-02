@@ -8963,8 +8963,6 @@ xabber.BlockListView = xabber.BasicView.extend({
     events: {
         "click .btn-reset-panel": "deselectParticipants",
         "click .btn-remove-selected": "actionSelectedParticipants",
-        "click .blocked-contact input": "selectUnblock",
-        "click .btn-unblock-selected": "unblockSelected"
     },
 
     _initialize: function (options) {
@@ -8986,20 +8984,19 @@ xabber.BlockListView = xabber.BasicView.extend({
     },
 
     deselectBlocked: function (ev) {
-        this.$('.blocked-contact input').prop('checked', false)
+        this.parent.$('.blocked-contact input').prop('checked', false)
         this.updateUnblockButton();
     },
 
     updateUnblockButton: function () {
-        let has_changes = this.$('.blocked-contact input:checked').length;
-        this.$('.btn-unblock-selected').hideIf(!has_changes);
-        this.$('.btn-deselect-blocked').hideIf(!has_changes);
-        this.$('.btn-block').hideIf(has_changes);
+        let has_changes = this.parent.$('.blocked-contact input:checked').length;
+        this.parent.$('.btn-unblock-selected').hideIf(!has_changes);
+        this.parent.$('.btn-deselect-blocked').hideIf(!has_changes);
+        this.parent.$('.btn-block').hideIf(has_changes);
     },
 
     unblockSelected: function (ev) {
-        let $current_tab = this.$('.settings-block-wrap:not(.hidden)'),
-            selected = $current_tab.find('.blocked-contact input:checked').closest('.blocked-contact');
+        let selected = this.parent.$('.blocked-contact input:checked').closest('.blocked-contact');
         selected.each((index, item) => {
             this.unblockContactByJid($(item).attr('data-jid'))
         });
@@ -9055,7 +9052,7 @@ xabber.BlockListView = xabber.BasicView.extend({
     },
 
     onContactRemoved: function (jid) {
-        let $elem = this.$(`.blocked-contact[data-jid="${jid}"]`);
+        let $elem = this.parent.$(`.blocked-contact[data-jid="${jid}"]`);
         $elem.detach();
 
         if (this.parent && this.parent.updateHeight){

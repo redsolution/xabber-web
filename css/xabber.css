@@ -14801,7 +14801,7 @@ input[type=range].voice-message-volume:focus {
     float: right;
     color: #616161;
 }
-.details-panel .gallery-wrap .gallery-storage-wrap .storage-label{
+.details-panel .gallery-wrap .gallery-storage-wrap .storage-label-title{
     margin-bottom: 8px;
     position: absolute;
     font-size: 16px;

@@ -2963,6 +2963,7 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
         "click .devices-wrap .btn-revoke-all-tokens": "revokeAllXTokens",
         "click .btn-manage-devices": "openDevicesWindow",
         "click .btn-block": "openBlockWindow",
+        "click .blocked-contact input": "selectUnblock",
         "click .btn-unblock-selected": "unblockSelected",
         "click .btn-deselect-blocked": "deselectBlocked",
         "click .btn-gallery-sorting": "sortFiles",
@@ -3812,6 +3813,12 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
                 }
             }
         });
+    },
+
+    selectUnblock: function (ev) {
+        if (this.children && this.children.blocklist){
+            this.children.blocklist.selectUnblock();
+        }
     },
 
     unblockSelected: function () {
