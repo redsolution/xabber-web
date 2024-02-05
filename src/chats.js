@@ -2299,13 +2299,13 @@ xabber.ChatItemView = xabber.BasicView.extend({
     updateEmptyChat: function () {
         let msg_time = this.model.get('timestamp'),
             is_empty = Number(this.model.get('last_delivered_id')) || Number(this.model.get('last_displayed_id')) || Number(this.model.get('last_read_msg')),
-            is_truly_empty = Boolean(is_empty) && !this.model.messages.length && !this.model.get('encrypted');
+            is_truly_empty = Boolean(is_empty) && !this.model.messages.length && !this.model.get('encrypted'),
+            own_domain = Strophe.getDomainFromJid(this.account.get('jid')),
+            contact_domain = Strophe.getDomainFromJid(this.model.get('jid'));
 
-        console.log('is_empty ' ,Boolean(is_empty));
-        console.log('this.model.messages.length ' ,this.model.messages.length);
-        console.log('this.model.get(\'history_loaded\') ' ,this.model.get('history_loaded'));
-        console.log('this.model.get(\'jid\') ' ,this.model.get('jid'));
-        console.log('is_truly_empty ' ,is_truly_empty);
+        if (Boolean(is_truly_empty) && this.model.get('group_chat') && own_domain != contact_domain){
+            is_truly_empty = this.model.get('history_loaded');
+        }
 
         this.$('.last-msg').html(xabber.getString(is_truly_empty ? "recent_chat__history_cleared" : is_empty ? "recent_chat__last_message_retracted" : "recent_chat__start_conversation").italics());
         this.$('.last-msg-date').text(utils.pretty_short_datetime_recent_chat(msg_time))
@@ -4085,9 +4085,6 @@ xabber.ChatContentView = xabber.BasicView.extend({
             }
             if (options.previous_history && (messages.length < query.max) && success) {
                 this.model.set('history_loaded', true);
-                if (!this.model.messages.length){
-                    this.model.item_view.updateEmptyChat();
-                }
             }
             if (options.previous_history || options.unread_history_before || !this.model.get('first_archive_id')) {
                 rsm.first && this.model.set('first_archive_id', rsm.first);
@@ -4104,6 +4101,9 @@ xabber.ChatContentView = xabber.BasicView.extend({
                 );
                 if (loaded_message) counter++;
             });
+            if (this.model.get('history_loaded') && !this.model.messages.length){
+                this.model.item_view.updateEmptyChat();
+            }
             if ((counter === 0) && options.last_history && !this.model.get('history_loaded')) {
                 this.getMessageArchive(_.extend(query, {
                     max: xabber.settings.mam_messages_limit,

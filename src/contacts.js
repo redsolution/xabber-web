@@ -8570,7 +8570,7 @@ xabber.Roster = xabber.ContactsBase.extend({
                 && !chat.item_view.content && !chat.get('group_chat')){
                 chat.item_view.content = new xabber.ChatContentView({chat_item: chat.item_view});
             }
-            chat.item_view.updateEmptyChat();
+            !chat.messages.length && chat.item_view.updateEmptyChat();
         }
         if (request_with_stamp && chat.retraction_version !== 0 && chat.retraction_version < msg_retraction_version)
             chat.trigger("get_retractions_list");
