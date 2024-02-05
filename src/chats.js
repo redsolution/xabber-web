@@ -2298,8 +2298,16 @@ xabber.ChatItemView = xabber.BasicView.extend({
 
     updateEmptyChat: function () {
         let msg_time = this.model.get('timestamp'),
-            is_empty = Number(this.model.get('last_delivered_id')) || Number(this.model.get('last_displayed_id')) || Number(this.model.get('last_read_msg'));
-        this.$('.last-msg').html(xabber.getString(is_empty ? "recent_chat__last_message_retracted" : "no_messages").italics());
+            is_empty = Number(this.model.get('last_delivered_id')) || Number(this.model.get('last_displayed_id')) || Number(this.model.get('last_read_msg')),
+            is_truly_empty = Boolean(is_empty) && !this.model.messages.length && !this.model.get('encrypted');
+
+        console.log('is_empty ' ,Boolean(is_empty));
+        console.log('this.model.messages.length ' ,this.model.messages.length);
+        console.log('this.model.get(\'history_loaded\') ' ,this.model.get('history_loaded'));
+        console.log('this.model.get(\'jid\') ' ,this.model.get('jid'));
+        console.log('is_truly_empty ' ,is_truly_empty);
+
+        this.$('.last-msg').html(xabber.getString(is_truly_empty ? "recent_chat__history_cleared" : is_empty ? "recent_chat__last_message_retracted" : "recent_chat__start_conversation").italics());
         this.$('.last-msg-date').text(utils.pretty_short_datetime_recent_chat(msg_time))
             .attr('title', pretty_datetime(msg_time));
     },
@@ -4077,6 +4085,9 @@ xabber.ChatContentView = xabber.BasicView.extend({
             }
             if (options.previous_history && (messages.length < query.max) && success) {
                 this.model.set('history_loaded', true);
+                if (!this.model.messages.length){
+                    this.model.item_view.updateEmptyChat();
+                }
             }
             if (options.previous_history || options.unread_history_before || !this.model.get('first_archive_id')) {
                 rsm.first && this.model.set('first_archive_id', rsm.first);
