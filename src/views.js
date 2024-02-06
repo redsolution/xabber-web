@@ -1893,6 +1893,7 @@ xabber.SettingsModalView = xabber.BasicView.extend({
         "click .current-background-wrap": "changeBackgroundImage",
         "change .hotkeys input[type=radio][name=hotkeys]": "setHotkeys",
         "change .avatar-shape input[type=radio][name=avatar_shape]": "setAvatarShape",
+        "change .device-metadata input[type=radio][name=device_metadata]": "setDeviceMetadata",
         "click .settings-tab.delete-all-accounts": "deleteAllAccounts"
     },
 
@@ -1992,6 +1993,9 @@ xabber.SettingsModalView = xabber.BasicView.extend({
                 .prop('checked', true);
         this.$(`.avatar-shape input[type=radio][name=avatar_shape][value=${settings.avatar_shape}]`)
                 .prop('checked', true);
+        this.$(`.device-metadata input[type=radio][name=device_metadata][value=${settings.device_metadata}]`)
+                .prop('checked', true);
+        this.$(`.device-metadata-description`).text(xabber.getString(`settings__section_privacy__${settings.device_metadata}_metadata_description`));
         (lang == xabber.get("default_language")) && (lang = 'default');
         this.$(`.languages-list input[type=radio][name=language][value="${lang}"]`)
             .prop('checked', true);
@@ -2676,6 +2680,13 @@ xabber.SettingsModalView = xabber.BasicView.extend({
     setAvatarShape: function (ev) {
         this.model.save('avatar_shape', ev.target.value);
         xabber.trigger('update_avatar_shape');
+    },
+
+
+    setDeviceMetadata: function (ev) {
+        this.model.save('device_metadata', ev.target.value);
+        this.$(`.device-metadata-description`).text(xabber.getString(`settings__section_privacy__${this.model.get('device_metadata')}_metadata_description`));
+        this.updateHeight();
     },
 
     deleteAllAccounts: function (ev) {

@@ -414,7 +414,9 @@ xabber.Account = Backbone.Model.extend({
             let jid = this.get('jid'),
                 auth_type = this.get('auth_type'),
                 password;
-            jid += '/' + constants.CLIENT_RESOURCE + '-' + xabber.get('client_id');
+            if (xabber.settings.device_metadata === 'contacts'){
+                jid += '/' + constants.CLIENT_RESOURCE + '-' + xabber.get('client_id');
+            }
             this.connection.x_token = this.get('x_token');
             this.connection.counter = this.get('hotp_counter');
             this.connection.account = this;
@@ -3390,7 +3392,7 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
             let pretty_token = {
                 resource_obj: undefined,
                 client: token.client,
-                device: token.device,
+                device: token.device || xabber.getString('unknown'),
                 token_uid: token.token_uid,
                 ip: token.ip,
                 last_auth: pretty_datetime_date(token.last_auth),
@@ -5408,6 +5410,8 @@ xabber.XmppLoginPanel = xabber.AuthView.extend({
         "focusout input[name=register_domain]": "focusoutDomain",
         "keyup input[name=register_password]": "keyUpPassword",
         "change .circle-avatar input": "changeAvatar",
+        "change .device-metadata input[type=radio][name=device_metadata]": "setDeviceMetadata",
+        "click .auth-settings": "openLoginSettings",
         "click .btn-choose-image": "chooseAvatar",
         "click .btn-emoji-panel": "openEmojiPanel",
         "click .btn-selfie": "openWebcamPanel",
@@ -5458,6 +5462,9 @@ xabber.XmppLoginPanel = xabber.AuthView.extend({
         this.updateOptions && this.updateOptions();
         this.$('#select-xmpp-server').hideIf(xabber.url_params.rkey)
         this.$('.select-xmpp-server .caret').hideIf(xabber.url_params.rkey)
+        this.$(`.device-metadata input[type=radio][name=device_metadata][value=${xabber.settings.device_metadata}]`)
+            .prop('checked', true);
+        this.$(`.device-metadata-description`).text(xabber.getString(`settings__section_privacy__${xabber.settings.device_metadata}_metadata_description`));
         if (xabber.url_params.anchor == 'signup' || xabber.url_params.rkey)
             this.data.set('step', 2)
         else if (xabber.url_params.anchor == 'signin')
@@ -5466,7 +5473,8 @@ xabber.XmppLoginPanel = xabber.AuthView.extend({
     },
 
     openButtonsMenu: function () {
-        this.data.set('step', 1)
+        this.data.set('step', 1);
+        this.$('.settings-block-wrap.privacy').addClass('hidden');
     },
 
     register: function () {
@@ -5983,6 +5991,15 @@ xabber.XmppLoginPanel = xabber.AuthView.extend({
                 this.$('.circle-avatar').setAvatar(image, this.member_details_avatar_size);
             }
         });
+    },
+
+    openLoginSettings: function (ev) {
+        this.$('.settings-block-wrap.privacy').removeClass('hidden');
+    },
+
+    setDeviceMetadata: function (ev) {
+        xabber._settings.save('device_metadata', ev.target.value);
+        this.$(`.device-metadata-description`).text(xabber.getString(`settings__section_privacy__${xabber._settings.get('device_metadata')}_metadata_description`));
     },
 
     successFeedback: function () {

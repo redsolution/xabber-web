@@ -312,6 +312,7 @@ let Xabber = Backbone.Model.extend({
             sound_on_call_busy: '_phone_busy',
             hotkeys: 'enter',
             avatar_shape: 'circle',
+            device_metadata: 'default',
             language: 'default',
             load_history: true,
             mam_requests_limit: 200,
@@ -377,6 +378,10 @@ let Xabber = Backbone.Model.extend({
                 this._settings.set("typing_notifications", config.PRIVACY_TYPING_NOTIFICATIONS);
             else if (this._settings.get("typing_notifications") === 'default')
                 this._settings.set("typing_notifications", true);
+            if (this._settings.get("device_metadata") === 'default' && config.PRIVACY_DEVICE_METADATA_DEFAULT != null)
+                this._settings.set("device_metadata", config.PRIVACY_DEVICE_METADATA_DEFAULT);
+            else if (this._settings.get("device_metadata") === 'default')
+                this._settings.set("device_metadata", 'contacts');
             if (this._settings.get("mapping_service") === 'default' && config.PRIVACY_MAPPING_SERVICE != null)
                 this._settings.set("mapping_service", config.PRIVACY_MAPPING_SERVICE);
             else if (this._settings.get("mapping_service") === 'default')

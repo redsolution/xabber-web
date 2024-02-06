@@ -561,6 +561,31 @@
                     </div>
 
                     <div data-header='{[print(xabber.getString("settings__menu_item__privacy"))]}'  class="settings-block-wrap privacy hidden">
+                        <div class="block-subheader">
+                            <span class="block-name">{[print(xabber.getString("settings__menu_item__device_metadata_sharing"))]}</span>
+                        </div>
+                        <div class="setting device-metadata radio-button field-wrap">
+                            <div class="field radio-field clickable-field">
+                                <form action="#">
+                                    <p>
+                                        <input class="with-gap" name="device_metadata" value="contacts" type="radio" id="{{view.cid}}-contacts" />
+                                        <label for="{{view.cid}}-contacts">{[print(xabber.getString("settings__section_privacy__contacts_metadata"))]}</label>
+                                    </p>
+                                    <p>
+                                        <input class="with-gap" name="device_metadata" value="server" type="radio" id="{{view.cid}}-server" />
+                                        <label for="{{view.cid}}-server">{[print(xabber.getString("settings__section_privacy__server_metadata"))]}</label>
+                                    </p>
+                                    <p>
+                                        <input class="with-gap" name="device_metadata" value="none" type="radio" id="{{view.cid}}-none" />
+                                        <label for="{{view.cid}}-none">{[print(xabber.getString("settings__section_privacy__none_metadata"))]}</label>
+                                    </p>
+                                </form>
+                            </div>
+                        </div>
+                        <div class="device-metadata-description"></div>
+                        <div class="block-subheader">
+                            <span class="block-name">{[print(xabber.getString("settings__menu_item__privacy"))]}</span>
+                        </div>
                         <div class="setting load-media checkbox-setting field-wrap">
                             <div class="input-field checkbox-field">
                                 <input type="checkbox" class="filled-in" id="load-media"/>

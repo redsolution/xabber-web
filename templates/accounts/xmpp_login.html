@@ -7,6 +7,33 @@
     <div class="login-buttons">
         <div class="btn-flat btn-main btn-register-form one-line">{[print(xabber.getString("xmpp_login__button_sign_up"))]}</div>
         <div class="btn-flat btn-main btn-login-form one-line">{[print(xabber.getString("xmpp_login__button_sign_in"))]}</div>
+        <div class="auth-settings one-line">{[print(xabber.getString("account_settings_privacy_settings"))]}</div>
+    </div>
+
+    <div data-header='{[print(xabber.getString("settings__menu_item__privacy"))]}'  class="settings-block-wrap privacy login-panel-form hidden">
+        <svg class="details-icon btn-go-back-menu mdi mdi-24px mdi-svg-template" data-svgname="chevron-left-variant"></svg>
+        <div class="block-subheader">
+            <span class="block-name">{[print(xabber.getString("settings__menu_item__device_metadata_sharing"))]}</span>
+        </div>
+        <div class="setting device-metadata radio-button field-wrap">
+            <div class="field radio-field clickable-field">
+                <form action="#">
+                    <p>
+                        <input class="with-gap" name="device_metadata" value="contacts" type="radio" id="{{view.cid}}-contacts" />
+                        <label for="{{view.cid}}-contacts">{[print(xabber.getString("settings__section_privacy__contacts_metadata"))]}</label>
+                    </p>
+                    <p>
+                        <input class="with-gap" name="device_metadata" value="server" type="radio" id="{{view.cid}}-server" />
+                        <label for="{{view.cid}}-server">{[print(xabber.getString("settings__section_privacy__server_metadata"))]}</label>
+                    </p>
+                    <p>
+                        <input class="with-gap" name="device_metadata" value="none" type="radio" id="{{view.cid}}-none" />
+                        <label for="{{view.cid}}-none">{[print(xabber.getString("settings__section_privacy__none_metadata"))]}</label>
+                    </p>
+                </form>
+            </div>
+        </div>
+        <div class="device-metadata-description"></div>
     </div>
 </div>
 <div class="login-panel-form xmpp-login-form noselect hidden">

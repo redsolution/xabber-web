@@ -3825,6 +3825,48 @@ input[type=text].simple-input-field:hover {
     letter-spacing: 0.25px;
     text-align: center;
 }
+.login-buttons .btn-login-form{
+    margin-bottom: 12px;
+}
+.login-panel-intro .auth-settings{
+    color: #9E9E9E;
+    cursor: pointer;
+    text-align: center;
+}
+.login-panel-intro .settings-block-wrap{
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #FFF;
+    padding: 48px 24px 12px;
+}
+.login-panel-intro .settings-block-wrap .details-icon{
+    left: -16px;
+}
+.login-panel-intro .settings-block-wrap .block-subheader .block-name{
+    FONT-WEIGHT: 500;
+    color: rgba(0,0,0,.54);
+    font-size: 16px;
+    line-height: 32px;
+    text-transform: capitalize;
+}
+.login-panel-intro .settings-block-wrap .radio-field label{
+    color: #000000de!important;
+    font-size: 16px;
+    height: 24px;
+    line-height: 24px;
+}
+.login-panel-intro .settings-block-wrap.login-panel-form .device-metadata-description{
+    bottom: 144px;
+    top: unset;
+    left: 50%;
+    transform: translate(-50%, 0);
+    width: calc(100% - 48px);
+    position: absolute;
+    padding: 0;
+}
 .register-form.login-panel-form,
 .xmpp-login-form.login-panel-form {
     width: 560px;
@@ -13489,6 +13531,11 @@ input[type=range].voice-message-volume:focus {
     padding: 12px;
 }
 
+.settings-block-wrap.privacy .device-metadata-description{
+    color: #616161;
+    font-size: 14px;
+    padding: 10px 32px 16px 20px;
+}
 /* ----------------- COLOR PICKER -------------------- */
 
 .modal.color-picker {
