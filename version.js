@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.3.4.144","version_description":"fixed chat history cleared for remote group chats, fixed updateemptychat func call on sync push overlaying existing message in groupchat"}'
+'{"version_number":"2.3.4.145","version_description":"removed leading spaces trimmer in message input, added scroll to message input"}'
 )});

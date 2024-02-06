@@ -171,6 +171,8 @@ input[type=checkbox].filled-in:checked + label:after {
 
 .ql-editor {
     overflow: hidden !important;
+    overflow-y: scroll !important;
+    scrollbar-width: none;
 }
 
 .ql-editor.ql-blank::before {

@@ -11990,21 +11990,21 @@ xabber.ChatBottomView = xabber.BasicView.extend({
             this.text_input_height = quill_current_height;
         }
         let quill_content = this.quill.getContents()
-        if (quill_content && quill_content.ops && quill_content.ops.length){
-            let text = quill_content.ops[0].insert;
-            if (text && text.trimStart) {
-                let trimmed_text = text.trimStart();
-                if (text.length != trimmed_text.length){
-                    quill_content.ops[0].insert = trimmed_text;
-                    this.quill.setContents(quill_content, 'user');
-                    this.quill.disable();
-                    setTimeout(() => {
-                        this.focusOnInput();
-                        this.quill.root.focus();
-                    },1)
-                }
-            }
-        }
+        // if (quill_content && quill_content.ops && quill_content.ops.length){
+        //     let text = quill_content.ops[0].insert;
+        //     if (text && text.trimStart) {
+        //         let trimmed_text = text.trimStart();
+        //         if (text.length != trimmed_text.length){
+        //             quill_content.ops[0].insert = trimmed_text;
+        //             this.quill.setContents(quill_content, 'user');
+        //             this.quill.disable();
+        //             setTimeout(() => {
+        //                 this.focusOnInput();
+        //                 this.quill.root.focus();
+        //             },1)
+        //         }
+        //     }
+        // }
 
         if (current_height !== this.bottom_height) {
             this.bottom_height = current_height;
