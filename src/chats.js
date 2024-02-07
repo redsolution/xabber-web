@@ -271,7 +271,7 @@ xabber.MessagesBase = Backbone.Collection.extend({
             unique_id = origin_id || options.stanza_id || archive_id || msgid;
             message = this.get(unique_id);
         }
-        if (!message && this.chat && this.chat.get('saved')){
+        if (!message && this.chat && (this.chat.get('saved') || this.chat.get('group_chat'))){
             message = this.findWhere({'origin_id': origin_id});
         }
         if (options.replaced) {
@@ -6018,6 +6018,9 @@ xabber.ChatContentView = xabber.BasicView.extend({
 
         message.set('original_message', body);
         body && stanza.c('body').t(body).up();
+        if (this.model.get('group_chat')){
+            stanza.c('private', {xmlns: Strophe.NS.CARBONS}).up();
+        }
         stanza.c('markable').attrs({'xmlns': Strophe.NS.CHAT_MARKERS}).up()
             .c('origin-id', {id: msg_id, xmlns: 'urn:xmpp:sid:0'}).up();
         message.set({xml: $(stanza.tree()).clone()[0]});
