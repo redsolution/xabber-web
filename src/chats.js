@@ -570,6 +570,9 @@ xabber.MessagesBase = Backbone.Collection.extend({
             }
         }
 
+        if (!options.synced_msg && this.chat && this.chat.item_view && !this.chat.item_view.content){
+            this.chat.item_view.content = new xabber.ChatContentView({chat_item: this.chat.item_view});
+        }
         message = this.create(attrs);
 
         (options.encrypted && options.is_unread) && message.set('is_unread', true);
