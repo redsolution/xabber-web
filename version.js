@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.3.4.150","version_description":"changed saved message chat to xep-favorites, fixed get conversation type, changed conversation-type attr sending in archive requests, fixed saved messages delivery state setting, removed group leave button inactive setting, fixed blocked elements list appending, added retrying for getting devices node and logging of that, changed font weight for bold font in message text input "}'
+'{"version_number":"2.3.4.151","version_description":"fixed previous chat appearing on screen change after it was closed, added chat head button update on omemo enabled"}'
 )});

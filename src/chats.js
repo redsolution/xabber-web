@@ -8844,6 +8844,12 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
         if (this.active_chat === this.child(chat.id)) {
             this.active_chat = null;
             xabber.body.showChatPlaceholder();
+            xabber.body.screen.set('chat_item', false);
+            let previous_chat = xabber.body.screen.get('previous_screen');
+            if (previous_chat){
+                previous_chat.chat_item = null;
+                xabber.body.screen.set('previous_screen', previous_chat);
+            }
         }
         this.removeChild(chat.id, options);
         this.updateScrollBar();
@@ -10180,6 +10186,7 @@ xabber.InvitationPanelView = xabber.SearchView.extend({
         this.updateNotifications();
         this.updateArchived();
         this.updatePinned();
+        this.account.on("change:omemo_enabled", this.updateMenu, this);
         this.model.on("change:encrypted", this.updateEncrypted, this);
         this.model.on("close_chat", this.closeChat, this);
         this.model.on("hide_chat", this.hideChat, this);
