@@ -175,6 +175,10 @@ input[type=checkbox].filled-in:checked + label:after {
     scrollbar-width: none;
 }
 
+.ql-editor strong {
+    font-weight: 600;
+}
+
 .ql-editor.ql-blank::before {
     left: inherit !important;
     right: inherit !important;

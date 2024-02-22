@@ -200,7 +200,7 @@ export default {
                 dialog.$modal.find('.modal-header').append('<i class="close-modal mdi mdi-close mdi-24px"></i>');
             }
 
-            if (dialog_options.input_placeholder_value || dialog_options.input_value) {
+            if (!_.isUndefined(dialog_options.input_placeholder_value) || dialog_options.input_value) {
                 dialog.$modal.find('.dialog-options-wrap').html($('<input type="text" placeholder="' + dialog_options.input_placeholder_value + '" id="user_value"/>').val(dialog_options.input_value));
             }
 

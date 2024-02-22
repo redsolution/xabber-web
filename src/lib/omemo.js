@@ -28,18 +28,31 @@
             return devices;
         };
 
-        var getDevicesNode = function (jid, callback, errback) {
+        var getDevicesNode = function (jid, callback, errback, retry) {
             let attrs = {type: 'get'};
             jid && (attrs.to = jid);
             let iq = $iq(attrs)
                 .c('pubsub', {xmlns: Strophe.NS.PUBSUB})
                 .c('items', {node: Strophe.NS.OMEMO + ":devices"});
-            this._connection.sendIQ(iq, callback, function (err) {
+            let resulted = false
+            this._connection.sendIQ(iq, (stanza) => {
+                console.error(stanza);
+                resulted = true;
+                callback && callback(stanza);
+            }, function (err) {
+                resulted = true;
+                console.error(err);
                 if ($(err).find('error').attr('code') == 404 && !jid)
                     createDeviceNode.call(this, callback);
                 else
                     errback && errback();
-            }.bind(this));
+                }.bind(this));
+
+            if (!retry)
+                setTimeout(() => {
+                    if (!resulted)
+                        getDevicesNode(jid,callback,errback, true)
+                }, 8000);
         };
 
         var sendOptOut = function (attrs, callback) {

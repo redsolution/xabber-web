@@ -1755,7 +1755,11 @@ xabber.EphemeralTimerSelector = xabber.BasicView.extend({
                         msg.set('timestamp', Number(delivered_time));
                     }
                 }
-                this.setMessagesDelivered(msg.get('timestamp'));
+                if (this.get('saved')){
+                    this.setMessagesDisplayed(msg.get('timestamp'));
+                } else {
+                    this.setMessagesDelivered(msg.get('timestamp'));
+                }
             } else {
                 let msg_state = msg.get('state');
                 if (msg_state === constants.MSG_ERROR){
@@ -1998,9 +2002,9 @@ xabber.EphemeralTimerSelector = xabber.BasicView.extend({
     },
 
     getConversationType: function (chat) {
-        if(chat.get('encrypted'))
+        if (chat.get('encrypted'))
             return Strophe.NS.SYNCHRONIZATION_OMEMO;
-        if(chat.contact.get('group_chat'))
+        if (chat.contact && chat.contact.get('group_chat'))
             return Strophe.NS.GROUP_CHAT;
         return Strophe.NS.SYNCHRONIZATION_REGULAR_CHAT
     },
@@ -3946,11 +3950,8 @@ xabber.ChatContentView = xabber.BasicView.extend({
             .c('value').t(Strophe.NS.MAM).up().up();
         if (this.account.server_features.get(Strophe.NS.ARCHIVE)) {
             iq.c('field', {'var': `conversation-type`});
-            if (this.model.get('encrypted')){
-                iq.c('value').t(Strophe.NS.OMEMO).up().up();
-            } else {
-                iq.c('value').t(Strophe.NS.XABBER_CHAT).up().up();
-            }
+            let sync_type = this.model.get('sync_type') ? this.model.get('sync_type') : this.model.getConversationType(this.model);
+            iq.c('value').t(sync_type).up().up();
         }
         if (!is_groupchat)
             iq.c('field', {'var': 'with'})
@@ -4516,7 +4517,6 @@ xabber.ChatContentView = xabber.BasicView.extend({
             }
             if (this.model.get('saved')) {
                 message.set('muted', true);
-                message.set('state', constants.MSG_DISPLAYED);
             }
         }
 
@@ -7837,9 +7837,11 @@ xabber.AccountChats = xabber.ChatsBase.extend({
     },
 
     getSavedChat: function () {
-      let jid = this.account.get('jid'),
-          attrs = {jid: jid, type: 'saved', name: xabber.getString("saved_messages__header"), id: `${jid}:saved`},
-          chat = this.get(attrs.id);
+        if (!this.account.server_features.get(Strophe.NS.XABBER_FAVORITES))
+            return;
+        let jid = this.account.server_features.get(Strophe.NS.XABBER_FAVORITES).get('from'),
+            attrs = {jid: jid, type: 'saved', name: xabber.getString("saved_messages__header"), id: `${jid}:saved`},
+            chat = this.get(attrs.id);
         if (!chat) {
             chat = xabber.chats.create(attrs, {account: this.account});
             this.add(chat);
@@ -8061,7 +8063,8 @@ xabber.AccountChats = xabber.ChatsBase.extend({
                     return;
                 if (!msg.get('stanza_id') && msg.get('locations'))
                     msg.set({'stanza_id': stanza_id})
-                msg.set({'state': constants.MSG_SENT, 'time': delivered_time, 'timestamp': Number(moment(delivered_time))}); // delivery receipt, changing on server time
+                let msg_state = chat.get('saved') ? constants.MSG_DISPLAYED : constants.MSG_SENT;
+                msg.set({'state': msg_state, 'time': delivered_time, 'timestamp': Number(moment(delivered_time))}); // delivery receipt, changing on server time
                 chat.setStanzaId(pending_message.unique_id, stanza_id);
                 this.account._pending_messages.splice(this.account._pending_messages.indexOf(pending_message), 1);
             }
@@ -8129,7 +8132,7 @@ xabber.AccountChats = xabber.ChatsBase.extend({
 
         if ($message.find(`replace[xmlns="${Strophe.NS.REWRITE}#notify"]`).length) {
             !contact && (contact = this.account.contacts.get($message.find('replace').attr('conversation'))) && (chat = this.account.chats.getChat(contact));
-            if ($message.find('replace').attr('conversation') === this.account.get('jid'))
+            if (this.account.server_features.get(Strophe.NS.XABBER_FAVORITES) && $message.find('replace').attr('conversation') === this.account.server_features.get(Strophe.NS.XABBER_FAVORITES).get('from'))
                 chat = this.getSavedChat();
             if (!chat)
                 return;
@@ -8157,7 +8160,7 @@ xabber.AccountChats = xabber.ChatsBase.extend({
 
         if ($message.find(`invalidate[xmlns="${Strophe.NS.REWRITE}#notify"]`).length) {
             !contact && (contact = this.account.contacts.get($message.find('invalidate').attr('conversation'))) && (chat = this.account.chats.getChat(contact));
-            if ($message.find('invalidate').attr('conversation') === this.account.get('jid'))
+            if (this.account.server_features.get(Strophe.NS.XABBER_FAVORITES) && $message.find('invalidate').attr('conversation') === this.account.server_features.get(Strophe.NS.XABBER_FAVORITES).get('from'))
                 chat = this.getSavedChat();
             if (!chat)
                 return;
@@ -8190,7 +8193,7 @@ xabber.AccountChats = xabber.ChatsBase.extend({
         if ($message.find('retract-message').length) {
             let is_encrypted = $message.find('retract-message').attr('type') == Strophe.NS.OMEMO;
             !contact && (contact = this.account.contacts.get($message.find('retract-message').attr('conversation'))) && (chat = this.account.chats.getChat(contact,  is_encrypted && 'encrypted'));
-            if ($message.find('retract-message').attr('conversation') === this.account.get('jid'))
+            if (this.account.server_features.get(Strophe.NS.XABBER_FAVORITES) && $message.find('retract-message').attr('conversation') === this.account.server_features.get(Strophe.NS.XABBER_FAVORITES).get('from'))
                 chat = this.getSavedChat();
             if (!chat)
                 return;
@@ -8376,14 +8379,16 @@ xabber.AccountChats = xabber.ChatsBase.extend({
         options.replaced && (contact_jid = $message.children('replace').attr('conversation'));
 
         if (contact_jid === this.account.get('jid')) {
+            xabber.warn('Message from me to me');
+            xabber.warn(message);
+            return;
+        }
+
+        if (this.account.server_features.get(Strophe.NS.XABBER_FAVORITES) && this.account.server_features.get(Strophe.NS.XABBER_FAVORITES).get('from') && contact_jid === this.account.server_features.get(Strophe.NS.XABBER_FAVORITES).get('from')) {
             if (options.carbon_copied && options.carbon_direction === 'sent' || !options.carbon_copied) {
                 let chat = this.getSavedChat(),
                     stanza_ids = this.receiveStanzaId($message, {from_bare_jid: from_bare_jid, carbon_copied: options.carbon_copied, replaced: options.replaced});
                 return chat.receiveMessage($message, _.extend(options, {is_sender: is_sender, stanza_id: stanza_ids.stanza_id, contact_stanza_id: stanza_ids.contact_stanza_id}));
-            } else {
-                xabber.warn('Message from me to me');
-                xabber.warn(message);
-                return;
             }
         }
 
@@ -9418,7 +9423,7 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
                     this.$('.chat-list-wrap .chat-list').append(chat.item_view.$el.clone().removeClass('hidden'));
             }
         });
-        if (!this.saved_chat) {
+        if (!this.saved_chat && this.account.server_features.get(Strophe.NS.XABBER_FAVORITES)) {
             let saved_chat = this.account.chats.getSavedChat(),
                 $cloned_item = saved_chat.item_view.$el.clone();
             $cloned_item.find('.last-msg').text(xabber.getString("saved_messages__hint_forward_here"));

@@ -579,9 +579,11 @@ xabber.SearchView = xabber.BasicView.extend({
           this.$('.contacts-list').html("");
           this.$('.chats-list').html("");
           xabber.accounts.connected.forEach((acc) => {
-              let saved_chat = acc.chats.getSavedChat();
-              saved_chat.set('opened', true);
-              saved_chat.item_view.updateLastMessage();
+              if (acc.server_features.get(Strophe.NS.XABBER_FAVORITES)) {
+                  let saved_chat = acc.chats.getSavedChat();
+                  saved_chat.set('opened', true);
+                  saved_chat.item_view.updateLastMessage();
+              }
           });
           let query_chats = _.clone(xabber.chats);
           query_chats.comparator = 'timestamp';
@@ -1106,6 +1108,9 @@ xabber.ToolbarView = xabber.BasicView.extend({
 
     showSavedChats: function (ev, no_unread) {
         if (xabber.accounts.enabled.length === 1){
+            if (!xabber.accounts.enabled[0].server_features.get(Strophe.NS.XABBER_FAVORITES)) {
+                return;
+            }
             let saved_chat = xabber.accounts.enabled[0].chats.getSavedChat();
             saved_chat.item_view && saved_chat.item_view.open({right_contact_save: true, clear_search: false, scroll_to_chat: true});
             this.$('.active').removeClass('active');

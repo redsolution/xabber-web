@@ -772,6 +772,7 @@ xabber.Contact = Backbone.Model.extend({
             account = this.account,
             is_fast = account.fast_connection && !account.fast_connection.disconnecting && account.fast_connection.authenticated && account.fast_connection.connected && account.get('status') !== 'offline',
             conn = is_fast ? account.fast_connection : account.connection,
+            chat = account.chats.getChat(this, options.encrypted && 'encrypted'),
             receiver = this.get('group_chat') ? this.get('full_jid') || this.get('jid') : this.account.get('jid'),
             iq = $iq({type: 'set', to: receiver})
                 .c('query', {xmlns: Strophe.NS.MAM, queryid: queryid})
@@ -782,11 +783,8 @@ xabber.Contact = Backbone.Model.extend({
                 .c('value').t(stanza_id).up().up();
         if (this.account.server_features.get(Strophe.NS.ARCHIVE))    {
             iq.c('field', {'var': `conversation-type`});
-            if (options.encrypted){
-                iq.c('value').t(Strophe.NS.OMEMO).up().up();
-            } else {
-                iq.c('value').t(Strophe.NS.XABBER_CHAT).up().up();
-            }
+            let sync_type = chat.get('sync_type') ? chat.get('sync_type') : chat.getConversationType(chat);
+            iq.c('value').t(sync_type).up().up();
         }
         let handler = conn.addHandler((message) => {
             let $msg = $(message);
@@ -807,6 +805,7 @@ xabber.Contact = Backbone.Model.extend({
             is_fast = options.fast && account.fast_connection && !account.fast_connection.disconnecting && account.fast_connection.authenticated && account.fast_connection.connected && account.get('status') !== 'offline',
             conn = is_fast ? account.fast_connection : account.connection,
             contact = this,
+            chat = account.chats.getChat(contact, options.encrypted && 'encrypted'),
             messages = [], queryid = uuid(),
             is_groupchat = contact && contact.get('group_chat'), success = true, iq;
         delete options.fast;
@@ -820,11 +819,8 @@ xabber.Contact = Backbone.Model.extend({
             .c('value').t(Strophe.NS.MAM).up().up();
         if (this.account.server_features.get(Strophe.NS.ARCHIVE))    {
             iq.c('field', {'var': `conversation-type`});
-            if (options.encrypted){
-                iq.c('value').t(Strophe.NS.OMEMO).up().up();
-            } else {
-                iq.c('value').t(Strophe.NS.XABBER_CHAT).up().up();
-            }
+            let sync_type = chat.get('sync_type') ? chat.get('sync_type') : chat.getConversationType(chat);
+            iq.c('value').t(sync_type).up().up();
             iq.c('field', {'var': `with-tags`});
             if (options.filter_image)
                 iq.c('value').t('image').up();
@@ -2163,7 +2159,6 @@ xabber.GroupChatDetailsViewRight = xabber.BasicView.extend({
             is_blocked = this.model.get('blocked');
         this.$('.btn-settings-wrap').switchClass('non-active', !is_owner);
         this.$('.btn-edit-settings').switchClass('hidden', !(is_owner || change_group));
-        this.$('.btn-leave-wrap').switchClass('non-active', this.model.get('subscription') != 'both');
         this.$('.btn-invite-wrap').switchClass('non-active', this.model.get('private_chat') || this.model.get('subscription') != 'both');
         this.$('.btn-default-restrictions-wrap').switchClass('non-active', !is_owner);
         this.$('.btn-block').hideIf(is_blocked);
@@ -3142,7 +3137,7 @@ xabber.MediaBaseView = xabber.BasicView.extend({
         this.loading_messages = true;
         !options.max && (options.max = xabber.settings.mam_messages_limit);
         !options.after && !options.before && (options.before = '');
-        this.encrypted && (options.encrypted = this.encrypted)
+        this.encrypted && (options.encrypted = this.encrypted);
         this.parent.participant && (options.var = [{var: 'with', value: this.parent.participant.id}]);
         this.contact.MAMRequest(options, (success, messages, rsm) => {
             let messages_count = 0;
@@ -8451,7 +8446,7 @@ xabber.Roster = xabber.ContactsBase.extend({
                 };
             });
         }
-        if (jid === this.account.get('jid'))
+        if (this.account.server_features.get(Strophe.NS.XABBER_FAVORITES) && this.account.server_features.get(Strophe.NS.XABBER_FAVORITES).get('from') && jid === this.account.server_features.get(Strophe.NS.XABBER_FAVORITES).get('from'))
             saved = true;
         if ($item.attr('type') === Strophe.NS.SYNCHRONIZATION_OLD_OMEMO)
             return true;
@@ -8586,7 +8581,7 @@ xabber.Roster = xabber.ContactsBase.extend({
             if (!msg.get('is_unread') && $unread_messages.attr('count') > 0 && !msg.isSenderMe() && !(msg.get('type') === 'system') && ($unread_messages.attr('after') < msg.get('stanza_id') || $unread_messages.attr('after') < msg.get('contact_stanza_id')))//TODO: change to timestamp checking
                 msg.set('is_unread', true);
             if(!(is_invite || encrypted && this.account.omemo)) {
-                if (msg.isSenderMe() && msg.get('stanza_id') == last_displayed_msg)
+                if (msg.isSenderMe() && ((msg.get('stanza_id') == last_displayed_msg) || saved))
                     msg.set('state', constants.MSG_DISPLAYED);
                 else if (msg.isSenderMe())
                     msg.set('state', constants.MSG_DELIVERED);
@@ -8646,7 +8641,7 @@ xabber.Roster = xabber.ContactsBase.extend({
         this.account.set('last_sync', sync_timestamp);
         this.account.settings.update_settings({last_sync_timestamp: sync_timestamp});
         xabber.chats_view.hideChatsFeedback();
-        if (!request_with_stamp)
+        if (!request_with_stamp && this.account.server_features.get(Strophe.NS.XABBER_FAVORITES))
             this.account.chats.getSavedChat();
         if (is_first_sync)
             this.account.set('first_sync', sync_timestamp);
@@ -8657,7 +8652,8 @@ xabber.Roster = xabber.ContactsBase.extend({
                         return $(this).attr('jid') +  '/' + $(this).attr('type');
                     }).toArray());
                     res = res.filter(item => !cached_conversations_exclude.includes(item.account_conversation_type));
-                    this.syncCachedConversations(null, request_with_stamp, is_first_sync, res);
+                    if (!this.account.session.get('reconnected'))
+                        this.syncCachedConversations(null, request_with_stamp, is_first_sync, res);
                 }
                 this.syncConversations(iq, request_with_stamp, is_first_sync, res);
                 this.account.cached_sync_conversations.putInCachedConversations({
@@ -8665,9 +8661,11 @@ xabber.Roster = xabber.ContactsBase.extend({
                     timestamp: sync_timestamp,
                 });
                 if (!is_last_sync){
-                    let saved_chat = this.account.chats.getSavedChat();
-                    saved_chat.set('opened', true);
-                    saved_chat.item_view.updateLastMessage();
+                    if (this.account.server_features.get(Strophe.NS.XABBER_FAVORITES)){
+                        let saved_chat = this.account.chats.getSavedChat();
+                        saved_chat.set('opened', true);
+                        saved_chat.item_view.updateLastMessage();
+                    }
                     this.account.getAllMessageRetractions((result) => {
                         let retract_version = $(result).find(`query[xmlns="${Strophe.NS.REWRITE}"]`).attr('version');
                         if (retract_version > this.account.retraction_version)
@@ -9023,6 +9021,12 @@ xabber.BlockListView = xabber.BasicView.extend({
     onContactAdded: function (attrs) {
         let rendered;
         this.$('.blocked-contact').each((idx, item) => { //this construction avoids being destroyed by stupid domain and jid names in blocklist
+            ($(item).attr('data-jid') === attrs.jid) && (rendered = true);
+        });
+        this.$('.blocked-domains').each((idx, item) => { //this construction avoids being destroyed by stupid domain and jid names in blocklist
+            ($(item).attr('data-jid') === attrs.jid) && (rendered = true);
+        });
+        this.parent.$('.blocked-invitations').each((idx, item) => { //this construction avoids being destroyed by stupid domain and jid names in blocklist
             ($(item).attr('data-jid') === attrs.jid) && (rendered = true);
         });
         if (rendered)
