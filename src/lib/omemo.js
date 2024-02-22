@@ -50,7 +50,7 @@
 
             if (!retry)
                 setTimeout(() => {
-                    if (!resulted)
+                    if (!resulted && this._connection)
                         getDevicesNode(jid,callback,errback, true)
                 }, 8000);
         };

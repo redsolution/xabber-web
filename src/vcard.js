@@ -351,7 +351,6 @@ xabber.VCardRightView = xabber.VCardView.extend({
                 );
         }
         this.model.updateName();
-        this.model.updateAvatar();
         this.model.getVCard(() => {
             this.update();
         });
