@@ -35,18 +35,20 @@
                 .c('pubsub', {xmlns: Strophe.NS.PUBSUB})
                 .c('items', {node: Strophe.NS.OMEMO + ":devices"});
             let resulted = false
-            this._connection.sendIQ(iq, (stanza) => {
-                console.error(stanza);
-                resulted = true;
-                callback && callback(stanza);
-            }, function (err) {
-                resulted = true;
-                console.error(err);
-                if ($(err).find('error').attr('code') == 404 && !jid)
-                    createDeviceNode.call(this, callback);
-                else
-                    errback && errback();
+            if (this._connection && this._connection.sendIQ){
+                this._connection.sendIQ(iq, (stanza) => {
+                    console.error(stanza);
+                    resulted = true;
+                    callback && callback(stanza);
+                }, function (err) {
+                    resulted = true;
+                    console.error(err);
+                    if ($(err).find('error').attr('code') == 404 && !jid)
+                        createDeviceNode.call(this, callback);
+                    else
+                        errback && errback();
                 }.bind(this));
+            }
 
             if (!retry)
                 setTimeout(() => {

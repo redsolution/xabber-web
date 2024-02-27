@@ -92,7 +92,7 @@ var getHyperLink = function (url) {
     var prot = (url.indexOf('http://') === 0 ||  url.indexOf('https://') === 0) ? '' : 'http://',
         escaped_url = "";
     try {
-        escaped_url = encodeURI(decodeURI(url)).replace(/[!'()]/g, escape).replace(/\*/g, "%2A");
+        escaped_url = url.replace(/[!'()]/g, escape).replace(/\*/g, "%2A");
     }
     catch (e) {
         escaped_url = url;

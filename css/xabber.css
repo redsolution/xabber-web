@@ -10353,6 +10353,12 @@ img.fwd-img-preview {
     cursor: pointer;
 }
 
+.message-input-panel .attach-voice-message.disabled,
+.message-input-panel .send-message.disabled {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
 .message-input-panel .message-form {
     position: relative;
     padding: 6px 90px 0 64px;

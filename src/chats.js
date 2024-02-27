@@ -6190,17 +6190,49 @@ xabber.ChatContentView = xabber.BasicView.extend({
                 if (attrs.files && attrs.files.length) {
                     attrs.type = 'file_upload';
                     this.account.server_features.get(Strophe.NS.HTTP_UPLOAD) && (attrs.upload_service = this.account.server_features.get(Strophe.NS.HTTP_UPLOAD).get('from'));
-                    this.model.messages.create(attrs);
-                } else {
+                    if (this.model.get('encrypted')){
+                        this.bottom.disableSendButtons();
+                    }
                     let message = this.model.messages.create(attrs);
+                    if (this.model.get('encrypted')){
+                        message.once('change:state', () => {
+                            this.bottom.enableSendButtons();
+                        });
+                    }
+                } else {
+                    if (this.model.get('encrypted')){
+                        this.bottom.disableSendButtons();
+                    }
+                    let message = this.model.messages.create(attrs);
+                    if (this.model.get('encrypted')){
+                        message.once('change:state', () => {
+                            this.bottom.enableSendButtons();
+                        });
+                    }
                     this.sendMessage(message);
                 }
             } else if (attrs.files && attrs.files.length) {
                 attrs.type = 'file_upload';
                 this.account.server_features.get(Strophe.NS.HTTP_UPLOAD) && (attrs.upload_service = this.account.server_features.get(Strophe.NS.HTTP_UPLOAD).get('from'));
-                this.model.messages.create(attrs);
-            } else if (text || (attrs.link_references && attrs.link_references.length)) {
+                if (this.model.get('encrypted')){
+                    this.bottom.disableSendButtons();
+                }
                 let message = this.model.messages.create(attrs);
+                if (this.model.get('encrypted')){
+                    message.once('change:state', () => {
+                        this.bottom.enableSendButtons();
+                    });
+                }
+            } else if (text || (attrs.link_references && attrs.link_references.length)) {
+                if (this.model.get('encrypted')){
+                    this.bottom.disableSendButtons();
+                }
+                let message = this.model.messages.create(attrs);
+                if (this.model.get('encrypted')){
+                    message.once('change:state', () => {
+                        this.bottom.enableSendButtons();
+                    });
+                }
                 this.sendMessage(message);
             }
             if (this.contact && this.model.get('archived') && !this.model.isMuted()) {
@@ -12617,6 +12649,9 @@ xabber.ChatBottomView = xabber.BasicView.extend({
     },
 
     writeVoiceMessage: function (ev) {
+        if (this.$('.send-message').hasClass('disabled') || this.$('.attach-voice-message').hasClass('disabled') ){ //34
+            return;
+        }
         let $elem = $(ev.target);
         if ($elem.hasClass('recording'))
             $elem.removeClass('recording');
@@ -12778,7 +12813,20 @@ xabber.ChatBottomView = xabber.BasicView.extend({
         });
     },
 
+    disableSendButtons: function () {
+        this.$('.send-message').addClass('disabled');
+        this.$('.attach-voice-message').addClass('disabled');
+    },
+
+    enableSendButtons: function () {
+        this.$('.send-message').removeClass('disabled');
+        this.$('.attach-voice-message').removeClass('disabled');
+    },
+
     submit: function (ev, forced) {
+        if (this.$('.send-message').hasClass('disabled') || this.$('.attach-voice-message').hasClass('disabled') ){
+            return;
+        }
         let $rich_textarea = this.$('.input-message .rich-textarea'),
             mentions = [],
             markup_references = [],
