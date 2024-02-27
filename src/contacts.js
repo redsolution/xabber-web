@@ -60,6 +60,7 @@ xabber.Contact = Backbone.Model.extend({
         this.on("update_avatar", this.updateAvatar, this);
         this.on("change:full_jid", this.updateCachedInfo, this);
         this.on("change:name", this.updateCachedInfo, this);
+        this.on("change:vcard_updated", this.updateCachedInfo, this);
         this.on("change:roster_name", this.updateName, this);
         this.on("destroy", this.onDestroy, this);
         this.account.dfd_presence.done(() => {
