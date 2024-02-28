@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.3.4.155","version_description":"added caps version caching and checks on it for requesting disco info"}'
+'{"version_number":"2.3.4.156","version_description":"fixed saved chat pin, fixed msg deletion for chat which return error on disco info"}'
 )});

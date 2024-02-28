@@ -2004,6 +2004,8 @@ xabber.EphemeralTimerSelector = xabber.BasicView.extend({
     getConversationType: function (chat) {
         if (chat.get('encrypted'))
             return Strophe.NS.SYNCHRONIZATION_OMEMO;
+        if (chat.get('saved'))
+            return Strophe.NS.XABBER_FAVORITES;
         if (chat.contact && chat.contact.get('group_chat'))
             return Strophe.NS.GROUP_CHAT;
         return Strophe.NS.SYNCHRONIZATION_REGULAR_CHAT
@@ -9939,7 +9941,7 @@ xabber.InvitationPanelView = xabber.SearchView.extend({
               is_pinned = pinned && pinned !== '0' ? true : false,
               pinned_value = is_pinned ? '0' : + new Date(),
               conversation_options = {
-                  jid: this.account.get('jid'),
+                  jid: this.model.get('jid'),
                   pinned: pinned_value,
                   type: this.model.get('sync_type') ? this.model.get('sync_type') : this.model.getConversationType(this.model)
               },
@@ -13472,6 +13474,8 @@ xabber.ChatBottomView = xabber.BasicView.extend({
                         } else {
                             dfd.resolve();
                         }
+                    }, (err) => {
+                        dfd.resolve();
                     });
                 }
             } else

@@ -161,7 +161,6 @@ xabber.ServerFeatures = Backbone.Collection.extend({
     },
 
     onItems: function (stanza) {
-        console.log(stanza);
         let groupchat_servers_list = [];
         $(stanza).find('query item').each((idx, item) => {
             let jid = $(item).attr('jid'),
@@ -180,7 +179,6 @@ xabber.ServerFeatures = Backbone.Collection.extend({
     },
 
     onInfo: function (stanza) {
-        console.log(stanza);
         let $stanza = $(stanza),
             from = $stanza.attr('from'),
             self = this;
