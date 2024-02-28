@@ -113,23 +113,55 @@ xabber.ServerFeatures = Backbone.Collection.extend({
     },
 
     request: function () {
-        this.account.cached_server_features.getAllFromCachedFeatures((res) => {
-            if (res && res.length){
-                res.forEach((item) => {
-                    this.create({
-                        'var': item.var,
-                        from: item.from
+        let dfd = $.Deferred()
+        dfd.done((is_changed) => {
+            this.account.cached_server_features.getAllFromCachedFeatures((res) => {
+                if (res && res.length && !is_changed){
+                    res.forEach((item) => {
+                        if (item.var && item.var === 'caps_version')
+                            return;
+                        this.create({
+                            'var': item.var,
+                            from: item.from
+                        });
                     });
-                });
-                this.is_cached = true;
-            } else {
-                this.connection.disco.info(this.account.domain, null, this.onInfo.bind(this));
-            }
-            this.connection.disco.items(this.account.domain, null, this.onItems.bind(this));
+                    this.is_cached = true;
+                } else {
+                    this.connection.disco.info(this.account.domain, null, this.onInfo.bind(this));
+                }
+                this.connection.disco.items(this.account.domain, null, this.onItems.bind(this));
+            });
         });
+
+        if (this.connection.caps_ver){
+            this.account.cached_server_features.getFromCachedFeatures('caps_version', (caps_ver) => {
+                if (caps_ver){
+                    if (caps_ver.ver === this.connection.caps_ver){
+                        dfd.resolve();
+                    } else {
+                        this.account.cached_server_features.putInCachedFeatures({
+                            var: 'caps_version',
+                            ver: this.connection.caps_ver,
+                        }, () => {
+                            dfd.resolve(true);
+                        })
+                    }
+                } else {
+                    this.account.cached_server_features.putInCachedFeatures({
+                        var: 'caps_version',
+                        ver: this.connection.caps_ver,
+                    }, () => {
+                        dfd.resolve(true);
+                    })
+                }
+            });
+        } else {
+            dfd.resolve(true);
+        }
     },
 
     onItems: function (stanza) {
+        console.log(stanza);
         let groupchat_servers_list = [];
         $(stanza).find('query item').each((idx, item) => {
             let jid = $(item).attr('jid'),
@@ -148,6 +180,7 @@ xabber.ServerFeatures = Backbone.Collection.extend({
     },
 
     onInfo: function (stanza) {
+        console.log(stanza);
         let $stanza = $(stanza),
             from = $stanza.attr('from'),
             self = this;

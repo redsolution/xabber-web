@@ -609,6 +609,10 @@ _.extend(Strophe.Connection.prototype, {
                 this.do_session = true;
             }
 
+            if (child.nodeName === 'c' && child.namespaceURI === Strophe.NS.CAPS) {
+                this.caps_ver = child.getAttribute('ver');
+            }
+
             if ((child.nodeName === 'devices') && child.namespaceURI === Strophe.NS.AUTH_DEVICES && this.options['x-token']) {
                 this.x_token_auth = true;
             }
