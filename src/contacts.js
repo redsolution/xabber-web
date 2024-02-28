@@ -8076,7 +8076,7 @@ xabber.GroupSettingsView = xabber.BasicView.extend({
             (this.model.settings.show_offline)+']').prop('checked', true);
         this.$el.openModal({
             ready: function () {
-                Materialize.updateTextFields();
+                Materialize && Materialize.updateTextFields && Materialize.updateTextFields();
             },
             complete: this.hide.bind(this)
         });
@@ -9355,7 +9355,7 @@ xabber.AddContactView = xabber.BasicView.extend({
         this.$('span.errors').text('');
         this.$el.openModal({
             ready: () => {
-                Materialize.updateTextFields();
+                Materialize && Materialize.updateTextFields && Materialize.updateTextFields();
                 this.$('.account-dropdown-wrap').dropdown({
                     inDuration: 100,
                     outDuration: 100,

@@ -523,7 +523,7 @@ xabber.VCardEditModalView = xabber.BasicView.extend({
         options.$el.append(this.$el);
         this.data.set('saving', false);
         this.setData();
-        Materialize.updateTextFields();
+        Materialize && Materialize.updateTextFields && Materialize.updateTextFields();
         this.changePlaceholder();
         this.updateScrollBar();
         this.$('.btn-vcard-save').addClass('hidden');

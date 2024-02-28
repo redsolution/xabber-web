@@ -4251,7 +4251,7 @@ xabber.ChangeStatusView = xabber.BasicView.extend({
     },
 
     onRender: function () {
-        Materialize.updateTextFields();
+        Materialize && Materialize.updateTextFields && Materialize.updateTextFields();
     },
 
     onHide: function () {
@@ -5017,7 +5017,7 @@ xabber.ChangePasswordView = xabber.BasicView.extend({
     },
 
     onRender: function () {
-        Materialize.updateTextFields();
+        Materialize && Materialize.updateTextFields && Materialize.updateTextFields();
         this.authFeedback({});
         this.$password_input.val('').focus();
     },
@@ -5234,7 +5234,7 @@ xabber.AuthView = xabber.BasicView.extend({
     onRender: function () {
         this.account = null;
         this.authFeedback({});
-        Materialize.updateTextFields();
+        Materialize && Materialize.updateTextFields && Materialize.updateTextFields();
         this.$jid_input.val('').focus();
         this.$password_input.val('');
         this.updateButtons();
@@ -5469,7 +5469,7 @@ xabber.XmppLoginPanel = xabber.AuthView.extend({
             this.data.set('step', 2)
         else if (xabber.url_params.anchor == 'signin')
             this.data.set('step', 0)
-        Materialize.updateTextFields();
+        Materialize && Materialize.updateTextFields && Materialize.updateTextFields();
     },
 
     openButtonsMenu: function () {
@@ -6261,7 +6261,7 @@ xabber.AddAccountView = xabber.XmppLoginPanel.extend({
         this.$('.property-field .select-auth-xmpp-server .caret').dropdown(dropdown_settings);
         this.$('.property-field .select-auth-xmpp-server .xmpp-server-item-wrap').dropdown(dropdown_settings);
         this.$('.login-form-jid .dropdown-content .set-custom-domain').hideIf(!constants.LOGIN_CUSTOM_DOMAIN);
-        Materialize.updateTextFields();
+        Materialize && Materialize.updateTextFields && Materialize.updateTextFields();
         this.updateButtons();
         this.updateOptions && this.updateOptions();
     },
@@ -6413,7 +6413,7 @@ xabber.UnregisterAccountView = xabber.XmppLoginPanel.extend({
         this.$jid_input.val('')
         this.$password_input.val('')
         this.keyUpLogin();
-        Materialize.updateTextFields();
+        Materialize && Materialize.updateTextFields && Materialize.updateTextFields();
     },
 
     keyUpLogin: function (ev) {

@@ -8547,7 +8547,7 @@ xabber.AddGroupChatView = xabber.SearchView.extend({
                     hover: false,
                     alignment: 'left'
                 };
-                Materialize.updateTextFields();
+                Materialize && Materialize.updateTextFields && Materialize.updateTextFields();
                 this.$('.account-dropdown-wrap').dropdown(dropdown_settings);
                 this.$('.property-field .dropdown-button').dropdown(dropdown_settings);
                 this.$('.property-field .select-xmpp-server .caret').dropdown(dropdown_settings);
@@ -11095,7 +11095,7 @@ xabber.ChatLocationView = xabber.BasicView.extend({
         this.$el.openModal({
             ready: () => {
                 this.initMap();
-                Materialize.updateTextFields();
+                Materialize && Materialize.updateTextFields && Materialize.updateTextFields();
             },
             complete: this.hide.bind(this)
         });
