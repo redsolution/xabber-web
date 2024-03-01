@@ -8165,7 +8165,8 @@ xabber.AccountChats = xabber.ChatsBase.extend({
         }
 
         if ($message.find(`replace[xmlns="${Strophe.NS.REWRITE}#notify"]`).length) {
-            !contact && (contact = this.account.contacts.get($message.find('replace').attr('conversation'))) && (chat = this.account.chats.getChat(contact));
+            contact = this.account.contacts.get($message.find('replace').attr('conversation'));
+            chat = this.account.chats.getChat(contact);
             if (this.account.server_features.get(Strophe.NS.XABBER_FAVORITES) && $message.find('replace').attr('conversation') === this.account.server_features.get(Strophe.NS.XABBER_FAVORITES).get('from'))
                 chat = this.getSavedChat();
             if (!chat)
