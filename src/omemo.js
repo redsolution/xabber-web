@@ -459,34 +459,32 @@ xabber.FingerprintsOwnDevices = xabber.BasicView.extend({
     },
 
     updateTrustDevice: function (device_id, $container, context, callback, no_omemo_callback) {
-        this.omemo.getMyDevices().then(() => {
-            let device = this.model.own_devices[device_id];
-            if (!device){
-                no_omemo_callback && no_omemo_callback()
-                return;
-            }
-            if (device.get('ik')) {
-                let f = device.generateFingerprint(),
-                    fing = (this.omemo.get('fingerprints')[this.jid] || [])[device_id],
-                    is_trusted = fing ? (fing.fingerprint != f ? 'error' : (fing.trusted ? 'trust' : 'ignore')) : 'unknown';
-                this.renderTrustOnFingerprint(is_trusted, $container, context, callback);
-            }
-            else {
-                this.account.getConnectionForIQ().omemo.getBundleInfo({jid: device.jid, id: device.id}, async (iq) => {
-                    let $iq = $(iq),
-                        $bundle = $iq.find(`item[id="${device.id}"] bundle[xmlns="${Strophe.NS.OMEMO}"]`),
-                        ik = $bundle.find(`ik`).text();
-                    if (ik) {
-                        device.set('ik', utils.fromBase64toArrayBuffer(ik));
-                        let f = device.generateFingerprint(),
-                            fing = (this.omemo.get('fingerprints')[this.jid] || [])[device.id],
-                            is_trusted = fing ? (fing.fingerprint != f ? 'error' : (fing.trusted ? 'trust' : 'ignore')) : 'unknown';
-                        this.renderTrustOnFingerprint(is_trusted, $container, context, callback);
-                    }
-                }, () => {
-                });
-            }
-        });
+        let device = this.model.own_devices[device_id];
+        if (!device){
+            no_omemo_callback && no_omemo_callback()
+            return;
+        }
+        if (device.get('ik')) {
+            let f = device.generateFingerprint(),
+                fing = (this.omemo.get('fingerprints')[this.jid] || [])[device_id],
+                is_trusted = fing ? (fing.fingerprint != f ? 'error' : (fing.trusted ? 'trust' : 'ignore')) : 'unknown';
+            this.renderTrustOnFingerprint(is_trusted, $container, context, callback);
+        }
+        else {
+            this.account.getConnectionForIQ().omemo.getBundleInfo({jid: device.jid, id: device.id}, async (iq) => {
+                let $iq = $(iq),
+                    $bundle = $iq.find(`item[id="${device.id}"] bundle[xmlns="${Strophe.NS.OMEMO}"]`),
+                    ik = $bundle.find(`ik`).text();
+                if (ik) {
+                    device.set('ik', utils.fromBase64toArrayBuffer(ik));
+                    let f = device.generateFingerprint(),
+                        fing = (this.omemo.get('fingerprints')[this.jid] || [])[device.id],
+                        is_trusted = fing ? (fing.fingerprint != f ? 'error' : (fing.trusted ? 'trust' : 'ignore')) : 'unknown';
+                    this.renderTrustOnFingerprint(is_trusted, $container, context, callback);
+                }
+            }, () => {
+            });
+        }
     },
 
     renderTrustOnFingerprint: function (is_trusted, $container, context, callback) {
@@ -514,16 +512,14 @@ xabber.FingerprintsOwnDevices = xabber.BasicView.extend({
     },
 
     renderOwnDevices: function (device_id, is_own) {
-        this.omemo.getMyDevices().then(() => {
-            this.device_id = device_id;
-            this.fingerprint = null;
-            if (is_own)
-                this.updateOwnFingerprint(device_id);
-            else{
-                this.updateOwnFingerprint(device_id);
-                this.updateFingerprints(device_id);
-            }
-        });
+        this.device_id = device_id;
+        this.fingerprint = null;
+        if (is_own)
+            this.updateOwnFingerprint(device_id);
+        else{
+            this.updateOwnFingerprint(device_id);
+            this.updateFingerprints(device_id);
+        }
     },
 
     render: function () {

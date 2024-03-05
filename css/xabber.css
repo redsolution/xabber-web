@@ -5153,6 +5153,12 @@ input[type=text].simple-input-field:hover {
 .device-encryption[data-trust="trust"] path{
     fill: #388E3C !important;
 }
+.device-encryption[data-trust="trust"] .mdi-alert,
+.device-encryption[data-trust="trust"] .mdi-alert-circle,
+.device-encryption[data-trust="ignore"] .mdi-alert,
+.device-encryption[data-trust="ignore"] .mdi-alert-circle{
+    display: none;
+}
 
 .account-settings-panel .token-wrap .buttons[data-trust="ignore"],
 .device-encryption[data-trust="ignore"],
@@ -5171,6 +5177,10 @@ input[type=text].simple-input-field:hover {
 .device-encryption[data-trust="unknown"] path{
     fill: #FFA000 !important;
 }
+.device-encryption[data-trust="unknown"] .mdi-lock,
+.device-encryption[data-trust="unknown"] .mdi-alert-circle{
+    display: none;
+}
 
 .account-settings-panel .token-wrap .buttons[data-trust="error"],
 .device-encryption[data-trust="error"],
@@ -5179,6 +5189,10 @@ input[type=text].simple-input-field:hover {
 }
 .device-encryption[data-trust="error"] path{
     fill: #f44336 !important;
+}
+.device-encryption[data-trust="error"] .mdi-lock,
+.device-encryption[data-trust="error"] .mdi-alert{
+    display: none;
 }
 
 .fingerprints-wrap .own-fingerprint-wrap>div {
@@ -8003,6 +8017,10 @@ input[type=text].simple-input-field:hover {
 .chat-item[data-trust=true] .chat-title-wrap .encrypted-icon {
     color: #388E3C !important;
 }
+.chat-item[data-trust=true] .chat-title-wrap .encrypted-icon.mdi-alert,
+.chat-item[data-trust=true] .chat-title-wrap .encrypted-icon.mdi-alert-circle {
+    display: none;
+}
 
 .chat-head-wrap.encrypted[data-trust=none] .contact-name,
 .chat-head-wrap.encrypted[data-trust=none] .encrypted-icon,
@@ -8010,6 +8028,10 @@ input[type=text].simple-input-field:hover {
 .chat-item.encrypted[data-trust=none] .chat-title,
 .chat-item[data-trust=none] .chat-title-wrap .encrypted-icon {
     color: #FFA000 !important;
+}
+.chat-item[data-trust=none] .chat-title-wrap .encrypted-icon.mdi-alert-circle,
+.chat-item[data-trust=none] .chat-title-wrap .encrypted-icon.mdi-lock {
+    display: none;
 }
 
 .chat-head-wrap.encrypted[data-trust=error] .contact-name,
@@ -8020,6 +8042,10 @@ input[type=text].simple-input-field:hover {
     color: #d32f2f !important;
 }
 
+.chat-item[data-trust=error] .chat-title-wrap .encrypted-icon.mdi-alert,
+.chat-item[data-trust=error] .chat-title-wrap .encrypted-icon.mdi-lock {
+    display: none;
+}
 .message-item.encrypted .chat-title-wrap .encrypted-icon,
 .mention-item.encrypted .chat-title-wrap .encrypted-icon,
 .chat-item.encrypted .chat-title-wrap .encrypted-icon {

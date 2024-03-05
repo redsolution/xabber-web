@@ -57,6 +57,7 @@ let badges_names = [
         'key',
         'key-variant',
         'account',
+        'alert',
         'alert-circle',
         'map-marker-outline',
         'map-marker',

@@ -318,6 +318,7 @@
     addSvgTemplate('svg.key');
     addSvgTemplate('svg.key-variant');
     addSvgTemplate('svg.account');
+    addSvgTemplate('svg.alert');
     addSvgTemplate('svg.alert-circle');
     addSvgTemplate('svg.security');
     addSvgTemplate('svg.edit');
