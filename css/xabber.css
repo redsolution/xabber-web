@@ -8011,8 +8011,8 @@ input[type=text].simple-input-field:hover {
 }
 .chat-head-wrap.encrypted .encrypted-icon.mdi-alert,
 .chat-head-wrap.encrypted .encrypted-icon.mdi-alert-circle,
-.chat-item .chat-title-wrap .encrypted-icon.mdi-alert,
-.chat-item .chat-title-wrap .encrypted-icon.mdi-alert-circle {
+.chat-item.encrypted .chat-title-wrap .encrypted-icon.mdi-alert,
+.chat-item.encrypted .chat-title-wrap .encrypted-icon.mdi-alert-circle {
     display: none !important;
 }
 
@@ -8025,12 +8025,12 @@ input[type=text].simple-input-field:hover {
 }
 .chat-head-wrap.encrypted[data-trust=true] .encrypted-icon.mdi-alert,
 .chat-head-wrap.encrypted[data-trust=true] .encrypted-icon.mdi-alert-circle,
-.chat-item[data-trust=true] .chat-title-wrap .encrypted-icon.mdi-alert,
-.chat-item[data-trust=true] .chat-title-wrap .encrypted-icon.mdi-alert-circle {
+.chat-item.encrypted[data-trust=true] .chat-title-wrap .encrypted-icon.mdi-alert,
+.chat-item.encrypted[data-trust=true] .chat-title-wrap .encrypted-icon.mdi-alert-circle {
     display: none !important;
 }
 .chat-head-wrap.encrypted[data-trust=true] .encrypted-icon.mdi-lock,
-.chat-item[data-trust=true] .chat-title-wrap .encrypted-icon.mdi-lock{
+.chat-item.encrypted[data-trust=true] .chat-title-wrap .encrypted-icon.mdi-lock{
     display: block !important;
 }
 
@@ -8043,12 +8043,12 @@ input[type=text].simple-input-field:hover {
 }
 .chat-head-wrap.encrypted[data-trust=none] .encrypted-icon.mdi-alert-circle,
 .chat-head-wrap.encrypted[data-trust=none] .encrypted-icon.mdi-lock,
-.chat-item[data-trust=none] .chat-title-wrap .encrypted-icon.mdi-alert-circle,
-.chat-item[data-trust=none] .chat-title-wrap .encrypted-icon.mdi-lock {
+.chat-item.encrypted[data-trust=none] .chat-title-wrap .encrypted-icon.mdi-alert-circle,
+.chat-item.encrypted[data-trust=none] .chat-title-wrap .encrypted-icon.mdi-lock {
     display: none !important;
 }
 .chat-head-wrap.encrypted[data-trust=none] .encrypted-icon.mdi-alert,
-.chat-item[data-trust=none] .chat-title-wrap .encrypted-icon.mdi-alert{
+.chat-item.encrypted[data-trust=none] .chat-title-wrap .encrypted-icon.mdi-alert{
     display: block !important;
 }
 
@@ -8062,12 +8062,12 @@ input[type=text].simple-input-field:hover {
 
 .chat-head-wrap.encrypted[data-trust=error] .encrypted-icon.mdi-alert,
 .chat-head-wrap.encrypted[data-trust=error] .encrypted-icon.mdi-lock,
-.chat-item[data-trust=error] .chat-title-wrap .encrypted-icon.mdi-alert,
-.chat-item[data-trust=error] .chat-title-wrap .encrypted-icon.mdi-lock {
+.chat-item.encrypted[data-trust=error] .chat-title-wrap .encrypted-icon.mdi-alert,
+.chat-item.encrypted[data-trust=error] .chat-title-wrap .encrypted-icon.mdi-lock {
     display: none !important;
 }
 .chat-head-wrap.encrypted[data-trust=error] .encrypted-icon.mdi-alert-circle,
-.chat-item[data-trust=error] .chat-title-wrap .encrypted-icon.mdi-alert-circle{
+.chat-item.encrypted[data-trust=error] .chat-title-wrap .encrypted-icon.mdi-alert-circle{
     display: block !important;
 }
 .message-item.encrypted .chat-title-wrap .encrypted-icon,

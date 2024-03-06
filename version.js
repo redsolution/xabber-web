@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.3.4.160","version_description":"fixed chat item and chat head encrypted trust icons"}'
+'{"version_number":"2.3.4.161","version_description":"another fix for chat item trust icons"}'
 )});
