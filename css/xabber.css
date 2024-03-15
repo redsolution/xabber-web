@@ -16019,7 +16019,8 @@ input[type=range].voice-message-volume:focus {
     background-color: #f8f9fa;
 }
 
-.details-panel-right .edit-wrap .subscription-statuses{
+.details-panel-right .edit-wrap .subscription-statuses.subscription-statuses-group{
+    margin-top: 64px;
 }
 
 .details-panel-right .edit-wrap .subscription-statuses .subscription-status-wrap{

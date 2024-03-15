@@ -7207,13 +7207,13 @@ xabber.ContactEditView = xabber.BasicView.extend({
         this.model.acceptRequest();
     },
 
-    cancelSubscriptionOut: function () {
-        this.model.declineSubscription();
-    },
-
     cancelSubscriptionIn: function () {
         this.model.declineSubscribe();
         this.model.set('subscription_request_in', false);
+    },
+
+    cancelSubscriptionOut: function () {
+        this.model.declineSubscription();
     },
 
     hideEdit: function (ev) {
@@ -7250,7 +7250,16 @@ xabber.GroupEditView = xabber.BasicView.extend({
         "click .btn-add-block": "blockId",
         "keydown .field-input": "keyDownName",
         "keyup .field-input": "keyUp",
-        "focusout .field-input": "changeValue"
+        "focusout .field-input": "changeValue",
+
+        'click .btn-request': 'requestSubscription',
+        'click .btn-allow': 'allowSubscription',
+        'click .btn-cancel-request': 'cancelSubscriptionRequest',
+        'click .btn-allow-request': 'handleSubscriptionRequest',
+        'click .btn-disallow-request': 'cancelSubscriptionIn',
+        'click .btn-disallow-preapproved': 'cancelSubscriptionIn',
+        'click .btn-cancel-subscription-out': 'cancelSubscriptionOut',
+        'click .btn-cancel-subscription-in': 'cancelSubscriptionIn',
     },
 
     _initialize: function (options) {
@@ -7258,11 +7267,19 @@ xabber.GroupEditView = xabber.BasicView.extend({
         this.model = this.parent.model;
         this.model.set('edit_hidden', true)
         this.model.on('change:group_info', this.update, this)
+        this.model.on("change:status_updated", this.updateStatuses, this);
+        this.model.on("change:subscription", this.updateStatuses, this);
+        this.model.on("change:subscription_preapproved", this.updateStatuses, this);
+        this.model.on("change:blocked", this.updateStatuses, this);
+        this.model.on("change:subscription_request_in", this.updateStatuses, this);
+        this.model.on("change:subscription_request_out", this.updateStatuses, this);
     },
 
     render: function () {
         this.$el.html(this.template(_.extend({view: this}, constants)));
         this.$('.edit-wrap').hideIf(this.model.get('edit_hidden'))
+        this.$('.edit-group-wrap').showIf(this.model.get('subscription') === 'both');
+        this.$('.subscription-statuses').showIf(this.model.get('subscription') !== 'both');
         this.$('.index-property-edit-wrap').hideIf(true)
         this.$('.membership-property-edit-wrap').hideIf(true)
         this.$('.description-edit-wrap').hideIf(true)
@@ -7289,6 +7306,17 @@ xabber.GroupEditView = xabber.BasicView.extend({
             model: this.model,
             parent: this,
         });
+        this.$('.status-out.dropdown-button').dropdown({
+            inDuration: 100,
+            outDuration: 100,
+            hover: false
+        });
+        this.$('.status-in.dropdown-button').dropdown({
+            inDuration: 100,
+            outDuration: 100,
+            hover: false
+        });
+        this.updateStatuses();
         this.update();
     },
 
@@ -7353,6 +7381,85 @@ xabber.GroupEditView = xabber.BasicView.extend({
         }
         this.updateAvatar();
 
+    },
+
+    updateStatuses: function () {
+        let statuses = this.model.getSubscriptionStatuses(),
+            subscription_preapproved = this.model.get('subscription_preapproved');
+        if (statuses){
+            this.$('.status-out').addClass(statuses.status_out_class)
+            this.$('.status-out .value').text(statuses.status_out)
+            this.$('.status-out').showIf(statuses.status_out)
+            this.$('.status-in').addClass(statuses.status_in_class)
+            this.$('.status-in  .value').text(statuses.status_in)
+            this.$('.status-in').showIf(statuses.status_in)
+            this.$('.status-description .value').html(statuses.status_description)
+            this.$('.status-description').showIf(statuses.status_description)
+            this.$('.btn-delete').hideIf(!this.model.get('in_roster'));
+            if (statuses.status_out_color === 'request') {
+                this.$('.status-out').addClass('text-color-500').addClass('request').removeClass('subbed')
+                this.$('.status-out').addClass('text-decoration-color-300')
+            }
+            if (statuses.status_in_color === 'request') {
+                this.$('.status-in').addClass('text-color-500').addClass('request').removeClass('subbed')
+                this.$('.status-in').addClass('text-decoration-color-300')
+            }
+            if (statuses.status_out_color === 'subbed') {
+                this.$('.status-out').addClass('text-color-500').addClass('subbed').removeClass('request')
+                this.$('.status-out').addClass('text-decoration-color-300')
+            }
+            if (statuses.status_in_color === 'subbed') {
+                this.$('.status-in').addClass('text-color-500').addClass('subbed').removeClass('request')
+                this.$('.status-in').addClass('text-decoration-color-300')
+            }
+            if (statuses.status_out_color === '') {
+                this.$('.status-out').removeClass('text-color-500').removeClass('request').removeClass('subbed')
+                this.$('.status-out').removeClass('text-decoration-color-300')
+            }
+            if (statuses.status_in_color === '') {
+                this.$('.status-in').removeClass('text-color-500').removeClass('request').removeClass('subbed')
+                this.$('.status-in').removeClass('text-decoration-color-300')
+            }
+            this.$('.btn-request').hideIf(!(statuses.status_out_color === ''))
+            this.$('.btn-allow').hideIf(!(statuses.status_in_color === '' && !subscription_preapproved))
+            this.$('.btn-disallow-preapproved').hideIf(!(statuses.status_in_color === '' && subscription_preapproved))
+            this.$('.btn-cancel-request').hideIf(!(statuses.status_out_color === 'request'))
+            this.$('.btn-allow-request').hideIf(!(statuses.status_in_color === 'request'))
+            this.$('.btn-disallow-request').hideIf(!(statuses.status_in_color === 'request'))
+            this.$('.btn-cancel-subscription-out').hideIf(!(statuses.status_out_color === 'subbed'))
+            this.$('.btn-cancel-subscription-in').hideIf(!(statuses.status_in_color === 'subbed'))
+        }
+        this.$('.edit-group-wrap').showIf(this.model.get('subscription') === 'both');
+        this.$('.subscription-statuses').showIf(this.model.get('subscription') !== 'both');
+    },
+
+    requestSubscription: function () {
+        this.model.askRequest();
+        setTimeout(() => {
+
+        }, 1000)
+    },
+
+    allowSubscription: function () {
+        this.model.acceptRequest();
+        !this.account.server_features.get(Strophe.NS.SUBSCRIPTION_PREAPPROVAL) && this.set('subscription_preapproved', true)
+    },
+
+    cancelSubscriptionRequest: function () {
+        this.model.declineSubscription();
+    },
+
+    handleSubscriptionRequest: function () {
+        this.model.acceptRequest();
+    },
+
+    cancelSubscriptionIn: function () {
+        this.model.declineSubscribe();
+        this.model.set('subscription_request_in', false);
+    },
+
+    cancelSubscriptionOut: function () {
+        this.model.declineSubscription();
     },
 
     updateAvatar: function () {
