@@ -9445,7 +9445,7 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
             all_chats_pinned = all_chats_pinned.sort((a, b) => (a.get('pinned') > b.get('pinned')) ? 1 : -1)
             all_chats_pinned.forEach((chat) => {
                 if (chat.account.get('jid') === this.account.get('jid')) {
-                    if (chat.id == `${this.account.get('jid')}:saved`) {
+                    if (this.account.server_features.get(Strophe.NS.XABBER_FAVORITES) && chat.id == `${this.account.server_features.get(Strophe.NS.XABBER_FAVORITES).get('from')}:saved`) {
                         let $cloned_item = chat.item_view.$el.clone().removeClass('hidden');
                         $cloned_item.find('.last-msg').text(xabber.getString("saved_messages__hint_forward_here"));
                         this.saved_chat = true;
@@ -9457,7 +9457,7 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
         }
         all_chats.forEach((chat) => {
             if (chat.account.get('jid') === this.account.get('jid')) {
-                if (chat.id == `${this.account.get('jid')}:saved`) {
+                if (this.account.server_features.get(Strophe.NS.XABBER_FAVORITES) && chat.id == `${this.account.server_features.get(Strophe.NS.XABBER_FAVORITES).get('from')}:saved`) {
                     let $cloned_item = chat.item_view.$el.clone().removeClass('hidden');
                     $cloned_item.find('.last-msg').text(xabber.getString("saved_messages__hint_forward_here"));
                     this.saved_chat = true;

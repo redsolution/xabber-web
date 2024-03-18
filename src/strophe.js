@@ -885,6 +885,7 @@ Strophe.addNamespace('OGP', 'https://xabber.com/protocol/ogp');
 Strophe.addNamespace('URLDISCO', 'urn:xabber:http:url');
 Strophe.addNamespace('MEDIAGALLERY', 'urn:xabber:http:url:mediagallery');
 Strophe.addNamespace('EPHEMERAL', 'urn:xmpp:ephemeral:0');
-Strophe.addNamespace('XABBER_FAVORITES', 'urn:xabber:favorites');
+Strophe.addNamespace('XABBER_FAVORITES', 'urn:xabber:favorites:0');
+Strophe.addNamespace('XABBER_NOTIFY', 'urn:xabber:notify:0');
 
 export default xabber;
