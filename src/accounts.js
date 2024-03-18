@@ -4015,6 +4015,8 @@ xabber.AccountSettingsItemModalView = xabber.BasicView.extend({
         if (this.model.get('vcard')) {
             if (this.model.get('vcard').nickname)
                 nickname = this.model.get('vcard').nickname;
+            else if (this.model.get('vcard').first_name && this.model.get('vcard').last_name)
+                nickname = this.model.get('vcard').first_name + ' ' + this.model.get('vcard').last_name;
             else if (this.model.get('vcard').fullname)
                 nickname = this.model.get('vcard').fullname;
             else if (this.model.get('vcard').first_name || this.model.get('vcard').last_name)

@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.3.4.162","version_description":"added subscription setting buttons for group when subscription is not both"}'
+'{"version_number":"2.3.4.163","version_description":"changed account item nickname forming order in modal settings, fixed contact details being visible on chat removal, fixed msg input send icon not being shown on pasting text"}'
 )});

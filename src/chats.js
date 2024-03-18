@@ -8880,9 +8880,11 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
             this.active_chat = null;
             xabber.body.showChatPlaceholder();
             xabber.body.screen.set('chat_item', false);
+            xabber.body.screen.set('right_contact', '');
             let previous_chat = xabber.body.screen.get('previous_screen');
             if (previous_chat){
                 previous_chat.chat_item = null;
+                previous_chat.right_contact = '';
                 xabber.body.screen.set('previous_screen', previous_chat);
             }
         }
@@ -12042,7 +12044,12 @@ xabber.ChatBottomView = xabber.BasicView.extend({
             }
             this.text_input_height = quill_current_height;
         }
-        let quill_content = this.quill.getContents()
+        let quill_content = this.quill.getContents(),
+            text = quill_textarea.getTextFromRichTextarea().replace(/\n$/, "");
+        if ((!text || text == "\n") && !this.edit_message && !(this.attached_files && this.attached_files.length) && !(this.link_references && this.link_references.length))
+            this.displayMicrophone();
+        else
+            this.displaySend();
         // if (quill_content && quill_content.ops && quill_content.ops.length){
         //     let text = quill_content.ops[0].insert;
         //     if (text && text.trimStart) {
