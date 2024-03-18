@@ -171,7 +171,7 @@ xabber.ServerFeatures = Backbone.Collection.extend({
                 this.account.set('groupchat_servers_list', groupchat_servers_list);
             }
             this.connection.disco.addItem(jid, name, node, () => {});
-            (!this.is_cached) && this.connection.disco.info(
+            this.connection.disco.info(
                 jid,
                 null,
                 this.onInfo.bind(this));

@@ -9223,7 +9223,12 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
     showNotifications: function (no_unread) {
         this.$('.chat-item').detach();
         let chats = this.model,
-            notificatons_chats = chats.filter(chat => (chat.get('jid') === chat.account.domain || chat.contact && chat.contact.get('subscription_request_in') && chat.contact.get('subscription') != 'both' ));
+            notificatons_chats;
+
+        notificatons_chats = chats.filter(chat =>
+            (chat.account.server_features.get(Strophe.NS.XABBER_NOTIFY) && (chat.get('jid') === chat.account.server_features.get(Strophe.NS.XABBER_NOTIFY).get('from')))
+            || (!chat.account.server_features.get(Strophe.NS.XABBER_NOTIFY) && (chat.get('jid') === chat.account.domain))
+        );
         if (xabber.toolbar_view.data.get('account_filtering') && !no_unread){
             xabber.toolbar_view.data.set('account_filtering', null);
             xabber.toolbar_view.$('.toolbar-item.account-item').removeClass('active');
