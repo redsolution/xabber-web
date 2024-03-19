@@ -13288,6 +13288,7 @@ xabber.ChatBottomView = xabber.BasicView.extend({
             iq = $iq({type: 'set', to: (this.contact && this.contact.get('group_chat')) ? this.contact.get('full_jid') : this.account.get('jid')}).c('replace', {
                 xmlns: Strophe.NS.REWRITE,
                 type: this.model.get('sync_type') ? this.model.get('sync_type') : this.model.getConversationType(this.model),
+                conversation: this.model.get('jid'),
                 id: stanza_id
             }),
             $message = $build('message').attrs({xmlns: undefined});
