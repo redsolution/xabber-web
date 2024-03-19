@@ -8596,8 +8596,12 @@ xabber.Roster = xabber.ContactsBase.extend({
             account_conversation_type: $(item).attr('jid') +  '/' + $(item).attr('type'),
             conversation: item.outerHTML,
         });
-        if (!chat.item_view.content && (is_invite || encrypted && this.account.omemo)) {
+        if (!chat.item_view.content && (chat.get('sync_type') === Strophe.NS.XABBER_NOTIFY || is_invite || encrypted && this.account.omemo)) {
             chat.item_view.content = new xabber.ChatContentView({chat_item: chat.item_view});
+            if (chat.get('sync_type') === Strophe.NS.XABBER_NOTIFY){
+                chat.set('notifications', true);
+                chat.item_view.content.loadPreviousHistory(true);
+            }
         }
         if ($item.attr('pinned') || $item.attr('pinned') === '0'){
             chat.set('pinned', $item.attr('pinned'));
