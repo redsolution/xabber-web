@@ -1912,7 +1912,7 @@ xabber.EphemeralTimerSelector = xabber.BasicView.extend({
                     .c('retract-message', {
                         id: (this.get('group_chat') && contact_stanza_id || stanza_id),
                         xmlns: Strophe.NS.REWRITE,
-                        conversation: this.contact.get('jid'),
+                        conversation: this.account.server_features.get(Strophe.NS.XABBER_FAVORITES) && this.get('saved') ? this.account.server_features.get(Strophe.NS.XABBER_FAVORITES).get('from') : this.contact.get('jid'),
                         symmetric: symmetric,
                         type: this.get('sync_type') ? this.get('sync_type') : this.getConversationType(this),
                         by: this.account.get('jid')
