@@ -8143,7 +8143,9 @@ xabber.AccountChats = xabber.ChatsBase.extend({
             return;
         }
 
-        let contact = this.account.contacts.get(msg_from), chat;
+        let contact, chat;
+        if (msg_from !== this.account.get('jid'))
+            contact = this.account.contacts.get(msg_from)
         if (contact) {
             contact && (chat = this.account.chats.getChat(contact));
             if (!chat.item_view.content)
