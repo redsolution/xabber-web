@@ -6301,7 +6301,7 @@ xabber.AddAccountView = xabber.XmppLoginPanel.extend({
         this.$('.server-features-error').text('');
         let timeout_timer = 1000;
         setTimeout(() => {
-            if (this.account.server_features.get(Strophe.NS.MAM)){
+            if (this.account && this.account.server_features.get(Strophe.NS.MAM)){
                 this.$(`.server-feature[data-xmlns="${Strophe.NS.MAM}"]`).addClass('active-feature');
                 this.$(`.server-feature[data-xmlns="${Strophe.NS.MAM}"] .mdi`).hideIf(false).removeClass('.mdi-alert').addClass('mdi-checkbox-marked-circle');
             }
@@ -6309,7 +6309,7 @@ xabber.AddAccountView = xabber.XmppLoginPanel.extend({
                 this.$(`.server-feature[data-xmlns="${Strophe.NS.MAM}"] .mdi`).hideIf(false).addClass('.mdi-alert').removeClass('mdi-checkbox-marked-circle');
             this.$(`.server-feature[data-xmlns="${Strophe.NS.MAM}"] .preloader-wrapper`).removeClass('active').removeClass('visible');
             setTimeout(() => {
-                if (this.account.server_features.get(Strophe.NS.SYNCHRONIZATION)){
+                if (this.account && this.account.server_features.get(Strophe.NS.SYNCHRONIZATION)){
                     this.$(`.server-feature[data-xmlns="${Strophe.NS.SYNCHRONIZATION}"]`).addClass('active-feature');
                     this.$(`.server-feature[data-xmlns="${Strophe.NS.SYNCHRONIZATION}"] .mdi`).hideIf(false).removeClass('.mdi-alert').addClass('mdi-checkbox-marked-circle');
                 }
@@ -6317,7 +6317,7 @@ xabber.AddAccountView = xabber.XmppLoginPanel.extend({
                     this.$(`.server-feature[data-xmlns="${Strophe.NS.SYNCHRONIZATION}"] .mdi`).hideIf(false).addClass('.mdi-alert').removeClass('mdi-checkbox-marked-circle');
                 this.$(`.server-feature[data-xmlns="${Strophe.NS.SYNCHRONIZATION}"] .preloader-wrapper`).removeClass('active').removeClass('visible');
                 setTimeout(() => {
-                    if (this.account.server_features.get(Strophe.NS.REWRITE)){
+                    if (this.account && this.account.server_features.get(Strophe.NS.REWRITE)){
                         this.$(`.server-feature[data-xmlns="${Strophe.NS.REWRITE}"]`).addClass('active-feature');
                         this.$(`.server-feature[data-xmlns="${Strophe.NS.REWRITE}"] .mdi`).hideIf(false).removeClass('.mdi-alert').addClass('mdi-checkbox-marked-circle');
                     }
@@ -6325,7 +6325,7 @@ xabber.AddAccountView = xabber.XmppLoginPanel.extend({
                         this.$(`.server-feature[data-xmlns="${Strophe.NS.REWRITE}"] .mdi`).hideIf(false).addClass('.mdi-alert').removeClass('mdi-checkbox-marked-circle');
                     this.$(`.server-feature[data-xmlns="${Strophe.NS.REWRITE}"] .preloader-wrapper`).removeClass('active').removeClass('visible');
                     setTimeout(() => {
-                        if (this.account.server_features.get(Strophe.NS.AUTH_DEVICES)) {
+                        if (this.account && this.account.server_features.get(Strophe.NS.AUTH_DEVICES)) {
                             this.$(`.server-feature[data-xmlns="${Strophe.NS.AUTH_DEVICES}"]`).addClass('active-feature');
                             this.$(`.server-feature[data-xmlns="${Strophe.NS.AUTH_DEVICES}"] .mdi`).hideIf(false).removeClass('.mdi-alert').addClass('mdi-checkbox-marked-circle');
                         }
@@ -6333,7 +6333,7 @@ xabber.AddAccountView = xabber.XmppLoginPanel.extend({
                             this.$(`.server-feature[data-xmlns="${Strophe.NS.AUTH_DEVICES}"] .mdi`).hideIf(false).addClass('.mdi-alert').removeClass('mdi-checkbox-marked-circle')
                         this.$(`.server-feature[data-xmlns="${Strophe.NS.AUTH_DEVICES}"] .preloader-wrapper`).removeClass('active').removeClass('visible');;
                         setTimeout(() => {
-                            if (this.account.server_features.get(Strophe.NS.PUBSUB)){
+                            if (this.account && this.account.server_features.get(Strophe.NS.PUBSUB)){
                                 this.$(`.server-feature[data-xmlns="${Strophe.NS.PUBSUB}"]`).addClass('active-feature');
                                 this.$(`.server-feature[data-xmlns="${Strophe.NS.PUBSUB}"] .mdi`).hideIf(false).removeClass('.mdi-alert').addClass('mdi-checkbox-marked-circle');
                             }
@@ -6341,7 +6341,7 @@ xabber.AddAccountView = xabber.XmppLoginPanel.extend({
                                 this.$(`.server-feature[data-xmlns="${Strophe.NS.PUBSUB}"] .mdi`).hideIf(false).addClass('.mdi-alert').removeClass('mdi-checkbox-marked-circle');
                             this.$(`.server-feature[data-xmlns="${Strophe.NS.PUBSUB}"] .preloader-wrapper`).removeClass('active').removeClass('visible');
                             setTimeout(() => {
-                                if (this.account.server_features.get(Strophe.NS.HTTP_UPLOAD)){
+                                if (this.account && this.account.server_features.get(Strophe.NS.HTTP_UPLOAD)){
                                     this.$(`.server-feature[data-xmlns="${Strophe.NS.HTTP_UPLOAD}"]`).addClass('active-feature');
                                     this.$(`.server-feature[data-xmlns="${Strophe.NS.HTTP_UPLOAD}"] .mdi`).hideIf(false).removeClass('.mdi-alert').addClass('mdi-checkbox-marked-circle');
                                 }

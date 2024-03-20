@@ -29,6 +29,7 @@
     "url": "https://github.com/redsolution/xabber-web"
   },
   "dependencies": {
+    "curve25519-js": "^0.0.4",
     "idle-js": "^1.2.0",
     "opus-recorder": "^8.0.5",
     "xmldom": "^0.4.0"

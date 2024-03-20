@@ -21,6 +21,7 @@ import VanillaQR from "VanillaQR";
 import idleJs from "idle-js";
 import backgroundImagesXml from "xml-loader!~/xmls/background-images.xml";
 import backgroundPatternsXml from "xml-loader!~/xmls/background-patterns.xml";
+import { sharedKey, sign, verify } from 'curve25519-js';
 import "~/css/color-scheme.css";
 import "~/css/materialdesignicons.css";
 import "~/css/materialize.css";
@@ -55,6 +56,11 @@ export default _.extend({
     xabber_i18next: i18next,
     xabber_i18next_sprintf: i18next_sprintf,
     sha256: sha256,
+    curve25519js: {
+        sharedKeyCurve: sharedKey,
+        signCurve: sign,
+        verifyCurve: verify,
+    },
     VanillaQR: VanillaQR,
     magnificPopup: magnificPopup,
     backgroundImagesXml: backgroundImagesXml,

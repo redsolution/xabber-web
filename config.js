@@ -61,6 +61,7 @@ require.config({
         "xabber-mentions":          "src/mentions",
         "xabber-ui":                "src/ui",
         "xabber-omemo":             "src/omemo",
+        "xabber-trust":             "src/trust",
 
         "xabber-translations-info": "translations/translation_progress",
 

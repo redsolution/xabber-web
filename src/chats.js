@@ -7996,6 +7996,11 @@ xabber.AccountChats = xabber.ChatsBase.extend({
             node = $message.find('items').attr('node');
         if (node.indexOf(Strophe.NS.OMEMO) > -1)
             return;
+        if (node.indexOf(Strophe.NS.PUBSUB_TRUST_SHARING_ITEMS) > -1){
+            if (this.account.omemo && this.account.omemo.xabber_trust)
+                this.account.omemo.xabber_trust.receivePubSubMessage($message);
+
+        }
         if (node.indexOf(Strophe.NS.PUBSUB_AVATAR_METADATA) > -1) {
             let member_id = this.parsePubSubNode(node),
                 photo_url =  $message.find('info').attr('url'),
@@ -8358,6 +8363,18 @@ xabber.AccountChats = xabber.ChatsBase.extend({
             to_bare_jid = Strophe.getBareJidFromJid(to_jid),
             to_resource = to_jid && Strophe.getResourceFromJid(to_jid),
             from_jid = $message.attr('from') || options.from_jid;
+
+        if (($message.children(`authenticated-key-exchange[xmlns="${Strophe.NS.XABBER_TRUST}"]`).length
+            || $message.children(`trust-message[xmlns="${Strophe.NS.XABBER_TRUST}"]`).length) && !options.forwarded
+        || $message.children(`envelope`).length && $message.find(`content trust-message[xmlns="${Strophe.NS.TRUSTED_MESSAGES}"]`).length) {
+            if (this.account.omemo && this.account.omemo.xabber_trust)
+                this.account.omemo.xabber_trust.receiveTrustVerificationMessage(message, options);
+            return;
+        }
+        console.log(message);
+        console.log($message.children(`encrypted[xmlns="${Strophe.NS.OMEMO}"]`).length);
+        console.log(options);
+        console.log(options.forwarded);
 
         if ($message.children(`encrypted[xmlns="${Strophe.NS.OMEMO}"]`).length && !options.forwarded) {
             if (this.account.omemo)
@@ -10250,6 +10267,8 @@ xabber.InvitationPanelView = xabber.SearchView.extend({
         "click .btn-show-fingerprints": "showFingerprints",
         "click .btn-start-encryption": "startEncryptedChat",
         "click .btn-open-encrypted-chat": "openEncryptedChat",
+        "click .btn-start-trust-verification": "startTrustVerification",
+        "click .btn-start-trust-verification-own": "startTrustVerificationOwn",
         "click .btn-open-regular-chat": "openRegularChat",
         "click .btn-chat-pin": "pinChat",
         "click .btn-archive-chat": "archiveChat",
@@ -10393,6 +10412,8 @@ xabber.InvitationPanelView = xabber.SearchView.extend({
         this.$('.btn-clear-history').hideIf(is_group_chat);
         this.$('.btn-start-encryption').showIf(!is_group_chat && this.account.omemo && !this.model.get('encrypted') && !this.account.chats.get(`${this.contact.hash_id}:encrypted`));
         this.$('.btn-open-encrypted-chat').showIf(!is_group_chat && this.account.omemo && !this.model.get('encrypted') && this.account.chats.get(`${this.contact.hash_id}:encrypted`));
+        this.$('.btn-start-trust-verification').showIf(!is_group_chat && this.account.omemo && this.model.get('encrypted') && this.account.chats.get(`${this.contact.hash_id}:encrypted`) && this.account.server_features.get(Strophe.NS.XABBER_NOTIFY));
+        this.$('.btn-start-trust-verification-own').showIf(!is_group_chat && this.account.omemo && this.model.get('encrypted') && this.account.chats.get(`${this.contact.hash_id}:encrypted`) && this.account.server_features.get(Strophe.NS.XABBER_NOTIFY));
         this.$('.btn-open-regular-chat').showIf(this.model.get('encrypted'));
         this.$('.btn-show-fingerprints').showIf(!is_group_chat && this.account.omemo && this.model.get('encrypted'));
         this.$('.btn-retract-own-messages').showIf(is_group_chat);
@@ -10892,6 +10913,54 @@ xabber.InvitationPanelView = xabber.SearchView.extend({
     openEncryptedChat: function () {
         this.model.set('opened', true);
         this.account.chats.openChat(this.contact, {encrypted: true});
+    },
+
+    startTrustVerification: function () {
+        if (!this.account.omemo || !this.account.omemo.get('device_id') || this.account.server_features.get(Strophe.NS.XABBER_NOTIFY))
+            return;
+        let msg_id = uuid(),
+            sid = uuid(),
+            stanza = $msg({
+                to: this.model.get('jid'),
+                type: 'chat',
+                id: msg_id
+            });
+        stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: sid }).c('verification-start', {'device-id': this.account.omemo.get('device_id') }).up().up();
+        this.account.sendFast(stanza, () => {
+            console.log(stanza);
+            console.log(stanza.tree());
+            this.account.omemo.xabber_trust.verification_started = true;
+            this.account.omemo.xabber_trust.current_verification_sid = sid;
+            utils.callback_popup_message(xabber.getString("trust_verification_started"), 5000);
+        });
+    },
+
+    startTrustVerificationOwn: function () {
+        if (!this.account.omemo || !this.account.omemo.get('device_id') || !this.account.server_features.get(Strophe.NS.XABBER_NOTIFY))
+            return;
+
+        let msg_id = uuid(),
+            sid = uuid(),
+            stanza = $msg({
+                to: this.account.server_features.get(Strophe.NS.XABBER_NOTIFY).get('from'),
+                type: 'chat',
+                id: msg_id
+            });
+        stanza.c('notify', {xmlns: Strophe.NS.XABBER_NOTIFY});
+        stanza.c('message', {
+            to: this.account.get('jid'),
+            type: 'chat',
+            id: msg_id
+        });
+        stanza.c('private', {xmlns: Strophe.NS.CARBONS}).up();
+        stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: sid }).c('verification-start', {'device-id': this.account.omemo.get('device_id') }).up().up();
+        this.account.sendFast(stanza, () => {
+            console.log(stanza);
+            console.log(stanza.tree());
+            this.account.omemo.xabber_trust.verification_started = true;
+            this.account.omemo.xabber_trust.current_verification_sid = sid;
+            utils.callback_popup_message(xabber.getString("trust_verification_started"), 5000);
+        });
     },
 
     openRegularChat: function () {

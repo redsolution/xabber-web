@@ -887,5 +887,11 @@ Strophe.addNamespace('MEDIAGALLERY', 'urn:xabber:http:url:mediagallery');
 Strophe.addNamespace('EPHEMERAL', 'urn:xmpp:ephemeral:0');
 Strophe.addNamespace('XABBER_FAVORITES', 'urn:xabber:favorites:0');
 Strophe.addNamespace('XABBER_NOTIFY', 'urn:xabber:notify:0');
+Strophe.addNamespace('XABBER_TRUST', 'urn:xabber:trust');
+Strophe.addNamespace('DIGITAL_SIGNATURES', 'urn:xmpp:signed:0');
+Strophe.addNamespace('TRUSTED_MESSAGES', 'urn:xmpp:tm:1');
+Strophe.addNamespace('DIGITAL_SIGNATURES_ATM', 'urn:xmpp:atm:1');
+Strophe.addNamespace('PUBSUB_TRUST_SHARING', 'urn:xmpp:trustsharing:0');
+Strophe.addNamespace('PUBSUB_TRUST_SHARING_ITEMS', 'urn:xmpp:trustsharing:0:items');
 
 export default xabber;

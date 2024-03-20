@@ -68,6 +68,7 @@ xabber.ClientFeatures = Backbone.Collection.extend({
         this.addFeature(Strophe.NS.MAM, 'XEP-0313: Message archive management');
         this.connection.disco.addFeature(Strophe.NS.CHAT_MARKERS);
         this.connection.disco.addFeature(Strophe.NS.PUBSUB_AVATAR_METADATA + '+notify');
+        this.connection.disco.addFeature(Strophe.NS.PUBSUB_TRUST_SHARING_ITEMS + '+notify');
         this.addFeature(Strophe.NS.HTTP_UPLOAD, 'XEP-0363: HTTP File Upload');
         this.addFeature(Strophe.NS.SYNCHRONIZATION, 'XEP-SYNC: Client Synchronization');
         this.addFeature(Strophe.NS.AUTH_DEVICES, 'XEP-DEVICES: HOTP and Device Management');

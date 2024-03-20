@@ -7,7 +7,8 @@ import textarea from "xabber-textarea-utils";
 
 var $ = deps.$,
     _ = deps._,
-    moment = deps.moment;
+    moment = deps.moment,
+    curve25519js = deps.curve25519js;
 
 // jQuery extensions
 $.fn.switchClass = function (klass, condition) {
@@ -172,6 +173,84 @@ var utils = {
 
     now: function () {
         return Math.floor(moment.now() / 1000);
+    },
+
+    randomCode: function (length) {
+        let result = '',
+            characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789',
+            charactersLength = characters.length,
+            counter = 0;
+        while (counter < length) {
+            result += characters.charAt(Math.floor(Math.random() * charactersLength));
+            counter += 1;
+        }
+        return result;
+    },
+
+    doCurve: function (priv_key, pub_key) {
+        if (!priv_key || !pub_key)
+            return;
+        // console.log(priv_key);
+        // console.log(pub_key);
+
+        // a_key = new Uint8Array(a_key);
+        // b_key = new Uint8Array(b_key);
+
+        let secret = curve25519js.sharedKeyCurve(new Uint8Array(priv_key), new Uint8Array(pub_key));
+
+        // console.log('Secret secret:')
+        // console.log(secret)
+        // console.log('Secret:', Buffer.from(secret).toString('hex'))
+        // console.log('Secret 2:')
+        // console.log(Buffer.from(secret))
+        return Buffer.from(secret);
+    },
+
+    curveSign: function (priv_key, msg) {
+        if (!priv_key || !msg)
+            return;
+
+        let is_verified = curve25519js.signCurve(new Uint8Array(priv_key), msg);
+
+        return is_verified;
+    },
+
+    curveVerify: function (pubkey, msg, signature) {
+        if (!pubkey || !msg)
+            return;
+        // console.log(pubkey);
+        // console.log(msg);
+
+        let is_verified = curve25519js.verifyCurve(new Uint8Array(pubkey), msg, signature);
+
+        return is_verified;
+    },
+
+    stringToArrayBuffer32: function (str) {
+        // Ensure the string is not longer than 32 bytes when encoded
+        const encoder = new TextEncoder(); // UTF-8 by default
+        let encoded = encoder.encode(str); // Convert the string to Uint8Array
+
+        // Create an ArrayBuffer of 32 bytes length
+        let buffer = new ArrayBuffer(32);
+
+        // Create a view to manipulate the buffer
+        let view = new Uint8Array(buffer);
+
+        // Copy the encoded string bytes to the ArrayBuffer
+        // Note: This will truncate if encoded string is longer than 32 bytes
+        view.set(encoded.slice(0, Math.min(encoded.length, 32)));
+
+        return buffer;
+    },
+
+    createSha256: async function (input) {
+        if (typeof input === 'string' || input instanceof String)
+            input = new TextEncoder().encode(input);
+
+        let hashBuffer = await crypto.subtle.digest('SHA-256', input);
+
+        return hashBuffer;
     },
 
     getDateFormat: function (date_format) {
@@ -684,6 +763,14 @@ var utils = {
 
     ArrayBuffertoBase64: function (arrayBuffer) {
         return btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
+    },
+
+    fromBase64toUint8Array: function (b64_string) {
+        return Uint8Array.from(atob(b64_string), c => c.charCodeAt(0));
+    },
+
+    Uint8ArraytoBase64: function (uint8Array) {
+        return btoa(String.fromCharCode(...uint8Array));
     },
 
     generateHOTPKey: async function(secret, counter) {

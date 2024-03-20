@@ -112,7 +112,7 @@ xabber.Peer = Backbone.Model.extend({
 
     getDevice: function (id) {
         if (!this.devices[id]) {
-            this.devices[id] = new xabber.Device({jid: this.get('jid'), id: id }, { account: this.account, store: this.store});
+            this.devices[id] = new xabber.Device({jid: this.get('jid'), id: id }, { account: this.account, store: this.store, peer: this});
         }
 
         return this.devices[id];
@@ -894,6 +894,7 @@ xabber.Device = Backbone.Model.extend({
         this.id = attrs.id;
         this.jid = attrs.jid;
         this.store = options.store;
+        options.peer && (this.peer = options.peer);
         this.preKeys = null;
         this.address = new SignalProtocolAddress(attrs.jid, attrs.id);
     },
@@ -1105,6 +1106,13 @@ xabber.Omemo = Backbone.ModelWithStorage.extend({
         this.account.on("devices_updated", this.onOwnDevicesUpdated, this);
         this.store.on('prekey_removed', this.removePreKey, this);
         this.store.on('session_stored', this.cacheSession, this);
+        console.log('here');
+        this.xabber_trust = new xabber.Trust({id: 'xabber-trust'}, {
+            omemo: this,
+            storage_name: xabber.getStorageName() + '-trusted-devices-' + this.account.get('jid'),
+            account: this.account,
+            fetch: 'before'
+        })
     },
 
     storeSessions: function () {
@@ -1119,6 +1127,7 @@ xabber.Omemo = Backbone.ModelWithStorage.extend({
         if (this.own_devices && Object.keys(this.own_devices).length != 0)
             this.deleteOwnDevice();
         this.cached_messages && this.cached_messages.destroy();
+        this.xabber_trust && this.xabber_trust.destroy();
         this.account.connection.deleteHandler(this._msg_handler);
     },
 
@@ -1146,6 +1155,7 @@ xabber.Omemo = Backbone.ModelWithStorage.extend({
         this.connection = this.account.connection;
         this.registerMessageHandler();
         this.addDevice();
+        this.xabber_trust.onConnected();
         this.account.set("omemo_enabled", true);
     },
 
@@ -1282,12 +1292,15 @@ xabber.Omemo = Backbone.ModelWithStorage.extend({
     },
 
     encrypt: function (contact, message) {
-        let peer = this.getPeer(contact.get('jid')),
+        let peer = this.getPeer(contact ? contact.get('jid') : this.account.get('jid')),
             $msg = $(message.tree()),
             origin_id = $msg.children('origin-id').attr('id'),
             plaintext = Strophe.serialize($msg.children('envelope')[0]) || "";
 
-        origin_id && this.cached_messages.putMessage(contact, origin_id, {envelope: plaintext});
+        contact && origin_id && this.cached_messages.putMessage(contact, origin_id, {envelope: plaintext});
+
+        console.log(message);
+        console.log(message.tree().outerHTML);
 
         return peer.encrypt(plaintext).then((encryptedMessage) => {
 
@@ -1298,7 +1311,9 @@ xabber.Omemo = Backbone.ModelWithStorage.extend({
                 }),
                 myKeys = $build('keys', {jid: this.account.get('jid')});
 
-            encryptedElement.c('keys', { jid: contact.get('jid')});
+            contact && encryptedElement.c('keys', { jid: contact.get('jid')});
+            console.log(encryptedMessage.keys);
+            console.log(peer);
 
             for (let key of encryptedMessage.keys) {
                 let attrs = {
@@ -1308,14 +1323,19 @@ xabber.Omemo = Backbone.ModelWithStorage.extend({
                 if (key.preKey) {
                     attrs.kex = true;
                 }
+                console.log(key.deviceId)
+                if (contact){
 
-                if (peer.devices[key.deviceId])
-                    encryptedElement.c('key', attrs).t(btoa(key.ciphertext.body)).up();
-                else
+                    if (peer.devices[key.deviceId])
+                        contact && encryptedElement.c('key', attrs).t(btoa(key.ciphertext.body)).up();
+                    else
+                        myKeys.c('key', attrs).t(btoa(key.ciphertext.body)).up();
+                } else {
                     myKeys.c('key', attrs).t(btoa(key.ciphertext.body)).up();
-
+                }
             }
-            encryptedElement.up().cnode(myKeys.tree());
+            contact && encryptedElement.up();
+            encryptedElement.cnode(myKeys.tree());
 
             encryptedElement.up().up()
                 .c('payload').t(utils.ArrayBuffertoBase64(encryptedMessage.payload));
@@ -1334,6 +1354,7 @@ xabber.Omemo = Backbone.ModelWithStorage.extend({
 
             return {message: message, is_trusted: encryptedMessage.is_trusted};
         }).catch((msg) => {
+            console.error(msg);
         });
     },
 
@@ -1422,6 +1443,8 @@ xabber.Omemo = Backbone.ModelWithStorage.extend({
 
     receiveChatMessage: function (message, options, deferred) {
         options = options || {};
+        console.log(message);
+        console.log(options);
         let $message = $(message);
         if ($message.find(`encrypted[xmlns="${Strophe.NS.OMEMO}"]`).length) {
             if ($message.find('result[xmlns="' + Strophe.NS.MAM + '"]').length)
@@ -1435,8 +1458,14 @@ xabber.Omemo = Backbone.ModelWithStorage.extend({
             let $msg = $message.find(`encrypted[xmlns="${Strophe.NS.OMEMO}"]`).parent(),
                 jid = (Strophe.getBareJidFromJid($msg.attr('from')) === this.account.get('jid') ? Strophe.getBareJidFromJid($msg.attr('to')) : Strophe.getBareJidFromJid($msg.attr('from'))) || options.from_jid,
                 contact = this.account.contacts.get(options.conversation ? options.conversation : jid),
-                stanza_id = $msg.children(`stanza-id[by="${this.account.get('jid')}"]`).attr('id'),
+                stanza_id = $msg.children(`stanza-id[by="${this.account.get('jid')}"]`).attr('id');
+            let cached_msg;
+            if (Strophe.getBareJidFromJid($msg.attr('from')) != this.account.get('jid')){
                 cached_msg = stanza_id && this.cached_messages && this.cached_messages.getMessage(contact, stanza_id);
+            }
+
+            console.log(Strophe.getBareJidFromJid($msg.attr('from')) != this.account.get('jid'));
+            console.log(Boolean(Strophe.getBareJidFromJid($msg.attr('from')) != this.account.get('jid') && options.carbon_copied && options.carbon_direction && options.carbon_direction === 'sent'));
 
             if (Strophe.getBareJidFromJid($msg.attr('from')) != this.account.get('jid') && options.carbon_copied && options.carbon_direction && options.carbon_direction === 'sent')
                 return;
@@ -1473,6 +1502,7 @@ xabber.Omemo = Backbone.ModelWithStorage.extend({
                                 options.not_verified_device_no_device = true;
                             }
                         }
+                        console.log($message[0]);
                         this.account.chats.receiveChatMessage($message[0], options);
                     });
                     return;
@@ -1509,10 +1539,13 @@ xabber.Omemo = Backbone.ModelWithStorage.extend({
                     }
                 });
             } else {
+                console.log('here')
                 this.getTrusted($message).then((is_trusted) => {
+                    console.log(is_trusted);
                     options.is_trusted = is_trusted;
                     return this.decrypt(message);
                 }).then((decrypted_msg) => {
+                    console.log(decrypted_msg);
                     if (decrypted_msg) {
                         options.encrypted = true;
                         stanza_id && this.cached_messages.putMessage(contact, stanza_id, {envelope: decrypted_msg});
@@ -1546,6 +1579,7 @@ xabber.Omemo = Backbone.ModelWithStorage.extend({
                             options.not_verified_device_no_device = true;
                         }
                     }
+                    console.log($message[0]);
                     this.account.chats.receiveChatMessage($message[0], options);
                 }).catch((e) => {
                     if (e.name === 'MessageCounterError')//for capturing double decryption of same message
@@ -1559,6 +1593,8 @@ xabber.Omemo = Backbone.ModelWithStorage.extend({
                     $message.find(`encrypted[xmlns="${Strophe.NS.OMEMO}"]`).remove();
                     if (options.gallery && deferred)
                         deferred.reject();
+                    console.error(e);
+                    console.log($message[0]);
                     this.account.chats.receiveChatMessage($message[0], options);
                 });
             }
@@ -1836,7 +1872,7 @@ xabber.Omemo = Backbone.ModelWithStorage.extend({
         return this.peers.get(jid);
     },
 
-    decrypt: async function (message, options) {
+    decrypt: async function (message, options) { /// не может расшифровать trusted-message
         let $message = $(message),
             from_jid = Strophe.getBareJidFromJid($message.attr('from')) || options.from_jid,
             $encrypted;
@@ -1846,7 +1882,7 @@ xabber.Omemo = Backbone.ModelWithStorage.extend({
             from_jid = Strophe.getBareJidFromJid($m.attr('from'));
             $encrypted = $message.children(`result`).children(`forwarded`).children(`message`).children(`encrypted[xmlns="${Strophe.NS.OMEMO}"]`);
         }
-        else if ($message.find('[xmlns="'+Strophe.NS.CARBONS+'"]').length){
+        else if ($message.find('[xmlns="'+Strophe.NS.CARBONS+'"]').length && !$message.find('private[xmlns="'+Strophe.NS.CARBONS+'"]').length){
             $encrypted = $message.children(`[xmlns="${Strophe.NS.CARBONS}"]`).children(`forwarded`).children(`message`).children(`encrypted[xmlns="${Strophe.NS.OMEMO}"]`);
         }
         else
@@ -1856,6 +1892,11 @@ xabber.Omemo = Backbone.ModelWithStorage.extend({
             deviceId = this.get('device_id'),
             ownPreKeysArr =  encryptedData.keys.filter(preKey => preKey.deviceId == deviceId),
             ownPreKey = ownPreKeysArr[0];
+        console.log($message);
+        console.log($encrypted);
+        console.log(encryptedData);
+        console.log(deviceId);
+        console.log(ownPreKey);
         if (!ownPreKey)
             return null;
         let peer = this.getPeer(from_jid),
@@ -1871,6 +1912,7 @@ xabber.Omemo = Backbone.ModelWithStorage.extend({
         let exportedMasterKey = exportedKey.slice(0, 32),
             HMACData = exportedKey.slice(32);
 
+        console.log('here');
         return utils.AES.decrypt(exportedMasterKey, HMACData, encryptedData.payload);
     },
 

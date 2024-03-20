@@ -79,7 +79,7 @@
         };
 
         var createBundleNode = function (callback) {
-            createNode.call(this, `${Strophe.NS.OMEMO}:bundles`, {'pubsub#access_model': 'open', 'pubsub#max_items': 10}, callback);
+            createNode.call(this, `${Strophe.NS.OMEMO}:bundles`, {'pubsub#access_model': 'open', 'pubsub#max_items': 32}, callback);
         };
 
         var createNode = function(node, options, callback) {
