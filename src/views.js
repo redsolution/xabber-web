@@ -1221,16 +1221,19 @@ xabber.ToolbarView = xabber.BasicView.extend({
                     if (chat.get('unread') || chat.get('const_unread')){
                         xabber.error(chat);
                     }
-                    count_all_msg += chat.get('unread') + chat.get('const_unread');
-                    if (chat.contact.get('group_chat'))
-                        count_group_msg += chat.get('unread') + chat.get('const_unread');
-                    else
-                        count_msg += chat.get('unread') + chat.get('const_unread');
+                    if (chat.get('notifications')){
+                        mentions += chat.get('unread') + chat.get('const_unread');
+                    } else {
+                        count_all_msg += chat.get('unread') + chat.get('const_unread');
+                        if (chat.contact.get('group_chat'))
+                            count_group_msg += chat.get('unread') + chat.get('const_unread');
+                        else
+                            count_msg += chat.get('unread') + chat.get('const_unread');
+                    }
                 }
             });
             let incoming_subscriptions = account.contacts.filter(item => (item.get('invitation') && !item.get('removed')) || (item.get('subscription_request_in') && item.get('subscription') != 'both')).length;
             count_all_msg += incoming_subscriptions;
-            mentions += account.unread_mentions.length;
         });
         return { msgs: count_msg, all_msgs: count_all_msg, group_msgs: count_group_msg, mentions: mentions };
     },
