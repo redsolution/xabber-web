@@ -1053,6 +1053,8 @@ xabber.Contact = Backbone.Model.extend({
     showDetailsRight: function (screen, options) {
         let chat = this.account.chats.getChat(this),
              scrolled_top_chats_view, scrolled_top_chat;
+        if (chat.get('notifications'))
+            return;
         if (chat)
             if (!chat.item_view.content)
                 chat.item_view.content = new xabber.ChatContentView({chat_item: chat.item_view});
@@ -8600,6 +8602,7 @@ xabber.Roster = xabber.ContactsBase.extend({
             chat.item_view.content = new xabber.ChatContentView({chat_item: chat.item_view});
             if (chat.get('sync_type') === Strophe.NS.XABBER_NOTIFY){
                 chat.set('notifications', true);
+                contact.set('subscription', 'both');
                 chat.item_view.content.loadPreviousHistory(true);
             }
         }

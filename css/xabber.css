@@ -8733,6 +8733,23 @@ input[type=text].simple-input-field:hover {
     height: 450px !important;
     max-height: unset !important;
 }
+/* ------------------ CHAT BOX NOTIFICATIONS ---------------------- */
+
+
+.chat-head-wrap.notifications .circle-avatar,
+.chat-head-wrap.notifications .chat-head-details {
+    cursor: auto;
+}
+.chat-head-wrap.notifications .contact-info .contact-status-message {
+    pointer-events: none;
+}
+.chat-head-wrap.notifications .chat-tools-wrap {
+    display: none;
+}
+.chat-body-container.chat-body-container-notifications {
+    bottom: 0 !important;
+}
+/* ------------------ CHAT BOX NOTIFICATIONS END ---------------------- */
 
 .xabber-account-menu {
     top: 0px !important;
