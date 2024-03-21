@@ -19,5 +19,8 @@ httpsserver:
 minify: npm-ready
 	npm run-script build
 
+watch: npm-ready
+	npm run-script watch
+
 release: npm-ready
 	./bash/release.sh

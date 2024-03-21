@@ -80,6 +80,8 @@ xabber.Message = Backbone.Model.extend({
     },
 
     isSenderMe: function () {
+        if (this.get('notification_msg'))
+            return false;
         if (this.account)
             return this.account.get('jid') === this.get('from_jid');
         else if (this.collection && this.collection.account)
@@ -341,6 +343,16 @@ xabber.MessagesBase = Backbone.Collection.extend({
             },
             mentions = [], blockquotes = [], markups = [], mutable_content = [], files = [], images = [], videos = [], locations = [], link_references = [];
 
+        if (options.notification_msg && $notification_msg.length){
+            attrs.notification_msg_content = $notification_msg[0];
+            let $keyExchange = $notification_msg.children(`authenticated-key-exchange[xmlns="${Strophe.NS.XABBER_TRUST}"]`)
+            if ($keyExchange.length){
+                if ($keyExchange.children('verification-start').length){
+                    attrs.trust_sid = $keyExchange.attr('sid');
+                    attrs.trust_device_id = $keyExchange.children('verification-start').attr('device-id');
+                }
+            }
+        }
         options.encrypted && _.extend(attrs, {encrypted: true});
         options.hasOwnProperty('is_trusted') && _.extend(attrs, {is_trusted: options.is_trusted});
         let references;
@@ -2498,8 +2510,7 @@ xabber.ChatItemView = xabber.BasicView.extend({
             this.$('.last-msg').html(this.$('.last-msg').html().italics());
         this.$el.emojify('.last-msg', {emoji_size: 16}).hyperlinkify({decode_uri: true});
         this.$('.last-msg-date').text(utils.pretty_short_datetime_recent_chat(msg_time))
-            .attr('title', pretty_datetime(msg_time));
-        this.$('.msg-delivering-state').showIf(msg.get('type') !== 'system' && msg.isSenderMe() && (msg.get('state') !== constants.MSG_ARCHIVED))
+        this.$('.msg-delivering-state').showIf(msg.get('type') !== 'system' && msg.isSenderMe() && (msg.get('state') !== constants.MSG_ARCHIVED) && !msg.get('notification_msg'))
             .attr('data-state', msg.getState());
     },
 
@@ -7287,7 +7298,15 @@ xabber.ChatContentView = xabber.BasicView.extend({
     },
 
     onClickNotification: function (ev) {
-        console.log('notification clicked');
+        let $elem = $(ev.target),
+            msg = this.model.messages.get($elem.closest('.chat-message').data('uniqueid')),
+            $notification_msg = $(msg.get('notification_msg_content'));
+
+        if ($notification_msg.children(`authenticated-key-exchange[xmlns="${Strophe.NS.XABBER_TRUST}"]`).length) {
+            if (this.account.omemo && this.account.omemo.xabber_trust)
+                this.account.omemo.xabber_trust.receiveTrustVerificationMessage($notification_msg[0], {});
+            return;
+        }
     },
 
     onClickMessage: function (ev) {
@@ -9469,7 +9488,7 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
           this.$el.emojify('.last-msg', {emoji_size: 16}).hyperlinkify({decode_uri: true});
           this.$('.last-msg-date').text(utils.pretty_short_datetime_recent_chat(msg_time))
               .attr('title', pretty_datetime(msg_time));
-          this.$('.msg-delivering-state').showIf(msg.isSenderMe() && (msg.get('state') !== constants.MSG_ARCHIVED))
+          this.$('.msg-delivering-state').showIf(msg.isSenderMe() && (msg.get('state') !== constants.MSG_ARCHIVED) && !msg.get('notification_msg'))
               .attr('data-state', msg.getState());
       },
 
@@ -10916,21 +10935,37 @@ xabber.InvitationPanelView = xabber.SearchView.extend({
     },
 
     startTrustVerification: function () {
-        if (!this.account.omemo || !this.account.omemo.get('device_id') || this.account.server_features.get(Strophe.NS.XABBER_NOTIFY))
+        if (!this.account.omemo || !this.account.omemo.get('device_id') || !this.account.server_features.get(Strophe.NS.XABBER_NOTIFY))
             return;
         let msg_id = uuid(),
             sid = uuid(),
             stanza = $msg({
-                to: this.model.get('jid'),
-                type: 'chat',
+                to: this.account.server_features.get(Strophe.NS.XABBER_NOTIFY).get('from'),
+                type: 'headline',
                 id: msg_id
             });
+        stanza.c('notify', {xmlns: Strophe.NS.XABBER_NOTIFY});
+        stanza.c('forwarded', {xmlns: Strophe.NS.FORWARD});
+        stanza.c('message', {
+            to: this.model.get('jid'),
+            from: this.account.get('jid'),
+            type: 'chat',
+            id: uuid()
+        });
         stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: sid }).c('verification-start', {'device-id': this.account.omemo.get('device_id') }).up().up();
+        stanza.c('body').t(`Device Verification request from ${this.account.get('jid')}`).up();
+        stanza.up().up().up();
+        stanza.c('fallback',{xmlns: Strophe.NS.XABBER_NOTIFY}).t(`device verification fallback text`).up();
+        stanza.c('no-store', {xmlns: Strophe.NS.HINTS}).up();
+        stanza.c('no-copy', {xmlns: Strophe.NS.HINTS}).up();
+        stanza.c('addresses', {xmlns: Strophe.NS.ADDRESS}).c('address',{type: 'to', jid: this.model.get('jid')}).up().up();
         this.account.sendFast(stanza, () => {
             console.log(stanza);
             console.log(stanza.tree());
-            this.account.omemo.xabber_trust.verification_started = true;
-            this.account.omemo.xabber_trust.current_verification_sid = sid;
+
+            this.account.omemo.xabber_trust.addVerificationSessionData(sid, {
+                verification_started: true
+            });
             utils.callback_popup_message(xabber.getString("trust_verification_started"), 5000);
         });
     },
@@ -10943,22 +10978,31 @@ xabber.InvitationPanelView = xabber.SearchView.extend({
             sid = uuid(),
             stanza = $msg({
                 to: this.account.server_features.get(Strophe.NS.XABBER_NOTIFY).get('from'),
-                type: 'chat',
+                type: 'headline',
                 id: msg_id
             });
         stanza.c('notify', {xmlns: Strophe.NS.XABBER_NOTIFY});
+        stanza.c('forwarded', {xmlns: Strophe.NS.FORWARD});
         stanza.c('message', {
             to: this.account.get('jid'),
+            from: this.account.get('jid'),
             type: 'chat',
-            id: msg_id
+            id: uuid()
         });
-        stanza.c('private', {xmlns: Strophe.NS.CARBONS}).up();
         stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: sid }).c('verification-start', {'device-id': this.account.omemo.get('device_id') }).up().up();
+        stanza.c('body').t(`Device Verification request from ${this.account.get('jid')}`).up();
+        stanza.up().up().up();
+        stanza.c('fallback',{xmlns: Strophe.NS.XABBER_NOTIFY}).t(`device verification fallback text`).up();
+        stanza.c('no-store', {xmlns: Strophe.NS.HINTS}).up();
+        stanza.c('no-copy', {xmlns: Strophe.NS.HINTS}).up();
+        stanza.c('addresses', {xmlns: Strophe.NS.ADDRESS}).c('address',{type: 'to', jid: this.account.get('jid')}).up().up();
         this.account.sendFast(stanza, () => {
             console.log(stanza);
             console.log(stanza.tree());
-            this.account.omemo.xabber_trust.verification_started = true;
-            this.account.omemo.xabber_trust.current_verification_sid = sid;
+
+            this.account.omemo.xabber_trust.addVerificationSessionData(sid, {
+                verification_started: true
+            });
             utils.callback_popup_message(xabber.getString("trust_verification_started"), 5000);
         });
     },
