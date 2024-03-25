@@ -1291,13 +1291,14 @@ xabber.Omemo = Backbone.ModelWithStorage.extend({
         }, null, 'message', null, null, null, {'encrypted': true});
     },
 
-    encrypt: function (contact, message) {
+    encrypt: function (contact, message, is_own) {
         let peer = this.getPeer(contact ? contact.get('jid') : this.account.get('jid')),
             $msg = $(message.tree()),
             origin_id = $msg.children('origin-id').attr('id'),
             plaintext = Strophe.serialize($msg.children('envelope')[0]) || "";
 
-        contact && origin_id && this.cached_messages.putMessage(contact, origin_id, {envelope: plaintext});
+        contact && origin_id && this.cached_messages.putMessage(contact, origin_id, {envelope: plaintext});//34
+        is_own && this.cached_messages.putMessageOwn(this.account.get('jid'), origin_id, {envelope: plaintext});//34
 
         console.log(message);
         console.log(message.tree().outerHTML);
@@ -1461,6 +1462,21 @@ xabber.Omemo = Backbone.ModelWithStorage.extend({
                 stanza_id = $msg.children(`stanza-id[by="${this.account.get('jid')}"]`).attr('id');
             let cached_msg;
             if (Strophe.getBareJidFromJid($msg.attr('from')) != this.account.get('jid')){
+                if (options.notification_msg) {
+                    if ($message.children(`notify[xmlns="${Strophe.NS.XABBER_NOTIFY}"]`).length) {
+                        let $notification_msg = $message.children(`notify[xmlns="${Strophe.NS.XABBER_NOTIFY}"]`).children('forwarded').children('message'),
+                            origin_id = $notification_msg.children('origin-id').attr('id');
+                        if (origin_id)
+                            cached_msg = stanza_id && this.cached_messages && this.cached_messages.getMessage(contact, origin_id);
+                    }
+                }
+                if (!cached_msg){
+                    cached_msg = stanza_id && this.cached_messages && this.cached_messages.getMessage(contact, stanza_id);
+                }
+            }
+            if (options.notification_msg && this.account.server_features.get(Strophe.NS.XABBER_NOTIFY)
+                && this.account.server_features.get(Strophe.NS.XABBER_NOTIFY).get('from') === Strophe.getBareJidFromJid($msg.attr('from'))){
+                let origin_
                 cached_msg = stanza_id && this.cached_messages && this.cached_messages.getMessage(contact, stanza_id);
             }
 
@@ -1543,9 +1559,9 @@ xabber.Omemo = Backbone.ModelWithStorage.extend({
                 this.getTrusted($message).then((is_trusted) => {
                     console.log(is_trusted);
                     options.is_trusted = is_trusted;
-                    return this.decrypt(message);
+                    return this.decrypt(message, options);
                 }).then((decrypted_msg) => {
-                    console.log(decrypted_msg);
+                    console.error(decrypted_msg);
                     if (decrypted_msg) {
                         options.encrypted = true;
                         stanza_id && this.cached_messages.putMessage(contact, stanza_id, {envelope: decrypted_msg});
@@ -1885,6 +1901,11 @@ xabber.Omemo = Backbone.ModelWithStorage.extend({
         else if ($message.find('[xmlns="'+Strophe.NS.CARBONS+'"]').length && !$message.find('private[xmlns="'+Strophe.NS.CARBONS+'"]').length){
             $encrypted = $message.children(`[xmlns="${Strophe.NS.CARBONS}"]`).children(`forwarded`).children(`message`).children(`encrypted[xmlns="${Strophe.NS.OMEMO}"]`);
         }
+        else if ($message.children(`notify[xmlns="${Strophe.NS.XABBER_NOTIFY}"]`).length){
+            let $notification_msg = $message.children(`notify[xmlns="${Strophe.NS.XABBER_NOTIFY}"]`).children('forwarded').children('message')
+            $encrypted = $notification_msg.children(`encrypted[xmlns="${Strophe.NS.OMEMO}"]`);
+            from_jid = Strophe.getBareJidFromJid($notification_msg.attr('from'));
+        }
         else
             $encrypted = $message.children(`encrypted[xmlns="${Strophe.NS.OMEMO}"]`);
 
@@ -2127,6 +2148,14 @@ xabber.DecryptedMessages = Backbone.ModelWithStorage.extend({
             contact_messages = messages[contact.get('jid')] || {};
         contact_messages[stanza_id] = message;
         messages[contact.get('jid')] = contact_messages;
+        this.save('messages', messages);
+    },
+
+    putMessageOwn: function (jid, stanza_id, message) {
+        let messages = _.clone(this.get('messages')),
+            contact_messages = messages[jid] || {};
+        contact_messages[stanza_id] = message;
+        messages[jid] = contact_messages;
         this.save('messages', messages);
     },
 

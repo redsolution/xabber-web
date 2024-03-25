@@ -161,15 +161,15 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
             to = this.account.get('jid'),
             stanza = $msg({
                 to: to,
+                from: this.account.get('jid'),
                 type: 'chat',
                 id: msg_id
             });
 
-        stanza.c('private', {xmlns: Strophe.NS.CARBONS}).up();
-        stanza.c('no-store', {xmlns: Strophe.NS.HINTS}).up();
-        stanza.c('private', {xmlns: Strophe.NS.CARBONS}).up();
+        stanza.c('origin-id', {id: uuid(), xmlns: 'urn:xmpp:sid:0'}).up();
         stanza.c('envelope', {xmlns: Strophe.NS.SCE}).c('content');
 
+        stanza.c('body').t(`${this.account.jid} shared his trusted devices`).up();
         stanza.c('trust-message', {xmlns: Strophe.NS.TRUSTED_MESSAGES, usage: Strophe.NS.OMEMO});
 
         console.log(trusted_devices);
@@ -190,12 +190,30 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
         console.log(stanza.tree());
         console.log(stanza.tree().outerHTML);
 
-        this.omemo.encrypt(null, stanza).then((msg) => {
+        this.omemo.encrypt(null, stanza ,true).then((msg) => {
             if (msg) {
                 stanza = msg.message;
             }
-            console.log(stanza);
-            this.account.sendFast(stanza, () => {
+
+            let final_stanza = $msg({
+                    to: this.account.server_features.get(Strophe.NS.XABBER_NOTIFY).get('from'),
+                    type: 'headline',
+                    id: uuid()
+                });
+
+            final_stanza.c('notify', {xmlns: Strophe.NS.XABBER_NOTIFY});
+            final_stanza.c('forwarded', {xmlns: Strophe.NS.FORWARD});
+
+            final_stanza.cnode(stanza.tree()).up();
+
+
+            final_stanza.up().up();
+            final_stanza.c('fallback',{xmlns: Strophe.NS.XABBER_NOTIFY}).t(`Encrypted notification`).up();
+            final_stanza.c('no-store', {xmlns: Strophe.NS.HINTS}).up();
+            final_stanza.c('no-copy', {xmlns: Strophe.NS.HINTS}).up();
+            final_stanza.c('addresses', {xmlns: Strophe.NS.ADDRESS}).c('address',{type: 'to', jid: to}).up().up();
+
+            this.account.sendFast(final_stanza, () => {
 
             });
         })
@@ -332,6 +350,8 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
             }
 
             session_data.active_verification_code = session.active_verification_code;
+
+            session_data.verification_step = session.verification_step;
 
             session_data.current_a_jid = session.current_a_jid;
 
@@ -664,7 +684,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
         console.log(sid);
         console.log(contact);
         console.log(options);
-        if (options.encrypted && options.device_id){
+        if (options.notification_trust_msg && options.device_id){
             if (options.device_id == this.omemo.get('device_id'))
                 return;
             this.parseContactsTrustedDevices(message, options);
@@ -683,7 +703,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                 return;
             }
             if ($message.find('verification-failed').length){
-                console.log($message.find('verification-failed').attr('reason'))
+                console.log($message.find('verification-failed').attr('reason'));
                 this.clearData(sid);
                 return;
             }
@@ -701,23 +721,25 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
         }
 
         if (contact){
-            if ($message.find('verification-start').length && $message.find('verification-start').attr('device-id') && this.omemo.get('device_id')){
+            if ($message.find('verification-start').length && $message.find('verification-start').attr('device-id') && this.omemo.get('device_id') && !options.automated){
                 this.account.omemo.xabber_trust.addVerificationSessionData(sid, {
                     current_a_jid: contact.get('jid')
                 });
                 this.handleTrustVerificationStart($message, contact);
                 return;
             }
-            if ($message.find(`verification-accepted`).length && $message.find(`verification-accepted`).attr('device-id') && $message.find(`salt`).length && this.active_sessions_data[sid] && this.active_sessions_data[sid].verification_started){
-                this.handleTrustVerificationSigned($message, contact);
+            if ($message.find(`verification-accepted`).length && $message.find(`verification-accepted`).attr('device-id')
+                && $message.find(`salt`).length && this.active_sessions_data[sid] && this.active_sessions_data[sid].verification_started && !options.automated){
+                if (this.active_sessions_data[sid].verification_step === '1a')
+                    this.handleTrustVerificationSigned($message, contact);
                 return;
             }
             if (this.active_sessions_data[sid] && this.active_sessions_data[sid].active_verification_device && this.active_sessions_data[sid].active_verification_code){
-                if ($message.find('hash').length && $message.find('salt').length){
+                if ($message.find('hash').length && $message.find('salt').length && this.active_sessions_data[sid].verification_step === '1b'){
                     this.handleTrustVerificationCodeHash($message, contact);
                     return;
                 }
-                if ($message.find('hash').length){
+                if ($message.find('hash').length && !$message.find('salt').length && this.active_sessions_data[sid].verification_step === '2a'){
                     this.handleTrustVerificationFinalHash($message, contact);
                     return;
                 }
@@ -729,7 +751,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
         } else if (Strophe.getBareJidFromJid($message.attr('from')) === this.account.get('jid') && Strophe.getBareJidFromJid($message.attr('to')) === this.account.get('jid')) {
             if (this.active_sessions_data[sid] && this.active_sessions_data[sid].last_sent_message_id == $message.attr('id'))
                 return;
-            if ($message.find('verification-start').length && $message.find('verification-start').attr('device-id') && this.omemo.get('device_id')){
+            if ($message.find('verification-start').length && $message.find('verification-start').attr('device-id') && this.omemo.get('device_id') && !options.automated){
                 this.account.omemo.xabber_trust.addVerificationSessionData(sid, {
                     current_a_jid: this.account.get('jid')
                 });
@@ -738,18 +760,20 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                 this.handleTrustVerificationStart($message, null, true);
                 return;
             }
-            if ($message.find(`verification-accepted`).length && $message.find(`verification-accepted`).attr('device-id') && $message.find(`salt`).length && this.active_sessions_data[sid] && this.active_sessions_data[sid].verification_started){
+            if ($message.find(`verification-accepted`).length && $message.find(`verification-accepted`).attr('device-id')
+                && $message.find(`salt`).length && this.active_sessions_data[sid] && this.active_sessions_data[sid].verification_started && !options.automated){
                 if ($message.find('verification-accepted').attr('device-id') == this.omemo.get('device_id'))
                     return;
-                this.handleTrustVerificationSigned($message, null, true);
+                if (this.active_sessions_data[sid].verification_step === '1a')
+                    this.handleTrustVerificationSigned($message, null, true);
                 return;
             }
             if (this.active_sessions_data[sid] && this.active_sessions_data[sid].active_verification_device && this.active_sessions_data[sid].active_verification_code){
-                if ($message.find('hash').length && $message.find('salt').length){
+                if ($message.find('hash').length && $message.find('salt').length && this.active_sessions_data[sid].verification_step === '1b'){
                     this.handleTrustVerificationCodeHash($message, null);
                     return;
                 }
-                if ($message.find('hash').length){
+                if ($message.find('hash').length && !$message.find('salt').length &&  this.active_sessions_data[sid].verification_step === '2a'){
                     this.handleTrustVerificationFinalHash($message, null);
                     return;
                 }
@@ -844,7 +868,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                         stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: sid});
                         stanza.c('verification-accepted', {'device-id': this.account.omemo.get('device_id')}).up();
                         stanza.c('salt').c('ciphertext').t(response.data).up().c('iv').t(response.iv).up().up().up();
-                        stanza.c('body').t(`Device Verification answered from ${this.account.get('jid')}`).up();
+                        stanza.c('body').t(`Device Verification answered from ${this.account.jid} B1`).up();
                         stanza.up().up().up();
                         stanza.c('fallback',{xmlns: Strophe.NS.XABBER_NOTIFY}).t(`device verification answer fallback text`).up();
                         stanza.c('no-store', {xmlns: Strophe.NS.HINTS}).up();
@@ -858,6 +882,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                             },
                             active_verification_code: code,
                             b_payload: utils.ArrayBuffertoBase64(response.not_encrypted_payload),
+                            verification_step: '1b',
                             last_sent_message_id: msg_id
                         });
                         this.account.sendFast(stanza, () => {
@@ -922,15 +947,29 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                                         let msg_id = uuid(),
                                             to = contact ? contact.get('jid') : this.account.get('jid'),
                                             stanza = $msg({
-                                                to: to,
-                                                type: 'chat',
+                                                to: this.account.server_features.get(Strophe.NS.XABBER_NOTIFY).get('from'),
+                                                type: 'headline',
                                                 id: msg_id
                                             });
-                                        stanza.c('private', {xmlns: Strophe.NS.CARBONS}).up();
+                                        stanza.c('notify', {xmlns: Strophe.NS.XABBER_NOTIFY});
+                                        stanza.c('forwarded', {xmlns: Strophe.NS.FORWARD});
+                                        stanza.c('message', {
+                                            to: to,
+                                            from: this.account.get('jid'),
+                                            type: 'chat',
+                                            id: uuid()
+                                        });
                                         stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: sid});
+
                                         stanza.c('salt').c('ciphertext').t(response.data).up().c('iv').t(response.iv).up().up();
                                         stanza.c('hash', {xmlns: Strophe.NS.HASH, algo: 'sha-256'});
-                                        stanza.c('ciphertext').t(hash_response.data).up().c('iv').t(hash_response.iv);
+                                        stanza.c('ciphertext').t(hash_response.data).up().c('iv').t(hash_response.iv).up().up().up();
+                                        stanza.c('body').t(`Device Verification Обмен данными from ${this.account.jid} A1`).up();
+                                        stanza.up().up().up();
+                                        stanza.c('fallback',{xmlns: Strophe.NS.XABBER_NOTIFY}).t(`device verification Обмен данными fallback text`).up();
+                                        stanza.c('no-store', {xmlns: Strophe.NS.HINTS}).up();
+                                        stanza.c('no-copy', {xmlns: Strophe.NS.HINTS}).up();
+                                        stanza.c('addresses', {xmlns: Strophe.NS.ADDRESS}).c('address',{type: 'to', jid: to}).up().up();
 
                                         this.account.omemo.xabber_trust.addVerificationSessionData(sid, {
                                             active_verification_device: {
@@ -940,6 +979,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                                             },
                                             active_verification_code: code,
                                             a_payload: utils.ArrayBuffertoBase64(response.not_encrypted_payload),
+                                            verification_step: '2a',
                                             last_sent_message_id: msg_id
                                         });
 
@@ -958,13 +998,28 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                             let msg_id = uuid(),
                                 to = contact ? contact.get('jid') : this.account.get('jid'),
                                 stanza = $msg({
-                                    to: to,
-                                    type: 'chat',
+                                    to: this.account.server_features.get(Strophe.NS.XABBER_NOTIFY).get('from'),
+                                    type: 'headline',
                                     id: msg_id
                                 });
-                            stanza.c('private', {xmlns: Strophe.NS.CARBONS}).up();
+
+                            stanza.c('notify', {xmlns: Strophe.NS.XABBER_NOTIFY});
+                            stanza.c('forwarded', {xmlns: Strophe.NS.FORWARD});
+                            stanza.c('message', {
+                                to: to,
+                                from: this.account.get('jid'),
+                                type: 'chat',
+                                id: uuid()
+                            });
                             stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: sid});
-                            stanza.c('verification-failed', {reason: 'Data decryption failed'});
+                            stanza.c('verification-failed', {reason: 'Data decryption failed'}).up().up();
+
+                            stanza.c('body').t(`Device Verification Data decryption failed from ${this.account.jid} A1`).up();
+                            stanza.up().up().up();
+                            stanza.c('fallback',{xmlns: Strophe.NS.XABBER_NOTIFY}).t(`device verification Data decryption failed fallback text`).up();
+                            stanza.c('no-store', {xmlns: Strophe.NS.HINTS}).up();
+                            stanza.c('no-copy', {xmlns: Strophe.NS.HINTS}).up();
+                            stanza.c('addresses', {xmlns: Strophe.NS.ADDRESS}).c('address',{type: 'to', jid: to}).up().up();
 
                             this.account.sendFast(stanza, () => {
                                 console.log(stanza);
@@ -979,13 +1034,28 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                         let msg_id = uuid(),
                             to = contact ? contact.get('jid') : this.account.get('jid'),
                             stanza = $msg({
-                                to: to,
-                                type: 'chat',
+                                to: this.account.server_features.get(Strophe.NS.XABBER_NOTIFY).get('from'),
+                                type: 'headline',
                                 id: msg_id
                             });
-                        stanza.c('private', {xmlns: Strophe.NS.CARBONS}).up();
+
+                        stanza.c('notify', {xmlns: Strophe.NS.XABBER_NOTIFY});
+                        stanza.c('forwarded', {xmlns: Strophe.NS.FORWARD});
+                        stanza.c('message', {
+                            to: to,
+                            from: this.account.get('jid'),
+                            type: 'chat',
+                            id: uuid()
+                        });
                         stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: sid});
-                        stanza.c('verification-failed', {reason: 'Signature verification cancelled!'});
+                        stanza.c('verification-failed', {reason: 'Signature verification cancelled'}).up().up();
+
+                        stanza.c('body').t(`Device Verification Signature verification cancelled from ${this.account.jid} A1`).up();
+                        stanza.up().up().up();
+                        stanza.c('fallback',{xmlns: Strophe.NS.XABBER_NOTIFY}).t(`device verification Signature verification cancelled fallback text`).up();
+                        stanza.c('no-store', {xmlns: Strophe.NS.HINTS}).up();
+                        stanza.c('no-copy', {xmlns: Strophe.NS.HINTS}).up();
+                        stanza.c('addresses', {xmlns: Strophe.NS.ADDRESS}).c('address',{type: 'to', jid: to}).up().up();
 
                         this.account.sendFast(stanza, () => {
                             console.log(stanza);
@@ -1073,11 +1143,12 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                                 if (generated_hash_b64 === decrypted_hash_b64){
                                     this.getTrustedKey(this.omemo.own_devices[this.omemo.get('device_id')]).then((B_trustedKeyBuffer) => {
                                         this.generateVerificationEncryptedFinalHash(B_trustedKeyBuffer, code, this.active_sessions_data[sid].b_payload, this.active_sessions_data[sid].a_payload, decrypted_a.encryptionKeyHash).then((hash_response) => {
+
                                             let msg_id = uuid(),
                                                 to = contact ? contact.get('jid') : this.account.get('jid'),
                                                 stanza = $msg({
-                                                    to: to,
-                                                    type: 'chat',
+                                                    to: this.account.server_features.get(Strophe.NS.XABBER_NOTIFY).get('from'),
+                                                    type: 'headline',
                                                     id: msg_id
                                                 });
 
@@ -1096,14 +1167,30 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                                             // console.log(utils.ArrayBuffertoBase64(decrypted_a.encryptionKeyHash));
                                             // console.log(decrypted_a.encryptionKeyHash);
 
-                                            stanza.c('private', {xmlns: Strophe.NS.CARBONS}).up();
+                                            stanza.c('notify', {xmlns: Strophe.NS.XABBER_NOTIFY});
+                                            stanza.c('forwarded', {xmlns: Strophe.NS.FORWARD});
+                                            stanza.c('message', {
+                                                to: to,
+                                                from: this.account.get('jid'),
+                                                type: 'chat',
+                                                id: uuid()
+                                            });
                                             stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: sid});
+
                                             stanza.c('hash', {xmlns: Strophe.NS.HASH, algo: 'sha-256'});
-                                            stanza.c('ciphertext').t(hash_response.data).up().c('iv').t(hash_response.iv);
+                                            stanza.c('ciphertext').t(hash_response.data).up().c('iv').t(hash_response.iv).up().up().up();
+
+                                            stanza.c('body').t(`Device Verification Окончание верификации from ${this.account.jid} B1`).up();
+                                            stanza.up().up().up();
+                                            stanza.c('fallback',{xmlns: Strophe.NS.XABBER_NOTIFY}).t(`device verification Окончание верификации fallback text`).up();
+                                            stanza.c('no-store', {xmlns: Strophe.NS.HINTS}).up();
+                                            stanza.c('no-copy', {xmlns: Strophe.NS.HINTS}).up();
+                                            stanza.c('addresses', {xmlns: Strophe.NS.ADDRESS}).c('address',{type: 'to', jid: to}).up().up();
 
                                             this.account.omemo.xabber_trust.addVerificationSessionData(sid, {
                                                 can_handle_trust: true,
-                                                last_sent_message_id: msg_id
+                                                last_sent_message_id: msg_id,
+                                                verification_step: '2b',
                                             });
 
                                             this.account.sendFast(stanza, () => {
@@ -1119,13 +1206,28 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                                     let msg_id = uuid(),
                                         to = contact ? contact.get('jid') : this.account.get('jid'),
                                         stanza = $msg({
-                                            to: to,
-                                            type: 'chat',
+                                            to: this.account.server_features.get(Strophe.NS.XABBER_NOTIFY).get('from'),
+                                            type: 'headline',
                                             id: msg_id
                                         });
-                                    stanza.c('private', {xmlns: Strophe.NS.CARBONS}).up();
+
+                                    stanza.c('notify', {xmlns: Strophe.NS.XABBER_NOTIFY});
+                                    stanza.c('forwarded', {xmlns: Strophe.NS.FORWARD});
+                                    stanza.c('message', {
+                                        to: to,
+                                        from: this.account.get('jid'),
+                                        type: 'chat',
+                                        id: uuid()
+                                    });
                                     stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: sid});
-                                    stanza.c('verification-failed', {reason: 'Hashes didn\'t match!'});
+                                    stanza.c('verification-failed', {reason: 'Hashes didn\'t match'}).up().up();
+
+                                    stanza.c('body').t(`Device Verification Hashes didn't match from ${this.account.jid} B1`).up();
+                                    stanza.up().up().up();
+                                    stanza.c('fallback',{xmlns: Strophe.NS.XABBER_NOTIFY}).t(`device verification Hashes didn't match fallback text`).up();
+                                    stanza.c('no-store', {xmlns: Strophe.NS.HINTS}).up();
+                                    stanza.c('no-copy', {xmlns: Strophe.NS.HINTS}).up();
+                                    stanza.c('addresses', {xmlns: Strophe.NS.ADDRESS}).c('address',{type: 'to', jid: to}).up().up();
 
                                     this.account.sendFast(stanza, () => {
                                         console.log(stanza);
@@ -1142,13 +1244,28 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                         let msg_id = uuid(),
                             to = contact ? contact.get('jid') : this.account.get('jid'),
                             stanza = $msg({
-                                to: to,
-                                type: 'chat',
+                                to: this.account.server_features.get(Strophe.NS.XABBER_NOTIFY).get('from'),
+                                type: 'headline',
                                 id: msg_id
                             });
-                        stanza.c('private', {xmlns: Strophe.NS.CARBONS}).up();
+
+                        stanza.c('notify', {xmlns: Strophe.NS.XABBER_NOTIFY});
+                        stanza.c('forwarded', {xmlns: Strophe.NS.FORWARD});
+                        stanza.c('message', {
+                            to: to,
+                            from: this.account.get('jid'),
+                            type: 'chat',
+                            id: uuid()
+                        });
                         stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: sid});
-                        stanza.c('verification-failed', {reason: 'Data decryption failed'});
+                        stanza.c('verification-failed', {reason: 'Data decryption failed'}).up().up();
+
+                        stanza.c('body').t(`Device Verification Data decryption failed from ${this.account.jid} B1`).up();
+                        stanza.up().up().up();
+                        stanza.c('fallback',{xmlns: Strophe.NS.XABBER_NOTIFY}).t(`device verification Data decryption failed fallback text`).up();
+                        stanza.c('no-store', {xmlns: Strophe.NS.HINTS}).up();
+                        stanza.c('no-copy', {xmlns: Strophe.NS.HINTS}).up();
+                        stanza.c('addresses', {xmlns: Strophe.NS.ADDRESS}).c('address',{type: 'to', jid: to}).up().up();
 
                         this.account.sendFast(stanza, () => {
                             console.log(stanza);
@@ -1163,13 +1280,28 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                     let msg_id = uuid(),
                         to = contact ? contact.get('jid') : this.account.get('jid'),
                         stanza = $msg({
-                            to: to,
-                            type: 'chat',
+                            to: this.account.server_features.get(Strophe.NS.XABBER_NOTIFY).get('from'),
+                            type: 'headline',
                             id: msg_id
                         });
-                    stanza.c('private', {xmlns: Strophe.NS.CARBONS}).up();
+
+                    stanza.c('notify', {xmlns: Strophe.NS.XABBER_NOTIFY});
+                    stanza.c('forwarded', {xmlns: Strophe.NS.FORWARD});
+                    stanza.c('message', {
+                        to: to,
+                        from: this.account.get('jid'),
+                        type: 'chat',
+                        id: uuid()
+                    });
                     stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: sid});
-                    stanza.c('verification-failed', {reason: 'Data decryption failed'});
+                    stanza.c('verification-failed', {reason: 'Data decryption failed with error'}).up().up();
+
+                    stanza.c('body').t(`Device Verification Data decryption failed with error from ${this.account.jid} B1`).up();
+                    stanza.up().up().up();
+                    stanza.c('fallback',{xmlns: Strophe.NS.XABBER_NOTIFY}).t(`device verification Data decryption failed with error fallback text`).up();
+                    stanza.c('no-store', {xmlns: Strophe.NS.HINTS}).up();
+                    stanza.c('no-copy', {xmlns: Strophe.NS.HINTS}).up();
+                    stanza.c('addresses', {xmlns: Strophe.NS.ADDRESS}).c('address',{type: 'to', jid: to}).up().up();
 
                     this.account.sendFast(stanza, () => {
                         console.log(stanza);
@@ -1217,10 +1349,10 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                             let generated_hash_b64 = utils.ArrayBuffertoBase64(concatinated_hash),
                                 decrypted_hash_b64 = utils.ArrayBuffertoBase64(decrypted_hash.decryptedBuffer);
 
-                            // console.log('generated_hash_b64  !!!!!!!!!!!!!!!!!!!!!!!!!2');
-                            // console.log(generated_hash_b64);
-                            // console.log('decrypted_hash_b64  !!!!!!!!!!!!!!!!!!!!!!!!!2');
-                            // console.log(decrypted_hash_b64);
+                            console.log('generated_hash_b64  !!!!!!!!!!!!!!!!!!!!!!!!!2');
+                            console.log(generated_hash_b64);
+                            console.log('decrypted_hash_b64  !!!!!!!!!!!!!!!!!!!!!!!!!2');
+                            console.log(decrypted_hash_b64);
 
                             if (generated_hash_b64 === decrypted_hash_b64){
                                 //start devices exchange
@@ -1231,13 +1363,28 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                                 let msg_id = uuid(),
                                     to = contact ? contact.get('jid') : this.account.get('jid'),
                                     stanza = $msg({
-                                        to: to,
-                                        type: 'chat',
+                                        to: this.account.server_features.get(Strophe.NS.XABBER_NOTIFY).get('from'),
+                                        type: 'headline',
                                         id: msg_id
                                     });
-                                stanza.c('private', {xmlns: Strophe.NS.CARBONS}).up();
+
+                                stanza.c('notify', {xmlns: Strophe.NS.XABBER_NOTIFY});
+                                stanza.c('forwarded', {xmlns: Strophe.NS.FORWARD});
+                                stanza.c('message', {
+                                    to: to,
+                                    from: this.account.get('jid'),
+                                    type: 'chat',
+                                    id: uuid()
+                                });
                                 stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: sid});
-                                stanza.c('verification-failed', {reason: 'Hashes didn\'t match!'});
+                                stanza.c('verification-failed', {reason: 'Hashes didn\'t match in final stanza'}).up().up();
+
+                                stanza.c('body').t(`Device Verification Hashes didn't match in final stanza from ${this.account.jid} A1`).up();
+                                stanza.up().up().up();
+                                stanza.c('fallback',{xmlns: Strophe.NS.XABBER_NOTIFY}).t(`device verification Hashes didn't match in final stanza fallback text`).up();
+                                stanza.c('no-store', {xmlns: Strophe.NS.HINTS}).up();
+                                stanza.c('no-copy', {xmlns: Strophe.NS.HINTS}).up();
+                                stanza.c('addresses', {xmlns: Strophe.NS.ADDRESS}).c('address',{type: 'to', jid: to}).up().up();
 
                                 this.account.sendFast(stanza, () => {
                                     console.log(stanza);
@@ -1386,15 +1533,31 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
     },
 
     sendVerificationSuccess: async function (to, sid) {
+
         let msg_id = uuid(),
             stanza = $msg({
-                to: to,
-                type: 'chat',
+                to: this.account.server_features.get(Strophe.NS.XABBER_NOTIFY).get('from'),
+                type: 'headline',
                 id: msg_id
             });
-        stanza.c('private', {xmlns: Strophe.NS.CARBONS}).up();
+
+        stanza.c('notify', {xmlns: Strophe.NS.XABBER_NOTIFY});
+        stanza.c('forwarded', {xmlns: Strophe.NS.FORWARD});
+        stanza.c('message', {
+            to: to,
+            from: this.account.get('jid'),
+            type: 'chat',
+            id: uuid()
+        });
         stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: sid});
-        stanza.c('verification-successful');
+        stanza.c('verification-successful').up().up();
+
+        stanza.c('body').t(`Device Verification was successful from ${this.account.jid} A1`).up();
+        stanza.up().up().up();
+        stanza.c('fallback',{xmlns: Strophe.NS.XABBER_NOTIFY}).t(`device verification Verification was successful fallback text`).up();
+        stanza.c('no-store', {xmlns: Strophe.NS.HINTS}).up();
+        stanza.c('no-copy', {xmlns: Strophe.NS.HINTS}).up();
+        stanza.c('addresses', {xmlns: Strophe.NS.ADDRESS}).c('address',{type: 'to', jid: to}).up().up();
 
         this.account.sendFast(stanza, () => {
             console.log(stanza);

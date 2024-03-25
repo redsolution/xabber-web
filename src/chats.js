@@ -345,12 +345,18 @@ xabber.MessagesBase = Backbone.Collection.extend({
 
         if (options.notification_msg && $notification_msg.length){
             attrs.notification_msg_content = $notification_msg[0];
+            attrs.not_verified_device = null;
             let $keyExchange = $notification_msg.children(`authenticated-key-exchange[xmlns="${Strophe.NS.XABBER_TRUST}"]`)
             if ($keyExchange.length){
                 if ($keyExchange.children('verification-start').length){
                     attrs.trust_sid = $keyExchange.attr('sid');
                     attrs.trust_device_id = $keyExchange.children('verification-start').attr('device-id');
                 }
+            }
+            if ($notification_msg.children(`envelope`).length && $notification_msg.find(`content trust-message[xmlns="${Strophe.NS.TRUSTED_MESSAGES}"]`).length){
+                let msg_text = `${this.account.jid} updated their devices`;
+                attrs.original_message = body = msg_text;
+                attrs.notification_trust_msg = true;
             }
         }
         options.encrypted && _.extend(attrs, {encrypted: true});
@@ -1850,7 +1856,7 @@ xabber.EphemeralTimerSelector = xabber.BasicView.extend({
                 second_deferred = new $.Deferred(),
                 new_last_read_msg = msg;
             second_deferred.done(() => {
-                if (last_read_msg.get('timestamp') < new_last_read_msg.get('timestamp')){
+                if (last_read_msg && new_last_read_msg &&  last_read_msg.get('timestamp') < new_last_read_msg.get('timestamp')){
                     this.set('last_read_msg', new_last_read_msg.get('stanza_id'))
                     this.trigger('update_last_read_msg');
                 }
@@ -4485,6 +4491,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
         this.account.messages.add(message);
         let is_scrolled_to_bottom = this.isScrolledToBottom(),
             scrolled_from_bottom = this.getScrollBottom();
+
         if (!_.isUndefined(message.get('is_accepted'))) {
             this.model.set('is_accepted', false);
         }
@@ -4643,6 +4650,22 @@ xabber.ChatContentView = xabber.BasicView.extend({
         if (this.model.messages_view && xabber.body.screen.get('right') === 'message_context' && this.model.messages_view.last_history_loaded)
             this.account.context_messages.add(message);
 
+
+
+        if (message.get('notification_msg') && message.get('notification_msg_content')){
+
+            let $notification_msg = $(message.get('notification_msg_content'));
+
+            if (message.get('notification_trust_msg') || $notification_msg.children(`authenticated-key-exchange[xmlns="${Strophe.NS.XABBER_TRUST}"]`).length) {
+                if (this.account.omemo && this.account.omemo.xabber_trust)
+                    this.account.omemo.xabber_trust.receiveTrustVerificationMessage($notification_msg[0], {
+                        automated: true,
+                        notification_trust_msg: message.get('notification_trust_msg'),
+                        device_id: message.get('device_id')
+                    });
+                return;
+            }
+        }
     },
 
 
@@ -8366,7 +8389,7 @@ xabber.AccountChats = xabber.ChatsBase.extend({
     receiveNotification: function ($message, options) {
         let from_bare_jid = Strophe.getBareJidFromJid($message.attr('from')),
             contact = this.account.contacts.mergeContact($message.attr('from')),
-            chat = this.account.chats.getChat(contact, (options.encrypted || options.not_encrypted) && 'encrypted'),
+            chat = this.account.chats.getChat(contact),
             stanza_ids = this.receiveStanzaId($message, {from_bare_jid: from_bare_jid});
         options = _.extend(options, {stanza_id: stanza_ids.stanza_id, contact_stanza_id: stanza_ids.contact_stanza_id});
 
@@ -8383,14 +8406,7 @@ xabber.AccountChats = xabber.ChatsBase.extend({
             to_resource = to_jid && Strophe.getResourceFromJid(to_jid),
             from_jid = $message.attr('from') || options.from_jid;
 
-        if (($message.children(`authenticated-key-exchange[xmlns="${Strophe.NS.XABBER_TRUST}"]`).length
-            || $message.children(`trust-message[xmlns="${Strophe.NS.XABBER_TRUST}"]`).length) && !options.forwarded
-        || $message.children(`envelope`).length && $message.find(`content trust-message[xmlns="${Strophe.NS.TRUSTED_MESSAGES}"]`).length) {
-            if (this.account.omemo && this.account.omemo.xabber_trust)
-                this.account.omemo.xabber_trust.receiveTrustVerificationMessage(message, options);
-            return;
-        }
-        console.log(message);
+        console.error(message);
         console.log($message.children(`encrypted[xmlns="${Strophe.NS.OMEMO}"]`).length);
         console.log(options);
         console.log(options.forwarded);
@@ -8425,10 +8441,22 @@ xabber.AccountChats = xabber.ChatsBase.extend({
 
         if ($forwarded.length && !options.xml) {
             let $notify = $message.children(`notify[xmlns="${Strophe.NS.XABBER_NOTIFY}"]`);
-            if (!options.notification_msg && $notify.length) {
-                return this.receiveNotification($message, _.extend(options, {
-                    notification_msg: true
-                }));
+            if ($notify.length){
+                console.error($message[0]);
+                console.log(Boolean($message.find(`encrypted[xmlns="${Strophe.NS.OMEMO}"]`).length && !options.forwarded));
+
+                if ($message.find(`encrypted[xmlns="${Strophe.NS.OMEMO}"]`).length && !options.forwarded) {
+                    if (this.account.omemo)
+                        this.account.omemo.receiveChatMessage(message, _.extend(options, {
+                            notification_msg: true
+                        }));
+                    return;
+                } else {
+                    options.encrypted = false;
+                    return this.receiveNotification($message, _.extend(options, {
+                        notification_msg: true
+                    }));
+                }
             }
             let $mam = $message.find(`result[xmlns="${Strophe.NS.MAM}"]`);
             if ($mam.length) {
@@ -10953,7 +10981,7 @@ xabber.InvitationPanelView = xabber.SearchView.extend({
             id: uuid()
         });
         stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: sid }).c('verification-start', {'device-id': this.account.omemo.get('device_id') }).up().up();
-        stanza.c('body').t(`Device Verification request from ${this.account.get('jid')}`).up();
+        stanza.c('body').t(`Device Verification request from ${this.account.jid} A1`).up();
         stanza.up().up().up();
         stanza.c('fallback',{xmlns: Strophe.NS.XABBER_NOTIFY}).t(`device verification fallback text`).up();
         stanza.c('no-store', {xmlns: Strophe.NS.HINTS}).up();
@@ -10964,7 +10992,8 @@ xabber.InvitationPanelView = xabber.SearchView.extend({
             console.log(stanza.tree());
 
             this.account.omemo.xabber_trust.addVerificationSessionData(sid, {
-                verification_started: true
+                verification_started: true,
+                verification_step: '1a'
             });
             utils.callback_popup_message(xabber.getString("trust_verification_started"), 5000);
         });
@@ -10990,7 +11019,7 @@ xabber.InvitationPanelView = xabber.SearchView.extend({
             id: uuid()
         });
         stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: sid }).c('verification-start', {'device-id': this.account.omemo.get('device_id') }).up().up();
-        stanza.c('body').t(`Device Verification request from ${this.account.get('jid')}`).up();
+        stanza.c('body').t(`Device Verification request from ${this.account.jid} A1`).up();
         stanza.up().up().up();
         stanza.c('fallback',{xmlns: Strophe.NS.XABBER_NOTIFY}).t(`device verification fallback text`).up();
         stanza.c('no-store', {xmlns: Strophe.NS.HINTS}).up();
@@ -11001,7 +11030,8 @@ xabber.InvitationPanelView = xabber.SearchView.extend({
             console.log(stanza.tree());
 
             this.account.omemo.xabber_trust.addVerificationSessionData(sid, {
-                verification_started: true
+                verification_started: true,
+                verification_step: '1a'
             });
             utils.callback_popup_message(xabber.getString("trust_verification_started"), 5000);
         });
@@ -12836,7 +12866,7 @@ xabber.ChatBottomView = xabber.BasicView.extend({
     },
 
     writeVoiceMessage: function (ev) {
-        if (this.$('.send-message').hasClass('disabled') || this.$('.attach-voice-message').hasClass('disabled') ){ //34
+        if (this.$('.send-message').hasClass('disabled') || this.$('.attach-voice-message').hasClass('disabled') ){
             return;
         }
         let $elem = $(ev.target);
