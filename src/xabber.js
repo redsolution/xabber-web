@@ -12,9 +12,10 @@ import mentions from "xabber-mentions";
 import ui from "xabber-ui";
 import omemo from "xabber-omemo";
 import trust from "xabber-trust";
+import notifications from "xabber-notifications";
 
 xabber.extendWith(views, api_service, strophe, vcard,
-    accounts, discovery, contacts, chats, searching, mentions, ui, omemo, trust);
+    accounts, discovery, contacts, chats, searching, mentions, ui, omemo, trust, notifications);
 global.xabber = xabber;
 
 export default xabber;

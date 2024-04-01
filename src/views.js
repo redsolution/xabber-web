@@ -33,6 +33,10 @@ xabber.BasicView = Backbone.View.extend({
         this.vname = options.vname;
         this.children = {};
         this.$el.addClass(options.classlist);
+        if (!this.template){
+            console.error(this);
+            console.log(this.template);
+        }
         if (!options.el) {
             this.$el.html(this.template(_.extend({view: this}, constants)));
         }
@@ -964,6 +968,7 @@ xabber.Body = xabber.NodeView.extend({
                 new_attrs.previous_screen = undefined;
             }
         }
+        (!attrs || !attrs.notifications) && (new_attrs.notifications = false);
         this.screen.set(_.extend(new_attrs, attrs), options);
     },
 
@@ -1130,10 +1135,11 @@ xabber.ToolbarView = xabber.BasicView.extend({
 
     showNotifications: function (ev, no_unread) {
         this.$('.toolbar-item:not(.account-item):not(.toolbar-logo)').removeClass('active unread')
-            .filter('.mentions').addClass('active');
-        xabber.body.setScreen('all-chats',);
-        xabber.trigger('show_notification_chats', no_unread);
-        xabber.trigger('update_placeholder');
+            .filter('.mentions').addClass('active')
+
+        xabber.body.setScreen('notifications', {right: 'notifications', notifications: xabber.notifications_view}); //34
+        // xabber.trigger('show_notification_chats', no_unread);
+        // xabber.trigger('update_placeholder');
     },
 
     showChatsByAccount: function (account) {
@@ -1234,6 +1240,11 @@ xabber.ToolbarView = xabber.BasicView.extend({
             });
             let incoming_subscriptions = account.contacts.filter(item => (item.get('invitation') && !item.get('removed')) || (item.get('subscription_request_in') && item.get('subscription') != 'both')).length;
             count_all_msg += incoming_subscriptions;
+            if (account.omemo && account.omemo.xabber_trust){
+                let trust = account.omemo.xabber_trust,
+                    active_trust_sessions = trust.get('active_trust_sessions');
+                mentions += Object.keys(active_trust_sessions).length;
+            }
         });
         return { msgs: count_msg, all_msgs: count_all_msg, group_msgs: count_group_msg, mentions: mentions };
     },
@@ -1259,7 +1270,9 @@ xabber.ToolbarView = xabber.BasicView.extend({
 
     onChangedMentionsCounter: function () {
         let c = this.data.get('mentions_counter');
-        this.$('.mentions-indicator').switchClass('unread', c).text();
+        if (c >= 100)
+            c = '99+';
+        this.$('.mentions-indicator').switchClass('unread', c).text(c);
     },
 
     onChangedAllMessageCounter: function () {

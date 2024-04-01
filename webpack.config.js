@@ -73,6 +73,7 @@ module.exports = {
             "xabber-ui": "./ui",
             "xabber-omemo": "./omemo",
             "xabber-trust": "./trust",
+            "xabber-notifications": "./notifications",
 
             "xabber-translations-info": "~/translations/translation_progress",
 

@@ -438,6 +438,7 @@ xabber.FingerprintsOwnDevices = xabber.BasicView.extend({
     template: templates.fingerprints_devices,
 
     events: {
+        'click .btn-start-trust-session': "startTrustVerificationOwn",
         'click .btn-trust': "trustDevice",
         'click .btn-ignore': "ignoreDevice",
         'click .btn-cancel': "close"
@@ -452,10 +453,53 @@ xabber.FingerprintsOwnDevices = xabber.BasicView.extend({
 
     open: function (device_id, is_own) {
         this.omemo = this.account.omemo;
+        this.device_id = this.account.omemo;
         this.data.set('visible', true);
         this.updateColorScheme();
         this.show();
         this.renderOwnDevices(device_id, is_own);
+    },
+
+    startTrustVerificationOwn: function () {
+        if (!this.account.omemo || !this.omemo.get('device_id') || !this.account.server_features.get(Strophe.NS.XABBER_NOTIFY))
+            return;
+
+        let msg_id = uuid(),
+            sid = uuid(),
+            stanza = $msg({
+                to: this.account.server_features.get(Strophe.NS.XABBER_NOTIFY).get('from'),
+                type: 'headline',
+                id: msg_id
+            });
+        stanza.c('notify', {xmlns: Strophe.NS.XABBER_NOTIFY});
+        stanza.c('forwarded', {xmlns: Strophe.NS.FORWARD});
+        stanza.c('message', {
+            to: this.account.get('jid'),
+            from: this.account.get('jid'),
+            type: 'chat',
+            id: uuid()
+        });
+        stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: sid }).c('verification-start', {'device-id': this.account.omemo.get('device_id'), 'to-device-id': this.device_id }).up().up();
+        stanza.c('body').t(`Device Verification request from ${this.account.jid} A1`).up();
+        stanza.up().up().up();
+        stanza.c('fallback',{xmlns: Strophe.NS.XABBER_NOTIFY}).t(`device verification fallback text`).up();
+        stanza.c('no-store', {xmlns: Strophe.NS.HINTS}).up();
+        stanza.c('no-copy', {xmlns: Strophe.NS.HINTS}).up();
+        stanza.c('addresses', {xmlns: Strophe.NS.ADDRESS}).c('address',{type: 'to', jid: this.account.get('jid')}).up().up();
+        this.account.sendFast(stanza, () => {
+            console.log(stanza);
+            console.log(stanza.tree());
+
+            this.account.omemo.xabber_trust.addVerificationSessionData(sid, {
+                verification_started: true,
+                active_verification_device: {
+                    peer_jid: this.account.get('jid'),
+                },
+                verification_step: '1a'
+            });
+            utils.callback_popup_message(xabber.getString("trust_verification_started"), 5000);
+            this.close();
+        });
     },
 
     updateTrustDevice: function (device_id, $container, context, callback, no_omemo_callback) {

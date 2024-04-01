@@ -1,0 +1,10 @@
+<div class="notification-trust-session" data-sid="{{sid}}" data-jid="{{jid}}">
+    <div class="cancel-session">
+        <svg class="mdi mdi-24px mdi-svg-template" data-svgname="close"></svg>
+    </div>
+    <div class="sid">{{sid}}</div>
+    {[if (jid) {]}<div class="contact-jid">{{jid}}</div>{[}]}
+    {[if (device_id) {]}<div class="contact-device-id">{{device_id}}</div>{[}]}
+    <div class="state">{{state}}</div>
+    {[if (code) {]}<div class="code">{{code}}</div>{[}]}
+</div>

@@ -1444,7 +1444,7 @@ xabber.EphemeralTimerSelector = xabber.BasicView.extend({
     },
 
     getAllMessageRetractions: function () {
-        if (!this.contact.get('group_chat'))
+        if (!this.contact || !this.contact.get('group_chat'))
             return;
         let jid = this.contact.get('full_jid') || this.contact.get('jid');
         let retractions_query = $iq({type: 'get', to: jid})
@@ -4149,6 +4149,9 @@ xabber.ChatContentView = xabber.BasicView.extend({
                 );
                 if (loaded_message) counter++;
             });
+            if (options.is_scrollToTop){
+                this.scrollToTop();
+            }
             if (this.model.get('history_loaded') && !this.model.messages.length){
                 this.model.item_view.updateEmptyChat();
             }
@@ -4566,20 +4569,26 @@ xabber.ChatContentView = xabber.BasicView.extend({
         }
 
         if (this.isVisible() && (!message.get('is_unread') || is_scrolled_to_bottom) && !message.get('is_between_anchors')) {
-            let is_scrolling_needed;
-            if (is_scrolled_to_bottom){
-                if (this.$(`.chat-message.unread-message`).length){
-                    if (this.$(`.chat-message.unread-message`)[0].offsetTop > (this._scrolltop + 140)) {
+            if (this.model.get('notifications')){
+                if (this.isScrolledToTop()){
+                    this.scrollToTop();
+                }
+            } else {
+                let is_scrolling_needed;
+                if (is_scrolled_to_bottom){
+                    if (this.$(`.chat-message.unread-message`).length){
+                        if (this.$(`.chat-message.unread-message`)[0].offsetTop > (this._scrolltop + 140)) {
+                            is_scrolling_needed = true;
+                        }
+                    } else
                         is_scrolling_needed = true;
-                    }
-                } else
-                    is_scrolling_needed = true;
-            }
-            if ((is_scrolled_to_bottom && is_scrolling_needed) || message.get('submitted_here')) {
-                this.scrollToBottom();
-            } else if (!is_scrolled_to_bottom) {
-                this.updateScrollBar();
-                this.scrollTo(this.ps_container[0].scrollHeight - this.ps_container[0].offsetHeight - scrolled_from_bottom);
+                }
+                if ((is_scrolled_to_bottom && is_scrolling_needed) || message.get('submitted_here')) {
+                    this.scrollToBottom();
+                } else if (!is_scrolled_to_bottom) {
+                    this.updateScrollBar();
+                    this.scrollTo(this.ps_container[0].scrollHeight - this.ps_container[0].offsetHeight - scrolled_from_bottom);
+                }
             }
         }
 
@@ -4652,7 +4661,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
 
 
 
-        if (message.get('notification_msg') && message.get('notification_msg_content')){
+        if (message.get('notification_msg') && message.get('notification_msg_content') && this.data.get('notification_content')){
 
             let $notification_msg = $(message.get('notification_msg_content'));
 
@@ -4661,7 +4670,8 @@ xabber.ChatContentView = xabber.BasicView.extend({
                     this.account.omemo.xabber_trust.receiveTrustVerificationMessage($notification_msg[0], {
                         automated: true,
                         notification_trust_msg: message.get('notification_trust_msg'),
-                        device_id: message.get('device_id')
+                        device_id: message.get('device_id'),
+                        msg_item: message
                     });
                 return;
             }
@@ -4889,6 +4899,9 @@ xabber.ChatContentView = xabber.BasicView.extend({
         }
         if ($message && ($message !== $message_in_chat))
             this.removeMessageFromDOM($message);
+        if (this.account.notifications_content && this.model.get('notifications')){
+            this.account.notifications_content.removeMessage(item);
+        }
     },
 
     removeMessageFromDOM: function ($message) {
@@ -10993,6 +11006,9 @@ xabber.InvitationPanelView = xabber.SearchView.extend({
 
             this.account.omemo.xabber_trust.addVerificationSessionData(sid, {
                 verification_started: true,
+                active_verification_device: {
+                    peer_jid: this.model.get('jid'),
+                },
                 verification_step: '1a'
             });
             utils.callback_popup_message(xabber.getString("trust_verification_started"), 5000);
@@ -11031,6 +11047,9 @@ xabber.InvitationPanelView = xabber.SearchView.extend({
 
             this.account.omemo.xabber_trust.addVerificationSessionData(sid, {
                 verification_started: true,
+                active_verification_device: {
+                    peer_jid: this.account.get('jid'),
+                },
                 verification_step: '1a'
             });
             utils.callback_popup_message(xabber.getString("trust_verification_started"), 5000);

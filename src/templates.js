@@ -65,6 +65,7 @@
     addTemplate('base.fingerprints_devices');
     addTemplate('base.fingerprint_item');
     addTemplate('base.fingerprint_devices_item');
+    addTemplate('base.incoming_trust_session');
     addTemplate('base.jingle_message_calling');
     addTemplate('base.plyr_player_popup');
     addTemplate('base.input_widget');
@@ -229,6 +230,10 @@
     addTemplate('chats.ephemeral_timer_selector');
     addTemplate('chats.export_history');
 
+    addTemplate('notifications.notifications_view');
+    addTemplate('notifications.account_filter_item');
+    addTemplate('notifications.current_verification_sessions');
+    addTemplate('notifications.verification_session');
 
     addTemplate('mentions.mentions_panel');
     addTemplate('mentions.mentions_placeholder');

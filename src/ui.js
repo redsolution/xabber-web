@@ -126,11 +126,17 @@ xabber.once("start", function () {
             right_contact_panel_width = 0;
             right_panel_width = panel_width - left_panel_width;
         }
+
+        if (this.body.screen.get('notifications') || (this.body.screen.get('previous_screen') && this.body.screen.get('previous_screen').notifications) ) {
+            left_panel_width = 0;
+            right_panel_width = panel_width;
+        }
         if (right_panel_width < 768) {
             chat_bottom_panel_width = right_panel_width;
         }
 
         right_contact_panel_styles.width = right_contact_panel_width;
+        this.left_panel.$el.switchClass('hidden', this.body.screen.get('notifications')  || (this.body.screen.get('previous_screen') && this.body.screen.get('previous_screen').notifications));
         this.chat_head.$el.switchClass('chat-head-ultra-narrow', right_panel_width <= 650);
         this.chat_head.$el.switchClass('chat-head-narrow', right_panel_width < 750);
         this.chat_head.$el.switchClass('chat-head-normal', (right_panel_width < 850 && right_panel_width >= 750));
@@ -195,6 +201,7 @@ xabber.once("start", function () {
 
     let path_chat_head = new this.ViewPath('chat_item.content.head'),
         path_chat_body = new this.ViewPath('chat_item.content'),
+        path_notifications_body = new this.ViewPath('notifications'),
         path_chat_body_placeholder = new this.ViewPath('chat_item.content_placeholder'),
         path_chat_bottom = new this.ViewPath('chat_item.content.bottom'),
         path_group_invitation = new this.ViewPath('contact.invitation'),
@@ -250,8 +257,21 @@ xabber.once("start", function () {
         roster: null
     });
 
+    this.body.addScreen('notifications', {
+        blur_overlay: null,
+        toolbar: null,
+        main: {
+            // left: { chats: null },
+            right: { notifications_body: null  },
+            // right_contact: {},
+            // placeholders: null
+        },
+        // roster: null
+    });
+
 
     this.right_panel.patchTree = function (tree, options) {
+        console.log(options);
         if (options.right === undefined)
             return;
         if (options.show_placeholder) {
@@ -260,6 +280,11 @@ xabber.once("start", function () {
                 chat_body: null,
                 chat_body_placeholder: path_chat_body_placeholder,
                 chat_bottom: null
+            };
+        }
+        if (options.notifications && options.right === 'notifications') {
+            return {
+                notifications_body: path_notifications_body,
             };
         }
         if ((options.right === 'message_context') || (options.right === 'participant_messages') || (options.right === 'searched_messages')) {
