@@ -1072,12 +1072,15 @@ xabber.ToolbarView = xabber.BasicView.extend({
             (this.$('.toolbar-item:not(.toolbar-logo).all-chats').hasClass('active') ||
                 this.$('.toolbar-item:not(.toolbar-logo).chats').hasClass('active')||
                 this.$('.toolbar-item:not(.toolbar-logo).saved-chats').hasClass('active')||
-                this.$('.toolbar-item:not(.toolbar-logo).mentions').hasClass('active')||
                 this.$('.toolbar-item:not(.toolbar-logo).archive-chats').hasClass('active'))) {
             return;
         }
         this.$('.toolbar-item:not(.toolbar-logo):not(.account-item)').removeClass('active unread');
-        if (_.contains(['all-chats', 'contacts', 'mentions',
+        if (name === 'notifications'){
+            this.$('.toolbar-item:not(.toolbar-logo).mentions').addClass('active');
+            return;
+        }
+        if (_.contains(['all-chats', 'contacts',
                         'settings', 'settings-modal', 'search', 'jingle-calls', 'geolocation-chats', 'about'], name)) {
             this.$('.toolbar-item:not(.toolbar-logo).'+name).addClass('active');
         }
@@ -1195,8 +1198,7 @@ xabber.ToolbarView = xabber.BasicView.extend({
             xabber.chats_view.active_chat.model.trigger('hide_chat');
             xabber.chats_view.active_chat = null;
         }
-        let screen_name = this.$('.toolbar-item:not(.toolbar-logo).settings').hasClass('active') ? 'all-chats' : xabber.body.screen.get('name');
-        xabber.body.setScreen(screen_name, {chat_item: null});
+        xabber.body.setScreen('all-chats', {chat_item: null});
         let $el = $(ev.target).closest('.toolbar-item:not(.toolbar-logo)');
         this.$('.toolbar-item:not(.toolbar-logo):not(.account-item)').removeClass('active unread');
         $el.addClass('active');

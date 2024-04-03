@@ -8601,6 +8601,15 @@ xabber.Roster = xabber.ContactsBase.extend({
         if (!chat.item_view.content && (chat.get('sync_type') === Strophe.NS.XABBER_NOTIFY || is_invite || encrypted && this.account.omemo)) {
             chat.item_view.content = new xabber.ChatContentView({chat_item: chat.item_view});
             if (chat.get('sync_type') === Strophe.NS.XABBER_NOTIFY){
+                if (xabber.notifications_view){
+                    let content;
+                    if (!xabber.notifications_view.notifications_chats.some(item => item.account.get('jid') === chat.account.get('jid'))){
+                        content = new xabber.NotificationsChatContentView({chat_item: chat.item_view});
+                        this.account.notifications_content = content;
+                        xabber.notifications_view.notifications_chats.push(content);
+                        content.data.set('notification_content', true);
+                    }
+                }
                 chat.set('notifications', true);
                 contact.set('subscription', 'both');
                 chat.item_view.content.loadPreviousHistory(true);

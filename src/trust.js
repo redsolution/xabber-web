@@ -30,10 +30,18 @@ xabber.IncomingTrustSessionView = xabber.BasicView.extend({
             ready: this.onRender.bind(this),
             complete: this.close.bind(this)
         });
+        xabber.on('verification_session_cancelled', this.onSessionCancel, this);
     },
 
     onRender: function (options) {
         this.message_options && this.message_options.msg_item && this.trust.removeAfterHandle(this.message_options.msg_item);
+    },
+
+    onSessionCancel: function (options) {
+        options && console.log(options.sid);
+        if (options && options.sid === this.sid){
+            this.closeModal();
+        }
     },
 
     cancel: function () {
@@ -101,6 +109,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
     defaults: {
         trusted_devices: {},
         active_trust_sessions: {},
+        ended_sessions: [],
     },
 
     _initialize: function (attrs, options) {
@@ -457,6 +466,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
 
         this.save('active_trust_sessions', active_sessions);
         this.updateVerificationData();
+        this.addEndedSessionsData(sid);
     },
 
     addVerificationSessionData: function (sid, new_data) {
@@ -474,9 +484,20 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
         }
     },
 
+    addEndedSessionsData: function (sid) {
+        let ended_sessions = this.get('ended_sessions');
+
+        if (!ended_sessions.includes(sid)){
+            ended_sessions.push(sid);
+            xabber.trigger('verification_session_cancelled',{sid: sid});
+
+            this.save('ended_sessions', ended_sessions);
+        }
+    },
+
     updateVerificationData: function () {
         console.error('updateverdat');
-        let active_sessions = this.get('active_trust_sessions'),//34
+        let active_sessions = this.get('active_trust_sessions'),
             active_sessions_data = {};
 
         Object.keys(active_sessions).forEach((session_id) => {
@@ -566,7 +587,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
 
     },
 
-    addNewContactsDevice: function (trusted_key, jid, device_id) { //34
+    addNewContactsDevice: function (trusted_key, jid, device_id) {
         let peer = this.omemo.getPeer(jid);
         console.log(peer);
         if (!peer)
@@ -807,10 +828,6 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                     let contact_trusted_devices = this.get('trusted_devices')[from],
                         $all_items_msg = $(res),
                         peer = this.omemo.getPeer(from);
-                    console.log(peer);
-//34
-                    console.log(contact_trusted_devices);
-                    console.log(res);
                     this.getNewTrustedDevices(contact_trusted_devices, $all_items_msg, null, true, peer);
                 });
 
@@ -853,7 +870,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                 console.log($message.find('verification-successful').attr('reason'));
                 if (this.active_sessions_data[sid].can_handle_trust){
                     this.handleVerificationSuccess($message, contact, sid);
-                } else {//cannot trust yet
+                } else {
                     console.log('cannot trust yet');
                     this.clearData(sid);
                 }
@@ -861,6 +878,11 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
             }
             if ($message.find('verification-failed').length){
                 console.log($message.find('verification-failed').attr('reason'));
+                this.clearData(sid);
+                return;
+            }
+        } else {
+            if ($message.find('verification-failed').length){
                 this.clearData(sid);
                 return;
             }
@@ -878,6 +900,25 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
         }
 
         if (contact){
+            if ($message.find('verification-start').length && $message.find('verification-start').attr('device-id') && this.omemo.get('device_id') && options.automated){
+                let ended_sessions = this.get('ended_sessions');
+
+                if (ended_sessions.includes(sid)){
+                    options.msg_item && this.removeAfterHandle(options.msg_item);
+                    return;
+                }
+                this.account.omemo.xabber_trust.addVerificationSessionData(sid, {
+                });
+                let view = new xabber.IncomingTrustSessionView();
+                view.show({
+                    account: this.account,
+                    trust: this,
+                    message: message,
+                    message_options: options,
+                    contact: contact,
+                    sid: sid
+                });
+            }
             if ($message.find('verification-start').length && $message.find('verification-start').attr('device-id') && this.omemo.get('device_id') && !options.automated){
                 this.account.omemo.xabber_trust.addVerificationSessionData(sid, {
                     current_a_jid: contact.get('jid'),
@@ -925,9 +966,16 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
 
                 if ($message.find('verification-start').attr('to-device-id') != this.omemo.get('device_id'))
                     return;
+                let ended_sessions = this.get('ended_sessions');
 
+                if (ended_sessions.includes(sid)){
+                    options.msg_item && this.removeAfterHandle(options.msg_item);
+                    return;
+                }
+
+                this.account.omemo.xabber_trust.addVerificationSessionData(sid, {
+                });
                 let view = new xabber.IncomingTrustSessionView();
-                console.error(view);
                 view.show({
                     account: this.account,
                     trust: this,

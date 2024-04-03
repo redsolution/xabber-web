@@ -127,6 +127,7 @@ xabber.NotificationsView = xabber.BasicView.extend({
                 content = new xabber.NotificationsChatContentView({chat_item: chat.item_view});
                 this.account.notifications_content = content;
                 this.notifications_chats.push(content);
+                content.data.set('notification_content', true);
                 console.log(content);
             } else {
                 content = this.notifications_chats.filter(item => item.account.get('jid') === chat.account.get('jid'));
@@ -159,7 +160,6 @@ xabber.NotificationsChatContentView = xabber.ChatContentView.extend({
 
     onShow: function (attrs) {
         console.log(attrs);
-        this.data.set('notification_content', true);
         xabber.notifications_view.$('.notifications-content').append(this.$el);
         this.onScroll();
         if (!this.$('.chat-content .notification-sessions-wrap').length){

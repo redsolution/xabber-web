@@ -4549,7 +4549,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
                     if (!xabber.get('focused')) {
                         if (this.model.get('saved') || this.model.isMuted())
                             message.set('muted', true);
-                        else if (!message.get('synced_invitation_from_server'))
+                        else if (!message.get('synced_invitation_from_server') && !((message.get('notification_msg') && message.get('notification_msg_content') && !this.data.get('notification_content'))))
                             this.notifyMessage(message);
                     }
                     this.model.setMessagesDisplayed(message.get('timestamp'));
