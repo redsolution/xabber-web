@@ -7334,15 +7334,15 @@ xabber.ChatContentView = xabber.BasicView.extend({
     },
 
     onClickNotification: function (ev) {
-        let $elem = $(ev.target),
-            msg = this.model.messages.get($elem.closest('.chat-message').data('uniqueid')),
-            $notification_msg = $(msg.get('notification_msg_content'));
-
-        if ($notification_msg.children(`authenticated-key-exchange[xmlns="${Strophe.NS.XABBER_TRUST}"]`).length) {
-            if (this.account.omemo && this.account.omemo.xabber_trust)
-                this.account.omemo.xabber_trust.receiveTrustVerificationMessage($notification_msg[0], {});
-            return;
-        }
+        // let $elem = $(ev.target),
+        //     msg = this.model.messages.get($elem.closest('.chat-message').data('uniqueid')),
+        //     $notification_msg = $(msg.get('notification_msg_content'));
+        //
+        // if ($notification_msg.children(`authenticated-key-exchange[xmlns="${Strophe.NS.XABBER_TRUST}"]`).length) {
+        //     if (this.account.omemo && this.account.omemo.xabber_trust)
+        //         this.account.omemo.xabber_trust.receiveTrustVerificationMessage($notification_msg[0], {});
+        //     return;
+        // }
     },
 
     onClickMessage: function (ev) {

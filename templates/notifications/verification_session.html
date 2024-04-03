@@ -2,6 +2,11 @@
     <div class="cancel-session">
         <svg class="mdi mdi-24px mdi-svg-template" data-svgname="close"></svg>
     </div>
+    {[if (is_enter_code) {]}
+        <div class="enter-code">
+            <svg class="mdi mdi-24px mdi-svg-template" data-svgname="code"></svg>
+        </div>
+    {[}]}
     <div class="sid">{{sid}}</div>
     {[if (jid) {]}<div class="contact-jid">{{jid}}</div>{[}]}
     {[if (device_id) {]}<div class="contact-device-id">{{device_id}}</div>{[}]}

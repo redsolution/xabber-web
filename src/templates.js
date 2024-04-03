@@ -243,6 +243,7 @@
     addSvgTemplate('svg.xmpp');
     addSvgTemplate('svg.account-outline');
     addSvgTemplate('svg.qrcode');
+    addSvgTemplate('svg.code');
     addSvgTemplate('svg.id-outline');
     addSvgTemplate('svg.clock-outline');
     addSvgTemplate('svg.index');

@@ -20579,9 +20579,17 @@ ul.restrictions-list-content>li {
     top: 8px;
     right: 8px;
 }
+.notifications-content-wrap .notification-trust-session .enter-code{
+    cursor: pointer;
+    position: absolute;
+    top: 8px;
+    right: 40px;
+}
 .notifications-content-wrap .notification-trust-session:hover .cancel-session{
     display: block;
 }
+.notifications-content-wrap .notification-trust-session .enter-code svg polygon,
+.notifications-content-wrap .notification-trust-session .enter-code svg path,
 .notifications-content-wrap .notification-trust-session .cancel-session svg polygon{
     fill: #80868b;
 }

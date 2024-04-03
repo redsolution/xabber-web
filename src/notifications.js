@@ -28,6 +28,7 @@ xabber.NotificationsView = xabber.BasicView.extend({
     events: {
         "click .notifications-account-filter-content .filter-item-wrap": "selectAccount",
         "click .cancel-session": "cancelTrustSession",
+        "click .enter-code": "enterCode",
 
     },
 
@@ -45,10 +46,18 @@ xabber.NotificationsView = xabber.BasicView.extend({
     cancelTrustSession: function (ev) {
         if (!this.account || !this.account.omemo)
             return;
-        let $item = $(ev.target).closest('.notification-trust-session'),
-            sid;
+        let $item = $(ev.target).closest('.notification-trust-session');
         if ($item.attr('data-sid')){
             this.account.omemo.xabber_trust && this.account.omemo.xabber_trust.cancelSession($item.attr('data-sid'), $item.attr('data-jid'))
+        }
+    },
+
+    enterCode: function (ev) {
+        if (!this.account || !this.account.omemo)
+            return;
+        let $item = $(ev.target).closest('.notification-trust-session');
+        if ($item.attr('data-sid')){
+            this.account.omemo.xabber_trust && this.account.omemo.xabber_trust.handleAcceptedMsgBySid($item.attr('data-sid'))
         }
     },
 
@@ -245,10 +254,14 @@ xabber.NotificationsChatContentView = xabber.ChatContentView.extend({
                 sid: session_id,
                 state: state,
                 code: session.active_verification_code,
+                is_enter_code: null,
             };
             if (session.active_verification_device) {
                 item.jid = session.active_verification_device.peer_jid;
                 item.device_id = session.active_verification_device.device_id;
+            }
+            if (session.verification_step === '1a' && session.verification_accepted_msg_id) {
+                item.is_enter_code = true;
             }
 
             this.$('.notification-sessions-wrap').append($(templates.verification_session(item)));
@@ -271,10 +284,14 @@ xabber.NotificationsChatContentView = xabber.ChatContentView.extend({
             sid: session_id,
             state: state,
             code: session.active_verification_code,
+            is_enter_code: null,
         };
         if (session.active_verification_device) {
             item.jid = session.active_verification_device.peer_jid;
             item.device_id = session.active_verification_device.device_id;
+        }
+        if (session.verification_step === '1a' && session.verification_accepted_msg_id) {
+            item.is_enter_code = true;
         }
 
         this.$('.notification-sessions-wrap').prepend($(templates.verification_session(item)));
@@ -309,7 +326,8 @@ xabber.NotificationsChatContentView = xabber.ChatContentView.extend({
 
     updateNotificationDate: function (msg_elem, msg) {
         let $msg = $(msg_elem);
-        $msg.find('.msg-time').text(xabber.getString("time_since_with_time", [utils.pretty_time_since($msg.data('time')), utils.pretty_time($msg.data('time'))]));
+        // $msg.find('.msg-time').text(xabber.getString("time_since_with_time", [utils.pretty_time_since($msg.data('time')), utils.pretty_time($msg.data('time'))]));
+        $msg.find('.msg-time').text(pretty_datetime($msg.data('time')));
     },
 
     scrollToUnreadWithButton: function () {

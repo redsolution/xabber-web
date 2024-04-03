@@ -844,6 +844,32 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
 
     },
 
+    handleAcceptedMsgBySid: function (sid) {
+        let active_sessions = this.get('active_trust_sessions');
+
+        if (active_sessions[sid]){
+            let session = active_sessions[sid];
+            if (session.verification_accepted_msg_id){
+                let message;
+                message = this.account.messages.get(session.verification_accepted_msg_id)
+                console.error(message);
+                if (!message)
+                    return;
+
+                if (message.get('notification_msg_content')) {
+                    let $notification_msg = $(message.get('notification_msg_content'));
+                    this.account.omemo.xabber_trust.receiveTrustVerificationMessage($notification_msg[0], {
+                        automated: false,
+                        notification_trust_msg: message.get('notification_trust_msg'),
+                        device_id: message.get('device_id'),
+                        msg_item: message
+                    });
+                }
+            }
+        }
+
+    },
+
     receiveTrustVerificationMessage: function (message, options) {
         if (!this.account.server_features.get(Strophe.NS.XABBER_NOTIFY))
             return;
@@ -890,10 +916,8 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
 
         if (this.active_sessions_data[sid]
             && this.active_sessions_data[sid].current_a_jid === Strophe.getBareJidFromJid($message.attr('to'))){
-            console.log('HERE');
-            console.log($('#modals').find('.modal.modal-verification-start'));
-            if ($message.find(`verification-accepted`).length && $('#modals').find('.modal.modal-verification-start').length){// on accept from another device closes modal
-                let $verifcationStartModal = $('#modals').find('.modal.modal-verification-start');
+            if ($message.find(`verification-accepted`).length && $('#modals').find('.modal.modal-verification-start').length){
+                let $verifcationStartModal = $('#modals').find('.modal.modal-verification-start');  // change to close opened request view
                 $verifcationStartModal.find('.btn-cancel').click();
                 return;
             }
@@ -941,6 +965,11 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                         peer_jid: device.jid,
                     },
                 });
+                if (options.automated){
+                    options.msg_item && this.account.omemo.xabber_trust.addVerificationSessionData(sid, {
+                        verification_accepted_msg_id: options.msg_item.get('unique_id'),
+                    });
+                }
                 if (this.active_sessions_data[sid].verification_step === '1a' && !options.automated)
                     this.handleTrustVerificationSigned($message, contact);
                 return;
@@ -954,10 +983,6 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                     this.handleTrustVerificationFinalHash($message, contact);
                     return;
                 }
-                // if ($message.find('trusted-message').length){
-                //     this.handleTrustVerificationDevices($message, contact);
-                //     return;
-                // }
             }
         } else if (Strophe.getBareJidFromJid($message.attr('from')) === this.account.get('jid') && Strophe.getBareJidFromJid($message.attr('to')) === this.account.get('jid')) {
             if (this.active_sessions_data[sid] && this.active_sessions_data[sid].last_sent_message_id == $message.attr('id'))
@@ -991,10 +1016,6 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                 if ($message.find('verification-start').attr('to-device-id') != this.omemo.get('device_id'))
                     return;
                 let device = this.omemo.own_devices[$message.find('verification-start').attr('to-device-id')];
-
-                console.error('saveddddddddddddddddddddddddd');
-                console.log(sid);
-                console.log(message);
                 this.account.omemo.xabber_trust.addVerificationSessionData(sid, {
                     current_a_jid: this.account.get('jid'),
                     active_verification_device: {
@@ -1022,6 +1043,11 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                         peer_jid: device.jid,
                     },
                 });
+                if (options.automated){
+                    options.msg_item && this.account.omemo.xabber_trust.addVerificationSessionData(sid, {
+                        verification_accepted_msg_id: options.msg_item.get('unique_id'),
+                    });
+                }
                 if (this.active_sessions_data[sid].verification_step === '1a' && !options.automated)
                     this.handleTrustVerificationSigned($message, null, true);
                 return;

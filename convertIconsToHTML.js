@@ -98,6 +98,7 @@ let badges_names = [
         'information',
         'information-outline',
         'qrcode',
+        'code',
         'fullname',
         'fullname-outline',
         'id-outline',
