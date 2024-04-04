@@ -8449,11 +8449,14 @@ xabber.AccountChats = xabber.ChatsBase.extend({
         if ($forwarded.length && !options.xml) {
             let $notify = $message.children(`notify[xmlns="${Strophe.NS.XABBER_NOTIFY}"]`);
             if ($notify.length){
+                if (!this.account.server_features.get(Strophe.NS.XABBER_NOTIFY))
+                    return;
 
                 if ($message.find(`encrypted[xmlns="${Strophe.NS.OMEMO}"]`).length && !options.forwarded) {
                     if (this.account.omemo)
                         this.account.omemo.receiveChatMessage(message, _.extend(options, {
-                            notification_msg: true
+                            notification_msg: true,
+                            conversation: this.account.server_features.get(Strophe.NS.XABBER_NOTIFY).get('from')
                         }));
                     return;
                 } else {
