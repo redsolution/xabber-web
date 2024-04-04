@@ -115,6 +115,10 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
     _initialize: function (attrs, options) {
         this.account = options.account;
         this.omemo = options.omemo;
+        this.account.omemo = this.omemo;
+        this.account.on('peer_devices_updated', () => {
+            this.updateVerificationData();
+        });
         this.updateVerificationData();
     },
 
@@ -363,7 +367,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
 
         this.account.sendIQFast(iq,
             (res) => {
-                console.log(res)
+                console.log(res);
                 callback && callback(res);
             },
             (data_error) => {
@@ -498,7 +502,9 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
     updateVerificationData: function () {
         console.error('updateverdat');
         let active_sessions = this.get('active_trust_sessions'),
-            active_sessions_data = {};
+            active_sessions_data = {},
+            device_exists_jid_list = [];
+
 
         Object.keys(active_sessions).forEach((session_id) => {
             let session = active_sessions[session_id],
@@ -512,6 +518,12 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                 } else {
                     peer = this.omemo.getPeer(active_verification_device.peer_jid);
                     device = peer.devices[active_verification_device.device_id];
+                    if (this.active_sessions_data && this.active_sessions_data[session_id] && device && !this.active_sessions_data[session_id].active_verification_device){
+                        device_exists_jid_list.push({
+                            sid: session_id,
+                            jid: active_verification_device.peer_jid
+                        })
+                    }
                 }
                 session_data.active_verification_device = device;
             } else {
@@ -537,9 +549,16 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
 
 
             active_sessions_data[session_id] = session_data;
+
         });
 
         this.active_sessions_data = active_sessions_data;
+
+        device_exists_jid_list.forEach((item) => {
+            let event_name = `trust_omemo_device_appeared-${item.sid}`;
+            this.account.trigger(event_name, item.jid)
+        });
+
     },
 
     parseContactsTrustedDevices: function (message, options) {
@@ -849,22 +868,10 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
 
         if (active_sessions[sid]){
             let session = active_sessions[sid];
-            if (session.verification_accepted_msg_id){
-                let message;
-                message = this.account.messages.get(session.verification_accepted_msg_id)
-                console.error(message);
-                if (!message)
-                    return;
+            if (session.verification_accepted_msg_xml){
+                this.account.omemo.xabber_trust.receiveTrustVerificationMessage(session.verification_accepted_msg_xml, {
 
-                if (message.get('notification_msg_content')) {
-                    let $notification_msg = $(message.get('notification_msg_content'));
-                    this.account.omemo.xabber_trust.receiveTrustVerificationMessage($notification_msg[0], {
-                        automated: false,
-                        notification_trust_msg: message.get('notification_trust_msg'),
-                        device_id: message.get('device_id'),
-                        msg_item: message
-                    });
-                }
+                });
             }
         }
 
@@ -955,33 +962,46 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
             }
             if ($message.find(`verification-accepted`).length && $message.find(`verification-accepted`).attr('device-id')
                 && $message.find(`salt`).length && this.active_sessions_data[sid] && this.active_sessions_data[sid].verification_started){
-                let peer = this.omemo.getPeer(contact.get('jid')),
-                    device = peer.devices[$message.find('verification-accepted').attr('device-id')];
 
                 this.account.omemo.xabber_trust.addVerificationSessionData(sid, {
                     active_verification_device: {
-                        device_id: device.id,
+                        device_id: $message.find('verification-accepted').attr('device-id'),
                         is_own_device: false,
-                        peer_jid: device.jid,
+                        peer_jid: contact.get('jid'),
                     },
                 });
                 if (options.automated){
-                    options.msg_item && this.account.omemo.xabber_trust.addVerificationSessionData(sid, {
-                        verification_accepted_msg_id: options.msg_item.get('unique_id'),
+                    this.account.omemo.xabber_trust.addVerificationSessionData(sid, {
+                        verification_accepted_msg_xml: message.outerHTML,
                     });
                 }
                 if (this.active_sessions_data[sid].verification_step === '1a' && !options.automated)
                     this.handleTrustVerificationSigned($message, contact);
                 return;
             }
-            if (this.active_sessions_data[sid] && this.active_sessions_data[sid].active_verification_device && this.active_sessions_data[sid].active_verification_code){
-                if ($message.find('hash').length && $message.find('salt').length && this.active_sessions_data[sid].verification_step === '1b'){
-                    this.handleTrustVerificationCodeHash($message, contact);
-                    return;
-                }
-                if ($message.find('hash').length && !$message.find('salt').length && this.active_sessions_data[sid].verification_step === '2a'){
-                    this.handleTrustVerificationFinalHash($message, contact);
-                    return;
+            if (this.active_sessions_data[sid] && this.active_sessions_data[sid].active_verification_code){
+                let dfd = new $.Deferred();
+                dfd.done(() => {
+                    if ($message.find('hash').length && $message.find('salt').length && this.active_sessions_data[sid].verification_step === '1b'){
+                        this.handleTrustVerificationCodeHash($message, contact);
+                        return;
+                    }
+                    if ($message.find('hash').length && !$message.find('salt').length && this.active_sessions_data[sid].verification_step === '2a'){
+                        this.handleTrustVerificationFinalHash($message, contact);
+                        return;
+                    }
+                });
+                if (this.active_sessions_data[sid].active_verification_device){
+                    dfd.resolve();
+                } else {
+                    let event_name = `trust_omemo_device_appeared-${sid}`;
+
+                    this.account.on(event_name, (jid) => {
+                        if (jid === contact.get('jid')){
+                            this.account.off(event_name);
+                            dfd.resolve();
+                        }
+                    });
                 }
             }
         } else if (Strophe.getBareJidFromJid($message.attr('from')) === this.account.get('jid') && Strophe.getBareJidFromJid($message.attr('to')) === this.account.get('jid')) {
@@ -1044,8 +1064,8 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                     },
                 });
                 if (options.automated){
-                    options.msg_item && this.account.omemo.xabber_trust.addVerificationSessionData(sid, {
-                        verification_accepted_msg_id: options.msg_item.get('unique_id'),
+                    this.account.omemo.xabber_trust.addVerificationSessionData(sid, {
+                        verification_accepted_msg_xml: message.outerHTML,
                     });
                 }
                 if (this.active_sessions_data[sid].verification_step === '1a' && !options.automated)
@@ -1074,21 +1094,31 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
         return new Promise((resolve, reject) => {
             if (device){
                 this.omemo.store.getIdentityKeyPair().then((own_ik) => {
-                    let own_pubkey = own_ik.pubKey,
-                        own_privkey = own_ik.privKey;
-                    if (own_pubkey.byteLength == 33)
-                        own_pubkey = own_pubkey.slice(1);
-                    if (own_privkey.byteLength == 33)
-                        own_privkey = own_privkey.slice(1);
-                    let device_pubkey = device.get('ik');
-                    if (device_pubkey.byteLength == 33) // иногда после запуска пустой
-                        device_pubkey = device_pubkey.slice(1);
+                    let dfd = new $.Deferred();
+                    dfd.done(() => {
+                        let own_pubkey = own_ik.pubKey,
+                            own_privkey = own_ik.privKey;
+                        if (own_pubkey.byteLength == 33)
+                            own_pubkey = own_pubkey.slice(1);
+                        if (own_privkey.byteLength == 33)
+                            own_privkey = own_privkey.slice(1);
+                        let device_pubkey = device.get('ik');
+                        if (device_pubkey.byteLength == 33) // иногда после запуска пустой
+                            device_pubkey = device_pubkey.slice(1);
 
-                    resolve({
-                        own_pubkey,
-                        own_privkey,
-                        device_pubkey,
+                        resolve({
+                            own_pubkey,
+                            own_privkey,
+                            device_pubkey,
+                        });
                     });
+                    if (device.get('ik') && device.get('ik').byteLength){
+                        dfd.resolve();
+                    } else {
+                        device.on('change:ik', () => {
+                            dfd.resolve();
+                        })
+                    }
                 });
             } else {
                 console.log('no device');

@@ -260,7 +260,7 @@ xabber.NotificationsChatContentView = xabber.ChatContentView.extend({
                 item.jid = session.active_verification_device.peer_jid;
                 item.device_id = session.active_verification_device.device_id;
             }
-            if (session.verification_step === '1a' && session.verification_accepted_msg_id) {
+            if (session.verification_step === '1a' && session.verification_accepted_msg_xml) {
                 item.is_enter_code = true;
             }
 
@@ -290,7 +290,7 @@ xabber.NotificationsChatContentView = xabber.ChatContentView.extend({
             item.jid = session.active_verification_device.peer_jid;
             item.device_id = session.active_verification_device.device_id;
         }
-        if (session.verification_step === '1a' && session.verification_accepted_msg_id) {
+        if (session.verification_step === '1a' && session.verification_accepted_msg_xml) {
             item.is_enter_code = true;
         }
 
@@ -599,6 +599,7 @@ xabber.once("start", function () {
 
     this.notifications_body = this.right_panel.addChild('notifications_body',
             this.NotificationsBodyContainer);
+
 }, xabber);
 
 export default xabber;

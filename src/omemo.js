@@ -41,6 +41,9 @@ xabber.Peer = Backbone.Model.extend({
                 label = devices[d].label;
             label && device.set('label', label);
         }
+        if (devices){
+            this.account.trigger('peer_devices_updated');
+        }
     },
 
     getDevicesNode: async function () {
