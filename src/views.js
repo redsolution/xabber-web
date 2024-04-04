@@ -1141,6 +1141,7 @@ xabber.ToolbarView = xabber.BasicView.extend({
             .filter('.mentions').addClass('active')
 
         xabber.body.setScreen('notifications', {right: 'notifications', notifications: xabber.notifications_view}); //34
+        xabber.notifications_view && xabber.notifications_view.onShowNotificationsTab();
         // xabber.trigger('show_notification_chats', no_unread);
         // xabber.trigger('update_placeholder');
     },

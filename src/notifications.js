@@ -43,6 +43,15 @@ xabber.NotificationsView = xabber.BasicView.extend({
         this.updateAccountsFilter();
     },
 
+    onShowNotificationsTab: function () {
+        if (!this.account || !this.account.omemo){
+            return;
+        }
+        if (this.current_content){
+            this.current_content.onShowNotificationsTab();
+        }
+    },
+
     cancelTrustSession: function (ev) {
         if (!this.account || !this.account.omemo)
             return;
@@ -196,21 +205,128 @@ xabber.NotificationsChatContentView = xabber.ChatContentView.extend({
         return;
     },
 
+    onShowNotificationsTab: function () {
+        let unread_count_sync = this.model.get('const_unread');
+        if (unread_count_sync){
+            this.model.set('const_unread', 0);
+
+            if (this.model.get('unread'))
+                this.readMessages();
+            unread_count_sync--;
+            for (let step = 0; step < unread_count_sync; step++) {
+                let read_messages = this.$('.chat-message:not(.unread-message-background)');
+                if (read_messages.length){
+                    read_messages.first().addClass('unread-message-background');
+                }
+            }
+
+        }
+    },
+
     readVisibleMessages: function (is_context) {
         let self = is_context ? this.model.messages_view : this;
         if (!self.isVisible())
             return;
         if (self.$('.chat-message.unread-message').length && xabber.get('focused') && !xabber.get('idle')){
-            let last_visible_unread_msg;
+            let first_visible_unread_msg;
             self.$('.chat-message.unread-message').each((idx, msg) => {
                 if ($(msg).isVisibleInContainer(self.$('.chat-content'))) {
-                    last_visible_unread_msg = msg;
+                    first_visible_unread_msg = msg;
+                    return false;
                 }
             });
-            if (last_visible_unread_msg){
-                this.readMessage(this.model.messages.get($(last_visible_unread_msg).data('uniqueid')), $(last_visible_unread_msg), is_context);
+            if (first_visible_unread_msg){
+                this.readMessage(this.model.messages.get($(first_visible_unread_msg).data('uniqueid')), $(first_visible_unread_msg), is_context);
             }
         }
+    },
+
+    onChangedReadState: function (message) {
+        let is_unread = message.get('is_unread'),
+            is_synced = message.get('synced_from_server'),
+            is_unread_archived = message.get('is_unread_archived'),
+            is_missed_msg = message.get('missed_msg'),
+            $msg = this.$(`.chat-message[data-uniqueid="${message.get("unique_id")}"]`);
+        if (is_unread) {
+            if (!is_unread_archived && !is_synced && !is_missed_msg)
+                this.model.messages_unread.add(message);
+            if (!message.get('was_readen')){
+                $msg.addClass('unread-message');
+                $msg.addClass('unread-message-background');
+            }
+            this.model.recountUnread();
+        } else {
+            if ((!is_unread_archived && !is_synced && !is_missed_msg) || this.model.messages_unread.indexOf(message) > -1)
+                this.model.messages_unread.remove(message);
+            message.set('was_readen', true);
+            $msg.removeClass('unread-message');
+            // setTimeout(() => {
+            //     $msg.removeClass('unread-message-background');
+            // }, 1000);
+            this.model.recountUnread();
+            if (!message.get('muted')) {
+                xabber.recountAllMessageCounter();
+            }
+            if (message.get('ephemeral_timer')) {
+                message.set('displayed_time', new Date());
+                message.collection.checkEphemeralTimers();
+            }
+        }
+    },
+
+    readMessage: function (last_visible_msg, $last_visible_msg, is_context) {
+        clearTimeout(this._read_last_message_timeout);
+        this._read_last_message_timeout = setTimeout(() => {
+            this.model.sendMarker(last_visible_msg.get('msgid'), 'displayed', last_visible_msg.get('stanza_id'), last_visible_msg.get('contact_stanza_id'), last_visible_msg.get('encrypted') && last_visible_msg.get('ephemeral_timer'));
+            this.model.set('last_read_msg', last_visible_msg.get('stanza_id'));
+            this.model.set('prev_last_read_msg', last_visible_msg.get('stanza_id'));
+
+            if (is_context){
+                let unread_context_messages = _.clone(this.account.context_messages.models).filter(item => Boolean(item.get('is_unread')) || Boolean(item.get('is_unread_archived')));
+                _.each(unread_context_messages, (msg) => {
+                    let msg_item = this.model.messages.find(message => message.get('stanza_id') == msg.get('stanza_id') || message.get('contact_stanza_id') == msg.get('stanza_id'));
+                    if (msg_item) {
+                        msg.set('is_unread', msg_item.get('is_unread'));
+                        msg.set('is_unread_archived', msg_item.get('is_unread_archived'));
+                    }
+                });
+                // setTimeout(() => {
+                //     $last_visible_msg.removeClass('unread-message-background');
+                // }, 1000);
+            }
+
+            xabber.toolbar_view.recountAllMessageCounter();
+        }, 1000);
+
+        if (last_visible_msg.get('is_unread_archived') || this.model.last_message && (last_visible_msg.get('unique_id') === this.model.last_message.get('unique_id')) || this.model.get('const_unread')){
+            let unread_messages = _.clone(this.model.messages.models).filter(item => Boolean(item.get('is_unread'))),
+                read_count = 0;
+
+            _.each(unread_messages, (msg) => {
+                if (msg.get('timestamp') <= last_visible_msg.get('timestamp')) {
+                    msg.set('is_unread', false);
+                    read_count++;
+                }
+            });
+            read_count = this.model.get('const_unread') - read_count;
+            (read_count < 0) && (read_count = 0);
+            this.model.set('unread', 0);
+            this.model.set('const_unread', read_count);
+        } else {
+            let unread_messages = _.clone(this.model.messages_unread.models);
+            _.each(unread_messages, (msg) => {
+                if (msg.get('timestamp') <= last_visible_msg.get('timestamp')) {
+                    msg.set('is_unread', false);
+                }
+            });
+        }
+        xabber.toolbar_view.recountAllMessageCounter();
+
+        // if (!is_context){
+        //     setTimeout(() => {
+        //         $last_visible_msg.removeClass('unread-message-background');
+        //     }, 1000);
+        // }
     },
 
     removeMessage: function (item) {

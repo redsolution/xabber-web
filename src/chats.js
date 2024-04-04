@@ -7334,7 +7334,9 @@ xabber.ChatContentView = xabber.BasicView.extend({
     },
 
     onClickNotification: function (ev) {
-        // let $elem = $(ev.target),
+        let $elem = $(ev.target);
+
+        $elem.closest('.chat-message').removeClass('unread-message-background');
         //     msg = this.model.messages.get($elem.closest('.chat-message').data('uniqueid')),
         //     $notification_msg = $(msg.get('notification_msg_content'));
         //
