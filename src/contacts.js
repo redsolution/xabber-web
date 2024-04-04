@@ -8613,6 +8613,7 @@ xabber.Roster = xabber.ContactsBase.extend({
                 chat.set('notifications', true);
                 contact.set('subscription', 'both');
                 chat.item_view.content.loadPreviousHistory(true);
+                xabber.accounts.trigger('notification_chat_created');
             }
         }
         if ($item.attr('pinned') || $item.attr('pinned') === '0'){

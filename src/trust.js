@@ -19,7 +19,6 @@ xabber.IncomingTrustSessionView = xabber.BasicView.extend({
     },
 
     render: function (options) {
-        console.error(options);
         this.account = options.account;
         this.trust = options.trust;
         this.message = options.message;
@@ -38,7 +37,6 @@ xabber.IncomingTrustSessionView = xabber.BasicView.extend({
     },
 
     onSessionCancel: function (options) {
-        options && console.log(options.sid);
         if (options && options.sid === this.sid){
             this.closeModal();
         }
@@ -60,8 +58,6 @@ xabber.IncomingTrustSessionView = xabber.BasicView.extend({
     },
 
     close: function (is_accepted) {
-        console.log('close');
-        console.log(is_accepted);
         if (!is_accepted){
 
             let msg_id = uuid(),
@@ -91,8 +87,8 @@ xabber.IncomingTrustSessionView = xabber.BasicView.extend({
             stanza.c('addresses', {xmlns: Strophe.NS.ADDRESS}).c('address',{type: 'to', jid: to}).up().up();
 
             this.account.sendFast(stanza, () => {
-                console.log(stanza);
-                console.log(stanza.tree());
+                // console.log(stanza);
+                // console.log(stanza.tree());
                 utils.callback_popup_message(xabber.getString("trust_verification_decrypt_failed"), 5000);
             });
             this.trust.clearData(this.sid);
@@ -155,8 +151,8 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
             stanza.c('addresses', {xmlns: Strophe.NS.ADDRESS}).c('address',{type: 'to', jid: to}).up().up();
 
             this.account.sendFast(stanza, () => {
-                console.log(stanza);
-                console.log(stanza.tree());
+                // console.log(stanza);
+                // console.log(stanza.tree());
                 utils.callback_popup_message(xabber.getString("trust_verification_decrypt_failed"), 5000);
             });
         }
@@ -264,7 +260,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                 this.configNode(() => {
                     this.account.sendIQFast(iq,
                         (res) => {
-                            console.log(res);
+                            // console.log(res);
                             callback && callback(res);
                         },
                         (data_error) => {
@@ -272,12 +268,12 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                         });
                 }, (err) => {
                     let err_code = $(err).find('error').attr('code');
-                    console.log(err_code);
+                    // console.log(err_code);
                     if (err_code == 404){
                         this.createNode(() => {
                             this.account.sendIQFast(iq,
                                 (res) => {
-                                    console.log(res);
+                                    // console.log(res);
                                     callback && callback(res);
                                 },
                                 (data_error) => {
@@ -311,7 +307,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
         stanza.c('body').t(`${this.account.jid} shared his trusted devices`).up();
         stanza.c('trust-message', {xmlns: Strophe.NS.TRUSTED_MESSAGES, usage: Strophe.NS.OMEMO});
 
-        console.log(trusted_devices);
+        // console.log(trusted_devices);
 
         Object.keys(trusted_devices).forEach((item) => {
             if (item === this.account.get('jid'))
@@ -325,9 +321,9 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
         stanza.up().up().c('rpad').t('0'.repeat(200).slice(1, Math.floor((Math.random() * 198) + 1))).up();
         stanza.c('from', {jid: this.account.get('jid')}).up().up();
 
-        console.log(stanza);
-        console.log(stanza.tree());
-        console.log(stanza.tree().outerHTML);
+        // console.log(stanza);
+        // console.log(stanza.tree());
+        // console.log(stanza.tree().outerHTML);
 
         this.omemo.encrypt(null, stanza ,true).then((msg) => {
             if (msg) {
@@ -367,7 +363,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
 
         this.account.sendIQFast(iq,
             (res) => {
-                console.log(res);
+                // console.log(res);
                 callback && callback(res);
             },
             (data_error) => {
@@ -376,22 +372,22 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
     },
 
     populateOwnTrustedDevices: function () {
-        console.log(this.get('trusted_devices'));
+        // console.log(this.get('trusted_devices'));
         let trusted_devices = this.get('trusted_devices');
-        console.log(Object.keys(trusted_devices).length);
+        // console.log(Object.keys(trusted_devices).length);
         if (!Object.keys(trusted_devices).length) {
             let own_device = this.omemo.own_devices[this.omemo.get('device_id')];
-            console.log(own_device);
+            // console.log(own_device);
                 if (!own_device){
                     this.account.once('devices_updated', () => {
-                        console.log('devices_updated');
+                        // console.log('devices_updated');
                         this.populateOwnTrustedDevices()
                     });
                     return;
                 }
 
                 this.getTrustedKey(own_device).then((trustedKeyBuffer) => {
-                    console.log(utils.ArrayBuffertoBase64(trustedKeyBuffer));
+                    // console.log(utils.ArrayBuffertoBase64(trustedKeyBuffer));
                     trusted_devices[this.account.get('jid')] = [
                         {
                             trusted_key: utils.ArrayBuffertoBase64(trustedKeyBuffer),
@@ -402,10 +398,10 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                             public_key: utils.ArrayBuffertoBase64(own_device.get('ik'))
                         }];
                     this.save('trusted_devices', trusted_devices);
-                    console.log(this.get('trusted_devices'));
+                    // console.log(this.get('trusted_devices'));
                     this.publishOwnTrustedDevices();
                 }).catch((err) => {
-                    console.error(err);
+                    // console.error(err);
                 });
         } else {
             this.publishOwnTrustedDevices();
@@ -421,7 +417,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
 
             dfd.done(() => {
                 let trustedKey = device.get('id') + '::' + device.get('fingerprint');
-                console.log(trustedKey);
+                // console.log(trustedKey);
 
                 let trustedKeyBytes = new TextEncoder().encode(trustedKey);
 
@@ -500,7 +496,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
     },
 
     updateVerificationData: function () {
-        console.error('updateverdat');
+        // console.error('updateverdat');
         let active_sessions = this.get('active_trust_sessions'),
             active_sessions_data = {},
             device_exists_jid_list = [];
@@ -570,24 +566,24 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
 
         let my_trusted_devices = this.get('trusted_devices')[this.account.get('jid')];
 
-        console.log(my_trusted_devices.filter(e => e.device_id == received_device_id));
-        console.log(my_trusted_devices.some(e => e.device_id == received_device_id));
+        // console.log(my_trusted_devices.filter(e => e.device_id == received_device_id));
+        // console.log(my_trusted_devices.some(e => e.device_id == received_device_id));
 
         if (my_trusted_devices.some(e => e.device_id == received_device_id)){// сделать обработку трастов
             let $trust_message = $message.find('trust-message');
             $trust_message.children('key-owner').each((idx, key_owner) => {
-                console.log(key_owner);
+                // console.log(key_owner);
                 let $key_owner = $(key_owner),
                     jid = $key_owner.attr('jid');
                 $key_owner.children('trust').each((idx, trust_item) => {
-                    console.log(trust_item);
+                    // console.log(trust_item);
                     let $trust_item = $(trust_item),
                         device_id = $trust_item.attr('device-id'),
                         trusted_key = $trust_item.text();
 
                     let is_new = this.addNewContactsDevice(trusted_key, jid, device_id);
-                    console.log(is_new);
-                    console.log(device_id);
+                    // console.log(is_new);
+                    // console.log(device_id);
 
                     counter++;
                     if (is_new)
@@ -596,7 +592,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                        if (is_new_devices)
                            this.publishContactsTrustedDevices();
                        else {
-                           console.log('no new devices')
+                           // console.log('no new devices')
                        }
                     }
                 });
@@ -608,12 +604,12 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
 
     addNewContactsDevice: function (trusted_key, jid, device_id) {
         let peer = this.omemo.getPeer(jid);
-        console.log(peer);
+        // console.log(peer);
         if (!peer)
             return;
         let device = peer.devices[device_id],
             trusted_devices = this.get('trusted_devices');
-        console.log(device);
+        // console.log(device);
         if (!device)
             return;
         if (trusted_devices[jid] && _.isArray(trusted_devices[jid])){
@@ -637,14 +633,14 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                 public_key: utils.ArrayBuffertoBase64(device.get('ik'))
             }];
         }
-        console.log('new item');
-        console.log({
-            trusted_key: trusted_key,
-            fingerprint: device.get('fingerprint'),
-            device_id: device.get('id'),
-            timestamp: Date.now(),
-            public_key: utils.ArrayBuffertoBase64(device.get('ik'))
-        });
+        // console.log('new item');
+        // console.log({
+        //     trusted_key: trusted_key,
+        //     fingerprint: device.get('fingerprint'),
+        //     device_id: device.get('id'),
+        //     timestamp: Date.now(),
+        //     public_key: utils.ArrayBuffertoBase64(device.get('ik'))
+        // });
         this.save('trusted_devices', trusted_devices);
 
         return true;
@@ -653,17 +649,17 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
     },
 
     getNewTrustedDevices: function (trusted_devices, $message, final_trusted_devices, is_first, peer) {
-        console.error('here');
-        console.error(this.omemo.own_devices.length);
-        peer && console.error(peer);
-        peer && console.error(peer.devices);
+        // console.error('here');
+        // console.error(this.omemo.own_devices.length);
+        // peer && console.error(peer);
+        // peer && console.error(peer.devices);
         let new_trusted_devices = [],
             counter = 0;
         final_trusted_devices = final_trusted_devices || [];
         let devices_to_remove = [];
         if (!is_first){
             trusted_devices.forEach((item,idx) => {
-                console.log(item);
+                // console.log(item);
                 // console.log(idx);
                 let trustedKeyString = atob(item.trusted_key);
 
@@ -698,8 +694,8 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                 // console.log(counter === trusted_devices.length);
 
                 if (counter === trusted_devices.length) {
-                    console.log(trusted_devices);
-                    console.log(final_trusted_devices);
+                    // console.log(trusted_devices);
+                    // console.log(final_trusted_devices);
                     if (new_trusted_devices.length){
                         this.getNewTrustedDevices(new_trusted_devices, $message, final_trusted_devices, null, peer)
                     } else {
@@ -835,8 +831,8 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                 let my_trusted_devices = this.get('trusted_devices')[this.account.get('jid')],
                     $all_items_msg = $(res);
 
-                console.log(my_trusted_devices);
-                console.log(res);
+                // console.log(my_trusted_devices);
+                // console.log(res);
                 this.getNewTrustedDevices(my_trusted_devices, $all_items_msg, null, true);
             });
         } else {
@@ -855,7 +851,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
     },
 
     removeAfterHandle: function (message) {
-        console.log(message);
+        // console.log(message);
         if (!message.collection || !message.collection.chat)
             return;
         let chat = message.collection.chat;
@@ -882,15 +878,15 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
             return;
         let $message = $(message),
             sid = $message.find('authenticated-key-exchange').attr('sid');
-        console.error(message);
+        // console.error(message);
         let contact = this.account.contacts.get(Strophe.getBareJidFromJid($message.attr('from')));
 
         if (Strophe.getBareJidFromJid($message.attr('from')) === this.account.get('jid'))
             contact = undefined;
 
-        console.log(sid);
-        console.log(contact);
-        console.log(options);
+        // console.log(sid);
+        // console.log(contact);
+        // console.log(options);
         if (options.notification_trust_msg && options.device_id){
             if (options.device_id == this.omemo.get('device_id'))
                 return;
@@ -900,17 +896,17 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
 
         if (this.active_sessions_data[sid]){
             if ($message.find('verification-successful').length){
-                console.log($message.find('verification-successful').attr('reason'));
+                // console.log($message.find('verification-successful').attr('reason'));
                 if (this.active_sessions_data[sid].can_handle_trust){
                     this.handleVerificationSuccess($message, contact, sid);
                 } else {
-                    console.log('cannot trust yet');
+                    // console.log('cannot trust yet');
                     this.clearData(sid);
                 }
                 return;
             }
             if ($message.find('verification-failed').length){
-                console.log($message.find('verification-failed').attr('reason'));
+                // console.log($message.find('verification-failed').attr('reason'));
                 this.clearData(sid);
                 return;
             }
@@ -1031,8 +1027,8 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                 });
             }
             if ($message.find('verification-start').length && $message.find('verification-start').attr('device-id') && $message.find('verification-start').attr('to-device-id') && this.omemo.get('device_id') && !options.automated){
-                console.log(this.omemo.get('device_id'));
-                console.log($message.find('verification-start').attr('to-device-id'));
+                // console.log(this.omemo.get('device_id'));
+                // console.log($message.find('verification-start').attr('to-device-id'));
                 if ($message.find('verification-start').attr('to-device-id') != this.omemo.get('device_id'))
                     return;
                 let device = this.omemo.own_devices[$message.find('verification-start').attr('to-device-id')];
@@ -1129,21 +1125,15 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
     },
 
     handleTrustVerificationStart: function ($message, contact, is_own, msg_item) {
-        console.log($message[0]);
         let device_id = $message.find('verification-start').attr('device-id'),
             sid = $message.find('authenticated-key-exchange').attr('sid'),
             code = utils.randomCode(6),
             peer,device;
         if (contact) {
             peer = this.omemo.getPeer(contact.get('jid'));
-            console.log(peer);
             device = peer.devices[device_id];
         } else if (is_own){
-            console.log(is_own);
-            console.log(this.omemo.own_devices);
             device = this.omemo.own_devices[device_id];
-            console.log(device_id);
-            console.log(device);
         }
         if (!device)
             return;
@@ -1160,10 +1150,10 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
         //     null
         // ).done((result) => {
         //     if (result) {
-                console.log(device);
+        //         console.log(device);
                 this.getDevicesIKsForTrustVerification(device).then((devices_IK) => {
-                    console.log(devices_IK);
-                    console.log(code);
+                    // console.log(devices_IK);
+                    // console.log(code);
                     this.generateVerificationArrayBuffer(devices_IK.device_pubkey, devices_IK.own_privkey, code).then((response) => {
                         // console.log(response);
                         let msg_id = uuid(),
@@ -1203,8 +1193,8 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                         });
                         msg_item && this.removeAfterHandle(msg_item);
                         this.account.sendFast(stanza, () => {
-                            console.log(stanza);
-                            console.log(stanza.tree());
+                            // console.log(stanza);
+                            // console.log(stanza.tree());
                             utils.callback_popup_message(xabber.getString("trust_verification_traded"), 5000);
                         });
                     });
@@ -1233,7 +1223,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
             return;
 
         this.getDevicesIKsForTrustVerification(device).then((devices_IK) => {
-            console.log(devices_IK);
+            // console.log(devices_IK);
 
             let curve = utils.doCurve(devices_IK.own_privkey, devices_IK.device_pubkey),
                 $salt = $message.find('salt');
@@ -1301,8 +1291,8 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                                         });
 
                                         this.account.sendFast(stanza, () => {
-                                            console.log(stanza);
-                                            console.log(stanza.tree());
+                                            // console.log(stanza);
+                                            // console.log(stanza.tree());
                                             utils.callback_popup_message(xabber.getString("trust_verification_answered"), 5000);
                                         });
 
@@ -1310,7 +1300,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                                 });
                             });
                         }).catch(e => {
-                            console.log(e);
+                            console.error(e);
 
                             let msg_id = uuid(),
                                 to = contact ? contact.get('jid') : this.account.get('jid'),
@@ -1339,8 +1329,8 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                             stanza.c('addresses', {xmlns: Strophe.NS.ADDRESS}).c('address',{type: 'to', jid: to}).up().up();
 
                             this.account.sendFast(stanza, () => {
-                                console.log(stanza);
-                                console.log(stanza.tree());
+                                // console.log(stanza);
+                                // console.log(stanza.tree());
                                 utils.callback_popup_message(xabber.getString("trust_verification_decrypt_failed"), 5000);
                             });
                             this.clearData(sid);
@@ -1375,8 +1365,8 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                         stanza.c('addresses', {xmlns: Strophe.NS.ADDRESS}).c('address',{type: 'to', jid: to}).up().up();
 
                         this.account.sendFast(stanza, () => {
-                            console.log(stanza);
-                            console.log(stanza.tree());
+                            // console.log(stanza);
+                            // console.log(stanza.tree());
                             utils.callback_popup_message(xabber.getString("trust_verification_decrypt_failed"), 5000);
                         });
                         this.clearData(sid);
@@ -1393,10 +1383,10 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
         }
         let device = this.active_sessions_data[sid].active_verification_device,
             code = this.active_sessions_data[sid].active_verification_code;
-        console.log(device);
+        // console.log(device);
 
         this.getDevicesIKsForTrustVerification(device).then((devices_IK) => {
-            console.log(devices_IK);
+            // console.log(devices_IK);
 
             let curve = utils.doCurve(devices_IK.own_privkey, devices_IK.device_pubkey),
                 $salt = $message.find('salt'),
@@ -1435,27 +1425,27 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
 
                             let concatinated = new Uint8Array([...new Uint8Array(A_trustedKeyBuffer), ...new Uint8Array(code_buffer), ...new Uint8Array(b_payload) ]);
 
-                            console.log('A_trustedKeyBuffer  !!!!!!!!!!!!!!!!!!!!!!!!!2');
-                            console.log(A_trustedKeyBuffer);
-                            console.log(utils.ArrayBuffertoBase64(A_trustedKeyBuffer));
-                            console.log('code_buffer  !!!!!!!!!!!!!!!!!!!!!!!!!2');
-                            console.log(code_buffer);
-                            console.log(utils.ArrayBuffertoBase64(code_buffer));
-                            console.log('b_payload  !!!!!!!!!!!!!!!!!!!!!!!!!2');
-                            console.log(b_payload);
-                            console.log(utils.ArrayBuffertoBase64(b_payload));
-                            console.log('concatinated  !!!!!!!!!!!!!!!!!!!!!!!!!2');
-                            console.log(concatinated);
-                            console.log(utils.ArrayBuffertoBase64(concatinated));
+                            // console.log('A_trustedKeyBuffer  !!!!!!!!!!!!!!!!!!!!!!!!!2');
+                            // console.log(A_trustedKeyBuffer);
+                            // console.log(utils.ArrayBuffertoBase64(A_trustedKeyBuffer));
+                            // console.log('code_buffer  !!!!!!!!!!!!!!!!!!!!!!!!!2');
+                            // console.log(code_buffer);
+                            // console.log(utils.ArrayBuffertoBase64(code_buffer));
+                            // console.log('b_payload  !!!!!!!!!!!!!!!!!!!!!!!!!2');
+                            // console.log(b_payload);
+                            // console.log(utils.ArrayBuffertoBase64(b_payload));
+                            // console.log('concatinated  !!!!!!!!!!!!!!!!!!!!!!!!!2');
+                            // console.log(concatinated);
+                            // console.log(utils.ArrayBuffertoBase64(concatinated));
 
                             utils.createSha256(concatinated).then((concatinated_hash) => {
                                 let generated_hash_b64 = utils.ArrayBuffertoBase64(concatinated_hash),
                                     decrypted_hash_b64 = utils.ArrayBuffertoBase64(decrypted_hash.decryptedBuffer);
 
-                                console.log('generated_hash_b64  !!!!!!!!!!!!!!!!!!!!!!!!!2');
-                                console.log(generated_hash_b64);
-                                console.log('decrypted_hash_b64  !!!!!!!!!!!!!!!!!!!!!!!!!2');
-                                console.log(decrypted_hash_b64);
+                                // console.log('generated_hash_b64  !!!!!!!!!!!!!!!!!!!!!!!!!2');
+                                // console.log(generated_hash_b64);
+                                // console.log('decrypted_hash_b64  !!!!!!!!!!!!!!!!!!!!!!!!!2');
+                                // console.log(decrypted_hash_b64);
 
                                 if (generated_hash_b64 === decrypted_hash_b64){
                                     this.getTrustedKey(this.omemo.own_devices[this.omemo.get('device_id')]).then((B_trustedKeyBuffer) => {
@@ -1511,8 +1501,8 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                                             });
 
                                             this.account.sendFast(stanza, () => {
-                                                console.log(stanza);
-                                                console.log(stanza.tree());
+                                                // console.log(stanza);
+                                                // console.log(stanza.tree());
                                                 utils.callback_popup_message(xabber.getString("trust_verification_answered"), 5000);
                                             });
 
@@ -1547,8 +1537,8 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                                     stanza.c('addresses', {xmlns: Strophe.NS.ADDRESS}).c('address',{type: 'to', jid: to}).up().up();
 
                                     this.account.sendFast(stanza, () => {
-                                        console.log(stanza);
-                                        console.log(stanza.tree());
+                                        // console.log(stanza);
+                                        // console.log(stanza.tree());
                                         utils.callback_popup_message(xabber.getString("trust_verification_decrypt_failed"), 5000);
                                     });
                                     this.clearData(sid);
@@ -1585,8 +1575,8 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                         stanza.c('addresses', {xmlns: Strophe.NS.ADDRESS}).c('address',{type: 'to', jid: to}).up().up();
 
                         this.account.sendFast(stanza, () => {
-                            console.log(stanza);
-                            console.log(stanza.tree());
+                            // console.log(stanza);
+                            // console.log(stanza.tree());
                             utils.callback_popup_message(xabber.getString("trust_verification_decrypt_failed"), 5000);
                         });
                         this.clearData(sid);
@@ -1621,8 +1611,8 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                     stanza.c('addresses', {xmlns: Strophe.NS.ADDRESS}).c('address',{type: 'to', jid: to}).up().up();
 
                     this.account.sendFast(stanza, () => {
-                        console.log(stanza);
-                        console.log(stanza.tree());
+                        // console.log(stanza);
+                        // console.log(stanza.tree());
                         utils.callback_popup_message(xabber.getString("trust_verification_decrypt_failed"), 5000);
                     });
                     this.clearData(sid);
@@ -1639,8 +1629,8 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
         }
         let device = this.active_sessions_data[sid].active_verification_device,
             code = this.active_sessions_data[sid].active_verification_code;
-        console.log('device');
-        console.log(device);
+        // console.log('device');
+        // console.log(device);
 
         this.getDevicesIKsForTrustVerification(device).then((devices_IK) => {
 
@@ -1666,10 +1656,10 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                             let generated_hash_b64 = utils.ArrayBuffertoBase64(concatinated_hash),
                                 decrypted_hash_b64 = utils.ArrayBuffertoBase64(decrypted_hash.decryptedBuffer);
 
-                            console.log('generated_hash_b64  !!!!!!!!!!!!!!!!!!!!!!!!!2');
-                            console.log(generated_hash_b64);
-                            console.log('decrypted_hash_b64  !!!!!!!!!!!!!!!!!!!!!!!!!2');
-                            console.log(decrypted_hash_b64);
+                            // console.log('generated_hash_b64  !!!!!!!!!!!!!!!!!!!!!!!!!2');
+                            // console.log(generated_hash_b64);
+                            // console.log('decrypted_hash_b64  !!!!!!!!!!!!!!!!!!!!!!!!!2');
+                            // console.log(decrypted_hash_b64);
 
                             if (generated_hash_b64 === decrypted_hash_b64){
                                 //start devices exchange
@@ -1704,8 +1694,8 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                                 stanza.c('addresses', {xmlns: Strophe.NS.ADDRESS}).c('address',{type: 'to', jid: to}).up().up();
 
                                 this.account.sendFast(stanza, () => {
-                                    console.log(stanza);
-                                    console.log(stanza.tree());
+                                    // console.log(stanza);
+                                    // console.log(stanza.tree());
                                     utils.callback_popup_message(xabber.getString("trust_verification_decrypt_failed"), 5000);
                                 });
                                 this.clearData(sid);
@@ -1723,17 +1713,17 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
         let hash = await utils.createSha256(code),
             concatinated = new Uint8Array([...new Uint8Array(curve), ...new Uint8Array(hash)]),
             encryptionKeyHash = await utils.createSha256(concatinated);
-        console.log('code');
-        console.log(code);
-        console.log('hash');
-        console.log(hash);
-        console.log(utils.ArrayBuffertoBase64(hash));
-        console.log('concatinated');
-        console.log(concatinated);
-        console.log(utils.ArrayBuffertoBase64(concatinated));
-        console.log('encryptionKeyHash');
-        console.log(encryptionKeyHash);
-        console.log(utils.ArrayBuffertoBase64(encryptionKeyHash));
+        // console.log('code');
+        // console.log(code);
+        // console.log('hash');
+        // console.log(hash);
+        // console.log(utils.ArrayBuffertoBase64(hash));
+        // console.log('concatinated');
+        // console.log(concatinated);
+        // console.log(utils.ArrayBuffertoBase64(concatinated));
+        // console.log('encryptionKeyHash');
+        // console.log(encryptionKeyHash);
+        // console.log(utils.ArrayBuffertoBase64(encryptionKeyHash));
 
         // console.log('utils.ArrayBuffertoBase64(hash)');
         // console.log(utils.ArrayBuffertoBase64(hash));
@@ -1836,8 +1826,8 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
         // console.log(utils.ArrayBuffertoBase64(aes_key));
         // console.log('utils.ArrayBuffertoBase64(concatinated_hash)  !!!!!!!!!!!!!!!!!!!!!!!!!2');
         // console.log(utils.ArrayBuffertoBase64(concatinated_hash));
-        console.log('utils.ArrayBuffertoBase64(sharedKey)  !!!!!!!!!!!!!!!!!!!!!!!!!2');
-        console.log(utils.ArrayBuffertoBase64(sharedKey));
+        // console.log('utils.ArrayBuffertoBase64(sharedKey)  !!!!!!!!!!!!!!!!!!!!!!!!!2');
+        // console.log(utils.ArrayBuffertoBase64(sharedKey));
 
         let encryptionKey = await window.crypto.subtle.importKey('raw', sharedKey, { "name": 'AES-CBC' }, true, ['encrypt']);
 
@@ -1877,7 +1867,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
         stanza.c('addresses', {xmlns: Strophe.NS.ADDRESS}).c('address',{type: 'to', jid: to}).up().up();
 
         this.account.sendFast(stanza, () => {
-            console.log(stanza);
+            // console.log(stanza);
             console.log(stanza.tree());
             this.clearData(sid);
             utils.callback_popup_message(xabber.getString("trust_verification_verification_succeded"), 5000);
@@ -1909,7 +1899,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                 }];
             }
             this.save('trusted_devices', trusted_devices);
-            console.log(this.get('trusted_devices'));
+            // console.log(this.get('trusted_devices'));
 
             this.sendVerificationSuccess(to, sid);
             this.publishOwnTrustedDevices(() => {
@@ -1949,7 +1939,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                 }];
             }
             this.save('trusted_devices', trusted_devices);
-            console.log(this.get('trusted_devices'));
+            // console.log(this.get('trusted_devices'));
 
 
             this.publishOwnTrustedDevices(() => {

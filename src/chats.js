@@ -8204,14 +8204,11 @@ xabber.AccountChats = xabber.ChatsBase.extend({
         }
 
         if ($echo_msg.length) {
-            console.log(this.account._pending_messages);
-            console.log(this.account._pending_messages.length);
             let origin_msg_id = $echo_msg.children('origin-id').first().attr('id'),
                 pending_message = this.account._pending_messages.find(msg => msg.unique_id == origin_msg_id);
             if (pending_message) {
                 this.account._pending_messages.splice(this.account._pending_messages.indexOf(pending_message), 1);
             }
-            console.log(this.account._pending_messages.length);
             return this.receiveChatMessage($echo_msg[0], {echo_msg: true, stanza_id: $echo_msg.children('stanza-id').attr('id')});
         }
 
@@ -8421,11 +8418,6 @@ xabber.AccountChats = xabber.ChatsBase.extend({
             to_resource = to_jid && Strophe.getResourceFromJid(to_jid),
             from_jid = $message.attr('from') || options.from_jid;
 
-        console.error(message);
-        console.log($message.children(`encrypted[xmlns="${Strophe.NS.OMEMO}"]`).length);
-        console.log(options);
-        console.log(options.forwarded);
-
         if ($message.children(`encrypted[xmlns="${Strophe.NS.OMEMO}"]`).length && !options.forwarded) {
             if (this.account.omemo)
                 this.account.omemo.receiveChatMessage(message, options);
@@ -8457,8 +8449,6 @@ xabber.AccountChats = xabber.ChatsBase.extend({
         if ($forwarded.length && !options.xml) {
             let $notify = $message.children(`notify[xmlns="${Strophe.NS.XABBER_NOTIFY}"]`);
             if ($notify.length){
-                console.error($message[0]);
-                console.log(Boolean($message.find(`encrypted[xmlns="${Strophe.NS.OMEMO}"]`).length && !options.forwarded));
 
                 if ($message.find(`encrypted[xmlns="${Strophe.NS.OMEMO}"]`).length && !options.forwarded) {
                     if (this.account.omemo)
@@ -11003,8 +10993,6 @@ xabber.InvitationPanelView = xabber.SearchView.extend({
         stanza.c('no-copy', {xmlns: Strophe.NS.HINTS}).up();
         stanza.c('addresses', {xmlns: Strophe.NS.ADDRESS}).c('address',{type: 'to', jid: this.model.get('jid')}).up().up();
         this.account.sendFast(stanza, () => {
-            console.log(stanza);
-            console.log(stanza.tree());
 
             this.account.omemo.xabber_trust.addVerificationSessionData(sid, {
                 verification_started: true,
@@ -11044,8 +11032,6 @@ xabber.InvitationPanelView = xabber.SearchView.extend({
         stanza.c('no-copy', {xmlns: Strophe.NS.HINTS}).up();
         stanza.c('addresses', {xmlns: Strophe.NS.ADDRESS}).c('address',{type: 'to', jid: this.account.get('jid')}).up().up();
         this.account.sendFast(stanza, () => {
-            console.log(stanza);
-            console.log(stanza.tree());
 
             this.account.omemo.xabber_trust.addVerificationSessionData(sid, {
                 verification_started: true,
@@ -12531,7 +12517,6 @@ xabber.ChatBottomView = xabber.BasicView.extend({
             clipboard_data = ev.clipboardData;
         // if (clipboard_data) {
             if (clipboard_data && clipboard_data.files.length > 0) {
-                console.log('true');
                 ev.preventDefault();
                 let image_from_clipboard = clipboard_data.files[clipboard_data.files.length - 1],
                     blob_image = window.URL.createObjectURL(new Blob([image_from_clipboard])),
@@ -12542,7 +12527,6 @@ xabber.ChatBottomView = xabber.BasicView.extend({
             else if (clipboard_data && clipboard_data.items.length > 0) {
                 let image_from_clipboard = clipboard_data.items[clipboard_data.items.length - 1];
                 if (image_from_clipboard.kind === 'file') {
-                    console.log('true');
                     ev.preventDefault();
                     let blob = image_from_clipboard.getAsFile(),
                         reader = new FileReader(), deferred = new $.Deferred();

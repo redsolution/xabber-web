@@ -1137,13 +1137,19 @@ xabber.ToolbarView = xabber.BasicView.extend({
     },
 
     showNotifications: function (ev, no_unread) {
-        this.$('.toolbar-item:not(.account-item):not(.toolbar-logo)').removeClass('active unread')
-            .filter('.mentions').addClass('active')
+        try {
+            let chat = xabber.chats.filter(item => item.get('jid') === item.account.server_features.get(Strophe.NS.XABBER_NOTIFY).get('from') && item.get('notifications'));
 
-        xabber.body.setScreen('notifications', {right: 'notifications', notifications: xabber.notifications_view}); //34
-        xabber.notifications_view && xabber.notifications_view.onShowNotificationsTab();
-        // xabber.trigger('show_notification_chats', no_unread);
-        // xabber.trigger('update_placeholder');
+            if (!xabber.accounts.enabled.length || !xabber.accounts.connected.length || !chat.length)
+                return;
+            this.$('.toolbar-item:not(.account-item):not(.toolbar-logo)').removeClass('active unread')
+                .filter('.mentions').addClass('active')
+
+            xabber.body.setScreen('notifications', {right: 'notifications', notifications: xabber.notifications_view}); //34
+            xabber.notifications_view && xabber.notifications_view.onShowNotificationsTab();
+        } catch (e) {
+            console.error(e);
+        }
     },
 
     showChatsByAccount: function (account) {
@@ -2390,10 +2396,15 @@ xabber.SettingsModalView = xabber.BasicView.extend({
     closeSettings: function (ev) {
         this.current_sound && this.current_sound.pause();
         if (xabber.body.screen && xabber.body.screen.get('previous_screen')){
+
             let previous_screen = xabber.body.screen.get('previous_screen');
-            previous_screen.close_settings = true;
-            xabber.body.setScreen(previous_screen.name, previous_screen);
-            xabber.body.screen.attributes.close_settings = undefined;
+            if (previous_screen.name === 'notifications' && !xabber.accounts.enabled.length){
+                xabber.toolbar_view.showAllChats();
+            } else {
+                previous_screen.close_settings = true;
+                xabber.body.setScreen(previous_screen.name, previous_screen);
+                xabber.body.screen.attributes.close_settings = undefined;
+            }
         } else
             xabber.toolbar_view.showAllChats();
     },

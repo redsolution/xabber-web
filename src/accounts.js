@@ -1738,6 +1738,7 @@ xabber.Accounts = Backbone.CollectionWithStorage.extend({
     },
 
     getConnectedList: function () {
+        this.trigger('connected_list_changed');
         this.connected = this.filter(account => account.isConnected());
     },
 

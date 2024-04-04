@@ -34,12 +34,12 @@ xabber.NotificationsView = xabber.BasicView.extend({
 
     _initialize: function () {
         this.notifications_chats = [];
-        xabber.accounts.on("list_changed add change:enabled destroy", this.updateAccountsFilter, this);
+        xabber.accounts.on("list_changed connected_list_changed notification_chat_created add change:enabled destroy", this.updateAccountsFilter, this);
         return this;
     },
 
     render: function (options) {
-        console.log(options);
+        // console.log(options);
         this.updateAccountsFilter();
     },
 
@@ -71,10 +71,10 @@ xabber.NotificationsView = xabber.BasicView.extend({
     },
 
     updateAccountsFilter: function () {
-        let accounts = xabber.accounts.connected;
-        console.log(accounts.length);
+        let accounts = xabber.accounts.enabled;
+        // console.log(accounts.length);
         accounts = accounts.filter(item => item.server_features.get(Strophe.NS.XABBER_NOTIFY));
-        console.log(accounts.length);
+        // console.log(accounts.length);
         if (accounts.length){
             //     jid = options.jid || '';
             // this.$('input[name="username"]').val(jid).attr('readonly', !!jid)
@@ -102,6 +102,26 @@ xabber.NotificationsView = xabber.BasicView.extend({
             }
         } else {
             // if no accounts
+            // console.log(xabber.accounts.enabled.length);
+            // console.log(xabber.body.screen.get('name') === 'notifications');
+            if (!xabber.accounts.enabled.length){
+                if (xabber.body.screen.get('name') === 'notifications'){
+                    xabber.toolbar_view.showAllChats(null, true);
+                } else if (xabber.body.screen.get('previous_screen') && xabber.body.screen.get('previous_screen').name === 'notifications') {
+                    this.$el.detach();
+                    xabber.toolbar_view.$('.toolbar-item:not(.account-item):not(.toolbar-logo)').removeClass('active');
+                    // // let previous_chat = xabber.body.screen.get('previous_screen');
+                    // //     previous_chat.name = 'all-chats';
+                    // //     previous_chat.right_contact = '';
+                    // let previous_chat = {
+                    //     name: 'all-chats',
+                    //     notifications: false
+                    // };
+                    //     // previous_chat.name = 'all-chats';
+                    //     // previous_chat.right_contact = '';
+                    // xabber.body.screen.set('previous_screen', previous_chat);
+                }
+            }
         }
     },
 
@@ -119,8 +139,8 @@ xabber.NotificationsView = xabber.BasicView.extend({
         }
         this.$('.notifications-account-filter-content .filter-item-wrap').removeClass('selected-filter');
         $item.addClass('selected-filter');
-        console.log($item);
-        console.log($item.attr('data-jid'));
+        // console.log($item);
+        // console.log($item.attr('data-jid'));
         this.account = xabber.accounts.connected.filter(item => item.get('jid') === $item.attr('data-jid'));
         if (this.account.length){
             this.account = this.account[0];
@@ -130,36 +150,38 @@ xabber.NotificationsView = xabber.BasicView.extend({
 
     updateCurrentNotifications: function () {
         let content;
-        console.log(this.account);
-        console.log(this.account.get('jid'));
+        // console.log(this.account);
+        // console.log(this.account.get('jid'));
         if (this.account){
+            if (!xabber.accounts.enabled.length || !xabber.accounts.connected.length)
+                return;
             let chat = this.account.chats.filter(item => item.get('jid') === this.account.server_features.get(Strophe.NS.XABBER_NOTIFY).get('from') && item.get('notifications'));
             if (chat.length){
                 chat = chat[0];
             }
-            console.log(chat);
+            // console.log(chat);
             if (!chat)
                 console.log('no chat!');
-            console.log(this.notifications_chats.some(item => item.model.get('jid') === this.account.server_features.get(Strophe.NS.XABBER_NOTIFY).get('from')));
+            // console.log(this.notifications_chats.some(item => item.model.get('jid') === this.account.server_features.get(Strophe.NS.XABBER_NOTIFY).get('from')));
             if (!this.notifications_chats.some(item => item.account.get('jid') === chat.account.get('jid'))){
                 content = new xabber.NotificationsChatContentView({chat_item: chat.item_view});
                 this.account.notifications_content = content;
                 this.notifications_chats.push(content);
                 content.data.set('notification_content', true);
-                console.log(content);
+                // console.log(content);
             } else {
                 content = this.notifications_chats.filter(item => item.account.get('jid') === chat.account.get('jid'));
                 if (content.length)
                     content = content[0];
-                console.log(content);
+                // console.log(content);
             }
-            console.log(this.notifications_chats);
-
-            console.log(content);
+            // console.log(this.notifications_chats);
+            //
+            // console.log(content);
             if (content){
-                console.log(content.$el);
-                console.log(this);
-                console.log(this.current_content);
+                // console.log(content.$el);
+                // console.log(this);
+                // console.log(this.current_content);
                 if (this.current_content){
                     if (this.current_content.account.get('jid') === content.account.get('jid')){
                         return;
@@ -177,7 +199,7 @@ xabber.NotificationsView = xabber.BasicView.extend({
 xabber.NotificationsChatContentView = xabber.ChatContentView.extend({
 
     onShow: function (attrs) {
-        console.log(attrs);
+        // console.log(attrs);
         xabber.notifications_view.$('.notifications-content').append(this.$el);
         this.onScroll();
         if (!this.$('.chat-content .notification-sessions-wrap').length){
@@ -196,7 +218,7 @@ xabber.NotificationsChatContentView = xabber.ChatContentView.extend({
     },
 
     onHide: function (attrs) {
-        console.log(attrs);
+        // console.log(attrs);
         this.$el.detach();
 
     },
