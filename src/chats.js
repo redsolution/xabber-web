@@ -315,7 +315,7 @@ xabber.MessagesBase = Backbone.Collection.extend({
 
         let $notification_msg;
         if (options.notification_msg){
-            $notification_msg = $message.children(`notify[xmlns="${Strophe.NS.XABBER_NOTIFY}"]`).children('forwarded').children('message');
+            $notification_msg = $message.children(`notification[xmlns="${Strophe.NS.XABBER_NOTIFY}"]`).children('forwarded').children('message');
 
             full_jid = $notification_msg.attr('from');
             from_jid = Strophe.getBareJidFromJid(full_jid);
@@ -8447,7 +8447,7 @@ xabber.AccountChats = xabber.ChatsBase.extend({
         }
 
         if ($forwarded.length && !options.xml) {
-            let $notify = $message.children(`notify[xmlns="${Strophe.NS.XABBER_NOTIFY}"]`);
+            let $notify = $message.children(`notification[xmlns="${Strophe.NS.XABBER_NOTIFY}"]`);
             if ($notify.length){
                 if (!this.account.server_features.get(Strophe.NS.XABBER_NOTIFY))
                     return;
@@ -10975,12 +10975,13 @@ xabber.InvitationPanelView = xabber.SearchView.extend({
             return;
         let msg_id = uuid(),
             sid = uuid(),
-            stanza = $msg({
+            stanza = $iq({
+                type: 'set',
                 to: this.account.server_features.get(Strophe.NS.XABBER_NOTIFY).get('from'),
-                type: 'headline',
                 id: msg_id
             });
         stanza.c('notify', {xmlns: Strophe.NS.XABBER_NOTIFY});
+        stanza.c('notification', {xmlns: Strophe.NS.XABBER_NOTIFY});
         stanza.c('forwarded', {xmlns: Strophe.NS.FORWARD});
         stanza.c('message', {
             to: this.model.get('jid'),
@@ -10992,8 +10993,6 @@ xabber.InvitationPanelView = xabber.SearchView.extend({
         stanza.c('body').t(`Device Verification request from ${this.account.jid} A1`).up();
         stanza.up().up().up();
         stanza.c('fallback',{xmlns: Strophe.NS.XABBER_NOTIFY}).t(`device verification fallback text`).up();
-        stanza.c('no-store', {xmlns: Strophe.NS.HINTS}).up();
-        stanza.c('no-copy', {xmlns: Strophe.NS.HINTS}).up();
         stanza.c('addresses', {xmlns: Strophe.NS.ADDRESS}).c('address',{type: 'to', jid: this.model.get('jid')}).up().up();
         this.account.sendFast(stanza, () => {
 
@@ -11014,12 +11013,13 @@ xabber.InvitationPanelView = xabber.SearchView.extend({
 
         let msg_id = uuid(),
             sid = uuid(),
-            stanza = $msg({
+            stanza = $iq({
+                type: 'set',
                 to: this.account.server_features.get(Strophe.NS.XABBER_NOTIFY).get('from'),
-                type: 'headline',
                 id: msg_id
             });
         stanza.c('notify', {xmlns: Strophe.NS.XABBER_NOTIFY});
+        stanza.c('notification', {xmlns: Strophe.NS.XABBER_NOTIFY});
         stanza.c('forwarded', {xmlns: Strophe.NS.FORWARD});
         stanza.c('message', {
             to: this.account.get('jid'),

@@ -3794,6 +3794,7 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
         let value = $(ev.target).closest('.color-picker-button').attr('data-color-value');
         this.model.settings.update_settings({color: value});
         this.$el.attr('data-color', this.model.settings.get('color'));
+        xabber.accounts.trigger('account_color_updated');
     },
 
     showQRCode: function () {

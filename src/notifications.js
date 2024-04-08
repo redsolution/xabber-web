@@ -34,7 +34,7 @@ xabber.NotificationsView = xabber.BasicView.extend({
 
     _initialize: function () {
         this.notifications_chats = [];
-        xabber.accounts.on("list_changed connected_list_changed notification_chat_created add change:enabled destroy", this.updateAccountsFilter, this);
+        xabber.accounts.on("list_changed connected_list_changed notification_chat_created account_color_updated add change:enabled destroy", this.updateAccountsFilter, this);
         return this;
     },
 
@@ -126,7 +126,7 @@ xabber.NotificationsView = xabber.BasicView.extend({
     },
 
     renderAccountItem: function (account) {
-        let $item = $(templates.account_filter_item({jid: account.get('jid')}));
+        let $item = $(templates.account_filter_item({jid: account.get('jid'), color: account.settings.get('color')}));
         return $item;
     },
 
@@ -160,8 +160,10 @@ xabber.NotificationsView = xabber.BasicView.extend({
                 chat = chat[0];
             }
             // console.log(chat);
-            if (!chat)
+            if (!chat || !chat.item_view){
                 console.log('no chat!');
+                return;
+            }
             // console.log(this.notifications_chats.some(item => item.model.get('jid') === this.account.server_features.get(Strophe.NS.XABBER_NOTIFY).get('from')));
             if (!this.notifications_chats.some(item => item.account.get('jid') === chat.account.get('jid'))){
                 content = new xabber.NotificationsChatContentView({chat_item: chat.item_view});

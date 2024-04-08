@@ -58,6 +58,8 @@
   color: #F44336 !important;
 }
 .fill-color-red-500,
+.fill-color-red-500 path,
+.fill-color-red-500 use,
 .hover-fill-color-red-500:hover,
 [data-color=red] .fill-color-500 path,
 [data-color=red] .fill-color-500 use,
@@ -210,6 +212,8 @@
   color: #E91E63 !important;
 }
 .fill-color-pink-500,
+.fill-color-pink-500 path,
+.fill-color-pink-500 use,
 .hover-fill-color-pink-500:hover,
 [data-color=pink] .fill-color-500 path,
 [data-color=pink] .fill-color-500 use,
@@ -362,6 +366,8 @@
   color: #9C27B0 !important;
 }
 .fill-color-purple-500,
+.fill-color-purple-500 path,
+.fill-color-purple-500 use,
 .hover-fill-color-purple-500:hover,
 [data-color=purple] .fill-color-500 path,
 [data-color=purple] .fill-color-500 use,
@@ -515,6 +521,8 @@
   color: #673AB7 !important;
 }
 .fill-color-deep-purple-500,
+.fill-color-deep-purple-500 path,
+.fill-color-deep-purple-500 use,
 .hover-fill-color-deep-purple-500:hover,
 [data-color=deep-purple] .fill-color-500 path,
 [data-color=deep-purple] .fill-color-500 use,
@@ -667,6 +675,8 @@
   color: #3F51B5 !important;
 }
 .fill-color-indigo-500,
+.fill-color-indigo-500 path,
+.fill-color-indigo-500 use,
 .hover-fill-color-indigo-500:hover,
 [data-color=indigo] .fill-color-500 path,
 [data-color=indigo] .fill-color-500 use,
@@ -820,6 +830,8 @@
   color: #2196F3 !important;
 }
 .fill-color-blue-500,
+.fill-color-blue-500 path,
+.fill-color-blue-500 use,
 .hover-fill-color-blue-500:hover,
 [data-color=blue] .fill-color-500 path,
 [data-color=blue] .fill-color-500 use,
@@ -973,6 +985,8 @@
   color: #03A9F4 !important;
 }
 .fill-color-light-blue-500,
+.fill-color-light-blue-500 path,
+.fill-color-light-blue-500 use,
 .hover-fill-color-light-blue-500:hover,
 [data-color=light-blue] .fill-color-500 path,
 [data-color=light-blue] .fill-color-500 use,
@@ -1125,6 +1139,8 @@
   color: #00BCD4 !important;
 }
 .fill-color-cyan-500,
+.fill-color-cyan-500 path,
+.fill-color-cyan-500 use,
 .hover-fill-color-cyan-500:hover,
 [data-color=cyan] .fill-color-500 path,
 [data-color=cyan] .fill-color-500 use,
@@ -1277,6 +1293,8 @@
   color: #009688 !important;
 }
 .fill-color-teal-500,
+.fill-color-teal-500 path,
+.fill-color-teal-500 use,
 .hover-fill-color-teal-500:hover,
 [data-color=teal] .fill-color-500 path,
 [data-color=teal] .fill-color-500 use,
@@ -1430,6 +1448,8 @@
   color: #4CAF50 !important;
 }
 .fill-color-green-500,
+.fill-color-green-500 path,
+.fill-color-green-500 use,
 .hover-fill-color-green-500:hover,
 [data-color=green] .fill-color-500 path,
 [data-color=green] .fill-color-500 use,
@@ -1583,6 +1603,8 @@
   color: #8BC34A !important;
 }
 .fill-color-light-green-500,
+.fill-color-light-green-500 path,
+.fill-color-light-green-500 use,
 .hover-fill-color-light-green-500:hover,
 [data-color=light-green] .fill-color-500 path,
 [data-color=light-green] .fill-color-500 use,
@@ -1735,6 +1757,8 @@
   color: #CDDC39 !important;
 }
 .fill-color-lime-500,
+.fill-color-lime-500 path,
+.fill-color-lime-500 use,
 .hover-fill-color-lime-500:hover,
 [data-color=lime] .fill-color-500 path,
 [data-color=lime] .fill-color-500 use,
@@ -1888,6 +1912,8 @@
   color: #FFC107 !important;
 }
 .fill-color-amber-500,
+.fill-color-amber-500 path,
+.fill-color-amber-500 use,
 .hover-fill-color-amber-500:hover,
 [data-color=amber] .fill-color-500 path,
 [data-color=amber] .fill-color-500 use,
@@ -2040,6 +2066,8 @@
   color: #FF9800 !important;
 }
 .fill-color-orange-500,
+.fill-color-orange-500 path,
+.fill-color-orange-500 use,
 .hover-fill-color-orange-500:hover,
 [data-color=orange] .fill-color-500 path,
 [data-color=orange] .fill-color-500 use,
@@ -2193,6 +2221,8 @@
   color: #FF5722 !important;
 }
 .fill-color-deep-orange-500,
+.fill-color-deep-orange-500 path,
+.fill-color-deep-orange-500 use,
 .hover-fill-color-deep-orange-500:hover,
 [data-color=deep-orange] .fill-color-500 path,
 [data-color=deep-orange] .fill-color-500 use,
@@ -2345,6 +2375,8 @@
   color: #795548 !important;
 }
 .fill-color-brown-500,
+.fill-color-brown-500 path,
+.fill-color-brown-500 use,
 .hover-fill-color-brown-500:hover,
 [data-color=brown] .fill-color-500 path,
 [data-color=brown] .fill-color-500 use,
@@ -2497,6 +2529,8 @@
   color: #607D8B !important;
 }
 .fill-color-blue-grey-500,
+.fill-color-blue-grey-500 path,
+.fill-color-blue-grey-500 use,
 .hover-fill-color-blue-grey-500:hover,
 [data-color=blue-grey] .fill-color-500 path,
 [data-color=blue-grey] .fill-color-500 use,

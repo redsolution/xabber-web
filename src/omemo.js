@@ -469,12 +469,13 @@ xabber.FingerprintsOwnDevices = xabber.BasicView.extend({
 
         let msg_id = uuid(),
             sid = uuid(),
-            stanza = $msg({
+            stanza = $iq({
+                type: 'set',
                 to: this.account.server_features.get(Strophe.NS.XABBER_NOTIFY).get('from'),
-                type: 'headline',
                 id: msg_id
             });
         stanza.c('notify', {xmlns: Strophe.NS.XABBER_NOTIFY});
+        stanza.c('notification', {xmlns: Strophe.NS.XABBER_NOTIFY});
         stanza.c('forwarded', {xmlns: Strophe.NS.FORWARD});
         stanza.c('message', {
             to: this.account.get('jid'),
@@ -486,8 +487,6 @@ xabber.FingerprintsOwnDevices = xabber.BasicView.extend({
         stanza.c('body').t(`Device Verification request from ${this.account.jid} A1`).up();
         stanza.up().up().up();
         stanza.c('fallback',{xmlns: Strophe.NS.XABBER_NOTIFY}).t(`device verification fallback text`).up();
-        stanza.c('no-store', {xmlns: Strophe.NS.HINTS}).up();
-        stanza.c('no-copy', {xmlns: Strophe.NS.HINTS}).up();
         stanza.c('addresses', {xmlns: Strophe.NS.ADDRESS}).c('address',{type: 'to', jid: this.account.get('jid')}).up().up();
         this.account.sendFast(stanza, () => {
             // console.log(stanza);
@@ -1509,26 +1508,17 @@ xabber.Omemo = Backbone.ModelWithStorage.extend({
                 stanza_id = $msg.children(`stanza-id[by="${this.account.get('jid')}"]`).attr('id');
             let cached_msg;
             if (Strophe.getBareJidFromJid($msg.attr('from')) != this.account.get('jid')){
-                if (options.notification_msg) {
-                    if ($message.children(`notify[xmlns="${Strophe.NS.XABBER_NOTIFY}"]`).length) {
-                        let $notification_msg = $message.children(`notify[xmlns="${Strophe.NS.XABBER_NOTIFY}"]`).children('forwarded').children('message'),
-                            origin_id = $notification_msg.children('origin-id').attr('id');
-                        if (origin_id)
-                            cached_msg = stanza_id && this.cached_messages && this.cached_messages.getMessage(contact, origin_id);
-                    }
-                }
-                if (!cached_msg){
-                    cached_msg = stanza_id && this.cached_messages && this.cached_messages.getMessage(contact, stanza_id);
-                }
-            }
-            if (options.notification_msg && this.account.server_features.get(Strophe.NS.XABBER_NOTIFY)
-                && this.account.server_features.get(Strophe.NS.XABBER_NOTIFY).get('from') === Strophe.getBareJidFromJid($msg.attr('from'))){
-                let origin_
                 cached_msg = stanza_id && this.cached_messages && this.cached_messages.getMessage(contact, stanza_id);
             }
-
-            // console.log(Strophe.getBareJidFromJid($msg.attr('from')) != this.account.get('jid'));
-            // console.log(Boolean(Strophe.getBareJidFromJid($msg.attr('from')) != this.account.get('jid') && options.carbon_copied && options.carbon_direction && options.carbon_direction === 'sent'));
+            if (options.notification_msg) {
+                if ($message.children(`notification[xmlns="${Strophe.NS.XABBER_NOTIFY}"]`).length) {
+                    let $notification_msg = $message.children(`notification[xmlns="${Strophe.NS.XABBER_NOTIFY}"]`).children('forwarded').children('message'),
+                        origin_id = $notification_msg.children('origin-id').attr('id'),
+                        true_contact = this.account.contacts.get(Strophe.getBareJidFromJid($msg.attr('from')));
+                    if (origin_id && true_contact)
+                        cached_msg = this.cached_messages && this.cached_messages.getMessage(true_contact, origin_id);
+                }
+            }
 
             if (Strophe.getBareJidFromJid($msg.attr('from')) != this.account.get('jid') && options.carbon_copied && options.carbon_direction && options.carbon_direction === 'sent')
                 return;
@@ -1935,7 +1925,7 @@ xabber.Omemo = Backbone.ModelWithStorage.extend({
         return this.peers.get(jid);
     },
 
-    decrypt: async function (message, options) { /// не может расшифровать trusted-message
+    decrypt: async function (message, options) {
         let $message = $(message),
             from_jid = Strophe.getBareJidFromJid($message.attr('from')) || options.from_jid,
             $encrypted;
@@ -1948,8 +1938,8 @@ xabber.Omemo = Backbone.ModelWithStorage.extend({
         else if ($message.find('[xmlns="'+Strophe.NS.CARBONS+'"]').length && !$message.find('private[xmlns="'+Strophe.NS.CARBONS+'"]').length){
             $encrypted = $message.children(`[xmlns="${Strophe.NS.CARBONS}"]`).children(`forwarded`).children(`message`).children(`encrypted[xmlns="${Strophe.NS.OMEMO}"]`);
         }
-        else if ($message.children(`notify[xmlns="${Strophe.NS.XABBER_NOTIFY}"]`).length){
-            let $notification_msg = $message.children(`notify[xmlns="${Strophe.NS.XABBER_NOTIFY}"]`).children('forwarded').children('message')
+        else if ($message.children(`notification[xmlns="${Strophe.NS.XABBER_NOTIFY}"]`).length){
+            let $notification_msg = $message.children(`notification[xmlns="${Strophe.NS.XABBER_NOTIFY}"]`).children('forwarded').children('message')
             $encrypted = $notification_msg.children(`encrypted[xmlns="${Strophe.NS.OMEMO}"]`);
             from_jid = Strophe.getBareJidFromJid($notification_msg.attr('from'));
         }

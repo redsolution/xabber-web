@@ -244,6 +244,9 @@
     addSvgTemplate('svg.account-outline');
     addSvgTemplate('svg.qrcode');
     addSvgTemplate('svg.code');
+    addSvgTemplate('svg.group-public-add');
+    addSvgTemplate('svg.heart-circle');
+    addSvgTemplate('svg.bank-circle');
     addSvgTemplate('svg.id-outline');
     addSvgTemplate('svg.clock-outline');
     addSvgTemplate('svg.index');
@@ -252,6 +255,8 @@
     addSvgTemplate('svg.chevron-down');
     addSvgTemplate('svg.camera');
     addSvgTemplate('svg.camera-retake');
+    addSvgTemplate('svg.vcard');
+    addSvgTemplate('svg.membership');
     addSvgTemplate('svg.membership-outline');
     addSvgTemplate('svg.invite');
     addSvgTemplate('svg.invite-outline');

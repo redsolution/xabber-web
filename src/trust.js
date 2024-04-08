@@ -62,13 +62,13 @@ xabber.IncomingTrustSessionView = xabber.BasicView.extend({
 
             let msg_id = uuid(),
                 to = this.contact ? this.contact.get('jid') : this.account.get('jid'),
-                stanza = $msg({
+                stanza = $iq({
+                    type: 'set',
                     to: this.account.server_features.get(Strophe.NS.XABBER_NOTIFY).get('from'),
-                    type: 'headline',
                     id: msg_id
                 });
-
             stanza.c('notify', {xmlns: Strophe.NS.XABBER_NOTIFY});
+            stanza.c('notification', {xmlns: Strophe.NS.XABBER_NOTIFY});
             stanza.c('forwarded', {xmlns: Strophe.NS.FORWARD});
             stanza.c('message', {
                 to: to,
@@ -126,13 +126,13 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
 
         if (to){
             let msg_id = uuid(),
-                stanza = $msg({
+                stanza = $iq({
+                    type: 'set',
                     to: this.account.server_features.get(Strophe.NS.XABBER_NOTIFY).get('from'),
-                    type: 'headline',
                     id: msg_id
                 });
-
             stanza.c('notify', {xmlns: Strophe.NS.XABBER_NOTIFY});
+            stanza.c('notification', {xmlns: Strophe.NS.XABBER_NOTIFY});
             stanza.c('forwarded', {xmlns: Strophe.NS.FORWARD});
             stanza.c('message', {
                 to: to,
@@ -330,13 +330,13 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                 stanza = msg.message;
             }
 
-            let final_stanza = $msg({
+            let final_stanza = $iq({
+                    type: 'set',
                     to: this.account.server_features.get(Strophe.NS.XABBER_NOTIFY).get('from'),
-                    type: 'headline',
-                    id: uuid()
+                    id: msg_id
                 });
-
             final_stanza.c('notify', {xmlns: Strophe.NS.XABBER_NOTIFY});
+            final_stanza.c('notification', {xmlns: Strophe.NS.XABBER_NOTIFY});
             final_stanza.c('forwarded', {xmlns: Strophe.NS.FORWARD});
 
             final_stanza.cnode(stanza.tree()).up();
@@ -1158,12 +1158,13 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                         // console.log(response);
                         let msg_id = uuid(),
                             to = contact ? contact.get('jid') : this.account.get('jid'),
-                            stanza = $msg({
+                            stanza = $iq({
+                                type: 'set',
                                 to: this.account.server_features.get(Strophe.NS.XABBER_NOTIFY).get('from'),
-                                type: 'headline',
                                 id: msg_id
                             });
                         stanza.c('notify', {xmlns: Strophe.NS.XABBER_NOTIFY});
+                        stanza.c('notification', {xmlns: Strophe.NS.XABBER_NOTIFY});
                         stanza.c('forwarded', {xmlns: Strophe.NS.FORWARD});
                         stanza.c('message', {
                             to: to,
@@ -1253,12 +1254,13 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                                     this.generateVerificationEncryptedHash(trustedKeyBuffer, code, decrypted_response.decryptedBuffer, decrypted_response.encryptionKeyHash).then((hash_response) => {
                                         let msg_id = uuid(),
                                             to = contact ? contact.get('jid') : this.account.get('jid'),
-                                            stanza = $msg({
+                                            stanza = $iq({
+                                                type: 'set',
                                                 to: this.account.server_features.get(Strophe.NS.XABBER_NOTIFY).get('from'),
-                                                type: 'headline',
                                                 id: msg_id
                                             });
                                         stanza.c('notify', {xmlns: Strophe.NS.XABBER_NOTIFY});
+                                        stanza.c('notification', {xmlns: Strophe.NS.XABBER_NOTIFY});
                                         stanza.c('forwarded', {xmlns: Strophe.NS.FORWARD});
                                         stanza.c('message', {
                                             to: to,
@@ -1304,13 +1306,13 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
 
                             let msg_id = uuid(),
                                 to = contact ? contact.get('jid') : this.account.get('jid'),
-                                stanza = $msg({
+                                stanza = $iq({
+                                    type: 'set',
                                     to: this.account.server_features.get(Strophe.NS.XABBER_NOTIFY).get('from'),
-                                    type: 'headline',
                                     id: msg_id
                                 });
-
                             stanza.c('notify', {xmlns: Strophe.NS.XABBER_NOTIFY});
+                            stanza.c('notification', {xmlns: Strophe.NS.XABBER_NOTIFY});
                             stanza.c('forwarded', {xmlns: Strophe.NS.FORWARD});
                             stanza.c('message', {
                                 to: to,
@@ -1340,13 +1342,13 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
 
                         let msg_id = uuid(),
                             to = contact ? contact.get('jid') : this.account.get('jid'),
-                            stanza = $msg({
+                            stanza = $iq({
+                                type: 'set',
                                 to: this.account.server_features.get(Strophe.NS.XABBER_NOTIFY).get('from'),
-                                type: 'headline',
                                 id: msg_id
                             });
-
                         stanza.c('notify', {xmlns: Strophe.NS.XABBER_NOTIFY});
+                        stanza.c('notification', {xmlns: Strophe.NS.XABBER_NOTIFY});
                         stanza.c('forwarded', {xmlns: Strophe.NS.FORWARD});
                         stanza.c('message', {
                             to: to,
@@ -1453,9 +1455,9 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
 
                                             let msg_id = uuid(),
                                                 to = contact ? contact.get('jid') : this.account.get('jid'),
-                                                stanza = $msg({
+                                                stanza = $iq({
+                                                    type: 'set',
                                                     to: this.account.server_features.get(Strophe.NS.XABBER_NOTIFY).get('from'),
-                                                    type: 'headline',
                                                     id: msg_id
                                                 });
 
@@ -1473,8 +1475,8 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                                             // console.log('decrypted_a.encryptionKeyHash  !!!!!!!!!!!!!!!!!!!!!!!!!2');
                                             // console.log(utils.ArrayBuffertoBase64(decrypted_a.encryptionKeyHash));
                                             // console.log(decrypted_a.encryptionKeyHash);
-
                                             stanza.c('notify', {xmlns: Strophe.NS.XABBER_NOTIFY});
+                                            stanza.c('notification', {xmlns: Strophe.NS.XABBER_NOTIFY});
                                             stanza.c('forwarded', {xmlns: Strophe.NS.FORWARD});
                                             stanza.c('message', {
                                                 to: to,
@@ -1512,13 +1514,13 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
 
                                     let msg_id = uuid(),
                                         to = contact ? contact.get('jid') : this.account.get('jid'),
-                                        stanza = $msg({
+                                        stanza = $iq({
+                                            type: 'set',
                                             to: this.account.server_features.get(Strophe.NS.XABBER_NOTIFY).get('from'),
-                                            type: 'headline',
                                             id: msg_id
                                         });
-
                                     stanza.c('notify', {xmlns: Strophe.NS.XABBER_NOTIFY});
+                                    stanza.c('notification', {xmlns: Strophe.NS.XABBER_NOTIFY});
                                     stanza.c('forwarded', {xmlns: Strophe.NS.FORWARD});
                                     stanza.c('message', {
                                         to: to,
@@ -1550,13 +1552,13 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
 
                         let msg_id = uuid(),
                             to = contact ? contact.get('jid') : this.account.get('jid'),
-                            stanza = $msg({
+                            stanza = $iq({
+                                type: 'set',
                                 to: this.account.server_features.get(Strophe.NS.XABBER_NOTIFY).get('from'),
-                                type: 'headline',
                                 id: msg_id
                             });
-
                         stanza.c('notify', {xmlns: Strophe.NS.XABBER_NOTIFY});
+                        stanza.c('notification', {xmlns: Strophe.NS.XABBER_NOTIFY});
                         stanza.c('forwarded', {xmlns: Strophe.NS.FORWARD});
                         stanza.c('message', {
                             to: to,
@@ -1586,13 +1588,13 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
 
                     let msg_id = uuid(),
                         to = contact ? contact.get('jid') : this.account.get('jid'),
-                        stanza = $msg({
+                        stanza = $iq({
+                            type: 'set',
                             to: this.account.server_features.get(Strophe.NS.XABBER_NOTIFY).get('from'),
-                            type: 'headline',
                             id: msg_id
                         });
-
                     stanza.c('notify', {xmlns: Strophe.NS.XABBER_NOTIFY});
+                    stanza.c('notification', {xmlns: Strophe.NS.XABBER_NOTIFY});
                     stanza.c('forwarded', {xmlns: Strophe.NS.FORWARD});
                     stanza.c('message', {
                         to: to,
@@ -1669,13 +1671,13 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                                 // if hashes dont match
                                 let msg_id = uuid(),
                                     to = contact ? contact.get('jid') : this.account.get('jid'),
-                                    stanza = $msg({
+                                    stanza = $iq({
+                                        type: 'set',
                                         to: this.account.server_features.get(Strophe.NS.XABBER_NOTIFY).get('from'),
-                                        type: 'headline',
                                         id: msg_id
                                     });
-
                                 stanza.c('notify', {xmlns: Strophe.NS.XABBER_NOTIFY});
+                                stanza.c('notification', {xmlns: Strophe.NS.XABBER_NOTIFY});
                                 stanza.c('forwarded', {xmlns: Strophe.NS.FORWARD});
                                 stanza.c('message', {
                                     to: to,
@@ -1842,13 +1844,13 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
     sendVerificationSuccess: async function (to, sid) {
 
         let msg_id = uuid(),
-            stanza = $msg({
+            stanza = $iq({
+                type: 'set',
                 to: this.account.server_features.get(Strophe.NS.XABBER_NOTIFY).get('from'),
-                type: 'headline',
                 id: msg_id
             });
-
         stanza.c('notify', {xmlns: Strophe.NS.XABBER_NOTIFY});
+        stanza.c('notification', {xmlns: Strophe.NS.XABBER_NOTIFY});
         stanza.c('forwarded', {xmlns: Strophe.NS.FORWARD});
         stanza.c('message', {
             to: to,
