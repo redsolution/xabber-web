@@ -75,6 +75,7 @@ xabber.NotificationsView = xabber.BasicView.extend({
         // console.log(accounts.length);
         accounts = accounts.filter(item => item.server_features.get(Strophe.NS.XABBER_NOTIFY));
         // console.log(accounts.length);
+        this.$('.notifications-account-filter').switchClass('hidden', accounts.length === 1 || !accounts.length);
         if (accounts.length){
             //     jid = options.jid || '';
             // this.$('input[name="username"]').val(jid).attr('readonly', !!jid)
@@ -110,16 +111,9 @@ xabber.NotificationsView = xabber.BasicView.extend({
                 } else if (xabber.body.screen.get('previous_screen') && xabber.body.screen.get('previous_screen').name === 'notifications') {
                     this.$el.detach();
                     xabber.toolbar_view.$('.toolbar-item:not(.account-item):not(.toolbar-logo)').removeClass('active');
-                    // // let previous_chat = xabber.body.screen.get('previous_screen');
-                    // //     previous_chat.name = 'all-chats';
-                    // //     previous_chat.right_contact = '';
-                    // let previous_chat = {
-                    //     name: 'all-chats',
-                    //     notifications: false
-                    // };
-                    //     // previous_chat.name = 'all-chats';
-                    //     // previous_chat.right_contact = '';
-                    // xabber.body.screen.set('previous_screen', previous_chat);
+                    let previous_chat = xabber.body.screen.get('previous_screen');
+                        previous_chat.open_all_chats = true;
+                    xabber.body.screen.set('previous_screen', previous_chat);
                 }
             }
         }

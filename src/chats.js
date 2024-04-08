@@ -8062,7 +8062,7 @@ xabber.AccountChats = xabber.ChatsBase.extend({
             let member_id = this.parsePubSubNode(node),
                 photo_url =  $message.find('info').attr('url'),
                 contact = this.account.contacts.get(from_jid);
-            if (contact) {
+            if (contact && from_jid !== this.account.get('jid')) {
                 if (member_id) {
                     if (contact.my_info) {
                         if ((member_id == contact.my_info.get('id')) && (photo_id == contact.my_info.get('avatar'))) {

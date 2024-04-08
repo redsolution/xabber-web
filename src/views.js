@@ -2398,7 +2398,7 @@ xabber.SettingsModalView = xabber.BasicView.extend({
         if (xabber.body.screen && xabber.body.screen.get('previous_screen')){
 
             let previous_screen = xabber.body.screen.get('previous_screen');
-            if (previous_screen.name === 'notifications' && !xabber.accounts.enabled.length){
+            if (previous_screen.name === 'notifications' && previous_screen.open_all_chats ){
                 xabber.toolbar_view.showAllChats();
             } else {
                 previous_screen.close_settings = true;
