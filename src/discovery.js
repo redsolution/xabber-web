@@ -185,6 +185,8 @@ xabber.ServerFeatures = Backbone.Collection.extend({
             self = this;
         $stanza.find('feature').each(function () {
             let namespace = $(this).attr('var');
+            if (namespace === Strophe.NS.XABBER_NOTIFY && from === self.connection.domain)
+                return;
             self.create({
                 'var': namespace,
                 from: from

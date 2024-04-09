@@ -95,20 +95,25 @@ function getTranslationsURL () {
                 rawData += body;
             });
             res.on('end', () => {
-                let buildId = JSON.parse(rawData).data.id;
-                checkBuildProgress(buildId).then(() => {
-                    http.get({protocol: "https:", host: "crowdin.com", path: `/api/v2/projects/110652/translations/builds/${buildId}/download`, headers: {"Authorization": `Bearer ${token}`, "Content-Type": "application/json"}}, (res) => {
-                        let rawData = "";
-                        res.setEncoding('utf8');
-                        res.on('data', (body) => {
-                            rawData += body;
-                        });
-                        res.on('end', () => {
-                            let url = JSON.parse(rawData).data.url;
-                            resolve(url);
+                try{
+                    let buildId = JSON.parse(rawData).data.id;
+                    checkBuildProgress(buildId).then(() => {
+                        http.get({protocol: "https:", host: "crowdin.com", path: `/api/v2/projects/110652/translations/builds/${buildId}/download`, headers: {"Authorization": `Bearer ${token}`, "Content-Type": "application/json"}}, (res) => {
+                            let rawData = "";
+                            res.setEncoding('utf8');
+                            res.on('data', (body) => {
+                                rawData += body;
+                            });
+                            res.on('end', () => {
+                                let url = JSON.parse(rawData).data.url;
+                                resolve(url);
+                            });
                         });
                     });
-                });
+                } catch (e) {
+                    console.log(e);
+                    console.log(rawData);
+                }
             });
         });
         request.end();

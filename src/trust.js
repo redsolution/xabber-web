@@ -64,7 +64,7 @@ xabber.IncomingTrustSessionView = xabber.BasicView.extend({
                 to = this.contact ? this.contact.get('jid') : this.account.get('jid'),
                 stanza = $iq({
                     type: 'set',
-                    to: Strophe.getDomainFromJid(to),
+                    to: to,
                     id: msg_id
                 });
             stanza.c('notify', {xmlns: Strophe.NS.XABBER_NOTIFY});
@@ -128,7 +128,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
             let msg_id = uuid(),
                 stanza = $iq({
                     type: 'set',
-                    to: Strophe.getDomainFromJid(to),
+                    to: to,
                     id: msg_id
                 });
             stanza.c('notify', {xmlns: Strophe.NS.XABBER_NOTIFY});
@@ -336,7 +336,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
 
             let final_stanza = $iq({
                     type: 'set',
-                    to: Strophe.getDomainFromJid(to),
+                    to: to,
                     id: msg_id
                 });
             final_stanza.c('notify', {xmlns: Strophe.NS.XABBER_NOTIFY});
@@ -1164,7 +1164,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                             to = contact ? contact.get('jid') : this.account.get('jid'),
                             stanza = $iq({
                                 type: 'set',
-                                to: Strophe.getDomainFromJid(to),
+                                to: to,
                                 id: msg_id
                             });
                         stanza.c('notify', {xmlns: Strophe.NS.XABBER_NOTIFY});
@@ -1260,7 +1260,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                                             to = contact ? contact.get('jid') : this.account.get('jid'),
                                             stanza = $iq({
                                                 type: 'set',
-                                                to: Strophe.getDomainFromJid(to),
+                                                to: to,
                                                 id: msg_id
                                             });
                                         stanza.c('notify', {xmlns: Strophe.NS.XABBER_NOTIFY});
@@ -1312,7 +1312,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                                 to = contact ? contact.get('jid') : this.account.get('jid'),
                                 stanza = $iq({
                                     type: 'set',
-                                    to: Strophe.getDomainFromJid(to),
+                                    to: to,
                                     id: msg_id
                                 });
                             stanza.c('notify', {xmlns: Strophe.NS.XABBER_NOTIFY});
@@ -1348,7 +1348,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                             to = contact ? contact.get('jid') : this.account.get('jid'),
                             stanza = $iq({
                                 type: 'set',
-                                to: Strophe.getDomainFromJid(to),
+                                to: to,
                                 id: msg_id
                             });
                         stanza.c('notify', {xmlns: Strophe.NS.XABBER_NOTIFY});
@@ -1461,7 +1461,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                                                 to = contact ? contact.get('jid') : this.account.get('jid'),
                                                 stanza = $iq({
                                                     type: 'set',
-                                                    to: Strophe.getDomainFromJid(to),
+                                                    to: to,
                                                     id: msg_id
                                                 });
 
@@ -1520,7 +1520,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                                         to = contact ? contact.get('jid') : this.account.get('jid'),
                                         stanza = $iq({
                                             type: 'set',
-                                            to: Strophe.getDomainFromJid(to),
+                                            to: to,
                                             id: msg_id
                                         });
                                     stanza.c('notify', {xmlns: Strophe.NS.XABBER_NOTIFY});
@@ -1558,7 +1558,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                             to = contact ? contact.get('jid') : this.account.get('jid'),
                             stanza = $iq({
                                 type: 'set',
-                                to: Strophe.getDomainFromJid(to),
+                                to: to,
                                 id: msg_id
                             });
                         stanza.c('notify', {xmlns: Strophe.NS.XABBER_NOTIFY});
@@ -1594,7 +1594,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                         to = contact ? contact.get('jid') : this.account.get('jid'),
                         stanza = $iq({
                             type: 'set',
-                            to: Strophe.getDomainFromJid(to),
+                            to: to,
                             id: msg_id
                         });
                     stanza.c('notify', {xmlns: Strophe.NS.XABBER_NOTIFY});
@@ -1677,7 +1677,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                                     to = contact ? contact.get('jid') : this.account.get('jid'),
                                     stanza = $iq({
                                         type: 'set',
-                                        to: Strophe.getDomainFromJid(to),
+                                        to: to,
                                         id: msg_id
                                     });
                                 stanza.c('notify', {xmlns: Strophe.NS.XABBER_NOTIFY});
@@ -1850,7 +1850,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
         let msg_id = uuid(),
             stanza = $iq({
                 type: 'set',
-                to: Strophe.getDomainFromJid(to),
+                to: to,
                 id: msg_id
             });
         stanza.c('notify', {xmlns: Strophe.NS.XABBER_NOTIFY});

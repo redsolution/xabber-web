@@ -158,7 +158,6 @@ xabber.NotificationsView = xabber.BasicView.extend({
                 console.log('no chat!');
                 return;
             }
-            // console.log(this.notifications_chats.some(item => item.model.get('jid') === this.account.server_features.get(Strophe.NS.XABBER_NOTIFY).get('from')));
             if (!this.notifications_chats.some(item => item.account.get('jid') === chat.account.get('jid'))){
                 content = new xabber.NotificationsChatContentView({chat_item: chat.item_view});
                 this.account.notifications_content = content;

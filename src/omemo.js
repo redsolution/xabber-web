@@ -471,7 +471,7 @@ xabber.FingerprintsOwnDevices = xabber.BasicView.extend({
             sid = uuid(),
             stanza = $iq({
                 type: 'set',
-                to: Strophe.getDomainFromJid(this.account.get('jid')),
+                to: this.account.get('jid'),
                 id: msg_id
             });
         stanza.c('notify', {xmlns: Strophe.NS.XABBER_NOTIFY});
