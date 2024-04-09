@@ -384,6 +384,23 @@ xabber.Account = Backbone.Model.extend({
             }
         },
 
+        retractMessageById: function (stanza_id, to, conversation, type) {
+            let iq_retraction = $iq({type: 'set', to: to})
+                    .c('retract-message', {
+                        id: stanza_id,
+                        xmlns: Strophe.NS.REWRITE,
+                        conversation: conversation,
+                        symmetric: false,
+                        type: type,
+                        by: this.get('jid')
+                    });
+                this.sendIQFast(iq_retraction, (success) => {
+
+                }, (error) => {
+
+                });
+        },
+
         createFastConnection: function () {
             let jid = this.get('jid'),
                 auth_type = this.conn_manager.auth_type,

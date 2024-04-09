@@ -320,6 +320,12 @@ xabber.MessagesBase = Backbone.Collection.extend({
             full_jid = $notification_msg.attr('from');
             from_jid = Strophe.getBareJidFromJid(full_jid);
             body = $notification_msg.children('body').text();
+            let notification_from = $notification_msg.attr('from'),
+                notification_from_address = $message.children(`addresses[xmlns="${Strophe.NS.ADDRESS}"]`).children('address[type="ofrom"]').attr('jid');
+            if (!notification_from_address || notification_from_address !== notification_from){
+                this.account.retractMessageById(options.stanza_id, this.account.get('jid'), from_jid, this.chat.get('sync_type'))
+                return;
+            }
         }
 
         let attrs = {

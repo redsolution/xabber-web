@@ -1138,7 +1138,7 @@ xabber.ToolbarView = xabber.BasicView.extend({
 
     showNotifications: function (ev, no_unread) {
         try {
-            let chat = xabber.chats.filter(item => item.get('jid') === item.account.server_features.get(Strophe.NS.XABBER_NOTIFY).get('from') && item.get('notifications'));
+            let chat = xabber.chats.filter(item => item.account.server_features.get(Strophe.NS.XABBER_NOTIFY) && item.get('jid') === item.account.server_features.get(Strophe.NS.XABBER_NOTIFY).get('from') && item.get('notifications'));
 
             if (!xabber.accounts.enabled.length || !xabber.accounts.connected.length || !chat.length)
                 return;
