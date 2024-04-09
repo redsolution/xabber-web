@@ -10998,7 +10998,7 @@ xabber.InvitationPanelView = xabber.SearchView.extend({
             sid = uuid(),
             stanza = $iq({
                 type: 'set',
-                to: this.account.server_features.get(Strophe.NS.XABBER_NOTIFY).get('from'),
+                to: Strophe.getDomainFromJid(this.model.get('jid')),
                 id: msg_id
             });
         stanza.c('notify', {xmlns: Strophe.NS.XABBER_NOTIFY});
@@ -11036,7 +11036,7 @@ xabber.InvitationPanelView = xabber.SearchView.extend({
             sid = uuid(),
             stanza = $iq({
                 type: 'set',
-                to: this.account.server_features.get(Strophe.NS.XABBER_NOTIFY).get('from'),
+                to: Strophe.getDomainFromJid(this.account.get('jid')),
                 id: msg_id
             });
         stanza.c('notify', {xmlns: Strophe.NS.XABBER_NOTIFY});
