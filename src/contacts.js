@@ -8602,7 +8602,7 @@ xabber.Roster = xabber.ContactsBase.extend({
         });
         if (!chat.item_view.content && (chat.get('sync_type') === Strophe.NS.XABBER_NOTIFY || is_invite || encrypted && this.account.omemo)) {
             chat.item_view.content = new xabber.ChatContentView({chat_item: chat.item_view});
-            if (chat.get('sync_type') === Strophe.NS.XABBER_NOTIFY){
+            if (chat.get('sync_type') === Strophe.NS.XABBER_NOTIFY && this.account.server_features.get(Strophe.NS.XABBER_NOTIFY) && jid === this.account.server_features.get(Strophe.NS.XABBER_NOTIFY).get('from')){
                 if (xabber.notifications_view){
                     let content;
                     if (!xabber.notifications_view.notifications_chats.some(item => item.account.get('jid') === chat.account.get('jid'))){
