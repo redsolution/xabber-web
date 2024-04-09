@@ -2357,6 +2357,9 @@ xabber.ChatItemView = xabber.BasicView.extend({
         if (Boolean(is_truly_empty) && this.model.get('group_chat') && own_domain != contact_domain){
             is_truly_empty = this.model.get('history_loaded');
         }
+        if (this.model.get('saved') && xabber.toolbar_view.$('.toolbar-item.saved-chats.active').length){
+            return;
+        }
 
         this.$('.last-msg').html(xabber.getString(is_truly_empty ? "recent_chat__history_cleared" : is_empty ? "recent_chat__last_message_retracted" : "recent_chat__start_conversation").italics());
         this.$('.last-msg-date').text(utils.pretty_short_datetime_recent_chat(msg_time))
@@ -2371,6 +2374,9 @@ xabber.ChatItemView = xabber.BasicView.extend({
     },
 
     updateLastMessage: function (msg) {
+        if (this.model.get('saved') && xabber.toolbar_view.$('.toolbar-item.saved-chats.active').length){
+            return;
+        }
         msg || (msg = this.model.last_message);
         if (!this.model.get('active') && this.model.item_view && this.model.item_view.content && this.model.item_view.content.bottom && this.model.item_view.content.bottom.$('.input-message .rich-textarea').getTextFromRichTextarea().trim()){
             let draft_message = this.model.item_view.content.bottom.$('.input-message .rich-textarea').getTextFromRichTextarea();
@@ -4458,7 +4464,12 @@ xabber.ChatContentView = xabber.BasicView.extend({
             this.bottom.showChatNotification(`${this.contact.get('name')} ${message}`);
         else
             this.bottom.showChatNotification();
-        this.chat_item.$('.last-msg').text(message);
+        if (this.model.get('saved') && xabber.toolbar_view.$('.toolbar-item.saved-chats.active').length){
+            return;
+        }
+        if (!(this.model.get('saved') && xabber.toolbar_view.$('.toolbar-item.saved-chats.active').length)){
+            this.chat_item.$('.last-msg').text(message);
+        }
         this.chat_item.$('.last-msg-date').text(utils.pretty_short_datetime())
             .attr('title', pretty_datetime());
         this.chat_item.$('.msg-delivering-state').addClass('hidden');
@@ -8123,11 +8134,15 @@ xabber.AccountChats = xabber.ChatsBase.extend({
                         contact.set({photo_hash: photo_id, image: photo_url, avatar_priority: constants.AVATAR_PRIORITIES.PUBSUB_AVATAR});
                     }
                     contact.getAvatar(photo_id, Strophe.NS.PUBSUB_AVATAR_DATA, (data_avatar) => {
-                        contact.cached_image = Images.getCachedImage(data_avatar);
-                        contact.set('avatar_priority', constants.AVATAR_PRIORITIES.PUBSUB_AVATAR);
-                        contact.set('photo_hash', photo_id);
-                        contact.set('image', data_avatar);
-                        contact.updateCachedInfo();
+                        try {
+                            contact.cached_image = Images.getCachedImage(data_avatar);
+                            contact.set('avatar_priority', constants.AVATAR_PRIORITIES.PUBSUB_AVATAR);
+                            contact.set('photo_hash', photo_id);
+                            contact.set('image', data_avatar);
+                            contact.updateCachedInfo();
+                        } catch (e) {
+                            console.error(e);
+                        }
                     });
                 }
             }
@@ -9331,8 +9346,13 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
 
     showSavedChats: function (no_unread) {
         this.$('.chat-item').detach();
-        let chats = this.model,
-            saved_chats = chats.filter(chat => chat.get('saved'));
+        let saved_chats = []
+        xabber.accounts.connected.forEach((acc) => {
+            if (acc.server_features.get(Strophe.NS.XABBER_FAVORITES)) {
+                let saved_chat = acc.chats.getSavedChat();
+                saved_chats.push(saved_chat);
+            }
+        });
         if (xabber.toolbar_view.data.get('account_filtering') && !no_unread){
             xabber.toolbar_view.data.set('account_filtering', null);
             xabber.toolbar_view.$('.toolbar-item.account-item').removeClass('active');
@@ -9341,7 +9361,8 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
             saved_chats = saved_chats.filter(chat => (chat.account.get('jid') === xabber.toolbar_view.data.get('account_filtering')));
         saved_chats.forEach((chat) => {
             this.$('.chat-list').append(chat.item_view.$el);
-            this.$(`.chat-list .chat-item[data-id="${chat.id}"] .chat-title`).text(chat.get('jid'));
+            chat.item_view.$(`.last-msg`).text(chat.account.get('jid'));
+            chat.item_view.$(`.msg-delivering-state`).addClass('hidden');
         });
     },
 

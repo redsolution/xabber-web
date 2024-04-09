@@ -194,8 +194,12 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
 
     publishOwnTrustedDevices: function (callback) {
         let my_trusted_devices = this.get('trusted_devices')[this.account.get('jid')],
-            my_saved_trusted_device = my_trusted_devices.filter(item => item.is_me),
+            my_saved_trusted_device,
             current_timestamp = Date.now();
+        if (!my_trusted_devices)
+            return;
+
+        my_saved_trusted_device = my_trusted_devices.filter(item => item.is_me);
 
         if (!my_saved_trusted_device.length){
             console.error('no own device');

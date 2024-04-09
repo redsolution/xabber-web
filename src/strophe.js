@@ -886,7 +886,7 @@ Strophe.addNamespace('URLDISCO', 'urn:xabber:http:url');
 Strophe.addNamespace('MEDIAGALLERY', 'urn:xabber:http:url:mediagallery');
 Strophe.addNamespace('EPHEMERAL', 'urn:xmpp:ephemeral:0');
 Strophe.addNamespace('XABBER_FAVORITES', 'urn:xabber:favorites:0');
-Strophe.addNamespace('XABBER_NOTIFY', 'urn:xabber:notify:0');
+Strophe.addNamespace('XABBER_NOTIFY', 'urn:xabber:xen:0');
 Strophe.addNamespace('XABBER_TRUST', 'urn:xabber:trust');
 Strophe.addNamespace('DIGITAL_SIGNATURES', 'urn:xmpp:signed:0');
 Strophe.addNamespace('TRUSTED_MESSAGES', 'urn:xmpp:tm:1');
