@@ -458,6 +458,8 @@ xabber.Contact = Backbone.Model.extend({
 
     pres: function (type) {
         let pres = $pres({to: this.get('jid'), type: type});
+        if (type === 'subscribe')
+            pres.c('nick', {xmlns: Strophe.NS.NICK}).t(this.account.getOwnNickname());
         this.account.sendPres(pres);
         return this;
     },

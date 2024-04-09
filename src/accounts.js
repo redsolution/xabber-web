@@ -365,6 +365,25 @@ xabber.Account = Backbone.Model.extend({
             return this.connection.authenticated;
         },
 
+        getOwnNickname: function () {
+            let nickname;
+            if (this.get('vcard')) {
+                if (this.get('vcard').nickname)
+                    nickname = this.get('vcard').nickname;
+                else if (this.get('vcard').first_name && this.get('vcard').last_name)
+                    nickname = this.get('vcard').first_name + ' ' + this.get('vcard').last_name;
+                else if (this.get('vcard').fullname)
+                    nickname = this.get('vcard').fullname;
+                else if (this.get('vcard').first_name || this.get('vcard').last_name)
+                    nickname = this.get('vcard').first_name + ' ' + this.get('vcard').last_name;
+            }
+            if (nickname){
+                return nickname;
+            } else {
+                return this.get('jid');
+            }
+        },
+
         createFastConnection: function () {
             let jid = this.get('jid'),
                 auth_type = this.conn_manager.auth_type,
