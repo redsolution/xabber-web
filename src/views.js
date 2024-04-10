@@ -1140,12 +1140,12 @@ xabber.ToolbarView = xabber.BasicView.extend({
         try {
             let chat = xabber.chats.filter(item => item.account.server_features.get(Strophe.NS.XABBER_NOTIFY) && item.get('jid') === item.account.server_features.get(Strophe.NS.XABBER_NOTIFY).get('from') && item.get('notifications'));
 
-            if (!xabber.accounts.enabled.length || !xabber.accounts.connected.length || !chat.length)
+            if (!xabber.accounts.enabled.length || !xabber.accounts.connected.length)
                 return;
             this.$('.toolbar-item:not(.account-item):not(.toolbar-logo)').removeClass('active unread')
                 .filter('.mentions').addClass('active')
 
-            xabber.body.setScreen('notifications', {right: 'notifications', notifications: xabber.notifications_view}); //34
+            xabber.body.setScreen('notifications', {right: 'notifications', notifications: xabber.notifications_view});
             xabber.notifications_view && xabber.notifications_view.onShowNotificationsTab();
         } catch (e) {
             console.error(e);
