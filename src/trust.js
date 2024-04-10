@@ -115,11 +115,25 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
         this.account.on('peer_devices_updated', () => {
             this.updateVerificationData();
         });
+        this.on('trust_updated change:trusted_devices', this.updateOmemoTrusts, this);
         this.updateVerificationData();
     },
 
     onConnected: function () {
         this.populateOwnTrustedDevices();
+    },
+
+    updateOmemoTrusts: function () {
+        console.log(this.omemo);
+        if (!this.omemo)
+            return;
+        let trusted_devices = this.get('trusted_devices');
+
+        Object.keys(trusted_devices).forEach((item) => {
+            trusted_devices[item].forEach((device_item) => {
+                this.omemo.updateFingerprints(item, device_item.device_id, device_item.fingerprint, true);
+            });
+        });
     },
 
     cancelSession: function (sid, to) {
@@ -402,7 +416,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                             public_key: utils.ArrayBuffertoBase64(own_device.get('ik'))
                         }];
                     this.save('trusted_devices', trusted_devices);
-                    // console.log(this.get('trusted_devices'));
+                    this.trigger('trust_updated');
                     this.publishOwnTrustedDevices();
                 }).catch((err) => {
                     // console.error(err);
@@ -646,6 +660,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
         //     public_key: utils.ArrayBuffertoBase64(device.get('ik'))
         // });
         this.save('trusted_devices', trusted_devices);
+        this.trigger('trust_updated');
 
         return true;
 
@@ -712,6 +727,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                             }
                             console.log(saved_trusted_devices);
                             this.save('trusted_devices', saved_trusted_devices);
+                            this.trigger('trust_updated');
                             if (peer){
                                 this.publishContactsTrustedDevices();
                             } else {
@@ -892,6 +908,9 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
         // console.log(contact);
         // console.log(options);
         if (options.notification_trust_msg && options.device_id){
+            // console.log(options.device_id);
+            // console.log(this.omemo.get('device_id'));
+            // console.log(options.device_id == this.omemo.get('device_id'));
             if (options.device_id == this.omemo.get('device_id'))
                 return;
             this.parseContactsTrustedDevices(message, options);
@@ -1905,6 +1924,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                 }];
             }
             this.save('trusted_devices', trusted_devices);
+            this.trigger('trust_updated');
             // console.log(this.get('trusted_devices'));
 
             this.sendVerificationSuccess(to, sid);
@@ -1945,6 +1965,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                 }];
             }
             this.save('trusted_devices', trusted_devices);
+            this.trigger('trust_updated');
             // console.log(this.get('trusted_devices'));
 
 
