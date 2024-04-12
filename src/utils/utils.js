@@ -253,6 +253,15 @@ var utils = {
         return hashBuffer;
     },
 
+    isJsonString: function (str) {
+        try {
+            JSON.parse(str);
+        } catch (e) {
+            return false;
+        }
+        return true;
+    },
+
     getDateFormat: function (date_format) {
         let final_format;
         if (date_format === 'iso'){

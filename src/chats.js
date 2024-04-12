@@ -4775,6 +4775,12 @@ xabber.ChatContentView = xabber.BasicView.extend({
         return $message;
     },
 
+    isMessageAdded: function (message) {
+        let $message = this.$(`.chat-message[data-uniqueid="${message.get('unique_id')}"]`),
+            is_added = Boolean($message.length);
+        return is_added;
+    },
+
     initPopup: function ($message) {
         let $one_image = $message.find('.uploaded-img'),
             $collage_image = $message.find('.uploaded-img-for-collage');
@@ -4928,7 +4934,9 @@ xabber.ChatContentView = xabber.BasicView.extend({
             $message.next().find('.circle-avatar').replaceWith(avatar);
         }
         $message.prev('.chat-day-indicator').remove();
+        let $next_msg = $message.next('.chat-message');
         $message.remove();
+        $next_msg.length && this.updateMessageInChat($next_msg[0]);
         this.bottom.manageSelectedMessages();
         if (!this._clearing_history) {
             this.updateScrollBar();
@@ -5745,7 +5753,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
             }
             else {
                 let author = this.account.contacts.get($msg.data('from')) || $msg.find('.msg-wrap .chat-msg-author').text() || $msg.data('from');
-                image = author.cached_image || Images.getDefaultAvatar(author);
+                image = author && author.cached_image || Images.getDefaultAvatar(author);
             }
         }
         $avatar.setAvatar(image, this.avatar_size);
@@ -6625,7 +6633,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
                 let xhr_status = this.fakeStatus || this.status;
                 if (xhr_status >= 200 && xhr_status < 300) {
                     $message.find('div[data-upload-file-id="' + file.upload_id + '"] .mdi-center-loading-indicator').addClass('mdi-check').removeClass('mdi-close');
-                    let response = this.response ? JSON.parse(this.response) : this.fakeResponse;
+                    let response = this.response && utils.isJsonString(this.response) ? JSON.parse(this.response) : this.fakeResponse;
                     message.get('files')[idx].id = response.id;
                     message.get('files')[idx].created_at = response.created_at;
                     (response.thumbnail && response.thumbnail.url) && (message.get('files')[idx].thumbnail = response.thumbnail.url);
@@ -6683,8 +6691,8 @@ xabber.ChatContentView = xabber.BasicView.extend({
                         if (xhr_status === 500)
                             response_text = this.fakeResponse || this.statusText;
                         else if (xhr_status === 400 || this.fakeStatus){
-                            response_text = this.fakeResponse || JSON.parse(this.response).error;
-                            error_status = this.fakeStatus || JSON.parse(this.response).status;
+                            response_text = this.fakeResponse || utils.isJsonString(this.response) && JSON.parse(this.response).error || 'Could not parse response';
+                            error_status = this.fakeStatus ||  utils.isJsonString(this.response) && JSON.parse(this.response).status || 500;
                             if (error_status && error_status == 429){
                                 setTimeout(() => {
                                     self.account.testGalleryTokenExpire(() => {
@@ -7202,6 +7210,9 @@ xabber.ChatContentView = xabber.BasicView.extend({
                 this.model.messages_unread.remove(message);
             message.set('was_readen', true);
             $msg.removeClass('unread-message');
+            if (this.model.last_message && this.model.last_message === message){
+                this.model.set('const_unread', 0)
+            }
             setTimeout(() => {
                 $msg.removeClass('unread-message-background');
             }, 1000);
@@ -9144,6 +9155,8 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
     },
 
     openChat: function (view, options) {
+        if (view.model.get('notifications'))
+            return;
         if (!view.content)
             view.content = new xabber.ChatContentView({chat_item: view});
         options = options || {};
@@ -9200,13 +9213,19 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
                     chat_item: view,
                     blocked: view.model.get('blocked')
                 },{right_contact_save: options.right_contact_save, right_force_close: options.right_force_close} );
+                if (view.model.last_message && !view.content.isMessageAdded(view.model.last_message)){
+                    view.content.addMessage(view.model.last_message);
+                }
                 if (view.model.get('unread') && unread_scroll) {
                     view.content.scrollToUnread();
                     view.content._long_reading_timeout = true;
                     view.content._no_scrolling_event = false;
                     view.content.onScroll();
+                } else if ((!scrolled_to_bottom || !unread_scroll) && current_scrolling){
+                    view.content.scrollTo(current_scrolling);
+                } else {
+                    view.content.scrollToBottom();
                 }
-                (!scrolled_to_bottom || !unread_scroll) && current_scrolling && view.content.scrollTo(current_scrolling);
             } else {
                 xabber.body.setScreen((options.screen || 'all-chats'), {
                     right: 'chat',
@@ -13572,7 +13591,7 @@ xabber.ChatBottomView = xabber.BasicView.extend({
                 file.voice && $message.c('voice-message', {xmlns: Strophe.NS.VOICE_MESSAGE});
                 $message.c('file-sharing', {xmlns: Strophe.NS.FILES}).c('file');
                 file.type && $message.c('media-type').t(file.type).up();
-                file.thumbnail && stanza.c('thumbnail', {
+                file.thumbnail && $message.c('thumbnail', {
                     xmlns: Strophe.NS.PUBSUB_AVATAR_METADATA_THUMBNAIL,
                     uri: file.thumbnail
                 }).up();
