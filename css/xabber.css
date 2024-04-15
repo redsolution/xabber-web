@@ -20579,7 +20579,8 @@ ul.restrictions-list-content>li {
     display: none;
 }
 .notifications-content-wrap .notification-trust-session{
-    margin: 0 70px 0 134px;
+    margin: 0 auto;
+    max-width: 768px;
     border-bottom: 1px solid;
     position: relative;
 }

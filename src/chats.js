@@ -11035,7 +11035,7 @@ xabber.InvitationPanelView = xabber.SearchView.extend({
             type: 'chat',
             id: uuid()
         });
-        stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: sid }).c('verification-start', {'device-id': this.account.omemo.get('device_id') }).up().up();
+        stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: sid, timestamp: Date.now() }).c('verification-start', {'device-id': this.account.omemo.get('device_id') }).up().up();
         stanza.c('body').t(`Device Verification request from ${this.account.jid} A1`).up();
         stanza.up().up().up();
         stanza.c('fallback',{xmlns: Strophe.NS.XABBER_NOTIFY}).t(`device verification fallback text`).up();
@@ -11073,7 +11073,7 @@ xabber.InvitationPanelView = xabber.SearchView.extend({
     //         type: 'chat',
     //         id: uuid()
     //     });
-    //     stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: sid }).c('verification-start', {'device-id': this.account.omemo.get('device_id') }).up().up();
+    //     stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: sid, timestamp: Date.now() }).c('verification-start', {'device-id': this.account.omemo.get('device_id') }).up().up();
     //     stanza.c('body').t(`Device Verification request from ${this.account.jid} A1`).up();
     //     stanza.up().up().up();
     //     stanza.c('fallback',{xmlns: Strophe.NS.XABBER_NOTIFY}).t(`device verification fallback text`).up();

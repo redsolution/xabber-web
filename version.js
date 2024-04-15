@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.3.5.4","version_description":"fixed missing last messages, fixed date marker dissapering on retract, bugfixes, gallery json response check, sync unread msgs counter reset on reading last msg, fixed opening notification chat through notifications, fixed editing msgs with files, fixed scrolling in chats with new unread msg which was read from another device, changed emoji regex"}'
+'{"version_number":"2.3.5.5","version_description":"fixed offline trust handling, added timestamp to authenticated-key-exchange tags, added handling for old xen sync conversations,"}'
 )});

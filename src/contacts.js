@@ -8644,7 +8644,7 @@ xabber.Roster = xabber.ContactsBase.extend({
             chat.set('archived', true);
         else if ($item.attr('status') === 'active' && !saved)
             chat.set('archived', false);
-        if ($item.attr('status') === 'deleted') {
+        if ($item.attr('status') === 'deleted' || chat.get('sync_type') === Strophe.NS.XABBER_NOTIFY && this.account.server_features.get(Strophe.NS.XABBER_NOTIFY) && jid !== this.account.server_features.get(Strophe.NS.XABBER_NOTIFY).get('from')) {
             chat.get('display') && xabber.body.setScreen(xabber.body.screen.get('name'), {right_contact: '', right: undefined});
             chat.set('opened', false);
             chat.set('const_unread', 0);
