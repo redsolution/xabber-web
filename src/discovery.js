@@ -137,12 +137,13 @@ xabber.ServerFeatures = Backbone.Collection.extend({
         if (this.connection.caps_ver){
             this.account.cached_server_features.getFromCachedFeatures('caps_version', (caps_ver) => {
                 if (caps_ver){
-                    if (caps_ver.ver === this.connection.caps_ver){
+                    if (caps_ver.ver === this.connection.caps_ver && caps_ver.timestamp && ((Date.now() / 1000) - caps_ver.timestamp) < 86400){
                         dfd.resolve();
                     } else {
                         this.account.cached_server_features.putInCachedFeatures({
                             var: 'caps_version',
                             ver: this.connection.caps_ver,
+                            timestamp: Date.now() / 1000,
                         }, () => {
                             dfd.resolve(true);
                         })
@@ -151,6 +152,7 @@ xabber.ServerFeatures = Backbone.Collection.extend({
                     this.account.cached_server_features.putInCachedFeatures({
                         var: 'caps_version',
                         ver: this.connection.caps_ver,
+                        timestamp: Date.now() / 1000,
                     }, () => {
                         dfd.resolve(true);
                     })

@@ -999,6 +999,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                     this.account.omemo.xabber_trust.addVerificationSessionData(sid, {
                         verification_accepted_msg_xml: message.outerHTML,
                     });
+                    options.msg_item && this.removeAfterHandle(options.msg_item);
                 }
                 if (this.active_sessions_data[sid].verification_step === '1a' && !options.automated)
                     this.handleTrustVerificationSigned($message, contact);
@@ -1008,11 +1009,11 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                 let dfd = new $.Deferred();
                 dfd.done(() => {
                     if ($message.find('hash').length && $message.find('salt').length && this.active_sessions_data[sid].verification_step === '1b'){
-                        this.handleTrustVerificationCodeHash($message, contact);
+                        this.handleTrustVerificationCodeHash($message, contact, options.msg_item);
                         return;
                     }
                     if ($message.find('hash').length && !$message.find('salt').length && this.active_sessions_data[sid].verification_step === '2a'){
-                        this.handleTrustVerificationFinalHash($message, contact);
+                        this.handleTrustVerificationFinalHash($message, contact, options.msg_item);
                         return;
                     }
                 });
@@ -1092,6 +1093,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                     this.account.omemo.xabber_trust.addVerificationSessionData(sid, {
                         verification_accepted_msg_xml: message.outerHTML,
                     });
+                    options.msg_item && this.removeAfterHandle(options.msg_item);
                 }
                 if (this.active_sessions_data[sid].verification_step === '1a' && !options.automated)
                     this.handleTrustVerificationSigned($message, null, true);
@@ -1101,11 +1103,11 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                 let dfd = new $.Deferred();
                 dfd.done(() => {
                     if ($message.find('hash').length && $message.find('salt').length && this.active_sessions_data[sid].verification_step === '1b'){
-                        this.handleTrustVerificationCodeHash($message, null);
+                        this.handleTrustVerificationCodeHash($message, null, options.msg_item);
                         return;
                     }
                     if ($message.find('hash').length && !$message.find('salt').length && this.active_sessions_data[sid].verification_step === '2a'){
-                        this.handleTrustVerificationFinalHash($message, null);
+                        this.handleTrustVerificationFinalHash($message, null, options.msg_item);
                         return;
                     }
                 });
@@ -1246,7 +1248,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
         // });
     },
 
-    handleTrustVerificationSigned: function ($message, contact, is_own) {
+    handleTrustVerificationSigned: function ($message, contact, is_own, msg_item) {
         let device_id = $message.find('verification-accepted').attr('device-id'),
             sid = $message.find('authenticated-key-exchange').attr('sid'),
             peer, device;
@@ -1332,6 +1334,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                                             last_sent_message_id: msg_id
                                         });
 
+                                        msg_item && this.removeAfterHandle(msg_item);
                                         this.account.sendFast(stanza, () => {
                                             // console.log(stanza);
                                             // console.log(stanza.tree());
@@ -1370,6 +1373,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                             stanza.c('no-copy', {xmlns: Strophe.NS.HINTS}).up();
                             stanza.c('addresses', {xmlns: Strophe.NS.ADDRESS}).c('address',{type: 'to', jid: to}).up().up();
 
+                            msg_item && this.removeAfterHandle(msg_item);
                             this.account.sendFast(stanza, () => {
                                 // console.log(stanza);
                                 // console.log(stanza.tree());
@@ -1406,6 +1410,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                         stanza.c('no-copy', {xmlns: Strophe.NS.HINTS}).up();
                         stanza.c('addresses', {xmlns: Strophe.NS.ADDRESS}).c('address',{type: 'to', jid: to}).up().up();
 
+                        msg_item && this.removeAfterHandle(msg_item);
                         this.account.sendFast(stanza, () => {
                             // console.log(stanza);
                             // console.log(stanza.tree());
@@ -1418,7 +1423,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
         });
     },
 
-    handleTrustVerificationCodeHash: function ($message, contact) {
+    handleTrustVerificationCodeHash: function ($message, contact, msg_item) {
         let sid = $message.find('authenticated-key-exchange').attr('sid');
         if (!this.active_sessions_data[sid]) {
             return;
@@ -1542,6 +1547,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                                                 verification_step: '2b',
                                             });
 
+                                            msg_item && this.removeAfterHandle(msg_item);
                                             this.account.sendFast(stanza, () => {
                                                 // console.log(stanza);
                                                 // console.log(stanza.tree());
@@ -1578,6 +1584,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                                     stanza.c('no-copy', {xmlns: Strophe.NS.HINTS}).up();
                                     stanza.c('addresses', {xmlns: Strophe.NS.ADDRESS}).c('address',{type: 'to', jid: to}).up().up();
 
+                                    msg_item && this.removeAfterHandle(msg_item);
                                     this.account.sendFast(stanza, () => {
                                         // console.log(stanza);
                                         // console.log(stanza.tree());
@@ -1616,6 +1623,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                         stanza.c('no-copy', {xmlns: Strophe.NS.HINTS}).up();
                         stanza.c('addresses', {xmlns: Strophe.NS.ADDRESS}).c('address',{type: 'to', jid: to}).up().up();
 
+                        msg_item && this.removeAfterHandle(msg_item);
                         this.account.sendFast(stanza, () => {
                             // console.log(stanza);
                             // console.log(stanza.tree());
@@ -1652,6 +1660,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                     stanza.c('no-copy', {xmlns: Strophe.NS.HINTS}).up();
                     stanza.c('addresses', {xmlns: Strophe.NS.ADDRESS}).c('address',{type: 'to', jid: to}).up().up();
 
+                    msg_item && this.removeAfterHandle(msg_item);
                     this.account.sendFast(stanza, () => {
                         // console.log(stanza);
                         // console.log(stanza.tree());
@@ -1664,7 +1673,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
 
     },
 
-    handleTrustVerificationFinalHash: function ($message, contact) {
+    handleTrustVerificationFinalHash: function ($message, contact, msg_item) {
         let sid = $message.find('authenticated-key-exchange').attr('sid');
         if (!this.active_sessions_data[sid]) {
             return;
@@ -1704,6 +1713,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                             // console.log(decrypted_hash_b64);
 
                             if (generated_hash_b64 === decrypted_hash_b64){
+                                msg_item && this.removeAfterHandle(msg_item);
                                 //start devices exchange
                                 this.sendTrustedDevices(contact, device, sid);
 
@@ -1735,6 +1745,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                                 stanza.c('no-copy', {xmlns: Strophe.NS.HINTS}).up();
                                 stanza.c('addresses', {xmlns: Strophe.NS.ADDRESS}).c('address',{type: 'to', jid: to}).up().up();
 
+                                msg_item && this.removeAfterHandle(msg_item);
                                 this.account.sendFast(stanza, () => {
                                     // console.log(stanza);
                                     // console.log(stanza.tree());

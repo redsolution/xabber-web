@@ -1252,7 +1252,8 @@ xabber.ToolbarView = xabber.BasicView.extend({
             if (account.omemo && account.omemo.xabber_trust){
                 let trust = account.omemo.xabber_trust,
                     active_trust_sessions = trust.get('active_trust_sessions');
-                mentions += Object.keys(active_trust_sessions).length;
+                if (account.get('enabled'))
+                    mentions += Object.keys(active_trust_sessions).length;
             }
         });
         return { msgs: count_msg, all_msgs: count_all_msg, group_msgs: count_group_msg, mentions: mentions };

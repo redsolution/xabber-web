@@ -271,6 +271,9 @@ let Xabber = Backbone.Model.extend({
             {ok_button: {text: this.getString("dialog_version_update__button_reload")}, cancel_button: {text: this.getString("dialog_version_update__option_not_now")}}
         ).done((result) => {
             if (result) {
+                this.accounts.models.forEach((item) => {
+                    item.cached_server_features.clearDataBase();
+                });
                 window.location.reload(true);
             }
         });
