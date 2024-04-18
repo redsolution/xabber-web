@@ -229,11 +229,11 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
             .c('publish', {node: Strophe.NS.PUBSUB_TRUST_SHARING_ITEMS})
             .c('item', {id: this.omemo.get('device_id')})
             .c('share', {xmlns: Strophe.NS.PUBSUB_TRUST_SHARING, usage: Strophe.NS.OMEMO})
-            .c('identity').t(my_saved_trusted_device.fingerprint).up()
+            .c('identity', {id: my_saved_trusted_device.device_id}).t(my_saved_trusted_device.fingerprint).up()
             .c('trusted-items', {timestamp: current_timestamp});
 
         my_trusted_devices.forEach((trusted_device) => {
-            iq.c('trust', {timestamp: trusted_device.timestamp}).t(trusted_device.trusted_key).up();
+            iq.c('trust', {timestamp: trusted_device.timestamp, xmlns: Strophe.NS.PUBSUB_TRUST_SHARING}).t(trusted_device.trusted_key).up();
         });
 
         let $trusted_items = $(iq.tree()).find('trusted-items');
@@ -324,53 +324,95 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
         stanza.c('envelope', {xmlns: Strophe.NS.SCE}).c('content');
 
         stanza.c('body').t(`${this.account.jid} shared his trusted devices`).up();
-        stanza.c('trust-message', {xmlns: Strophe.NS.TRUSTED_MESSAGES, usage: Strophe.NS.OMEMO});
+        stanza.c('share', {xmlns: Strophe.NS.PUBSUB_TRUST_SHARING, usage: Strophe.NS.OMEMO});
 
         // console.log(trusted_devices);
 
         Object.keys(trusted_devices).forEach((item) => {
             if (item === this.account.get('jid'))
                 return;
-            stanza.c('key-owner', {jid: item});
+            stanza.c('trusted-items', {owner: item, timestamp: Date.now()});
             trusted_devices[item].forEach((device_item) => {
-                stanza.c('trust', {'device-id': device_item.device_id}).t(device_item.trusted_key).up();
+                stanza.c('trust', {timestamp: Date.now()}).t(device_item.trusted_key).up();
             });
             stanza.up();
         });
-        stanza.up().up().c('rpad').t('0'.repeat(200).slice(1, Math.floor((Math.random() * 198) + 1))).up();
-        stanza.c('from', {jid: this.account.get('jid')}).up().up();
 
-        // console.log(stanza);
-        // console.log(stanza.tree());
-        // console.log(stanza.tree().outerHTML);
+        let $share = $(stanza.tree()).find('share'),
+            trusted_string = '';
 
-        this.omemo.encrypt(null, stanza ,true).then((msg) => {
-            if (msg) {
-                stanza = msg.message;
-            }
+        $share.children('trusted-items').sort(function(a, b) {
+            return +a.getAttribute('timestamp') - +b.getAttribute('timestamp');
+        }).appendTo($share);
 
-            let final_stanza = $iq({
-                    type: 'set',
-                    to: to,
-                    id: msg_id
-                });
-            final_stanza.c('notify', {xmlns: Strophe.NS.XABBER_NOTIFY});
-            final_stanza.c('notification', {xmlns: Strophe.NS.XABBER_NOTIFY});
-            final_stanza.c('forwarded', {xmlns: Strophe.NS.FORWARD});
+        $share.children('trusted-items').each((idx, trusted_items) => {
+            let $item = $(trusted_items);
+            trusted_string = trusted_string + `${$item.attr('timestamp')}`;
 
-            final_stanza.cnode(stanza.tree()).up();
-
-
-            final_stanza.up().up();
-            final_stanza.c('fallback',{xmlns: Strophe.NS.XABBER_NOTIFY}).t(`Encrypted notification`).up();
-            final_stanza.c('no-store', {xmlns: Strophe.NS.HINTS}).up();
-            final_stanza.c('no-copy', {xmlns: Strophe.NS.HINTS}).up();
-            final_stanza.c('addresses', {xmlns: Strophe.NS.ADDRESS}).c('address',{type: 'to', jid: to}).up().up();
-
-            this.account.sendFast(final_stanza, () => {
-
+            $item.find('trust').sort(function(a, b) {
+                return +a.getAttribute('timestamp') - +b.getAttribute('timestamp');
+            }).appendTo($item);
+            $item.find('trust').each((idx, trust_item) => {
+                let $trust = $(trust_item);
+                trusted_string = trusted_string + `<${$trust.attr('timestamp')}/${$trust.text()}`;
             });
-        })
+
+        });
+
+        this.omemo.store.getIdentityKeyPair().then((own_ik) => {
+            let own_privkey = own_ik.privKey;
+            if (own_privkey.byteLength === 33)
+                own_privkey = own_privkey.slice(1);
+
+            utils.createSha256(trusted_string).then((sha256_trust_message) => {
+
+                let signature = utils.curveSign(own_privkey, new Uint8Array(sha256_trust_message));
+
+                stanza.c('signature').t(utils.ArrayBuffertoBase64(signature.buffer)).up();
+
+                let my_trusted_devices = this.get('trusted_devices')[this.account.get('jid')],
+                    my_saved_trusted_device = my_trusted_devices.filter(item => item.is_me);
+                if (!my_saved_trusted_device.length)
+                    return;
+                my_saved_trusted_device = my_saved_trusted_device[0];
+
+                stanza.c('identity', {id: my_saved_trusted_device.device_id}).t(my_saved_trusted_device.fingerprint).up();
+
+                stanza.up().up().c('rpad').t('0'.repeat(200).slice(1, Math.floor((Math.random() * 198) + 1))).up();
+                stanza.c('from', {jid: this.account.get('jid')}).up().up();
+
+                // console.log(stanza);
+                // console.log(stanza.tree());
+                // console.log(stanza.tree().outerHTML);
+
+                this.omemo.encrypt(null, stanza ,true).then((msg) => {
+                    if (msg) {
+                        stanza = msg.message;
+                    }
+
+                    let final_stanza = $iq({
+                        type: 'set',
+                        to: to,
+                        id: msg_id
+                    });
+                    final_stanza.c('notify', {xmlns: Strophe.NS.XABBER_NOTIFY});
+                    final_stanza.c('notification', {xmlns: Strophe.NS.XABBER_NOTIFY});
+                    final_stanza.c('forwarded', {xmlns: Strophe.NS.FORWARD});
+
+                    final_stanza.cnode(stanza.tree()).up();
+
+                    final_stanza.up().up();
+                    final_stanza.c('fallback',{xmlns: Strophe.NS.XABBER_NOTIFY}).t(`Encrypted notification`).up();
+                    final_stanza.c('no-store', {xmlns: Strophe.NS.HINTS}).up();
+                    final_stanza.c('no-copy', {xmlns: Strophe.NS.HINTS}).up();
+                    final_stanza.c('addresses', {xmlns: Strophe.NS.ADDRESS}).c('address',{type: 'to', jid: to}).up().up();
+
+                    this.account.sendFast(final_stanza, () => {
+
+                    });
+                })
+            });
+        });
 
 
     },
@@ -587,39 +629,113 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
             received_device_id = options.device_id,
             is_new_devices = false,
             counter = 0,
-            total_count = $message.find('trust-message key-owner trust').length;
+            total_count = $message.find('share trusted-items trust').length,
+            device_fingerprint = $message.find('share identity').text();
 
         let my_trusted_devices = this.get('trusted_devices')[this.account.get('jid')];
 
-        // console.log(my_trusted_devices.filter(e => e.device_id == received_device_id));
-        // console.log(my_trusted_devices.some(e => e.device_id == received_device_id));
+        // console.log(received_device_id);
+        // console.log(device_fingerprint);
+        // console.log(my_trusted_devices.some(e => e.device_id == received_device_id && e.fingerprint == device_fingerprint));
 
-        if (my_trusted_devices.some(e => e.device_id == received_device_id)){// сделать обработку трастов
-            let $trust_message = $message.find('trust-message');
-            $trust_message.children('key-owner').each((idx, key_owner) => {
-                // console.log(key_owner);
-                let $key_owner = $(key_owner),
-                    jid = $key_owner.attr('jid');
-                $key_owner.children('trust').each((idx, trust_item) => {
-                    // console.log(trust_item);
-                    let $trust_item = $(trust_item),
-                        device_id = $trust_item.attr('device-id'),
-                        trusted_key = $trust_item.text();
+        if (my_trusted_devices.some(e => e.device_id == received_device_id && e.fingerprint == device_fingerprint)){ //34
 
-                    let is_new = this.addNewContactsDevice(trusted_key, jid, device_id);
-                    // console.log(is_new);
-                    // console.log(device_id);
 
-                    counter++;
-                    if (is_new)
-                       is_new_devices = true;
-                    if (counter === total_count){
-                       if (is_new_devices)
-                           this.publishContactsTrustedDevices();
-                       else {
-                           // console.log('no new devices')
-                       }
-                    }
+            let $share = $message.find('share'),
+                trusted_item_signature = $share.find('signature').text(),
+                trusted_string = '',
+                is_signature_verified,
+                identity_device_id;
+
+            if (!$share.find('identity').length)
+                return;
+
+
+            identity_device_id = $share.find('identity').attr('id');
+
+            // console.log(identity_device_id);
+            // console.log(options.device_id);
+
+            if (options.device_id != identity_device_id)
+                return;
+
+
+            $share.children('trusted-items').sort(function(a, b) {
+                return +a.getAttribute('timestamp') - +b.getAttribute('timestamp');
+            }).appendTo($share);
+
+            $share.children('trusted-items').each((idx, trusted_items) => {
+                let $item = $(trusted_items);
+                trusted_string = trusted_string + `${$item.attr('timestamp')}`;
+
+                $item.find('trust').sort(function(a, b) {
+                    return +a.getAttribute('timestamp') - +b.getAttribute('timestamp');
+                }).appendTo($item);
+                $item.find('trust').each((idx, trust_item) => {
+                    let $trust = $(trust_item);
+                    trusted_string = trusted_string + `<${$trust.attr('timestamp')}/${$trust.text()}`;
+                });
+
+            });
+
+
+            utils.createSha256(trusted_string).then((sha256_trust_message) => {
+
+                let item_device = this.omemo.own_devices[identity_device_id];
+                // console.log(item_device);
+                if (!item_device)
+                    return;
+
+                let item_public_key = item_device.get('ik');
+
+                // console.log(item_public_key);
+
+                if (!item_public_key){
+                    return;
+                }
+
+                if (item_public_key.byteLength === 33)
+                    item_public_key = item_public_key.slice(1);
+
+                is_signature_verified = utils.curveVerify(item_public_key, new Uint8Array(sha256_trust_message), new Uint8Array(utils.fromBase64toArrayBuffer(trusted_item_signature)));
+
+                // console.log(is_signature_verified);
+
+                if (!is_signature_verified)
+                    return;
+
+                $share.children('trusted-items').each((idx, key_owner) => {
+                    // console.log(key_owner);
+                    let $key_owner = $(key_owner),
+                        jid = $key_owner.attr('owner');
+                    $key_owner.children('trust').each((idx, trust_item) => {
+                        // console.log(trust_item);
+                        let $trust_item = $(trust_item),
+                            // device_id = $trust_item.attr('device-id'), //сделать получение device_id из trusted_key
+                            trusted_key = $trust_item.text();
+
+                        let trustedKeyString = atob(trusted_key);
+
+                        let device_id = trustedKeyString.split('::')[0];
+
+                        // console.log(device_id);
+                        // console.log(jid);
+
+                        let is_new = this.addNewContactsDevice(trusted_key, jid, device_id);
+
+                        counter++;
+                        if (is_new)
+                            is_new_devices = true;
+
+                        if (counter === total_count){
+                            if (is_new_devices)
+                                this.publishContactsTrustedDevices();
+                            else {
+                                // console.log('no new devices')
+                            }
+                        }
+                    });
+
                 });
 
             });
@@ -758,9 +874,10 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
             }
 
             let item_device_id = trustedKeyString.split('::')[0],
+                item_device_fingerprint = trustedKeyString.split('::')[1],
                 item_device = peer ? peer.devices[item_device_id] : this.omemo.own_devices[item_device_id];
 
-            // console.log(item_fingerprint);
+            // console.log(item_device_fingerprint);
             // console.log(item_device_id);
             // console.log(item_device);
 
@@ -781,8 +898,14 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                 item_public_key = item_public_key.slice(1);
 
             let $item = $message.find(`item[id="${item_device_id}"]`);
+            // console.log($item);
+            // console.log($item[0]);
+            // console.log($item.find('identity').length);
+            // console.log(item_device_fingerprint);
+            // console.log($item.find('identity').text());
+            // console.log($item.find('identity').text() != item_device_fingerprint);
 
-            if (!$item.length){
+            if (!$item.length || !$item.find('identity').length || $item.find('identity').text() != item_device_fingerprint){
                 dfd.resolve();
                 return;
             }

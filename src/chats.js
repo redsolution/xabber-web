@@ -359,7 +359,7 @@ xabber.MessagesBase = Backbone.Collection.extend({
                     attrs.trust_device_id = $keyExchange.children('verification-start').attr('device-id');
                 }
             }
-            if ($notification_msg.children(`envelope`).length && $notification_msg.find(`content trust-message[xmlns="${Strophe.NS.TRUSTED_MESSAGES}"]`).length){
+            if ($notification_msg.children(`envelope`).length && $notification_msg.find(`content share[xmlns="${Strophe.NS.PUBSUB_TRUST_SHARING}"]`).length){
                 let msg_text = `${this.account.jid} updated their devices`;
                 attrs.original_message = body = msg_text;
                 attrs.notification_trust_msg = true;
