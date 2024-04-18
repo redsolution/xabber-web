@@ -11788,6 +11788,9 @@ input[type=range].voice-message-volume:focus {
 .settings-panel-wrap .settings-panel .settings-column .settings-tab[data-block-name="encryption"] .setting-icon-background{
     background: #FFC107;
 }
+.settings-panel-wrap .settings-panel .settings-column .settings-tab[data-block-name="trust"] .setting-icon-background{
+    background: #4CAF50;
+}
 .settings-panel-wrap .settings-panel .settings-column .settings-tab[data-block-name="devices"] .setting-icon-background{
     background: #4CAF50;
 }

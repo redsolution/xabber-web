@@ -3643,7 +3643,7 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
                         device: device_item,
                         fingerprint: device_item.fingerprint.match(/.{1,4}/g).join(" "),
                         time: pretty_datetime(device_item.timestamp),
-                        trust_type: xabber.getString(`settings__trust_item__trust_type_${trust_type}`),
+                        trust_type: xabber.getString(`settings_account__trust__trust_type_${trust_type}`),
                     }));
                     $trust_peer.find('.trust-item-devices-wrap').append($trust_device);
 

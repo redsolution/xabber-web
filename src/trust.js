@@ -721,7 +721,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                         // console.log(device_id);
                         // console.log(jid);
 
-                        let is_new = this.addNewContactsDevice(trusted_key, jid, device_id);
+                        let is_new = this.addNewContactsDevice(trusted_key, jid, device_id, identity_device_id);
 
                         counter++;
                         if (is_new)
@@ -743,7 +743,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
 
     },
 
-    addNewContactsDevice: function (trusted_key, jid, device_id) {
+    addNewContactsDevice: function (trusted_key, jid, device_id, from_device_id) {
         let peer = this.omemo.getPeer(jid);
         // console.log(peer);
         if (!peer)
@@ -757,6 +757,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
             if (!trusted_devices[jid].some(e => e.trusted_key === trusted_key)){
                 trusted_devices[jid].push({
                     trusted_key: trusted_key,
+                    from_device_id: from_device_id,
                     fingerprint: device.get('fingerprint'),
                     device_id: device.get('id'),
                     timestamp: Date.now(),
@@ -768,6 +769,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
         } else {
             trusted_devices[jid] = [{
                 trusted_key: trusted_key,
+                from_device_id: from_device_id,
                 fingerprint: device.get('fingerprint'),
                 device_id: device.get('id'),
                 timestamp: Date.now(),
@@ -796,7 +798,8 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
         // peer && console.error(peer);
         // peer && console.error(peer.devices);
         let new_trusted_devices = [],
-            counter = 0;
+            counter = 0,
+            was_removed;
         final_trusted_devices = final_trusted_devices || [];
         let devices_to_remove = [];
         if (!is_first){
@@ -808,16 +811,24 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                 let item_fingerprint = trustedKeyString.split('::')[1],
                     item_device_id = trustedKeyString.split('::')[0],
                     item_device = peer ? peer.devices[item_device_id] : this.omemo.own_devices[item_device_id];
+
+
+                // console.log(item_fingerprint);
+                // console.log(item_device_id);
+                // console.log(item_device);
+                // console.log(this.omemo.own_devices);
                 if (item_device){
                     trusted_devices[idx] = {
                         trusted_key: item.trusted_key,
+                        from_device_id: item.from_device_id,
                         timestamp: Date.now(),
                         fingerprint: item_fingerprint,
                         device_id: item_device_id,
                         public_key: utils.ArrayBuffertoBase64(item_device.get('ik'))
                     };
                 } else {
-                    trusted_devices[idx] = null
+                    trusted_devices[idx] = null;
+                    was_removed = true;
                 }
                 // console.log(idx);
                 // console.log(trusted_devices[idx]);
@@ -826,6 +837,31 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
         }
         trusted_devices = trusted_devices.filter(Boolean);
         final_trusted_devices = final_trusted_devices.concat(trusted_devices);
+        // console.log(trusted_devices);
+        // console.log(final_trusted_devices);
+
+        if (!trusted_devices.length && !is_first && final_trusted_devices.length && was_removed){
+            let saved_trusted_devices = this.get('trusted_devices');
+            if (peer) {
+                if (final_trusted_devices.length === saved_trusted_devices[peer.get('jid')].length)
+                    return;
+                saved_trusted_devices[peer.get('jid')] = final_trusted_devices;
+            } else {
+                if (final_trusted_devices.length === saved_trusted_devices[this.account.get('jid')].length)
+                    return;
+                saved_trusted_devices[this.account.get('jid')] = final_trusted_devices;//
+            }
+            // console.error(saved_trusted_devices[this.account.get('jid')]);
+            // console.error(saved_trusted_devices);
+            this.save('trusted_devices', saved_trusted_devices);
+            this.trigger('trust_updated');
+            if (peer){
+                this.publishContactsTrustedDevices();
+            } else {
+                this.publishOwnTrustedDevices();
+            }
+        }
+
         trusted_devices.forEach((item) => {
             let dfd = $.Deferred();
 
@@ -836,11 +872,24 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                 // console.log(counter === trusted_devices.length);
 
                 if (counter === trusted_devices.length) {
-                    // console.log(trusted_devices);
+                    // console.error(trusted_devices);
                     // console.log(final_trusted_devices);
+                    // console.log(new_trusted_devices);
+                    // console.log(new_trusted_devices.length);
+
+                    // new_trusted_devices.forEach((test_item) => {
+                    //     console.log(test_item);
+                    // });
+
+                    new_trusted_devices = new_trusted_devices.filter(Boolean);
+                    // console.log(new_trusted_devices);
+                    // console.log(new_trusted_devices.length);
+
                     if (new_trusted_devices.length){
                         this.getNewTrustedDevices(new_trusted_devices, $message, final_trusted_devices, null, peer)
                     } else {
+                        // console.log(final_trusted_devices);
+                        // console.log(!is_first);
                         if (!is_first){
                             let saved_trusted_devices = this.get('trusted_devices');
                             if (peer) {
@@ -848,7 +897,8 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                             } else {
                                 saved_trusted_devices[this.account.get('jid')] = final_trusted_devices;//
                             }
-                            console.log(saved_trusted_devices);
+                            // console.error(saved_trusted_devices[this.account.get('jid')]);
+                            // console.error(saved_trusted_devices);
                             this.save('trusted_devices', saved_trusted_devices);
                             this.trigger('trust_updated');
                             if (peer){
@@ -857,7 +907,6 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                                 this.publishOwnTrustedDevices();
                             }
                         }
-                        // console.log(final_trusted_devices);
                     }
                 }
             });
@@ -945,27 +994,38 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
 
                     $trusted_items.find('trust').each((idx, trust_item) => {
 
-                        let $item = $(trust_item);
+                        let $trust_item = $(trust_item);
 
+                        // console.log($trust_item.text());
                         // console.log(final_trusted_devices);
-                        // console.log(final_trusted_devices.filter(e => e.trusted_key === $item.text()));
-                        // console.log(!devices_to_remove.includes($item.text()));
+                        // console.log(final_trusted_devices.filter(e => e.trusted_key === $trust_item.text()));
+                        // console.log(final_trusted_devices.filter(e => e.trusted_key === $trust_item.text()).length);
+                        // console.log(!(final_trusted_devices.filter(e => e.trusted_key === $trust_item.text()).length > 0));
+                        // console.log(!devices_to_remove.includes($trust_item.text()));
+                        // console.log(Boolean(!(final_trusted_devices.filter(e => e.trusted_key === $trust_item.text()).length > 0) && !devices_to_remove.includes($trust_item.text())));
 
-                        if (!(final_trusted_devices.filter(e => e.trusted_key === $item.text()).length > 0) && !devices_to_remove.includes($item.text())){
+                        if (!(final_trusted_devices.filter(e => e.trusted_key === $trust_item.text()).length > 0) && !devices_to_remove.includes($trust_item.text())){
                             let trusted_new_saved_device = {
-                                trusted_key: $item.text(),
+                                trusted_key: $trust_item.text(),
+                                from_device_id: item_device_id,
                             };
                             new_trusted_devices.push(trusted_new_saved_device);
+                            // console.log(new_trusted_devices);
+                            // console.log(new_trusted_devices.length);
                         }
                     });
+                    // console.log(new_trusted_devices);
+                    // console.log(new_trusted_devices.length);
 
                     dfd.resolve();
                 } else {
                     // подпись неверна
-                    // console.log(final_trusted_devices.length);
+                    // console.error(final_trusted_devices.length);
+                    // final_trusted_devices.filter(i => i.trusted_key !== item.trusted_key).length && console.error(final_trusted_devices.filter(i => i.trusted_key !== item.trusted_key));
+                    // final_trusted_devices.filter(i => i.trusted_key !== item.trusted_key).length && console.error(final_trusted_devices.filter(i => i.trusted_key !== item.trusted_key)[0]);
                     final_trusted_devices = final_trusted_devices.filter(i => i.trusted_key !== item.trusted_key);
 
-                    // console.log(final_trusted_devices.length);
+                    // console.error(final_trusted_devices.length);
 
                     devices_to_remove.push(item.trusted_key);
                     dfd.resolve();
