@@ -4510,7 +4510,17 @@ xabber.ChatContentView = xabber.BasicView.extend({
         this.updateMentions(message);
         this.account.messages.add(message);
         let is_scrolled_to_bottom = this.isScrolledToBottom(),
-            scrolled_from_bottom = this.getScrollBottom();
+            scrolled_from_bottom = this.getScrollBottom(),
+            $notification_msg, ignored;
+
+        if (message.get('notification_msg') && message.get('notification_msg_content') && this.data.get('notification_content')){
+            $notification_msg = $(message.get('notification_msg_content'));
+            if (message.get('notification_trust_msg') || $notification_msg.children(`authenticated-key-exchange[xmlns="${Strophe.NS.XABBER_TRUST}"]`).length) {
+                if (!$notification_msg.find('verification-successful').length && !$notification_msg.find('verification-failed').length){
+                    ignored = true;
+                }
+            }
+        }
 
         if (!_.isUndefined(message.get('is_accepted'))) {
             this.model.set('is_accepted', false);
@@ -4558,7 +4568,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
                     }
                 }
             } else {
-                if (!(message.isSenderMe() || message.get('silent') || ((message.get('type') === 'system') && !message.get('auth_request')))) {
+                if (!ignored && !(message.isSenderMe() || message.get('silent') || ((message.get('type') === 'system') && !message.get('auth_request')))) {
                     message.set('is_unread', true);
                     if (message.get('is_unread') && xabber.get('focused') && !xabber.get('idle') && this.isVisible()){
                         this.readVisibleMessages();
@@ -4680,9 +4690,11 @@ xabber.ChatContentView = xabber.BasicView.extend({
 
         if (message.get('notification_msg') && message.get('notification_msg_content') && this.data.get('notification_content')){
 
-            let $notification_msg = $(message.get('notification_msg_content'));
-
             if (message.get('notification_trust_msg') || $notification_msg.children(`authenticated-key-exchange[xmlns="${Strophe.NS.XABBER_TRUST}"]`).length) {
+                if (ignored){
+                    message.set('is_unread', false);
+                    $message.addClass('hidden');
+                }
                 if (this.account.omemo && this.account.omemo.xabber_trust)
                     this.account.omemo.xabber_trust.receiveTrustVerificationMessage($notification_msg[0], {
                         automated: true,
@@ -8178,9 +8190,13 @@ xabber.AccountChats = xabber.ChatsBase.extend({
                     return;
                 }
                 this.account.getAvatar(photo_id, (data_avatar) => {
-                    this.account.cached_image = Images.getCachedImage(data_avatar);
-                    let avatar_attrs = {avatar_priority: constants.AVATAR_PRIORITIES.PUBSUB_AVATAR, image: data_avatar};
-                    this.account.save(avatar_attrs);
+                    try {
+                        this.account.cached_image = Images.getCachedImage(data_avatar);
+                        let avatar_attrs = {avatar_priority: constants.AVATAR_PRIORITIES.PUBSUB_AVATAR, image: data_avatar};
+                        this.account.save(avatar_attrs);
+                    } catch (e) {
+
+                    }
                 });
             }
         }
@@ -9038,6 +9054,7 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
             xabber.body.showChatPlaceholder();
             xabber.body.screen.set('chat_item', false);
             xabber.body.screen.set('right_contact', '');
+            xabber.right_contact_panel.$el.detach();
             let previous_chat = xabber.body.screen.get('previous_screen');
             if (previous_chat){
                 previous_chat.chat_item = null;

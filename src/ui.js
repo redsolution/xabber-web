@@ -92,6 +92,7 @@ xabber.once("start", function () {
         chat_bottom_panel_width = '100%';
         if (is_narrow){
             right_contact_panel_width = left_panel_width = (panel_width * 0.264) < 288 ? 288 : panel_width * 0.264;
+            right_panel_width = panel_width - (left_panel_width + right_contact_panel_width);
 
         }
         if (right_panel_width < 512 ){
@@ -107,7 +108,7 @@ xabber.once("start", function () {
                 this.right_contact_panel.$el.removeClass('background-click')
             }
             else {
-                right_contact_panel_width = 384
+                right_contact_panel_width = 384;
                 this.right_contact_panel.$el.addClass('background-click')
             }
         }

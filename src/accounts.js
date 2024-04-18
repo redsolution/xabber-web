@@ -3056,6 +3056,7 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
         this.model.on("update_omemo_devices", this.updateOmemoDevices, this);
         this.model.on('trusting_updated', this.updateOmemoDevices, this);
         this.model.on('trusting_updated', this.updateXTokens, this);
+        this.model.on('xabber_trust_items_updated', this.updateTrustItems, this);
         this.model.settings.on("change:omemo", this.updateEnabledOmemo, this);
         this.model.settings.on("change:encrypted_chatstates", this.updateEncryptedChatstates, this);
         this.model.on("change:status_updated", this.updateStatus, this);
@@ -3086,6 +3087,7 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
         this.updateEnabled();
         this.updateXTokens();
         this.updateGroupsLabel();
+        this.updateTrustItems();
         this.updateView();
         this.$('.main-resource .client').text(constants.CLIENT_NAME);
         this.$('.main-resource .resource').text(this.model.resource);
@@ -3614,6 +3616,42 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
             label_text = groups_count === 0 ? xabber.getString("contact_circles_empty") : xabber.getQuantityString("settings_account__section_header_circles", groups_count);
 
         this.$('.settings-tab[data-block-name="circles-groups"] .settings-block-label').text(label_text);
+    },
+
+    updateTrustItems: function () {//34
+        this.$('.settings-trust-items-wrap').html('');
+        if (this.model.omemo && this.model.omemo.xabber_trust){
+            this.$('.settings-tab[data-block-name="trust"]').removeClass('hidden');
+
+            let trusted_devices = this.model.omemo.xabber_trust.get('trusted_devices');
+
+            Object.keys(trusted_devices).forEach((item) => {
+                let $trust_peer = $(templates.trust_item_peer({jid: item}));
+                this.$('.settings-trust-items-wrap').append($trust_peer);
+                let peers_trusted_devices = trusted_devices[item];
+
+                peers_trusted_devices.sort((a,b) => {
+                    if(a.after_trust === b.after_trust)
+                        return a.timestamp-b.timestamp;
+                    return a.after_trust ? -1 : 1;
+                })
+                peers_trusted_devices.forEach((device_item) => {
+                    if (device_item.is_me)
+                        return;
+                    let trust_type = device_item.after_trust ? 'direct' : 'indirect',
+                        $trust_device = $(templates.trust_item_device({
+                        device: device_item,
+                        fingerprint: device_item.fingerprint.match(/.{1,4}/g).join(" "),
+                        time: pretty_datetime(device_item.timestamp),
+                        trust_type: xabber.getString(`settings__trust_item__trust_type_${trust_type}`),
+                    }));
+                    $trust_peer.find('.trust-item-devices-wrap').append($trust_device);
+
+                });
+            });
+        } else {
+            this.$('.settings-tab[data-block-name="trust"]').addClass('hidden');
+        }
     },
 
     revokeXToken: function (ev) {
@@ -4652,8 +4690,8 @@ xabber.WebcamProfileImageView = xabber.BasicView.extend({
         this.registration = options.registration;
         this.registration_view = options.registration_view;
 
-        this.width = 171;
-        this.height = 128;
+        this.width = 342;
+        this.height = 256;
         this.streaming = false;
         this.video = null;
         this.canvas = null;
@@ -4758,7 +4796,6 @@ xabber.WebcamProfileImageView = xabber.BasicView.extend({
             context.drawImage(this.video, 0, 0, this.width, this.height);
             context.globalCompositeOperation='destination-in';
             context.beginPath();
-            context.arc(this.width/2,this.height/2,this.height/2,0,Math.PI*2);
             context.closePath();
             context.fill();
 

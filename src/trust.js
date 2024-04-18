@@ -125,6 +125,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
 
     updateOmemoTrusts: function () {
         console.log(this.omemo);
+        this.account.trigger('xabber_trust_items_updated');
         if (!this.omemo)
             return;
         let trusted_devices = this.get('trusted_devices');
@@ -1939,6 +1940,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                         fingerprint: device.get('fingerprint'),
                         device_id: device.get('id'),
                         timestamp: Date.now(),
+                        after_trust: true,
                         public_key: utils.ArrayBuffertoBase64(device.get('ik'))
                     });
                 }
@@ -1948,6 +1950,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                     fingerprint: device.get('fingerprint'),
                     device_id: device.get('id'),
                     timestamp: Date.now(),
+                    after_trust: true,
                     public_key: utils.ArrayBuffertoBase64(device.get('ik'))
                 }];
             }
@@ -1980,6 +1983,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                         fingerprint: device.get('fingerprint'),
                         device_id: device.get('id'),
                         timestamp: Date.now(),
+                        after_trust: true,
                         public_key: utils.ArrayBuffertoBase64(device.get('ik'))
                     });
                 }
@@ -1989,6 +1993,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                     fingerprint: device.get('fingerprint'),
                     device_id: device.get('id'),
                     timestamp: Date.now(),
+                    after_trust: true,
                     public_key: utils.ArrayBuffertoBase64(device.get('ik'))
                 }];
             }

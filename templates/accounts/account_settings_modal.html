@@ -116,6 +116,13 @@
                     <div class="settings-block-label hidden label-encryption-enabled one-line">{[print(xabber.getString("settings_account__encryption_enabled_label"))]}</div>
                     <div class="settings-block-label label-encryption-disabled one-line">{[print(xabber.getString("settings_account__encryption_disabled_label"))]}</div>
                 </div>
+                <div class="settings-tab" data-block-name="trust">
+                    <div class="setting-icon-background">
+                        <svg class="mdi mdi-24px mdi-svg-template" data-svgname="key"></svg>
+                    </div>
+                    <div class="settings-block-name one-line">{[print(xabber.getString("settings_account__trust"))]}</div>
+                    <div class="settings-block-label one-line">{[print(xabber.getString("settings_account__settings_account__trust_label"))]}</div>
+                </div>
             </div>
             <div class="devices-wrap hidden">
                 <div class="device-encryption-warning hidden" data-not-trusted-count="0">
@@ -470,6 +477,13 @@
                             </div>
                         </div>
 
+                    </div>
+
+                    <div data-header='{[print(xabber.getString("settings_account__trust"))]}' class="settings-block-wrap trust">
+                        <div class="settings-trust-wrap">
+                            <div class="settings-trust-items-wrap">
+                            </div>
+                        </div>
                     </div>
 
                     <div data-header='{[print(xabber.getString("account_cloud_storage"))]}' class="settings-block-wrap media-gallery">

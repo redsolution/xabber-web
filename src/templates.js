@@ -92,6 +92,8 @@
     addTemplate('accounts.delete_files_media_gallery');
     addTemplate('accounts.single_account_settings_modal');
     addTemplate('accounts.account_settings_modal');
+    addTemplate('accounts.trust_item_peer');
+    addTemplate('accounts.trust_item_device');
     addTemplate('accounts.existing_groupchat_item');
     addTemplate('accounts.resource');
     addTemplate('accounts.resource_right');
