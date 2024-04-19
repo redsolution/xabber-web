@@ -8614,7 +8614,7 @@ xabber.Roster = xabber.ContactsBase.extend({
                 }
                 chat.set('notifications', true);
                 contact.set('subscription', 'both');
-                chat.item_view.content.loadPreviousHistory(true);
+                chat.item_view.content.loadNotificationsHistoryToPreviousLastMsg();
                 xabber.accounts.trigger('notification_chat_created');
             }
         }
@@ -8715,6 +8715,8 @@ xabber.Roster = xabber.ContactsBase.extend({
                 this.account.messages.add(msg);
                 if ((chat.last_message && (msg.get('timestamp') > chat.last_message.get('timestamp'))) || !chat.last_message){
                     chat.last_message = msg;
+                    if (chat.get('notifications'))
+                        chat.account.trigger('notification_last_msg_updated', msg.get('stanza_id'));
                     chat.item_view.updateLastMessage(msg);
                     msg.get('stanza_id') && chat.set('synced_msg', msg);
                 }

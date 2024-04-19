@@ -710,6 +710,8 @@ xabber.NotificationsChatContentView = xabber.ChatContentView.extend({
         let last_message = this.model.last_message;
         if (!last_message || message.get('timestamp') > last_message.get('timestamp')) {
             this.model.last_message = message;
+            if (this.model.get('notifications'))
+                this.account.trigger('notification_last_msg_updated', message.get('stanza_id'));
             this.chat_item.updateLastMessage();
         }
     },

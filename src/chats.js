@@ -2315,6 +2315,8 @@ xabber.ChatItemView = xabber.BasicView.extend({
                     break;
             }
             this.model.last_message = last_message;
+            if (this.model.get('notifications'))
+                this.account.trigger('notification_last_msg_updated', last_message.get('stanza_id'));
             this.updateLastMessage();
         }
         this.deletePlayersFromMessage(msg);
@@ -4114,6 +4116,20 @@ xabber.ChatContentView = xabber.BasicView.extend({
             this.hideHistoryFeedback();
             if (options.missed_history && !rsm.complete && (rsm.count > messages.length))
                 this.getMessageArchive({after: rsm.last}, {missed_history: true});
+
+            if (options.notifications_last_msg && !rsm.complete && (rsm.count > messages.length)) //34
+                this.getMessageArchive({
+                    fast: true,
+                    max: xabber.settings.mam_messages_limit,
+                    before: rsm.first,
+                    var: [
+                        {var: 'after-id', value: options.notifications_last_msg},
+                    ]
+                },
+                {
+                    notifications_last_msg: options.notifications_last_msg
+                });
+
             if (options.unread_history){
                 if (messages.length)
                     this.model.set('last_sync_unread_id', $(messages[messages.length - 1]).find(`result[xmlns="${Strophe.NS.MAM}"]`).attr('id'));
@@ -4172,6 +4188,16 @@ xabber.ChatContentView = xabber.BasicView.extend({
                     max: xabber.settings.mam_messages_limit,
                     before: this.model.get('first_archive_id') || ''
                 }), {previous_history: true});
+            }
+            if (this.model.get('notifications') && !this.model.get('history_loaded')) {
+                let normal_msgs_count = this.model.messages.filter(m => !m.get('ignored')).length;
+                if (normal_msgs_count < xabber.settings.mam_messages_limit){
+                    this.getMessageArchive({
+                        max: xabber.settings.mam_messages_limit,
+                        fast: true,
+                        before: this.model.get('first_archive_id') || ''
+                    }, {previous_history: true});
+                }
             }
             if (options.unread_history_before){
                 if (this.model.get('encrypted')){
@@ -4237,6 +4263,28 @@ xabber.ChatContentView = xabber.BasicView.extend({
             },
             {
                 previous_history: true
+            });
+    },
+
+    loadNotificationsHistoryToPreviousLastMsg: function () {
+        if (this.contact) {
+            if (!xabber.settings.load_history || (!this.contact.get('subscription') || this.contact.get('subscription') !== 'both') && this.contact.get('group_chat')) {
+                return;
+            }
+        }
+        let previous_last_msg = this.account.chat_settings.getNotificationsLastMsgId(),
+            before = this.model.get('first_archive_id') || '';
+
+        this.getMessageArchive({
+                fast: true,
+                max: xabber.settings.mam_messages_limit,
+                before: '',
+                var: [
+                    {var: 'after-id', value: previous_last_msg},
+                ]
+            },
+            {
+                notifications_last_msg: previous_last_msg
             });
     },
 
@@ -4646,6 +4694,8 @@ xabber.ChatContentView = xabber.BasicView.extend({
         let last_message = this.model.last_message;
         if (!last_message || message.get('timestamp') >= last_message.get('timestamp')) {
             this.model.last_message = message;
+            if (this.model.get('notifications'))
+                this.account.trigger('notification_last_msg_updated', message.get('stanza_id'));
             this.chat_item.updateLastMessage();
         }
         if (message.get('mentions')) {
@@ -4692,6 +4742,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
 
             if (message.get('notification_trust_msg') || $notification_msg.children(`authenticated-key-exchange[xmlns="${Strophe.NS.XABBER_TRUST}"]`).length) {
                 if (ignored){
+                    message.set('ignored', true);
                     message.set('is_unread', false);
                     $message.addClass('hidden');
                 }
@@ -4912,6 +4963,8 @@ xabber.ChatContentView = xabber.BasicView.extend({
             (this.bottom.content_view) && ($message = this.bottom.content_view.$(`.chat-message[data-uniqueid="${message.get('unique_id')}"]`));
             $message.prev('.chat-day-indicator').remove();
             $message.remove();
+            console.error('MESSAGE REMOVED !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!11')
+            console.error($message)
         });
         this.model.messages.reset(messages_to_save);
         this.updateScrollBar();
@@ -4947,6 +5000,8 @@ xabber.ChatContentView = xabber.BasicView.extend({
         }
         $message.prev('.chat-day-indicator').remove();
         let $next_msg = $message.next('.chat-message');
+        console.error('MESSAGE REMOVED !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!11')
+        console.error($message)
         $message.remove();
         $next_msg.length && this.updateMessageInChat($next_msg[0]);
         this.bottom.manageSelectedMessages();
@@ -7168,16 +7223,22 @@ xabber.ChatContentView = xabber.BasicView.extend({
         $message.attr({
             'data-time': message.get('timestamp')
         });
+        console.error('MESSAGE DETACHEDDDDD !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!11')
+        console.error($message)
         $message.detach();
         $message.children('.right-side').find('.msg-time').attr({title: pretty_datetime(message.get('time'))}).text(utils.pretty_time(message.get('time')));
         message.get('user_info') && $message.attr('data-from-id', message.get('user_info').id);
         this.model.messages.sort();
         let index = this.model.messages.indexOf(message);
         if (index === 0) {
-            if ($old_prev_msg.hasClass('chat-day-indicator'))
+            if ($old_prev_msg.hasClass('chat-day-indicator')){
+                console.error('here !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!11')
                 $old_prev_msg.after($message);
-            else
+            }
+            else {
+                console.error('here !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!11')
                 $message.prependTo(this.$('.chat-content'));
+            }
         } else {
             let $prev_msg = this.$('.chat-message').eq(index - 1),
                 is_same_sender = ($message.data('from') === $prev_msg.data('from')),
@@ -7186,11 +7247,14 @@ xabber.ChatContentView = xabber.BasicView.extend({
             if (($old_prev_msg.data('from') !== $message.data('from')) && ($next_msg.data('from') === $message.data('from')) && (($next_msg.children('.right-side').find('.msg-delivering-state').attr('data-state') === 'delivered') || ($next_msg.children('.right-side').find('.msg-delivering-state').attr('data-state') === 'displayed')))
                 this.showMessageAuthor($next_msg);
             if ($prev_msg.next().hasClass('chat-day-indicator') && (moment($prev_msg.next().data('time')).format('DD.MM.YY') === moment(message.get('timestamp')).format('DD.MM.YY'))) {
+                console.error('here !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!11')
                 $message.insertAfter($prev_msg.next());
                 this.showMessageAuthor($message);
             }
-            else
+            else {
+                console.error('here !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!11')
                 $message.insertAfter($prev_msg);
+            }
             if (message.get('data_form') || message.get('forwarded_message') || !is_same_date || !is_same_sender || $prev_msg.hasClass('system') || $prev_msg.hasClass('saved-main'))
                 this.showMessageAuthor($message);
             else
@@ -7199,6 +7263,8 @@ xabber.ChatContentView = xabber.BasicView.extend({
         let last_message = this.model.last_message;
         if (!last_message || message.get('timestamp') > last_message.get('timestamp')) {
             this.model.last_message = message;
+            if (this.model.get('notifications'))
+                this.account.trigger('notification_last_msg_updated', message.get('stanza_id'));
             this.chat_item.updateLastMessage();
         }
     },
@@ -13988,7 +14054,21 @@ xabber.ChatSettings = Backbone.ModelWithStorage.extend({
         archived: [],
         group_chat: [],
         cached_avatars: [],
-        group_chat_members_lists: []
+        group_chat_members_lists: [],
+        notifications_last_msg_id: null
+    },
+
+    _initialize: function (attrs, options) {
+        this.account = options.account;
+        this.account.on('notification_last_msg_updated', this.updateNotificationsLastMsgId, this)
+    },
+
+    getNotificationsLastMsgId: function (msg_id) {
+        return _.clone(this.get('notifications_last_msg_id'));
+    },
+
+    updateNotificationsLastMsgId: function (msg_id) {
+        this.save('notifications_last_msg_id', msg_id);
     },
 
     getLastEmoji: function () {
