@@ -12490,10 +12490,46 @@ input[type=range].voice-message-volume:focus {
 .settings-panel-wrap .settings-panel .settings-trust-wrap .settings-trust-items-wrap{
 }
 .settings-panel-wrap .settings-panel .settings-trust-wrap .trust-item-peer{
-    margin: 32px 16px;
+    margin: 32px 32px;
+}
+.settings-panel-wrap .settings-panel .settings-trust-wrap .trust-item-peer-jid{
+    font-size: 16px;
+    font-weight: 500;
 }
 .settings-panel-wrap .settings-panel .settings-trust-wrap .trust-item-device{
-    margin: 16px 8px;
+    margin: 16px 16px;
+    margin-bottom: 48px;
+}
+.settings-panel-wrap .settings-panel .settings-trust-wrap .trust-item-device-row{
+    display: flex;
+    min-height: 36px;
+    align-items: baseline;
+    margin-bottom: 6px;
+}
+.settings-panel-wrap .settings-panel .settings-trust-wrap .trust-item-device-row{
+    display: flex;
+    min-height: 36px;
+    align-items: baseline;
+    margin-bottom: 6px;
+}
+.settings-panel-wrap .settings-panel .settings-trust-wrap .trust-item-device-label{
+    width: 30%;
+    padding: 6px 0;
+}
+.settings-panel-wrap .settings-panel .settings-trust-wrap .trust-item-device-value{
+    color: #757575;
+    user-select: text;
+}
+.settings-panel-wrap .settings-panel .settings-trust-wrap .trust-item-device-under-row{
+    display: flex;
+    min-height: 36px;
+    align-items: baseline;
+    margin-bottom: 6px;
+    flex-direction: column;
+    margin-left: 30%;
+}
+.settings-panel-wrap .settings-panel .settings-trust-wrap .trust-item-device-under-row .trust-item-device-value{
+    margin-bottom: 8px;
 }
 .settings-panel-wrap .settings-panel .setting.idling-time{
     padding: 10px 40% 24px 72px!important;

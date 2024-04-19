@@ -5,7 +5,7 @@
     </div>
     <div class="trust-item-device-row">
         <div class="trust-item-device-label">{[print(xabber.getString("omemo__dialog_fingerprints__fingerprint_label"))]}</div>
-        <div class="trust-item-device-value">{{fingerprint}}</div>
+        <div class="trust-item-device-value device-information-fingerprint-text">{{fingerprint}}</div>
     </div>
     <div class="trust-item-device-row">
         <div class="trust-item-device-label">{[print(xabber.getString("settings_account__trust__time_label"))]}</div>
@@ -15,8 +15,9 @@
         <div class="trust-item-device-label">{[print(xabber.getString("settings_account__trust__trust_reason_label"))]}</div>
         <div class="trust-item-device-value">{{trust_type}}</div>
     </div>
-    {[if (device.from_device_id){]}
+    {[if (device.from_device_id && device.trust_reason_jid){]}
     <div class="trust-item-device-under-row">
+        <div class="trust-item-device-value">{{device.trust_reason_jid}}</div>
         <div class="trust-item-device-value">{{device.from_device_id}}</div>
     </div>
     {[}]}

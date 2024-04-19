@@ -3641,7 +3641,7 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
                     let trust_type = device_item.after_trust ? 'direct' : 'indirect',
                         $trust_device = $(templates.trust_item_device({
                         device: device_item,
-                        fingerprint: device_item.fingerprint.match(/.{1,4}/g).join(" "),
+                        fingerprint: device_item.fingerprint.match(/.{1,8}/g).join(" "),
                         time: pretty_datetime(device_item.timestamp),
                         trust_type: xabber.getString(`settings_account__trust__trust_type_${trust_type}`),
                     }));

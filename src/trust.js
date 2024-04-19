@@ -758,6 +758,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                 trusted_devices[jid].push({
                     trusted_key: trusted_key,
                     from_device_id: from_device_id,
+                    trust_reason_jid: this.account.get('jid'),
                     fingerprint: device.get('fingerprint'),
                     device_id: device.get('id'),
                     timestamp: Date.now(),
@@ -770,6 +771,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
             trusted_devices[jid] = [{
                 trusted_key: trusted_key,
                 from_device_id: from_device_id,
+                trust_reason_jid: this.account.get('jid'),
                 fingerprint: device.get('fingerprint'),
                 device_id: device.get('id'),
                 timestamp: Date.now(),
@@ -821,6 +823,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                     trusted_devices[idx] = {
                         trusted_key: item.trusted_key,
                         from_device_id: item.from_device_id,
+                        trust_reason_jid: item.trust_reason_jid,
                         timestamp: Date.now(),
                         fingerprint: item_fingerprint,
                         device_id: item_device_id,
@@ -1008,6 +1011,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                             let trusted_new_saved_device = {
                                 trusted_key: $trust_item.text(),
                                 from_device_id: item_device_id,
+                                trust_reason_jid: peer ? peer.get('jid') : this.account.get('jid'),
                             };
                             new_trusted_devices.push(trusted_new_saved_device);
                             // console.log(new_trusted_devices);
