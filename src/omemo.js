@@ -71,6 +71,19 @@ xabber.Peer = Backbone.Model.extend({
         }
     },
 
+    updateDevicesKeys: async function () {
+        this.getDevicesNode().then(() => {
+            let counter = Object.keys(this.devices).length;
+            for (let device_id in this.devices) {
+                let device = this.devices[device_id];
+                device.getBundle().then(({pk, spk, ik}) => {
+                    device.set('ik', utils.fromBase64toArrayBuffer(ik));
+                    device.set('fingerprint', device.generateFingerprint());
+                });
+            };
+        });
+    },
+
     encrypt: async function (message) {
         let enc_promises = [],
             aes = await utils.AES.encrypt(message),

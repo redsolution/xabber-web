@@ -27,7 +27,7 @@ xabber.IncomingTrustSessionView = xabber.BasicView.extend({
         this.sid = options.sid;
         this.$el.openModal({
             ready: this.onRender.bind(this),
-            complete: this.close.bind(this)
+            complete: this.close.bind(this),
         });
         xabber.on('verification_session_cancelled', this.onSessionCancel, this);
     },
@@ -87,6 +87,14 @@ xabber.IncomingTrustSessionView = xabber.BasicView.extend({
             stanza.c('addresses', {xmlns: Strophe.NS.ADDRESS}).c('address',{type: 'to', jid: to}).up().up();
 
             this.account.sendFast(stanza, () => {
+                if (this.contact){
+                    let $stanza = $(stanza.tree());
+                    $stanza.attr('to',this.account.get('jid'));
+                    $stanza.find('notification forwarded message').attr('to',this.account.get('jid'));
+                    $stanza.find(`addresses[xmlns="${Strophe.NS.ADDRESS}"] address[type="to"]`).attr('jid',this.account.get('jid'));
+                    this.account.sendFast(stanza, () => {
+                    });
+                }
                 // console.log(stanza);
                 // console.log(stanza.tree());
                 utils.callback_popup_message(xabber.getString("trust_verification_decrypt_failed"), 5000);
@@ -166,6 +174,14 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
             stanza.c('addresses', {xmlns: Strophe.NS.ADDRESS}).c('address',{type: 'to', jid: to}).up().up();
 
             this.account.sendFast(stanza, () => {
+                if (to !== this.account.get('jid')){
+                    let $stanza = $(stanza.tree());
+                    $stanza.attr('to',this.account.get('jid'));
+                    $stanza.find('notification forwarded message').attr('to',this.account.get('jid'));
+                    $stanza.find(`addresses[xmlns="${Strophe.NS.ADDRESS}"] address[type="to"]`).attr('jid',this.account.get('jid'));
+                    this.account.sendFast(stanza, () => {
+                    });
+                }
                 // console.log(stanza);
                 // console.log(stanza.tree());
                 utils.callback_popup_message(xabber.getString("trust_verification_decrypt_failed"), 5000);
@@ -1087,11 +1103,24 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
 
     },
 
+    receiveTrustVerificationHeadline: function (message) {
+        let $message = $(message),
+            sid = $message.find('authenticated-key-exchange').attr('sid');
+        if (this.active_sessions_data[sid]){
+            if (!this.active_sessions_data[sid].verification_step){
+                this.clearData(sid);
+            }
+        }
+    },
+
     receiveTrustVerificationMessage: function (message, options) {
         if (!this.account.server_features.get(Strophe.NS.XABBER_NOTIFY))
             return;
         let $message = $(message),
-            sid = $message.find('authenticated-key-exchange').attr('sid');
+            sid = $message.find('authenticated-key-exchange').attr('sid'),
+            type = $message.attr('type');
+        if (type === 'headline')
+            return this.receiveTrustVerificationHeadline(message);
         // console.error(message);
         let contact = this.account.contacts.get(Strophe.getBareJidFromJid($message.attr('from')));
 
@@ -1154,6 +1183,11 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                 this.account.omemo.xabber_trust.addVerificationSessionData(sid, {
                 });
                 let view = new xabber.IncomingTrustSessionView();
+                let peer = this.omemo.getPeer(contact.get('jid')),
+                    device = peer.devices[$message.find('verification-start').attr('device-id')];
+                if (!device){
+                    peer.updateDevicesKeys();
+                }
                 view.show({
                     account: this.account,
                     trust: this,
@@ -1167,7 +1201,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                 this.account.omemo.xabber_trust.addVerificationSessionData(sid, {
                     current_a_jid: contact.get('jid'),
                     active_verification_device: {
-                        peer_jid: this.account.get('jid'),
+                        peer_jid: contact.get('jid'),
                     },
                 });
                 this.handleTrustVerificationStart($message, contact, null, options.msg_item);
@@ -1424,6 +1458,19 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                         });
                         msg_item && this.removeAfterHandle(msg_item);
                         this.account.sendFast(stanza, () => {
+                            if (contact){
+                                let $stanza = $(stanza.tree());
+                                $stanza.attr('to',this.account.get('jid'));
+                                let $msg = $stanza.find('notification forwarded message');
+                                $msg.attr('to',this.account.get('jid'));
+                                $msg.attr('type', 'headline');
+                                $msg.children('body').remove();
+                                $msg.find('verification-accepted').attr('device-id', '');
+                                $msg.find('salt').remove();
+                                $stanza.find(`addresses[xmlns="${Strophe.NS.ADDRESS}"] address[type="to"]`).attr('jid',this.account.get('jid'));
+                                this.account.sendFast(stanza, () => {
+                                });
+                            }
                             // console.log(stanza);
                             // console.log(stanza.tree());
                             utils.callback_popup_message(xabber.getString("trust_verification_traded"), 5000);
@@ -1563,6 +1610,14 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
 
                             msg_item && this.removeAfterHandle(msg_item);
                             this.account.sendFast(stanza, () => {
+                                if (contact){
+                                    let $stanza = $(stanza.tree());
+                                    $stanza.attr('to',this.account.get('jid'));
+                                    $stanza.find('notification forwarded message').attr('to',this.account.get('jid'));
+                                    $stanza.find(`addresses[xmlns="${Strophe.NS.ADDRESS}"] address[type="to"]`).attr('jid',this.account.get('jid'));
+                                    this.account.sendFast(stanza, () => {
+                                    });
+                                }
                                 // console.log(stanza);
                                 // console.log(stanza.tree());
                                 utils.callback_popup_message(xabber.getString("trust_verification_decrypt_failed"), 5000);
@@ -1600,6 +1655,14 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
 
                         msg_item && this.removeAfterHandle(msg_item);
                         this.account.sendFast(stanza, () => {
+                            if (contact){
+                                let $stanza = $(stanza.tree());
+                                $stanza.attr('to',this.account.get('jid'));
+                                $stanza.find('notification forwarded message').attr('to',this.account.get('jid'));
+                                $stanza.find(`addresses[xmlns="${Strophe.NS.ADDRESS}"] address[type="to"]`).attr('jid',this.account.get('jid'));
+                                this.account.sendFast(stanza, () => {
+                                });
+                            }
                             // console.log(stanza);
                             // console.log(stanza.tree());
                             utils.callback_popup_message(xabber.getString("trust_verification_decrypt_failed"), 5000);
@@ -1774,6 +1837,14 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
 
                                     msg_item && this.removeAfterHandle(msg_item);
                                     this.account.sendFast(stanza, () => {
+                                        if (contact){
+                                            let $stanza = $(stanza.tree());
+                                            $stanza.attr('to',this.account.get('jid'));
+                                            $stanza.find('notification forwarded message').attr('to',this.account.get('jid'));
+                                            $stanza.find(`addresses[xmlns="${Strophe.NS.ADDRESS}"] address[type="to"]`).attr('jid',this.account.get('jid'));
+                                            this.account.sendFast(stanza, () => {
+                                            });
+                                        }
                                         // console.log(stanza);
                                         // console.log(stanza.tree());
                                         utils.callback_popup_message(xabber.getString("trust_verification_decrypt_failed"), 5000);
@@ -1813,6 +1884,14 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
 
                         msg_item && this.removeAfterHandle(msg_item);
                         this.account.sendFast(stanza, () => {
+                            if (contact){
+                                let $stanza = $(stanza.tree());
+                                $stanza.attr('to',this.account.get('jid'));
+                                $stanza.find('notification forwarded message').attr('to',this.account.get('jid'));
+                                $stanza.find(`addresses[xmlns="${Strophe.NS.ADDRESS}"] address[type="to"]`).attr('jid',this.account.get('jid'));
+                                this.account.sendFast(stanza, () => {
+                                });
+                            }
                             // console.log(stanza);
                             // console.log(stanza.tree());
                             utils.callback_popup_message(xabber.getString("trust_verification_decrypt_failed"), 5000);
@@ -1850,6 +1929,14 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
 
                     msg_item && this.removeAfterHandle(msg_item);
                     this.account.sendFast(stanza, () => {
+                        if (contact){
+                            let $stanza = $(stanza.tree());
+                            $stanza.attr('to',this.account.get('jid'));
+                            $stanza.find('notification forwarded message').attr('to',this.account.get('jid'));
+                            $stanza.find(`addresses[xmlns="${Strophe.NS.ADDRESS}"] address[type="to"]`).attr('jid',this.account.get('jid'));
+                            this.account.sendFast(stanza, () => {
+                            });
+                        }
                         // console.log(stanza);
                         // console.log(stanza.tree());
                         utils.callback_popup_message(xabber.getString("trust_verification_decrypt_failed"), 5000);
@@ -1935,6 +2022,14 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
 
                                 msg_item && this.removeAfterHandle(msg_item);
                                 this.account.sendFast(stanza, () => {
+                                    if (contact){
+                                        let $stanza = $(stanza.tree());
+                                        $stanza.attr('to',this.account.get('jid'));
+                                        $stanza.find('notification forwarded message').attr('to',this.account.get('jid'));
+                                        $stanza.find(`addresses[xmlns="${Strophe.NS.ADDRESS}"] address[type="to"]`).attr('jid',this.account.get('jid'));
+                                        this.account.sendFast(stanza, () => {
+                                        });
+                                    }
                                     // console.log(stanza);
                                     // console.log(stanza.tree());
                                     utils.callback_popup_message(xabber.getString("trust_verification_decrypt_failed"), 5000);
@@ -2108,6 +2203,15 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
         stanza.c('addresses', {xmlns: Strophe.NS.ADDRESS}).c('address',{type: 'to', jid: to}).up().up();
 
         this.account.sendFast(stanza, () => {
+            console.error(to);
+            if (to !== this.account.get('jid')){
+                let $stanza = $(stanza.tree());
+                $stanza.attr('to',this.account.get('jid'));
+                $stanza.find('notification forwarded message').attr('to',this.account.get('jid'));
+                $stanza.find(`addresses[xmlns="${Strophe.NS.ADDRESS}"] address[type="to"]`).attr('jid',this.account.get('jid'));
+                this.account.sendFast(stanza, () => {
+                });
+            }
             // console.log(stanza);
             console.log(stanza.tree());
             this.clearData(sid);
