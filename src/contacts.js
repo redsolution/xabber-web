@@ -8751,6 +8751,8 @@ xabber.Roster = xabber.ContactsBase.extend({
             chat.messages_unread.reset();
             chat.set('unread', 0);
             chat.set('const_unread', unread_msgs_count);
+            if (msg && msg.isSenderMe() && unread_msgs_count && last_read_msg == 0 && !saved)
+                chat.set('const_unread', 0);
         }
         if (presence.length)
             contact && contact.handlePresence(presence[0]);

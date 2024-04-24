@@ -1227,6 +1227,11 @@ xabber.Account = Backbone.Model.extend({
             this.cached_sync_conversations && this.cached_sync_conversations.deleteDataBase();
             this.cached_roster && this.cached_roster.deleteDataBase();
             this.cached_server_features && this.cached_server_features.deleteDataBase();
+            xabber.notifications_view.notifications_chats = xabber.notifications_view.notifications_chats.filter(item => item.account.get('jid') !== this.get('jid'));
+            if (xabber.notifications_view && xabber.notifications_view.current_content && xabber.notifications_view.current_content.account.get('jid') === this.get('jid')) {
+                xabber.notifications_view.current_content.destroyView();
+                xabber.notifications_view.current_content = null;
+            }
             this.trigger('remove_saved_chat');
         },
 

@@ -626,16 +626,20 @@ xabber.MessagesBase = Backbone.Collection.extend({
           return new Promise((resolve, reject) => {
               fetch(uri).then((r) => {
                   r.blob().then((blob) => {
-                      let filereader = new FileReader();
-                      filereader.onloadend = () => {
-                          let arrayBuffer = filereader.result,
-                              exportedMasterKey = key.slice(0, 32),
-                              HMACData = key.slice(32);
-                          utils.AES.decrypt(exportedMasterKey, HMACData, arrayBuffer).then((enc_file) => {
-                              resolve(enc_file);
-                          });
-                      };
-                      filereader.readAsArrayBuffer(blob);
+                      try {
+                          let filereader = new FileReader();
+                          filereader.onloadend = () => {
+                              let arrayBuffer = filereader.result,
+                                  exportedMasterKey = key.slice(0, 32),
+                                  HMACData = key.slice(32);
+                              utils.AES.decrypt(exportedMasterKey, HMACData, arrayBuffer).then((enc_file) => {
+                                  resolve(enc_file);
+                              });
+                          };
+                          filereader.readAsArrayBuffer(blob);
+                      } catch (e) {
+                          resolve(null)
+                      }
                   });
               }).catch(() => {
                   resolve(null)
@@ -5253,7 +5257,9 @@ xabber.ChatContentView = xabber.BasicView.extend({
         let markup_body = utils.markupBodyMessage(message), $message;
         if (attrs.searched_message){
             let myRegexp = new RegExp('(.{0,12})(' + attrs.query + ')(.{0,12})','gmius'),
-                matching_markup = myRegexp.exec(markup_body);
+                matching_markup = myRegexp.exec(Strophe.xmlescape(attrs.original_message || attrs.message) || markup_body);
+            console.log(markup_body);
+            console.log(matching_markup);
             if (matching_markup) {
                 if (matching_markup[1].length == 12)
                     matching_markup[1] = '...' + matching_markup[1].substring(1);
