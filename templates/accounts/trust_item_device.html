@@ -3,10 +3,12 @@
         <div class="trust-item-device-label">{[print(xabber.getString("settings_account__device_information_device_id"))]}</div>
         <div class="trust-item-device-value">{{device.device_id}}</div>
     </div>
+    {[if (fingerprint){]}
     <div class="trust-item-device-row">
         <div class="trust-item-device-label">{[print(xabber.getString("omemo__dialog_fingerprints__fingerprint_label"))]}</div>
         <div class="trust-item-device-value device-information-fingerprint-text">{{fingerprint}}</div>
     </div>
+    {[}]}
     <div class="trust-item-device-row">
         <div class="trust-item-device-label">{[print(xabber.getString("settings_account__trust__time_label"))]}</div>
         <div class="trust-item-device-value">{{time}}</div>

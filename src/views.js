@@ -2811,6 +2811,9 @@ xabber.SettingsModalView = xabber.BasicView.extend({
                     this.$(`.emoji-fonts-list input[type=radio][name=emoji_font][value="${this.model.get('emoji_font')}"]`)
                         .prop('checked', true);
                     $(ev.target).prop('disabled', true);
+                    if (this.model.get('emoji_font') !== 'system' && constants.EMOJI_FONTS_LIST[this.model.get('emoji_font')] && constants.EMOJI_FONTS_LIST[this.model.get('emoji_font')].url) {
+                        xabber.loadEmojiFont(constants.EMOJI_FONTS_LIST[this.model.get('emoji_font')].url);
+                    }
                 } else {
                     this.model.save('emoji_font', value);
                 }
