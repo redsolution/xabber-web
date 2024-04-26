@@ -9046,6 +9046,11 @@ input[type=text].simple-input-field:hover {
     background-size: 4px 4px;
     background-position: 0px 0, 2px 2px;
 }
+[data-trust=true] .chat-day-indicator[data-trust=none],
+[data-trust=true] .chat-message.encrypted:not(.selected)[data-trust=none],
+.chat-bottom-wrap[data-contact-trust=true]{
+    background-image: linear-gradient( 45deg,#E8F5E9 25%, transparent 25%, transparent 74%, #E8F5E9 75%, #E8F5E9), linear-gradient( 45deg,#E8F5E9 25%, #FFF 25%, #FFF 74%, #E8F5E9 75%, #E8F5E9) !important;
+}
 
 .chat-bottom-wrap.loading {
     border-top: 1px solid #FAFAFA;
@@ -9219,6 +9224,11 @@ input[type=text].simple-input-field:hover {
     width: min-content;
     text-align: center;
     z-index: 1;
+}
+[data-trust=none] .chat-notification.encryption-warning,
+[data-trust=error] .chat-notification.encryption-warning{
+    display: none !important;
+
 }
 
 .chat-notification.encryption-warning {
@@ -9848,12 +9858,13 @@ img.fwd-img-preview {
 .chat-message.not-decrypted .not-decrypted-icon svg{
     pointer-events: none;
 }
-
-.chat-message.not-verified-previously .not-decrypted-icon svg path,
 .chat-message.not-existing-device .not-decrypted-icon svg path,
 .chat-message.not-verified .not-decrypted-icon svg path,
 .chat-message.not-decrypted .not-decrypted-icon svg path{
     fill: #FFA000;
+}
+.chat-message.not-verified-previously .not-decrypted-icon svg path{
+    fill: #388e3c;
 }
 
 .chat-message.not-verified-previously .not-decrypted-tooltip,

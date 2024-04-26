@@ -1448,7 +1448,7 @@ xabber.EphemeralTimerSelector = xabber.BasicView.extend({
     endCall: function (status) {
         status && xabber.current_voip_call.set('status', status);
         xabber.trigger('update_jingle_button');
-        xabber.current_voip_call.destroy(status);
+        xabber.current_voip_call.destroy();
         xabber.current_voip_call = null;
         xabber.trigger('update_jingle_button');
     },
@@ -2373,7 +2373,7 @@ xabber.ChatItemView = xabber.BasicView.extend({
             return;
         }
 
-        this.$('.last-msg').html(xabber.getString(is_truly_empty ? "recent_chat__history_cleared" : is_empty ? "recent_chat__last_message_retracted" : "recent_chat__start_conversation").italics());
+        this.$('.last-msg').html(xabber.getString(this.model.get('encrypted') ? 'recent_chat__start_encrypted_conversation' : is_truly_empty ? "recent_chat__history_cleared" : is_empty ? "recent_chat__last_message_retracted" : "recent_chat__start_conversation").italics());
         this.$('.last-msg-date').text(utils.pretty_short_datetime_recent_chat(msg_time))
             .attr('title', pretty_datetime(msg_time));
     },
@@ -4121,7 +4121,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
             if (options.missed_history && !rsm.complete && (rsm.count > messages.length))
                 this.getMessageArchive({after: rsm.last}, {missed_history: true});
 
-            if (options.notifications_last_msg && !rsm.complete && (rsm.count > messages.length)) //34
+            if (options.notifications_last_msg && !rsm.complete && (rsm.count > messages.length))
                 this.getMessageArchive({
                     fast: true,
                     max: xabber.settings.mam_messages_limit,
@@ -8478,7 +8478,7 @@ xabber.AccountChats = xabber.ChatsBase.extend({
             chat.item_view.updateLastMessage(chat.last_message);
         }
         if ($message.find('retract-all').length) {
-            !contact && (contact = this.account.contacts.get($message.find('retract-all').attr('conversation'))) && (chat = this.getChat(contact, $message.find('retract-all').attr('type') == 'encrypted' && 'encrypted'));
+            !contact && (contact = this.account.contacts.get($message.find('retract-all').attr('conversation'))) && (chat = this.getChat(contact, $message.find('retract-all').attr('type') == Strophe.NS.OMEMO && 'encrypted'));
             if (!chat)
                 return;
             let all_messages = chat.messages.models;
@@ -12135,51 +12135,53 @@ xabber.ChatBottomView = xabber.BasicView.extend({
             this.$el.prepend(env.templates.contacts.preloader());
             this.account.omemo.checkOwnFingerprints().then((is_trusted) => {
                 if (is_trusted == 'none' || is_trusted == 'error') {
-                    let is_scrolled_bottom = this.view.isScrolledToBottom();
+                //     let is_scrolled_bottom = this.view.isScrolledToBottom();
                     this.$el.attr('data-trust', is_trusted);
-                    this.view.$('.chat-message:not([data-trust=untrusted])').attr('data-trust', is_trusted);
-                    this.view.$('.chat-day-indicator:not(.fixed-day-indicator-wrap)').attr('data-trust', is_trusted);
-                    this.view.$el.attr('data-trust', is_trusted);
-                    this.$el.removeClass('loading');
-                    this.$el.children('.preloader-wrapper').detach();
+                    // this.view.$('.chat-message:not([data-trust=untrusted])').attr('data-trust', is_trusted);
+                    // this.view.$('.chat-day-indicator:not(.fixed-day-indicator-wrap)').attr('data-trust', is_trusted);
+                    // this.view.$el.attr('data-trust', is_trusted);
+                    // this.$el.removeClass('loading');
+                    // this.$el.children('.preloader-wrapper').detach();
                     if (is_trusted == 'none')
                         this.$el.prepend(templates.encryption_warning({color: 'amber', message: xabber.getString("omemo__alert_new_device_yours__text_new_device")}));
-                    else
+                    else if (is_trusted == 'error')
                         this.$el.prepend(templates.encryption_warning({color: 'red', message: xabber.getString("omemo__alert_keys_changed_yours__text_keys_changed")}));
                     xabber.chat_body.updateHeight();
-                    is_scrolled_bottom && this.view.scrollToBottom();
-                    this.account.omemo.checkContactFingerprints(this.contact);
-                    (this.model.get('active') && this.model.get('display')) && this.focusOnInput();
-                } else {
-                    this.account.omemo.checkContactFingerprints(this.contact).then((obj) => {
-                        let is_contact_trusted = obj.trust,
-                            unverified_counter = obj.unverified_counter;
-                        let is_scrolled_bottom = this.view.isScrolledToBottom();
-                        this.$el.removeClass('loading');
-                        this.$el.children('.preloader-wrapper').detach();
-                        if (is_contact_trusted === 'nil') {
-                            this.$el.prepend($(`<div class="warning-wrap no-fingerprints">${xabber.getString("omemo__dialog_fingerprints__text_no_fingerprints")}</div>`));
-                            this.$el.attr('data-contact-trust', is_contact_trusted);
-                            return;
-                        }
-                        if (is_contact_trusted === 'error') {
-                            this.$el.attr('data-contact-trust', is_contact_trusted);
-                            this.$el.prepend(templates.encryption_warning({color: 'red', message: xabber.getString("omemo__alert_keys_changed_partner__text_keys_changed")}));
-                        } else {
-                            if (is_contact_trusted === 'none') {
-                                this.view.$el.addClass('encrypted');
-                                this.view.$('.chat-notification').removeClass('hidden').addClass('encryption-warning').attr('data-unverified-device-count', unverified_counter).html(templates.content_encryption_warning({message: xabber.getString("omemo__alert_new_device_partner__text_new_device")}));
-                            }
-                            this.$el.attr('data-contact-trust', is_contact_trusted);
-                        }
-                        this.view.$el.attr('data-trust', is_contact_trusted);
-                        this.view.$('.chat-message:not([data-trust=untrusted])').attr('data-trust', is_contact_trusted);
-                        this.view.$('.chat-day-indicator:not(.fixed-day-indicator-wrap)').attr('data-trust', is_contact_trusted);
-                        xabber.chat_body.updateHeight();
-                        is_scrolled_bottom && this.view.scrollToBottom();
-                        (this.model.get('active') && this.model.get('display')) && this.focusOnInput();
-                    });
+                    // is_scrolled_bottom && this.view.scrollToBottom();
+                    // this.account.omemo.checkContactFingerprints(this.contact);
+                    // (this.model.get('active') && this.model.get('display')) && this.focusOnInput();
                 }
+                // } else {
+                this.account.omemo.checkContactFingerprints(this.contact).then((obj) => {
+                    let is_contact_trusted = obj.trust,
+                        unverified_counter = obj.unverified_counter;
+                    let is_scrolled_bottom = this.view.isScrolledToBottom();
+                    this.$el.removeClass('loading');
+                    this.$el.children('.preloader-wrapper').detach();
+                    if (is_contact_trusted === 'nil') {
+                        this.$el.prepend($(`<div class="warning-wrap no-fingerprints">${xabber.getString("omemo__dialog_fingerprints__text_no_fingerprints")}</div>`));
+                        this.$el.attr('data-trust', null);
+                        this.$el.attr('data-contact-trust', is_contact_trusted);
+                        return;
+                    }
+                    if (is_contact_trusted === 'error') {
+                        this.$el.attr('data-contact-trust', is_contact_trusted);
+                        this.$el.prepend(templates.encryption_warning({color: 'red', message: xabber.getString("omemo__alert_keys_changed_partner__text_keys_changed")}));
+                    } else {
+                        if (is_contact_trusted === 'none') {
+                            this.view.$el.addClass('encrypted');
+                            this.view.$('.chat-notification').removeClass('hidden').addClass('encryption-warning').attr('data-unverified-device-count', unverified_counter).html(templates.content_encryption_warning({message: xabber.getString("omemo__alert_new_device_partner__text_new_device")}));
+                        }
+                        this.$el.attr('data-contact-trust', is_contact_trusted);
+                    }
+                    this.view.$el.attr('data-trust', is_contact_trusted);
+                    this.view.$('.chat-message:not([data-trust=untrusted])').attr('data-trust', is_contact_trusted);
+                    this.view.$('.chat-day-indicator:not(.fixed-day-indicator-wrap)').attr('data-trust', is_contact_trusted);
+                    xabber.chat_body.updateHeight();
+                    is_scrolled_bottom && this.view.scrollToBottom();
+                    (this.model.get('active') && this.model.get('display')) && this.focusOnInput();
+                });
+                // }
             });
         } else {
             this.$el.addClass('loading');
