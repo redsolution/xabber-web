@@ -1510,9 +1510,13 @@ xabber.EphemeralTimerSelector = xabber.BasicView.extend({
             if (options.is_archived || options.synced_msg)
                 return;
             if (xabber.current_voip_call && xabber.current_voip_call.get('session_id') === $jingle_msg_accept.attr('id')) {
-                if (carbon_copied)
+                if (carbon_copied) {
                     this.endCall('accepted_another_device');
-                else {
+                    this.messages.createSystemMessage({
+                        from_jid: this.account.get('jid'),
+                        message: xabber.getString('dialog_jingle_message__status_another_device_accepted')
+                    });
+                } else {
                     !xabber.current_voip_call.get('state') && xabber.current_voip_call.set('state', constants.JINGLE_MSG_ACCEPT);
                     xabber.trigger('update_jingle_button');
                     let jingle_start = $jingle_msg_accept.find('time').attr('stamp');
@@ -9149,7 +9153,7 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
     onChangedReadStatus: function (item) {
         let view = this.child(item.id),
             active_toolbar = xabber.toolbar_view.$('.active');
-        this.updateChatPosition(item);
+        this.updateChatPosition(item, true);
         if (!view)
             return;
         if (!active_toolbar.hasClass('unread') || (active_toolbar.hasClass('unread') && (item.get('unread') || item.get('const_unread'))))
@@ -9199,7 +9203,7 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
         }
     },
 
-    updateChatPosition: function (item) {
+    updateChatPosition: function (item, unread) {
         let view = this.child(item.id),
             active_toolbar = xabber.toolbar_view.$('.active');
         if (!view)
@@ -9207,6 +9211,12 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
         if (active_toolbar.hasClass('unread') && !(item.get('unread') || item.get('const_unread')))
             return;
         if (active_toolbar.hasClass('account-item') && view.account.get('jid') !== active_toolbar.attr('data-jid')){
+            return;
+        }
+        if (active_toolbar.hasClass('unread') && unread){
+            this.replaceChatItem(item,
+                this.model.filter(chat => ((chat.get('unread') || chat.get('const_unread')) && (!chat.get('archived') && !chat.get('notifications'))) && (chat.get('pinned') === '0' || !chat.get('pinned'))),
+                this.model.filter(chat => ((chat.get('unread') || chat.get('const_unread')) && (!chat.get('archived') && !chat.get('notifications'))) && chat.get('pinned') !== '0' && chat.get('pinned')))
             return;
         }
         active_toolbar.hasClass('group-chats') && (view.model.get('saved') || view.contact.get('group_chat')) && this.replaceChatItem(item, this.model.filter(chat => (chat.get('saved') || chat.contact.get('group_chat') && (!chat.get('archived') && !chat.get('notifications'))) && (chat.get('pinned') === '0' || !chat.get('pinned'))), this.model.filter(chat => (chat.get('saved') || chat.contact.get('group_chat') && (!chat.get('archived') && !chat.get('notifications'))) && chat.get('pinned') !== '0' && chat.get('pinned')));

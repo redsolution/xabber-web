@@ -1527,9 +1527,9 @@ xabber.JingleMessageView = xabber.BasicView.extend({
             status_text = 'dialog_jingle_message__status_device_busy';
         else if (this.model.get('status') == 'busy')
             status_text = 'dialog_jingle_message__status_busy';
-        else if (this.model.get('status') == 'accepted_another_device')
+        else if (this.model.get('status') == 'accepted_another_device') {
             status_text = 'dialog_jingle_message__status_another_device_accepted';
-        else
+        } else
             status_text = 'dialog_jingle_message__status_disconnected';
         this.updateStatusText(xabber.getString(status_text));
         setTimeout(() => {
