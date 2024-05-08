@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.3.5.11","version_description":"added call was accepted from another device system msg, fixed dissapearing chats after reading in unread chats tab"}'
+'{"version_number":"2.3.5.12","version_description":"fixed trusted devices tab showing, fixed backspace press for mac in empty message input, fixed message input font, fixed chat scrolling on sync unread updating, added search clear on tabs click"}'
 )});

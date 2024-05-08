@@ -3626,9 +3626,10 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
     updateTrustItems: function () {//34
         this.$('.settings-trust-items-wrap').html('');
         if (this.model.omemo && this.model.omemo.xabber_trust){
-            this.$('.settings-tab[data-block-name="trust"]').removeClass('hidden');
 
-            let trusted_devices = this.model.omemo.xabber_trust.get('trusted_devices');
+            let trusted_devices = this.model.omemo.xabber_trust.get('trusted_devices'),
+                count = 0;
+
 
             Object.keys(trusted_devices).forEach((item) => {
                 let $trust_peer = $(templates.trust_item_peer({jid: item}));
@@ -3651,10 +3652,15 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
                             trust_type: xabber.getString(`settings_account__trust__trust_type_${trust_type}`),
                         };
                     let $trust_device = $(templates.trust_item_device(trust_attrs));
+                    count++;
                     $trust_peer.find('.trust-item-devices-wrap').append($trust_device);
 
                 });
             });
+            if (count)
+                this.$('.settings-tab[data-block-name="trust"]').removeClass('hidden');
+            else
+                this.$('.settings-tab[data-block-name="trust"]').addClass('hidden');
         } else {
             this.$('.settings-tab[data-block-name="trust"]').addClass('hidden');
         }

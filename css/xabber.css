@@ -185,6 +185,9 @@ input[type=checkbox].filled-in:checked + label:after {
     font-style: inherit !important;
 }
 
+.ql-container{
+    font-family: Roboto,sans-serif !important;
+}
 .ql-container.ql-snow {
     border: none !important;
     background: #f5f5f5;

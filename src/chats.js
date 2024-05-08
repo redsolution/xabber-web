@@ -1297,8 +1297,8 @@ xabber.EphemeralTimerSelector = xabber.BasicView.extend({
                 deferred.done(() => {
                     last_read_msg && last_read_msg.set('is_unread', false);
                     if (this.item_view.content.isVisible()){
-                        this.item_view.content._long_reading_timeout = true;
-                        this.item_view.content.scrollToUnread();
+                        // this.item_view.content._long_reading_timeout = true;
+                        // this.item_view.content.scrollToUnread();
                     } else {
                         this.set('show_new_unread', true);
                     }
@@ -9022,6 +9022,7 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
         this.$('.read-all-button').click(this.readAllMessages.bind(this));
         xabber.on("update_screen", this.onUpdatedScreen, this);
         xabber.on("update_layout", this.onWindowResized, this);
+        xabber.on('clear_chats_search', this.clearSearch, this);
         this.$('input').on('input', this.updateSearch.bind(this));
     },
 
@@ -12320,6 +12321,10 @@ xabber.ChatBottomView = xabber.BasicView.extend({
 
     keyDown: function (ev) {
         let $rich_textarea = this.$('.input-message .rich-textarea');
+        if ( ev.keyCode === constants.KEY_BACKSPACE && ev.target.textContent.length === 0){
+            ev.preventDefault()
+            return;
+        }
         if (ev.keyCode === constants.KEY_ESCAPE && !xabber.body.screen.get('right_contact') ||
                 ev.keyCode === constants.KEY_BACKSPACE ||
                 ev.keyCode === constants.KEY_DELETE) {
@@ -12548,6 +12553,10 @@ xabber.ChatBottomView = xabber.BasicView.extend({
     },
 
     keyUp: function (ev) {
+        if (ev.keyCode === constants.KEY_BACKSPACE && ev.target.textContent.length === 0){
+            ev.preventDefault()
+            return;
+        }
         let $rich_textarea = $(ev.target).closest('.rich-textarea'),
             text = $rich_textarea.getTextFromRichTextarea().replace(/\n$/, "");
         if (text) {

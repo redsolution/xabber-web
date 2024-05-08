@@ -1103,6 +1103,7 @@ xabber.ToolbarView = xabber.BasicView.extend({
         no_unread && (options.no_unread = no_unread);
         xabber.body.setScreen('all-chats', options);
         xabber.trigger('show_all_chats', no_unread);
+        xabber.trigger('clear_chats_search');
         xabber.trigger('update_placeholder');
     },
 
@@ -1111,10 +1112,15 @@ xabber.ToolbarView = xabber.BasicView.extend({
             .filter('.archive-chats').addClass('active');
         xabber.body.setScreen('all-chats',);
         xabber.trigger('show_archive_chats', no_unread);
+        xabber.trigger('clear_chats_search');
         xabber.trigger('update_placeholder');
     },
 
     showSavedChats: function (ev, no_unread) {
+        xabber.trigger('clear_chats_search');
+        if (this.$('.all-chats.unread').length){
+            this.showAllChats(null, true);
+        }
         if (xabber.accounts.enabled.length === 1){
             if (!xabber.accounts.enabled[0].server_features.get(Strophe.NS.XABBER_FAVORITES)) {
                 return;
