@@ -2381,6 +2381,8 @@ xabber.SettingsModalView = xabber.BasicView.extend({
         })
 
         emoji_fonts_list.forEach((item) => {
+            if(utils.getBrowser() === "Firefox" && item.no_glyph)
+                return;
             let item_name = item.name,
                 element = $(templates.setting_emoji_font_radio_input({
                     input_name: 'emoji_font',
