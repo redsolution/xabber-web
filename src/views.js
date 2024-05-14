@@ -1325,6 +1325,7 @@ xabber.JingleMessageView = xabber.BasicView.extend({
         this.model.on('change:status', this.updateBackground, this);
         this.model.on('change:volume_on', this.updateButtons, this);
         this.model.on('change:video_live', this.updateButtons, this);
+        xabber.on('change:video', this.updateButtons, this);
         this.model.on('change:video_screen', this.updateButtons, this);
         this.model.on('change:video_in', this.updateCollapsedWindow, this);
         this.model.on('change:video', this.updateCollapsedWindow, this);
@@ -1424,7 +1425,7 @@ xabber.JingleMessageView = xabber.BasicView.extend({
     },
 
     updateButtons: function () {
-        this.$('.btn-video .video').switchClass('hidden', !this.model.get('video'));
+        this.$('.btn-video').switchClass('hidden', !xabber.get('video'));
         this.$('.btn-share-screen').switchClass('active', this.model.get('video_screen'));
         this.$('.btn-full-screen').switchClass('hidden', !this.model.get('video_in'));
         this.$('.btn-video').switchClass('mdi-video active', this.model.get('video_live'))
@@ -2381,8 +2382,9 @@ xabber.SettingsModalView = xabber.BasicView.extend({
         })
 
         emoji_fonts_list.forEach((item) => {
-            if(utils.getBrowser() === "Firefox" && item.no_glyph)
-                return;
+            let no_glyph = '';
+            if (utils.getBrowser() === "Firefox" && item.no_glyph)
+                no_glyph = xabber.getString('emoji_font__not_supported_firefox');
             let item_name = item.name,
                 element = $(templates.setting_emoji_font_radio_input({
                     input_name: 'emoji_font',
@@ -2390,6 +2392,7 @@ xabber.SettingsModalView = xabber.BasicView.extend({
                     label: item_name,
                     value: item.value,
                     hint: item.hint,
+                    no_glyph_text: no_glyph,
                 }));
             this.$('.emoji-fonts-list').append(element);
         });
