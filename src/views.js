@@ -1005,7 +1005,7 @@ xabber.Body = xabber.NodeView.extend({
 
 xabber.ToolbarView = xabber.BasicView.extend({
     className: "toolbar noselect",
-    ps_selector: '.accounts',
+    ps_selector: '.toolbar-main-wrap',
     template: templates.toolbar,
 
     events: {
@@ -2382,9 +2382,6 @@ xabber.SettingsModalView = xabber.BasicView.extend({
         })
 
         emoji_fonts_list.forEach((item) => {
-            let no_glyph = '';
-            if (utils.getBrowser() === "Firefox" && item.no_glyph)
-                no_glyph = xabber.getString('emoji_font__not_supported_firefox');
             let item_name = item.name,
                 element = $(templates.setting_emoji_font_radio_input({
                     input_name: 'emoji_font',
@@ -2392,7 +2389,6 @@ xabber.SettingsModalView = xabber.BasicView.extend({
                     label: item_name,
                     value: item.value,
                     hint: item.hint,
-                    no_glyph_text: no_glyph,
                 }));
             this.$('.emoji-fonts-list').append(element);
         });
@@ -2811,6 +2807,7 @@ xabber.SettingsModalView = xabber.BasicView.extend({
                 this.$('.emoji_font .emoji-font-download-text').addClass('hidden');
                 this.$('.emoji_font .emojis-preview').removeClass('hidden');
                 this.$('.emoji_font .emoji-font-external-url-text').addClass('hidden');
+                this.$('.emoji_font .emoji-font-not-supported-text').addClass('hidden');
                 this.$('.emoji_font .emoji-font-external-url-button').addClass('hidden');
                 this.$(`.emoji-fonts-list input[type=radio][name=emoji_font]`)
                     .prop('disabled', false);
@@ -2831,6 +2828,7 @@ xabber.SettingsModalView = xabber.BasicView.extend({
             });
 
             this.$('.emoji_font .emoji-font-external-url-text').addClass('hidden');
+            this.$('.emoji_font .emoji-font-not-supported-text').addClass('hidden');
             this.$('.emoji_font .emoji-font-external-url-button').addClass('hidden');
             this.$('.emoji_font .preloader-wrap').removeClass('hidden');
             this.$('.emoji_font .emoji-font-download-text').removeClass('hidden');
@@ -2847,8 +2845,10 @@ xabber.SettingsModalView = xabber.BasicView.extend({
         this.$('.emoji_font .emojis-preview').addClass('hidden');
         this.$('.emoji_font .emoji-font-attribution-text').addClass('hidden');
 
-        if (emoji_font && emoji_font.is_outside_url && value !== 'system'){
-            this.$('.emoji_font .emoji-font-external-url-text').removeClass('hidden');
+        if (emoji_font && (emoji_font.is_outside_url || (emoji_font.no_glyph && utils.getBrowser() === "Firefox")) && value !== 'system'){
+            this.$('.emoji_font .emoji-font-external-url-text').switchClass('hidden', !emoji_font.is_outside_url);
+            this.$('.emoji_font .emoji-font-not-supported-text').switchClass('hidden', !(emoji_font.no_glyph && utils.getBrowser() === "Firefox"));
+            this.$('.emoji_font .emoji-font-not-supported-text').switchClass('also-external', emoji_font.is_outside_url && emoji_font.no_glyph);
             this.$('.emoji_font .emoji-font-external-url-button').removeClass('hidden');
         } else {
             this.load_emoji_external_dfd.resolve();
@@ -2876,6 +2876,7 @@ xabber.SettingsModalView = xabber.BasicView.extend({
         this.$(`.emoji-fonts-list input[type=radio][name=emoji_font]`)
             .prop('disabled', false);
         this.$('.emoji_font .emoji-font-external-url-text').addClass('hidden');
+        this.$('.emoji_font .emoji-font-not-supported-text').addClass('hidden');
         this.$('.emoji_font .emoji-font-external-url-button').addClass('hidden');
         this.$('.emoji_font .preloader-wrap').addClass('hidden');
         this.$('.emoji_font .emoji-font-download-text').addClass('hidden');

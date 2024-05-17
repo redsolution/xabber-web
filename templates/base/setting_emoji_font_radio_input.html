@@ -1,6 +1,6 @@
 <div class="emoji-font-field">
     <input class="with-gap" name="{{input_name}}" value="{{value}}" type="radio" id="{{input_id}}" />
     <label class="one-line" for="{{input_id}}">{{label}}</label>
-    {[ if (hint) {]}<div class="emoji-hint">{{hint}}{[ if (no_glyph_text) {]}<br><i>{{no_glyph_text}}</i>{[}]}</div>{[}]}
+    {[ if (hint) {]}<div class="emoji-hint">{{hint}}</div>{[}]}
     {[ if (value === 'system') {]}<div class="emoji-hint">{[print(xabber.getString("settings__menu_item__emoji_font_system_label"))]}</div>{[}]}
 </div>

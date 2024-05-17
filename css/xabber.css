@@ -1128,11 +1128,22 @@ body {
     height: 100%;
     background-color: transparent;
     z-index: 490;
+}
+.toolbar-main-wrap{
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+    height: 100%;
 }
-
+.toolbar-main-wrap .ps-scrollbar-y-rail{
+    background: transparent !important;
+    right: unset !important;
+    left: 56px;
+}
+.toolbar-top-fake-el{
+    width: 64px;
+    height: 56px;
+}
 .client-body-wrap .blur-overlay {
     position: absolute;
     z-index: -1;
@@ -1451,6 +1462,7 @@ body {
 
 .toolbar .toolbar-item.toolbar-logo {
     height: 56px;
+    z-index: 500;
 }
 
 .toolbar .toolbar-item.unread img,
@@ -3556,17 +3568,26 @@ input[type=text].simple-input-field:hover {
 }
 
 .toolbar .add-variants {
-    top: -21px !important;
-    left: 50px !important;
-    min-width: 224px !important;
-    width: auto!important;
-    max-width: 256px;
     background-color: transparent;
     box-shadow: none;
+    height: 0;
+    left: 50px !important;
+    overflow: visible;
+    position: relative !important;
+    top: -21px !important;
+    width: 300px !important;
     z-index: 1100;
 }
 
+.toolbar .add-variants.active {
+    display: flex !important;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+}
+
 .toolbar .add-variant {
+    min-height: 36px;
     position: relative;
     height: 36px;
     max-width: 100%;
@@ -9325,6 +9346,7 @@ input[type=text].simple-input-field:hover {
 }
 
 .chat-message .chat-msg-author-wrap,
+.chat-message.with-author.without-username .chat-msg-author-wrap,
 .fwd-message .fwd-msg-author-wrap {
     display: none;
     height: 16px;
@@ -13646,7 +13668,8 @@ input[type=range].voice-message-volume:focus {
 }
 
 .settings-block-wrap.emoji_font .emoji-font-download-text,
-.settings-block-wrap.emoji_font .emoji-font-external-url-text{
+.settings-block-wrap.emoji_font .emoji-font-external-url-text,
+.settings-block-wrap.emoji_font .emoji-font-not-supported-text{
     font-size: 14px;
     left: 50%;
     position: absolute;
@@ -13655,6 +13678,10 @@ input[type=range].voice-message-volume:focus {
     transform: translate(-50%);
     width: 200px;
     color: #9e9e9e;
+}
+
+.settings-block-wrap.emoji_font .emoji-font-not-supported-text.also-external{
+    top: 150px;
 }
 
 .settings-block-wrap.emoji_font .emoji-font-external-url-button{

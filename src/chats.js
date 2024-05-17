@@ -320,7 +320,7 @@ xabber.MessagesBase = Backbone.Collection.extend({
             full_jid = $notification_msg.attr('from');
             from_jid = Strophe.getBareJidFromJid(full_jid);
             body = $notification_msg.children('body').text();
-            let notification_from = $notification_msg.attr('from'),
+            let notification_from = Strophe.getBareJidFromJid($notification_msg.attr('from')),
                 notification_from_address = $message.children(`addresses[xmlns="${Strophe.NS.ADDRESS}"]`).children('address[type="ofrom"]').attr('jid');
             if (!notification_from_address || notification_from_address !== notification_from){
                 this.account.retractMessageById(options.stanza_id, this.account.get('jid'), from_jid, this.chat.get('sync_type'))
@@ -352,6 +352,9 @@ xabber.MessagesBase = Backbone.Collection.extend({
         if (options.notification_msg && $notification_msg.length){
             attrs.notification_msg_content = $notification_msg[0];
             attrs.not_verified_device = null;
+            if (from_jid === this.account.domain){
+                attrs.ntf_new_device_msg = true;
+            }
             let $keyExchange = $notification_msg.children(`authenticated-key-exchange[xmlns="${Strophe.NS.XABBER_TRUST}"]`)
             if ($keyExchange.length){
                 if ($keyExchange.children('verification-start').length){
@@ -5980,9 +5983,6 @@ xabber.ChatContentView = xabber.BasicView.extend({
                 }
             });
         }
-
-        if (this.model.get('notifications'))
-            this.showMessageAuthor($msg);
     },
 
     notifyMessage: function (message) {

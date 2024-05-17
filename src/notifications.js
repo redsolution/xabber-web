@@ -195,8 +195,12 @@ xabber.NotificationsChatContentView = xabber.ChatContentView.extend({
 
     onShow: function (attrs) {
         // console.log(attrs);
+        // console.log('shooooowwwwwwwwwwwwwwwwwwww');
         xabber.notifications_view.$('.notifications-content').append(this.$el);
         this.onScroll();
+        setTimeout(() => {
+            this.onScroll();
+        }, 1500);
         if (!this.$('.chat-content .notification-sessions-wrap').length){
             this.addTrustSessionsContainer()
         }
@@ -270,6 +274,9 @@ xabber.NotificationsChatContentView = xabber.ChatContentView.extend({
             if (!message.get('was_readen')){
                 $msg.addClass('unread-message');
                 $msg.addClass('unread-message-background');
+            }
+            if (message.get('ignored')){
+                message.set('is_unread', false)
             }
             this.model.recountUnread();
         } else {
@@ -454,7 +461,47 @@ xabber.NotificationsChatContentView = xabber.ChatContentView.extend({
         }
         this.initPopup($message);
         this.bottom.showChatNotification();
+        xabber.toolbar_view.recountAllMessageCounter();
         return $message;
+    },
+
+    updateMessageInChat: function (msg_elem, msg) {
+        let $msg = $(msg_elem);
+        $msg.prev('.chat-day-indicator').remove();
+        if ($msg.find('.plyr-video-container').length) {
+            this.initPlyrEmbedPlayer($msg, msg);
+        }
+        if ($msg.hasClass('forwarding')) {
+            let $fwd_message = $msg.find('.fwd-message');
+            $fwd_message.each((idx, fwd_msg_item) => {
+                let $fwd_msg_item = $(fwd_msg_item),
+                    $prev_fwd_message = (idx > 0) ? $fwd_msg_item.prev() : [];
+                $fwd_msg_item.switchClass('hide-date', is_same_date && $prev_fwd_message.length);
+                $fwd_msg_item.removeClass('hide-time');
+                if ($prev_fwd_message.length) {
+                    let is_same_fwded_sender = ($fwd_msg_item.data('from') === $prev_fwd_message.data('from'));
+                    if (is_same_fwded_sender) {
+                        this.hideFwdMessageAuthor($fwd_msg_item);
+                    } else {
+                        this.showFwdMessageAuthor($fwd_msg_item);
+                    }
+                } else {
+                    this.showMessageAuthor($msg);
+                    this.showFwdMessageAuthor($fwd_msg_item);
+                }
+            });
+        }
+        if (this.model.get('notifications')){
+            !msg && (msg = this.model.messages.get($msg.data('uniqueid')));
+            if (msg && msg.get('ntf_new_device_msg')){
+                this.hideAuthorUsername($msg);
+            }
+            this.showMessageAuthor($msg);
+        }
+    },
+
+    hideAuthorUsername: function ($msg) {
+        $msg.addClass('without-username');
     },
 
     updateNotificationDate: function (msg_elem, msg) {

@@ -46,7 +46,7 @@ xabber.Peer = Backbone.Model.extend({
         }
     },
 
-    getDevicesNode: async function () {
+    getDevicesNode: async function (dfd) {
         if (!this._pending_devices) {
             this._pending_devices = true;
             this._dfd_devices = new $.Deferred();
@@ -56,10 +56,12 @@ xabber.Peer = Backbone.Model.extend({
                     this._pending_devices = false;
                     this._dfd_devices.resolve();
                     resolve();
+                    dfd && dfd.resolve()
                 }, () => {
                     this._pending_devices = false;
                     this._dfd_devices.resolve();
                     resolve();
+                    dfd && dfd.reject()
                 });
             });
         } else {

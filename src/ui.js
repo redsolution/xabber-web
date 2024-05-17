@@ -78,7 +78,7 @@ xabber.once("start", function () {
             right_contact_panel_width,
             chat_bottom_panel_width,
             toolbar_width = 64,
-            toolbar_accounts_heigth = height - 506,
+            toolbar_main_wrap_heigth = $(window).height() - 56,
             right_contact_panel_styles = {};
         if (is_wide || !(is_narrow)) {
             panel_width = 1536;
@@ -156,8 +156,8 @@ xabber.once("start", function () {
         this.chat_bottom.setCustomCss({
             width: chat_bottom_panel_width,
         });
-        this.toolbar_view.$el.find('.toolbar-bottom .accounts-wrap .accounts').css({
-            'max-height': toolbar_accounts_heigth,
+        this.toolbar_view.$el.find('.toolbar-main-wrap').css({
+            'max-height': toolbar_main_wrap_heigth,
         });
     };
 

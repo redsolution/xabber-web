@@ -3,83 +3,85 @@
         <img class="logo" src="{{TOOLBAR_LOGO}}">
     </div>
 </div>
-
-<div class="toolbar-middle">
-    <div class="toolbar-item all-chats active" title='{[print(xabber.getString("toolbar__menu_item__all_chats"))]}'>
-        <div class="border"></div>
-        <i class="toolbar-icon mdi mdi-24px mdi-message-text"></i>
-        <span class="all-msg-indicator"></span>
-    </div>
-
-    <div class="toolbar-item jingle-calls" title='{[print(xabber.getString("toolbar__menu_item__jingle_calls"))]}'>
-        <div class="border"></div>
-        <i class="toolbar-icon mdi mdi-24px mdi-phone"></i>
-        <span class="archive-msg-indicator hidden"></span>
-    </div>
-
-    <div class="toolbar-item mentions" title='{[print(xabber.getString("contact_bar_notifications"))]}'>
-        <div class="border"></div>
-        <svg class="toolbar-icon mdi mdi-24px mdi-svg-template" viewBox="0 0 24 24" data-svgname="bell"></svg>
-        <span class="mentions-indicator"></span>
-    </div>
-
-    <div class="toolbar-item contacts" title='{[print(xabber.getString("category_title_contacts"))]}'>
-        <div class="border"></div>
-        <i class="toolbar-icon mdi mdi-24px mdi-account-multiple"></i>
-    </div>
-
-    <div class="toolbar-item geolocation-chats" title='{[print(xabber.getString("toolbar__menu_item__geolocation_chats"))]}'>
-        <div class="border"></div>
-        <i class="toolbar-icon mdi mdi-24px mdi-compass"></i>
-        <span class="archive-msg-indicator hidden"></span>
-    </div>
-
-    <div class="toolbar-item archive-chats" title='{[print(xabber.getString("toolbar__menu_item__archive_chats"))]}'>
-        <div class="border"></div>
-        <i class="toolbar-icon mdi mdi-24px mdi-archive"></i>
-        <span class="archive-msg-indicator hidden"></span>
-    </div>
-
-    <div class="toolbar-item saved-chats" title='{[print(xabber.getString("toolbar__menu_item__saved_chats"))]}'>
-        <div class="border"></div>
-        <i class="toolbar-icon mdi mdi-24px mdi-bookmark"></i>
-        <span class="archive-msg-indicator hidden"></span>
-    </div>
-
-    <div class="add-something-wrap">
-        <div class="toolbar-item dropdown-button add-something" data-activates="{{view.cid}}-add" title='{[print(xabber.getString("toolbar__button_add_tooltip"))]}'>
-            <i class="toolbar-icon mdi mdi-24px mdi-plus"></i>
+<div class="toolbar-main-wrap">
+    <div class="toolbar-top-fake-el"></div>
+    <div class="toolbar-middle">
+        <div class="toolbar-item all-chats active" title='{[print(xabber.getString("toolbar__menu_item__all_chats"))]}'>
+            <div class="border"></div>
+            <i class="toolbar-icon mdi mdi-24px mdi-message-text"></i>
+            <span class="all-msg-indicator"></span>
         </div>
 
-        <div id="{{view.cid}}-add" class="add-variants dropdown-content noselect">
-            <div class="add-variant contact">
-                <i class="mdi mdi-20px mdi-account-plus"></i>
-                <span class="text one-line">{[print(xabber.getString("add_contact"))]}</span>
+        <div class="toolbar-item jingle-calls" title='{[print(xabber.getString("toolbar__menu_item__jingle_calls"))]}'>
+            <div class="border"></div>
+            <i class="toolbar-icon mdi mdi-24px mdi-phone"></i>
+            <span class="archive-msg-indicator hidden"></span>
+        </div>
+
+        <div class="toolbar-item mentions" title='{[print(xabber.getString("contact_bar_notifications"))]}'>
+            <div class="border"></div>
+            <svg class="toolbar-icon mdi mdi-24px mdi-svg-template" viewBox="0 0 24 24" data-svgname="bell"></svg>
+            <span class="mentions-indicator"></span>
+        </div>
+
+        <div class="toolbar-item contacts" title='{[print(xabber.getString("category_title_contacts"))]}'>
+            <div class="border"></div>
+            <i class="toolbar-icon mdi mdi-24px mdi-account-multiple"></i>
+        </div>
+
+        <div class="toolbar-item geolocation-chats" title='{[print(xabber.getString("toolbar__menu_item__geolocation_chats"))]}'>
+            <div class="border"></div>
+            <i class="toolbar-icon mdi mdi-24px mdi-compass"></i>
+            <span class="archive-msg-indicator hidden"></span>
+        </div>
+
+        <div class="toolbar-item archive-chats" title='{[print(xabber.getString("toolbar__menu_item__archive_chats"))]}'>
+            <div class="border"></div>
+            <i class="toolbar-icon mdi mdi-24px mdi-archive"></i>
+            <span class="archive-msg-indicator hidden"></span>
+        </div>
+
+        <div class="toolbar-item saved-chats" title='{[print(xabber.getString("toolbar__menu_item__saved_chats"))]}'>
+            <div class="border"></div>
+            <i class="toolbar-icon mdi mdi-24px mdi-bookmark"></i>
+            <span class="archive-msg-indicator hidden"></span>
+        </div>
+
+        <div class="add-something-wrap">
+            <div class="toolbar-item dropdown-button add-something" data-activates="{{view.cid}}-add" title='{[print(xabber.getString("toolbar__button_add_tooltip"))]}'>
+                <i class="toolbar-icon mdi mdi-24px mdi-plus"></i>
             </div>
-            <div class="add-variant public-groupchat">
-                <i class="mdi mdi-20px mdi-account-multiple-plus"></i>
-                <span class="text one-line">{[print(xabber.getString("create_group"))]}</span>
-            </div>
-            <div class="add-variant incognito-groupchat">
-                <svg class="mdi mdi-20px" viewBox="0 0 24 24">
-                    <path d="M13 11A3 3 0 1 0 10 8A3 3 0 0 0 13 11M13 7A1 1 0 1 1 12 8A1 1 0 0 1 13 7M17.11 10.86A5 5 0 0 0 17.11 5.14A2.91 2.91 0 0 1 18 5A3 3 0 0 1 18 11A2.91 2.91 0 0 1 17.11 10.86M13 13C7 13 7 17 7 17V19H19V17S19 13 13 13M9 17C9 16.71 9.32 15 13 15C16.5 15 16.94 16.56 17 17M24 17V19H21V17A5.6 5.6 0 0 0 19.2 13.06C24 13.55 24 17 24 17M8 12H5V15H3V12H0V10H3V7H5V10H8Z" />
-                </svg>
-                <span class="text one-line">{[print(xabber.getString("create_incognito_group"))]}</span>
-            </div>
-            <div class="add-variant account">
-                <i class="mdi mdi-20px mdi-account-circle"></i>
-                <span class="text one-line">{[print(xabber.getString("dialog_add__label_add_account"))]}</span>
+
+            <div id="{{view.cid}}-add" class="add-variants dropdown-content noselect">
+                <div class="add-variant contact">
+                    <i class="mdi mdi-20px mdi-account-plus"></i>
+                    <span class="text one-line">{[print(xabber.getString("add_contact"))]}</span>
+                </div>
+                <div class="add-variant public-groupchat">
+                    <i class="mdi mdi-20px mdi-account-multiple-plus"></i>
+                    <span class="text one-line">{[print(xabber.getString("create_group"))]}</span>
+                </div>
+                <div class="add-variant incognito-groupchat">
+                    <svg class="mdi mdi-20px" viewBox="0 0 24 24">
+                        <path d="M13 11A3 3 0 1 0 10 8A3 3 0 0 0 13 11M13 7A1 1 0 1 1 12 8A1 1 0 0 1 13 7M17.11 10.86A5 5 0 0 0 17.11 5.14A2.91 2.91 0 0 1 18 5A3 3 0 0 1 18 11A2.91 2.91 0 0 1 17.11 10.86M13 13C7 13 7 17 7 17V19H19V17S19 13 13 13M9 17C9 16.71 9.32 15 13 15C16.5 15 16.94 16.56 17 17M24 17V19H21V17A5.6 5.6 0 0 0 19.2 13.06C24 13.55 24 17 24 17M8 12H5V15H3V12H0V10H3V7H5V10H8Z" />
+                    </svg>
+                    <span class="text one-line">{[print(xabber.getString("create_incognito_group"))]}</span>
+                </div>
+                <div class="add-variant account">
+                    <i class="mdi mdi-20px mdi-account-circle"></i>
+                    <span class="text one-line">{[print(xabber.getString("dialog_add__label_add_account"))]}</span>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
-<div class="toolbar-bottom">
-    <div class="accounts-wrap">
-        <div class="accounts">
-            <div class="toolbar-item settings-modal hidden" title='{[print(xabber.getString("settings"))]}'>
-                <div class="border"></div>
-                <i class="toolbar-icon mdi mdi-24px mdi-settings"></i>
+    <div class="toolbar-bottom">
+        <div class="accounts-wrap">
+            <div class="accounts">
+                <div class="toolbar-item settings-modal hidden" title='{[print(xabber.getString("settings"))]}'>
+                    <div class="border"></div>
+                    <i class="toolbar-icon mdi mdi-24px mdi-settings"></i>
+                </div>
             </div>
         </div>
     </div>
