@@ -4201,7 +4201,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
                 }), {previous_history: true});
             }
             if (this.model.get('notifications') && !this.model.get('history_loaded')) {
-                let normal_msgs_count = this.model.messages.filter(m => !m.get('ignored')).length;
+                let normal_msgs_count = this.getFilteredMessages();
                 if (normal_msgs_count < xabber.settings.mam_messages_limit){
                     this.getMessageArchive({
                         max: xabber.settings.mam_messages_limit,
@@ -4314,6 +4314,17 @@ xabber.ChatContentView = xabber.BasicView.extend({
             unread_history_first: true,
             unread_history: true,
         });
+    },
+
+    getFilteredMessages: function () {
+        let msgs_count,
+            active_chat_filter = this.model.get('notifications_filter');
+        if (!active_chat_filter || active_chat_filter === 'all'){
+            msgs_count = this.model.messages.filter(m => !m.get('ignored')).length;
+        } else if (active_chat_filter === 'security'){
+            msgs_count = this.model.messages.filter(m => m.get('security_notification')).length;
+        }
+        return msgs_count;
     },
 
     showHistoryFeedback: function (is_error) {
@@ -4570,13 +4581,17 @@ xabber.ChatContentView = xabber.BasicView.extend({
         this.account.messages.add(message);
         let is_scrolled_to_bottom = this.isScrolledToBottom(),
             scrolled_from_bottom = this.getScrollBottom(),
-            $notification_msg, ignored;
+            $notification_msg, ignored, verification_failed;
 
         if (message.get('notification_msg') && message.get('notification_msg_content') && this.data.get('notification_content')){
             $notification_msg = $(message.get('notification_msg_content'));
             if (message.get('notification_trust_msg') || $notification_msg.children(`authenticated-key-exchange[xmlns="${Strophe.NS.XABBER_TRUST}"]`).length) {
                 if (!$notification_msg.find('verification-successful').length && !$notification_msg.find('verification-failed').length){
                     ignored = true;
+                }
+                if ($notification_msg.find('verification-failed').length){
+                    ignored = true;
+                    verification_failed = true;
                 }
             }
         }
@@ -4756,6 +4771,11 @@ xabber.ChatContentView = xabber.BasicView.extend({
                     message.set('ignored', true);
                     message.set('is_unread', false);
                     $message.addClass('hidden');
+                    if (verification_failed){
+                        message.set('security_notification', true);
+                        $message.removeClass('hidden');
+                        $message.addClass('security-content-msg');
+                    }
                 }
                 if (this.account.omemo && this.account.omemo.xabber_trust)
                     this.account.omemo.xabber_trust.receiveTrustVerificationMessage($notification_msg[0], {
@@ -7178,7 +7198,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
             if (this.account.get('gallery_token') && this.account.get('gallery_url'))
                 this.bottom.deleteFilesFromMessages([message]);
             $message.find('.edit-upload').one("click",() => {
-                if (this.model.get('encrypted')){
+                if (!this.model.get('encrypted')){
                     this.bottom.setEditedMessageAttachments(message, true);
                     this.bottom.setRedactedUploadMessage(message);
                 }

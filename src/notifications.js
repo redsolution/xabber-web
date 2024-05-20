@@ -29,6 +29,7 @@ xabber.NotificationsView = xabber.BasicView.extend({
         "click .notifications-account-filter-content .filter-item-wrap": "selectAccount",
         "click .cancel-session": "cancelTrustSession",
         "click .enter-code": "enterCode",
+        "click .filter-item-wrap": "filterContent",
 
     },
 
@@ -67,6 +68,35 @@ xabber.NotificationsView = xabber.BasicView.extend({
         let $item = $(ev.target).closest('.notification-trust-session');
         if ($item.attr('data-sid')){
             this.account.omemo.xabber_trust && this.account.omemo.xabber_trust.handleAcceptedMsgBySid($item.attr('data-sid'))
+        }
+    },
+
+    filterContent: function (ev) {
+        if (!this.current_content || !this.account)
+            return;
+        let $item = $(ev.target).closest('.filter-item-wrap'),
+            filter_type = $item.attr('data-filter');
+        this.$('.filter-item-wrap').removeClass('selected-filter');
+        this.$('.filter-item-wrap[data-filter="all"').addClass('selected-filter');
+        this.current_content.$el.removeClass('security-content');
+        if (filter_type === 'all'){
+
+        } else if (filter_type === 'security'){
+            this.$('.filter-item-wrap').removeClass('selected-filter');
+            this.$(`.filter-item-wrap[data-filter="${filter_type}"`).addClass('selected-filter');
+            this.current_content.$el.addClass('security-content');
+        }
+        this.current_content.model.set('notifications_filter', filter_type);
+        this.current_content.backToBottom();
+        if (!this.current_content.model.get('history_loaded')) {
+            let normal_msgs_count = this.current_content.getFilteredMessages();
+            if (normal_msgs_count < xabber.settings.mam_messages_limit){
+                this.current_content.getMessageArchive({
+                    max: xabber.settings.mam_messages_limit,
+                    fast: true,
+                    before: this.current_content.model.get('first_archive_id') || ''
+                }, {previous_history: true});
+            }
         }
     },
 
@@ -227,6 +257,10 @@ xabber.NotificationsChatContentView = xabber.ChatContentView.extend({
     },
 
     onShowNotificationsTab: function () {
+        this.onScroll();
+        setTimeout(() => {
+            this.onScroll();
+        }, 1500);
         let unread_count_sync = this.model.get('const_unread');
         if (unread_count_sync){
             this.model.set('const_unread', 0);
