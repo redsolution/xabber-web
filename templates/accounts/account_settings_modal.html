@@ -494,18 +494,8 @@
                             <div class="device-information-trust-text"></div>
                         </div>
                         <div class="device-information-wrap">
-                            <div class="settings-panel-label">{[print(xabber.getString("settings_account__device_information"))]}</div>
-                            <div class="device-information-items-wrap device-information-basic">
-                                <div class="device-information-item device-information-status">
-                                    <svg class="mdi device-information-icon mdi-24px mdi-svg-template" data-svgname="status"></svg>
-                                    <div class="device-information-label">{[print(xabber.getString("device__info__status__label"))]}</div>
-                                    <div class="device-information-text"></div>
-                                </div>
-                                <div class="device-information-item device-information-last-seen">
-                                    <svg class="mdi device-information-icon mdi-24px mdi-svg-template" data-svgname="history"></svg>
-                                    <div class="device-information-label">{[print(xabber.getString("device__info__status__label_last_seen"))]}</div>
-                                    <div class="device-information-text"></div>
-                                </div>
+                            <div class="settings-panel-label device-information-security-label">{[print(xabber.getString("settings_account__device_information_private"))]}</div>
+                            <div class="device-information-items-wrap device-information-encryption">
                                 <div class="device-information-item device-information-client">
                                     <svg class="mdi device-information-icon mdi-24px mdi-svg-template" data-svgname="id"></svg>
                                     <div class="device-information-label">{[print(xabber.getString("device__info__client__label"))]}</div>
@@ -522,8 +512,23 @@
                                     <div class="device-information-text"></div>
                                 </div>
                             </div>
-                            <div class="settings-panel-label device-information-security-label">{[print(xabber.getString("settings__menu_item__security"))]}</div>
-                            <div class="device-information-items-wrap device-information-encryption">
+                            <div class="settings-panel-label">{[print(xabber.getString("settings_account__device_information"))]}</div>
+                            <div class="device-information-items-wrap device-information-basic">
+                                <div class="device-information-item device-information-status">
+                                    <svg class="mdi device-information-icon mdi-24px mdi-svg-template" data-svgname="status"></svg>
+                                    <div class="device-information-label">{[print(xabber.getString("device__info__status__label"))]}</div>
+                                    <div class="device-information-text"></div>
+                                </div>
+                                <div class="device-information-item device-information-last-seen">
+                                    <svg class="mdi device-information-icon mdi-24px mdi-svg-template" data-svgname="history"></svg>
+                                    <div class="device-information-label">{[print(xabber.getString("device__info__status__label_last_seen"))]}</div>
+                                    <div class="device-information-text"></div>
+                                </div>
+                                <div class="device-information-item device-information-description">
+                                    <svg class="mdi device-information-icon mdi-24px mdi-svg-template" data-svgname="devices"></svg>
+                                    <div class="device-information-label">{[print(xabber.getString("device__info__public_label__label"))]}</div>
+                                    <div class="device-information-text"></div>
+                                </div>
                                 <div class="device-information-item device-information-device-id">
                                     <svg class="mdi device-information-icon mdi-24px mdi-svg-template" data-svgname="information"></svg>
                                     <div class="device-information-label">{[print(xabber.getString("settings_account__device_information_device_id"))]}</div>

@@ -687,23 +687,32 @@ _.extend(Strophe.Connection.prototype, {
             id: uniq_id
         }).c('register', { xmlns: Strophe.NS.AUTH_DEVICES});
         this.account && (old_token = this.account.get('old_device_token'));
-        let client_name = uuid();
+        let client_name = constants.CLIENT_NAME,
+            public_label = client_name;
         if (xabber.settings.device_metadata === 'contacts'){
-            client_name = constants.CLIENT_NAME;
+            public_label = client_name + `, PC, ${utils.getOS()}, ${env.utils.getBrowser()}`;
+        } else {
+            public_label = utils.generateDeviceName();
         }
         if (old_token && old_token.token && old_token.token_uid){
             iq.c('device', { xmlns: Strophe.NS.AUTH_DEVICES, id: old_token.token_uid})
                 .c('client').t(client_name).up()
-                .c('secret').t(old_token.token).up();
-            if (xabber.settings.device_metadata === 'contacts'){
+                .c('secret').t(old_token.token).up()
+                .c('public-label').t(public_label).up();
+            if (xabber.settings.device_metadata === 'contacts' || xabber.settings.device_metadata === 'server'){
                 iq.c('info').t(`PC, ${utils.getOS()}, ${env.utils.getBrowser()}`);
+            } else {
+                iq.c('info').t(public_label);
             }
             this.account.save('old_device_token', null);
         } else {
             iq.c('device', { xmlns: Strophe.NS.AUTH_DEVICES})
-                .c('client').t(client_name).up();
-            if (xabber.settings.device_metadata === 'contacts'){
+                .c('client').t(client_name).up()
+                .c('public-label').t(public_label).up();
+            if (xabber.settings.device_metadata === 'contacts' || xabber.settings.device_metadata === 'server'){
                 iq.c('info').t(`PC, ${utils.getOS()}, ${env.utils.getBrowser()}`);
+            } else {
+                iq.c('info').t(public_label);
             }
         }
         let handler = function (stanza) {

@@ -824,6 +824,7 @@ xabber.Account = Backbone.Model.extend({
                 $(tokens).find('device').each((idx, token) => {
                     let $token = $(token),
                         client = $token.find('client').text(),
+                        public_label = $token.find('public-label').text(),
                         device = $token.find('info').text(),
                         description = $token.find('public-label').text(),
                         omemo_id = $token.find('omemo-id').text(),
@@ -3513,9 +3514,9 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
         this.$('.device-information-device').showIf(token.device).find('.device-information-text').text(token.device);
         this.$('.device-information-client').showIf(token.client).find('.device-information-text').text(token.client);
         this.$('.device-information-ip').showIf(token.ip).find('.device-information-text').text(token.ip);
+        this.$('.device-information-description').showIf(token.description).find('.device-information-text').text(token.description);
         this.$('.device-information-expires').showIf(pretty_datetime(token.expire)).find('.device-information-text').text(pretty_datetime(token.expire));
         this.$('.device-information-device-id').showIf(token.omemo_id).find('.device-information-text').text(token.omemo_id);
-        this.$('.device-information-security-label').showIf(token.omemo_id);
         let resource_obj = this.model.resources.findWhere({ token_uid: token_uid }),
             status_text;
         if (resource_obj){
