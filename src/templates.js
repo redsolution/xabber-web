@@ -65,6 +65,7 @@
     addTemplate('base.fingerprints_devices');
     addTemplate('base.fingerprint_item');
     addTemplate('base.fingerprint_devices_item');
+    addTemplate('base.contact_verification_session');
     addTemplate('base.incoming_trust_session');
     addTemplate('base.jingle_message_calling');
     addTemplate('base.plyr_player_popup');

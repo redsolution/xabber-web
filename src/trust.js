@@ -535,6 +535,24 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
         return state;
     },
 
+    getVerificationStateLabel: function (session) {
+        let state,
+            step = session.verification_step;
+        if (step === '1a' && session.active_verification_device && session.active_verification_device.device_id){
+            state = xabber.getString("verification_session_state__outgoing_label");
+        } else if (step === '1a'){
+            state = xabber.getString("verification_session_state__outgoing_label");
+        } else if (step === '1b'){
+            state = xabber.getString("verification_session_state__incoming_label");
+        } else if (step === '2a'){
+            state = xabber.getString("verification_session_state__outgoing_label");
+        } else if (step === '2b'){
+            state = xabber.getString("verification_session_state__incoming_label");
+        }
+
+        return state;
+    },
+
     clearData: function (sid) {
         let active_sessions = this.get('active_trust_sessions');
         if (this.account.notifications_content){
@@ -546,6 +564,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
         this.save('active_trust_sessions', active_sessions);
         this.updateVerificationData();
         this.addEndedSessionsData(sid);
+        this.account.trigger('active_session_change');
         xabber.toolbar_view.recountAllMessageCounter();
     },
 
@@ -562,6 +581,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
         if (this.account.notifications_content){
             this.account.notifications_content.updateTrustSession(sid);
         }
+        this.account.trigger('active_session_change');
     },
 
     addEndedSessionsData: function (sid) {
@@ -1162,6 +1182,22 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
         }
     },
 
+    isActiveSessionWithJid: function (jid) {
+        if (!jid)
+            return false;
+        let active_sessions = this.get('active_trust_sessions'),
+            sessions_with_jid = Object.values(active_sessions).filter(item => item.session_check_jid && item.session_check_jid === jid);
+
+        if (sessions_with_jid.length){
+            sessions_with_jid.forEach((session) => {
+                let sid = Object.keys(active_sessions).find(key => active_sessions[key] === session);
+                if (sid){
+                    this.cancelSession(sid, jid);
+                }
+            });
+        }
+    },
+
     receiveTrustVerificationMessage: function (message, options) {
         if (!this.account.server_features.get(Strophe.NS.XABBER_NOTIFY))
             return;
@@ -1224,6 +1260,9 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
 
         if (contact){
             if ($message.find('verification-start').length && $message.find('verification-start').attr('device-id') && this.omemo.get('device_id') && options.automated){
+                let is_active_session_jid = this.isActiveSessionWithJid(contact.get('jid'), sid);
+                if (is_active_session_jid)
+                    return;
                 let ended_sessions = this.get('ended_sessions');
 
                 if (ended_sessions.includes(sid)){
@@ -1231,6 +1270,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                     return;
                 }
                 this.account.omemo.xabber_trust.addVerificationSessionData(sid, {
+                    session_check_jid: contact.get('jid')
                 });
                 let view = new xabber.IncomingTrustSessionView();
                 let peer = this.omemo.getPeer(contact.get('jid')),
@@ -1307,6 +1347,10 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                 return;
             if ($message.find('verification-start').length && $message.find('verification-start').attr('device-id') && $message.find('verification-start').attr('to-device-id') && this.omemo.get('device_id') && options.automated){
 
+                let is_active_session_jid = this.isActiveSessionWithJid(this.account.get('jid'), sid);
+                if (is_active_session_jid)
+                    return;
+
                 if ($message.find('verification-start').attr('to-device-id') != this.omemo.get('device_id'))
                     return;
                 let ended_sessions = this.get('ended_sessions');
@@ -1317,6 +1361,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                 }
 
                 this.account.omemo.xabber_trust.addVerificationSessionData(sid, {
+                    session_check_jid: this.account.get('jid')
                 });
                 let view = new xabber.IncomingTrustSessionView();
                 view.show({
@@ -1449,7 +1494,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
     handleTrustVerificationStart: function ($message, contact, is_own, msg_item) {
         let device_id = $message.find('verification-start').attr('device-id'),
             sid = $message.find('authenticated-key-exchange').attr('sid'),
-            code = utils.randomCode(6),
+            code = utils.randomNumberCode(6),
             peer,device;
         if (contact) {
             peer = this.omemo.getPeer(contact.get('jid'));
@@ -1638,49 +1683,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                                 });
                             });
                         }).catch(e => {
-                            console.error(e);
 
-                            let msg_id = uuid(),
-                                to = contact ? contact.get('jid') : this.account.get('jid'),
-                                stanza = $iq({
-                                    type: 'set',
-                                    to: to,
-                                    id: msg_id
-                                });
-                            stanza.c('notify', {xmlns: Strophe.NS.XABBER_NOTIFY});
-                            stanza.c('notification', {xmlns: Strophe.NS.XABBER_NOTIFY});
-                            stanza.c('forwarded', {xmlns: Strophe.NS.FORWARD});
-                            stanza.c('message', {
-                                to: to,
-                                from: this.account.get('jid'),
-                                type: 'chat',
-                                id: uuid()
-                            });
-                            stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: sid, timestamp: Date.now()});
-                            stanza.c('verification-failed', {reason: 'Data decryption failed'}).up().up();
-
-                            stanza.c('body').t(`Device Verification Data decryption failed from ${this.account.jid} A1`).up();
-                            stanza.up().up().up();
-                            stanza.c('fallback',{xmlns: Strophe.NS.XABBER_NOTIFY}).t(`device verification Data decryption failed fallback text`).up();
-                            stanza.c('no-store', {xmlns: Strophe.NS.HINTS}).up();
-                            stanza.c('no-copy', {xmlns: Strophe.NS.HINTS}).up();
-                            stanza.c('addresses', {xmlns: Strophe.NS.ADDRESS}).c('address',{type: 'to', jid: to}).up().up();
-
-                            msg_item && this.removeAfterHandle(msg_item);
-                            this.account.sendFast(stanza, () => {
-                                if (contact){
-                                    let $stanza = $(stanza.tree());
-                                    $stanza.attr('to',this.account.get('jid'));
-                                    $stanza.find('notification forwarded message').attr('to',this.account.get('jid'));
-                                    $stanza.find(`addresses[xmlns="${Strophe.NS.ADDRESS}"] address[type="to"]`).attr('jid',this.account.get('jid'));
-                                    this.account.sendFast(stanza, () => {
-                                    });
-                                }
-                                // console.log(stanza);
-                                // console.log(stanza.tree());
-                                utils.callback_popup_message(xabber.getString("trust_verification_decrypt_failed"), 5000);
-                            });
-                            this.clearData(sid);
                         });
                     } else {
                         //handle if cancelled

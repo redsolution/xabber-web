@@ -1,20 +1,38 @@
-<div class="modal-header fingerprints-header">
-    <div class="header"></div>
-    <div class="additional-info"></div>
-</div>
-<div class="fingerprints-content">
-</div>
-<div class="fingerprints-bottom">
-    <div class="this-device-wrap">
-        <div class="this-device-header-wrap">
-            <div class="divider"></div>
-            <div class="this-device-header">{[print(xabber.getString("omemo__dialog_fingerprints__text_this_device"))]}</div>
-        </div>
-        <div class="this-device-content">
+<div class="fingerprints-list-wrap">
+    <div class="modal-header fingerprints-header">
+        <div class="header"></div>
+        <div class="buttons-wrap">
+            <button class="btn-verify btn-flat btn-main text-color-500 hover-ground-color-grey-300">{[print(xabber.getString("trust_session__start_verification"))]}</button>
         </div>
     </div>
-    <div class="fingerprints-description-wrap">
-        <div class="fingerprints-description">{[print(xabber.getString("omemo__dialog_fingerprints__text_description"))]}</div>
-        <div class="link-about-encryption"><a href="{[print(xabber.getString('omemo__dialog_fingerprints__link_learn_more'))]}" target="_blank">{[print(xabber.getString("omemo__dialog_fingerprints__text_learn_more"))]}</a></div>
+    <div class="fingerprints-content-wrap">
+        <div class="fingerprints-active-trust-session">
+        </div>
+        <div class="fingerprints-list-content">
+        </div>
+        <!--<div class="fingerprints-bottom">-->
+            <!--<div class="fingerprints-description-wrap">-->
+                <!--<div class="fingerprints-description">{[print(xabber.getString("omemo__dialog_fingerprints__text_description"))]}</div>-->
+                <!--<div class="link-about-encryption"><a href="{[print(xabber.getString('omemo__dialog_fingerprints__link_learn_more'))]}" target="_blank">{[print(xabber.getString("omemo__dialog_fingerprints__text_learn_more"))]}</a></div>-->
+            <!--</div>-->
+        <!--</div>-->
+    </div>
+</div>
+<div class="fingerprint-details-wrap fingerprints-devices-wrap hidden">
+    <div class="modal-header fingerprints-header">
+        <i class="btn-back mdi mdi-24px mdi-arrow-left"></i>
+    </div>
+    <div class="fingerprints-content">
+        <div class="contact-device-content">
+
+        </div>
+        <div class="contact-own-device-content">
+
+        </div>
+    </div>
+    <div class="fingerprints-bottom">
+        <div class="fingerprints-help-text">
+            {[print(xabber.getString("omemo__dialog_fingerprints__bottom_help_text"))]}
+        </div>
     </div>
 </div>

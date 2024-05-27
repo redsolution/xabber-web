@@ -187,6 +187,18 @@ var utils = {
         return result;
     },
 
+    randomNumberCode: function (length) {
+        let result = '',
+            characters = '0123456789',
+            charactersLength = characters.length,
+            counter = 0;
+        while (counter < length) {
+            result += characters.charAt(Math.floor(Math.random() * charactersLength));
+            counter += 1;
+        }
+        return result;
+    },
+
     doCurve: function (priv_key, pub_key) {
         if (!priv_key || !pub_key)
             return;

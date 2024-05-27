@@ -10489,7 +10489,6 @@ xabber.InvitationPanelView = xabber.SearchView.extend({
         "click .btn-start-encryption": "startEncryptedChat",
         "click .btn-open-encrypted-chat": "openEncryptedChat",
         "click .btn-start-trust-verification": "startTrustVerification",
-        // "click .btn-start-trust-verification-own": "startTrustVerificationOwn",
         "click .btn-open-regular-chat": "openRegularChat",
         "click .btn-chat-pin": "pinChat",
         "click .btn-archive-chat": "archiveChat",
@@ -10633,8 +10632,6 @@ xabber.InvitationPanelView = xabber.SearchView.extend({
         this.$('.btn-clear-history').hideIf(is_group_chat);
         this.$('.btn-start-encryption').showIf(!is_group_chat && this.account.omemo && !this.model.get('encrypted') && !this.account.chats.get(`${this.contact.hash_id}:encrypted`));
         this.$('.btn-open-encrypted-chat').showIf(!is_group_chat && this.account.omemo && !this.model.get('encrypted') && this.account.chats.get(`${this.contact.hash_id}:encrypted`));
-        this.$('.btn-start-trust-verification').showIf(!is_group_chat && this.account.omemo && this.model.get('encrypted') && this.account.chats.get(`${this.contact.hash_id}:encrypted`) && this.account.server_features.get(Strophe.NS.XABBER_NOTIFY));
-        // this.$('.btn-start-trust-verification-own').showIf(!is_group_chat && this.account.omemo && this.model.get('encrypted') && this.account.chats.get(`${this.contact.hash_id}:encrypted`) && this.account.server_features.get(Strophe.NS.XABBER_NOTIFY));
         this.$('.btn-open-regular-chat').showIf(this.model.get('encrypted'));
         this.$('.btn-show-fingerprints').showIf(!is_group_chat && this.account.omemo && this.model.get('encrypted'));
         this.$('.btn-retract-own-messages').showIf(is_group_chat);
@@ -11135,83 +11132,6 @@ xabber.InvitationPanelView = xabber.SearchView.extend({
         this.model.set('opened', true);
         this.account.chats.openChat(this.contact, {encrypted: true});
     },
-
-    startTrustVerification: function () {
-        if (!this.account.omemo || !this.account.omemo.get('device_id') || !this.account.server_features.get(Strophe.NS.XABBER_NOTIFY))
-            return;
-        let msg_id = uuid(),
-            sid = uuid(),
-            stanza = $iq({
-                type: 'set',
-                to: this.model.get('jid'),
-                id: msg_id
-            });
-        stanza.c('notify', {xmlns: Strophe.NS.XABBER_NOTIFY});
-        stanza.c('notification', {xmlns: Strophe.NS.XABBER_NOTIFY});
-        stanza.c('forwarded', {xmlns: Strophe.NS.FORWARD});
-        stanza.c('message', {
-            to: this.model.get('jid'),
-            from: this.account.get('jid'),
-            type: 'chat',
-            id: uuid()
-        });
-        stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: sid, timestamp: Date.now() }).c('verification-start', {'device-id': this.account.omemo.get('device_id') }).up().up();
-        stanza.c('body').t(`Device Verification request from ${this.account.jid} A1`).up();
-        stanza.up().up().up();
-        stanza.c('fallback',{xmlns: Strophe.NS.XABBER_NOTIFY}).t(`device verification fallback text`).up();
-        stanza.c('addresses', {xmlns: Strophe.NS.ADDRESS}).c('address',{type: 'to', jid: this.model.get('jid')}).up().up();
-        this.account.sendFast(stanza, () => {
-
-            this.account.omemo.xabber_trust.addVerificationSessionData(sid, {
-                verification_started: true,
-                active_verification_device: {
-                    peer_jid: this.model.get('jid'),
-                },
-                verification_step: '1a'
-            });
-            utils.callback_popup_message(xabber.getString("trust_verification_started"), 5000);
-        });
-    },
-
-    // startTrustVerificationOwn: function () {
-    //     if (!this.account.omemo || !this.account.omemo.get('device_id') || !this.account.server_features.get(Strophe.NS.XABBER_NOTIFY))
-    //         return;
-    //
-    //     let msg_id = uuid(),
-    //         sid = uuid(),
-    //         stanza = $iq({
-    //             type: 'set',
-    //             to: this.account.get('jid'),
-    //             id: msg_id
-    //         });
-    //     stanza.c('notify', {xmlns: Strophe.NS.XABBER_NOTIFY});
-    //     stanza.c('notification', {xmlns: Strophe.NS.XABBER_NOTIFY});
-    //     stanza.c('forwarded', {xmlns: Strophe.NS.FORWARD});
-    //     stanza.c('message', {
-    //         to: this.account.get('jid'),
-    //         from: this.account.get('jid'),
-    //         type: 'chat',
-    //         id: uuid()
-    //     });
-    //     stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: sid, timestamp: Date.now() }).c('verification-start', {'device-id': this.account.omemo.get('device_id') }).up().up();
-    //     stanza.c('body').t(`Device Verification request from ${this.account.jid} A1`).up();
-    //     stanza.up().up().up();
-    //     stanza.c('fallback',{xmlns: Strophe.NS.XABBER_NOTIFY}).t(`device verification fallback text`).up();
-    //     stanza.c('no-store', {xmlns: Strophe.NS.HINTS}).up();
-    //     stanza.c('no-copy', {xmlns: Strophe.NS.HINTS}).up();
-    //     stanza.c('addresses', {xmlns: Strophe.NS.ADDRESS}).c('address',{type: 'to', jid: this.account.get('jid')}).up().up();
-    //     this.account.sendFast(stanza, () => {
-    //
-    //         this.account.omemo.xabber_trust.addVerificationSessionData(sid, {
-    //             verification_started: true,
-    //             active_verification_device: {
-    //                 peer_jid: this.account.get('jid'),
-    //             },
-    //             verification_step: '1a'
-    //         });
-    //         utils.callback_popup_message(xabber.getString("trust_verification_started"), 5000);
-    //     });
-    // },
 
     openRegularChat: function () {
         this.model.set('opened', true);

@@ -1,0 +1,18 @@
+<div class="notification-trust-session" data-sid="{{sid}}" data-jid="{{jid}}">
+    <div class="cancel-session">
+        <svg class="mdi mdi-24px mdi-svg-template" data-svgname="close"></svg>
+    </div>
+    <div class="state-label">{{state_label}}</div>
+    <div class="state">{{state}}</div>
+    {[if (code) {]}
+    <div class="code-wrap">
+        <div class="code-label">{[print(xabber.getString("verification_session_code_label"))]}</div>
+        <div class="code">{{code}}</div>
+    </div>
+    {[}]}
+    {[if (is_enter_code) {]}
+    <div class="enter-code text-color-500 dotted-underline">
+        {[print(xabber.getString("verification_session_enter_code_button"))]}
+    </div>
+    {[}]}
+</div>

@@ -160,15 +160,16 @@ xabber.Peers = Backbone.Collection.extend({
 xabber.Fingerprints = xabber.BasicView.extend({
     className: 'modal main-modal fingerprints-wrap',
     template: templates.fingerprints,
-    ps_selector: '.fingerprints-content',
-    ps_settings: {theme: 'item-list'},
+    ps_selector: '.fingerprints-content-wrap',
 
     events: {
+        'click .btn-verify': "startTrustVerification",
         'click .btn-trust': "trustDevice",
-        'click .btn-ignore': "ignoreDevice",
-        'click .btn-delete': "deleteDevice",
-        "click .set-label + div": "editLabel",
-        'click .btn-cancel': "close"
+        "click .cancel-session": "cancelTrustSession",
+        "click .enter-code": "enterCode",
+        'click .btn-fingerprint-details': "showFingerprintDetails",
+        'click .btn-back': "backToList",
+        'click .btn-cancel': "close",
     },
 
     _initialize: function () {
@@ -181,6 +182,8 @@ xabber.Fingerprints = xabber.BasicView.extend({
             this.account = this.model.account;
             this.omemo = this.account.omemo;
             this.jid = this.model.get('jid');
+            this.account.on('trusting_updated', this.renderDevices, this);
+            this.account.on('active_session_change', this.renderActiveTrustSession, this);
         }
     },
 
@@ -195,12 +198,57 @@ xabber.Fingerprints = xabber.BasicView.extend({
         }
         this.$('.header').text(xabber.getString('omemo__dialog_fingerprints__header', [name]));
         this.data.set('visible', true);
+        this.backToList();
+        this.updateColorScheme();
         this.show();
-        this.$('div.fingerprints-content').html(env.templates.contacts.preloader());
+        this.$('div.fingerprints-list-content').html(env.templates.contacts.preloader());
         if (this.is_own_devices)
             this.renderOwnDevices();
-        else
+        else {
             this.renderDevices();
+            this.renderActiveTrustSession();
+        }
+    },
+
+    startTrustVerification: function () {
+        if (!this.account.omemo || !this.account.omemo.get('device_id') || !this.account.server_features.get(Strophe.NS.XABBER_NOTIFY))
+            return;
+        let msg_id = uuid(),
+            sid = uuid(),
+            stanza = $iq({
+                type: 'set',
+                to: this.jid,
+                id: msg_id
+            });
+        stanza.c('notify', {xmlns: Strophe.NS.XABBER_NOTIFY});
+        stanza.c('notification', {xmlns: Strophe.NS.XABBER_NOTIFY});
+        stanza.c('forwarded', {xmlns: Strophe.NS.FORWARD});
+        stanza.c('message', {
+            to: this.jid,
+            from: this.account.get('jid'),
+            type: 'chat',
+            id: uuid()
+        });
+        stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: sid, timestamp: Date.now() }).c('verification-start', {'device-id': this.account.omemo.get('device_id') }).up().up();
+        stanza.c('body').t(`Device Verification request from ${this.account.jid} A1`).up();
+        stanza.up().up().up();
+        stanza.c('fallback',{xmlns: Strophe.NS.XABBER_NOTIFY}).t(`device verification fallback text`).up();
+        stanza.c('addresses', {xmlns: Strophe.NS.ADDRESS}).c('address',{type: 'to', jid: this.jid}).up().up();
+        this.account.sendFast(stanza, () => {
+            this.account.omemo.xabber_trust.addVerificationSessionData(sid, {
+                verification_started: true,
+                active_verification_device: {
+                    peer_jid: this.jid,
+                },
+                verification_step: '1a'
+            });
+            utils.callback_popup_message(xabber.getString("trust_verification_started"), 5000);
+        });
+    },
+
+    updateColorScheme: function () {
+        this.$el.attr('data-color', this.account.settings.get('color'));
+        this.account.settings.once("change:color", this.updateColorScheme, this);
     },
 
     renderDevices: function () {
@@ -208,7 +256,6 @@ xabber.Fingerprints = xabber.BasicView.extend({
             let devices_count = _.keys(this.model.devices).length;
             this.updateFingerprints(this.model.devices);
         });
-        this.updateOwnFingerprint();
     },
 
     renderOwnDevices: function () {
@@ -217,6 +264,121 @@ xabber.Fingerprints = xabber.BasicView.extend({
             this.updateFingerprints(this.model.own_devices);
             this.updateOwnFingerprint();
         });
+    },
+
+    cancelTrustSession: function (ev) {
+        if (!this.account || !this.account.omemo)
+            return;
+        let $item = $(ev.target).closest('.notification-trust-session');
+        if ($item.attr('data-sid')){
+            this.account.omemo.xabber_trust && this.account.omemo.xabber_trust.cancelSession($item.attr('data-sid'), $item.attr('data-jid'))
+        }
+    },
+
+    enterCode: function (ev) {
+        if (!this.account || !this.account.omemo)
+            return;
+        let $item = $(ev.target).closest('.notification-trust-session');
+        if ($item.attr('data-sid')){
+            this.account.omemo.xabber_trust && this.account.omemo.xabber_trust.handleAcceptedMsgBySid($item.attr('data-sid'))
+        }
+    },
+
+    renderActiveTrustSession: function () {
+
+        let active_sessions = this.omemo.xabber_trust.get('active_trust_sessions');
+        this.$(`.notification-trust-session`).remove();
+
+        Object.keys(active_sessions).forEach((session_id) => {
+            let session = active_sessions[session_id];
+            if (session.active_verification_device && session.active_verification_device.peer_jid === this.jid){
+                let state = this.omemo.xabber_trust.getVerificationState(session),
+                    state_label = this.omemo.xabber_trust.getVerificationStateLabel(session);
+
+                let item = {
+                    jid: null,
+                    device_id: null,
+                    sid: session_id,
+                    state: state,
+                    state_label: state_label,
+                    code: session.active_verification_code,
+                    is_enter_code: null,
+                };
+                if (session.active_verification_device) {
+                    item.jid = session.active_verification_device.peer_jid;
+                    item.device_id = session.active_verification_device.device_id;
+                }
+                if (session.verification_step === '1a' && session.verification_accepted_msg_xml) {
+                    item.is_enter_code = true;
+                }
+
+                this.$('.fingerprints-active-trust-session').append($(templates.contact_verification_session(item)));
+            }
+        });
+        this.$('.btn-verify').switchClass('hidden', this.$('.fingerprints-active-trust-session').children().length)
+    },
+
+    showFingerprintDetails: function (ev) {
+        let $item = $(ev.target).closest('.row'),
+            device_id = $item.attr('data-device-id');
+
+        if (!device_id)
+            return;
+
+        let omemo = this.account.omemo;
+        let device = omemo.own_devices[omemo.get('device_id')];
+
+        let device_icons = [
+            'device-cellphone',
+            'device-console',
+            'device-desktop',
+            'device-tablet',
+            'device-web',
+        ],
+            svg_icon = device_icons[Math.floor(Math.random()*device_icons.length)],
+            $contact_row = templates.fingerprint_devices_item({
+            id: device_id,
+            label:$item.attr('data-device-id'),
+            trust: $item.attr('data-trust'),
+            svg_icon,
+            fingerprint: $item.attr('data-fingerprint'),
+            edit_setting: 'contact',
+            old_fingerprint: $item.attr('data-old-fingerprint'),
+            error: $item.attr('data-error'),
+        }),
+            $own_row = templates.fingerprint_devices_item({
+            id: device.id,
+            label: device.get('label'),
+            trust: null,
+            svg_icon: 'device-web',
+            fingerprint: device.get('fingerprint').match(/.{1,8}/g).join(" "),
+            edit_setting: true,
+            old_fingerprint: undefined,
+            error: undefined,
+        });
+
+        this.device_id = device_id;
+        this.fingerprint = $item.attr('data-fingerprint').replace(/ /g, "");
+        this.trust = $item.attr('data-trust');
+        this.$('.contact-device-content').html($contact_row);
+        this.$('.contact-own-device-content').html($own_row);
+        this.$('.fingerprints-list-wrap').addClass('hidden');
+        this.$('.fingerprint-details-wrap').removeClass('hidden');
+        this.$el.addClass('fingerprint-detail-modal');
+        this.$('.dropdown-button').dropdown({
+            inDuration: 100,
+            outDuration: 100,
+            constrainWidth: false,
+            hover: false,
+            container: this.$('.fingerprints-content .other-device-content')[0],
+            alignment: 'left'
+        });
+    },
+
+    backToList: function () {
+        this.$('.fingerprints-list-wrap').removeClass('hidden');
+        this.$('.fingerprint-details-wrap').addClass('hidden');
+        this.$el.removeClass('fingerprint-detail-modal');
     },
 
     render: function () {
@@ -256,28 +418,23 @@ xabber.Fingerprints = xabber.BasicView.extend({
         let counter = 0,
             devices_count = _.keys(devices).length,
             dfd = new $.Deferred(),
-            $container = this.$('div.fingerprints-content');
-        dfd.done((f_count) => {
-            if (!f_count)
+            $container = this.$('div.fingerprints-list-content');
+        dfd.done((row_list) => {
+            if (!row_list.length)
                 $container.html($(`<div class="empty-table">${xabber.getString("omemo__dialog_fingerprints__text_no_fingerprints")}</div>`));
-            else
-                this.$('.dropdown-button').dropdown({
-                    inDuration: 100,
-                    outDuration: 100,
-                    constrainWidth: false,
-                    hover: false,
-                    container: this.$('.fingerprints-content')[0],
-                    alignment: 'left'
-                });
-            this.jid == this.account.get('jid') && f_count++;
-            this.$('.additional-info').text(xabber.getQuantityString("omemo__dialog_fingerprints__text_devices_count", f_count, [this.jid, f_count]));
+            this.$('div.fingerprints-list-content').html(env.templates.contacts.preloader());
+            row_list.sort((a, b) => a.id - b.id);
+            row_list.forEach((row) => {
+                $container.append(row.row);
+            });
             $container.find('.preloader-wrapper').detach();
         });
+        let rows = [];
         for (let device_id in devices) {
             if (device_id == this.omemo.get('device_id')) {
                 counter++;
                 if (devices_count == counter)
-                    dfd.resolve($container.find('div.row').length);
+                    dfd.resolve(rows);
                 continue;
             }
             let device = devices[device_id];
@@ -287,10 +444,10 @@ xabber.Fingerprints = xabber.BasicView.extend({
                     fing = (this.omemo.get('fingerprints')[this.jid] || [])[device_id],
                     is_trusted = fing ? (fing.fingerprint != f ? 'error' : (fing.trusted ? 'trust' : 'ignore')) : 'unknown';
                 is_trusted === 'error' && (options.old_fingerprint = fing.fingerprint);
-                $container.append(this.addRow(device.id, device.get('label'), is_trusted, f, options));
+                rows.push({id: counter, row: this.addRow(device.id, device.get('label'), is_trusted, f, options)});
                 counter++;
                 if (devices_count == counter)
-                    dfd.resolve($container.find('div.row').length);
+                    dfd.resolve(rows);
             }
             else {
                 this.account.getConnectionForIQ().omemo.getBundleInfo({jid: device.jid, id: device.id}, async (iq) => {
@@ -304,15 +461,15 @@ xabber.Fingerprints = xabber.BasicView.extend({
                             fing = (this.omemo.get('fingerprints')[this.jid] || [])[device.id],
                             is_trusted = fing ? (fing.fingerprint != f ? 'error' : (fing.trusted ? 'trust' : 'ignore')) : 'unknown';
                         is_trusted === 'error' && (options.old_fingerprint = fing.fingerprint);
-                        $container.append(this.addRow(device.id, device.get('label'), is_trusted, f, options));
+                        rows.push({id: counter, row: this.addRow(device.id, device.get('label'), is_trusted, f, options)});
                     }
                     counter++;
                     if (devices_count == counter)
-                        dfd.resolve($container.find('div.row').length);
+                        dfd.resolve(rows);
                 }, () => {
                     counter++;
                     if (devices_count == counter)
-                        dfd.resolve($container.find('div.row').length);
+                        dfd.resolve(rows);
                 });
             }
         }
@@ -362,41 +519,53 @@ xabber.Fingerprints = xabber.BasicView.extend({
     },
 
     trustDevice: function (ev) {
-        let $target = $(ev.target).closest('div.row'),
-            fingerprint = $target.find('.fingerprint').text().replace(/ /g, ""),
-            is_trusted = $target.children('.buttons[data-trust]').attr('data-trust'),
-            device_id = Number($target.find('div.device-id').text());
-        $target.children('.buttons[data-trust]').attr('data-trust', 'trust');
-        $target.find('.trust-item-wrap').children().attr('data-value', 'trust').text(xabber.getString('omemo__dialog_fingerprints__button_trust'));
-        this.omemo.updateFingerprints(this.jid, device_id, fingerprint, true);
-        let device = this.is_own_devices ? this.account.omemo.own_devices[device_id] : this.model.devices[device_id];
-        if (device && is_trusted != 'trusted') {
-            if (is_trusted === 'error')
+        let $target = $(ev.target).closest('.contact-device-content');
+        this.omemo.updateFingerprints(this.jid, this.device_id, this.fingerprint, true);
+        let device = this.model.devices[this.device_id];
+        if (device && this.trust != 'trusted') {
+            if (this.trust === 'error')
+                //todo:
                 $target.find('.old-fingerprint').detach();
             device.set('trusted', true);
             device.is_session_initiated = false;
             device.preKeys = null;
             this.account.trigger('trusting_updated');
             this.account.trigger('device_trusted', device.id, this.jid);
-        }
-    },
+            this.backToList();
+            if (this.omemo.xabber_trust){
+                this.omemo.xabber_trust.getTrustedKey(device).then((trustedKeyBuffer) => {
+                    let trustedKeyBase64 = utils.ArrayBuffertoBase64(trustedKeyBuffer),
+                        trusted_devices = this.omemo.xabber_trust.get('trusted_devices'),
+                        to = this.jid;
+                    if (trusted_devices[to] && _.isArray(trusted_devices[to])){
+                        if (!trusted_devices[to].some(e => e.trusted_key === trustedKeyBase64)){
+                            trusted_devices[to].push({
+                                trusted_key: trustedKeyBase64,
+                                fingerprint: device.get('fingerprint'),
+                                device_id: device.get('id'),
+                                timestamp: Date.now(),
+                                fingerprint_trust: true,
+                                public_key: utils.ArrayBuffertoBase64(device.get('ik'))
+                            });
+                        }
+                    } else {
+                        trusted_devices[to] = [{
+                            trusted_key: trustedKeyBase64,
+                            fingerprint: device.get('fingerprint'),
+                            device_id: device.get('id'),
+                            timestamp: Date.now(),
+                            fingerprint_trust: true,
+                            public_key: utils.ArrayBuffertoBase64(device.get('ik'))
+                        }];
+                    }
+                    this.omemo.xabber_trust.save('trusted_devices', trusted_devices);
+                    this.omemo.xabber_trust.trigger('trust_updated');
+                    this.omemo.xabber_trust.getContactsTrustedDevices(to, device.get('id'));
+                    this.omemo.xabber_trust.publishContactsTrustedDevices(() => {
+                    });
+            });
 
-    ignoreDevice: function (ev) {
-        let $target = $(ev.target).closest('div.row'),
-            fingerprint = $target.find('.fingerprint').text().replace(/ /g, ""),
-            is_trusted = $target.children('.buttons[data-trust]').attr('data-trust'),
-            device_id = Number($target.find('div.device-id').text());
-        $target.children('.buttons[data-trust]').attr('data-trust', 'ignore');
-        $target.find('.trust-item-wrap').children().attr('data-value', 'ignore').text(xabber.getString('omemo__dialog_fingerprints__button_ignore'));
-        this.omemo.updateFingerprints(this.jid, device_id, fingerprint, false);
-        let device = this.is_own_devices ? this.account.omemo.own_devices[device_id] : this.model.devices[device_id];
-        if (device && is_trusted != 'ignore') {
-            if (is_trusted === 'error')
-                $target.find('.old-fingerprint').detach();
-            device.set('trusted', false);
-            device.is_session_initiated = false;
-            device.preKeys = null;
-            this.account.trigger('trusting_updated');
+            }
         }
     },
 
@@ -422,7 +591,8 @@ xabber.Fingerprints = xabber.BasicView.extend({
             }
         }
         old_fingerprint && (old_fingerprint = old_fingerprint.match(/.{1,8}/g).join(" "));
-        let $row = templates.fingerprint_item({id,label,trust,fingerprint, delete_button, edit_setting, old_fingerprint, error});
+        let trust_type = this.getTrustType(trust, id, this.jid);
+        let $row = templates.fingerprint_item({id,label,trust, trust_type,fingerprint, delete_button, edit_setting, old_fingerprint, error});
         return $row;
     },
 
@@ -432,11 +602,10 @@ xabber.Fingerprints = xabber.BasicView.extend({
         utils.dialogs.ask(xabber.getString("omemo__dialog_delete_device__header"), xabber.getString("omemo__dialog_delete_device__text", [device_id]), null, { ok_button_text: xabber.getString("omemo__dialog_delete_device__button_delete")}).done((result) => {
             if (result) {
                 $target.detach();
-                let f_count = this.$('div.fingerprints-content').find('div.row').length;
+                let f_count = this.$('div.fingerprints-list-content').find('div.row').length;
                 if (!f_count)
-                    this.$('div.fingerprints-content').html($(`<div class="empty-table">${xabber.getString("omemo__dialog_fingerprints__text_no_fingerprints")}</div>`));
+                    this.$('div.fingerprints-list-content').html($(`<div class="empty-table">${xabber.getString("omemo__dialog_fingerprints__text_no_fingerprints")}</div>`));
                 this.jid == this.account.get('jid') && f_count++;
-                this.$('.additional-info').text(xabber.getQuantityString("omemo__dialog_fingerprints__text_devices_count", f_count, [this.jid, f_count]));
                 delete this.model.own_devices[device_id];
                 let conn = this.account.getConnectionForIQ();
                 if (conn && conn.omemo) {
@@ -449,6 +618,32 @@ xabber.Fingerprints = xabber.BasicView.extend({
             }
         });
     },
+
+    getTrustType: function (trust, device_id, jid) {
+        let trust_type = '';
+        if (trust === 'error'){
+            trust_type = xabber.getString("fingerprint_trust_type_error")
+        } else if (trust === 'trust') {
+            if (this.omemo.xabber_trust && this.omemo.xabber_trust.get('trusted_devices')){
+                let trusted_devices = this.omemo.xabber_trust.get('trusted_devices');
+
+                if (trusted_devices[jid] && trusted_devices[jid].length){
+                    let peers_trusted_devices = trusted_devices[jid],
+                        trusted_device = peers_trusted_devices.filter(item => item.device_id == device_id)
+                    if (trusted_device.length){
+                        trusted_device = trusted_device[0]
+                        let trust_type = trusted_device.after_trust ? 'direct' : trusted_device.fingerprint_trust ? 'fingerprint_trust' :  'indirect';
+                        trust_type = xabber.getString(`fingerprint_trust_type_${trust_type}`)
+                        return trust_type;
+                    }
+                }
+            }
+            trust_type = xabber.getString(`fingerprint_trust_type_fingerprint_trust`)
+        } else if (trust === 'unknown') {
+            trust_type = xabber.getString("fingerprint_trust_type_unknown")
+        }
+        return trust_type;
+    },
 });
 
 xabber.FingerprintsOwnDevices = xabber.BasicView.extend({
@@ -458,7 +653,6 @@ xabber.FingerprintsOwnDevices = xabber.BasicView.extend({
     events: {
         'click .btn-start-trust-session': "startTrustVerificationOwn",
         'click .btn-trust': "trustDevice",
-        'click .btn-ignore': "ignoreDevice",
         'click .btn-cancel': "close"
     },
 

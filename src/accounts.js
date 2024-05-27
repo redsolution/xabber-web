@@ -1198,6 +1198,11 @@ xabber.Account = Backbone.Model.extend({
             } else {
                 this.onDisconnected();
             }
+            xabber.notifications_view.notifications_chats = xabber.notifications_view.notifications_chats.filter(item => item.account.get('jid') !== this.get('jid'));
+            if (xabber.notifications_view && xabber.notifications_view.current_content && xabber.notifications_view.current_content.account.get('jid') === this.get('jid')) {
+                xabber.notifications_view.current_content.destroyView();
+                xabber.notifications_view.current_content = null;
+            }
         },
 
         onDestroy: function () {

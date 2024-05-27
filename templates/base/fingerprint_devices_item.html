@@ -19,6 +19,8 @@
             <div class="label">
                 {[if (!edit_setting) {]}
                     {[print(xabber.getString("omemo__dialog_fingerprints__other_fingerprint_label"))]}
+                {[} else if (edit_setting === 'contact') {]}
+                    {[print(xabber.getString("omemo__dialog_fingerprints__contact_fingerprint_label"))]}
                 {[} else {]}
                 <span class="text-color-700">{[print(xabber.getString("omemo__dialog_fingerprints__text_this_device"))]}</span> {[print(xabber.getString("omemo__dialog_fingerprints__fingerprint_label"))]}
                 {[}]}</div>
@@ -38,7 +40,10 @@
         </div>
     </div>
     <div id="select-status-{{id}}" class="dropdown-content bootstrap-dropdown noselect fingerprint-dropdown">
-        <div data-value="ignore" class="property-variant btn-ignore">{[print(xabber.getString("omemo__dialog_fingerprints__button_ignore"))]}</div>
+        <!--<div data-value="ignore" class="property-variant btn-ignore">{[print(xabber.getString("omemo__dialog_fingerprints__button_ignore"))]}</div>-->
+        {[if (!edit_setting) {]}
+        <div data-value="trust" class="property-variant btn-start-trust-session">{[print(xabber.getString("trust_session__start_verification"))]}</div>
+        {[}]}
         <div data-value="trust" class="property-variant btn-trust">{[print(xabber.getString("omemo__dialog_fingerprints__button_trust"))]}</div>
     </div>
     {[}]}
