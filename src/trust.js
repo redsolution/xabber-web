@@ -79,11 +79,7 @@ xabber.IncomingTrustSessionView = xabber.BasicView.extend({
             stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: this.sid, timestamp: Date.now()});
             stanza.c('verification-failed', {reason: 'Session cancelled'}).up().up();
 
-            stanza.c('body').t(`Device Verification Session cancelled from ${this.account.jid}`).up();
             stanza.up().up().up();
-            stanza.c('fallback',{xmlns: Strophe.NS.XABBER_NOTIFY}).t(`device verification Session cancelled fallback text`).up();
-            stanza.c('no-store', {xmlns: Strophe.NS.HINTS}).up();
-            stanza.c('no-copy', {xmlns: Strophe.NS.HINTS}).up();
             stanza.c('addresses', {xmlns: Strophe.NS.ADDRESS}).c('address',{type: 'to', jid: to}).up().up();
 
             this.account.sendFast(stanza, () => {
@@ -101,6 +97,75 @@ xabber.IncomingTrustSessionView = xabber.BasicView.extend({
             });
             this.trust.clearData(this.sid);
         }
+        this.closeModal();
+    },
+
+    closeModal: function () {
+        this.$el.closeModal({ complete: this.hide.bind(this) });
+    }
+});
+
+xabber.CodeModalView = xabber.BasicView.extend({
+    className: 'modal main-modal code-modal',
+    template: templates.code_modal,
+    events: {
+        "click .btn-cancel": "cancel",
+    },
+
+    render: function (options) {
+        this.account = options.account;
+        this.contact = options.contact;
+        this.code = options.code;
+        this.sid = options.sid;
+        this.$el.openModal({
+            ready: this.onRender.bind(this),
+            complete: this.close.bind(this),
+        });
+    },
+
+    onRender: function () {
+        this.updateColorScheme();
+        // this.$('.code-own-text').switchClass('hidden', this.contact);
+        // this.$('.code-own-text-tip').switchClass('hidden', this.contact);
+        // this.$('.code-contact-text').switchClass('hidden', !this.contact);
+        // this.$('.code-contact-text-tip').switchClass('hidden', !this.contact);
+        this.$('.code-text').text(this.code);
+        if (this.contact){
+            let image = this.contact.cached_image;
+            this.$('.circle-avatar').setAvatar(image, 64);
+            this.$('.code-device-name').text(this.contact.get('name'));
+            this.$('.code-device-jid').switchClass('hidden', !this.contact.get('name'));
+            this.$('.code-device-jid').text(this.contact.get('jid'));
+            this.$('.part-one').html(xabber.getString("show_code__contact_device_tip_text_part_one"));
+            this.$('.part-one b').addClass('text-color-500');
+        } else {
+            let image = this.account.cached_image;
+            this.$('.circle-avatar').setAvatar(image, 64);
+            let nickname = this.account.getOwnNickname();
+            this.$('.code-device-name').text(nickname);
+            this.$('.code-device-jid').switchClass('hidden', !nickname);
+            this.$('.code-device-jid').text(this.account.get('jid'));
+        }
+    },
+
+    updateColorScheme: function () {
+        this.$el.attr('data-color', this.account.settings.get('color'));
+        this.account.settings.once("change:color", this.updateColorScheme, this);
+    },
+
+    cancel: function () {
+        this.close();
+    },
+
+    submit: function () {
+        this.close();
+    },
+
+    onHide: function () {
+        this.$el.detach();
+    },
+
+    close: function () {
         this.closeModal();
     },
 
@@ -166,11 +231,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
             stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: sid, timestamp: Date.now()});
             stanza.c('verification-failed', {reason: 'Session cancelled'}).up().up();
 
-            stanza.c('body').t(`Device Verification Session cancelled from ${this.account.jid}`).up();
             stanza.up().up().up();
-            stanza.c('fallback',{xmlns: Strophe.NS.XABBER_NOTIFY}).t(`device verification Data decryption failed fallback text`).up();
-            stanza.c('no-store', {xmlns: Strophe.NS.HINTS}).up();
-            stanza.c('no-copy', {xmlns: Strophe.NS.HINTS}).up();
             stanza.c('addresses', {xmlns: Strophe.NS.ADDRESS}).c('address',{type: 'to', jid: to}).up().up();
 
             this.account.sendFast(stanza, () => {
@@ -419,9 +480,6 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                     final_stanza.cnode(stanza.tree()).up();
 
                     final_stanza.up().up();
-                    final_stanza.c('fallback',{xmlns: Strophe.NS.XABBER_NOTIFY}).t(`Encrypted notification`).up();
-                    final_stanza.c('no-store', {xmlns: Strophe.NS.HINTS}).up();
-                    final_stanza.c('no-copy', {xmlns: Strophe.NS.HINTS}).up();
                     final_stanza.c('addresses', {xmlns: Strophe.NS.ADDRESS}).c('address',{type: 'to', jid: to}).up().up();
 
                     this.account.sendFast(final_stanza, () => {
@@ -1542,11 +1600,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                         stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: sid, timestamp: Date.now()});
                         stanza.c('verification-accepted', {'device-id': this.account.omemo.get('device_id')}).up();
                         stanza.c('salt').c('ciphertext').t(response.data).up().c('iv').t(response.iv).up().up().up();
-                        stanza.c('body').t(`Device Verification answered from ${this.account.jid} B1`).up();
                         stanza.up().up().up();
-                        stanza.c('fallback',{xmlns: Strophe.NS.XABBER_NOTIFY}).t(`device verification answer fallback text`).up();
-                        stanza.c('no-store', {xmlns: Strophe.NS.HINTS}).up();
-                        stanza.c('no-copy', {xmlns: Strophe.NS.HINTS}).up();
                         stanza.c('addresses', {xmlns: Strophe.NS.ADDRESS}).c('address',{type: 'to', jid: to}).up().up();
                         this.account.omemo.xabber_trust.addVerificationSessionData(sid, {
                             active_verification_device: {
@@ -1653,11 +1707,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                                         stanza.c('salt').c('ciphertext').t(response.data).up().c('iv').t(response.iv).up().up();
                                         stanza.c('hash', {xmlns: Strophe.NS.HASH, algo: 'sha-256'});
                                         stanza.c('ciphertext').t(hash_response.data).up().c('iv').t(hash_response.iv).up().up().up();
-                                        stanza.c('body').t(`Device Verification Обмен данными from ${this.account.jid} A1`).up();
                                         stanza.up().up().up();
-                                        stanza.c('fallback',{xmlns: Strophe.NS.XABBER_NOTIFY}).t(`device verification Обмен данными fallback text`).up();
-                                        stanza.c('no-store', {xmlns: Strophe.NS.HINTS}).up();
-                                        stanza.c('no-copy', {xmlns: Strophe.NS.HINTS}).up();
                                         stanza.c('addresses', {xmlns: Strophe.NS.ADDRESS}).c('address',{type: 'to', jid: to}).up().up();
 
                                         this.account.omemo.xabber_trust.addVerificationSessionData(sid, {
@@ -1683,52 +1733,46 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                                 });
                             });
                         }).catch(e => {
+                            console.error(e);
 
-                        });
-                    } else {
-                        //handle if cancelled
-
-                        let msg_id = uuid(),
-                            to = contact ? contact.get('jid') : this.account.get('jid'),
-                            stanza = $iq({
-                                type: 'set',
-                                to: to,
-                                id: msg_id
-                            });
-                        stanza.c('notify', {xmlns: Strophe.NS.XABBER_NOTIFY});
-                        stanza.c('notification', {xmlns: Strophe.NS.XABBER_NOTIFY});
-                        stanza.c('forwarded', {xmlns: Strophe.NS.FORWARD});
-                        stanza.c('message', {
-                            to: to,
-                            from: this.account.get('jid'),
-                            type: 'chat',
-                            id: uuid()
-                        });
-                        stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: sid, timestamp: Date.now()});
-                        stanza.c('verification-failed', {reason: 'Signature verification cancelled'}).up().up();
-
-                        stanza.c('body').t(`Device Verification Signature verification cancelled from ${this.account.jid} A1`).up();
-                        stanza.up().up().up();
-                        stanza.c('fallback',{xmlns: Strophe.NS.XABBER_NOTIFY}).t(`device verification Signature verification cancelled fallback text`).up();
-                        stanza.c('no-store', {xmlns: Strophe.NS.HINTS}).up();
-                        stanza.c('no-copy', {xmlns: Strophe.NS.HINTS}).up();
-                        stanza.c('addresses', {xmlns: Strophe.NS.ADDRESS}).c('address',{type: 'to', jid: to}).up().up();
-
-                        msg_item && this.removeAfterHandle(msg_item);
-                        this.account.sendFast(stanza, () => {
-                            if (contact){
-                                let $stanza = $(stanza.tree());
-                                $stanza.attr('to',this.account.get('jid'));
-                                $stanza.find('notification forwarded message').attr('to',this.account.get('jid'));
-                                $stanza.find(`addresses[xmlns="${Strophe.NS.ADDRESS}"] address[type="to"]`).attr('jid',this.account.get('jid'));
-                                this.account.sendFast(stanza, () => {
+                            let msg_id = uuid(),
+                                to = contact ? contact.get('jid') : this.account.get('jid'),
+                                stanza = $iq({
+                                    type: 'set',
+                                    to: to,
+                                    id: msg_id
                                 });
-                            }
-                            // console.log(stanza);
-                            // console.log(stanza.tree());
-                            utils.callback_popup_message(xabber.getString("trust_verification_decrypt_failed"), 5000);
+                            stanza.c('notify', {xmlns: Strophe.NS.XABBER_NOTIFY});
+                            stanza.c('notification', {xmlns: Strophe.NS.XABBER_NOTIFY});
+                            stanza.c('forwarded', {xmlns: Strophe.NS.FORWARD});
+                            stanza.c('message', {
+                                to: to,
+                                from: this.account.get('jid'),
+                                type: 'chat',
+                                id: uuid()
+                            });
+                            stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: sid, timestamp: Date.now()});
+                            stanza.c('verification-failed', {reason: 'Data decryption failed'}).up().up();
+
+                            stanza.up().up().up();
+                            stanza.c('addresses', {xmlns: Strophe.NS.ADDRESS}).c('address',{type: 'to', jid: to}).up().up();
+
+                            msg_item && this.removeAfterHandle(msg_item);
+                            this.account.sendFast(stanza, () => {
+                                if (contact){
+                                    let $stanza = $(stanza.tree());
+                                    $stanza.attr('to',this.account.get('jid'));
+                                    $stanza.find('notification forwarded message').attr('to',this.account.get('jid'));
+                                    $stanza.find(`addresses[xmlns="${Strophe.NS.ADDRESS}"] address[type="to"]`).attr('jid',this.account.get('jid'));
+                                    this.account.sendFast(stanza, () => {
+                                    });
+                                }
+                                // console.log(stanza);
+                                // console.log(stanza.tree());
+                                utils.callback_popup_message(xabber.getString("trust_verification_decrypt_failed"), 5000);
+                            });
+                            this.clearData(sid);
                         });
-                        this.clearData(sid);
                     }
                 });
             }
@@ -1846,11 +1890,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                                             stanza.c('hash', {xmlns: Strophe.NS.HASH, algo: 'sha-256'});
                                             stanza.c('ciphertext').t(hash_response.data).up().c('iv').t(hash_response.iv).up().up().up();
 
-                                            stanza.c('body').t(`Device Verification Окончание верификации from ${this.account.jid} B1`).up();
                                             stanza.up().up().up();
-                                            stanza.c('fallback',{xmlns: Strophe.NS.XABBER_NOTIFY}).t(`device verification Окончание верификации fallback text`).up();
-                                            stanza.c('no-store', {xmlns: Strophe.NS.HINTS}).up();
-                                            stanza.c('no-copy', {xmlns: Strophe.NS.HINTS}).up();
                                             stanza.c('addresses', {xmlns: Strophe.NS.ADDRESS}).c('address',{type: 'to', jid: to}).up().up();
 
                                             this.account.omemo.xabber_trust.addVerificationSessionData(sid, {
@@ -1889,11 +1929,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                                     stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: sid, timestamp: Date.now()});
                                     stanza.c('verification-failed', {reason: 'Hashes didn\'t match'}).up().up();
 
-                                    stanza.c('body').t(`Device Verification Hashes didn't match from ${this.account.jid} B1`).up();
                                     stanza.up().up().up();
-                                    stanza.c('fallback',{xmlns: Strophe.NS.XABBER_NOTIFY}).t(`device verification Hashes didn't match fallback text`).up();
-                                    stanza.c('no-store', {xmlns: Strophe.NS.HINTS}).up();
-                                    stanza.c('no-copy', {xmlns: Strophe.NS.HINTS}).up();
                                     stanza.c('addresses', {xmlns: Strophe.NS.ADDRESS}).c('address',{type: 'to', jid: to}).up().up();
 
                                     msg_item && this.removeAfterHandle(msg_item);
@@ -1936,11 +1972,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                         stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: sid, timestamp: Date.now()});
                         stanza.c('verification-failed', {reason: 'Data decryption failed'}).up().up();
 
-                        stanza.c('body').t(`Device Verification Data decryption failed from ${this.account.jid} B1`).up();
                         stanza.up().up().up();
-                        stanza.c('fallback',{xmlns: Strophe.NS.XABBER_NOTIFY}).t(`device verification Data decryption failed fallback text`).up();
-                        stanza.c('no-store', {xmlns: Strophe.NS.HINTS}).up();
-                        stanza.c('no-copy', {xmlns: Strophe.NS.HINTS}).up();
                         stanza.c('addresses', {xmlns: Strophe.NS.ADDRESS}).c('address',{type: 'to', jid: to}).up().up();
 
                         msg_item && this.removeAfterHandle(msg_item);
@@ -1981,11 +2013,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                     stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: sid, timestamp: Date.now()});
                     stanza.c('verification-failed', {reason: 'Data decryption failed with error'}).up().up();
 
-                    stanza.c('body').t(`Device Verification Data decryption failed with error from ${this.account.jid} B1`).up();
                     stanza.up().up().up();
-                    stanza.c('fallback',{xmlns: Strophe.NS.XABBER_NOTIFY}).t(`device verification Data decryption failed with error fallback text`).up();
-                    stanza.c('no-store', {xmlns: Strophe.NS.HINTS}).up();
-                    stanza.c('no-copy', {xmlns: Strophe.NS.HINTS}).up();
                     stanza.c('addresses', {xmlns: Strophe.NS.ADDRESS}).c('address',{type: 'to', jid: to}).up().up();
 
                     msg_item && this.removeAfterHandle(msg_item);
@@ -2074,11 +2102,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                                 stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: sid, timestamp: Date.now()});
                                 stanza.c('verification-failed', {reason: 'Hashes didn\'t match in final stanza'}).up().up();
 
-                                stanza.c('body').t(`Device Verification Hashes didn't match in final stanza from ${this.account.jid} A1`).up();
                                 stanza.up().up().up();
-                                stanza.c('fallback',{xmlns: Strophe.NS.XABBER_NOTIFY}).t(`device verification Hashes didn't match in final stanza fallback text`).up();
-                                stanza.c('no-store', {xmlns: Strophe.NS.HINTS}).up();
-                                stanza.c('no-copy', {xmlns: Strophe.NS.HINTS}).up();
                                 stanza.c('addresses', {xmlns: Strophe.NS.ADDRESS}).c('address',{type: 'to', jid: to}).up().up();
 
                                 msg_item && this.removeAfterHandle(msg_item);
@@ -2256,11 +2280,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
         stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: sid, timestamp: Date.now()});
         stanza.c('verification-successful').up().up();
 
-        stanza.c('body').t(`Device Verification was successful from ${this.account.jid} A1`).up();
         stanza.up().up().up();
-        stanza.c('fallback',{xmlns: Strophe.NS.XABBER_NOTIFY}).t(`device verification Verification was successful fallback text`).up();
-        stanza.c('no-store', {xmlns: Strophe.NS.HINTS}).up();
-        stanza.c('no-copy', {xmlns: Strophe.NS.HINTS}).up();
         stanza.c('addresses', {xmlns: Strophe.NS.ADDRESS}).c('address',{type: 'to', jid: to}).up().up();
 
         this.account.sendFast(stanza, () => {

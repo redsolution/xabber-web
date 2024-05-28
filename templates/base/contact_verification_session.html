@@ -5,9 +5,8 @@
     <div class="state-label">{{state_label}}</div>
     <div class="state">{{state}}</div>
     {[if (code) {]}
-    <div class="code-wrap">
-        <div class="code-label">{[print(xabber.getString("verification_session_code_label"))]}</div>
-        <div class="code">{{code}}</div>
+    <div class="show-code text-color-500 dotted-underline" data-code="{{code}}">
+        {[print(xabber.getString("verification_session_show_code_button"))]}
     </div>
     {[}]}
     {[if (is_enter_code) {]}

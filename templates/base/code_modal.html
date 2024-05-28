@@ -1,0 +1,21 @@
+<div class="modal-header">
+    {[print(xabber.getString("show_code__modal_header"))]}
+    <svg class="mdi btn-cancel mdi-24px mdi-svg-template" data-svgname="close"></svg>
+</div>
+<div class="modal-content">
+    <div class="code-own-text hidden">{[print(xabber.getString("show_code__own_device_text"))]}</div>
+    <div class="code-contact-text">{[print(xabber.getString("show_code__contact_device_text"))]}</div>
+    <div class="code-device-info-wrap">
+        <div class="circle-avatar"></div>
+        <div class="code-device-name"></div>
+        <div class="code-device-jid text-color-500"></div>
+    </div>
+    <div class="code-own-text-tip hidden">{[print(xabber.getString("show_code__own_device_tip_text"))]}</div>
+    <div class="code-contact-text-tip ">
+        <ol type="1">
+            <li class="part-one"></li>
+            <li class="part-two">{[print(xabber.getString("show_code__contact_device_tip_text_part_two"))]}</li>
+        </ol>
+    </div>
+    <div class="code-text"></div>
+</div>

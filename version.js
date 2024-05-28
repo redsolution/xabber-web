@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.3.5.18","version_description":"fixed notifications chat content stuck on deactivating account, changed trust modal for verifying contacts devices, added fingerprint trusted own devices to device sharing lists, removed ignore trust setting, changed fingerprint items rendering, added canceling of active verification session with jid when new session with this jid occurs, changed code generation to random 6 digit number"}'
+'{"version_number":"2.3.5.19","version_description":"added show verification code modal, added visual of revoke-all button, added disabling of verify button if all contacts devices are trusted, removed fallback texts from verification notifications "}'
 )});

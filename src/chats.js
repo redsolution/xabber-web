@@ -10488,7 +10488,6 @@ xabber.InvitationPanelView = xabber.SearchView.extend({
         "click .btn-show-fingerprints": "showFingerprints",
         "click .btn-start-encryption": "startEncryptedChat",
         "click .btn-open-encrypted-chat": "openEncryptedChat",
-        "click .btn-start-trust-verification": "startTrustVerification",
         "click .btn-open-regular-chat": "openRegularChat",
         "click .btn-chat-pin": "pinChat",
         "click .btn-archive-chat": "archiveChat",

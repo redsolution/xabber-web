@@ -164,9 +164,11 @@ xabber.Fingerprints = xabber.BasicView.extend({
 
     events: {
         'click .btn-verify': "startTrustVerification",
+        'click .btn-revoke-trust': "revokeAllTrust",
         'click .btn-trust': "trustDevice",
         "click .cancel-session": "cancelTrustSession",
         "click .enter-code": "enterCode",
+        "click .show-code": "showCode",
         'click .btn-fingerprint-details': "showFingerprintDetails",
         'click .btn-back': "backToList",
         'click .btn-cancel': "close",
@@ -246,6 +248,12 @@ xabber.Fingerprints = xabber.BasicView.extend({
         });
     },
 
+    revokeAllTrust: function () {
+        if (!this.account.omemo || !this.account.omemo.get('device_id') || !this.account.server_features.get(Strophe.NS.XABBER_NOTIFY))
+            return;
+
+    },
+
     updateColorScheme: function () {
         this.$el.attr('data-color', this.account.settings.get('color'));
         this.account.settings.once("change:color", this.updateColorScheme, this);
@@ -284,6 +292,26 @@ xabber.Fingerprints = xabber.BasicView.extend({
         }
     },
 
+    showCode: function (ev) {
+        if (!this.account || !this.account.omemo)
+            return;
+        let $item = $(ev.target).closest('.notification-trust-session'),
+            code = $item.find('.show-code').attr('data-code');
+        if ($item.attr('data-sid')){
+            let view = new xabber.CodeModalView();
+            let contact = this.account.contacts.get(Strophe.getBareJidFromJid($item.attr('data-jid')));
+            // let peer = this.omemo.getPeer(contact.get('jid'));
+            if (!contact)
+                return;
+            view.show({
+                account: this.account,
+                contact: contact,
+                code: code,
+                sid: $item.attr('data-sid')
+            });
+        }
+    },
+
     renderActiveTrustSession: function () {
 
         let active_sessions = this.omemo.xabber_trust.get('active_trust_sessions');
@@ -313,6 +341,7 @@ xabber.Fingerprints = xabber.BasicView.extend({
                 }
 
                 this.$('.fingerprints-active-trust-session').append($(templates.contact_verification_session(item)));
+                //34
             }
         });
         this.$('.btn-verify').switchClass('hidden', this.$('.fingerprints-active-trust-session').children().length)
@@ -428,6 +457,8 @@ xabber.Fingerprints = xabber.BasicView.extend({
                 $container.append(row.row);
             });
             $container.find('.preloader-wrapper').detach();
+            this.$('.btn-revoke-trust').switchClass('hidden', !this.$('.row.btn-fingerprint-details[data-trust="trust"]').length)
+            this.$('.btn-verify').prop('disabled', !this.$('.row.btn-fingerprint-details[data-trust="unknown"]').length)
         });
         let rows = [];
         for (let device_id in devices) {

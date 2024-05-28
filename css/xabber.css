@@ -4822,9 +4822,13 @@ input[type=text].simple-input-field:hover {
     width: 640px !important;
 }
 
-.fingerprints-wrap .btn-verify{
-}
 
+.fingerprints-wrap .btn-verify:disabled{
+    opacity: 0.4;
+}
+.fingerprints-wrap .btn-verify:disabled:hover {
+    background: transparent !important;
+}
 .fingerprints-wrap.fingerprint-detail-modal {
     max-height: unset;
     height: 480px;
@@ -4860,37 +4864,38 @@ input[type=text].simple-input-field:hover {
     height: 64px;
 }
 
-.fingerprints-wrap .fingerprints-content-wrap .notification-trust-session{
+.notification-trust-session{
     margin: 16px;
     padding: 16px;
     position: relative;
     border-radius: 8px;
     background-color: #EEEEEE;
 }
-.fingerprints-wrap .fingerprints-content-wrap .notification-trust-session .state-label{
+.notification-trust-session .state-label{
     font-weight: 500;
 }
-.fingerprints-wrap .fingerprints-content-wrap .notification-trust-session .state{
+.notification-trust-session .state{
     font-size: 13px;
 }
-.fingerprints-wrap .fingerprints-content-wrap .notification-trust-session .cancel-session{
+.notification-trust-session .cancel-session{
     position: absolute;
     right: 12px;
     top: 12px;
     cursor: pointer;
 }
-.fingerprints-wrap .fingerprints-content-wrap .notification-trust-session .cancel-session svg polygon {
+.notification-trust-session .cancel-session svg polygon {
     fill: #9E9E9E;
 }
-.fingerprints-wrap .fingerprints-content-wrap .notification-trust-session .enter-code{
+.notification-trust-session .enter-code,
+.notification-trust-session .show-code{
     cursor: pointer;
     margin-top: 8px;
     width: fit-content;
 }
-.fingerprints-wrap .fingerprints-content-wrap .notification-trust-session .code-wrap{
+.notification-trust-session .code-wrap{
     display: flex;
 }
-.fingerprints-wrap .fingerprints-content-wrap .notification-trust-session .code-wrap .code{
+.notification-trust-session .code-wrap .code{
     margin-left: 4px;
 }
 
@@ -4917,6 +4922,12 @@ input[type=text].simple-input-field:hover {
 
 .fingerprints-wrap .fingerprints-list-content {
     position: relative;
+}
+
+.fingerprints-wrap .fingerprints-list-content .preloader-wrapper {
+    position: absolute;
+    left: calc(50% - 10px);
+    top: 25%;
 }
 
 .fingerprints-wrap .fingerprints-list-content .row {
@@ -20622,4 +20633,63 @@ ul.restrictions-list-content>li {
 }
 .chat-content-wrap.security-content .chat-message:not(.security-content-msg){
     display: none;
+}
+/* Code Modal */
+.code-modal{
+    width: 390px !important;
+}
+.code-modal .code-contact-text{
+    text-align: center;
+    font-size: 17px;
+}
+/*.code-modal .code-own-text,*/
+/*.code-modal .code-contact-text{*/
+
+/*}*/
+.code-modal .code-device-info-wrap{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 16px 0;
+    margin-top: 16px;
+}
+.code-modal .code-device-info-wrap .circle-avatar{
+    width: 64px;
+    height: 64px;
+}
+.code-modal .code-device-info-wrap .code-device-name{
+    font-size: 17px;
+    line-height: 24px;
+    margin-top: 4px;
+}
+.code-modal .code-device-info-wrap .code-device-jid{
+    line-height: 24px;
+    font-size: 14px;
+}
+.code-modal .code-contact-text-tip {
+    font-size: 17px;
+    line-height: 22px;
+}
+.code-modal .code-contact-text-tip ol{
+    margin: 0;
+    padding: 0 0 0 21px;
+    margin-bottom: 32px;
+}
+.code-modal .code-contact-text-tip .part-one b.text-color-500{
+    font-weight: 400;
+}
+.code-modal .code-text{
+    text-align: center;
+    line-height: 64px;
+    font-size: 48px;
+    margin-bottom: 56px;
+}
+.code-modal .btn-cancel{
+    position: absolute;
+    right: 20px;
+    cursor: pointer;
+}
+.code-modal .btn-cancel svg polygon{
+    fill: #9E9E9E;
 }
