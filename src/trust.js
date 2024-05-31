@@ -307,6 +307,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                 this.omemo.updateFingerprints(item, device_item.device_id, device_item.fingerprint, true);
             });
         });
+        this.account.trigger('trusting_updated');
     },
 
     createFailedSessionMsg: function (jid, msg_text) {
@@ -1322,6 +1323,8 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                 $all_items_msg = $(res),
                 peer = this.omemo.getPeer(to);
             // console.log(peer);
+            // console.log(res);
+            // console.log(contact_trusted_devices);
             this.getNewTrustedDevices(contact_trusted_devices, $all_items_msg, null, true, peer);
         });
     },
@@ -1813,6 +1816,14 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                         this.generateVerificationArrayBuffer(devices_IK.device_pubkey, devices_IK.own_privkey, code).then((response) => {
 
                             this.getTrustedKey(this.omemo.own_devices[this.omemo.get('device_id')]).then((trustedKeyBuffer) => {
+                                // console.log('trustedKeyBuffer');
+                                // console.log(trustedKeyBuffer);
+                                // console.log('code');
+                                // console.log(code);
+                                // console.log('decrypted_response.decryptedBuffer');
+                                // console.log(decrypted_response.decryptedBuffer);
+                                // console.log('decrypted_response.encryptionKeyHash');
+                                // console.log(decrypted_response.encryptionKeyHash);
                                 this.generateVerificationEncryptedHash(trustedKeyBuffer, code, decrypted_response.decryptedBuffer, decrypted_response.encryptionKeyHash).then((hash_response) => {
                                     let msg_id = uuid(),
                                         to = contact ? contact.get('jid') : this.account.get('jid'),
@@ -2444,6 +2455,12 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
         // console.log(curve);
         // console.log('utils.ArrayBuffertoBase64(buffer)');
         // console.log(utils.ArrayBuffertoBase64(buffer));
+        // console.log('utils.ArrayBuffertoBase64(trustedKeyBuffer)');
+        // console.log(utils.ArrayBuffertoBase64(trustedKeyBuffer));
+        // console.log('utils.ArrayBuffertoBase64(code_buffer)');
+        // console.log(utils.ArrayBuffertoBase64(code_buffer));
+        // console.log('utils.ArrayBuffertoBase64(b_payload)');
+        // console.log(utils.ArrayBuffertoBase64(b_payload));
         // console.log('utils.ArrayBuffertoBase64(hash)');
         // console.log(utils.ArrayBuffertoBase64(hash));
 
@@ -2454,6 +2471,8 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
         // console.log(utils.ArrayBuffertoBase64(aes_key));
         // console.log('utils.ArrayBuffertoBase64(concatinated_hash)  !!!!!!!!!!!!!!!!!!!!!!!!!2');
         // console.log(utils.ArrayBuffertoBase64(concatinated_hash));
+        // console.log('utils.ArrayBuffertoBase64(concatinated)  !!!!!!!!!!!!!!!!!!!!!!!!!2');
+        // console.log(utils.ArrayBuffertoBase64(concatinated));
         // console.log('utils.ArrayBuffertoBase64(sharedKey)  !!!!!!!!!!!!!!!!!!!!!!!!!2');
         // console.log(utils.ArrayBuffertoBase64(sharedKey));
 
