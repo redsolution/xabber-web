@@ -43,7 +43,7 @@
                 </div>
             </div>
         </div>
-        <div class="chat-tool btn-show-fingerprints">
+        <div class="chat-tool btn-show-session">
             <i class="mdi mdi-lock mdi-24px"></i>
         </div>
         <div class="chat-tool btn-jingle-message">
@@ -81,6 +81,9 @@
             </li>
             <li class="btn-export-chat">
                 <span class="one-line">{[print(xabber.getString("export_chat"))]}</span>
+            </li>
+            <li class="btn-show-fingerprints">
+                <span class="one-line">{[print(xabber.getString("chat_head__encrypted_devices"))]}</span>
             </li>
             <li class="btn-invite-users">
                 <span class="one-line">{[print(xabber.getString("groupchat_invite"))]}</span>

@@ -167,11 +167,13 @@ xabber.Fingerprints = xabber.BasicView.extend({
         'click .btn-revoke-trust': "revokeAllTrust",
         'click .btn-trust': "trustDevice",
         "click .cancel-session": "cancelTrustSession",
-        "click .enter-code": "enterCode",
+        "click .enter-code": "showCode",
         "click .show-code": "showCode",
         'click .btn-fingerprint-details': "showFingerprintDetails",
         'click .btn-back': "backToList",
         'click .btn-cancel': "close",
+        'click .accept-request': "acceptRequest",
+        'click .decline-request': "rejectRequest",
     },
 
     _initialize: function () {
@@ -283,30 +285,18 @@ xabber.Fingerprints = xabber.BasicView.extend({
         }
     },
 
-    enterCode: function (ev) {
+    showCode: function (ev) {
         if (!this.account || !this.account.omemo)
             return;
         let $item = $(ev.target).closest('.notification-trust-session');
         if ($item.attr('data-sid')){
-            this.account.omemo.xabber_trust && this.account.omemo.xabber_trust.handleAcceptedMsgBySid($item.attr('data-sid'))
-        }
-    },
-
-    showCode: function (ev) {
-        if (!this.account || !this.account.omemo)
-            return;
-        let $item = $(ev.target).closest('.notification-trust-session'),
-            code = $item.find('.show-code').attr('data-code');
-        if ($item.attr('data-sid')){
-            let view = new xabber.CodeModalView();
+            let view = new xabber.ActiveSessionModalView();
             let contact = this.account.contacts.get(Strophe.getBareJidFromJid($item.attr('data-jid')));
-            // let peer = this.omemo.getPeer(contact.get('jid'));
             if (!contact)
                 return;
             view.show({
                 account: this.account,
                 contact: contact,
-                code: code,
                 sid: $item.attr('data-sid')
             });
         }
@@ -319,13 +309,15 @@ xabber.Fingerprints = xabber.BasicView.extend({
 
         Object.keys(active_sessions).forEach((session_id) => {
             let session = active_sessions[session_id];
-            if (session.active_verification_device && session.active_verification_device.peer_jid === this.jid){
+            if ((session.active_verification_device && session.active_verification_device.peer_jid === this.jid ) || session.session_check_jid === this.jid){
                 let state = this.omemo.xabber_trust.getVerificationState(session),
                     state_label = this.omemo.xabber_trust.getVerificationStateLabel(session);
 
                 let item = {
                     jid: null,
                     device_id: null,
+                    chat_bottom: null,
+                    is_active_request: null,
                     sid: session_id,
                     state: state,
                     state_label: state_label,
@@ -335,16 +327,81 @@ xabber.Fingerprints = xabber.BasicView.extend({
                 if (session.active_verification_device) {
                     item.jid = session.active_verification_device.peer_jid;
                     item.device_id = session.active_verification_device.device_id;
+                } else if (session.session_check_jid){
+                    item.jid = session.session_check_jid;
+                    item.device_id = session.session_check_device_id;
                 }
                 if (session.verification_step === '1a' && session.verification_accepted_msg_xml) {
                     item.is_enter_code = true;
                 }
+                if (session.verification_step === '0b') {
+                    item.is_active_request = true;
+                }
 
                 this.$('.fingerprints-active-trust-session').append($(templates.contact_verification_session(item)));
-                //34
             }
         });
         this.$('.btn-verify').switchClass('hidden', this.$('.fingerprints-active-trust-session').children().length)
+    },
+
+    acceptRequest: function (ev) {
+        if (!this.account.omemo.xabber_trust)
+            return;
+        let $item = $(ev.target).closest('.notification-trust-session'),
+            active_sessions = this.omemo.xabber_trust.get('active_trust_sessions'),
+            sid = $item.attr('data-sid'), session;
+
+        session = active_sessions[sid];
+        if (!session)
+            return;
+
+        let message = session.incoming_request_data.message,
+            message_options = session.incoming_request_data.message_options;
+        message_options.automated = false;
+        this.omemo.xabber_trust.receiveTrustVerificationMessage(message, message_options);
+
+    },
+
+    rejectRequest: function (ev) {
+        if (!this.account.omemo.xabber_trust)
+            return;
+
+        let $item = $(ev.target).closest('.notification-trust-session'),
+            sid = $item.attr('data-sid');
+
+        let msg_id = uuid(),
+            to = this.jid,
+            stanza = $iq({
+                type: 'set',
+                to: to,
+                id: msg_id
+            });
+        stanza.c('notify', {xmlns: Strophe.NS.XABBER_NOTIFY});
+        stanza.c('notification', {xmlns: Strophe.NS.XABBER_NOTIFY});
+        stanza.c('forwarded', {xmlns: Strophe.NS.FORWARD});
+        stanza.c('message', {
+            to: to,
+            from: this.account.get('jid'),
+            type: 'chat',
+            id: uuid()
+        });
+        stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: sid, timestamp: Date.now()});
+        stanza.c('verification-failed', {reason: 'Session cancelled'}).up().up();
+
+        stanza.up().up().up();
+        stanza.c('addresses', {xmlns: Strophe.NS.ADDRESS}).c('address',{type: 'to', jid: to}).up().up();
+
+        this.account.sendFast(stanza, () => {
+                let $stanza = $(stanza.tree());
+                $stanza.attr('to',this.account.get('jid'));
+                $stanza.find('notification forwarded message').attr('to',this.account.get('jid'));
+                $stanza.find(`addresses[xmlns="${Strophe.NS.ADDRESS}"] address[type="to"]`).attr('jid',this.account.get('jid'));
+                this.account.sendFast(stanza, () => {
+                });
+            utils.callback_popup_message(xabber.getString("trust_verification_decrypt_failed"), 5000);
+        });
+        this.account.omemo.xabber_trust.clearData(sid);
+
     },
 
     showFingerprintDetails: function (ev) {
@@ -1189,9 +1246,7 @@ xabber.Device = Backbone.Model.extend({
         let identityKey = this.get('ik');
         if (!identityKey)
             return;
-        if (identityKey.byteLength == 33)
-            identityKey = identityKey.slice(1);
-        return Array.from(new Uint8Array(identityKey)).map(b => b.toString(16).padStart(2, "0")).join("");
+        return sha256(identityKey);
     },
 
     closeSession: function (reason) {
@@ -1875,6 +1930,7 @@ xabber.Omemo = Backbone.ModelWithStorage.extend({
                     // console.log($message[0]);
                     this.account.chats.receiveChatMessage($message[0], options);
                 }).catch((e) => {
+                    console.error(e);
                     if (e.name === 'MessageCounterError')//for capturing double decryption of same message
                         return;
                     if (options.synced_msg && !options.decryption_retry) {
@@ -1886,7 +1942,6 @@ xabber.Omemo = Backbone.ModelWithStorage.extend({
                     $message.find(`encrypted[xmlns="${Strophe.NS.OMEMO}"]`).remove();
                     if (options.gallery && deferred)
                         deferred.reject();
-                    // console.error(e);
                     // console.log($message[0]);
                     this.account.chats.receiveChatMessage($message[0], options);
                 });

@@ -88,6 +88,7 @@ xabber.IncomingTrustSessionView = xabber.BasicView.extend({
                     $stanza.attr('to',this.account.get('jid'));
                     $stanza.find('notification forwarded message').attr('to',this.account.get('jid'));
                     $stanza.find(`addresses[xmlns="${Strophe.NS.ADDRESS}"] address[type="to"]`).attr('jid',this.account.get('jid'));
+                    this.contact && this.trust.createFailedSessionMsg(this.contact.get('jid'), 'Session cancelled');
                     this.account.sendFast(stanza, () => {
                     });
                 }
@@ -105,11 +106,15 @@ xabber.IncomingTrustSessionView = xabber.BasicView.extend({
     }
 });
 
-xabber.CodeModalView = xabber.BasicView.extend({
+xabber.ActiveSessionModalView = xabber.BasicView.extend({
     className: 'modal main-modal code-modal',
-    template: templates.code_modal,
+    template: templates.active_session_modal,
     events: {
         "click .btn-cancel": "cancel",
+        "click .btn-cancel-session": "cancelSession",
+        "click .btn-accept-session": "acceptRequest",
+        "click .btn-reject-session": "rejectRequest",
+        "click .btn-enter-code": "enterCode",
     },
 
     render: function (options) {
@@ -117,6 +122,10 @@ xabber.CodeModalView = xabber.BasicView.extend({
         this.contact = options.contact;
         this.code = options.code;
         this.sid = options.sid;
+        this.trust = this.account.omemo.xabber_trust;
+        if (!this.trust || !this.trust.get('active_trust_sessions')[this.sid])
+            return;
+        this.account.on('active_session_change', this.onRender, this);
         this.$el.openModal({
             ready: this.onRender.bind(this),
             complete: this.close.bind(this),
@@ -125,27 +134,46 @@ xabber.CodeModalView = xabber.BasicView.extend({
 
     onRender: function () {
         this.updateColorScheme();
-        // this.$('.code-own-text').switchClass('hidden', this.contact);
-        // this.$('.code-own-text-tip').switchClass('hidden', this.contact);
-        // this.$('.code-contact-text').switchClass('hidden', !this.contact);
-        // this.$('.code-contact-text-tip').switchClass('hidden', !this.contact);
-        this.$('.code-text').text(this.code);
+        let session = this.trust.get('active_trust_sessions')[this.sid];
+        if (!session) {
+            this.close();
+            return;
+        }
+        let step = session.verification_step;
+        this.$('.session-step').addClass('hidden');
+        if (step === '1a' && session.active_verification_device && session.active_verification_device.device_id){
+            // state = xabber.getString("verification_session_state__request_code_needed");
+            this.$('.1a-step').removeClass('hidden');
+        } else if (step === '1a'){
+            this.$('.0a-step').removeClass('hidden');
+        } else if (step === '1b'){
+            this.$('.1b-step').removeClass('hidden');
+            let code = session.active_verification_code;
+            this.$('.code-text').text(code);
+        } else if (step === '2a' || step === '2b'){
+            this.close();
+            return;
+        } else if (step === '0b'){
+            this.$('.0b-step').removeClass('hidden');
+        }
         if (this.contact){
             let image = this.contact.cached_image;
             this.$('.circle-avatar').setAvatar(image, 64);
             this.$('.code-device-name').text(this.contact.get('name'));
             this.$('.code-device-jid').switchClass('hidden', !this.contact.get('name'));
             this.$('.code-device-jid').text(this.contact.get('jid'));
-            this.$('.part-one').html(xabber.getString("show_code__contact_device_tip_text_part_one"));
-            this.$('.part-one b').addClass('text-color-500');
+
         } else {
             let image = this.account.cached_image;
             this.$('.circle-avatar').setAvatar(image, 64);
             let nickname = this.account.getOwnNickname();
             this.$('.code-device-name').text(nickname);
-            this.$('.code-device-jid').switchClass('hidden', !nickname);
+            this.$('.code-device-name').switchClass('hidden', !nickname);
             this.$('.code-device-jid').text(this.account.get('jid'));
         }
+        this.$('.part-one').html(xabber.getString("show_code__contact_device_tip_text_part_one"));
+        this.$('.part-one b').addClass('text-color-500');
+
     },
 
     updateColorScheme: function () {
@@ -153,8 +181,79 @@ xabber.CodeModalView = xabber.BasicView.extend({
         this.account.settings.once("change:color", this.updateColorScheme, this);
     },
 
+    acceptRequest: function () {
+        let active_sessions = this.trust.get('active_trust_sessions'),
+            session;
+
+        session = active_sessions[this.sid];
+        if (!session)
+            return;
+
+        let message = session.incoming_request_data.message,
+            message_options = session.incoming_request_data.message_options;
+        message_options.automated = false;
+        this.trust.receiveTrustVerificationMessage(message, message_options);
+
+    },
+
+    rejectRequest: function () {
+        if (!this.contact)
+            return;
+
+        let msg_id = uuid(),
+            to = this.contact.get('jid'),
+            stanza = $iq({
+                type: 'set',
+                to: to,
+                id: msg_id
+            });
+        stanza.c('notify', {xmlns: Strophe.NS.XABBER_NOTIFY});
+        stanza.c('notification', {xmlns: Strophe.NS.XABBER_NOTIFY});
+        stanza.c('forwarded', {xmlns: Strophe.NS.FORWARD});
+        stanza.c('message', {
+            to: to,
+            from: this.account.get('jid'),
+            type: 'chat',
+            id: uuid()
+        });
+        stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: this.sid, timestamp: Date.now()});
+        stanza.c('verification-failed', {reason: 'Session cancelled'}).up().up();
+
+        stanza.up().up().up();
+        stanza.c('addresses', {xmlns: Strophe.NS.ADDRESS}).c('address',{type: 'to', jid: to}).up().up();
+
+        this.account.sendFast(stanza, () => {
+            let $stanza = $(stanza.tree());
+            $stanza.attr('to',this.account.get('jid'));
+            $stanza.find('notification forwarded message').attr('to',this.account.get('jid'));
+            $stanza.find(`addresses[xmlns="${Strophe.NS.ADDRESS}"] address[type="to"]`).attr('jid',this.account.get('jid'));
+            this.contact && this.trust.createFailedSessionMsg(this.contact.get('jid'), 'Session cancelled');
+            this.account.sendFast(stanza, () => {
+            });
+            utils.callback_popup_message(xabber.getString("trust_verification_decrypt_failed"), 5000);
+        });
+        this.account.omemo.xabber_trust.clearData(this.sid);
+
+    },
+
+    enterCode: function () {
+        let code = this.$('input[name="code_enter"]').val();
+        if (!code){
+            this.$('input[name="code_enter"]').addClass('invalid');
+        } else {
+            this.account.omemo.xabber_trust.handleAcceptedMsgBySid(this.sid, code);
+        }
+    },
+
     cancel: function () {
         this.close();
+    },
+
+    cancelSession: function () {
+        this.close();
+        if (!this.account.omemo || !this.account.omemo.xabber_trust)
+            return;
+        this.account.omemo.xabber_trust.cancelSession(this.sid, this.contact ? this.contact.get('jid') : this.account.get('jid'))
     },
 
     submit: function () {
@@ -210,6 +309,17 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
         });
     },
 
+    createFailedSessionMsg: function (jid, msg_text) {
+        let contact = this.account.contacts.get(jid);
+
+        let chat = this.account.chats.getChat(contact, 'encrypted');
+
+        chat.messages.createSystemMessage({
+            from_jid: jid,
+            message: msg_text
+        });
+    },
+
     cancelSession: function (sid, to) {
 
         if (to){
@@ -240,6 +350,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                     $stanza.attr('to',this.account.get('jid'));
                     $stanza.find('notification forwarded message').attr('to',this.account.get('jid'));
                     $stanza.find(`addresses[xmlns="${Strophe.NS.ADDRESS}"] address[type="to"]`).attr('jid',this.account.get('jid'));
+                    this.createFailedSessionMsg(to, 'Session cancelled');
                     this.account.sendFast(stanza, () => {
                     });
                 }
@@ -338,47 +449,51 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
             // if (own_pubkey.byteLength == 33)
             //     own_pubkey = own_pubkey.slice(1);
 
-            utils.createSha256(trusted_string).then((sha256_trust_message) => {
-                // console.log(trusted_string);
-                // console.log(sha256_trust_message);
+            // console.error(trusted_string);
 
-                let signature = utils.curveSign(own_privkey, new Uint8Array(sha256_trust_message));
+            let encoder = new TextEncoder(),
+                trusted_string_text_buffer = encoder.encode(trusted_string);
 
-                iq.up().c('signature').t(utils.ArrayBuffertoBase64(signature.buffer));
+            let signature = utils.curveSign(own_privkey, trusted_string_text_buffer);
 
-                // console.log(utils.ArrayBuffertoBase64(sha256_trust_message));
-                // console.log(utils.ArrayBuffertoBase64(signature.buffer));
-                // console.log(utils.ArrayBuffertoBase64(own_pubkey));
-                //
-                // console.log(utils.curveVerify(own_pubkey, new Uint8Array(sha256_trust_message), signature));
-                //
-                // console.log(iq.tree());
-                this.configNode(() => {
-                    this.account.sendIQFast(iq,
-                        (res) => {
-                            // console.log(res);
-                            callback && callback(res);
-                        },
-                        (data_error) => {
-                            // errback && errback(data_error);
-                        });
-                }, (err) => {
-                    let err_code = $(err).find('error').attr('code');
-                    // console.log(err_code);
-                    if (err_code == 404){
-                        this.createNode(() => {
-                            this.account.sendIQFast(iq,
-                                (res) => {
-                                    // console.log(res);
-                                    callback && callback(res);
-                                },
-                                (data_error) => {
-                                    // errback && errback(data_error);
-                                });
-                        });
-                    }
-                })
-            });
+            iq.up().c('signature').t(utils.ArrayBuffertoBase64(signature.buffer));
+
+            // console.log(utils.ArrayBuffertoBase64(signature.buffer));
+
+            // let own_pubkey = own_ik.pubKey;
+            // if (own_pubkey.byteLength == 33)
+            //     own_pubkey = own_pubkey.slice(1);
+            // console.log(utils.ArrayBuffertoBase64(own_pubkey));
+            // console.log(utils.ArrayBuffertoBase64(signature));
+
+            // console.log(utils.curveVerify(own_pubkey, trusted_string_text_buffer, signature));
+            //
+            // console.log(iq.tree());
+            this.configNode(() => {
+                this.account.sendIQFast(iq,
+                    (res) => {
+                        // console.log(res);
+                        callback && callback(res);
+                    },
+                    (data_error) => {
+                        // errback && errback(data_error);
+                    });
+            }, (err) => {
+                let err_code = $(err).find('error').attr('code');
+                // console.log(err_code);
+                if (err_code == 404){
+                    this.createNode(() => {
+                        this.account.sendIQFast(iq,
+                            (res) => {
+                                // console.log(res);
+                                callback && callback(res);
+                            },
+                            (data_error) => {
+                                // errback && errback(data_error);
+                            });
+                    });
+                }
+            })
         });
 
 
@@ -442,51 +557,51 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                 own_privkey = own_privkey.slice(1);
 
             // console.log(trusted_string);
-            utils.createSha256(trusted_string).then((sha256_trust_message) => {
+            let encoder = new TextEncoder(),
+                trusted_string_text_buffer = encoder.encode(trusted_string);
 
-                let signature = utils.curveSign(own_privkey, new Uint8Array(sha256_trust_message));
+            let signature = utils.curveSign(own_privkey, trusted_string_text_buffer);
 
-                stanza.c('signature').t(utils.ArrayBuffertoBase64(signature.buffer)).up();
+            stanza.c('signature').t(utils.ArrayBuffertoBase64(signature.buffer)).up();
 
-                let my_trusted_devices = this.get('trusted_devices')[this.account.get('jid')],
-                    my_saved_trusted_device = my_trusted_devices.filter(item => item.is_me);
-                if (!my_saved_trusted_device.length)
-                    return;
-                my_saved_trusted_device = my_saved_trusted_device[0];
+            let my_trusted_devices = this.get('trusted_devices')[this.account.get('jid')],
+                my_saved_trusted_device = my_trusted_devices.filter(item => item.is_me);
+            if (!my_saved_trusted_device.length)
+                return;
+            my_saved_trusted_device = my_saved_trusted_device[0];
 
-                stanza.c('identity', {id: my_saved_trusted_device.device_id}).t(my_saved_trusted_device.fingerprint).up();
+            stanza.c('identity', {id: my_saved_trusted_device.device_id}).t(my_saved_trusted_device.fingerprint).up();
 
-                stanza.up().up().c('rpad').t('0'.repeat(200).slice(1, Math.floor((Math.random() * 198) + 1))).up();
-                stanza.c('from', {jid: this.account.get('jid')}).up().up();
+            stanza.up().up().c('rpad').t('0'.repeat(200).slice(1, Math.floor((Math.random() * 198) + 1))).up();
+            stanza.c('from', {jid: this.account.get('jid')}).up().up();
 
-                // console.log(stanza);
-                // console.log(stanza.tree());
-                // console.log(stanza.tree().outerHTML);
+            // console.log(stanza);
+            // console.log(stanza.tree());
+            // console.log(stanza.tree().outerHTML);
 
-                this.omemo.encrypt(null, stanza ,true).then((msg) => {
-                    if (msg) {
-                        stanza = msg.message;
-                    }
+            this.omemo.encrypt(null, stanza ,true).then((msg) => {
+                if (msg) {
+                    stanza = msg.message;
+                }
 
-                    let final_stanza = $iq({
-                        type: 'set',
-                        to: to,
-                        id: msg_id
-                    });
-                    final_stanza.c('notify', {xmlns: Strophe.NS.XABBER_NOTIFY});
-                    final_stanza.c('notification', {xmlns: Strophe.NS.XABBER_NOTIFY});
-                    final_stanza.c('forwarded', {xmlns: Strophe.NS.FORWARD});
+                let final_stanza = $iq({
+                    type: 'set',
+                    to: to,
+                    id: msg_id
+                });
+                final_stanza.c('notify', {xmlns: Strophe.NS.XABBER_NOTIFY});
+                final_stanza.c('notification', {xmlns: Strophe.NS.XABBER_NOTIFY});
+                final_stanza.c('forwarded', {xmlns: Strophe.NS.FORWARD});
 
-                    final_stanza.cnode(stanza.tree()).up();
+                final_stanza.cnode(stanza.tree()).up();
 
-                    final_stanza.up().up();
-                    final_stanza.c('addresses', {xmlns: Strophe.NS.ADDRESS}).c('address',{type: 'to', jid: to}).up().up();
+                final_stanza.up().up();
+                final_stanza.c('addresses', {xmlns: Strophe.NS.ADDRESS}).c('address',{type: 'to', jid: to}).up().up();
 
-                    this.account.sendFast(final_stanza, () => {
+                this.account.sendFast(final_stanza, () => {
 
-                    });
-                })
-            });
+                });
+            })
         });
 
 
@@ -588,6 +703,8 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
             state = xabber.getString("verification_session_state__request_answered");
         } else if (step === '2a' || step === '2b'){
             state = xabber.getString("verification_session_state__request_proceeding");
+        } else if (step === '0b'){
+            state = xabber.getString("verification_session_state__request_answer_needed");
         }
 
         return state;
@@ -604,7 +721,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
             state = xabber.getString("verification_session_state__incoming_label");
         } else if (step === '2a'){
             state = xabber.getString("verification_session_state__outgoing_label");
-        } else if (step === '2b'){
+        } else if (step === '2b' || step === '0b'){
             state = xabber.getString("verification_session_state__incoming_label");
         }
 
@@ -734,6 +851,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
         // console.log(received_device_id);
         // console.log(device_fingerprint);
         // console.log(my_trusted_devices.some(e => e.device_id == received_device_id && e.fingerprint == device_fingerprint));
+        // console.error(message);
 
         if (my_trusted_devices.some(e => e.device_id == received_device_id && e.fingerprint == device_fingerprint)){
 
@@ -776,71 +894,73 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
             });
 
 
-            utils.createSha256(trusted_string).then((sha256_trust_message) => {
+            let encoder = new TextEncoder(),
+                trusted_string_text_buffer = encoder.encode(trusted_string);
 
-                let item_device = this.omemo.own_devices[identity_device_id];
-                // console.log(trusted_string);
-                // console.log(item_device);
-                if (!item_device)
-                    return;
+            let item_device = this.omemo.own_devices[identity_device_id];
+            // console.log(trusted_string);
+            // console.log(item_device);
+            if (!item_device)
+                return;
 
-                let item_public_key = item_device.get('ik');
+            let item_public_key = item_device.get('ik');
 
-                // console.log(item_public_key);
+            // console.log(item_public_key);
 
-                if (!item_public_key){
-                    return;
-                }
+            if (!item_public_key){
+                return;
+            }
 
-                if (item_public_key.byteLength === 33)
-                    item_public_key = item_public_key.slice(1);
+            if (item_public_key.byteLength === 33)
+                item_public_key = item_public_key.slice(1);
+            // console.log(identity_device_id);
+            // console.log(trusted_string);
+            // console.log(utils.ArrayBuffertoBase64(item_public_key));
+            // console.log(trusted_item_signature);
 
-                is_signature_verified = utils.curveVerify(item_public_key, new Uint8Array(sha256_trust_message), new Uint8Array(utils.fromBase64toArrayBuffer(trusted_item_signature)));
+            is_signature_verified = utils.curveVerify(item_public_key, trusted_string_text_buffer, new Uint8Array(utils.fromBase64toArrayBuffer(trusted_item_signature)));
 
-                // console.log(is_signature_verified);
+            // console.log(is_signature_verified);
 
-                if (!is_signature_verified)
-                    return;
+            if (!is_signature_verified)
+                return;
 
-                $share.children('trusted-items').each((idx, key_owner) => {
-                    // console.log(key_owner);
-                    let $key_owner = $(key_owner),
-                        jid = $key_owner.attr('owner');
-                    // console.log(key_owner);
-                    $key_owner.children('trust').each((idx, trust_item) => {
-                        // console.log(trust_item);
-                        let $trust_item = $(trust_item),
-                            // device_id = $trust_item.attr('device-id'), //сделать получение device_id из trusted_key
-                            trusted_key = $trust_item.text();
+            $share.children('trusted-items').each((idx, key_owner) => {
+                // console.log(key_owner);
+                let $key_owner = $(key_owner),
+                    jid = $key_owner.attr('owner');
+                // console.log(key_owner);
+                $key_owner.children('trust').each((idx, trust_item) => {
+                    // console.log(trust_item);
+                    let $trust_item = $(trust_item),
+                        trusted_key = $trust_item.text();
 
-                        let trustedKeyString = atob(trusted_key);
+                    let trustedKeyString = atob(trusted_key);
 
-                        let device_id = trustedKeyString.split('::')[0];
+                    let device_id = trustedKeyString.split('::')[0];
 
-                        // console.log(trusted_key);
-                        // console.log(jid);
-                        // console.log(jid);
-                        // console.log(identity_device_id);
-                        let dfd = new $.Deferred();
+                    // console.log(trusted_key);
+                    // console.log(jid);
+                    // console.log(jid);
+                    // console.log(identity_device_id);
+                    let dfd = new $.Deferred();
 
-                        dfd.done((is_new) => {
-                            // console.log(is_new);
-                            counter++;
-                            if (is_new)
-                                is_new_devices = true;
+                    dfd.done((is_new) => {
+                        // console.log(is_new);
+                        counter++;
+                        if (is_new)
+                            is_new_devices = true;
 
-                            if (counter === total_count){
-                                if (is_new_devices)
-                                    this.publishContactsTrustedDevices();
-                                else {
-                                    // console.log('no new devices')
-                                }
+                        if (counter === total_count){
+                            if (is_new_devices)
+                                this.publishContactsTrustedDevices();
+                            else {
+                                // console.log('no new devices')
                             }
-                        });
-
-                        this.addNewContactsDevice(trusted_key, jid, device_id, identity_device_id, dfd);
+                        }
                     });
 
+                    this.addNewContactsDevice(trusted_key, jid, device_id, identity_device_id, dfd);
                 });
 
             });
@@ -1106,61 +1226,60 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                 trusted_string = trusted_string + `<${$item.attr('timestamp')}/${$item.text()}`;
             });
 
-            utils.createSha256(trusted_string).then((sha256_trust_message) => {
-                // console.log(trusted_string);
-                // console.log(sha256_trust_message);
-                //
-                // console.log(utils.ArrayBuffertoBase64(sha256_trust_message));
-                // console.log(trusted_item_signature);
-                // console.log(utils.ArrayBuffertoBase64(item_public_key));
+            let encoder = new TextEncoder(),
+                trusted_string_text_buffer = encoder.encode(trusted_string);
+            // console.log(trusted_string);
+            //
+            // console.log(item_device);
+            // console.log(utils.ArrayBuffertoBase64(item_public_key));
+            // console.log(trusted_item_signature);
 
-                let is_signature_verified = utils.curveVerify(item_public_key, new Uint8Array(sha256_trust_message), new Uint8Array(utils.fromBase64toArrayBuffer(trusted_item_signature)));
+            let is_signature_verified = utils.curveVerify(item_public_key, trusted_string_text_buffer, new Uint8Array(utils.fromBase64toArrayBuffer(trusted_item_signature)));
 
-                // console.log(is_signature_verified);
-                if (is_signature_verified){
+            // console.log(is_signature_verified);
+            if (is_signature_verified){
 
-                    $trusted_items.find('trust').each((idx, trust_item) => {
+                $trusted_items.find('trust').each((idx, trust_item) => {
 
-                        let $trust_item = $(trust_item);
+                    let $trust_item = $(trust_item);
 
-                        // console.log($trust_item.text());
-                        // console.log(final_trusted_devices);
-                        // console.log(final_trusted_devices.filter(e => e.trusted_key === $trust_item.text()));
-                        // console.log(final_trusted_devices.filter(e => e.trusted_key === $trust_item.text()).length);
-                        // console.log(!(final_trusted_devices.filter(e => e.trusted_key === $trust_item.text()).length > 0));
-                        // console.log(!devices_to_remove.includes($trust_item.text()));
-                        // console.log(Boolean(!(final_trusted_devices.filter(e => e.trusted_key === $trust_item.text()).length > 0) && !devices_to_remove.includes($trust_item.text())));
+                    // console.log($trust_item.text());
+                    // console.log(final_trusted_devices);
+                    // console.log(final_trusted_devices.filter(e => e.trusted_key === $trust_item.text()));
+                    // console.log(final_trusted_devices.filter(e => e.trusted_key === $trust_item.text()).length);
+                    // console.log(!(final_trusted_devices.filter(e => e.trusted_key === $trust_item.text()).length > 0));
+                    // console.log(!devices_to_remove.includes($trust_item.text()));
+                    // console.log(Boolean(!(final_trusted_devices.filter(e => e.trusted_key === $trust_item.text()).length > 0) && !devices_to_remove.includes($trust_item.text())));
 
-                        if (!(final_trusted_devices.filter(e => e.trusted_key === $trust_item.text()).length > 0) && !devices_to_remove.includes($trust_item.text())){
-                            let trusted_new_saved_device = {
-                                trusted_key: $trust_item.text(),
-                                from_device_id: item_device_id,
-                                trust_reason_jid: peer ? peer.get('jid') : this.account.get('jid'),
-                            };
-                            new_trusted_devices.push(trusted_new_saved_device);
-                            // console.log(new_trusted_devices);
-                            // console.log(new_trusted_devices.length);
-                        }
-                    });
-                    // console.log(new_trusted_devices);
-                    // console.log(new_trusted_devices.length);
+                    if (!(final_trusted_devices.filter(e => e.trusted_key === $trust_item.text()).length > 0) && !devices_to_remove.includes($trust_item.text())){
+                        let trusted_new_saved_device = {
+                            trusted_key: $trust_item.text(),
+                            from_device_id: item_device_id,
+                            trust_reason_jid: peer ? peer.get('jid') : this.account.get('jid'),
+                        };
+                        new_trusted_devices.push(trusted_new_saved_device);
+                        // console.log(new_trusted_devices);
+                        // console.log(new_trusted_devices.length);
+                    }
+                });
+                // console.log(new_trusted_devices);
+                // console.log(new_trusted_devices.length);
 
-                    // console.error('herer');
-                    dfd.resolve();
-                } else {
-                    // подпись неверна
-                    // console.error(final_trusted_devices.length);
-                    // final_trusted_devices.filter(i => i.trusted_key !== item.trusted_key).length && console.error(final_trusted_devices.filter(i => i.trusted_key !== item.trusted_key));
-                    // final_trusted_devices.filter(i => i.trusted_key !== item.trusted_key).length && console.error(final_trusted_devices.filter(i => i.trusted_key !== item.trusted_key)[0]);
-                    final_trusted_devices = final_trusted_devices.filter(i => i.trusted_key !== item.trusted_key);
+                // console.error('herer');
+                dfd.resolve();
+            } else {
+                // подпись неверна
+                // console.error(final_trusted_devices.length);
+                // final_trusted_devices.filter(i => i.trusted_key !== item.trusted_key).length && console.error(final_trusted_devices.filter(i => i.trusted_key !== item.trusted_key));
+                // final_trusted_devices.filter(i => i.trusted_key !== item.trusted_key).length && console.error(final_trusted_devices.filter(i => i.trusted_key !== item.trusted_key)[0]);
+                final_trusted_devices = final_trusted_devices.filter(i => i.trusted_key !== item.trusted_key);
 
-                    // console.error(final_trusted_devices.length);
+                // console.error(final_trusted_devices.length);
 
-                    devices_to_remove.push(item.trusted_key);
-                    // console.error('herer');
-                    dfd.resolve();
-                }
-            });
+                devices_to_remove.push(item.trusted_key);
+                // console.error('herer');
+                dfd.resolve();
+            }
         });
     },
 
@@ -1175,7 +1294,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
 
                 // console.log(my_trusted_devices);
                 // console.log(res);
-                my_trusted_devices.length && this.getNewTrustedDevices(my_trusted_devices, $all_items_msg, null, true);
+                my_trusted_devices && my_trusted_devices.length && this.getNewTrustedDevices(my_trusted_devices, $all_items_msg, null, true);
             });
         } else {
             let from = Strophe.getBareJidFromJid($message.attr('from')),
@@ -1216,14 +1335,14 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
 
     },
 
-    handleAcceptedMsgBySid: function (sid) {
+    handleAcceptedMsgBySid: function (sid, code) {
         let active_sessions = this.get('active_trust_sessions');
 
         if (active_sessions[sid]){
             let session = active_sessions[sid];
             if (session.verification_accepted_msg_xml){
                 this.account.omemo.xabber_trust.receiveTrustVerificationMessage(session.verification_accepted_msg_xml, {
-
+                    forced_code: code,
                 });
             }
         }
@@ -1240,8 +1359,10 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
         }
     },
 
-    isActiveSessionWithJid: function (jid) {
+    isActiveSessionWithJid: function (jid, original_sid) {
         if (!jid)
+            return false;
+        if (this.get('active_trust_sessions')[original_sid])
             return false;
         let active_sessions = this.get('active_trust_sessions'),
             sessions_with_jid = Object.values(active_sessions).filter(item => item.session_check_jid && item.session_check_jid === jid);
@@ -1250,6 +1371,11 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
             sessions_with_jid.forEach((session) => {
                 let sid = Object.keys(active_sessions).find(key => active_sessions[key] === session);
                 if (sid){
+                    // console.error('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
+                    // console.error('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
+                    // console.error(original_sid);
+                    // console.error(sid);
+                    // console.error(jid);
                     this.cancelSession(sid, jid);
                 }
             });
@@ -1271,8 +1397,8 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
             contact = undefined;
 
         console.log(sid);
-        console.log(contact);
-        console.log(options);
+        // console.log(contact);
+        // console.log(options);
         console.log(message);
         if (options.notification_trust_msg && options.device_id){
             // console.log(options.device_id);
@@ -1298,6 +1424,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
             if ($message.find('verification-failed').length){
                 // console.log($message.find('verification-failed').attr('reason'));
                 this.clearData(sid);
+                contact && this.createFailedSessionMsg(contact.get('jid'), $message.find('verification-failed').attr('reason'));
                 return;
             }
         } else {
@@ -1318,32 +1445,40 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
 
         if (contact){
             if ($message.find('verification-start').length && $message.find('verification-start').attr('device-id') && this.omemo.get('device_id') && options.automated){
-                let is_active_session_jid = this.isActiveSessionWithJid(contact.get('jid'), sid);
-                if (is_active_session_jid)
-                    return;
                 let ended_sessions = this.get('ended_sessions');
 
                 if (ended_sessions.includes(sid)){
                     options.msg_item && this.removeAfterHandle(options.msg_item);
                     return;
                 }
-                this.account.omemo.xabber_trust.addVerificationSessionData(sid, {
-                    session_check_jid: contact.get('jid')
-                });
-                let view = new xabber.IncomingTrustSessionView();
+                let is_active_session_jid = this.isActiveSessionWithJid(contact.get('jid'), sid);
+                if (is_active_session_jid)
+                    return;
+                // let view = new xabber.IncomingTrustSessionView();
                 let peer = this.omemo.getPeer(contact.get('jid')),
                     device = peer.devices[$message.find('verification-start').attr('device-id')];
                 if (!device){
                     peer.updateDevicesKeys();
                 }
-                view.show({
-                    account: this.account,
-                    trust: this,
-                    message: message,
-                    message_options: options,
-                    contact: contact,
-                    sid: sid
+                // console.log({message});
+                this.account.omemo.xabber_trust.addVerificationSessionData(sid, {
+                    session_check_jid: contact.get('jid'),
+                    session_check_device_id: $message.find('verification-start').attr('device-id'),
+                    incoming_request_data: {
+                        message: message.outerHTML,
+                        message_options: options,
+                    },
+                    verification_step: '0b',
                 });
+
+                // view.show({
+                //     account: this.account,
+                //     trust: this,
+                //     message: message,
+                //     message_options: options,
+                //     contact: contact,
+                //     sid: sid
+                // });
             }
             if ($message.find('verification-start').length && $message.find('verification-start').attr('device-id') && this.omemo.get('device_id') && !options.automated){
                 this.account.omemo.xabber_trust.addVerificationSessionData(sid, {
@@ -1372,7 +1507,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                     options.msg_item && this.removeAfterHandle(options.msg_item);
                 }
                 if (this.active_sessions_data[sid].verification_step === '1a' && !options.automated)
-                    this.handleTrustVerificationSigned($message, contact);
+                    this.handleTrustVerificationSigned($message, contact, null, null, options.forced_code);
                 return;
             }
             if (this.active_sessions_data[sid] && this.active_sessions_data[sid].active_verification_code){
@@ -1640,7 +1775,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
         // });
     },
 
-    handleTrustVerificationSigned: function ($message, contact, is_own, msg_item) {
+    handleTrustVerificationSigned: function ($message, contact, is_own, msg_item, forced_code) {
         let device_id = $message.find('verification-accepted').attr('device-id'),
             sid = $message.find('authenticated-key-exchange').attr('sid'),
             peer, device;
@@ -1666,115 +1801,221 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
             if ($salt.length){
                 let data = utils.fromBase64toArrayBuffer($message.find('ciphertext').text()),
                     iv = utils.fromBase64toArrayBuffer($message.find('iv').text());
+                if (forced_code){
+                    // console.error(forced_code);
+                    let code = forced_code;
 
-                utils.dialogs.ask_enter_value(
-                    xabber.getString("xabber_trust__verification_code_label"),
-                    xabber.getString("xabber_trust__verification_code_text"),
-                    { modal_class: 'modal-verification-code', input_placeholder_value: ''},
-                    {}
-                ).done((result) => {
-                    // console.log(result)
-                    if (result) {
-                        let code = result;
-
-                        this.decryptTrustBuffer(iv, data, curve, code).then((decrypted_response) => {
-                            this.account.omemo.xabber_trust.addVerificationSessionData(sid, {
-                                b_payload: utils.ArrayBuffertoBase64(decrypted_response.decryptedBuffer),
-                            });
-
-                            this.generateVerificationArrayBuffer(devices_IK.device_pubkey, devices_IK.own_privkey, code).then((response) => {
-
-                                this.getTrustedKey(this.omemo.own_devices[this.omemo.get('device_id')]).then((trustedKeyBuffer) => {
-                                    this.generateVerificationEncryptedHash(trustedKeyBuffer, code, decrypted_response.decryptedBuffer, decrypted_response.encryptionKeyHash).then((hash_response) => {
-                                        let msg_id = uuid(),
-                                            to = contact ? contact.get('jid') : this.account.get('jid'),
-                                            stanza = $iq({
-                                                type: 'set',
-                                                to: to,
-                                                id: msg_id
-                                            });
-                                        stanza.c('notify', {xmlns: Strophe.NS.XABBER_NOTIFY});
-                                        stanza.c('notification', {xmlns: Strophe.NS.XABBER_NOTIFY});
-                                        stanza.c('forwarded', {xmlns: Strophe.NS.FORWARD});
-                                        stanza.c('message', {
-                                            to: to,
-                                            from: this.account.get('jid'),
-                                            type: 'chat',
-                                            id: uuid()
-                                        });
-                                        stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: sid, timestamp: Date.now()});
-
-                                        stanza.c('salt').c('ciphertext').t(response.data).up().c('iv').t(response.iv).up().up();
-                                        stanza.c('hash', {xmlns: Strophe.NS.HASH, algo: 'sha-256'});
-                                        stanza.c('ciphertext').t(hash_response.data).up().c('iv').t(hash_response.iv).up().up().up();
-                                        stanza.up().up().up();
-                                        stanza.c('addresses', {xmlns: Strophe.NS.ADDRESS}).c('address',{type: 'to', jid: to}).up().up();
-
-                                        this.account.omemo.xabber_trust.addVerificationSessionData(sid, {
-                                            active_verification_device: {
-                                                device_id: device.id,
-                                                is_own_device: is_own,
-                                                peer_jid: device.jid,
-                                            },
-                                            active_verification_code: code,
-                                            a_payload: utils.ArrayBuffertoBase64(response.not_encrypted_payload),
-                                            verification_step: '2a',
-                                            last_sent_message_id: msg_id
-                                        });
-
-                                        msg_item && this.removeAfterHandle(msg_item);
-                                        this.account.sendFast(stanza, () => {
-                                            // console.log(stanza);
-                                            // console.log(stanza.tree());
-                                            utils.callback_popup_message(xabber.getString("trust_verification_answered"), 5000);
-                                        });
-
-                                    });
-                                });
-                            });
-                        }).catch(e => {
-                            console.error(e);
-
-                            let msg_id = uuid(),
-                                to = contact ? contact.get('jid') : this.account.get('jid'),
-                                stanza = $iq({
-                                    type: 'set',
-                                    to: to,
-                                    id: msg_id
-                                });
-                            stanza.c('notify', {xmlns: Strophe.NS.XABBER_NOTIFY});
-                            stanza.c('notification', {xmlns: Strophe.NS.XABBER_NOTIFY});
-                            stanza.c('forwarded', {xmlns: Strophe.NS.FORWARD});
-                            stanza.c('message', {
-                                to: to,
-                                from: this.account.get('jid'),
-                                type: 'chat',
-                                id: uuid()
-                            });
-                            stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: sid, timestamp: Date.now()});
-                            stanza.c('verification-failed', {reason: 'Data decryption failed'}).up().up();
-
-                            stanza.up().up().up();
-                            stanza.c('addresses', {xmlns: Strophe.NS.ADDRESS}).c('address',{type: 'to', jid: to}).up().up();
-
-                            msg_item && this.removeAfterHandle(msg_item);
-                            this.account.sendFast(stanza, () => {
-                                if (contact){
-                                    let $stanza = $(stanza.tree());
-                                    $stanza.attr('to',this.account.get('jid'));
-                                    $stanza.find('notification forwarded message').attr('to',this.account.get('jid'));
-                                    $stanza.find(`addresses[xmlns="${Strophe.NS.ADDRESS}"] address[type="to"]`).attr('jid',this.account.get('jid'));
-                                    this.account.sendFast(stanza, () => {
-                                    });
-                                }
-                                // console.log(stanza);
-                                // console.log(stanza.tree());
-                                utils.callback_popup_message(xabber.getString("trust_verification_decrypt_failed"), 5000);
-                            });
-                            this.clearData(sid);
+                    this.decryptTrustBuffer(iv, data, curve, code).then((decrypted_response) => {
+                        this.account.omemo.xabber_trust.addVerificationSessionData(sid, {
+                            b_payload: utils.ArrayBuffertoBase64(decrypted_response.decryptedBuffer),
                         });
-                    }
-                });
+
+                        this.generateVerificationArrayBuffer(devices_IK.device_pubkey, devices_IK.own_privkey, code).then((response) => {
+
+                            this.getTrustedKey(this.omemo.own_devices[this.omemo.get('device_id')]).then((trustedKeyBuffer) => {
+                                this.generateVerificationEncryptedHash(trustedKeyBuffer, code, decrypted_response.decryptedBuffer, decrypted_response.encryptionKeyHash).then((hash_response) => {
+                                    let msg_id = uuid(),
+                                        to = contact ? contact.get('jid') : this.account.get('jid'),
+                                        stanza = $iq({
+                                            type: 'set',
+                                            to: to,
+                                            id: msg_id
+                                        });
+                                    stanza.c('notify', {xmlns: Strophe.NS.XABBER_NOTIFY});
+                                    stanza.c('notification', {xmlns: Strophe.NS.XABBER_NOTIFY});
+                                    stanza.c('forwarded', {xmlns: Strophe.NS.FORWARD});
+                                    stanza.c('message', {
+                                        to: to,
+                                        from: this.account.get('jid'),
+                                        type: 'chat',
+                                        id: uuid()
+                                    });
+                                    stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: sid, timestamp: Date.now()});
+
+                                    stanza.c('salt').c('ciphertext').t(response.data).up().c('iv').t(response.iv).up().up();
+                                    stanza.c('hash', {xmlns: Strophe.NS.HASH, algo: 'sha-256'});
+                                    stanza.c('ciphertext').t(hash_response.data).up().c('iv').t(hash_response.iv).up().up().up();
+                                    stanza.up().up().up();
+                                    stanza.c('addresses', {xmlns: Strophe.NS.ADDRESS}).c('address',{type: 'to', jid: to}).up().up();
+
+                                    this.account.omemo.xabber_trust.addVerificationSessionData(sid, {
+                                        active_verification_device: {
+                                            device_id: device.id,
+                                            is_own_device: is_own,
+                                            peer_jid: device.jid,
+                                        },
+                                        active_verification_code: code,
+                                        a_payload: utils.ArrayBuffertoBase64(response.not_encrypted_payload),
+                                        verification_step: '2a',
+                                        last_sent_message_id: msg_id
+                                    });
+
+                                    msg_item && this.removeAfterHandle(msg_item);
+                                    this.account.sendFast(stanza, () => {
+                                        // console.log(stanza);
+                                        // console.log(stanza.tree());
+                                        utils.callback_popup_message(xabber.getString("trust_verification_answered"), 5000);
+                                    });
+
+                                });
+                            });
+                        });
+                    }).catch(e => {
+                        console.error(e);
+
+                        let msg_id = uuid(),
+                            to = contact ? contact.get('jid') : this.account.get('jid'),
+                            stanza = $iq({
+                                type: 'set',
+                                to: to,
+                                id: msg_id
+                            });
+                        stanza.c('notify', {xmlns: Strophe.NS.XABBER_NOTIFY});
+                        stanza.c('notification', {xmlns: Strophe.NS.XABBER_NOTIFY});
+                        stanza.c('forwarded', {xmlns: Strophe.NS.FORWARD});
+                        stanza.c('message', {
+                            to: to,
+                            from: this.account.get('jid'),
+                            type: 'chat',
+                            id: uuid()
+                        });
+                        stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: sid, timestamp: Date.now()});
+                        stanza.c('verification-failed', {reason: 'Data decryption failed'}).up().up();
+
+                        stanza.up().up().up();
+                        stanza.c('addresses', {xmlns: Strophe.NS.ADDRESS}).c('address',{type: 'to', jid: to}).up().up();
+
+                        msg_item && this.removeAfterHandle(msg_item);
+                        this.account.sendFast(stanza, () => {
+                            if (contact){
+                                let $stanza = $(stanza.tree());
+                                $stanza.attr('to',this.account.get('jid'));
+                                $stanza.find('notification forwarded message').attr('to',this.account.get('jid'));
+                                $stanza.find(`addresses[xmlns="${Strophe.NS.ADDRESS}"] address[type="to"]`).attr('jid',this.account.get('jid'));
+                                contact && this.createFailedSessionMsg(contact.get('jid'), 'Data decryption failed');
+                                this.account.sendFast(stanza, () => {
+                                });
+                            }
+                            // console.log(stanza);
+                            // console.log(stanza.tree());
+                            utils.callback_popup_message(xabber.getString("trust_verification_decrypt_failed"), 5000);
+                        });
+                        this.clearData(sid);
+                    });
+
+                } else {
+                    utils.dialogs.ask_enter_value(
+                        xabber.getString("xabber_trust__verification_code_label"),
+                        xabber.getString("xabber_trust__verification_code_text"),
+                        { modal_class: 'modal-verification-code', input_placeholder_value: ''},
+                        {}
+                    ).done((result) => {
+                        // console.log(result)
+                        if (result) {
+                            let code = result;
+
+                            this.decryptTrustBuffer(iv, data, curve, code).then((decrypted_response) => {
+                                this.account.omemo.xabber_trust.addVerificationSessionData(sid, {
+                                    b_payload: utils.ArrayBuffertoBase64(decrypted_response.decryptedBuffer),
+                                });
+
+                                this.generateVerificationArrayBuffer(devices_IK.device_pubkey, devices_IK.own_privkey, code).then((response) => {
+
+                                    this.getTrustedKey(this.omemo.own_devices[this.omemo.get('device_id')]).then((trustedKeyBuffer) => {
+                                        this.generateVerificationEncryptedHash(trustedKeyBuffer, code, decrypted_response.decryptedBuffer, decrypted_response.encryptionKeyHash).then((hash_response) => {
+                                            let msg_id = uuid(),
+                                                to = contact ? contact.get('jid') : this.account.get('jid'),
+                                                stanza = $iq({
+                                                    type: 'set',
+                                                    to: to,
+                                                    id: msg_id
+                                                });
+                                            stanza.c('notify', {xmlns: Strophe.NS.XABBER_NOTIFY});
+                                            stanza.c('notification', {xmlns: Strophe.NS.XABBER_NOTIFY});
+                                            stanza.c('forwarded', {xmlns: Strophe.NS.FORWARD});
+                                            stanza.c('message', {
+                                                to: to,
+                                                from: this.account.get('jid'),
+                                                type: 'chat',
+                                                id: uuid()
+                                            });
+                                            stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: sid, timestamp: Date.now()});
+
+                                            stanza.c('salt').c('ciphertext').t(response.data).up().c('iv').t(response.iv).up().up();
+                                            stanza.c('hash', {xmlns: Strophe.NS.HASH, algo: 'sha-256'});
+                                            stanza.c('ciphertext').t(hash_response.data).up().c('iv').t(hash_response.iv).up().up().up();
+                                            stanza.up().up().up();
+                                            stanza.c('addresses', {xmlns: Strophe.NS.ADDRESS}).c('address',{type: 'to', jid: to}).up().up();
+
+                                            this.account.omemo.xabber_trust.addVerificationSessionData(sid, {
+                                                active_verification_device: {
+                                                    device_id: device.id,
+                                                    is_own_device: is_own,
+                                                    peer_jid: device.jid,
+                                                },
+                                                active_verification_code: code,
+                                                a_payload: utils.ArrayBuffertoBase64(response.not_encrypted_payload),
+                                                verification_step: '2a',
+                                                last_sent_message_id: msg_id
+                                            });
+
+                                            msg_item && this.removeAfterHandle(msg_item);
+                                            this.account.sendFast(stanza, () => {
+                                                // console.log(stanza);
+                                                // console.log(stanza.tree());
+                                                utils.callback_popup_message(xabber.getString("trust_verification_answered"), 5000);
+                                            });
+
+                                        });
+                                    });
+                                });
+                            }).catch(e => {
+                                console.error(e);
+
+                                let msg_id = uuid(),
+                                    to = contact ? contact.get('jid') : this.account.get('jid'),
+                                    stanza = $iq({
+                                        type: 'set',
+                                        to: to,
+                                        id: msg_id
+                                    });
+                                stanza.c('notify', {xmlns: Strophe.NS.XABBER_NOTIFY});
+                                stanza.c('notification', {xmlns: Strophe.NS.XABBER_NOTIFY});
+                                stanza.c('forwarded', {xmlns: Strophe.NS.FORWARD});
+                                stanza.c('message', {
+                                    to: to,
+                                    from: this.account.get('jid'),
+                                    type: 'chat',
+                                    id: uuid()
+                                });
+                                stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: sid, timestamp: Date.now()});
+                                stanza.c('verification-failed', {reason: 'Data decryption failed'}).up().up();
+
+                                stanza.up().up().up();
+                                stanza.c('addresses', {xmlns: Strophe.NS.ADDRESS}).c('address',{type: 'to', jid: to}).up().up();
+
+                                msg_item && this.removeAfterHandle(msg_item);
+                                this.account.sendFast(stanza, () => {
+                                    if (contact){
+                                        let $stanza = $(stanza.tree());
+                                        $stanza.attr('to',this.account.get('jid'));
+                                        $stanza.find('notification forwarded message').attr('to',this.account.get('jid'));
+                                        $stanza.find(`addresses[xmlns="${Strophe.NS.ADDRESS}"] address[type="to"]`).attr('jid',this.account.get('jid'));
+                                        contact && this.createFailedSessionMsg(contact.get('jid'), 'Data decryption failed');
+                                        this.account.sendFast(stanza, () => {
+                                        });
+                                    }
+                                    // console.log(stanza);
+                                    // console.log(stanza.tree());
+                                    utils.callback_popup_message(xabber.getString("trust_verification_decrypt_failed"), 5000);
+                                });
+                                this.clearData(sid);
+                            });
+                        }
+                    });
+
+                }
+
             }
         });
     },
@@ -1939,6 +2180,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                                             $stanza.attr('to',this.account.get('jid'));
                                             $stanza.find('notification forwarded message').attr('to',this.account.get('jid'));
                                             $stanza.find(`addresses[xmlns="${Strophe.NS.ADDRESS}"] address[type="to"]`).attr('jid',this.account.get('jid'));
+                                            contact && this.createFailedSessionMsg(contact.get('jid'), 'Hashes didn\'t match');
                                             this.account.sendFast(stanza, () => {
                                             });
                                         }
@@ -1982,6 +2224,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                                 $stanza.attr('to',this.account.get('jid'));
                                 $stanza.find('notification forwarded message').attr('to',this.account.get('jid'));
                                 $stanza.find(`addresses[xmlns="${Strophe.NS.ADDRESS}"] address[type="to"]`).attr('jid',this.account.get('jid'));
+                                contact && this.createFailedSessionMsg(contact.get('jid'), 'Data decryption failed');
                                 this.account.sendFast(stanza, () => {
                                 });
                             }
@@ -2023,6 +2266,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                             $stanza.attr('to',this.account.get('jid'));
                             $stanza.find('notification forwarded message').attr('to',this.account.get('jid'));
                             $stanza.find(`addresses[xmlns="${Strophe.NS.ADDRESS}"] address[type="to"]`).attr('jid',this.account.get('jid'));
+                            contact && this.createFailedSessionMsg(contact.get('jid'), 'Data decryption failed with error');
                             this.account.sendFast(stanza, () => {
                             });
                         }
@@ -2112,6 +2356,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                                         $stanza.attr('to',this.account.get('jid'));
                                         $stanza.find('notification forwarded message').attr('to',this.account.get('jid'));
                                         $stanza.find(`addresses[xmlns="${Strophe.NS.ADDRESS}"] address[type="to"]`).attr('jid',this.account.get('jid'));
+                                        contact && this.createFailedSessionMsg(contact.get('jid'), 'Hashes didn\'t match in final stanza');
                                         this.account.sendFast(stanza, () => {
                                         });
                                     }

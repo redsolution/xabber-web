@@ -190,6 +190,7 @@ var utils = {
     randomNumberCode: function (length) {
         let result = '',
             characters = '0123456789',
+            // characters = '0',
             charactersLength = characters.length,
             counter = 0;
         while (counter < length) {

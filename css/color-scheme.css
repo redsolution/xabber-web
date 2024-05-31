@@ -34,6 +34,7 @@
   background-color: #E53935 !important;
 }
 
+[data-color=red] .outline-color-500,
 .outline-color-red-500{
   outline-color: #F44336 !important;
 }
@@ -83,6 +84,13 @@
 [data-color=red] .ground-color-300,
 [data-color=red] .hover-ground-color-300:hover {
   background-color: #E57373 !important;
+}
+[data-color=red] .ground-color-200,
+[data-color=red] .hover-ground-color-200:hover {
+  background-color: #EF9A9A !important;
+}
+[data-color=red] .outline-color-200 {
+  outline-color: #EF9A9A !important;
 }
 .text-color-red-300,
 .hover-text-color-red-300:hover,
@@ -188,6 +196,7 @@
   background-color: #D81B60 !important;
 }
 
+[data-color=pink] .outline-color-500,
 .outline-color-pink-500{
   outline-color: #E91E63 !important;
 }
@@ -237,6 +246,13 @@
 [data-color=pink] .ground-color-300,
 [data-color=pink] .hover-ground-color-300:hover {
   background-color: #F06292 !important;
+}
+[data-color=pink] .ground-color-200,
+[data-color=pink] .hover-ground-color-200:hover {
+  background-color: #F48FB1 !important;
+}
+[data-color=pink] .outline-color-200 {
+  outline-color: #F48FB1 !important;
 }
 .text-color-pink-300,
 .hover-text-color-pink-300:hover,
@@ -342,6 +358,7 @@
   background-color: #8E24AA !important;
 }
 
+[data-color=purple] .outline-color-500,
 .outline-color-purple-500{
   outline-color: #9C27B0 !important;
 }
@@ -391,6 +408,13 @@
 [data-color=purple] .ground-color-300,
 [data-color=purple] .hover-ground-color-300:hover {
   background-color: #BA68C8 !important;
+}
+[data-color=purple] .ground-color-200,
+[data-color=purple] .hover-ground-color-200:hover {
+  background-color: #CE93D8 !important;
+}
+[data-color=purple] .outline-color-200 {
+  outline-color: #CE93D8 !important;
 }
 .text-color-purple-300,
 .hover-text-color-purple-300:hover,
@@ -497,6 +521,7 @@
   background-color: #5E35B1 !important;
 }
 
+[data-color=deep-purple] .outline-color-500,
 .outline-color-deep-purple-500{
   outline-color: #673AB7 !important;
 }
@@ -546,6 +571,13 @@
 [data-color=deep-purple] .ground-color-300,
 [data-color=deep-purple] .hover-ground-color-300:hover {
   background-color: #9575CD !important;
+}
+[data-color=deep-purple] .ground-color-200,
+[data-color=deep-purple] .hover-ground-color-200:hover {
+  background-color: #B39DDB !important;
+}
+[data-color=deep-purple] .outline-color-200 {
+  outline-color: #B39DDB !important;
 }
 .text-color-deep-purple-300,
 .hover-text-color-deep-purple-300:hover,
@@ -651,6 +683,7 @@
   background-color: #3949AB !important;
 }
 
+[data-color=indigo] .outline-color-500,
 .outline-color-indigo-500{
   outline-color: #3F51B5 !important;
 }
@@ -700,6 +733,13 @@
 [data-color=indigo] .ground-color-300,
 [data-color=indigo] .hover-ground-color-300:hover {
   background-color: #7986CB !important;
+}
+[data-color=indigo] .ground-color-200,
+[data-color=indigo] .hover-ground-color-200:hover {
+  background-color: #9FA8DA !important;
+}
+[data-color=indigo] .outline-color-200 {
+  outline-color: #9FA8DA !important;
 }
 .text-color-indigo-300,
 .hover-text-color-indigo-300:hover,
@@ -806,6 +846,7 @@
   background-color: #1E88E5 !important;
 }
 
+[data-color=blue] .outline-color-500,
 .outline-color-blue-500{
   outline-color: #2196F3 !important;
 }
@@ -855,6 +896,13 @@
 [data-color=blue] .ground-color-300,
 [data-color=blue] .hover-ground-color-300:hover {
   background-color: #64B5F6 !important;
+}
+[data-color=blue] .ground-color-200,
+[data-color=blue] .hover-ground-color-200:hover {
+  background-color: #90CAF9 !important;
+}
+[data-color=blue] .outline-color-200 {
+  outline-color: #90CAF9 !important;
 }
 .text-color-blue-300,
 .hover-text-color-blue-300:hover,
@@ -961,6 +1009,7 @@
   background-color: #039BE5 !important;
 }
 
+[data-color=light-blue] .outline-color-500,
 .outline-color-light-blue-500{
   outline-color: #03A9F4 !important;
 }
@@ -1010,6 +1059,13 @@
 [data-color=light-blue] .ground-color-300,
 [data-color=light-blue] .hover-ground-color-300:hover {
   background-color: #4FC3F7 !important;
+}
+[data-color=light-blue] .ground-color-200,
+[data-color=light-blue] .hover-ground-color-200:hover {
+  background-color: #81D4FA !important;
+}
+[data-color=light-blue] .outline-color-200 {
+  outline-color: #81D4FA !important;
 }
 .text-color-light-blue-300,
 .hover-text-color-light-blue-300:hover,
@@ -1115,6 +1171,7 @@
   background-color: #00ACC1 !important;
 }
 
+[data-color=cyan] .outline-color-500,
 .outline-color-cyan-500{
   outline-color: #00BCD4 !important;
 }
@@ -1164,6 +1221,13 @@
 [data-color=cyan] .ground-color-300,
 [data-color=cyan] .hover-ground-color-300:hover {
   background-color: #4DD0E1 !important;
+}
+[data-color=cyan] .ground-color-200,
+[data-color=cyan] .hover-ground-color-200:hover {
+  background-color: #80DEEA !important;
+}
+[data-color=cyan] .outline-color-200 {
+  outline-color: #80DEEA !important;
 }
 .text-color-cyan-300,
 .hover-text-color-cyan-300:hover,
@@ -1269,6 +1333,7 @@
   background-color: #00897B !important;
 }
 
+[data-color=teal] .outline-color-500,
 .outline-color-teal-500{
   outline-color: #009688 !important;
 }
@@ -1318,6 +1383,13 @@
 [data-color=teal] .ground-color-300,
 [data-color=teal] .hover-ground-color-300:hover {
   background-color: #4DB6AC !important;
+}
+[data-color=teal] .ground-color-200,
+[data-color=teal] .hover-ground-color-200:hover {
+  background-color: #80CBC4 !important;
+}
+[data-color=teal] .outline-color-200 {
+  outline-color: #80CBC4 !important;
 }
 .text-color-teal-300,
 .hover-text-color-teal-300:hover,
@@ -1424,6 +1496,7 @@
   background-color: #43A047 !important;
 }
 
+[data-color=green] .outline-color-500,
 .outline-color-green-500{
   outline-color: #4CAF50 !important;
 }
@@ -1473,6 +1546,13 @@
 [data-color=green] .ground-color-300,
 [data-color=green] .hover-ground-color-300:hover {
   background-color: #81C784 !important;
+}
+[data-color=green] .ground-color-200,
+[data-color=green] .hover-ground-color-200:hover {
+  background-color: #A5D6A7 !important;
+}
+[data-color=green] .outline-color-200 {
+  outline-color: #A5D6A7 !important;
 }
 .text-color-green-300,
 .hover-text-color-green-300:hover,
@@ -1579,6 +1659,7 @@
   background-color: #7CB342 !important;
 }
 
+[data-color=light-green] .outline-color-500,
 .outline-color-light-green-500{
   outline-color: #8BC34A !important;
 }
@@ -1628,6 +1709,13 @@
 [data-color=light-green] .ground-color-300,
 [data-color=light-green] .hover-ground-color-300:hover {
   background-color: #AED581 !important;
+}
+[data-color=light-green] .ground-color-200,
+[data-color=light-green] .hover-ground-color-200:hover {
+  background-color: #C5E1A5 !important;
+}
+[data-color=light-green] .outline-color-200 {
+  outline-color: #C5E1A5 !important;
 }
 .text-color-light-green-300,
 .hover-text-color-light-green-300:hover,
@@ -1733,6 +1821,7 @@
   background-color: #C0CA33 !important;
 }
 
+[data-color=lime] .outline-color-500,
 .outline-color-lime-500{
   outline-color: #CDDC39 !important;
 }
@@ -1782,6 +1871,13 @@
 [data-color=lime] .ground-color-300,
 [data-color=lime] .hover-ground-color-300:hover {
   background-color: #DCE775 !important;
+}
+[data-color=lime] .ground-color-200,
+[data-color=lime] .hover-ground-color-200:hover {
+  background-color: #E6EE9C !important;
+}
+[data-color=lime] .outline-color-200 {
+  outline-color: #E6EE9C !important;
 }
 .text-color-lime-300,
 .hover-text-color-lime-300:hover,
@@ -1888,6 +1984,7 @@
   background-color: #FFB300 !important;
 }
 
+[data-color=amber] .outline-color-500,
 .outline-color-amber-500{
   outline-color: #FFC107 !important;
 }
@@ -1937,6 +2034,13 @@
 [data-color=amber] .ground-color-300,
 [data-color=amber] .hover-ground-color-300:hover {
   background-color: #FFD54F !important;
+}
+[data-color=amber] .ground-color-200,
+[data-color=amber] .hover-ground-color-200:hover {
+  background-color: #FFE082 !important;
+}
+[data-color=amber] .outline-color-200 {
+  outline-color: #FFE082 !important;
 }
 .text-color-amber-300,
 .hover-text-color-amber-300:hover,
@@ -2042,6 +2146,7 @@
   background-color: #FB8C00 !important;
 }
 
+[data-color=orange] .outline-color-500,
 .outline-color-orange-500{
   outline-color: #FF9800 !important;
 }
@@ -2091,6 +2196,13 @@
 [data-color=orange] .ground-color-300,
 [data-color=orange] .hover-ground-color-300:hover {
   background-color: #FFB74D !important;
+}
+[data-color=orange] .ground-color-200,
+[data-color=orange] .hover-ground-color-200:hover {
+  background-color: #FFCC80 !important;
+}
+[data-color=orange] .outline-color-200 {
+  outline-color: #FFCC80 !important;
 }
 .text-color-orange-300,
 .hover-text-color-orange-300:hover,
@@ -2197,6 +2309,7 @@
   background-color: #F4511E !important;
 }
 
+[data-color=deep-orange] .outline-color-500,
 .outline-color-deep-orange-500{
   outline-color: #FF5722 !important;
 }
@@ -2246,6 +2359,13 @@
 [data-color=deep-orange] .ground-color-300,
 [data-color=deep-orange] .hover-ground-color-300:hover {
   background-color: #FF8A65 !important;
+}
+[data-color=deep-orange] .ground-color-200,
+[data-color=deep-orange] .hover-ground-color-200:hover {
+  background-color: #FFAB91 !important;
+}
+[data-color=deep-orange] .outline-color-200 {
+  outline-color: #FFAB91 !important;
 }
 .text-color-deep-orange-300,
 .hover-text-color-deep-orange-300:hover,
@@ -2351,6 +2471,7 @@
   background-color: #6D4C41 !important;
 }
 
+[data-color=brown] .outline-color-500,
 .outline-color-brown-500{
   outline-color: #795548 !important;
 }
@@ -2400,6 +2521,13 @@
 [data-color=brown] .ground-color-300,
 [data-color=brown] .hover-ground-color-300:hover {
   background-color: #A1887F !important;
+}
+[data-color=brown] .ground-color-200,
+[data-color=brown] .hover-ground-color-200:hover {
+  background-color: #BCAAA4 !important;
+}
+[data-color=brown] .outline-color-200 {
+  outline-color: #BCAAA4 !important;
 }
 .text-color-brown-300,
 .hover-text-color-brown-300:hover,
@@ -2505,6 +2633,7 @@
   background-color: #546E7A !important;
 }
 
+[data-color=blue-grey] .outline-color-500,
 .outline-color-blue-grey-500{
   outline-color: #607D8B !important;
 }
@@ -2554,6 +2683,13 @@
 [data-color=blue-grey] .ground-color-300,
 [data-color=blue-grey] .hover-ground-color-300:hover {
   background-color: #90A4AE !important;
+}
+[data-color=blue-grey] .ground-color-200,
+[data-color=blue-grey] .hover-ground-color-200:hover {
+  background-color: #B0BEC5 !important;
+}
+[data-color=blue-grey] .outline-color-200 {
+  outline-color: #B0BEC5 !important;
 }
 .text-color-blue-grey-300,
 .hover-text-color-blue-grey-300:hover,
