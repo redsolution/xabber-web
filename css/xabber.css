@@ -884,6 +884,13 @@ input[type=file] {
     line-height: 12px;
 }
 
+.mdi.mdi-10px {
+    width: 10px;
+    height: 10px;
+    font-size: 10px;
+    line-height: 10px;
+}
+
 .mdi.mdi-8px {
     width: 8px;
     height: 8px;
@@ -8141,7 +8148,8 @@ input[type=text].simple-input-field:hover {
     background-color: #D32F2F !important;
 }
 .chat-item .chat-item-notifications-wrap .msg-chat-session{
-    background-color: #1976D2 !important;
+    background-color: #F57C00 !important;
+    padding: 3px !important;
 }
 .chat-item .chat-item-notifications-wrap .msg-counter,
 .chat-item .chat-item-notifications-wrap .msg-chat-error,
@@ -8923,9 +8931,9 @@ input[type=text].simple-input-field:hover {
     bottom: 0;
 }
 
-.encrypted .chat-content::after {
-    padding-bottom: 64px;
-}
+/*.encrypted .chat-content::after {*/
+    /*padding-bottom: 64px;*/
+/*}*/
 
 .chat-content .ps-scrollbar-y-rail {
     z-index: 2;
@@ -20652,11 +20660,35 @@ ul.restrictions-list-content>li {
 }
 /* Code Modal */
 .code-modal{
-    width: 390px !important;
+    height: 740px;
+    max-height: 80%;
+    width: 576px !important;
+    position: relative;
+}
+.code-modal .code-modal-wrap{
+    position: relative;
+    height: 100%;
+}
+.code-modal .modal-header{
+    text-align: center;
+    font-size: 18px;
+    height: 72px;
+    padding-top: 36px;
+}
+.code-modal .modal-content{
+    padding-top: 32px;
+    max-height: unset;
+    height: calc(100% - 72px);
 }
 .code-modal .code-contact-text{
+    font-size: 20px;
+    font-weight: 500;
     text-align: center;
-    font-size: 17px;
+    color: rgba(60, 60, 67, 0.6);
+    width: 65%;
+    position: relative;
+    left: 50%;
+    transform: translate(-50%, 0);
 }
 /*.code-modal .code-own-text,*/
 /*.code-modal .code-contact-text{*/
@@ -20667,30 +20699,37 @@ ul.restrictions-list-content>li {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 16px 0;
-    margin-top: 16px;
+    margin-top: 24px;
+    padding: 24px 0;
 }
 .code-modal .code-device-info-wrap .circle-avatar{
-    width: 64px;
-    height: 64px;
+    width: 128px;
+    height: 128px;
 }
 .code-modal .code-device-info-wrap .code-device-name {
-    font-size: 17px;
-    line-height: 24px;
-    margin-top: 4px;
+    font-size: 24px;
+    line-height: 32px;
+    margin-top: 24px;
 }
 .code-modal .code-device-info-wrap .code-device-jid {
     line-height: 24px;
-    font-size: 14px;
+    font-size: 16px;
+}
+.code-modal .session-incoming-request-text {
+    text-align: center;
+    margin-bottom: 8px;
 }
 .code-modal .code-contact-text-tip {
-    font-size: 17px;
-    line-height: 22px;
+    font-size: 16px;
+    line-height: 20px;
+    color: rgba(60, 60, 67, 0.6);
 }
 .code-modal .code-contact-text-tip ol {
-    margin: 0;
-    padding: 0 0 0 21px;
-    margin-bottom: 32px;
+    margin: 0 24px 32px;
+    padding: 0 0 0 22px;
+}
+.code-modal .code-contact-text-tip ol li {
+    margin-bottom: 16px;
 }
 .code-modal .code-contact-text-tip .part-one b.text-color-500 {
     font-weight: 400;
@@ -20699,33 +20738,51 @@ ul.restrictions-list-content>li {
     text-align: center;
     line-height: 48px;
     font-size: 48px;
-    margin-bottom: 32px;
+    margin-bottom: 90px;
+    color: rgb(73, 80, 87);
 }
 .code-modal .code-enter{
-    margin: 0;
+    font-size: 48px;
+    height: 48px !important;
+    padding: 7px 16px !important;
+    text-align: center;
+    width: calc(100% - 280px) !important;
+    color: rgb(73, 80, 87);
+    font-family: 'Roboto Mono', monospace;
 }
 .code-modal .btn-enter-code{
     cursor: pointer;
-    margin-left: 8px;
+    font-size: 18px;
+    font-weight: 500;
+    height: 48px;
+    width: calc(100% - 246px);
+    text-transform: capitalize;
+    line-height: 24px;
+    padding: 12px 47px;
+    text-align: center;
 }
 .code-modal .btn-cancel-session{
     text-align: center;
     cursor: pointer;
-    margin-bottom: 16px;
+    padding-bottom: 23px;
+    font-size: 16px;
 }
 .code-modal .btn-cancel{
     position: absolute;
     right: 20px;
     cursor: pointer;
+    display: none;
 }
 .code-modal .btn-cancel svg polygon{
     fill: #9E9E9E;
 }
 .code-modal .enter-code-buttons-wrap{
+    align-items: center;
     display: flex;
     justify-content: space-between;
-    margin-bottom: 14px;
-    align-items: center;
+    margin-bottom: 22px;
+    flex-direction: column;
+    margin-top: -8px;
 }
 .code-modal .incoming-request-buttons-wrap{
     display: flex;
@@ -20739,29 +20796,74 @@ ul.restrictions-list-content>li {
     cursor: pointer;
 }
 /* chat bottom active session */
-.chat-bottom-active-session-wrap:not(.hidden) {
+.chat-incoming-session-notification:not(.hidden) {
+    bottom: 176px;
     display: block;
-    position: absolute;
+    height: 176px;
+    position: relative;
     width: 100%;
-    height: 100%;
-    top: 0;
+    padding: 6px 90px 0 64px;
 }
-.chat-bottom-active-session-wrap .chat-bottom-active-session-container{
+.chat-incoming-session-notification .chat-bottom-active-session-container{
     position: relative;
     height: 100%;
 }
-.chat-bottom-active-session-wrap .notification-trust-session{
+.chat-incoming-session-notification .notification-trust-session{
     height: 100%;
     margin: 0;
+    padding: 52px 56px 32px 96px;
 }
-.chat-bottom-active-session-wrap .notification-trust-session .hide-session{
+.chat-incoming-session-notification .notification-trust-session .hide-session{
     position: absolute;
     right: 44px;
     top: 15px;
     cursor: pointer;
 }
-.chat-bottom-active-session-wrap .notification-trust-session .hide-session.moved-right{
-    right: 14px;
+.chat-incoming-session-notification .notification-trust-session .hide-session.moved-right{
+    right: 16px;
+    top: 16px
+}
+.chat-incoming-session-notification .notification-trust-session .accept-request-wrap{
+    position: absolute;
+    bottom: 12px;
+    right: 27px;
+    flex-direction: row-reverse;
+}
+.chat-incoming-session-notification .notification-trust-session .accept-request-wrap .btn-flat{
+    margin: 0;
+    margin-left: 24px;
+}
+.chat-incoming-session-notification .notification-trust-session .accept-request-wrap .accept-request:hover{
+    opacity: 0.8;
+}
+.chat-incoming-session-notification .notification-trust-session .accept-request-wrap .decline-request:hover{
+    background: transparent;
+    opacity: 0.8;
+}
+.chat-incoming-session-notification .notification-trust-session .active-session-icon{
+    border-radius: 50%;
+    height: 24px;
+    outline: 13px;
+    outline-offset: -1px;
+    outline-style: solid;
+    position: absolute;
+    left: 36px;
+    top: 36px;
+}
+.chat-incoming-session-notification .notification-trust-session .active-session-icon i{
+    color: #FFF;
+}
+.chat-incoming-session-notification .notification-trust-session .state-label{
+    position: absolute;
+    top: 16px;
+    left: 96px;
+    font-size: 20px;
+}
+.chat-incoming-session-notification .notification-trust-session .state{
+    color: rgba(0, 0, 0, 0.60);
+}
+.encrypted .chat-content.active-incoming-session::after{
+    padding-bottom: 176px;
 }
 .chat-tools-wrap .chat-tool.btn-show-session.active-session{
     background-color: #81d4fa;

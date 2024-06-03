@@ -66,6 +66,7 @@
     addTemplate('base.fingerprint_item');
     addTemplate('base.fingerprint_devices_item');
     addTemplate('base.contact_verification_session');
+    addTemplate('base.chat_content_contact_verification_session');
     addTemplate('base.incoming_trust_session');
     addTemplate('base.active_session_modal');
     addTemplate('base.jingle_message_calling');

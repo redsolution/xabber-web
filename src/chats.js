@@ -3411,7 +3411,10 @@ xabber.ChatContentView = xabber.BasicView.extend({
         "click .btn-retry-send-message": "retrySendMessage",
         "click .btn-delete-message": "removeFileErrorMessage",
         "click .not-decrypted-tooltip .btn-manage-devices": "openDevicesWindow",
-        "click .encryption-warning": "openDevicesWindow"
+        "click .encryption-warning": "openDevicesWindow",
+        "click .hide-session": "hideActiveTrustSession",
+        'click .accept-request': "acceptRequest",
+        'click .decline-request': "rejectRequest",
     },
 
     _initialize: function (options) {
@@ -3470,6 +3473,8 @@ xabber.ChatContentView = xabber.BasicView.extend({
         this.account.dfd_presence.done(() => {
             !this.account.connection.do_synchronization && this.loadLastHistory();
         });
+        if (this.model.get('encrypted'))
+            this.account.on('active_session_change', this.renderActiveTrustSession, this);
         return this;
     },
 
@@ -3488,7 +3493,127 @@ xabber.ChatContentView = xabber.BasicView.extend({
             this.contact.get('group_chat') && this.updatePinnedMessage();
             this.subscription_buttons.render();
         }
+        if (this.model.get('encrypted'))
+            this.renderActiveTrustSession();
         xabber.chat_body.updateBodyNotifications(this.model);
+    },
+
+    renderActiveTrustSession: function () {
+        if (!this.model.get('encrypted') || !this.account.omemo || !this.account.omemo.xabber_trust)
+            return
+
+        let active_sessions = this.account.omemo.xabber_trust.get('active_trust_sessions');
+        this.$(`.notification-trust-session`).remove();
+        this.$(`.chat-content`).removeClass('active-incoming-session');
+        this.$('.chat-incoming-session-notification').addClass('hidden');
+
+        Object.keys(active_sessions).forEach((session_id) => {
+            let session = active_sessions[session_id];
+            if (session.verification_step === '0b'){
+                if ((session.active_verification_device && session.active_verification_device.peer_jid === this.contact.get('jid') ) || session.session_check_jid === this.contact.get('jid')){
+                    let state = xabber.getString("chat_content__incoming_session_text"),
+                        state_label = xabber.getString("verification_session_state__incoming_label");
+
+                    let item = {
+                        jid: null,
+                        device_id: null,
+                        chat_bottom: true,
+                        is_active_request: null,
+                        sid: session_id,
+                        state: state,
+                        state_label: state_label,
+                        code: session.active_verification_code,
+                        is_enter_code: null,
+                    };
+                    if (session.active_verification_device) {
+                        item.jid = session.active_verification_device.peer_jid;
+                        item.device_id = session.active_verification_device.device_id;
+                    } else if (session.session_check_jid){
+                        item.jid = session.session_check_jid;
+                        item.device_id = session.session_check_device_id;
+                    }
+                    if (session.verification_step === '1a' && session.verification_accepted_msg_xml) {
+                        item.is_enter_code = true;
+                    }
+                    if (session.verification_step === '0b') {
+                        item.is_active_request = true;
+                    }
+
+                    this.$('.chat-incoming-session-notification').append($(env.templates.base.chat_content_contact_verification_session(item)));
+                    this.$('.chat-incoming-session-notification').removeClass('hidden');
+                    this.$(`.chat-content`).addClass('active-incoming-session');
+                }
+            }
+        });
+    },
+
+    acceptRequest: function (ev) {
+        if (!this.account.omemo.xabber_trust)
+            return;
+        let $item = $(ev.target).closest('.notification-trust-session'),
+            active_sessions = this.account.omemo.xabber_trust.get('active_trust_sessions'),
+            sid = $item.attr('data-sid'), session;
+
+        session = active_sessions[sid];
+        if (!session)
+            return;
+
+        let message = session.incoming_request_data.message,
+            message_options = session.incoming_request_data.message_options;
+        message_options.automated = false;
+        this.account.omemo.xabber_trust.receiveTrustVerificationMessage(message, message_options);
+
+    },
+
+    rejectRequest: function (ev) {
+        if (!this.account.omemo.xabber_trust)
+            return;
+
+        let $item = $(ev.target).closest('.notification-trust-session'),
+            sid = $item.attr('data-sid');
+
+        let msg_id = uuid(),
+            to = this.contact.get('jid'),
+            stanza = $iq({
+                type: 'set',
+                to: to,
+                id: msg_id
+            });
+        stanza.c('notify', {xmlns: Strophe.NS.XABBER_NOTIFY});
+        stanza.c('notification', {xmlns: Strophe.NS.XABBER_NOTIFY});
+        stanza.c('forwarded', {xmlns: Strophe.NS.FORWARD});
+        stanza.c('message', {
+            to: to,
+            from: this.account.get('jid'),
+            type: 'chat',
+            id: uuid()
+        });
+        stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: sid, timestamp: Date.now()});
+        stanza.c('verification-failed', {reason: 'Session cancelled'}).up().up();
+
+        stanza.up().up().up();
+        stanza.c('addresses', {xmlns: Strophe.NS.ADDRESS}).c('address',{type: 'to', jid: to}).up().up();
+
+        this.account.sendFast(stanza, () => {
+            let $stanza = $(stanza.tree());
+            $stanza.attr('to',this.account.get('jid'));
+            $stanza.find('notification forwarded message').attr('to',this.account.get('jid'));
+            $stanza.find(`addresses[xmlns="${Strophe.NS.ADDRESS}"] address[type="to"]`).attr('jid',this.account.get('jid'));
+            this.contact && this.account.omemo.xabber_trust.createFailedSessionMsg(this.contact.get('jid'), 'Session cancelled');
+            this.account.sendFast(stanza, () => {
+            });
+        });
+        this.account.omemo.xabber_trust.clearData(sid);
+
+    },
+
+    // showActiveTrustSession: function () {
+    //     this.$('.chat-incoming-session-notification').removeClass('hidden');
+    // },
+
+    hideActiveTrustSession: function () {
+        this.$('.chat-incoming-session-notification').addClass('hidden');
+        this.$(`.chat-content`).removeClass('active-incoming-session');
     },
 
     openDevicesWindow: function () {
@@ -11868,9 +11993,6 @@ xabber.ChatBottomView = xabber.BasicView.extend({
         "click .message-reference-preview-item-file .mdi-close": "removeFileSnippet",
         "click .btn-manage-devices": "openDevicesWindow",
         "click .ephemeral-timer-time": "showEphemeralTimerSelector",
-        "click .hide-session": "hideActiveTrustSession",
-        'click .accept-request': "acceptRequest",
-        'click .decline-request': "rejectRequest",
     },
 
     _initialize: function (options) {
@@ -12099,8 +12221,6 @@ xabber.ChatBottomView = xabber.BasicView.extend({
             $target_emoji.length && this.typeEmoticon($target_emoji.data('emoji'));
         });
         this.renderLastEmoticons();
-        if (this.model.get('encrypted'))
-            this.account.on('active_session_change', this.renderActiveTrustSession, this);
     },
 
     render: function (options) {
@@ -12139,127 +12259,8 @@ xabber.ChatBottomView = xabber.BasicView.extend({
         }
         this.focusOnInput();
         this.manageSelectedMessages();
-        if (this.model.get('encrypted'))
-            this.renderActiveTrustSession();
         xabber.chat_body.updateHeight();
         return this;
-    },
-
-    renderActiveTrustSession: function () {
-        if (!this.model.get('encrypted') || !this.account.omemo || !this.account.omemo.xabber_trust)
-            return
-
-        let active_sessions = this.account.omemo.xabber_trust.get('active_trust_sessions');
-        this.$(`.notification-trust-session`).remove();
-        this.$('.chat-bottom-active-session-wrap').addClass('hidden');
-        this.$('.btn-show-session').addClass('hidden');
-
-        Object.keys(active_sessions).forEach((session_id) => {
-            let session = active_sessions[session_id];
-            if (session.verification_step === '0b'){
-                if ((session.active_verification_device && session.active_verification_device.peer_jid === this.contact.get('jid') ) || session.session_check_jid === this.contact.get('jid')){
-                    let state = this.account.omemo.xabber_trust.getVerificationState(session),
-                        state_label = this.account.omemo.xabber_trust.getVerificationStateLabel(session);
-
-                    let item = {
-                        jid: null,
-                        device_id: null,
-                        chat_bottom: true,
-                        is_active_request: null,
-                        sid: session_id,
-                        state: state,
-                        state_label: state_label,
-                        code: session.active_verification_code,
-                        is_enter_code: null,
-                    };
-                    if (session.active_verification_device) {
-                        item.jid = session.active_verification_device.peer_jid;
-                        item.device_id = session.active_verification_device.device_id;
-                    } else if (session.session_check_jid){
-                        item.jid = session.session_check_jid;
-                        item.device_id = session.session_check_device_id;
-                    }
-                    if (session.verification_step === '1a' && session.verification_accepted_msg_xml) {
-                        item.is_enter_code = true;
-                    }
-                    if (session.verification_step === '0b') {
-                        item.is_active_request = true;
-                    }
-
-                    this.$('.chat-bottom-active-session-container').append($(env.templates.base.contact_verification_session(item)));
-                    this.$('.chat-bottom-active-session-wrap').removeClass('hidden');
-                    this.$('.btn-show-session').removeClass('hidden');
-                }
-            }
-        });
-    },
-
-    acceptRequest: function (ev) {
-        if (!this.account.omemo.xabber_trust)
-            return;
-        let $item = $(ev.target).closest('.notification-trust-session'),
-            active_sessions = this.account.omemo.xabber_trust.get('active_trust_sessions'),
-            sid = $item.attr('data-sid'), session;
-
-        session = active_sessions[sid];
-        if (!session)
-            return;
-
-        let message = session.incoming_request_data.message,
-            message_options = session.incoming_request_data.message_options;
-        message_options.automated = false;
-        this.account.omemo.xabber_trust.receiveTrustVerificationMessage(message, message_options);
-
-    },
-
-    rejectRequest: function (ev) {
-        if (!this.account.omemo.xabber_trust)
-            return;
-
-        let $item = $(ev.target).closest('.notification-trust-session'),
-            sid = $item.attr('data-sid');
-
-        let msg_id = uuid(),
-            to = this.contact.get('jid'),
-            stanza = $iq({
-                type: 'set',
-                to: to,
-                id: msg_id
-            });
-        stanza.c('notify', {xmlns: Strophe.NS.XABBER_NOTIFY});
-        stanza.c('notification', {xmlns: Strophe.NS.XABBER_NOTIFY});
-        stanza.c('forwarded', {xmlns: Strophe.NS.FORWARD});
-        stanza.c('message', {
-            to: to,
-            from: this.account.get('jid'),
-            type: 'chat',
-            id: uuid()
-        });
-        stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: sid, timestamp: Date.now()});
-        stanza.c('verification-failed', {reason: 'Session cancelled'}).up().up();
-
-        stanza.up().up().up();
-        stanza.c('addresses', {xmlns: Strophe.NS.ADDRESS}).c('address',{type: 'to', jid: to}).up().up();
-
-        this.account.sendFast(stanza, () => {
-            let $stanza = $(stanza.tree());
-            $stanza.attr('to',this.account.get('jid'));
-            $stanza.find('notification forwarded message').attr('to',this.account.get('jid'));
-            $stanza.find(`addresses[xmlns="${Strophe.NS.ADDRESS}"] address[type="to"]`).attr('jid',this.account.get('jid'));
-            this.contact && this.account.omemo.xabber_trust.createFailedSessionMsg(this.contact.get('jid'), 'Session cancelled');
-            this.account.sendFast(stanza, () => {
-            });
-        });
-        this.account.omemo.xabber_trust.clearData(sid);
-
-    },
-
-    showActiveTrustSession: function () {
-        this.$('.chat-bottom-active-session-wrap').removeClass('hidden');
-    },
-
-    hideActiveTrustSession: function () {
-        this.$('.chat-bottom-active-session-wrap').addClass('hidden');
     },
 
     setButtonsWidth: function () {

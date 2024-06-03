@@ -1,0 +1,22 @@
+<div class="notification-trust-session ground-color-100" data-sid="{{sid}}" data-jid="{{jid}}">
+    {[if (chat_bottom) {]}
+    <div class="hide-session {[if (is_active_request) {]}moved-right{[}]}">
+        <svg class="mdi mdi-24px mdi-svg-template" data-svgname="close"></svg>
+    </div>
+    {[}]}
+    <div class="active-session-icon ground-color-500 outline-color-500">
+        <i class="mdi mdi-lock mdi-24px"></i>
+    </div>
+    <div class="state-label">{{state_label}}</div>
+    <div class="state">{{state}}</div>
+    {[if (is_active_request) {]}
+    <div class="accept-request-wrap">
+        <div class="accept-request btn-flat btn-main-filled ground-color-500">
+            {[print(xabber.getString("accept"))]}
+        </div>
+        <div class="decline-request btn-flat btn-main text-color-500">
+            {[print(xabber.getString("reject"))]}
+        </div>
+    </div>
+    {[}]}
+</div>

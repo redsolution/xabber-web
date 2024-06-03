@@ -109,6 +109,7 @@ xabber.IncomingTrustSessionView = xabber.BasicView.extend({
 xabber.ActiveSessionModalView = xabber.BasicView.extend({
     className: 'modal main-modal code-modal',
     template: templates.active_session_modal,
+    ps_selector: '.code-modal-wrap',
     events: {
         "click .btn-cancel": "cancel",
         "click .btn-cancel-session": "cancelSession",
