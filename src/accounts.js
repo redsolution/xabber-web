@@ -924,6 +924,9 @@ xabber.Account = Backbone.Model.extend({
                 this.session.set({
                     ready_to_send: true
                 })
+
+                this._main_interval_worker.postMessage({});
+                this.fast_connection && this._fast_interval_worker.postMessage({});
             });
             this.registerPresenceHandler();
             this.enableCarbons();

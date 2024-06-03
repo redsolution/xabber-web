@@ -278,8 +278,6 @@ xabber.Account.addConnPlugin(function () {
         }
     };
 
-    this._main_interval_worker.postMessage({});
-
     this.server_features.request();
 }, true, true);
 
@@ -326,7 +324,6 @@ xabber.Account.addFastConnPlugin(function () {
             this.fast_connection && this.fast_connection.ping.ping(this.get('domain'));
         }
     };
-    this._fast_interval_worker.postMessage({});
 }, true, true);
 
 xabber.Account.addConnPlugin(function () {
