@@ -77,7 +77,7 @@ xabber.IncomingTrustSessionView = xabber.BasicView.extend({
                 id: uuid()
             });
             stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: this.sid, timestamp: Date.now()});
-            stanza.c('verification-failed', {reason: 'Session cancelled'}).up().up();
+            stanza.c('verification-rejected', {reason: 'Session cancelled'}).up().up();
 
             stanza.up().up().up();
             stanza.c('addresses', {xmlns: Strophe.NS.ADDRESS}).c('address',{type: 'to', jid: to}).up().up();
@@ -218,7 +218,7 @@ xabber.ActiveSessionModalView = xabber.BasicView.extend({
             id: uuid()
         });
         stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: this.sid, timestamp: Date.now()});
-        stanza.c('verification-failed', {reason: 'Session cancelled'}).up().up();
+        stanza.c('verification-rejected', {reason: 'Session cancelled'}).up().up();
 
         stanza.up().up().up();
         stanza.c('addresses', {xmlns: Strophe.NS.ADDRESS}).c('address',{type: 'to', jid: to}).up().up();
@@ -1427,14 +1427,14 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                 }
                 return;
             }
-            if ($message.find('verification-failed').length){
+            if ($message.find('verification-failed').length || $message.find('verification-rejected').length){
                 // console.log($message.find('verification-failed').attr('reason'));
                 this.clearData(sid);
-                contact && this.createFailedSessionMsg(contact.get('jid'), $message.find('verification-failed').attr('reason'));
+                contact && this.createFailedSessionMsg(contact.get('jid'), $message.find('verification-failed').attr('reason') || $message.find('verification-rejected').attr('reason'));
                 return;
             }
         } else {
-            if ($message.find('verification-failed').length){
+            if ($message.find('verification-failed').length || $message.find('verification-rejected').length){
                 this.clearData(sid);
                 return;
             }

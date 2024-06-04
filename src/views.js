@@ -1912,6 +1912,7 @@ xabber.SettingsModalView = xabber.BasicView.extend({
         "click .setting.mapping-service label": "setMappingService",
         "click .setting.desktop-autostart label": "setDesktopAutostart",
         "click .setting.reconnection-popup-log label": "setReconnectionLogs",
+        "click .setting.debug-mode label": "setDebugMode",
         "change .sound input[type=radio][name=private_sound]": "setPrivateSound",
         "change .sound input[type=radio][name=group_sound]": "setGroupSound",
         "change .sound input[type=radio][name=call_sound]": "setCallSound",
@@ -2595,6 +2596,13 @@ xabber.SettingsModalView = xabber.BasicView.extend({
         this.model.save('reconnection_logs', value);
         ev.preventDefault();
         $(ev.target).closest('.setting.reconnection-popup-log').find('input').prop('checked', value);
+    },
+
+    setDebugMode: function (ev) {
+        let value = !this.model.get('debug_mode');
+        this.model.save('debug_mode', value);
+        ev.preventDefault();
+        $(ev.target).closest('.setting.debug-mode').find('input').prop('checked', value);
     },
 
     setPrivateSound: function (ev) {

@@ -12423,6 +12423,18 @@ input[type=range].voice-message-volume:focus {
     top: 67px;
     z-index: 2;
 }
+.settings-panel-wrap .settings-panel .device-information-refresh-bundle-debug{
+    cursor: pointer;
+    z-index: 2;
+    position: absolute;
+    right: 20px;
+    top: -45px;
+    background: aliceblue;
+    height: 32px;
+    width: 150px;
+    text-align: center;
+    padding: 4px;
+}
 .settings-panel-wrap .settings-panel .device-information-trust-text-wrap .device-information-trust-text{
     position: absolute;
     top: -45px;
@@ -20660,25 +20672,24 @@ ul.restrictions-list-content>li {
 }
 /* Code Modal */
 .code-modal{
-    height: 740px;
     max-height: 80%;
-    width: 576px !important;
     position: relative;
+    width: 576px !important;
+    height: 600px;
 }
 .code-modal .code-modal-wrap{
     position: relative;
     height: 100%;
 }
 .code-modal .modal-header{
-    text-align: center;
     font-size: 18px;
-    height: 72px;
-    padding-top: 36px;
+    height: 56px;
+    padding-top: 16px;
+    text-align: center;
 }
 .code-modal .modal-content{
-    padding-top: 32px;
+    height: calc(100% - 56px);
     max-height: unset;
-    height: calc(100% - 72px);
 }
 .code-modal .code-contact-text{
     font-size: 20px;
@@ -20695,21 +20706,20 @@ ul.restrictions-list-content>li {
 
 /*}*/
 .code-modal .code-device-info-wrap{
+    align-items: center;
     display: flex;
     flex-direction: column;
-    align-items: center;
     justify-content: center;
-    margin-top: 24px;
-    padding: 24px 0;
+    padding: 12px 0;
 }
 .code-modal .code-device-info-wrap .circle-avatar{
-    width: 128px;
-    height: 128px;
+    height: 96px;
+    width: 96px;
 }
 .code-modal .code-device-info-wrap .code-device-name {
     font-size: 24px;
     line-height: 32px;
-    margin-top: 24px;
+    margin-top: 8px;
 }
 .code-modal .code-device-info-wrap .code-device-jid {
     line-height: 24px;
@@ -20738,7 +20748,7 @@ ul.restrictions-list-content>li {
     text-align: center;
     line-height: 48px;
     font-size: 48px;
-    margin-bottom: 90px;
+    margin-bottom: 96px;
     color: rgb(73, 80, 87);
 }
 .code-modal .code-enter{
@@ -20800,19 +20810,26 @@ ul.restrictions-list-content>li {
     bottom: 176px;
     display: block;
     height: 176px;
-    position: relative;
-    width: 100%;
+    max-width: 768px;
     padding: 6px 90px 0 64px;
+    position: relative;
+    left: 50%;
+    transform: translate(-50%, 0);
+    width: 100%;
 }
 .chat-incoming-session-notification .chat-bottom-active-session-container{
     position: relative;
     height: 100%;
 }
 .chat-incoming-session-notification .notification-trust-session{
-    height: 100%;
-    margin: 0;
-    padding: 52px 56px 32px 96px;
     background-color: #ffe0b2;
+    height: fit-content;
+    margin: 0;
+    position: absolute;
+    right: 90px;
+    left: 64px;
+    bottom: 0;
+    padding: 22px 56px 56px 96px;
 }
 .chat-incoming-session-notification .notification-trust-session .hide-session{
     position: absolute;
@@ -20863,16 +20880,14 @@ ul.restrictions-list-content>li {
     color: #FFF;
 }
 .chat-incoming-session-notification .notification-trust-session .state-label{
-    position: absolute;
-    top: 16px;
-    left: 96px;
     font-size: 20px;
+    padding-bottom: 6px;
 }
 .chat-incoming-session-notification .notification-trust-session .state{
     color: rgba(0, 0, 0, 0.60);
 }
 .encrypted .chat-content.active-incoming-session::after{
-    padding-bottom: 176px;
+    padding-bottom: var(--active-session-item-height,176px);
 }
 .chat-tools-wrap .chat-tool.btn-show-session.active-session{
     position:relative;

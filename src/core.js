@@ -307,6 +307,7 @@ let Xabber = Backbone.Model.extend({
             mapping_service: 'default',
             desktop_autostart: false,
             reconnection_logs: false,
+            debug_mode: false,
             sound_on_call: 'marching-band-dave-girtsman',
             sound_on_dialtone: 'marching-band-dave-girtsman',
             sound_on_connection: '_call_connecting',

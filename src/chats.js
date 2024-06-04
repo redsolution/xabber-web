@@ -3447,6 +3447,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
         this.ps_container.on("ps-scroll-y", this.onScrollY.bind(this));
         this.model.on("change:active change:idle", this.onChangedActiveStatus, this);
         xabber.on("change:idle change:focused", this.onChangedIdleStatus, this);
+        xabber.on('update_layout', this.updateActiveSessionHeight, this);
         this.model.on("load_last_history", this.loadLastHistory, this);
         this.model.on("get_missed_history", this.requestMissedMessages, this);
         this.model.messages.on("add", this.onMessage, this);
@@ -3509,7 +3510,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
 
         Object.keys(active_sessions).forEach((session_id) => {
             let session = active_sessions[session_id];
-            if (session.verification_step === '0b'){
+            if (session.verification_step === '0b' && this.model.get('hidden_active_session_sid') !== session_id){
                 if ((session.active_verification_device && session.active_verification_device.peer_jid === this.contact.get('jid') ) || session.session_check_jid === this.contact.get('jid')){
                     let state = xabber.getString("chat_content__incoming_session_text"),
                         state_label = xabber.getString("verification_session_state__incoming_label");
@@ -3545,6 +3546,9 @@ xabber.ChatContentView = xabber.BasicView.extend({
                 }
             }
         });
+        setTimeout(() => {
+            this.updateActiveSessionHeight();
+        }, 250)
     },
 
     acceptRequest: function (ev) {
@@ -3562,6 +3566,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
             message_options = session.incoming_request_data.message_options;
         message_options.automated = false;
         this.account.omemo.xabber_trust.receiveTrustVerificationMessage(message, message_options);
+        this.head.onSessionButtonClick()
 
     },
 
@@ -3589,7 +3594,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
             id: uuid()
         });
         stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: sid, timestamp: Date.now()});
-        stanza.c('verification-failed', {reason: 'Session cancelled'}).up().up();
+        stanza.c('verification-rejected', {reason: 'Session cancelled'}).up().up();
 
         stanza.up().up().up();
         stanza.c('addresses', {xmlns: Strophe.NS.ADDRESS}).c('address',{type: 'to', jid: to}).up().up();
@@ -3611,9 +3616,25 @@ xabber.ChatContentView = xabber.BasicView.extend({
     //     this.$('.chat-incoming-session-notification').removeClass('hidden');
     // },
 
-    hideActiveTrustSession: function () {
+    hideActiveTrustSession: function (ev) {
+        let $item = $(ev.target).closest('.notification-trust-session'),
+            sid = $item.attr('data-sid');
+        this.model.set('hidden_active_session_sid', sid)
+        this.head.renderActiveTrustSession && this.head.renderActiveTrustSession();
         this.$('.chat-incoming-session-notification').addClass('hidden');
         this.$(`.chat-content`).removeClass('active-incoming-session');
+    },
+
+    updateActiveSessionHeight: function () {
+        if (!this.model.get('encrypted') || !this.$('.notification-trust-session').length)
+            return;
+        let after_element = this.$('.chat-content');
+        if (!after_element.length)
+            return;
+        after_element = after_element[0];
+        let height = this.$('.notification-trust-session').height() + 78;
+        after_element.style.setProperty('--active-session-item-height', height + 'px')
+
     },
 
     openDevicesWindow: function () {
@@ -4735,10 +4756,10 @@ xabber.ChatContentView = xabber.BasicView.extend({
         if (message.get('notification_msg') && message.get('notification_msg_content') && this.data.get('notification_content')){
             $notification_msg = $(message.get('notification_msg_content'));
             if (message.get('notification_trust_msg') || $notification_msg.children(`authenticated-key-exchange[xmlns="${Strophe.NS.XABBER_TRUST}"]`).length) {
-                if (!$notification_msg.find('verification-successful').length && !$notification_msg.find('verification-failed').length){
+                if (!$notification_msg.find('verification-successful').length && !$notification_msg.find('verification-failed').length && !$notification_msg.find('verification-rejected').length){
                     ignored = true;
                 }
-                if ($notification_msg.find('verification-failed').length){
+                if ($notification_msg.find('verification-failed').length || $notification_msg.find('verification-rejected').length){
                     ignored = true;
                     verification_failed = true;
                 }
@@ -10746,17 +10767,19 @@ xabber.InvitationPanelView = xabber.SearchView.extend({
 
         Object.keys(active_sessions).forEach((session_id) => {
             let session = active_sessions[session_id];
+            if (session.verification_step === '0b' && this.model.get('hidden_active_session_sid') !== session_id)
+                return;
             if ((session.active_verification_device && session.active_verification_device.peer_jid === this.contact.get('jid') ) || session.session_check_jid === this.contact.get('jid')){
                 this.$('.btn-show-session').removeClass('hidden');
                 this.$('.btn-show-session').addClass('active-session');
-                this.$('.btn-show-session').addClass('pulsating');
+                this.$('.btn-show-session .background-element').addClass('pulsating');
                 if (session.verification_step === '1a' && !(session.active_verification_device && session.active_verification_device.device_id))
                     this.$('.btn-show-session .background-element').removeClass('pulsating');
             }
         });
     },
 
-    onSessionButtonClick: function (ev) {
+    onSessionButtonClick: function () {
         if (!this.model.get('encrypted') || !this.account.omemo || !this.account.omemo.xabber_trust)
             return;
 

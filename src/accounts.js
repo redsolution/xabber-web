@@ -3023,6 +3023,7 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
         "click .btn-select-files": "enableFilesSelect",
         "click .all-sessions .device-encryption.active": "openFingerprint",
         "click .device-information-trust": "openFingerprintDevice",
+        "click .device-information-refresh-bundle-debug": "refreshBundle",
         "click .btn-purge-keys": "purgeKeys"
     },
 
@@ -3435,6 +3436,17 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
             this.$(`.token-resource-wrap`).hideIf(true)
     },
 
+    refreshBundle: function () {
+        if (!this.model.omemo || !xabber._settings.get('debug_mode'))
+            return;
+        this.model.omemo.bundle.generateIdentity().then(()=>{
+            this.model.omemo.publishBundle();
+            this.$('.btn-back-subsettings-account').length && this.backToSubMenu({target: this.$('.btn-back-subsettings-account')[0]})
+            this.renderAllXTokens();
+        });
+
+    },
+
     renderAllXTokens: function () {
         this.$('.sessions-wrap').html("");
         this.$('.orphaned-fingerprints-wrap').html("");
@@ -3557,6 +3569,7 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
                 this.$('.device-information-trust-text').attr('data-trust', $this_device.attr('data-trust'));
                 if (this.model.get('x_token') && this.model.get('x_token').token_uid == token.token_uid){
                     this.$('.device-information-trust-text').text(xabber.getString("settings_account__omemo_enabled"));
+                    this.$('.device-information-refresh-bundle-debug').switchClass('hidden', !xabber._settings.get('debug_mode'));
                     this.$('.device-information-trust').addClass('hidden');
                     this.$('.device-information-trust').attr('data-trust', 'trust');
                     this.$('.device-information-trust-text').attr('data-trust', 'trust');

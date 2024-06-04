@@ -386,7 +386,7 @@ xabber.Fingerprints = xabber.BasicView.extend({
             id: uuid()
         });
         stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: sid, timestamp: Date.now()});
-        stanza.c('verification-failed', {reason: 'Session cancelled'}).up().up();
+        stanza.c('verification-rejected', {reason: 'Session cancelled'}).up().up();
 
         stanza.up().up().up();
         stanza.c('addresses', {xmlns: Strophe.NS.ADDRESS}).c('address',{type: 'to', jid: to}).up().up();

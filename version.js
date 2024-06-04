@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.3.5.24","version_description":"changed active session card and button coloring, changed pulsating button, fixed ik and fingerprint getting on generating trustedKey"}'
+'{"version_number":"2.3.5.25","version_description":"added debug mode option and added for it refresh bundle button, added dynamic height for chat incoming session notification, hidden chat head session button if chat incoming session notification is visible, changed request rejection to verification-rejected stanza, changed active session modal desing for height adjustments,"}'
 )});
