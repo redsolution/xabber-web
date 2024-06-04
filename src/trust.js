@@ -684,9 +684,11 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                 device.once('change:fingerprint', () => {
                     dfd.resolve()
                 });
+
                 setTimeout(() => {
                     dfd.reject();
                 }, 5000);
+                device.fillDeviceIK();
             } else {
                 dfd.resolve()
             }
@@ -2082,16 +2084,12 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                             let concatinated = new Uint8Array([...new Uint8Array(A_trustedKeyBuffer), ...new Uint8Array(code_buffer), ...new Uint8Array(b_payload) ]);
 
                             // console.log('A_trustedKeyBuffer  !!!!!!!!!!!!!!!!!!!!!!!!!2');
-                            // console.log(A_trustedKeyBuffer);
                             // console.log(utils.ArrayBuffertoBase64(A_trustedKeyBuffer));
                             // console.log('code_buffer  !!!!!!!!!!!!!!!!!!!!!!!!!2');
-                            // console.log(code_buffer);
                             // console.log(utils.ArrayBuffertoBase64(code_buffer));
                             // console.log('b_payload  !!!!!!!!!!!!!!!!!!!!!!!!!2');
-                            // console.log(b_payload);
                             // console.log(utils.ArrayBuffertoBase64(b_payload));
                             // console.log('concatinated  !!!!!!!!!!!!!!!!!!!!!!!!!2');
-                            // console.log(concatinated);
                             // console.log(utils.ArrayBuffertoBase64(concatinated));
 
                             utils.createSha256(concatinated).then((concatinated_hash) => {
@@ -2453,17 +2451,12 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
         let iv = window.crypto.getRandomValues(new Uint8Array(16)),
             code_buffer = new TextEncoder().encode(code);
 
-        // console.log(curve);
-        // console.log('utils.ArrayBuffertoBase64(buffer)');
-        // console.log(utils.ArrayBuffertoBase64(buffer));
         // console.log('utils.ArrayBuffertoBase64(trustedKeyBuffer)');
         // console.log(utils.ArrayBuffertoBase64(trustedKeyBuffer));
         // console.log('utils.ArrayBuffertoBase64(code_buffer)');
         // console.log(utils.ArrayBuffertoBase64(code_buffer));
         // console.log('utils.ArrayBuffertoBase64(b_payload)');
         // console.log(utils.ArrayBuffertoBase64(b_payload));
-        // console.log('utils.ArrayBuffertoBase64(hash)');
-        // console.log(utils.ArrayBuffertoBase64(hash));
 
         let concatinated = new Uint8Array([...new Uint8Array(trustedKeyBuffer), ...new Uint8Array(code_buffer), ...new Uint8Array(b_payload) ]),
             concatinated_hash = await utils.createSha256(concatinated);

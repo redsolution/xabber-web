@@ -20812,6 +20812,7 @@ ul.restrictions-list-content>li {
     height: 100%;
     margin: 0;
     padding: 52px 56px 32px 96px;
+    background-color: #ffe0b2;
 }
 .chat-incoming-session-notification .notification-trust-session .hide-session{
     position: absolute;
@@ -20833,6 +20834,12 @@ ul.restrictions-list-content>li {
     margin: 0;
     margin-left: 24px;
 }
+.chat-incoming-session-notification .notification-trust-session .accept-request-wrap .btn-main-filled{
+    background-color: #ff9800;
+}
+.chat-incoming-session-notification .notification-trust-session .accept-request-wrap .btn-main{
+    color: #ff9800;
+}
 .chat-incoming-session-notification .notification-trust-session .accept-request-wrap .accept-request:hover{
     opacity: 0.8;
 }
@@ -20849,6 +20856,8 @@ ul.restrictions-list-content>li {
     position: absolute;
     left: 36px;
     top: 36px;
+    background-color: #ff9800;
+    outline-color: #ff9800;
 }
 .chat-incoming-session-notification .notification-trust-session .active-session-icon i{
     color: #FFF;
@@ -20866,18 +20875,24 @@ ul.restrictions-list-content>li {
     padding-bottom: 176px;
 }
 .chat-tools-wrap .chat-tool.btn-show-session.active-session{
-    background-color: #81d4fa;
+    position:relative;
+}
+.chat-tools-wrap .chat-tool.btn-show-session.active-session .background-element{
+    background-color: #ffcc80;
     border-radius: 50%;
     height: 24px;
+    width: 24px;
     outline: 9px;
-    outline-color: #81d4fa;
+    outline-color: #ffcc80;
     outline-offset: -1px;
     outline-style: solid;
+    position: absolute;
+    left: 0;
 }
-.chat-tools-wrap .chat-tool.btn-show-session.active-session.pulsating{
+.chat-tools-wrap .chat-tool.btn-show-session.active-session .background-element.pulsating{
     -webkit-animation: pulsate 1.5s ease-out;
     -webkit-animation-iteration-count: infinite;
 }
 .chat-tools-wrap .chat-tool.btn-show-session.active-session i{
-    color: #0277bd;
+    color: #f57c00;
 }

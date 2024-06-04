@@ -10741,11 +10741,8 @@ xabber.InvitationPanelView = xabber.SearchView.extend({
 
         let active_sessions = this.account.omemo.xabber_trust.get('active_trust_sessions');
         this.$('.btn-show-session').addClass('hidden');
-        this.$('.btn-show-session').removeClass('pulsating');
+        this.$('.btn-show-session .background-element').removeClass('pulsating');
         this.$('.btn-show-session').removeClass('active-session');
-        this.$('.btn-show-session').removeClass('ground-color-200');
-        this.$('.btn-show-session').removeClass('outline-color-200');
-        this.$('.btn-show-session i').removeClass('text-color-700');
 
         Object.keys(active_sessions).forEach((session_id) => {
             let session = active_sessions[session_id];
@@ -10754,10 +10751,7 @@ xabber.InvitationPanelView = xabber.SearchView.extend({
                 this.$('.btn-show-session').addClass('active-session');
                 this.$('.btn-show-session').addClass('pulsating');
                 if (session.verification_step === '1a' && !(session.active_verification_device && session.active_verification_device.device_id))
-                    this.$('.btn-show-session').removeClass('pulsating');
-                this.$('.btn-show-session').addClass('ground-color-200');
-                this.$('.btn-show-session').addClass('outline-color-200');
-                this.$('.btn-show-session i').addClass('text-color-700');
+                    this.$('.btn-show-session .background-element').removeClass('pulsating');
             }
         });
     },
