@@ -847,7 +847,13 @@ xabber.FingerprintsOwnDevices = xabber.BasicView.extend({
             let $warning_container = $container.closest('.devices-wrap').find('.device-encryption-warning'),
                 untrusted_count = parseInt($warning_container.attr('data-not-trusted-count')) + 1;
             $warning_container.removeClass('hidden').attr('data-not-trusted-count', untrusted_count);
-            $warning_container.find('.device-encryption-warning-label').html(xabber.getString("settings_account__encryption_warning_text", [untrusted_count]));
+            if (is_trusted === 'error'){
+                $warning_container.addClass('warning-error');
+                $container.closest('.single-account-settings-panel-wrap').find('.settings-tabs-wrap .settings-tab .device-encryption').addClass('warning-error')
+                $warning_container.find('.device-encryption-warning-label').html(xabber.getString("settings_account__encryption_warning_error_text"));
+            } else {
+                $warning_container.find('.device-encryption-warning-label').html(xabber.getString("settings_account__encryption_warning_text", [untrusted_count]));
+            }
         }
         $container.find('.device-encryption .mdi-lock').removeClass('hidden');
         context && context.updateHeight && context.updateHeight();

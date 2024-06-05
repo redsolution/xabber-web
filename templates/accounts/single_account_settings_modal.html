@@ -127,6 +127,10 @@
             </div>
             <div class="settings-block-name one-line">{[print(xabber.getString("settings_account__devices_subheader"))]}</div>
             <div class="settings-block-label one-line">{[print(xabber.getString("placeholder_loading"))]}</div>
+            <div class="device-encryption hidden one-line">
+                <svg class="mdi mdi-24px mdi-svg-template" data-svgname="alert"></svg>
+                <svg class="mdi mdi-24px mdi-svg-template error-icon" data-svgname="alert-circle"></svg>
+            </div>
         </div>
     </div>
 </div>
@@ -160,7 +164,8 @@
             <div data-header='{[print(xabber.getString("settings_account__devices_subheader"))]}' class="settings-block-wrap devices">
                 <div class="devices-wrap hidden">
                     <div class="device-encryption-warning hidden" data-not-trusted-count="0">
-                        <svg class="device-encryption-icon mdi mdi-40px mdi-svg-template" data-svgname="alert-circle"></svg>
+                        <svg class="device-encryption-icon mdi mdi-40px mdi-svg-template error-icon" data-svgname="alert-circle"></svg>
+                        <svg class="device-encryption-icon mdi mdi-40px mdi-svg-template" data-svgname="alert"></svg>
                         <div class="device-encryption-warning-name one-line">{[print(xabber.getString("settings_account__encryption_warning_header"))]}</div>
                         <div class="device-encryption-warning-label"></div>
                     </div>

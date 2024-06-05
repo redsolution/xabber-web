@@ -116,6 +116,9 @@ xabber.ActiveSessionModalView = xabber.BasicView.extend({
         "click .btn-accept-session": "acceptRequest",
         "click .btn-reject-session": "rejectRequest",
         "click .btn-enter-code": "enterCode",
+        "click .btn-close": "cancel",
+        "keyup .code-enter": "keyDownCode",
+        "keydown .code-enter": "keyDownCode",
     },
 
     render: function (options) {
@@ -174,6 +177,8 @@ xabber.ActiveSessionModalView = xabber.BasicView.extend({
         }
         this.$('.part-one').html(xabber.getString("show_code__contact_device_tip_text_part_one"));
         this.$('.part-one b').addClass('text-color-500');
+        this.$('.btn-enter-code').prop('disabled', !this.$('input[name="code_enter"]').val());
+        this.ps_container.perfectScrollbar('update');
 
     },
 
@@ -244,6 +249,13 @@ xabber.ActiveSessionModalView = xabber.BasicView.extend({
         } else {
             this.account.omemo.xabber_trust.handleAcceptedMsgBySid(this.sid, code);
         }
+    },
+
+    keyDownCode: function (ev) {
+        let code = this.$('input[name="code_enter"]').val();
+        if (ev && ev.keyCode === constants.KEY_ENTER && code)
+            this.enterCode();
+        this.$('.btn-enter-code').prop('disabled', !code)
     },
 
     cancel: function () {

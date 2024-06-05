@@ -3451,6 +3451,8 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
         this.$('.sessions-wrap').html("");
         this.$('.orphaned-fingerprints-wrap').html("");
         this.$('.device-encryption-warning').attr('data-not-trusted-count', 0);
+        this.$('.device-encryption-warning').removeClass('warning-error');
+        this.$('.settings-tabs-wrap .settings-tab .device-encryption').removeClass('warning-error');
         this.$('.settings-tab[data-block-name="devices"] .settings-block-label').text(xabber.getQuantityString("settings_account__devices_subheader_label", this.model.x_tokens_list.length));
         let devices_count = this.model.x_tokens_list.length, handled_devices = 0;
         $(_.sortBy(this.model.x_tokens_list, '-last_auth')).each((idx, token) => {
@@ -3473,8 +3475,10 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
                     this.$('.current-session').append($cur_token_html);
                     handled_devices++;
                     if (handled_devices === devices_count){
-                        if (!_.isUndefined(this.$('.device-encryption-warning').attr('data-not-trusted-count')))
+                        if (!_.isUndefined(this.$('.device-encryption-warning').attr('data-not-trusted-count'))){
                             this.$('.device-encryption-warning').switchClass('hidden', this.$('.device-encryption-warning').attr('data-not-trusted-count') == '0');
+                            this.$('.settings-tabs-wrap .settings-tab .device-encryption').switchClass('hidden', this.$('.device-encryption-warning').attr('data-not-trusted-count') == '0');
+                        }
                     }
                     return;
                 }
@@ -3491,14 +3495,18 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
                     }
                     handled_devices++;
                     if (handled_devices === devices_count){
-                        if (!_.isUndefined(this.$('.device-encryption-warning').attr('data-not-trusted-count')))
+                        if (!_.isUndefined(this.$('.device-encryption-warning').attr('data-not-trusted-count'))){
                             this.$('.device-encryption-warning').switchClass('hidden', this.$('.device-encryption-warning').attr('data-not-trusted-count') == '0');
+                            this.$('.settings-tabs-wrap .settings-tab .device-encryption').switchClass('hidden', this.$('.device-encryption-warning').attr('data-not-trusted-count') == '0');
+                        }
                     }
                 }, () => {
                     handled_devices++;
                     if (handled_devices === devices_count){
-                        if (!_.isUndefined(this.$('.device-encryption-warning').attr('data-not-trusted-count')))
+                        if (!_.isUndefined(this.$('.device-encryption-warning').attr('data-not-trusted-count'))){
                             this.$('.device-encryption-warning').switchClass('hidden', this.$('.device-encryption-warning').attr('data-not-trusted-count') == '0');
+                            this.$('.settings-tabs-wrap .settings-tab .device-encryption').switchClass('hidden', this.$('.device-encryption-warning').attr('data-not-trusted-count') == '0');
+                        }
                     }
                 });
             } else {
@@ -3508,8 +3516,10 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
                 }
                 handled_devices++;
                 if (handled_devices === devices_count){
-                    if (!_.isUndefined(this.$('.device-encryption-warning').attr('data-not-trusted-count')))
+                    if (!_.isUndefined(this.$('.device-encryption-warning').attr('data-not-trusted-count'))){
                         this.$('.device-encryption-warning').switchClass('hidden', this.$('.device-encryption-warning').attr('data-not-trusted-count') == '0');
+                        this.$('.settings-tabs-wrap .settings-tab .device-encryption').switchClass('hidden', this.$('.device-encryption-warning').attr('data-not-trusted-count') == '0');
+                    }
                 }
             }
         });

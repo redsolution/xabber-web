@@ -2010,6 +2010,8 @@ xabber.SettingsModalView = xabber.BasicView.extend({
             .prop({checked: settings.mapping_service});
         this.$('.reconnection-popup-log input[type=checkbox]')
             .prop({checked: settings.reconnection_logs});
+        this.$('.debug-mode input[type=checkbox]')
+            .prop({checked: settings.debug_mode});
         if (constants.DESKTOP_AUTOSTART_OPTION) {
             this.$('.desktop-autostart input[type=checkbox]')
                 .prop({checked: settings.desktop_autostart});

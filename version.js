@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.3.5.25","version_description":"added debug mode option and added for it refresh bundle button, added dynamic height for chat incoming session notification, hidden chat head session button if chat incoming session notification is visible, changed request rejection to verification-rejected stanza, changed active session modal desing for height adjustments,"}'
+'{"version_number":"2.3.5.26","version_description":"changed warnings for unverified devices in devices tab, added warning variant for when there are errors with trusting, changed design for active session modal, added keyup and down event for code input in active session modal, fixed debug mode settings option default state,"}'
 )});

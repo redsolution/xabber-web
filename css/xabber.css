@@ -12122,12 +12122,19 @@ input[type=range].voice-message-volume:focus {
     width: unset;
 }
 
+.settings-panel-wrap .settings-tabs-wrap .settings-tab .device-encryption,
 .settings-panel-wrap .settings-column .devices-wrap .token-wrap .device-encryption{
     position: absolute;
     top: 21px;
     right: 27px;
     height: 24px;
     width: 24px;
+}
+.settings-panel-wrap .settings-tabs-wrap .settings-tab .device-encryption path{
+    fill: #ffa000 !important;
+}
+.settings-panel-wrap .settings-tabs-wrap .settings-tab .device-encryption.warning-error path{
+    fill: #D32F2F !important;
 }
 
 .settings-panel-wrap .settings-column .devices-wrap .token-wrap .device-encryption:not(.active){
@@ -12299,17 +12306,29 @@ input[type=range].voice-message-volume:focus {
     padding-left: 38px;
 }
 .settings-panel-wrap .settings-panel .device-encryption-warning{
-    padding: 16px 32px 6px 72px;
-    background: #FFEBEE;
+    padding: 16px 32px 16px 72px;
+    background: #fff8e1;
     position: relative;
+}
+.settings-panel-wrap .settings-panel .device-encryption-warning.warning-error{
+    background: #FFEBEE;
 }
 .settings-panel-wrap .settings-panel .device-encryption-icon{
     position: absolute;
     left: 20px;
     top: 20px;
 }
-.settings-panel-wrap .settings-panel .device-encryption-icon path{
+.settings-panel-wrap .settings-panel .device-encryption.warning-error .mdi:not(.error-icon),
+.settings-panel-wrap .settings-panel .device-encryption:not(.warning-error) .mdi.error-icon,
+.settings-panel-wrap .settings-panel .device-encryption-warning.warning-error .device-encryption-icon:not(.error-icon),
+.settings-panel-wrap .settings-panel .device-encryption-warning:not(.warning-error) .device-encryption-icon.error-icon{
+    display:none;
+}
+.settings-panel-wrap .settings-panel .device-encryption-icon.error-icon path{
     fill: #D32F2F;
+}
+.settings-panel-wrap .settings-panel .device-encryption-icon path{
+    fill: #ffa000;
 }
 .settings-panel-wrap .settings-panel .device-encryption-warning-name{
     font-size: 16px;
@@ -20675,7 +20694,7 @@ ul.restrictions-list-content>li {
     max-height: 80%;
     position: relative;
     width: 576px !important;
-    height: 600px;
+    /*height: 600px;*/
 }
 .code-modal .code-modal-wrap{
     position: relative;
@@ -20685,49 +20704,49 @@ ul.restrictions-list-content>li {
     font-size: 18px;
     height: 56px;
     padding-top: 16px;
-    text-align: center;
+    margin-left: 8px;
 }
 .code-modal .modal-content{
     height: calc(100% - 56px);
     max-height: unset;
 }
 .code-modal .code-contact-text{
-    font-size: 20px;
-    font-weight: 500;
-    text-align: center;
-    color: rgba(60, 60, 67, 0.6);
-    width: 65%;
+    color: rgba(60, 60, 67, .6);
+    font-size: 16px;
     position: relative;
-    left: 50%;
-    transform: translate(-50%, 0);
+    margin-left: 8px;
+    margin-bottom: 4px;
 }
 /*.code-modal .code-own-text,*/
 /*.code-modal .code-contact-text{*/
 
 /*}*/
 .code-modal .code-device-info-wrap{
-    align-items: center;
+    align-items: flex-start;
     display: flex;
     flex-direction: column;
     justify-content: center;
-    padding: 12px 0;
+    padding: 0 0 12px 0;
 }
 .code-modal .code-device-info-wrap .circle-avatar{
     height: 96px;
     width: 96px;
+    display:none;
 }
 .code-modal .code-device-info-wrap .code-device-name {
     font-size: 24px;
     line-height: 32px;
     margin-top: 8px;
+    display: none;
 }
 .code-modal .code-device-info-wrap .code-device-jid {
-    line-height: 24px;
     font-size: 16px;
+    line-height: 24px;
+    margin-left: 8px;
 }
+.code-modal .session-awaiting-response-text,
 .code-modal .session-incoming-request-text {
-    text-align: center;
-    margin-bottom: 8px;
+    margin-left: 8px;
 }
 .code-modal .code-contact-text-tip {
     font-size: 16px;
@@ -20735,7 +20754,7 @@ ul.restrictions-list-content>li {
     color: rgba(60, 60, 67, 0.6);
 }
 .code-modal .code-contact-text-tip ol {
-    margin: 0 24px 32px;
+    margin: 0 4px 32px;
     padding: 0 0 0 22px;
 }
 .code-modal .code-contact-text-tip ol li {
@@ -20748,8 +20767,9 @@ ul.restrictions-list-content>li {
     text-align: center;
     line-height: 48px;
     font-size: 48px;
-    margin-bottom: 96px;
+    margin-bottom: 48px;
     color: rgb(73, 80, 87);
+    font-family: Roboto Mono, monospace;
 }
 .code-modal .code-enter{
     font-size: 48px;
@@ -20760,22 +20780,45 @@ ul.restrictions-list-content>li {
     color: rgb(73, 80, 87);
     font-family: 'Roboto Mono', monospace;
 }
+.code-modal .active-session-buttons-wrap{
+    margin-bottom: 24px;
+    display: flex;
+    flex-direction: row-reverse;
+}
+.code-modal .btn-accept-session,
 .code-modal .btn-enter-code{
     cursor: pointer;
-    font-size: 18px;
+    font-size: 15px;
     font-weight: 500;
-    height: 48px;
-    width: calc(100% - 246px);
-    text-transform: capitalize;
-    line-height: 24px;
-    padding: 12px 47px;
+    height: 36px;
+    line-height: 12px;
+    letter-spacing: 1px;
+    padding: 12px;
     text-align: center;
+    text-transform: uppercase;
+    width: fit-content;
+    margin-left: 16px;
 }
+.code-modal .btn-enter-code:disabled{
+    pointer-events: none;
+    background: #BDBDBD !important;
+}
+.code-modal .btn-accept-session:hover,
+.code-modal .btn-enter-code:hover{
+    opacity: 0.8;
+}
+.code-modal .btn-reject-session,
+.code-modal .btn-close,
 .code-modal .btn-cancel-session{
-    text-align: center;
     cursor: pointer;
+    font-size: 15px;
     padding-bottom: 23px;
-    font-size: 16px;
+    width: fit-content;
+    float: right;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 500;
+    color: rgba(60, 60, 67, .6) !important;
 }
 .code-modal .btn-cancel{
     position: absolute;
@@ -20794,14 +20837,14 @@ ul.restrictions-list-content>li {
     flex-direction: column;
     margin-top: -8px;
 }
-.code-modal .incoming-request-buttons-wrap{
-    display: flex;
-    justify-content: center;
-    margin-bottom: 40px;
-}
-.code-modal .incoming-request-buttons-wrap .dotted-underline{
-    margin-right: 8px;
-}
+/*.code-modal .incoming-request-buttons-wrap{*/
+    /*display: flex;*/
+    /*justify-content: center;*/
+    /*margin-bottom: 40px;*/
+/*}*/
+/*.code-modal .incoming-request-buttons-wrap .dotted-underline{*/
+    /*margin-right: 8px;*/
+/*}*/
 .code-modal .dotted-underline{
     cursor: pointer;
 }
