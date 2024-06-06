@@ -2814,3 +2814,73 @@
 .hover-text-color-grey-50:hover {
   color: #FAFAFA !important;
 }
+
+/* linear gradients */
+[data-color=red] .linear-gradient-color-400-to-700{
+  background-image: linear-gradient(135deg, #ef5350 0%, #d32f2f 100%);
+}
+
+[data-color=pink] .linear-gradient-color-400-to-700{
+  background-image: linear-gradient(135deg, #ec407a 0%, #c2185b 100%);
+}
+
+[data-color=purple] .linear-gradient-color-400-to-700{
+  background-image: linear-gradient(135deg, #ab47bc 0%, #7b1fa2 100%);
+}
+
+[data-color=deep-purple] .linear-gradient-color-400-to-700{
+  background-image: linear-gradient(135deg, #7e57c2 0%, #512da8 100%);
+}
+
+[data-color=indigo] .linear-gradient-color-400-to-700{
+  background-image: linear-gradient(135deg, #5c6bc0 0%, #303f9f 100%);
+}
+
+[data-color=blue] .linear-gradient-color-400-to-700{
+  background-image: linear-gradient(135deg, #42a5f5 0%, #1976d2 100%);
+  background-image: linear-gradient(135deg, #42a5f5 0%, #1976d2 100%);
+}
+
+[data-color=light-blue] .linear-gradient-color-400-to-700{
+  background-image: linear-gradient(135deg, #29b6f6 0%, #0288d1 100%);
+}
+
+[data-color=cyan] .linear-gradient-color-400-to-700{
+  background-image: linear-gradient(135deg, #26c6da 0%, #0097a7 100%);
+}
+
+[data-color=teal] .linear-gradient-color-400-to-700{
+  background-image: linear-gradient(135deg, #26a69a 0%, #00796b 100%);
+}
+
+[data-color=green] .linear-gradient-color-400-to-700{
+  background-image: linear-gradient(135deg, #66bb6a 0%, #388e3c 100%);
+}
+
+[data-color=light-green] .linear-gradient-color-400-to-700{
+  background-image: linear-gradient(135deg, #9ccc65 0%, #689f38 100%);
+}
+
+[data-color=lime] .linear-gradient-color-400-to-700{
+  background-image: linear-gradient(135deg, #d4e157 0%, #afb42b 100%);
+}
+
+[data-color=amber] .linear-gradient-color-400-to-700{
+  background-image: linear-gradient(135deg, #ffca28 0%, #ffa000 100%);
+}
+
+[data-color=orange] .linear-gradient-color-400-to-700{
+  background-image: linear-gradient(135deg, #ffa726 0%, #f57c00 100%);
+}
+
+[data-color=deep-orange] .linear-gradient-color-400-to-700{
+  background-image: linear-gradient(135deg, #ff7043 0%, #e64a19 100%);
+}
+
+[data-color=brown] .linear-gradient-color-400-to-700{
+  background-image: linear-gradient(135deg, #8d6e63 0%, #5d4037 100%);
+}
+
+[data-color=blue-grey] .linear-gradient-color-400-to-700{
+  background-image: linear-gradient(135deg, #78909c 0%, #455a64 100%);
+}

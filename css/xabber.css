@@ -20710,9 +20710,15 @@ ul.restrictions-list-content>li {
     height: calc(100% - 56px);
     max-height: unset;
 }
+.code-modal .code-header{
+    font-size: 18px;
+    position: relative;
+    margin-left: 8px;
+    margin-bottom: 16px;
+    margin-top: 18px;;
+}
 .code-modal .code-contact-text{
-    color: rgba(60, 60, 67, .6);
-    font-size: 16px;
+    font-size: 14px;
     position: relative;
     margin-left: 8px;
     margin-bottom: 4px;
@@ -20722,34 +20728,35 @@ ul.restrictions-list-content>li {
 
 /*}*/
 .code-modal .code-device-info-wrap{
-    align-items: flex-start;
+    align-items: center;
     display: flex;
     flex-direction: column;
     justify-content: center;
-    padding: 0 0 12px 0;
+    padding: 32px 0 12px;
+    color: #fff;
 }
 .code-modal .code-device-info-wrap .circle-avatar{
     height: 96px;
     width: 96px;
-    display:none;
 }
 .code-modal .code-device-info-wrap .code-device-name {
-    font-size: 24px;
+    font-size: 20px;
     line-height: 32px;
-    margin-top: 8px;
-    display: none;
+    margin-top: 12px;
+    font-weight: 500;
 }
 .code-modal .code-device-info-wrap .code-device-jid {
-    font-size: 16px;
+    font-size: 15px;
     line-height: 24px;
     margin-left: 8px;
+    opacity: 0.85;
 }
 .code-modal .session-awaiting-response-text,
 .code-modal .session-incoming-request-text {
     margin-left: 8px;
 }
 .code-modal .code-contact-text-tip {
-    font-size: 16px;
+    font-size: 14px;
     line-height: 20px;
     color: rgba(60, 60, 67, 0.6);
 }
@@ -20758,7 +20765,7 @@ ul.restrictions-list-content>li {
     padding: 0 0 0 22px;
 }
 .code-modal .code-contact-text-tip ol li {
-    margin-bottom: 16px;
+    margin-bottom: 8px;
 }
 .code-modal .code-contact-text-tip .part-one b.text-color-500 {
     font-weight: 400;
@@ -20781,14 +20788,14 @@ ul.restrictions-list-content>li {
     font-family: 'Roboto Mono', monospace;
 }
 .code-modal .active-session-buttons-wrap{
-    margin-bottom: 24px;
+    margin-bottom: 8px;
     display: flex;
     flex-direction: row-reverse;
 }
 .code-modal .btn-accept-session,
 .code-modal .btn-enter-code{
     cursor: pointer;
-    font-size: 15px;
+    font-size: 14px;
     font-weight: 500;
     height: 36px;
     line-height: 12px;
@@ -20801,17 +20808,17 @@ ul.restrictions-list-content>li {
 }
 .code-modal .btn-enter-code:disabled{
     pointer-events: none;
-    background: #BDBDBD !important;
+    opacity: 0.4;
 }
-.code-modal .btn-accept-session:hover,
-.code-modal .btn-enter-code:hover{
-    opacity: 0.8;
-}
+/*.code-modal .btn-accept-session:hover,*/
+/*.code-modal .btn-enter-code:hover{*/
+    /*opacity: 0.8;*/
+/*}*/
 .code-modal .btn-reject-session,
 .code-modal .btn-close,
 .code-modal .btn-cancel-session{
     cursor: pointer;
-    font-size: 15px;
+    font-size: 14px;
     padding-bottom: 23px;
     width: fit-content;
     float: right;
@@ -20948,8 +20955,8 @@ ul.restrictions-list-content>li {
     left: 0;
 }
 .chat-tools-wrap .chat-tool.btn-show-session.active-session .background-element.pulsating{
-    -webkit-animation: pulsate 1.5s ease-out;
-    -webkit-animation-iteration-count: infinite;
+    /*-webkit-animation: pulsate 1.5s ease-out;*/
+    /*-webkit-animation-iteration-count: infinite;*/
 }
 .chat-tools-wrap .chat-tool.btn-show-session.active-session i{
     color: #f57c00;

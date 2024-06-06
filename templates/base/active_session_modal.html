@@ -1,9 +1,13 @@
 <div class="code-modal-wrap">
-    <div class="modal-header">
-        {[print(xabber.getString("show_code__modal_header"))]}
-        <svg class="mdi btn-cancel mdi-24px mdi-svg-template" data-svgname="close"></svg>
+    <div class="code-device-info-wrap linear-gradient-color-400-to-700">
+        <div class="circle-avatar"></div>
+        <div class="code-device-name"></div>
+        <div class="code-device-jid"></div>
     </div>
     <div class="modal-content">
+        <div class="code-header">
+            {[print(xabber.getString("show_code__modal_header"))]}
+        </div>
         <div class="code-contact-text 1b-step session-step">{[print(xabber.getString("show_code__contact_device_text"))]}</div>
         <div class="code-contact-text 1a-step session-step">{[print(xabber.getString("show_code__contact_device_text"))]}</div>
         <div class="session-awaiting-response-text 0a-step session-step">
@@ -11,11 +15,6 @@
         </div>
         <div class="session-incoming-request-text 0b-step session-step">
             {[print(xabber.getString("session_modal__incoming_request_text"))]}
-        </div>
-        <div class="code-device-info-wrap">
-            <div class="circle-avatar"></div>
-            <div class="code-device-name"></div>
-            <div class="code-device-jid text-color-500"></div>
         </div>
         <div class="code-contact-text-tip ">
             <ol class="1b-step session-step" type="1">
@@ -33,9 +32,9 @@
         <div class="code-text 1b-step session-step"></div>
         <div class="active-session-buttons-wrap no-select">
             <div class="btn-cancel-session 1b-step session-step btn-flat btn-main btn-dark ">{[print(xabber.getString("show_code__cancel_session"))]}</div>
-            <button class="btn-enter-code 1a-step session-step btn-flat btn-main-filled ground-color-500">{[print(xabber.getString("show_code__complete_verification"))]}</button>
+            <button class="btn-enter-code 1a-step session-step btn-flat btn-main text-color-500">{[print(xabber.getString("show_code__complete_verification"))]}</button>
             <div class="btn-cancel-session 1a-step session-step btn-flat btn-main btn-dark">{[print(xabber.getString("show_code__cancel_session"))]}</div>
-            <div class="btn-accept-session btn-flat btn-main-filled 0b-step session-step ground-color-500">{[print(xabber.getString("accept"))]}</div>
+            <div class="btn-accept-session btn-flat btn-main 0b-step session-step text-color-500">{[print(xabber.getString("accept"))]}</div>
             <div class="btn-reject-session btn-flat btn-main 0b-step session-step">{[print(xabber.getString("reject"))]}</div>
             <div class="btn-cancel-session 0a-step session-step btn-flat btn-main btn-dark ">{[print(xabber.getString("show_code__cancel_session"))]}</div>
             <div class="btn-close 0a-step session-step btn-flat btn-main btn-dark ">{[print(xabber.getString("close"))]}</div>
