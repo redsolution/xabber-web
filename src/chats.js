@@ -6135,6 +6135,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
             $msg.find('.fwd-message').each((idx, fwd_msg_item) => {
                 this.showFwdMessageAuthor($(fwd_msg_item));
             });
+            this.bottom && this.bottom.updateEncrypted();
             return;
         }
         if ($msg.find('.data-form').length) {
@@ -6148,6 +6149,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
         if (!is_same_date) {
             this.getDateIndicator($msg.data('time')).insertBefore($msg);
             this.showMessageAuthor($msg);
+            this.bottom && this.bottom.updateEncrypted();
         } else if (is_system || !is_same_sender || $prev_msg.hasClass('saved-main')) {
             this.showMessageAuthor($msg);
         } else {
