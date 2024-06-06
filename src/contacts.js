@@ -8520,11 +8520,11 @@ xabber.Roster = xabber.ContactsBase.extend({
         delete(options.stamp);
         delete(options.cached_conversations_exclude);
         let iq = $iq({type: 'get'}).c('query', request_attrs).cnode(new Strophe.RSM(options).toXML());
-        console.error('sync iq request');
-        console.error(iq);
+        // console.error('sync iq request');
+        // console.error(iq);
         this.account.sendFast(iq, (response) => {
-            console.error('sync iq response');
-            console.error(response);
+            // console.error('sync iq response');
+            // console.error(response);
             this.onSyncIQ(response, request_attrs.stamp, synchronization_with_stamp, is_first_sync, options.last_version_sync, cached_conversations_exclude).then(() => {
             });
         });

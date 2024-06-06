@@ -1234,13 +1234,13 @@ xabber.ToolbarView = xabber.BasicView.extend({
         xabber.trigger('add_group_chat', {public: true, right: null});
     },
 
-    setAllMessageCounter: function () {
+    setAllMessageCounter: function (log) {
         let count_msg = 0, count_all_msg = 0, count_group_msg = 0, mentions = 0;
         xabber.accounts.each((account) => {
             account.chats.each((chat) => {
                 if (chat.contact && !chat.isMuted()) {
                     if (chat.get('unread') || chat.get('const_unread')){
-                        xabber.error(chat);
+                        log && xabber.error(chat);
                     }
                     if (chat.get('notifications')){
                         mentions += chat.get('unread') + chat.get('const_unread');

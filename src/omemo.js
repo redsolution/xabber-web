@@ -1264,7 +1264,7 @@ xabber.Device = Backbone.Model.extend({
 
     fillDeviceIK: function (reason) {
         this.getBundle().then((bundle) => {
-            this.set('ik', bundle.ik);
+            this.set('ik', utils.fromBase64toArrayBuffer(bundle.ik));
             this.set('fingerprint', this.generateFingerprint());
         });
     },
