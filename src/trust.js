@@ -533,6 +533,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
         stanza.c('share', {xmlns: Strophe.NS.PUBSUB_TRUST_SHARING, usage: Strophe.NS.OMEMO});
 
         // console.log(trusted_devices);
+        let counter = 0;
 
         Object.keys(trusted_devices).forEach((item) => {
             if (item === this.account.get('jid'))
@@ -540,9 +541,12 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
             stanza.c('trusted-items', {owner: item, timestamp: Date.now()});
             trusted_devices[item].forEach((device_item) => {
                 stanza.c('trust', {timestamp: Date.now()}).t(device_item.trusted_key).up();
+                counter++;
             });
             stanza.up();
         });
+        if (counter === 0)
+            return;
 
         let $share = $(stanza.tree()).find('share'),
             trusted_string = '';
@@ -870,7 +874,25 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
         // console.error(message);
 
         if (my_trusted_devices.some(e => e.device_id == received_device_id && e.fingerprint == device_fingerprint)){
-
+            // console.error($message);
+            // console.error(message);
+            //
+            // let this_trusted_device = my_trusted_devices.find(e => e.device_id == received_device_id && e.fingerprint == device_fingerprint),
+            //     $whole_notification_msg = $message.parent().closest('message');
+            //
+            // if (!$whole_notification_msg.length)
+            //     return;
+            // let msg_timestamp = $whole_notification_msg.children('time').attr('stamp');
+            // if (!msg_timestamp)
+            //     return;
+            // msg_timestamp = Date.parse(msg_timestamp);
+            // if (!msg_timestamp)
+            //     return;
+            //
+            // console.log(this_trusted_device.last_parsed_contacts_devices_timestamp);
+            // console.log(msg_timestamp);
+            // if (this_trusted_device.last_parsed_contacts_devices_timestamp && msg_timestamp < this_trusted_device.last_parsed_contacts_devices_timestamp)
+            //     return;
 
             let $share = $message.find('share'),
                 trusted_item_signature = $share.find('signature').text(),
@@ -968,8 +990,19 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                             is_new_devices = true;
 
                         if (counter === total_count){
-                            if (is_new_devices)
+                            //
+                            // let updated_trusted_devices = this.get('trusted_devices'),
+                            //     index = updated_trusted_devices[this.account.get('jid')].indexOf(this_trusted_device);
+                            // this_trusted_device.last_parsed_contacts_devices_timestamp = msg_timestamp;
+                            // updated_trusted_devices[this.account.get('jid')][index] = this_trusted_device;
+                            // this.save('trusted_devices', updated_trusted_devices);
+                            // console.error('UPDATEDDDDDDDDDDDDDDDDDDDDDDDD!!!!!!!!1');
+                            // console.error(this_trusted_device);
+                            // console.error(is_new_devices);
+                            // console.error(msg_timestamp);
+                            if (is_new_devices){
                                 this.publishContactsTrustedDevices();
+                            }
                             else {
                                 // console.log('no new devices')
                             }
@@ -1556,13 +1589,13 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
         } else if (Strophe.getBareJidFromJid($message.attr('from')) === this.account.get('jid') && Strophe.getBareJidFromJid($message.attr('to')) === this.account.get('jid')) {
             if (this.active_sessions_data[sid] && this.active_sessions_data[sid].last_sent_message_id == $message.attr('id'))
                 return;
-            if ($message.find('verification-start').length && $message.find('verification-start').attr('device-id') && $message.find('verification-start').attr('to-device-id') && this.omemo.get('device_id') && options.automated){
+            if ($message.find('verification-start').length && $message.find('verification-start').attr('device-id') && this.omemo.get('device_id') && options.automated){
 
                 let is_active_session_jid = this.isActiveSessionWithJid(this.account.get('jid'), sid);
                 if (is_active_session_jid)
                     return;
 
-                if ($message.find('verification-start').attr('to-device-id') != this.omemo.get('device_id'))
+                if ($message.find('verification-start').attr('to-device-id') && $message.find('verification-start').attr('to-device-id') != this.omemo.get('device_id'))
                     return;
                 let ended_sessions = this.get('ended_sessions');
 
@@ -1584,12 +1617,12 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                     sid: sid
                 });
             }
-            if ($message.find('verification-start').length && $message.find('verification-start').attr('device-id') && $message.find('verification-start').attr('to-device-id') && this.omemo.get('device_id') && !options.automated){
+            if ($message.find('verification-start').length && $message.find('verification-start').attr('device-id') && this.omemo.get('device_id') && !options.automated){
                 // console.log(this.omemo.get('device_id'));
                 // console.log($message.find('verification-start').attr('to-device-id'));
-                if ($message.find('verification-start').attr('to-device-id') != this.omemo.get('device_id'))
+                if ($message.find('verification-start').attr('to-device-id') && $message.find('verification-start').attr('to-device-id') != this.omemo.get('device_id'))
                     return;
-                let device = this.omemo.own_devices[$message.find('verification-start').attr('to-device-id')];
+                let device = this.omemo.own_devices[$message.find('verification-start').attr('device-id')];
                 this.account.omemo.xabber_trust.addVerificationSessionData(sid, {
                     current_a_jid: this.account.get('jid'),
                     active_verification_device: {
