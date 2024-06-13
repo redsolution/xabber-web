@@ -12170,6 +12170,10 @@ input[type=range].voice-message-volume:focus {
 .settings-panel-wrap .settings-column .devices-wrap .btn-verify-devices{
     color: #42A5F5
 }
+.settings-panel-wrap .settings-column .devices-wrap .btn-verify-devices.disabled{
+    color: #9E9E9E;
+    pointer-events:none;
+}
 
 .settings-panel-wrap .settings-column .devices-wrap .btn-verify-devices:hover,
 .settings-panel-wrap .settings-column .devices-wrap .btn-revoke-all-tokens:hover{
@@ -12190,6 +12194,9 @@ input[type=range].voice-message-volume:focus {
 }
 .settings-panel-wrap .settings-column .devices-wrap .btn-verify-devices .mdi path{
     fill: #42A5F5;
+}
+.settings-panel-wrap .settings-column .devices-wrap .btn-verify-devices.disabled .mdi path{
+    fill: #9E9E9E;
 }
 .settings-panel-wrap .settings-panel .settings-tab.settings-deletion-button,
 .settings-panel-wrap .delete-account{

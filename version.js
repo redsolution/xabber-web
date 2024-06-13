@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.3.5.33","version_description":"moved verify button, added max width to account settings header, added modal opening on incoming own device request and on accepting it, changed text for modal on accepting step, fixed peer devices updation on sending session request, fixed new own trusted devices labels in session modal, fixed rejecting own device session through modal, fixed dissapearing incoming session request"}'
+'{"version_number":"2.3.5.34","version_description":"added disabling of verify button, fixed populating trusted devices list with own device on long start, changed timestamp to integer, added hiding of verify button on all trusted devices, added force trust storage clear on omemo destroy "}'
 )});

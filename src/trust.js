@@ -79,7 +79,7 @@ xabber.IncomingTrustSessionView = xabber.BasicView.extend({
                 type: 'chat',
                 id: uuid()
             });
-            stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: this.sid, timestamp: Date.now() / 1000});
+            stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: this.sid, timestamp: Math.floor(Date.now() / 1000)});
             stanza.c('verification-rejected', {reason: 'Session cancelled'}).up().up();
 
             stanza.up().up().up();
@@ -119,6 +119,7 @@ xabber.ActiveSessionModalView = xabber.BasicView.extend({
         "click .btn-accept-session": "acceptRequest",
         "click .btn-reject-session": "rejectRequest",
         "click .btn-enter-code": "enterCode",
+        "click .btn-manage-devices": "openDevices",
         "click .btn-close": "cancel",
         "keyup .code-enter": "keyDownCode",
         "keydown .code-enter": "keyDownCode",
@@ -280,7 +281,7 @@ xabber.ActiveSessionModalView = xabber.BasicView.extend({
             type: 'chat',
             id: uuid()
         });
-        stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: this.sid, timestamp: Date.now() / 1000});
+        stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: this.sid, timestamp: Math.floor(Date.now() / 1000)});
         stanza.c('verification-rejected', {reason: 'Session cancelled'}).up().up();
 
         stanza.up().up().up();
@@ -320,6 +321,15 @@ xabber.ActiveSessionModalView = xabber.BasicView.extend({
 
     cancel: function () {
         this.close();
+    },
+
+    openDevices: function () {
+        if (this.contact) {
+
+        } else {
+            this.close();
+            this.account.showSettings(null, 'devices'); // add handling if already opened
+        }
     },
 
     cancelSession: function () {
@@ -414,7 +424,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                 type: 'chat',
                 id: uuid()
             });
-            stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: sid, timestamp: Date.now() / 1000});
+            stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: sid, timestamp: Math.floor(Date.now() / 1000)});
             stanza.c('verification-failed', {reason: 'Session cancelled'}).up().up();
 
             stanza.up().up().up();
@@ -474,7 +484,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
     publishOwnTrustedDevices: function (callback) {
         let my_trusted_devices = this.get('trusted_devices')[this.account.get('jid')],
             my_saved_trusted_device,
-            current_timestamp = Date.now() / 1000;
+            current_timestamp = Math.floor(Date.now() / 1000);
         if (!my_trusted_devices)
             return;
 
@@ -600,9 +610,9 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
         Object.keys(trusted_devices).forEach((item) => {
             if (item === this.account.get('jid'))
                 return;
-            stanza.c('trusted-items', {owner: item, timestamp: Date.now() / 1000});
+            stanza.c('trusted-items', {owner: item, timestamp: Math.floor(Date.now() / 1000)});
             trusted_devices[item].forEach((device_item) => {
-                stanza.c('trust', {timestamp: Date.now() / 1000}).t(device_item.trusted_key).up();
+                stanza.c('trust', {timestamp: Math.floor(Date.now() / 1000)}).t(device_item.trusted_key).up();
                 counter++;
             });
             stanza.up();
@@ -704,17 +714,15 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
     },
 
     populateOwnTrustedDevices: function () {
-        // console.log(this.get('trusted_devices'));
         let trusted_devices = this.get('trusted_devices');
-        // console.log(Object.keys(trusted_devices).length);
         if (!Object.keys(trusted_devices).length) {
             let own_device = this.omemo.own_devices[this.omemo.get('device_id')];
-            // console.log(own_device);
                 if (!own_device){
                     this.account.once('devices_updated', () => {
-                        // console.log('devices_updated');
                         this.populateOwnTrustedDevices()
                     });
+                    let peer = this.omemo.getPeer(this.account.get('jid'))
+                    peer && peer.updateDevicesKeys();
                     return;
                 }
 
@@ -724,7 +732,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                         {
                             trusted_key: utils.ArrayBuffertoBase64(trustedKeyBuffer),
                             fingerprint: own_device.get('fingerprint'),
-                            timestamp: Date.now() / 1000,
+                            timestamp: Math.floor(Date.now() / 1000),
                             device_id: own_device.get('id'),
                             is_me: true,
                             public_key: utils.ArrayBuffertoBase64(own_device.get('ik'))
@@ -1113,7 +1121,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                         trust_reason_jid: this.account.get('jid'),
                         fingerprint: device.get('fingerprint'),
                         device_id: device.get('id'),
-                        timestamp: Date.now() / 1000,
+                        timestamp: Math.floor(Date.now() / 1000),
                         public_key: utils.ArrayBuffertoBase64(device.get('ik'))
                     });
                 } else {
@@ -1126,7 +1134,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                     trust_reason_jid: this.account.get('jid'),
                     fingerprint: device.get('fingerprint'),
                     device_id: device.get('id'),
-                    timestamp: Date.now() / 1000,
+                    timestamp: Math.floor(Date.now() / 1000),
                     public_key: utils.ArrayBuffertoBase64(device.get('ik'))
                 }];
             }
@@ -1186,7 +1194,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                         trusted_key: item.trusted_key,
                         from_device_id: item.from_device_id,
                         trust_reason_jid: item.trust_reason_jid,
-                        timestamp: Date.now() / 1000,
+                        timestamp: Math.floor(Date.now() / 1000),
                         fingerprint: item_fingerprint,
                         device_id: item_device_id,
                         public_key: utils.ArrayBuffertoBase64(item_device.get('ik'))
@@ -1904,7 +1912,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                             type: 'chat',
                             id: uuid()
                         });
-                        stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: sid, timestamp: Date.now() / 1000});
+                        stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: sid, timestamp: Math.floor(Date.now() / 1000)});
                         stanza.c('verification-accepted', {'device-id': this.account.omemo.get('device_id')}).up();
                         stanza.c('salt').c('ciphertext').t(response.data).up().c('iv').t(response.iv).up().up().up();
                         stanza.up().up().up();
@@ -2010,7 +2018,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                                         type: 'chat',
                                         id: uuid()
                                     });
-                                    stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: sid, timestamp: Date.now() / 1000});
+                                    stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: sid, timestamp: Math.floor(Date.now() / 1000)});
 
                                     stanza.c('salt').c('ciphertext').t(response.data).up().c('iv').t(response.iv).up().up();
                                     stanza.c('hash', {xmlns: Strophe.NS.HASH, algo: 'sha-256'});
@@ -2059,7 +2067,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                             type: 'chat',
                             id: uuid()
                         });
-                        stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: sid, timestamp: Date.now() / 1000});
+                        stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: sid, timestamp: Math.floor(Date.now() / 1000)});
                         stanza.c('verification-failed', {reason: 'Data decryption failed'}).up().up();
 
                         stanza.up().up().up();
@@ -2119,7 +2127,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                                                 type: 'chat',
                                                 id: uuid()
                                             });
-                                            stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: sid, timestamp: Date.now() / 1000});
+                                            stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: sid, timestamp: Math.floor(Date.now() / 1000)});
 
                                             stanza.c('salt').c('ciphertext').t(response.data).up().c('iv').t(response.iv).up().up();
                                             stanza.c('hash', {xmlns: Strophe.NS.HASH, algo: 'sha-256'});
@@ -2168,7 +2176,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                                     type: 'chat',
                                     id: uuid()
                                 });
-                                stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: sid, timestamp: Date.now() / 1000});
+                                stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: sid, timestamp: Math.floor(Date.now() / 1000)});
                                 stanza.c('verification-failed', {reason: 'Data decryption failed'}).up().up();
 
                                 stanza.up().up().up();
@@ -2302,7 +2310,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                                                 type: 'chat',
                                                 id: uuid()
                                             });
-                                            stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: sid, timestamp: Date.now() / 1000});
+                                            stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: sid, timestamp: Math.floor(Date.now() / 1000)});
 
                                             stanza.c('hash', {xmlns: Strophe.NS.HASH, algo: 'sha-256'});
                                             stanza.c('ciphertext').t(hash_response.data).up().c('iv').t(hash_response.iv).up().up().up();
@@ -2343,7 +2351,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                                         type: 'chat',
                                         id: uuid()
                                     });
-                                    stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: sid, timestamp: Date.now() / 1000});
+                                    stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: sid, timestamp: Math.floor(Date.now() / 1000)});
                                     stanza.c('verification-failed', {reason: 'Hashes didn\'t match'}).up().up();
 
                                     stanza.up().up().up();
@@ -2387,7 +2395,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                             type: 'chat',
                             id: uuid()
                         });
-                        stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: sid, timestamp: Date.now() / 1000});
+                        stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: sid, timestamp: Math.floor(Date.now() / 1000)});
                         stanza.c('verification-failed', {reason: 'Data decryption failed'}).up().up();
 
                         stanza.up().up().up();
@@ -2429,7 +2437,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                         type: 'chat',
                         id: uuid()
                     });
-                    stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: sid, timestamp: Date.now() / 1000});
+                    stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: sid, timestamp: Math.floor(Date.now() / 1000)});
                     stanza.c('verification-failed', {reason: 'Data decryption failed with error'}).up().up();
 
                     stanza.up().up().up();
@@ -2523,7 +2531,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                                     type: 'chat',
                                     id: uuid()
                                 });
-                                stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: sid, timestamp: Date.now() / 1000});
+                                stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: sid, timestamp: Math.floor(Date.now() / 1000)});
                                 stanza.c('verification-failed', {reason: 'Hashes didn\'t match in final stanza'}).up().up();
 
                                 stanza.up().up().up();
@@ -2705,7 +2713,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
             type: 'chat',
             id: uuid()
         });
-        stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: sid, timestamp: Date.now() / 1000});
+        stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: sid, timestamp: Math.floor(Date.now() / 1000)});
         stanza.c('verification-successful').up().up();
 
         stanza.up().up().up();
@@ -2739,7 +2747,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                         trusted_key: trustedKeyBase64,
                         fingerprint: device.get('fingerprint'),
                         device_id: device.get('id'),
-                        timestamp: Date.now() / 1000,
+                        timestamp: Math.floor(Date.now() / 1000),
                         after_trust: true,
                         public_key: utils.ArrayBuffertoBase64(device.get('ik'))
                     });
@@ -2749,7 +2757,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                     trusted_key: trustedKeyBase64,
                     fingerprint: device.get('fingerprint'),
                     device_id: device.get('id'),
-                    timestamp: Date.now() / 1000,
+                    timestamp: Math.floor(Date.now() / 1000),
                     after_trust: true,
                     public_key: utils.ArrayBuffertoBase64(device.get('ik'))
                 }];
@@ -2794,7 +2802,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                         trusted_key: trustedKeyBase64,
                         fingerprint: device.get('fingerprint'),
                         device_id: device.get('id'),
-                        timestamp: Date.now() / 1000,
+                        timestamp: Math.floor(Date.now() / 1000),
                         after_trust: true,
                         public_key: utils.ArrayBuffertoBase64(device.get('ik'))
                     });
@@ -2804,7 +2812,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                     trusted_key: trustedKeyBase64,
                     fingerprint: device.get('fingerprint'),
                     device_id: device.get('id'),
-                    timestamp: Date.now() / 1000,
+                    timestamp: Math.floor(Date.now() / 1000),
                     after_trust: true,
                     public_key: utils.ArrayBuffertoBase64(device.get('ik'))
                 }];

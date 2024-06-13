@@ -3150,6 +3150,14 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
         return this;
     },
 
+    // setActiveBlock: function (block_name) {
+    //     if (block_name) {
+    //         let $elem = this.$(`.settings-tab[data-block-name="${options.block_name}"]`);
+    //         if ($elem.length)
+    //             this.jumpToBlock({target: $elem[0]});
+    //     }
+    // },
+
     updateHeight: function () {
         let height;
         if (!this.$('.left-column').hasClass('hidden'))
@@ -3160,9 +3168,52 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
         this.updateScrollBar();
     },
 
+    verifyDevices: function () {
+        if (!this.model.omemo || !this.model.omemo.get('device_id') || !this.model.server_features.get(Strophe.NS.XABBER_NOTIFY) || this.active_trust_session)
+            return;
+
+        let msg_id = uuid(),
+            sid = uuid(),
+            stanza = $iq({
+                type: 'set',
+                to: this.model.get('jid'),
+                id: msg_id
+            });
+        stanza.c('notify', {xmlns: Strophe.NS.XABBER_NOTIFY});
+        stanza.c('notification', {xmlns: Strophe.NS.XABBER_NOTIFY});
+        stanza.c('forwarded', {xmlns: Strophe.NS.FORWARD});
+        stanza.c('message', {
+            to: this.model.get('jid'),
+            from: this.model.get('jid'),
+            type: 'chat',
+            id: uuid()
+        });
+        stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: sid, timestamp: Math.floor(Date.now() / 1000) }).c('verification-start', {'device-id': this.model.omemo.get('device_id')}).up().up();
+        stanza.up().up().up();
+        stanza.c('fallback',{xmlns: Strophe.NS.XABBER_NOTIFY}).t(`device verification fallback text`).up();
+        stanza.c('addresses', {xmlns: Strophe.NS.ADDRESS}).c('address',{type: 'to', jid: this.model.get('jid')}).up().up();
+        this.model.sendFast(stanza, () => {
+            // console.log(stanza);
+            // console.log(stanza.tree());
+            let peer = this.model.omemo.getPeer(this.model.get('jid'));
+            peer.updateDevicesKeys();
+
+            this.model.omemo.xabber_trust.addVerificationSessionData(sid, {
+                verification_started: true,
+                active_verification_device: {
+                    peer_jid: this.model.get('jid'),
+                },
+                verification_step: '1a'
+            });
+            utils.callback_popup_message(xabber.getString("trust_verification_started"), 5000);
+        });
+    },
+
     renderActiveTrustSession: function () { //34
+        this.$('.btn-verify-devices').removeClass('disabled');
         if (!this.model.omemo)
             return;
+        this.active_trust_session = false;
 
         let active_sessions = this.model.omemo.xabber_trust.get('active_trust_sessions');
         this.$(`.notification-trust-session`).remove();
@@ -3199,6 +3250,8 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
                 }
 
                 this.$('.active-trust-session-wrap').append($(env.templates.base.contact_verification_session(item)));
+                this.$('.btn-verify-devices').addClass('disabled');
+                this.active_trust_session = true;
             }
         });
         this.$('.btn-verify').switchClass('hidden', this.$('.active-trust-session-wrap').children().length)
@@ -3268,7 +3321,7 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
             type: 'chat',
             id: uuid()
         });
-        stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: sid, timestamp: Date.now() / 1000});
+        stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: sid, timestamp: Math.floor(Date.now() / 1000)});
         stanza.c('verification-rejected', {reason: 'Session cancelled'}).up().up();
 
         stanza.up().up().up();
@@ -3588,6 +3641,7 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
         this.$('.orphaned-fingerprints-wrap').html("");
         this.$('.device-encryption-warning').attr('data-not-trusted-count', 0);
         this.$('.device-encryption-warning').removeClass('warning-error');
+        this.$('.btn-verify-devices').addClass('hidden');
         this.$('.settings-tabs-wrap .settings-tab .device-encryption').removeClass('warning-error');
         this.$('.settings-tab[data-block-name="devices"] .settings-block-label').text(xabber.getQuantityString("settings_account__devices_subheader_label", this.model.x_tokens_list.length));
         let devices_count = this.model.x_tokens_list.length, handled_devices = 0;
@@ -3614,6 +3668,7 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
                         if (!_.isUndefined(this.$('.device-encryption-warning').attr('data-not-trusted-count'))){
                             this.$('.device-encryption-warning').switchClass('hidden', this.$('.device-encryption-warning').attr('data-not-trusted-count') == '0');
                             this.$('.settings-tabs-wrap .settings-tab .device-encryption').switchClass('hidden', this.$('.device-encryption-warning').attr('data-not-trusted-count') == '0');
+                            this.$('.btn-verify-devices').switchClass('hidden', this.$('.device-encryption-warning').attr('data-not-trusted-count') == '0');
                         }
                     }
                     return;
@@ -3634,6 +3689,7 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
                         if (!_.isUndefined(this.$('.device-encryption-warning').attr('data-not-trusted-count'))){
                             this.$('.device-encryption-warning').switchClass('hidden', this.$('.device-encryption-warning').attr('data-not-trusted-count') == '0');
                             this.$('.settings-tabs-wrap .settings-tab .device-encryption').switchClass('hidden', this.$('.device-encryption-warning').attr('data-not-trusted-count') == '0');
+                            this.$('.btn-verify-devices').switchClass('hidden', this.$('.device-encryption-warning').attr('data-not-trusted-count') == '0');
                         }
                     }
                 }, () => {
@@ -3642,6 +3698,7 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
                         if (!_.isUndefined(this.$('.device-encryption-warning').attr('data-not-trusted-count'))){
                             this.$('.device-encryption-warning').switchClass('hidden', this.$('.device-encryption-warning').attr('data-not-trusted-count') == '0');
                             this.$('.settings-tabs-wrap .settings-tab .device-encryption').switchClass('hidden', this.$('.device-encryption-warning').attr('data-not-trusted-count') == '0');
+                            this.$('.btn-verify-devices').switchClass('hidden', this.$('.device-encryption-warning').attr('data-not-trusted-count') == '0');
                         }
                     }
                 });
@@ -3655,6 +3712,7 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
                     if (!_.isUndefined(this.$('.device-encryption-warning').attr('data-not-trusted-count'))){
                         this.$('.device-encryption-warning').switchClass('hidden', this.$('.device-encryption-warning').attr('data-not-trusted-count') == '0');
                         this.$('.settings-tabs-wrap .settings-tab .device-encryption').switchClass('hidden', this.$('.device-encryption-warning').attr('data-not-trusted-count') == '0');
+                        this.$('.btn-verify-devices').switchClass('hidden', this.$('.device-encryption-warning').attr('data-not-trusted-count') == '0');
                     }
                 }
             }
@@ -3663,13 +3721,12 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
             this.$('.all-sessions-wrap').removeClass('hidden');
             this.$('.active-sessions-label').removeClass('hidden');
             this.$('.btn-revoke-all-tokens').removeClass('hidden');
-            this.$('.btn-verify-devices').switchClass('hidden', !this.model.omemo);
+            this.$('.btn-verify-devices').switchClass('hidden', !this.model.omemo || this.$('.device-encryption-warning').attr('data-not-trusted-count') == '0');
         }
         else {
             this.$('.all-sessions-wrap').addClass('hidden');
             this.$('.active-sessions-label').addClass('hidden');
             this.$('.btn-revoke-all-tokens').addClass('hidden');
-            this.$('.btn-verify-devices').addClass('hidden');
         }
         this.$('.devices-wrap').removeClass('hidden')
         !this._single_account  && this.$('.token-wrap').attr('data-subblock-parent-name', '');
@@ -3872,47 +3929,6 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
                         }
                     });
                 });
-        });
-    },
-
-    verifyDevices: function () {
-        if (!this.model.omemo || !this.model.omemo.get('device_id') || !this.model.server_features.get(Strophe.NS.XABBER_NOTIFY))
-            return;
-
-        let msg_id = uuid(),
-            sid = uuid(),
-            stanza = $iq({
-                type: 'set',
-                to: this.model.get('jid'),
-                id: msg_id
-            });
-        stanza.c('notify', {xmlns: Strophe.NS.XABBER_NOTIFY});
-        stanza.c('notification', {xmlns: Strophe.NS.XABBER_NOTIFY});
-        stanza.c('forwarded', {xmlns: Strophe.NS.FORWARD});
-        stanza.c('message', {
-            to: this.model.get('jid'),
-            from: this.model.get('jid'),
-            type: 'chat',
-            id: uuid()
-        });
-        stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: sid, timestamp: Date.now() / 1000 }).c('verification-start', {'device-id': this.model.omemo.get('device_id')}).up().up();
-        stanza.up().up().up();
-        stanza.c('fallback',{xmlns: Strophe.NS.XABBER_NOTIFY}).t(`device verification fallback text`).up();
-        stanza.c('addresses', {xmlns: Strophe.NS.ADDRESS}).c('address',{type: 'to', jid: this.model.get('jid')}).up().up();
-        this.model.sendFast(stanza, () => {
-            // console.log(stanza);
-            // console.log(stanza.tree());
-            let peer = this.model.omemo.getPeer(this.model.get('jid'));
-            peer.updateDevicesKeys();
-
-            this.model.omemo.xabber_trust.addVerificationSessionData(sid, {
-                verification_started: true,
-                active_verification_device: {
-                    peer_jid: this.model.get('jid'),
-                },
-                verification_step: '1a'
-            });
-            utils.callback_popup_message(xabber.getString("trust_verification_started"), 5000);
         });
     },
 

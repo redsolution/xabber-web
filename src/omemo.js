@@ -81,6 +81,9 @@ xabber.Peer = Backbone.Model.extend({
                 device.getBundle().then(({pk, spk, ik}) => {
                     device.set('ik', utils.fromBase64toArrayBuffer(ik));
                     device.set('fingerprint', device.generateFingerprint());
+                    if (this.get('jid') === this.account.get('jid')){
+                        this.account.trigger('devices_updated');
+                    }
                 });
             };
         });
@@ -233,7 +236,7 @@ xabber.Fingerprints = xabber.BasicView.extend({
             type: 'chat',
             id: uuid()
         });
-        stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: sid, timestamp: Date.now() / 1000 }).c('verification-start', {'device-id': this.account.omemo.get('device_id') }).up().up();
+        stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: sid, timestamp: Math.floor(Date.now() / 1000) }).c('verification-start', {'device-id': this.account.omemo.get('device_id') }).up().up();
         stanza.c('body').t(`Device Verification request from ${this.account.jid} A1`).up();
         stanza.up().up().up();
         stanza.c('fallback',{xmlns: Strophe.NS.XABBER_NOTIFY}).t(`device verification fallback text`).up();
@@ -387,7 +390,7 @@ xabber.Fingerprints = xabber.BasicView.extend({
             type: 'chat',
             id: uuid()
         });
-        stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: sid, timestamp: Date.now() / 1000});
+        stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: sid, timestamp: Math.floor(Date.now() / 1000)});
         stanza.c('verification-rejected', {reason: 'Session cancelled'}).up().up();
 
         stanza.up().up().up();
@@ -633,7 +636,7 @@ xabber.Fingerprints = xabber.BasicView.extend({
                                 trusted_key: trustedKeyBase64,
                                 fingerprint: device.get('fingerprint'),
                                 device_id: device.get('id'),
-                                timestamp: Date.now() / 1000,
+                                timestamp: Math.floor(Date.now() / 1000),
                                 fingerprint_trust: true,
                                 public_key: utils.ArrayBuffertoBase64(device.get('ik'))
                             });
@@ -643,7 +646,7 @@ xabber.Fingerprints = xabber.BasicView.extend({
                             trusted_key: trustedKeyBase64,
                             fingerprint: device.get('fingerprint'),
                             device_id: device.get('id'),
-                            timestamp: Date.now() / 1000,
+                            timestamp: Math.floor(Date.now() / 1000),
                             fingerprint_trust: true,
                             public_key: utils.ArrayBuffertoBase64(device.get('ik'))
                         }];
@@ -782,7 +785,7 @@ xabber.FingerprintsOwnDevices = xabber.BasicView.extend({
             type: 'chat',
             id: uuid()
         });
-        stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: sid, timestamp: Date.now() / 1000 }).c('verification-start', {'device-id': this.account.omemo.get('device_id'), 'to-device-id': this.device_id }).up().up();
+        stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: sid, timestamp: Math.floor(Date.now() / 1000) }).c('verification-start', {'device-id': this.account.omemo.get('device_id'), 'to-device-id': this.device_id }).up().up();
         stanza.c('body').t(`Device Verification request from ${this.account.jid} A1`).up();
         stanza.up().up().up();
         stanza.c('fallback',{xmlns: Strophe.NS.XABBER_NOTIFY}).t(`device verification fallback text`).up();
@@ -1485,6 +1488,7 @@ xabber.Omemo = Backbone.ModelWithStorage.extend({
         if (this.own_devices && Object.keys(this.own_devices).length != 0)
             this.deleteOwnDevice();
         this.cached_messages && this.cached_messages.destroy();
+        this.xabber_trust && this.xabber_trust.clearStorage();
         this.xabber_trust && this.xabber_trust.destroy();
         this.account.connection.deleteHandler(this._msg_handler);
     },
