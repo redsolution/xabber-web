@@ -3223,7 +3223,6 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
                 account: this.model,
                 sid: $item.attr('data-sid')
             });
-        // сделать поддержку для сессии со своим девайсом
         }
     },
 
@@ -3242,6 +3241,7 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
             message_options = session.incoming_request_data.message_options;
         message_options.automated = false;
         this.model.omemo.xabber_trust.receiveTrustVerificationMessage(message, message_options);
+        this.showCode(ev);
 
     },
 

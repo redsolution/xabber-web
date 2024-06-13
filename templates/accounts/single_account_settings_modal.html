@@ -139,7 +139,7 @@
     <div class="settings-panel-head">
         <i class="btn-back-settings mdi mdi-24px mdi-arrow-left"></i>
         <i class="btn-back-subsettings-account mdi mdi-24px mdi-arrow-left hidden"></i>
-        <span class="settings-panel-head-title">{[print(xabber.getString("account_editor"))]}</span>
+        <span class="settings-panel-head-title one-line">{[print(xabber.getString("account_editor"))]}</span>
         <i class="btn-sorting dropdown-button mdi mdi-24px mdi-sort hidden" data-activates="storage-file-sorting"></i>
         <ul id="storage-file-sorting" class="dropdown-content bootstrap-dropdown noselect">
             <div class="property-variant btn-gallery-sorting" data-value="-id">
@@ -180,12 +180,12 @@
                                 <svg class="mdi mdi-24px mdi-svg-template" data-svgname="restrictions-outline"></svg>
                                 <div class="settings-button-devices-label">{[print(xabber.getString("account_terminate_all_sessions"))]}</div>
                             </div>
-                            <div class="btn-verify-devices settings-button-devices">
-                                <svg class="mdi mdi-24px mdi-svg-template" data-svgname="restrictions-outline"></svg>
-                                <div class="settings-button-devices-label">{[print(xabber.getString("account_verify_devices"))]}</div>
-                            </div>
                         </div>
                         <div class="settings-panel-label active-sessions-label">{[print(xabber.getString("settings_account__label_active_sessions"))]}</div>
+                        <div class="btn-verify-devices settings-button-devices">
+                            <svg class="mdi mdi-24px mdi-svg-template" data-svgname="restrictions-outline"></svg>
+                            <div class="settings-button-devices-label">{[print(xabber.getString("account_verify_devices"))]}</div>
+                        </div>
                         <div class="all-sessions-wrap">
                             <div class="sessions-wrap all-sessions selectable-text"></div>
                         </div>

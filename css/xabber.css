@@ -11493,6 +11493,7 @@ input[type=range].voice-message-volume:focus {
     line-height: 24px;
     height: 24px;
     left: 72px;
+    max-width: 65%;
 }
 .settings-panel-wrap .settings-panel .left-column {
     position: relative;
@@ -12167,7 +12168,7 @@ input[type=range].voice-message-volume:focus {
     cursor: pointer;
 }
 .settings-panel-wrap .settings-column .devices-wrap .btn-verify-devices{
-    color: unset
+    color: #42A5F5
 }
 
 .settings-panel-wrap .settings-column .devices-wrap .btn-verify-devices:hover,
@@ -12188,7 +12189,7 @@ input[type=range].voice-message-volume:focus {
     fill: #D32F2F;
 }
 .settings-panel-wrap .settings-column .devices-wrap .btn-verify-devices .mdi path{
-    fill: #9e9e9e;
+    fill: #42A5F5;
 }
 .settings-panel-wrap .settings-panel .settings-tab.settings-deletion-button,
 .settings-panel-wrap .delete-account{

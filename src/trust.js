@@ -129,6 +129,7 @@ xabber.ActiveSessionModalView = xabber.BasicView.extend({
         this.contact = options.contact;
         this.code = options.code;
         this.sid = options.sid;
+        this.device_id = options.device_id;
         this.trust = this.account.omemo.xabber_trust;
         if (!this.trust || !this.trust.get('active_trust_sessions')[this.sid])
             return;
@@ -181,7 +182,7 @@ xabber.ActiveSessionModalView = xabber.BasicView.extend({
             this.$('.code-device-jid').text(this.contact.get('jid'));
 
         } else {
-            let token = this.account.x_tokens_list.find(item => (item.omemo_id === session.active_verification_device.device_id));
+            let token = this.account.x_tokens_list.find(item => ((session.active_verification_device && item.omemo_id === session.active_verification_device.device_id) || item.omemo_id == this.device_id));
             if (token) {
                 this.$('.code-device-name').text(token.device || xabber.getString('unknown'));
                 this.$('.code-device-jid').html(`${token.ip} • ${pretty_datetime_date(token.last_auth)}`);
@@ -232,6 +233,12 @@ xabber.ActiveSessionModalView = xabber.BasicView.extend({
                         return;
                     trust_attrs.label = device.get('label');
                     trust_attrs.jid = item;
+                    if (item === this.account.get('jid')){
+                        let token = this.account.x_tokens_list.find(item => (item.omemo_id == device_item.device_id));
+                        if (token){
+                            token.device && (trust_attrs.label = token.device);
+                        }
+                    }
                     let $trust_device = $(templates.trust_item_device_session(trust_attrs));
                     this.$('.new-trusted-devices-list').append($trust_device);
                     this.$('.new-trusted-devices-list .preloader-wrapper').remove();
@@ -256,8 +263,6 @@ xabber.ActiveSessionModalView = xabber.BasicView.extend({
     },
 
     rejectRequest: function () {
-        if (!this.contact)
-            return;
 
         let msg_id = uuid(),
             to = this.contact ? this.contact.get('jid') : this.account.get('jid'),
@@ -1693,14 +1698,16 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                     return;
                 }
 
+                if ($message.find('verification-start').attr('to-device-id') && $message.find('verification-start').attr('to-device-id') != this.omemo.get('device_id'))
+                    return;
+
+                if ($message.find('verification-start').attr('device-id') == this.omemo.get('device_id'))
+                    return;
+
                 let is_active_session_jid = this.isActiveSessionWithJid(this.account.get('jid'), sid);
                 if (is_active_session_jid)
                     return;
 
-                if ($message.find('verification-start').attr('to-device-id') && $message.find('verification-start').attr('to-device-id') != this.omemo.get('device_id'))
-                    return;
-                if ($message.find('verification-start').attr('device-id') == this.omemo.get('device_id'))
-                    return;
                 let peer = this.omemo.getPeer(this.account.get('jid')),
                     device = peer.devices[$message.find('verification-start').attr('device-id')];
                 if (!device){
@@ -1714,6 +1721,12 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                         message_options: options,
                     },
                     verification_step: '0b',
+                });
+                let view = new xabber.ActiveSessionModalView();
+                view.show({
+                    account: this.account,
+                    sid: sid,
+                    device_id: $message.find('verification-start').attr('device-id')
                 });
                 // let view = new xabber.IncomingTrustSessionView();
                 // view.show({

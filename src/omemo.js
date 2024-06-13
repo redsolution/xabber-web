@@ -239,7 +239,7 @@ xabber.Fingerprints = xabber.BasicView.extend({
         stanza.c('fallback',{xmlns: Strophe.NS.XABBER_NOTIFY}).t(`device verification fallback text`).up();
         stanza.c('addresses', {xmlns: Strophe.NS.ADDRESS}).c('address',{type: 'to', jid: this.jid}).up().up();
         this.account.sendFast(stanza, () => {
-            let peer = this.model.omemo.getPeer(this.jid);
+            let peer = this.account.omemo.getPeer(this.jid);
             peer.updateDevicesKeys();
             this.account.omemo.xabber_trust.addVerificationSessionData(sid, {
                 verification_started: true,
@@ -790,7 +790,7 @@ xabber.FingerprintsOwnDevices = xabber.BasicView.extend({
         this.account.sendFast(stanza, () => {
             // console.log(stanza);
             // console.log(stanza.tree());
-            let peer = this.model.omemo.getPeer(this.account.get('jid'));
+            let peer = this.account.omemo.getPeer(this.account.get('jid'));
             peer.updateDevicesKeys();
 
             this.account.omemo.xabber_trust.addVerificationSessionData(sid, {
