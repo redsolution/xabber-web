@@ -166,12 +166,12 @@ xabber.Fingerprints = xabber.BasicView.extend({
         'click .btn-verify': "startTrustVerification",
         'click .btn-revoke-trust': "revokeAllTrust",
         'click .btn-trust': "trustDevice",
-        "click .cancel-session": "cancelTrustSession",
-        "click .enter-code": "showCode",
-        "click .show-code": "showCode",
         'click .btn-fingerprint-details': "showFingerprintDetails",
         'click .btn-back': "backToList",
         'click .btn-cancel': "close",
+        "click .cancel-session": "cancelTrustSession",
+        "click .enter-code": "showCode",
+        "click .show-code": "showCode",
         'click .accept-request': "acceptRequest",
         'click .decline-request': "rejectRequest",
     },
@@ -233,12 +233,14 @@ xabber.Fingerprints = xabber.BasicView.extend({
             type: 'chat',
             id: uuid()
         });
-        stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: sid, timestamp: Date.now() }).c('verification-start', {'device-id': this.account.omemo.get('device_id') }).up().up();
+        stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: sid, timestamp: Date.now() / 1000 }).c('verification-start', {'device-id': this.account.omemo.get('device_id') }).up().up();
         stanza.c('body').t(`Device Verification request from ${this.account.jid} A1`).up();
         stanza.up().up().up();
         stanza.c('fallback',{xmlns: Strophe.NS.XABBER_NOTIFY}).t(`device verification fallback text`).up();
         stanza.c('addresses', {xmlns: Strophe.NS.ADDRESS}).c('address',{type: 'to', jid: this.jid}).up().up();
         this.account.sendFast(stanza, () => {
+            let peer = this.model.omemo.getPeer(this.jid);
+            peer.updateDevicesKeys();
             this.account.omemo.xabber_trust.addVerificationSessionData(sid, {
                 verification_started: true,
                 active_verification_device: {
@@ -385,7 +387,7 @@ xabber.Fingerprints = xabber.BasicView.extend({
             type: 'chat',
             id: uuid()
         });
-        stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: sid, timestamp: Date.now()});
+        stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: sid, timestamp: Date.now() / 1000});
         stanza.c('verification-rejected', {reason: 'Session cancelled'}).up().up();
 
         stanza.up().up().up();
@@ -631,7 +633,7 @@ xabber.Fingerprints = xabber.BasicView.extend({
                                 trusted_key: trustedKeyBase64,
                                 fingerprint: device.get('fingerprint'),
                                 device_id: device.get('id'),
-                                timestamp: Date.now(),
+                                timestamp: Date.now() / 1000,
                                 fingerprint_trust: true,
                                 public_key: utils.ArrayBuffertoBase64(device.get('ik'))
                             });
@@ -641,7 +643,7 @@ xabber.Fingerprints = xabber.BasicView.extend({
                             trusted_key: trustedKeyBase64,
                             fingerprint: device.get('fingerprint'),
                             device_id: device.get('id'),
-                            timestamp: Date.now(),
+                            timestamp: Date.now() / 1000,
                             fingerprint_trust: true,
                             public_key: utils.ArrayBuffertoBase64(device.get('ik'))
                         }];
@@ -780,7 +782,7 @@ xabber.FingerprintsOwnDevices = xabber.BasicView.extend({
             type: 'chat',
             id: uuid()
         });
-        stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: sid, timestamp: Date.now() }).c('verification-start', {'device-id': this.account.omemo.get('device_id'), 'to-device-id': this.device_id }).up().up();
+        stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: sid, timestamp: Date.now() / 1000 }).c('verification-start', {'device-id': this.account.omemo.get('device_id'), 'to-device-id': this.device_id }).up().up();
         stanza.c('body').t(`Device Verification request from ${this.account.jid} A1`).up();
         stanza.up().up().up();
         stanza.c('fallback',{xmlns: Strophe.NS.XABBER_NOTIFY}).t(`device verification fallback text`).up();
@@ -788,6 +790,8 @@ xabber.FingerprintsOwnDevices = xabber.BasicView.extend({
         this.account.sendFast(stanza, () => {
             // console.log(stanza);
             // console.log(stanza.tree());
+            let peer = this.model.omemo.getPeer(this.account.get('jid'));
+            peer.updateDevicesKeys();
 
             this.account.omemo.xabber_trust.addVerificationSessionData(sid, {
                 verification_started: true,

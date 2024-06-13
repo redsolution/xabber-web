@@ -12158,6 +12158,7 @@ input[type=range].voice-message-volume:focus {
     display: block;
 }
 
+.settings-panel-wrap .settings-column .devices-wrap .btn-verify-devices,
 .settings-panel-wrap .settings-column .devices-wrap .btn-revoke-all-tokens{
     height: 40px;
     color: #D32F2F;
@@ -12165,13 +12166,18 @@ input[type=range].voice-message-volume:focus {
     position: relative;
     cursor: pointer;
 }
+.settings-panel-wrap .settings-column .devices-wrap .btn-verify-devices{
+    color: unset
+}
 
+.settings-panel-wrap .settings-column .devices-wrap .btn-verify-devices:hover,
 .settings-panel-wrap .settings-column .devices-wrap .btn-revoke-all-tokens:hover{
     background-color: #f8f8f8;
 }
 
 .settings-panel-wrap .settings-panel .settings-tab.settings-deletion-button .setting-icon-background,
 .settings-panel-wrap .delete-account .setting-icon-background,
+.settings-panel-wrap .settings-column .devices-wrap .btn-verify-devices .mdi,
 .settings-panel-wrap .settings-column .devices-wrap .btn-revoke-all-tokens .mdi{
     position: absolute;
     top: 8px;
@@ -12180,6 +12186,9 @@ input[type=range].voice-message-volume:focus {
 
 .settings-panel-wrap .settings-column .devices-wrap .btn-revoke-all-tokens .mdi path{
     fill: #D32F2F;
+}
+.settings-panel-wrap .settings-column .devices-wrap .btn-verify-devices .mdi path{
+    fill: #9e9e9e;
 }
 .settings-panel-wrap .settings-panel .settings-tab.settings-deletion-button,
 .settings-panel-wrap .delete-account{
@@ -18255,10 +18264,12 @@ input[type=range].voice-message-volume:focus {
     display: block;
 }
 
+.details-panel-right .btn-verify-devices,
 .details-panel-right .btn-revoke-all-tokens{
     cursor: pointer;
     margin: 0 8px;
 }
+.details-panel .btn-verify-devices,
 .details-panel .btn-revoke-all-tokens {
     cursor: pointer;
 }
@@ -20694,7 +20705,12 @@ ul.restrictions-list-content>li {
     max-height: 80%;
     position: relative;
     width: 576px !important;
+    overflow: hidden;
     /*height: 600px;*/
+}
+.code-modal:not(.own-device-session-modal) .own-device-session,
+.code-modal.own-device-session-modal .contact-session{
+    display:none !important;
 }
 .code-modal .code-modal-wrap{
     position: relative;
@@ -20734,10 +20750,20 @@ ul.restrictions-list-content>li {
     justify-content: center;
     padding: 32px 0 12px;
     color: #fff;
+    border-radius: 10px 10px 0 0;
 }
 .code-modal .code-device-info-wrap .circle-avatar{
     height: 96px;
     width: 96px;
+}
+.code-modal .code-device-info-wrap .device-type-icon{
+    background-color: #fff;
+    padding: 16px;
+    overflow: visible;
+}
+.code-modal .code-device-info-wrap .device-type-icon path,
+.code-modal .code-device-info-wrap .device-type-icon polygon{
+    fill: #616161;
 }
 .code-modal .code-device-info-wrap .code-device-name {
     font-size: 20px;
@@ -20855,6 +20881,29 @@ ul.restrictions-list-content>li {
 .code-modal .dotted-underline{
     cursor: pointer;
 }
+.code-modal .new-trusted-devices-list{
+    min-height: 80px;
+    position: relative;
+}
+.code-modal .new-trusted-devices-list .preloader-wrapper{
+    position: absolute;
+    top: 26px;
+    left: 47%;
+    width: 24px;
+    height: 24px;
+}
+.code-modal .trust-item-device{
+    margin-bottom: 4px;
+    margin-left: 8px;
+}
+.code-modal .trust-item-device .trust-item-label{
+    font-size: 14px;
+    letter-spacing: 0.13px;
+}
+.code-modal .trust-item-device .trust-item-trust-type{
+    font-size: 13px;
+    color: #9E9E9E;
+}
 /* chat bottom active session */
 .chat-incoming-session-notification:not(.hidden) {
     bottom: 176px;
@@ -20955,8 +21004,8 @@ ul.restrictions-list-content>li {
     left: 0;
 }
 .chat-tools-wrap .chat-tool.btn-show-session.active-session .background-element.pulsating{
-    /*-webkit-animation: pulsate 1.5s ease-out;*/
-    /*-webkit-animation-iteration-count: infinite;*/
+    -webkit-animation: pulsate 1.5s ease-out;
+    -webkit-animation-iteration-count: infinite;
 }
 .chat-tools-wrap .chat-tool.btn-show-session.active-session i{
     color: #f57c00;

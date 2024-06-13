@@ -69,6 +69,7 @@
     addTemplate('base.chat_content_contact_verification_session');
     addTemplate('base.incoming_trust_session');
     addTemplate('base.active_session_modal');
+    addTemplate('base.trust_item_device_session');
     addTemplate('base.jingle_message_calling');
     addTemplate('base.plyr_player_popup');
     addTemplate('base.input_widget');

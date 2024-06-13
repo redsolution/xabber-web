@@ -7,6 +7,8 @@ let env = xabber.env,
     moment = env.moment,
     templates = env.templates.base,
     Strophe = env.Strophe,
+    pretty_datetime = (timestamp) => { return utils.pretty_datetime(timestamp, (xabber.settings.language == 'ru-RU' || xabber.settings.language == 'default' && xabber.get("default_language") == 'ru-RU') && 'D MMMM YYYY HH:mm:ss')},
+    pretty_datetime_date = (timestamp) => { return utils.pretty_datetime(timestamp, 'MMM DD, YYYY')},
     _ = env._;
 
 
@@ -77,7 +79,7 @@ xabber.IncomingTrustSessionView = xabber.BasicView.extend({
                 type: 'chat',
                 id: uuid()
             });
-            stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: this.sid, timestamp: Date.now()});
+            stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: this.sid, timestamp: Date.now() / 1000});
             stanza.c('verification-rejected', {reason: 'Session cancelled'}).up().up();
 
             stanza.up().up().up();
@@ -110,7 +112,7 @@ xabber.IncomingTrustSessionView = xabber.BasicView.extend({
 xabber.ActiveSessionModalView = xabber.BasicView.extend({
     className: 'modal main-modal code-modal',
     template: templates.active_session_modal,
-    ps_selector: '.code-modal-wrap',
+    ps_selector: '.new-trusted-devices-list',
     events: {
         "click .btn-cancel": "cancel",
         "click .btn-cancel-session": "cancelSession",
@@ -141,11 +143,13 @@ xabber.ActiveSessionModalView = xabber.BasicView.extend({
         this.updateColorScheme();
         let session = this.trust.get('active_trust_sessions')[this.sid];
         if (!session) {
-            this.close();
+            !this.session_ending && this.close();
             return;
         }
         let step = session.verification_step;
         this.$('.session-step').addClass('hidden');
+        this.$('.main-process-wrap').removeClass('hidden');
+        this.$('.session-trusted-devices-wrap').addClass('hidden');
         if (step === '1a' && session.active_verification_device && session.active_verification_device.device_id){
             // state = xabber.getString("verification_session_state__request_code_needed");
             this.$('.1a-step').removeClass('hidden');
@@ -156,8 +160,16 @@ xabber.ActiveSessionModalView = xabber.BasicView.extend({
             let code = session.active_verification_code;
             this.$('.code-text').text(code);
         } else if (step === '2a' || step === '2b'){
-            this.close();
-            return;
+            // proceeding
+        } else if (step === 'final'){
+            this.session_ending = true;
+            this.device_id = session.active_verification_device.device_id;
+            this.device_jid = this.contact ? this.contact.get('jid') : this.account.get('jid');
+            this.$('.main-process-wrap').addClass('hidden');
+            this.$('.session-trusted-devices-wrap').removeClass('hidden');
+            this.$('.new-trusted-devices-list').html(env.templates.contacts.preloader());
+            this.updateDevicesItems();
+            this.startUpdatingDevices();
         } else if (step === '0b'){
             this.$('.0b-step').removeClass('hidden');
         }
@@ -169,16 +181,17 @@ xabber.ActiveSessionModalView = xabber.BasicView.extend({
             this.$('.code-device-jid').text(this.contact.get('jid'));
 
         } else {
-            let image = this.account.cached_image;
-            this.$('.circle-avatar').setAvatar(image, 64);
-            let nickname = this.account.getOwnNickname();
-            this.$('.code-device-name').text(nickname);
-            this.$('.code-device-name').switchClass('hidden', !nickname);
-            this.$('.code-device-jid').text(this.account.get('jid'));
+            let token = this.account.x_tokens_list.find(item => (item.omemo_id === session.active_verification_device.device_id));
+            if (token) {
+                this.$('.code-device-name').text(token.device || xabber.getString('unknown'));
+                this.$('.code-device-jid').html(`${token.ip} • ${pretty_datetime_date(token.last_auth)}`);
+                this.$('.phone-icon').switchClass('hidden', !(token.device && (token.device.indexOf('Android') > -1 || token.device.indexOf('iOS') > -1)));
+                this.$('.web-icon').switchClass('hidden', (token.device && (token.device.indexOf('Android') > -1 || token.device.indexOf('iOS') > -1)));
+            }
         }
-        this.$('.part-one').html(xabber.getString("show_code__contact_device_tip_text_part_one"));
         this.$('.part-one b').addClass('text-color-500');
         this.$('.btn-enter-code').prop('disabled', !this.$('input[name="code_enter"]').val());
+        this.$el.switchClass('own-device-session-modal', !this.contact);
         this.ps_container.perfectScrollbar('update');
 
     },
@@ -186,6 +199,45 @@ xabber.ActiveSessionModalView = xabber.BasicView.extend({
     updateColorScheme: function () {
         this.$el.attr('data-color', this.account.settings.get('color'));
         this.account.settings.once("change:color", this.updateColorScheme, this);
+    },
+
+    startUpdatingDevices: function () {//34
+        this.trust.on('trust_updated', () => {
+            this.updateDevicesItems()
+        });
+        setTimeout(() => {
+            this.$('.new-trusted-devices-list .preloader-wrapper').remove();
+        }, 3000)
+    },
+
+    updateDevicesItems: function () {//34
+        let trusted_devices = this.trust.get('trusted_devices');
+
+        this.$('.trust-item-device').remove();
+        Object.keys(trusted_devices).forEach((item) => {
+            trusted_devices[item].forEach((device_item) => {
+                if ((device_item.trust_reason_jid && (device_item.trust_reason_jid === this.device_jid)
+                    && device_item.from_device_id && (device_item.from_device_id == this.device_id))
+                    || item === this.device_jid && device_item.device_id == this.device_id && device_item.after_trust){
+                    let trust_type = device_item.after_trust ? 'direct' : 'indirect',
+                        trust_attrs = {
+                            device: device_item,
+                            trust_type: xabber.getString(`settings_account__trust__trust_type_${trust_type}`),
+                        };
+                    let peer = this.account.omemo.getPeer(item);
+                    if (!peer)
+                        return;
+                    let device = peer.devices[device_item.device_id];
+                    if (!device)
+                        return;
+                    trust_attrs.label = device.get('label');
+                    trust_attrs.jid = item;
+                    let $trust_device = $(templates.trust_item_device_session(trust_attrs));
+                    this.$('.new-trusted-devices-list').append($trust_device);
+                    this.$('.new-trusted-devices-list .preloader-wrapper').remove();
+                }
+            });
+        });
     },
 
     acceptRequest: function () {
@@ -208,7 +260,7 @@ xabber.ActiveSessionModalView = xabber.BasicView.extend({
             return;
 
         let msg_id = uuid(),
-            to = this.contact.get('jid'),
+            to = this.contact ? this.contact.get('jid') : this.account.get('jid'),
             stanza = $iq({
                 type: 'set',
                 to: to,
@@ -223,21 +275,23 @@ xabber.ActiveSessionModalView = xabber.BasicView.extend({
             type: 'chat',
             id: uuid()
         });
-        stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: this.sid, timestamp: Date.now()});
+        stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: this.sid, timestamp: Date.now() / 1000});
         stanza.c('verification-rejected', {reason: 'Session cancelled'}).up().up();
 
         stanza.up().up().up();
         stanza.c('addresses', {xmlns: Strophe.NS.ADDRESS}).c('address',{type: 'to', jid: to}).up().up();
 
         this.account.sendFast(stanza, () => {
-            let $stanza = $(stanza.tree());
-            $stanza.attr('to',this.account.get('jid'));
-            $stanza.find('notification forwarded message').attr('to',this.account.get('jid'));
-            $stanza.find(`addresses[xmlns="${Strophe.NS.ADDRESS}"] address[type="to"]`).attr('jid',this.account.get('jid'));
-            this.contact && this.trust.createFailedSessionMsg(this.contact.get('jid'), 'Session cancelled');
-            this.account.sendFast(stanza, () => {
-            });
-            utils.callback_popup_message(xabber.getString("trust_verification_decrypt_failed"), 5000);
+            if (this.contact){
+                let $stanza = $(stanza.tree());
+                $stanza.attr('to',this.account.get('jid'));
+                $stanza.find('notification forwarded message').attr('to',this.account.get('jid'));
+                $stanza.find(`addresses[xmlns="${Strophe.NS.ADDRESS}"] address[type="to"]`).attr('jid',this.account.get('jid'));
+                this.trust.createFailedSessionMsg(this.contact.get('jid'), 'Session cancelled');
+                this.account.sendFast(stanza, () => {
+                });
+            }
+            utils.callback_popup_message(xabber.getString("trust_verification_rejected"), 5000);
         });
         this.account.omemo.xabber_trust.clearData(this.sid);
 
@@ -310,7 +364,6 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
     },
 
     updateOmemoTrusts: function () {
-        console.log(this.omemo);
         this.account.trigger('xabber_trust_items_updated');
         if (!this.omemo)
             return;
@@ -336,6 +389,9 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
     },
 
     cancelSession: function (sid, to) {
+        // console.error('herrrreeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee');
+        // console.error(sid);
+        // console.error(to);
 
         if (to){
             let msg_id = uuid(),
@@ -353,7 +409,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                 type: 'chat',
                 id: uuid()
             });
-            stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: sid, timestamp: Date.now()});
+            stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: sid, timestamp: Date.now() / 1000});
             stanza.c('verification-failed', {reason: 'Session cancelled'}).up().up();
 
             stanza.up().up().up();
@@ -413,7 +469,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
     publishOwnTrustedDevices: function (callback) {
         let my_trusted_devices = this.get('trusted_devices')[this.account.get('jid')],
             my_saved_trusted_device,
-            current_timestamp = Date.now();
+            current_timestamp = Date.now() / 1000;
         if (!my_trusted_devices)
             return;
 
@@ -539,9 +595,9 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
         Object.keys(trusted_devices).forEach((item) => {
             if (item === this.account.get('jid'))
                 return;
-            stanza.c('trusted-items', {owner: item, timestamp: Date.now()});
+            stanza.c('trusted-items', {owner: item, timestamp: Date.now() / 1000});
             trusted_devices[item].forEach((device_item) => {
-                stanza.c('trust', {timestamp: Date.now()}).t(device_item.trusted_key).up();
+                stanza.c('trust', {timestamp: Date.now() / 1000}).t(device_item.trusted_key).up();
                 counter++;
             });
             stanza.up();
@@ -663,7 +719,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                         {
                             trusted_key: utils.ArrayBuffertoBase64(trustedKeyBuffer),
                             fingerprint: own_device.get('fingerprint'),
-                            timestamp: Date.now(),
+                            timestamp: Date.now() / 1000,
                             device_id: own_device.get('id'),
                             is_me: true,
                             public_key: utils.ArrayBuffertoBase64(own_device.get('ik'))
@@ -726,6 +782,24 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
             state = xabber.getString("verification_session_state__request_proceeding");
         } else if (step === '0b'){
             state = xabber.getString("verification_session_state__request_answer_needed");
+        }
+
+        return state;
+    },
+
+    getVerificationStateOwn: function (session) {
+        let state,
+            step = session.verification_step;
+        if (step === '1a' && session.active_verification_device && session.active_verification_device.device_id){
+            state = xabber.getString("verification_session_state__own_request_code_needed");
+        } else if (step === '1a'){
+            state = xabber.getString("verification_session_state__own_request_send");
+        } else if (step === '1b'){
+            state = xabber.getString("verification_session_state__own_request_answered");
+        } else if (step === '2a' || step === '2b'){
+            state = xabber.getString("verification_session_state__request_proceeding");
+        } else if (step === '0b'){
+            state = xabber.getString("verification_session_state__own_request_answer_needed");
         }
 
         return state;
@@ -833,6 +907,8 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
             session_data.verification_step = session.verification_step;
 
             session_data.current_a_jid = session.current_a_jid;
+
+            session_data.session_check_jid = session.session_check_jid;
 
             session_data.a_payload = session.a_payload && typeof(session.a_payload) === 'string' ? utils.fromBase64toArrayBuffer(session.a_payload) : '';
 
@@ -1032,7 +1108,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                         trust_reason_jid: this.account.get('jid'),
                         fingerprint: device.get('fingerprint'),
                         device_id: device.get('id'),
-                        timestamp: Date.now(),
+                        timestamp: Date.now() / 1000,
                         public_key: utils.ArrayBuffertoBase64(device.get('ik'))
                     });
                 } else {
@@ -1045,7 +1121,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                     trust_reason_jid: this.account.get('jid'),
                     fingerprint: device.get('fingerprint'),
                     device_id: device.get('id'),
-                    timestamp: Date.now(),
+                    timestamp: Date.now() / 1000,
                     public_key: utils.ArrayBuffertoBase64(device.get('ik'))
                 }];
             }
@@ -1105,7 +1181,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                         trusted_key: item.trusted_key,
                         from_device_id: item.from_device_id,
                         trust_reason_jid: item.trust_reason_jid,
-                        timestamp: Date.now(),
+                        timestamp: Date.now() / 1000,
                         fingerprint: item_fingerprint,
                         device_id: item_device_id,
                         public_key: utils.ArrayBuffertoBase64(item_device.get('ik'))
@@ -1409,6 +1485,8 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
         if (this.active_sessions_data[sid]){
             if (!this.active_sessions_data[sid].verification_step){
                 this.clearData(sid);
+            } else if ($message.find(`verification-accepted`).length && $message.find(`verification-accepted`).attr('device-id') != this.omemo.get('device_id')) {
+                this.clearData(sid);
             }
         }
     },
@@ -1425,8 +1503,8 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
             sessions_with_jid.forEach((session) => {
                 let sid = Object.keys(active_sessions).find(key => active_sessions[key] === session);
                 if (sid){
-                    // console.error('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
-                    // console.error('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
+                    // console.error('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
+                    // console.error('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
                     // console.error(original_sid);
                     // console.error(sid);
                     // console.error(jid);
@@ -1488,12 +1566,15 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
             }
         }
 
+        this.active_sessions_data[sid] && console.log(this.active_sessions_data[sid].session_check_jid);
         if (this.active_sessions_data[sid]
-            && this.active_sessions_data[sid].current_a_jid === Strophe.getBareJidFromJid($message.attr('to'))){
+            && this.active_sessions_data[sid].session_check_jid === Strophe.getBareJidFromJid($message.attr('to'))){
             if ($message.find(`verification-accepted`).length && $('#modals').find('.modal.modal-verification-start').length){
                 let $verifcationStartModal = $('#modals').find('.modal.modal-verification-start');  // change to close opened request view
                 $verifcationStartModal.find('.btn-cancel').click();
                 return;
+            } else if ($message.find(`verification-accepted`).length && $message.find(`verification-accepted`).attr('device-id') != this.omemo.get('device_id')) {
+                this.clearData(sid);
             }
         }
 
@@ -1605,12 +1686,6 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                 if (this.isDeviceTrusted(this.account.get('jid'), $message.find('verification-start').attr('device-id')) && !$message.find('verification-start').attr('to-device-id'))
                     return;
 
-                let is_active_session_jid = this.isActiveSessionWithJid(this.account.get('jid'), sid);
-                if (is_active_session_jid)
-                    return;
-
-                if ($message.find('verification-start').attr('to-device-id') && $message.find('verification-start').attr('to-device-id') != this.omemo.get('device_id'))
-                    return;
                 let ended_sessions = this.get('ended_sessions');
 
                 if (ended_sessions.includes(sid)){
@@ -1618,18 +1693,37 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                     return;
                 }
 
+                let is_active_session_jid = this.isActiveSessionWithJid(this.account.get('jid'), sid);
+                if (is_active_session_jid)
+                    return;
+
+                if ($message.find('verification-start').attr('to-device-id') && $message.find('verification-start').attr('to-device-id') != this.omemo.get('device_id'))
+                    return;
+                if ($message.find('verification-start').attr('device-id') == this.omemo.get('device_id'))
+                    return;
+                let peer = this.omemo.getPeer(this.account.get('jid')),
+                    device = peer.devices[$message.find('verification-start').attr('device-id')];
+                if (!device){
+                    peer.updateDevicesKeys();
+                }
                 this.account.omemo.xabber_trust.addVerificationSessionData(sid, {
-                    session_check_jid: this.account.get('jid')
+                    session_check_jid: this.account.get('jid'),
+                    session_check_device_id: $message.find('verification-start').attr('device-id'),
+                    incoming_request_data: {
+                        message: message.outerHTML,
+                        message_options: options,
+                    },
+                    verification_step: '0b',
                 });
-                let view = new xabber.IncomingTrustSessionView();
-                view.show({
-                    account: this.account,
-                    trust: this,
-                    message: message,
-                    message_options: options,
-                    contact: null,
-                    sid: sid
-                });
+                // let view = new xabber.IncomingTrustSessionView();
+                // view.show({
+                //     account: this.account,
+                //     trust: this,
+                //     message: message,
+                //     message_options: options,
+                //     contact: null,
+                //     sid: sid
+                // });
             }
             if ($message.find('verification-start').length && $message.find('verification-start').attr('device-id') && this.omemo.get('device_id') && !options.automated){
                 // console.log(this.omemo.get('device_id'));
@@ -1671,7 +1765,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                     options.msg_item && this.removeAfterHandle(options.msg_item);
                 }
                 if (this.active_sessions_data[sid].verification_step === '1a' && !options.automated)
-                    this.handleTrustVerificationSigned($message, null, true);
+                    this.handleTrustVerificationSigned($message, null, true, null, options.forced_code);
                 return;
             }
             if (this.active_sessions_data[sid] && this.active_sessions_data[sid].active_verification_code){
@@ -1797,7 +1891,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                             type: 'chat',
                             id: uuid()
                         });
-                        stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: sid, timestamp: Date.now()});
+                        stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: sid, timestamp: Date.now() / 1000});
                         stanza.c('verification-accepted', {'device-id': this.account.omemo.get('device_id')}).up();
                         stanza.c('salt').c('ciphertext').t(response.data).up().c('iv').t(response.iv).up().up().up();
                         stanza.up().up().up();
@@ -1822,7 +1916,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                                 $msg.attr('to',this.account.get('jid'));
                                 $msg.attr('type', 'headline');
                                 $msg.children('body').remove();
-                                $msg.find('verification-accepted').attr('device-id', '');
+                                $msg.find('verification-accepted').attr('device-id', this.account.omemo.get('device_id'));
                                 $msg.find('salt').remove();
                                 $stanza.find(`addresses[xmlns="${Strophe.NS.ADDRESS}"] address[type="to"]`).attr('jid',this.account.get('jid'));
                                 this.account.sendFast(stanza, () => {
@@ -1903,7 +1997,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                                         type: 'chat',
                                         id: uuid()
                                     });
-                                    stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: sid, timestamp: Date.now()});
+                                    stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: sid, timestamp: Date.now() / 1000});
 
                                     stanza.c('salt').c('ciphertext').t(response.data).up().c('iv').t(response.iv).up().up();
                                     stanza.c('hash', {xmlns: Strophe.NS.HASH, algo: 'sha-256'});
@@ -1952,7 +2046,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                             type: 'chat',
                             id: uuid()
                         });
-                        stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: sid, timestamp: Date.now()});
+                        stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: sid, timestamp: Date.now() / 1000});
                         stanza.c('verification-failed', {reason: 'Data decryption failed'}).up().up();
 
                         stanza.up().up().up();
@@ -2012,7 +2106,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                                                 type: 'chat',
                                                 id: uuid()
                                             });
-                                            stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: sid, timestamp: Date.now()});
+                                            stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: sid, timestamp: Date.now() / 1000});
 
                                             stanza.c('salt').c('ciphertext').t(response.data).up().c('iv').t(response.iv).up().up();
                                             stanza.c('hash', {xmlns: Strophe.NS.HASH, algo: 'sha-256'});
@@ -2061,7 +2155,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                                     type: 'chat',
                                     id: uuid()
                                 });
-                                stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: sid, timestamp: Date.now()});
+                                stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: sid, timestamp: Date.now() / 1000});
                                 stanza.c('verification-failed', {reason: 'Data decryption failed'}).up().up();
 
                                 stanza.up().up().up();
@@ -2195,7 +2289,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                                                 type: 'chat',
                                                 id: uuid()
                                             });
-                                            stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: sid, timestamp: Date.now()});
+                                            stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: sid, timestamp: Date.now() / 1000});
 
                                             stanza.c('hash', {xmlns: Strophe.NS.HASH, algo: 'sha-256'});
                                             stanza.c('ciphertext').t(hash_response.data).up().c('iv').t(hash_response.iv).up().up().up();
@@ -2236,7 +2330,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                                         type: 'chat',
                                         id: uuid()
                                     });
-                                    stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: sid, timestamp: Date.now()});
+                                    stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: sid, timestamp: Date.now() / 1000});
                                     stanza.c('verification-failed', {reason: 'Hashes didn\'t match'}).up().up();
 
                                     stanza.up().up().up();
@@ -2280,7 +2374,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                             type: 'chat',
                             id: uuid()
                         });
-                        stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: sid, timestamp: Date.now()});
+                        stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: sid, timestamp: Date.now() / 1000});
                         stanza.c('verification-failed', {reason: 'Data decryption failed'}).up().up();
 
                         stanza.up().up().up();
@@ -2322,7 +2416,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                         type: 'chat',
                         id: uuid()
                     });
-                    stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: sid, timestamp: Date.now()});
+                    stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: sid, timestamp: Date.now() / 1000});
                     stanza.c('verification-failed', {reason: 'Data decryption failed with error'}).up().up();
 
                     stanza.up().up().up();
@@ -2392,6 +2486,10 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                             if (generated_hash_b64 === decrypted_hash_b64){
                                 msg_item && this.removeAfterHandle(msg_item);
                                 //start devices exchange
+
+                                this.account.omemo.xabber_trust.addVerificationSessionData(sid, {
+                                    verification_step: 'final',
+                                });
                                 this.sendTrustedDevices(contact, device, sid);
 
                             } else {
@@ -2412,7 +2510,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                                     type: 'chat',
                                     id: uuid()
                                 });
-                                stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: sid, timestamp: Date.now()});
+                                stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: sid, timestamp: Date.now() / 1000});
                                 stanza.c('verification-failed', {reason: 'Hashes didn\'t match in final stanza'}).up().up();
 
                                 stanza.up().up().up();
@@ -2594,7 +2692,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
             type: 'chat',
             id: uuid()
         });
-        stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: sid, timestamp: Date.now()});
+        stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: sid, timestamp: Date.now() / 1000});
         stanza.c('verification-successful').up().up();
 
         stanza.up().up().up();
@@ -2628,7 +2726,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                         trusted_key: trustedKeyBase64,
                         fingerprint: device.get('fingerprint'),
                         device_id: device.get('id'),
-                        timestamp: Date.now(),
+                        timestamp: Date.now() / 1000,
                         after_trust: true,
                         public_key: utils.ArrayBuffertoBase64(device.get('ik'))
                     });
@@ -2638,7 +2736,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                     trusted_key: trustedKeyBase64,
                     fingerprint: device.get('fingerprint'),
                     device_id: device.get('id'),
-                    timestamp: Date.now(),
+                    timestamp: Date.now() / 1000,
                     after_trust: true,
                     public_key: utils.ArrayBuffertoBase64(device.get('ik'))
                 }];
@@ -2668,6 +2766,9 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
         }
         let device = this.active_sessions_data[sid].active_verification_device,
             code = this.active_sessions_data[sid].active_verification_code;
+        this.account.omemo.xabber_trust.addVerificationSessionData(sid, {
+            verification_step: 'final',
+        });
         // console.log(device);
         this.getTrustedKey(device).then((trustedKeyBuffer) => {
             // console.log(trustedKeyBuffer);
@@ -2680,7 +2781,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                         trusted_key: trustedKeyBase64,
                         fingerprint: device.get('fingerprint'),
                         device_id: device.get('id'),
-                        timestamp: Date.now(),
+                        timestamp: Date.now() / 1000,
                         after_trust: true,
                         public_key: utils.ArrayBuffertoBase64(device.get('ik'))
                     });
@@ -2690,7 +2791,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                     trusted_key: trustedKeyBase64,
                     fingerprint: device.get('fingerprint'),
                     device_id: device.get('id'),
-                    timestamp: Date.now(),
+                    timestamp: Date.now() / 1000,
                     after_trust: true,
                     public_key: utils.ArrayBuffertoBase64(device.get('ik'))
                 }];

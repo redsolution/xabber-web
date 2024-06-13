@@ -138,7 +138,6 @@ $.fn.hyperlinkify = function (options) {
                                 try {
                                     x = x.replace(list[i], decodeURI(list[i]));
                                 } catch (e) {
-                                    console.log(list[i])
                                     console.error(e)
                                 }
                             }

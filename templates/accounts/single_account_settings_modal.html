@@ -169,6 +169,9 @@
                         <div class="device-encryption-warning-name one-line">{[print(xabber.getString("settings_account__encryption_warning_header"))]}</div>
                         <div class="device-encryption-warning-label"></div>
                     </div>
+                    <div class="active-trust-session-wrap">
+
+                    </div>
                     <div class="tokens-wrap">
                         <div class="settings-panel-label">{[print(xabber.getString("settings_account__label_this_device"))]}</div>
                         <div class="current-token-wrap">
@@ -176,6 +179,10 @@
                             <div class="btn-revoke-all-tokens settings-button-devices">
                                 <svg class="mdi mdi-24px mdi-svg-template" data-svgname="restrictions-outline"></svg>
                                 <div class="settings-button-devices-label">{[print(xabber.getString("account_terminate_all_sessions"))]}</div>
+                            </div>
+                            <div class="btn-verify-devices settings-button-devices">
+                                <svg class="mdi mdi-24px mdi-svg-template" data-svgname="restrictions-outline"></svg>
+                                <div class="settings-button-devices-label">{[print(xabber.getString("account_verify_devices"))]}</div>
                             </div>
                         </div>
                         <div class="settings-panel-label active-sessions-label">{[print(xabber.getString("settings_account__label_active_sessions"))]}</div>
