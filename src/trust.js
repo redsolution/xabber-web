@@ -240,9 +240,12 @@ xabber.ActiveSessionModalView = xabber.BasicView.extend({
                     if (!device)
                         return;
                     trust_attrs.label = device.get('label');
-                    trust_attrs.jid = item;
+                    // trust_attrs.jid = item;
                     if (item === this.account.get('jid')){
                         let token = this.account.x_tokens_list.find(item => (item.omemo_id == device_item.device_id));
+                        trust_attrs.ip = '';
+                        trust_attrs.last_auth = '';
+                        trust_attrs.icon = 'contact';
                         if (token){
                             token.device && (trust_attrs.label = token.device);
                             if (token.device && (token.device.indexOf('Android') > -1 || token.device.indexOf('iOS') > -1)){
@@ -250,13 +253,17 @@ xabber.ActiveSessionModalView = xabber.BasicView.extend({
                             } else {
                                 trust_attrs.icon = 'web';
                             }
+                            trust_attrs.ip = token.ip;
+                            trust_attrs.last_auth = pretty_datetime_date(token.last_auth);
                         }
+                        let $trust_device = $(templates.trust_item_device_session(trust_attrs));
+                        this.$('.new-trusted-devices-list').append($trust_device);
+                        this.$('.new-trusted-devices-list .preloader-wrapper').remove();
                     } else {
-                        trust_attrs.icon = 'contact';
+                        // trust_attrs.icon = 'contact';
                     }
-                    let $trust_device = $(templates.trust_item_device_session(trust_attrs));
-                    this.$('.new-trusted-devices-list').append($trust_device);
-                    this.$('.new-trusted-devices-list .preloader-wrapper').remove();
+                    // if (!this.contact){
+                    // }
                 }
             });
         });
@@ -1593,7 +1600,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                 return;
             }
         } else {
-            if ($message.find('verification-failed').length || $message.find('verification-rejected').length){
+            if ($message.find('verification-failed').length || $message.find('verification-rejected').length || $message.find('verification-successful').length){
                 this.clearData(sid);
                 return;
             }
@@ -1807,6 +1814,15 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                 }
                 if (this.active_sessions_data[sid].verification_step === '1a' && !options.automated)
                     this.handleTrustVerificationSigned($message, null, true, null, options.forced_code);
+
+                if (options.automated && !$('#modals').find('.code-modal').length){
+                    let view = new xabber.ActiveSessionModalView();
+                    view.show({
+                        account: this.account,
+                        sid: sid,
+                        device_id: $message.find(`verification-accepted`).attr('device-id')
+                    });
+                }
                 return;
             }
             if (this.active_sessions_data[sid] && this.active_sessions_data[sid].active_verification_code){

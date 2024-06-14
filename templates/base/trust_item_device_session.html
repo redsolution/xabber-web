@@ -6,6 +6,6 @@
         <svg class="mdi trust-item-icon mdi-24px mdi-svg-template" data-svgname="device-{{icon}}"></svg>
         {[}]}
     </div>
-    <div class="trust-item-label">{[if (label) {]}{{label}}{[} else {]}{{device.device_id}}{[}]} • {{jid}}</div>
-    <div class="trust-item-trust-type">{{trust_type}}</div>
+    <div class="trust-item-label">{[if (label) {]}{{label}}{[} else {]}{{device.device_id}}{[}]}</div>
+    <div class="trust-item-trust-type">{[if (ip) {]}{{ip}} • {[}]}{[if (last_auth) {]}{{last_auth}}{[}]}</div>
 </div>
