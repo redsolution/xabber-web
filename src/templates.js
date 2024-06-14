@@ -311,6 +311,7 @@
     addSvgTemplate('svg.description');
     addSvgTemplate('svg.description-outline');
     addSvgTemplate('svg.contact-add');
+    addSvgTemplate('svg.contacts');
     addSvgTemplate('svg.check');
     addSvgTemplate('svg.call-outline');
     addSvgTemplate('svg.call');

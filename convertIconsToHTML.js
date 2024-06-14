@@ -76,6 +76,7 @@ let badges_names = [
         'description',
         'description-outline',
         'contact-add',
+        'contacts',
         'check',
         'call-outline',
         'call',

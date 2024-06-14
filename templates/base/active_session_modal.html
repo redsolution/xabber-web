@@ -8,8 +8,20 @@
     </div>
     <div class="modal-content">
         <div class="main-process-wrap">
-            <div class="code-header">
+            <div class="code-header 0b-step session-step">
+                {[print(xabber.getString("show_code__modal_header_awaiting"))]}
+            </div>
+            <div class="code-header 0a-step session-step">
                 {[print(xabber.getString("show_code__modal_header"))]}
+            </div>
+            <div class="code-header 1b-step session-step">
+                {[print(xabber.getString("show_code__modal_header"))]}
+            </div>
+            <div class="code-header 1a-step session-step">
+                {[print(xabber.getString("show_code__modal_header"))]}
+            </div>
+            <div class="code-header proceeding-step session-step">
+                {[print(xabber.getString("show_code__modal_header_proceeding"))]}
             </div>
         </div>
         <div class="session-trusted-devices-wrap">
@@ -23,14 +35,17 @@
                 <div class="code-contact-text 1a-step session-step">{[print(xabber.getString("show_code__contact_device_text"))]}</div>
             </div>
             <div class="own-device-session">
-                <div class="code-contact-text 1b-step session-step">{[print(xabber.getString("show_code__own_device_text"))]}</div>
-                <div class="code-contact-text 1a-step session-step">{[print(xabber.getString("show_code__own_device_text"))]}</div>
+                <div class="code-contact-text 1b-step session-step">{[print(xabber.getString("show_code__own_device_text_code"))]}</div>
+                <div class="code-contact-text 1a-step session-step">{[print(xabber.getString("show_code__own_device_text_enter"))]}</div>
             </div>
             <div class="session-awaiting-response-text 0a-step session-step">
                 {[print(xabber.getString("session_modal__awaiting_response_text"))]}
             </div>
             <div class="session-incoming-request-text 0b-step session-step">
                 {[print(xabber.getString("session_modal__incoming_request_text"))]}
+            </div>
+            <div class="session-incoming-request-text proceeding-step session-step">
+                {[print(xabber.getString("session_modal__proceeding_request_text"))]}
             </div>
             <div class="code-contact-text-tip ">
                 <div class="contact-session">
@@ -44,12 +59,16 @@
                     </ol>
                 </div>
                 <div class="own-device-session">
+                    <ol class="0b-step session-step" type="1">
+                        <li class="part-one 0b-step session-step">{[print(xabber.getString("show_code__own_device_incoming_tip_text_part_one"))]}</li>
+                        <li class="part-two 0b-step session-step">{[print(xabber.getString("show_code__own_device_incoming_tip_text_part_two"))]}</li>
+                    </ol>
                     <ol class="1b-step session-step" type="1">
                         <li class="part-one 1b-step session-step">{[print(xabber.getString("show_code__own_device_tip_text_part_one"))]}</li>
                         <li class="part-two 1b-step session-step">{[print(xabber.getString("show_code__own_device_tip_text_part_two"))]}</li>
                     </ol>
                     <ol class="1a-step session-step" type="1">
-                        <li class="part-one 1a-step session-step">{[print(xabber.getString("show_code__own_device_tip_text_part_one"))]}</li>
+                        <li class="part-one 1a-step session-step">{[print(xabber.getString("show_code__enter_code_own_device_tip_text_part_one"))]}</li>
                         <li class="part-two 1a-step session-step">{[print(xabber.getString("show_code__enter_code_own_device_tip_text_part_two"))]}</li>
                     </ol>
                 </div>
@@ -69,6 +88,7 @@
                 <div class="btn-cancel-session 1b-step session-step btn-flat btn-main btn-dark ">{[print(xabber.getString("show_code__cancel_session"))]}</div>
                 <button class="btn-enter-code 1a-step session-step btn-flat btn-main text-color-500">{[print(xabber.getString("show_code__complete_verification"))]}</button>
                 <div class="btn-cancel-session 1a-step session-step btn-flat btn-main btn-dark">{[print(xabber.getString("show_code__cancel_session"))]}</div>
+                <div class="btn-cancel-session proceeding-step session-step btn-flat btn-main btn-dark">{[print(xabber.getString("show_code__cancel_session"))]}</div>
                 <div class="btn-accept-session btn-flat btn-main 0b-step session-step text-color-500">{[print(xabber.getString("show_code__proceed_verification"))]}</div>
                 <div class="btn-reject-session btn-flat btn-main 0b-step session-step">{[print(xabber.getString("show_code__cancel_verification"))]}</div>
                 <div class="btn-cancel-session 0a-step session-step btn-flat btn-main btn-dark ">{[print(xabber.getString("show_code__cancel_session"))]}</div>

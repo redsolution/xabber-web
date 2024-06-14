@@ -3255,6 +3255,7 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
             }
         });
         this.$('.btn-verify').switchClass('hidden', this.$('.active-trust-session-wrap').children().length)
+        this.updateHeight();
     },
 
     cancelTrustSession: function (ev) {

@@ -162,7 +162,7 @@ xabber.ActiveSessionModalView = xabber.BasicView.extend({
             let code = session.active_verification_code;
             this.$('.code-text').text(code);
         } else if (step === '2a' || step === '2b'){
-            // proceeding
+            this.$('.proceeding-step').removeClass('hidden');
         } else if (step === 'final'){
             this.session_ending = true;
             this.device_id = session.active_verification_device.device_id;
@@ -183,12 +183,19 @@ xabber.ActiveSessionModalView = xabber.BasicView.extend({
             this.$('.code-device-jid').text(this.contact.get('jid'));
 
         } else {
-            let token = this.account.x_tokens_list.find(item => ((session.active_verification_device && item.omemo_id === session.active_verification_device.device_id) || item.omemo_id == this.device_id));
-            if (token) {
+            let token;
+            this.account.x_tokens_list && (token = this.account.x_tokens_list.find(item => ((session.active_verification_device && item.omemo_id === session.active_verification_device.device_id) || item.omemo_id == this.device_id)));
+            if (token && this.account.x_tokens_list) {
                 this.$('.code-device-name').text(token.device || xabber.getString('unknown'));
                 this.$('.code-device-jid').html(`${token.ip} • ${pretty_datetime_date(token.last_auth)}`);
                 this.$('.phone-icon').switchClass('hidden', !(token.device && (token.device.indexOf('Android') > -1 || token.device.indexOf('iOS') > -1)));
                 this.$('.web-icon').switchClass('hidden', (token.device && (token.device.indexOf('Android') > -1 || token.device.indexOf('iOS') > -1)));
+            } else if (!this.requested_tokens) {
+                this.requested_tokens = true;
+                this.account.getAllXTokens(() => {
+                    this.onRender();
+                });
+                return;
             }
         }
         this.$('.part-one b').addClass('text-color-500');
@@ -238,7 +245,14 @@ xabber.ActiveSessionModalView = xabber.BasicView.extend({
                         let token = this.account.x_tokens_list.find(item => (item.omemo_id == device_item.device_id));
                         if (token){
                             token.device && (trust_attrs.label = token.device);
+                            if (token.device && (token.device.indexOf('Android') > -1 || token.device.indexOf('iOS') > -1)){
+                                trust_attrs.icon = 'cellphone';
+                            } else {
+                                trust_attrs.icon = 'web';
+                            }
                         }
+                    } else {
+                        trust_attrs.icon = 'contact';
                     }
                     let $trust_device = $(templates.trust_item_device_session(trust_attrs));
                     this.$('.new-trusted-devices-list').append($trust_device);
@@ -328,7 +342,13 @@ xabber.ActiveSessionModalView = xabber.BasicView.extend({
 
         } else {
             this.close();
-            this.account.showSettings(null, 'devices'); // add handling if already opened
+            if (xabber.accounts.length === 1 && xabber.body.screen.get('name') === 'settings-modal' && xabber.settings_modal_view.settings_single_account_modal) {
+                let $elem = xabber.settings_modal_view.settings_single_account_modal.$(`.settings-tab[data-block-name="devices"]`);
+                if ($elem.length)
+                    xabber.settings_modal_view.settings_single_account_modal.jumpToBlock({target: $elem[0]});
+            } else {
+                this.account.showSettings(null, 'devices');
+            }
         }
     },
 
