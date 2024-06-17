@@ -1902,6 +1902,9 @@ xabber.Omemo = Backbone.ModelWithStorage.extend({
                     if (decrypted_msg) {
                         options.encrypted = true;
                         stanza_id && this.cached_messages.putMessage(contact, stanza_id, {envelope: decrypted_msg});
+                        if (!this.account || !this.account.get('enabled')) {
+                            return;
+                        }
                         $message.find('body').remove();
                         $message.find(`encrypted[xmlns="${Strophe.NS.OMEMO}"]`).replaceWith(decrypted_msg);
                         let chat = this.account.chats.getChat(contact, 'encrypted');
@@ -1924,6 +1927,9 @@ xabber.Omemo = Backbone.ModelWithStorage.extend({
                     if (decrypted_msg) {
                         options.encrypted = true;
                         stanza_id && this.cached_messages.putMessage(contact, stanza_id, {envelope: decrypted_msg});
+                        if (!this.account || !this.account.get('enabled')){
+                            return;
+                        }
                         $message.find('body').remove();
                     }
                     else {

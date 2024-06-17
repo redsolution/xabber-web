@@ -632,12 +632,16 @@ xabber.MessagesBase = Backbone.Collection.extend({
                       try {
                           let filereader = new FileReader();
                           filereader.onloadend = () => {
-                              let arrayBuffer = filereader.result,
-                                  exportedMasterKey = key.slice(0, 32),
-                                  HMACData = key.slice(32);
-                              utils.AES.decrypt(exportedMasterKey, HMACData, arrayBuffer).then((enc_file) => {
-                                  resolve(enc_file);
-                              });
+                              try{
+                                  let arrayBuffer = filereader.result,
+                                      exportedMasterKey = key.slice(0, 32),
+                                      HMACData = key.slice(32);
+                                  utils.AES.decrypt(exportedMasterKey, HMACData, arrayBuffer).then((enc_file) => {
+                                      resolve(enc_file);
+                                  });                                  
+                              } catch (e) {
+                                  resolve(null)
+                              }
                           };
                           filereader.readAsArrayBuffer(blob);
                       } catch (e) {

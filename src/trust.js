@@ -743,12 +743,12 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
     populateOwnTrustedDevices: function () {
         let trusted_devices = this.get('trusted_devices');
         if (!Object.keys(trusted_devices).length) {
-            let own_device = this.omemo.own_devices[this.omemo.get('device_id')];
+            let peer = this.omemo.getPeer(this.account.get('jid')),
+                own_device = peer.devices[this.omemo.get('device_id')];
                 if (!own_device){
                     this.account.once('devices_updated', () => {
                         this.populateOwnTrustedDevices()
                     });
-                    let peer = this.omemo.getPeer(this.account.get('jid'))
                     peer && peer.updateDevicesKeys();
                     return;
                 }
@@ -768,7 +768,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                     this.trigger('trust_updated');
                     this.publishOwnTrustedDevices();
                 }).catch((err) => {
-                    // console.error(err);
+                    console.error(err);
                 });
         } else {
             this.publishOwnTrustedDevices();
