@@ -236,7 +236,7 @@ xabber.Fingerprints = xabber.BasicView.extend({
             type: 'chat',
             id: uuid()
         });
-        stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: sid, timestamp: Math.floor(Date.now() / 1000) }).c('verification-start', {'device-id': this.account.omemo.get('device_id') }).up().up();
+        stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: sid, timestamp: Math.floor(Date.now() / 1000) }).c('verification-start', {'device-id': this.account.omemo.get('device_id'), 'ttl': 86400 }).up().up();
         stanza.c('body').t(`Device Verification request from ${this.account.jid} A1`).up();
         stanza.up().up().up();
         stanza.c('fallback',{xmlns: Strophe.NS.XABBER_NOTIFY}).t(`device verification fallback text`).up();
@@ -249,7 +249,10 @@ xabber.Fingerprints = xabber.BasicView.extend({
                 active_verification_device: {
                     peer_jid: this.jid,
                 },
-                verification_step: '1a'
+                verification_step: '1a',
+                session_check_jid: this.jid,
+                msg_ttl: 86400,
+                message_timestamp: Math.floor(Date.now() / 1000),
             });
             utils.callback_popup_message(xabber.getString("trust_verification_started"), 5000);
         });
@@ -785,7 +788,7 @@ xabber.FingerprintsOwnDevices = xabber.BasicView.extend({
             type: 'chat',
             id: uuid()
         });
-        stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: sid, timestamp: Math.floor(Date.now() / 1000) }).c('verification-start', {'device-id': this.account.omemo.get('device_id'), 'to-device-id': this.device_id }).up().up();
+        stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: sid, timestamp: Math.floor(Date.now() / 1000) }).c('verification-start', {'device-id': this.account.omemo.get('device_id'), 'to-device-id': this.device_id, 'ttl': 300 }).up().up();
         stanza.c('body').t(`Device Verification request from ${this.account.jid} A1`).up();
         stanza.up().up().up();
         stanza.c('fallback',{xmlns: Strophe.NS.XABBER_NOTIFY}).t(`device verification fallback text`).up();
@@ -801,7 +804,10 @@ xabber.FingerprintsOwnDevices = xabber.BasicView.extend({
                 active_verification_device: {
                     peer_jid: this.account.get('jid'),
                 },
-                verification_step: '1a'
+                verification_step: '1a',
+                session_check_jid: this.account.get('jid'),
+                msg_ttl: 300,
+                message_timestamp: Math.floor(Date.now() / 1000),
             });
             utils.callback_popup_message(xabber.getString("trust_verification_started"), 5000);
             this.close();

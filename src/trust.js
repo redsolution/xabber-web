@@ -864,6 +864,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
     },
 
     clearData: function (sid) {
+        // console.error('here')
         let active_sessions = this.get('active_trust_sessions');
         if (this.account.notifications_content){
             this.account.notifications_content.updateTrustSession(sid, true);
@@ -911,10 +912,35 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
             active_sessions_data = {},
             device_exists_jid_list = [];
 
+        this.account.trigger('verification_session_data_update');
+
 
         Object.keys(active_sessions).forEach((session_id) => {
             let session = active_sessions[session_id],
                 session_data = {};
+
+            if (session.msg_ttl && Number(session.msg_ttl) && session.message_timestamp && Number(session.message_timestamp)){
+                let current_timestamp = Math.floor(Date.now()/1000),
+                    time_diff = current_timestamp - session.message_timestamp;
+                // console.error(active_sessions);
+                // console.error(this.get('active_trust_sessions'));
+                // console.error(time_diff);
+
+                if (time_diff >= session.msg_ttl){
+                    this.cancelSession(session_id, session.session_check_jid);
+                    return;
+                } else {
+                    let remaining_time = (session.msg_ttl - time_diff) * 1000;
+                    // console.error(remaining_time);
+                    let deletion_timeout = setTimeout(() => {
+                        // console.error('deleted by timeout: ' + session_id);
+                        this.cancelSession(session_id, session.session_check_jid);
+                    }, remaining_time);
+                    this.account.once('verification_session_data_update', () => {
+                        clearTimeout(deletion_timeout);
+                    });
+                }
+            }
 
             let active_verification_device = session.active_verification_device,
                 peer,device;
@@ -1608,7 +1634,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
 
         this.active_sessions_data[sid] && console.log(this.active_sessions_data[sid].session_check_jid);
         if (this.active_sessions_data[sid]
-            && this.active_sessions_data[sid].session_check_jid === Strophe.getBareJidFromJid($message.attr('to'))){
+            && (this.active_sessions_data[sid].session_check_jid === Strophe.getBareJidFromJid($message.attr('to'))) && !this.active_sessions_data[sid].verification_started){
             if ($message.find(`verification-accepted`).length && $('#modals').find('.modal.modal-verification-start').length){
                 let $verifcationStartModal = $('#modals').find('.modal.modal-verification-start');  // change to close opened request view
                 $verifcationStartModal.find('.btn-cancel').click();
@@ -1620,6 +1646,12 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
 
         if (contact){
             if ($message.find('verification-start').length && $message.find('verification-start').attr('device-id') && this.omemo.get('device_id') && options.automated){
+
+                let msg_timestamp = $message.find('authenticated-key-exchange').attr('timestamp'),
+                    ttl;
+                if (msg_timestamp)
+                    ttl = $message.find('verification-start').attr('ttl');
+
                 let ended_sessions = this.get('ended_sessions');
                 if (ended_sessions.includes(sid)){
                     options.msg_item && this.removeAfterHandle(options.msg_item);
@@ -1653,6 +1685,8 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                         message_options: options,
                     },
                     verification_step: '0b',
+                    msg_ttl: ttl,
+                    message_timestamp: msg_timestamp,
                 });
 
                 // view.show({
@@ -1726,6 +1760,10 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                 if (this.isDeviceTrusted(this.account.get('jid'), $message.find('verification-start').attr('device-id')) && !$message.find('verification-start').attr('to-device-id'))
                     return;
 
+                let msg_timestamp = $message.find('authenticated-key-exchange').attr('timestamp'),
+                    ttl;
+                if (msg_timestamp)
+                    ttl = $message.find('verification-start').attr('ttl');
                 let ended_sessions = this.get('ended_sessions');
 
                 if (ended_sessions.includes(sid)){
@@ -1756,6 +1794,8 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                         message_options: options,
                     },
                     verification_step: '0b',
+                    msg_ttl: ttl,
+                    message_timestamp: msg_timestamp,
                 });
                 let view = new xabber.ActiveSessionModalView();
                 view.show({
