@@ -12071,11 +12071,11 @@ input[type=range].voice-message-volume:focus {
     cursor: pointer;
 }
 .settings-panel-wrap .settings-column .devices-wrap .current-token-wrap .token-wrap{
-    margin-bottom: 8px;
+    /*margin-bottom: 8px;*/
 }
-.settings-panel-wrap .settings-column .devices-wrap .token-wrap[data-trust="unknown"]{
-    background: #FFF8E1;
-}
+/*.settings-panel-wrap .settings-column .devices-wrap .token-wrap[data-trust="unknown"]{*/
+    /*background: #FFF8E1;*/
+/*}*/
 .settings-panel-wrap .settings-column .devices-wrap .token-wrap[data-trust="error"] .device{
     color: #D32F2F;
 }
@@ -12159,20 +12159,26 @@ input[type=range].voice-message-volume:focus {
     display: block;
 }
 
-.settings-panel-wrap .settings-column .devices-wrap .btn-verify-devices,
 .settings-panel-wrap .settings-column .devices-wrap .btn-revoke-all-tokens{
     height: 40px;
     color: #D32F2F;
-    padding: 8px 72px;
+    padding: 11px 72px;
     position: relative;
     cursor: pointer;
 }
 .settings-panel-wrap .settings-column .devices-wrap .btn-verify-devices{
-    color: #42A5F5
+    cursor: pointer;
+    background-color: #ff9800;
+    width: fit-content;
+}
+/*.settings-panel-wrap .settings-column .devices-wrap .btn-verify-devices{*/
+    /*color: #42A5F5*/
+/*}*/
+.settings-panel-wrap .settings-column .devices-wrap .btn-verify-devices:hover{
+    opacity: .8;
 }
 .settings-panel-wrap .settings-column .devices-wrap .btn-verify-devices.disabled{
-    color: #9E9E9E;
-    pointer-events:none;
+    display: none;
 }
 
 .settings-panel-wrap .settings-column .devices-wrap .btn-verify-devices:hover,

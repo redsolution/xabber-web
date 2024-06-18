@@ -3641,6 +3641,7 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
     },
 
     renderAllXTokens: function () {
+        let was_hidden = this.$('.device-encryption-warning').hasClass('hidden');
         this.$('.sessions-wrap').html("");
         this.$('.orphaned-fingerprints-wrap').html("");
         this.$('.device-encryption-warning').attr('data-not-trusted-count', 0);
@@ -3671,6 +3672,9 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
                     if (handled_devices === devices_count){
                         if (!_.isUndefined(this.$('.device-encryption-warning').attr('data-not-trusted-count'))){
                             this.$('.device-encryption-warning').switchClass('hidden', this.$('.device-encryption-warning').attr('data-not-trusted-count') == '0');
+                            if (this.$('.device-encryption-warning').attr('data-not-trusted-count') != '0' && was_hidden && !this.isScrolledToTop()) {
+                                this.scrollTo(this.getScrollTop() + 116)
+                            }
                             this.$('.settings-tabs-wrap .settings-tab .device-encryption').switchClass('hidden', this.$('.device-encryption-warning').attr('data-not-trusted-count') == '0');
                             this.$('.btn-verify-devices').switchClass('hidden', this.$('.device-encryption-warning').attr('data-not-trusted-count') == '0');
                         }
@@ -3692,6 +3696,9 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
                     if (handled_devices === devices_count){
                         if (!_.isUndefined(this.$('.device-encryption-warning').attr('data-not-trusted-count'))){
                             this.$('.device-encryption-warning').switchClass('hidden', this.$('.device-encryption-warning').attr('data-not-trusted-count') == '0');
+                            if (this.$('.device-encryption-warning').attr('data-not-trusted-count') != '0' && was_hidden && !this.isScrolledToTop()) {
+                                this.scrollTo(this.getScrollTop() + 116)
+                            }
                             this.$('.settings-tabs-wrap .settings-tab .device-encryption').switchClass('hidden', this.$('.device-encryption-warning').attr('data-not-trusted-count') == '0');
                             this.$('.btn-verify-devices').switchClass('hidden', this.$('.device-encryption-warning').attr('data-not-trusted-count') == '0');
                         }
@@ -3701,6 +3708,9 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
                     if (handled_devices === devices_count){
                         if (!_.isUndefined(this.$('.device-encryption-warning').attr('data-not-trusted-count'))){
                             this.$('.device-encryption-warning').switchClass('hidden', this.$('.device-encryption-warning').attr('data-not-trusted-count') == '0');
+                            if (this.$('.device-encryption-warning').attr('data-not-trusted-count') != '0' && was_hidden && !this.isScrolledToTop()) {
+                                this.scrollTo(this.getScrollTop() + 116)
+                            }
                             this.$('.settings-tabs-wrap .settings-tab .device-encryption').switchClass('hidden', this.$('.device-encryption-warning').attr('data-not-trusted-count') == '0');
                             this.$('.btn-verify-devices').switchClass('hidden', this.$('.device-encryption-warning').attr('data-not-trusted-count') == '0');
                         }
@@ -3715,6 +3725,9 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
                 if (handled_devices === devices_count){
                     if (!_.isUndefined(this.$('.device-encryption-warning').attr('data-not-trusted-count'))){
                         this.$('.device-encryption-warning').switchClass('hidden', this.$('.device-encryption-warning').attr('data-not-trusted-count') == '0');
+                        if (this.$('.device-encryption-warning').attr('data-not-trusted-count') != '0' && was_hidden && !this.isScrolledToTop()) {
+                            this.scrollTo(this.getScrollTop() + 116)
+                        }
                         this.$('.settings-tabs-wrap .settings-tab .device-encryption').switchClass('hidden', this.$('.device-encryption-warning').attr('data-not-trusted-count') == '0');
                         this.$('.btn-verify-devices').switchClass('hidden', this.$('.device-encryption-warning').attr('data-not-trusted-count') == '0');
                     }

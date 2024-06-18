@@ -163,12 +163,6 @@
         <div class="panel-content details-panel">
             <div data-header='{[print(xabber.getString("settings_account__devices_subheader"))]}' class="settings-block-wrap devices">
                 <div class="devices-wrap hidden">
-                    <div class="device-encryption-warning hidden" data-not-trusted-count="0">
-                        <svg class="device-encryption-icon mdi mdi-40px mdi-svg-template error-icon" data-svgname="alert-circle"></svg>
-                        <svg class="device-encryption-icon mdi mdi-40px mdi-svg-template" data-svgname="alert"></svg>
-                        <div class="device-encryption-warning-name one-line">{[print(xabber.getString("settings_account__encryption_warning_header"))]}</div>
-                        <div class="device-encryption-warning-label"></div>
-                    </div>
                     <div class="active-trust-session-wrap">
 
                     </div>
@@ -182,9 +176,17 @@
                             </div>
                         </div>
                         <div class="settings-panel-label active-sessions-label">{[print(xabber.getString("settings_account__label_active_sessions"))]}</div>
-                        <div class="btn-verify-devices settings-button-devices">
-                            <svg class="mdi mdi-24px mdi-svg-template" data-svgname="restrictions-outline"></svg>
-                            <div class="settings-button-devices-label">{[print(xabber.getString("account_verify_devices"))]}</div>
+                        <div class="device-encryption-warning hidden" data-not-trusted-count="0">
+                            <svg class="device-encryption-icon mdi mdi-40px mdi-svg-template error-icon" data-svgname="alert-circle"></svg>
+                            <svg class="device-encryption-icon mdi mdi-40px mdi-svg-template" data-svgname="alert"></svg>
+                            <div class="device-encryption-warning-name one-line">{[print(xabber.getString("settings_account__encryption_warning_header"))]}</div>
+                            <div class="device-encryption-warning-label"></div>
+                            <div class="btn-verify-devices settings-button-devices btn-flat btn-main-filled">
+                                <!--<i class="mdi mdi-24px mdi-check-circle-outline"></i>-->
+                                <!--<svg class="mdi mdi-24px mdi-svg-template" data-svgname="restrictions-outline"></svg>-->
+                                <!--<div class="settings-button-devices-label">{[print(xabber.getString("account_verify_devices"))]}</div>-->
+                                {[print(xabber.getString("account_verify_devices"))]}
+                            </div>
                         </div>
                         <div class="all-sessions-wrap">
                             <div class="sessions-wrap all-sessions selectable-text"></div>

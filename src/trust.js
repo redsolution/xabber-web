@@ -210,7 +210,7 @@ xabber.ActiveSessionModalView = xabber.BasicView.extend({
         this.account.settings.once("change:color", this.updateColorScheme, this);
     },
 
-    startUpdatingDevices: function () {//34
+    startUpdatingDevices: function () {
         this.trust.on('trust_updated', () => {
             this.updateDevicesItems()
         });
@@ -219,7 +219,7 @@ xabber.ActiveSessionModalView = xabber.BasicView.extend({
         }, 3000)
     },
 
-    updateDevicesItems: function () {//34
+    updateDevicesItems: function () {
         let trusted_devices = this.trust.get('trusted_devices');
 
         this.$('.trust-item-device').remove();
@@ -515,7 +515,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
         if (!my_trusted_devices)
             return;
 
-        my_saved_trusted_device = my_trusted_devices.filter(item => item.is_me);
+        my_saved_trusted_device = my_trusted_devices.filter(item => item.is_me || item.device_id == this.omemo.get('device_id'));
 
         if (!my_saved_trusted_device.length){
             console.error('no own device');
@@ -682,7 +682,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
             stanza.c('signature').t(utils.ArrayBuffertoBase64(signature.buffer)).up();
 
             let my_trusted_devices = this.get('trusted_devices')[this.account.get('jid')],
-                my_saved_trusted_device = my_trusted_devices.filter(item => item.is_me);
+                my_saved_trusted_device = my_trusted_devices.filter(item => item.is_me || item.device_id == this.omemo.get('device_id'));
             if (!my_saved_trusted_device.length)
                 return;
             my_saved_trusted_device = my_saved_trusted_device[0];
@@ -772,6 +772,63 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                 });
         } else {
             this.publishOwnTrustedDevices();
+        }
+    },
+
+    fixMyTrustedDeviceAndPublish: function (callback) { //34
+        let trusted_devices = this.get('trusted_devices'),
+            own_trusted_devices =  trusted_devices[this.account.get('jid')];
+
+        if (!own_trusted_devices){
+            trusted_devices[this.account.get('jid')] = [];
+            this.set('trusted_devices', trusted_devices);
+        }
+
+        let own_trusted_device = own_trusted_devices.find(item => item.device_id == this.omemo.get('device_id') && !item.is_me);
+
+        console.error('fixMyTrustedDeviceAndPublish');
+        console.error(own_trusted_device);
+
+        if (own_trusted_device){
+
+            let peer = this.omemo.getPeer(this.account.get('jid')),
+                own_device = peer.devices[this.omemo.get('device_id')];
+            if (!own_device){
+                console.error('STILL NO DEVICE????');
+                return;
+            }
+
+            this.getTrustedKey(own_device).then((trustedKeyBuffer) => {
+                own_trusted_device = this.get('trusted_devices')[this.account.get('jid')].find(item => item.device_id == this.omemo.get('device_id') && !item.is_me);
+
+                if (!own_trusted_device){
+                    console.error('FIXED ALREADY AND PUBLISHED');
+                    this.publishOwnTrustedDevices(callback);
+                    return;
+                }
+
+                let updated_trusted_devices = this.get('trusted_devices'),
+                    index = updated_trusted_devices[this.account.get('jid')].indexOf(own_trusted_device);
+
+                own_trusted_device = {
+                    trusted_key: utils.ArrayBuffertoBase64(trustedKeyBuffer),
+                    fingerprint: own_device.get('fingerprint'),
+                    timestamp: Math.floor(Date.now() / 1000),
+                    device_id: own_device.get('id'),
+                    is_me: true,
+                    public_key: utils.ArrayBuffertoBase64(own_device.get('ik'))
+                };
+                updated_trusted_devices[this.account.get('jid')][index] = own_trusted_device;
+                this.save('trusted_devices', updated_trusted_devices);
+                this.trigger('trust_updated');
+                console.error('FIXED AND PUBLISHED');
+                this.publishOwnTrustedDevices(callback);
+            }).catch((err) => {
+                console.error(err);
+            });
+        } else {
+            console.error('NO FIX NEEDED');
+            this.publishOwnTrustedDevices(callback);
         }
     },
 
@@ -1284,7 +1341,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
             if (peer){
                 this.publishContactsTrustedDevices();
             } else {
-                this.publishOwnTrustedDevices();
+                this.fixMyTrustedDeviceAndPublish();
             }
         }
 
@@ -1330,14 +1387,14 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                             if (peer){
                                 this.publishContactsTrustedDevices();
                             } else {
-                                this.publishOwnTrustedDevices();
+                                this.fixMyTrustedDeviceAndPublish();
                             }
                         }
                     }
                 }
             });
 
-            if (item.is_me){
+            if (item.is_me || item.device_id == this.omemo.get('device_id')){
                 // console.error('herer');
                 dfd.resolve();
                 return;
@@ -2848,7 +2905,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                 this.publishContactsTrustedDevices(() => {
                 });
             } else {
-                this.publishOwnTrustedDevices(() => {
+                this.fixMyTrustedDeviceAndPublish(() => {
                     this.publishContactsTrustedDevices(() => {
                     });
                 });
@@ -2904,7 +2961,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                 });
                 this.clearData(sid);
             } else {
-                this.publishOwnTrustedDevices(() => {
+                this.fixMyTrustedDeviceAndPublish(() => {
                     this.publishContactsTrustedDevices(() => {
                     });
                     this.clearData(sid);
