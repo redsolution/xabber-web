@@ -109,6 +109,7 @@
     addTemplate('accounts.change_status');
     addTemplate('accounts.token_item_modal');
     addTemplate('accounts.current_token_item_modal');
+    addTemplate('accounts.own_device_verification_session');
     addTemplate('accounts.audio_file_waveform');
     addTemplate('accounts.avatars_gallery');
     addTemplate('accounts.status_message_input_widget');

@@ -3220,6 +3220,7 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
 
         let active_sessions = this.model.omemo.xabber_trust.get('active_trust_sessions');
         this.$(`.notification-trust-session`).remove();
+        this.$('.device-encryption-warning').removeClass('hidden2');
 
         Object.keys(active_sessions).forEach((session_id) => {
             let session = active_sessions[session_id];
@@ -3252,8 +3253,9 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
                     item.is_active_request = true;
                 }
 
-                this.$('.active-trust-session-wrap').append($(env.templates.base.contact_verification_session(item)));
+                this.$('.active-trust-session-wrap').append($(templates.own_device_verification_session(item)));
                 this.$('.btn-verify-devices').addClass('disabled');
+                this.$('.device-encryption-warning').addClass('hidden2');
                 this.active_trust_session = true;
             }
         });

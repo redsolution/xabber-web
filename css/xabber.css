@@ -4914,7 +4914,59 @@ input[type=text].simple-input-field:hover {
 .notification-trust-session .code-wrap .code{
     margin-left: 4px;
 }
+/* own devices trust session item */
 
+.devices-wrap .notification-trust-session{
+    background: #fff8e1;
+    padding: 16px 32px 16px 72px;
+    margin: 0;
+    border-radius: unset;
+}
+.devices-wrap .notification-trust-session .device-encryption-icon{
+}
+    .devices-wrap .notification-trust-session .state-label{
+    font-size: 16px;
+    height: 24px;
+    line-height: 24px;
+    font-weight: 400;
+}
+.devices-wrap .notification-trust-session .state{
+    margin-bottom: 8px;
+    color: #9e9e9e;
+    font-size: 13px;
+    line-height: 20px;
+}
+.devices-wrap .notification-trust-session .btn-main-filled,
+.devices-wrap .notification-trust-session .btn-main{
+    line-height: 36px;
+        font-size: 13px;
+    font-weight: 700;
+}
+.devices-wrap .notification-trust-session .btn-main{
+    color: #ff9800;
+}
+.devices-wrap .notification-trust-session .btn-main-filled{
+    background-color: #ff9800;
+}
+.devices-wrap .notification-trust-session .btn-main:hover{
+    background: transparent;
+    opacity: .8;
+}
+.devices-wrap .notification-trust-session .btn-main-filled:hover{
+    opacity: .8;
+}
+.devices-wrap .notification-trust-session .cancel-session{
+    position: static
+}
+.devices-wrap .notification-trust-session .cancel-session{
+}
+.devices-wrap .notification-trust-session .accept-request,
+.devices-wrap .notification-trust-session .decline-request,
+.devices-wrap .notification-trust-session .enter-code,
+.devices-wrap .notification-trust-session .show-code{
+    margin-top: 0;
+    margin-right: 4px;
+}
 .fingerprints-wrap .fingerprint-details-wrap .fingerprints-header {
     height: 56px;
 }
@@ -12167,6 +12219,7 @@ input[type=range].voice-message-volume:focus {
     cursor: pointer;
 }
 .settings-panel-wrap .settings-column .devices-wrap .btn-verify-devices{
+    margin-top: 8px;
     cursor: pointer;
     background-color: #ff9800;
     width: fit-content;
@@ -12364,7 +12417,12 @@ input[type=range].voice-message-volume:focus {
     line-height: 20px;
 }
 .settings-panel-wrap .settings-panel .device-encryption-warning-label span{
-    color: #616161;
+    /*color: #616161;*/
+}
+.settings-panel-wrap .settings-panel .device-encryption-warning-label hr{
+    height: 2px;
+    border: 0;
+    margin: 2px;
 }
 .settings-panel-wrap .settings-panel .vcard-edit-wrap{
     padding: 0;

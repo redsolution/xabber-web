@@ -447,6 +447,8 @@ xabber.NotificationsChatContentView = xabber.ChatContentView.extend({
 
         let session = active_sessions[session_id];
         this.$(`.notification-trust-session[data-sid="${session_id}"]`).remove();
+        if (!session || !session.verification_step)
+            return;
         if (is_remove){
             return;
         }
