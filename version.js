@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.3.5.40","version_description":"Changed active session item in own devices, changed visual for unverified devices warning notification, fixed notification trust session item render error"}'
+'{"version_number":"2.3.5.41","version_description":"session logs, changed identityKey pair get func to wait for identitykey value to be filled"}'
 )});

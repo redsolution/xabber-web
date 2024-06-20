@@ -2556,7 +2556,16 @@ xabber.SignalProtocolStore = Backbone.Model.extend({
     },
 
     getIdentityKeyPair: function () {
-        return Promise.resolve(this.get('identityKey'));
+        return new Promise((resolve, reject) => {
+            if (this.get('identityKey'))
+                resolve(this.get('identityKey'))
+            else{
+                this.on('updated_identityKey', () => {
+                    if (this.get('identityKey'))
+                        resolve(this.get('identityKey'))
+                })
+            }
+        });
     },
 
     getLocalRegistrationId: function () {
@@ -2567,6 +2576,7 @@ xabber.SignalProtocolStore = Backbone.Model.extend({
         if (key === undefined || value === undefined || key === null || value === null)
             throw new Error("Tried to store undefined/null");
         this.store[key] = value;
+        this.trigger(`updated_${key}`)
     },
 
     get: function (key, defaultValue) {

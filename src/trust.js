@@ -2014,7 +2014,6 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
         this.account.omemo.xabber_trust.addVerificationSessionData(sid, {
 
         });
-        // make here next handler
 
         // utils.dialogs.ask(
         //     xabber.getString("xabber_trust__start_verification_label"),
@@ -2126,14 +2125,14 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                         this.generateVerificationArrayBuffer(devices_IK.device_pubkey, devices_IK.own_privkey, code).then((response) => {
 
                             this.getTrustedKey(this.omemo.own_devices[this.omemo.get('device_id')]).then((trustedKeyBuffer) => {
-                                // console.log('trustedKeyBuffer');
-                                // console.log(trustedKeyBuffer);
-                                // console.log('code');
-                                // console.log(code);
-                                // console.log('decrypted_response.decryptedBuffer');
-                                // console.log(decrypted_response.decryptedBuffer);
-                                // console.log('decrypted_response.encryptionKeyHash');
-                                // console.log(decrypted_response.encryptionKeyHash);
+                                console.log('trustedKeyBuffer');
+                                console.log(trustedKeyBuffer);
+                                console.log('code');
+                                console.log(code);
+                                console.log('decrypted_response.decryptedBuffer');
+                                console.log(decrypted_response.decryptedBuffer);
+                                console.log('decrypted_response.encryptionKeyHash');
+                                console.log(decrypted_response.encryptionKeyHash);
                                 this.generateVerificationEncryptedHash(trustedKeyBuffer, code, decrypted_response.decryptedBuffer, decrypted_response.encryptionKeyHash).then((hash_response) => {
                                     let msg_id = uuid(),
                                         to = contact ? contact.get('jid') : this.account.get('jid'),
@@ -2351,7 +2350,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
         // console.log(device);
 
         this.getDevicesIKsForTrustVerification(device).then((devices_IK) => {
-            // console.log(devices_IK);
+            console.log(devices_IK);
 
             let curve = utils.doCurve(devices_IK.own_privkey, devices_IK.device_pubkey),
                 $salt = $message.find('salt'),
@@ -2363,15 +2362,15 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                     a_iv = utils.fromBase64toArrayBuffer($message.find('salt iv').text()),
                     hash_iv = utils.fromBase64toArrayBuffer($message.find('hash iv').text());
 
-                // console.log(curve);
-                // console.log(utils.ArrayBuffertoBase64(curve));
-                // console.log($message.find('salt iv').text());
-                // console.log(this.active_sessions_data[sid].active_verification_code);
-                // console.log(utils.ArrayBuffertoBase64(curve));
+                console.log(curve);
+                console.log(utils.ArrayBuffertoBase64(curve));
+                console.log($message.find('salt iv').text());
+                console.log(this.active_sessions_data[sid].active_verification_code);
+                console.log(utils.ArrayBuffertoBase64(curve));
 
                 this.decryptTrustBuffer(a_iv, data, curve, code).then((decrypted_a) => {
-                    // console.log('utils.ArrayBuffertoBase64(decrypted_a.decryptedBuffer)  !!!!!!!!!!!!!!!!!!!!!!!!!1');
-                    // console.log(utils.ArrayBuffertoBase64(decrypted_a.decryptedBuffer));
+                    console.log('utils.ArrayBuffertoBase64(decrypted_a.decryptedBuffer)  !!!!!!!!!!!!!!!!!!!!!!!!!1');
+                    console.log(utils.ArrayBuffertoBase64(decrypted_a.decryptedBuffer));
                     this.account.omemo.xabber_trust.addVerificationSessionData(sid, {
                         a_payload: utils.ArrayBuffertoBase64(decrypted_a.decryptedBuffer),
                     });
@@ -2383,30 +2382,30 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                             code_buffer = new TextEncoder().encode(code);
                         // console.log('B_device_id_buffer  !!!!!!!!!!!!!!!!!!!!!!!!!2');
                         // console.log(utils.ArrayBuffertoBase64(B_device_id_buffer));
-                        // console.log('devices_IK.own_pubkey  !!!!!!!!!!!!!!!!!!!!!!!!!2');
-                        // console.log(utils.ArrayBuffertoBase64(devices_IK.own_pubkey));
+                        console.log('devices_IK.own_pubkey  !!!!!!!!!!!!!!!!!!!!!!!!!2');
+                        console.log(utils.ArrayBuffertoBase64(devices_IK.own_pubkey));
 
                         this.getTrustedKey(device).then((A_trustedKeyBuffer) => {
 
                             let concatinated = new Uint8Array([...new Uint8Array(A_trustedKeyBuffer), ...new Uint8Array(code_buffer), ...new Uint8Array(b_payload) ]);
 
-                            // console.log('A_trustedKeyBuffer  !!!!!!!!!!!!!!!!!!!!!!!!!2');
-                            // console.log(utils.ArrayBuffertoBase64(A_trustedKeyBuffer));
-                            // console.log('code_buffer  !!!!!!!!!!!!!!!!!!!!!!!!!2');
-                            // console.log(utils.ArrayBuffertoBase64(code_buffer));
-                            // console.log('b_payload  !!!!!!!!!!!!!!!!!!!!!!!!!2');
-                            // console.log(utils.ArrayBuffertoBase64(b_payload));
-                            // console.log('concatinated  !!!!!!!!!!!!!!!!!!!!!!!!!2');
-                            // console.log(utils.ArrayBuffertoBase64(concatinated));
+                            console.log('A_trustedKeyBuffer  !!!!!!!!!!!!!!!!!!!!!!!!!2');
+                            console.log(utils.ArrayBuffertoBase64(A_trustedKeyBuffer));
+                            console.log('code_buffer  !!!!!!!!!!!!!!!!!!!!!!!!!2');
+                            console.log(utils.ArrayBuffertoBase64(code_buffer));
+                            console.log('b_payload  !!!!!!!!!!!!!!!!!!!!!!!!!2');
+                            console.log(utils.ArrayBuffertoBase64(b_payload));
+                            console.log('concatinated  !!!!!!!!!!!!!!!!!!!!!!!!!2');
+                            console.log(utils.ArrayBuffertoBase64(concatinated));
 
                             utils.createSha256(concatinated).then((concatinated_hash) => {
                                 let generated_hash_b64 = utils.ArrayBuffertoBase64(concatinated_hash),
                                     decrypted_hash_b64 = utils.ArrayBuffertoBase64(decrypted_hash.decryptedBuffer);
 
-                                // console.log('generated_hash_b64  !!!!!!!!!!!!!!!!!!!!!!!!!2');
-                                // console.log(generated_hash_b64);
-                                // console.log('decrypted_hash_b64  !!!!!!!!!!!!!!!!!!!!!!!!!2');
-                                // console.log(decrypted_hash_b64);
+                                console.log('generated_hash_b64  !!!!!!!!!!!!!!!!!!!!!!!!!2');
+                                console.log(generated_hash_b64);
+                                console.log('decrypted_hash_b64  !!!!!!!!!!!!!!!!!!!!!!!!!2');
+                                console.log(decrypted_hash_b64);
 
                                 if (generated_hash_b64 === decrypted_hash_b64){
                                     this.getTrustedKey(this.omemo.own_devices[this.omemo.get('device_id')]).then((B_trustedKeyBuffer) => {
@@ -2420,20 +2419,20 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                                                     id: msg_id
                                                 });
 
-                                            // console.log('B_trustedKeyBuffer  !!!!!!!!!!!!!!!!!!!!!!!!!2');
-                                            // console.log(utils.ArrayBuffertoBase64(B_trustedKeyBuffer));
-                                            // console.log(B_trustedKeyBuffer);
-                                            // console.log('code  !!!!!!!!!!!!!!!!!!!!!!!!!2');
-                                            // console.log(code);
-                                            // console.log('this.b_payload  !!!!!!!!!!!!!!!!!!!!!!!!!2');
-                                            // console.log(utils.ArrayBuffertoBase64(this.b_payload));
-                                            // console.log(this.b_payload);
-                                            // console.log('this.a_payload  !!!!!!!!!!!!!!!!!!!!!!!!!2');
-                                            // console.log(utils.ArrayBuffertoBase64(this.a_payload));
-                                            // console.log(this.a_payload);
-                                            // console.log('decrypted_a.encryptionKeyHash  !!!!!!!!!!!!!!!!!!!!!!!!!2');
-                                            // console.log(utils.ArrayBuffertoBase64(decrypted_a.encryptionKeyHash));
-                                            // console.log(decrypted_a.encryptionKeyHash);
+                                            console.log('B_trustedKeyBuffer  !!!!!!!!!!!!!!!!!!!!!!!!!2');
+                                            console.log(utils.ArrayBuffertoBase64(B_trustedKeyBuffer));
+                                            console.log(B_trustedKeyBuffer);
+                                            console.log('code  !!!!!!!!!!!!!!!!!!!!!!!!!2');
+                                            console.log(code);
+                                            console.log('this.b_payload  !!!!!!!!!!!!!!!!!!!!!!!!!2');
+                                            console.log(utils.ArrayBuffertoBase64(this.b_payload));
+                                            console.log(this.b_payload);
+                                            console.log('this.a_payload  !!!!!!!!!!!!!!!!!!!!!!!!!2');
+                                            console.log(utils.ArrayBuffertoBase64(this.a_payload));
+                                            console.log(this.a_payload);
+                                            console.log('decrypted_a.encryptionKeyHash  !!!!!!!!!!!!!!!!!!!!!!!!!2');
+                                            console.log(utils.ArrayBuffertoBase64(decrypted_a.encryptionKeyHash));
+                                            console.log(decrypted_a.encryptionKeyHash);
                                             stanza.c('notify', {xmlns: Strophe.NS.XABBER_NOTIFY});
                                             stanza.c('notification', {xmlns: Strophe.NS.XABBER_NOTIFY});
                                             stanza.c('forwarded', {xmlns: Strophe.NS.FORWARD});
@@ -2632,10 +2631,10 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                             let generated_hash_b64 = utils.ArrayBuffertoBase64(concatinated_hash),
                                 decrypted_hash_b64 = utils.ArrayBuffertoBase64(decrypted_hash.decryptedBuffer);
 
-                            // console.log('generated_hash_b64  !!!!!!!!!!!!!!!!!!!!!!!!!2');
-                            // console.log(generated_hash_b64);
-                            // console.log('decrypted_hash_b64  !!!!!!!!!!!!!!!!!!!!!!!!!2');
-                            // console.log(decrypted_hash_b64);
+                            console.log('generated_hash_b64  !!!!!!!!!!!!!!!!!!!!!!!!!2');
+                            console.log(generated_hash_b64);
+                            console.log('decrypted_hash_b64  !!!!!!!!!!!!!!!!!!!!!!!!!2');
+                            console.log(decrypted_hash_b64);
 
                             if (generated_hash_b64 === decrypted_hash_b64){
                                 msg_item && this.removeAfterHandle(msg_item);
@@ -2700,24 +2699,25 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
         let hash = await utils.createSha256(code),
             concatinated = new Uint8Array([...new Uint8Array(curve), ...new Uint8Array(hash)]),
             encryptionKeyHash = await utils.createSha256(concatinated);
-        // console.log('code');
-        // console.log(code);
-        // console.log('hash');
-        // console.log(hash);
-        // console.log(utils.ArrayBuffertoBase64(hash));
-        // console.log('concatinated');
-        // console.log(concatinated);
-        // console.log(utils.ArrayBuffertoBase64(concatinated));
-        // console.log('encryptionKeyHash');
-        // console.log(encryptionKeyHash);
-        // console.log(utils.ArrayBuffertoBase64(encryptionKeyHash));
+        console.log('code');
+        console.log(code);
+        console.log('hash');
+        console.log(hash);
+        console.log(utils.ArrayBuffertoBase64(hash));
+        console.log('concatinated');
+        console.log(concatinated);
+        console.log(utils.ArrayBuffertoBase64(concatinated));
+        console.log('encryptionKeyHash');
+        console.log(encryptionKeyHash);
+        console.log(utils.ArrayBuffertoBase64(encryptionKeyHash));
 
-        // console.log('utils.ArrayBuffertoBase64(hash)');
-        // console.log(utils.ArrayBuffertoBase64(hash));
-        // console.log('utils.ArrayBuffertoBase64(encryptionKey)');
-        // console.log(utils.ArrayBuffertoBase64(encryptionKey));
+        console.log('utils.ArrayBuffertoBase64(hash)');
+        console.log(utils.ArrayBuffertoBase64(hash));
 
         let encryptionKey = await window.crypto.subtle.importKey('raw', encryptionKeyHash, { "name": 'AES-CBC' }, true, ['decrypt']);
+
+        console.log('utils.ArrayBuffertoBase64(encryptionKey)');
+        console.log(utils.ArrayBuffertoBase64(encryptionKey));
 
         let decryptedBuffer = await window.crypto.subtle.decrypt({
             name: 'AES-CBC',
@@ -2734,19 +2734,19 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
             curve = utils.doCurve(own_privkey, device_pubkey),
             hash = await utils.createSha256(code);
 
-        // console.log(curve);
-        // console.log('utils.ArrayBuffertoBase64(buffer)');
-        // console.log(utils.ArrayBuffertoBase64(buffer));
-        // console.log('utils.ArrayBuffertoBase64(hash)');
-        // console.log(utils.ArrayBuffertoBase64(hash));
+        console.log(curve);
+        console.log('utils.ArrayBuffertoBase64(buffer)');
+        console.log(utils.ArrayBuffertoBase64(buffer));
+        console.log('utils.ArrayBuffertoBase64(hash)');
+        console.log(utils.ArrayBuffertoBase64(hash));
 
         let concatinated = new Uint8Array([...new Uint8Array(curve), ...new Uint8Array(hash)]),
             aes_key = await utils.createSha256(concatinated);
 
-        // console.log('utils.ArrayBuffertoBase64(aes_key) !!!!!!!!!!!!!!!!!!!!!!!!!1');
-        // console.log(utils.ArrayBuffertoBase64(aes_key));
-        // console.log('utils.ArrayBuffertoBase64(buffer) !!!!!!!!!!!!!!!!!!!!!!!!!1');
-        // console.log(utils.ArrayBuffertoBase64(buffer));
+        console.log('utils.ArrayBuffertoBase64(aes_key) !!!!!!!!!!!!!!!!!!!!!!!!!1');
+        console.log(utils.ArrayBuffertoBase64(aes_key));
+        console.log('utils.ArrayBuffertoBase64(buffer) !!!!!!!!!!!!!!!!!!!!!!!!!1');
+        console.log(utils.ArrayBuffertoBase64(buffer));
 
         let encryptionKey = await window.crypto.subtle.importKey('raw', aes_key, { "name": 'AES-CBC' }, true, ['encrypt']);
 
@@ -2762,24 +2762,22 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
         let iv = window.crypto.getRandomValues(new Uint8Array(16)),
             code_buffer = new TextEncoder().encode(code);
 
-        // console.log('utils.ArrayBuffertoBase64(trustedKeyBuffer)');
-        // console.log(utils.ArrayBuffertoBase64(trustedKeyBuffer));
-        // console.log('utils.ArrayBuffertoBase64(code_buffer)');
-        // console.log(utils.ArrayBuffertoBase64(code_buffer));
-        // console.log('utils.ArrayBuffertoBase64(b_payload)');
-        // console.log(utils.ArrayBuffertoBase64(b_payload));
+        console.log('utils.ArrayBuffertoBase64(trustedKeyBuffer)');
+        console.log(utils.ArrayBuffertoBase64(trustedKeyBuffer));
+        console.log('utils.ArrayBuffertoBase64(code_buffer)');
+        console.log(utils.ArrayBuffertoBase64(code_buffer));
+        console.log('utils.ArrayBuffertoBase64(b_payload)');
+        console.log(utils.ArrayBuffertoBase64(b_payload));
 
         let concatinated = new Uint8Array([...new Uint8Array(trustedKeyBuffer), ...new Uint8Array(code_buffer), ...new Uint8Array(b_payload) ]),
             concatinated_hash = await utils.createSha256(concatinated);
 
-        // console.log('utils.ArrayBuffertoBase64(aes_key)');
-        // console.log(utils.ArrayBuffertoBase64(aes_key));
-        // console.log('utils.ArrayBuffertoBase64(concatinated_hash)  !!!!!!!!!!!!!!!!!!!!!!!!!2');
-        // console.log(utils.ArrayBuffertoBase64(concatinated_hash));
-        // console.log('utils.ArrayBuffertoBase64(concatinated)  !!!!!!!!!!!!!!!!!!!!!!!!!2');
-        // console.log(utils.ArrayBuffertoBase64(concatinated));
-        // console.log('utils.ArrayBuffertoBase64(sharedKey)  !!!!!!!!!!!!!!!!!!!!!!!!!2');
-        // console.log(utils.ArrayBuffertoBase64(sharedKey));
+        console.log('utils.ArrayBuffertoBase64(concatinated_hash)  !!!!!!!!!!!!!!!!!!!!!!!!!2');
+        console.log(utils.ArrayBuffertoBase64(concatinated_hash));
+        console.log('utils.ArrayBuffertoBase64(concatinated)  !!!!!!!!!!!!!!!!!!!!!!!!!2');
+        console.log(utils.ArrayBuffertoBase64(concatinated));
+        console.log('utils.ArrayBuffertoBase64(sharedKey)  !!!!!!!!!!!!!!!!!!!!!!!!!2');
+        console.log(utils.ArrayBuffertoBase64(sharedKey));
 
         let encryptionKey = await window.crypto.subtle.importKey('raw', sharedKey, { "name": 'AES-CBC' }, true, ['encrypt']);
 
@@ -2796,28 +2794,22 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
             code_buffer = new TextEncoder().encode(code);
 
         // console.log(curve);
-        // console.log('utils.ArrayBuffertoBase64(buffer)');
-        // console.log(utils.ArrayBuffertoBase64(buffer));
-        // console.log('utils.ArrayBuffertoBase64(hash)');
-        // console.log(utils.ArrayBuffertoBase64(hash));
-        // console.log('trustedKeyBuffer  !!!!!!!!!!!!!!!!!!!!!!!!!2');
-        // console.log(utils.ArrayBuffertoBase64(trustedKeyBuffer));
-        // console.log('code_buffer  !!!!!!!!!!!!!!!!!!!!!!!!!2');
-        // console.log(utils.ArrayBuffertoBase64(code_buffer));
-        // console.log('b_payload  !!!!!!!!!!!!!!!!!!!!!!!!!2');
-        // console.log(utils.ArrayBuffertoBase64(b_payload));
-        // console.log('a_payload  !!!!!!!!!!!!!!!!!!!!!!!!!2');
-        // console.log(utils.ArrayBuffertoBase64(a_payload));
+        console.log('trustedKeyBuffer  !!!!!!!!!!!!!!!!!!!!!!!!!2');
+        console.log(utils.ArrayBuffertoBase64(trustedKeyBuffer));
+        console.log('code_buffer  !!!!!!!!!!!!!!!!!!!!!!!!!2');
+        console.log(utils.ArrayBuffertoBase64(code_buffer));
+        console.log('b_payload  !!!!!!!!!!!!!!!!!!!!!!!!!2');
+        console.log(utils.ArrayBuffertoBase64(b_payload));
+        console.log('a_payload  !!!!!!!!!!!!!!!!!!!!!!!!!2');
+        console.log(utils.ArrayBuffertoBase64(a_payload));
 
         let concatinated = new Uint8Array([...new Uint8Array(trustedKeyBuffer), ...new Uint8Array(code_buffer), ...new Uint8Array(b_payload), ...new Uint8Array(a_payload) ]),
             concatinated_hash = await utils.createSha256(concatinated);
 
-        // console.log('utils.ArrayBuffertoBase64(aes_key)');
-        // console.log(utils.ArrayBuffertoBase64(aes_key));
-        // console.log('utils.ArrayBuffertoBase64(concatinated_hash)  !!!!!!!!!!!!!!!!!!!!!!!!!2');
-        // console.log(utils.ArrayBuffertoBase64(concatinated_hash));
-        // console.log('utils.ArrayBuffertoBase64(sharedKey)  !!!!!!!!!!!!!!!!!!!!!!!!!2');
-        // console.log(utils.ArrayBuffertoBase64(sharedKey));
+        console.log('utils.ArrayBuffertoBase64(concatinated_hash)  !!!!!!!!!!!!!!!!!!!!!!!!!2');
+        console.log(utils.ArrayBuffertoBase64(concatinated_hash));
+        console.log('utils.ArrayBuffertoBase64(sharedKey)  !!!!!!!!!!!!!!!!!!!!!!!!!2');
+        console.log(utils.ArrayBuffertoBase64(sharedKey));
 
         let encryptionKey = await window.crypto.subtle.importKey('raw', sharedKey, { "name": 'AES-CBC' }, true, ['encrypt']);
 
