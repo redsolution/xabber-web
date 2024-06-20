@@ -139,6 +139,11 @@ xabber.ActiveSessionModalView = xabber.BasicView.extend({
             ready: this.onRender.bind(this),
             complete: this.close.bind(this),
         });
+        $(document).on(`keyup.session_keyup_close_${this.cid}`, (ev) => {
+            if (ev && ev.keyCode === constants.KEY_ENTER && this.session_ending){
+                this.cancel();
+            }
+        });
     },
 
     onRender: function () {
@@ -167,6 +172,29 @@ xabber.ActiveSessionModalView = xabber.BasicView.extend({
             this.session_ending = true;
             this.device_id = session.active_verification_device.device_id;
             this.device_jid = this.contact ? this.contact.get('jid') : this.account.get('jid');
+            let random_applause = [
+                "Awesome!",
+                "Groovy!",
+                "Yay!",
+                "Cool!",
+                "Fantastic!",
+                "Bingo!",
+                "Hooray!",
+                "Voilà!",
+                "Cheers!",
+                "Rock on!",
+                "Sweet!",
+                "Right on!",
+                "Super!",
+                "Bravo!",
+                "Got it!",
+                "Woohoo!",
+                "Yes!",
+                "Done!",
+                "Great!",
+                "Smashing!",
+            ];
+            this.$('.random-applause').text(random_applause[Math.floor(Math.random()*random_applause.length)]);
             this.$('.main-process-wrap').addClass('hidden');
             this.$('.session-trusted-devices-wrap').removeClass('hidden');
             this.$('.new-trusted-devices-list').html(env.templates.contacts.preloader());
@@ -375,6 +403,7 @@ xabber.ActiveSessionModalView = xabber.BasicView.extend({
     },
 
     close: function () {
+        $(document).off(`keyup.session_keyup_close_${this.cid}`);
         this.closeModal();
     },
 
@@ -1528,26 +1557,25 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
         // console.error($message);
         // console.error($message[0]);
         if (Strophe.getBareJidFromJid($message.attr('from')) === this.account.get('jid')){
-            this.getTrustedDevices(this.account.get('jid'), null, (res) => {
+            // this.getTrustedDevices(this.account.get('jid'), null, (res) => {
 
-                let my_trusted_devices = this.get('trusted_devices')[this.account.get('jid')],
-                    $all_items_msg = $(res);
+                let my_trusted_devices = this.get('trusted_devices')[this.account.get('jid')];
 
                 // console.log(my_trusted_devices);
                 // console.log(res);
-                my_trusted_devices && my_trusted_devices.length && this.getNewTrustedDevices(my_trusted_devices, $all_items_msg, null, true);
-            });
+                my_trusted_devices && my_trusted_devices.length && this.getNewTrustedDevices(my_trusted_devices, $message, null, true);
+            // });
         } else {
             let from = Strophe.getBareJidFromJid($message.attr('from')),
                 device_id;
             if (this.get('trusted_devices')[from] && this.get('trusted_devices')[from].length){
-                this.getTrustedDevices(from, device_id, (res) => {
+                // this.getTrustedDevices(from, device_id, (res) => {
 
                     let contact_trusted_devices = this.get('trusted_devices')[from],
-                        $all_items_msg = $(res),
+                        // $all_items_msg = $(res),
                         peer = this.omemo.getPeer(from);
-                    this.getNewTrustedDevices(contact_trusted_devices, $all_items_msg, null, true, peer);
-                });
+                    this.getNewTrustedDevices(contact_trusted_devices, $message, null, true, peer);
+                // });
 
             }
         }

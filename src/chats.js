@@ -12304,7 +12304,7 @@ xabber.ChatBottomView = xabber.BasicView.extend({
         this.$el.attr('data-trust', null);
         this.$el.attr('data-contact-trust', null);
         this.$el.find('.warning-wrap').detach();
-        if (!this.model.get('encrypted'))
+        if (!this.model.get('encrypted') || this.model.get('notifications'))
             return;
         if (this.account.omemo) {
             this.$el.addClass('loading');

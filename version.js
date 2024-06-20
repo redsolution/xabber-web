@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.3.5.41","version_description":"session logs, changed identityKey pair get func to wait for identitykey value to be filled"}'
+'{"version_number":"2.3.5.42","version_description":"removed whole pubsub requesting on incoming trustsharing pubsub message, fixed too many devices request when they are not needed for fingerprint modal, fixed devices request for notifications chat, added randomisation for close modal text when session is successful, added session modal closing on enter is successful session step, "}'
 )});

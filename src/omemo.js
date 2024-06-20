@@ -270,10 +270,12 @@ xabber.Fingerprints = xabber.BasicView.extend({
     },
 
     renderDevices: function () {
-        this.model.getDevicesNode().then(() => {
-            let devices_count = _.keys(this.model.devices).length;
-            this.updateFingerprints(this.model.devices);
-        });
+        if (this.data.get('visible')){
+            this.model.getDevicesNode().then(() => {
+                let devices_count = _.keys(this.model.devices).length;
+                this.updateFingerprints(this.model.devices);
+            });
+        }
     },
 
     renderOwnDevices: function () {
