@@ -3419,6 +3419,9 @@ xabber.ChatContentView = xabber.BasicView.extend({
         "click .hide-session": "hideActiveTrustSession",
         'click .accept-request': "acceptRequest",
         'click .decline-request': "rejectRequest",
+        "click .cancel-session": "cancelTrustSession",
+        "click .enter-code": "showCode",
+        "click .show-code": "showCode",
     },
 
     _initialize: function (options) {
@@ -3514,10 +3517,10 @@ xabber.ChatContentView = xabber.BasicView.extend({
 
         Object.keys(active_sessions).forEach((session_id) => {
             let session = active_sessions[session_id];
-            if (session.verification_step === '0b' && this.model.get('hidden_active_session_sid') !== session_id){
-                if ((session.active_verification_device && session.active_verification_device.peer_jid === this.contact.get('jid') ) || session.session_check_jid === this.contact.get('jid')){
-                    let state = xabber.getString("chat_content__incoming_session_text"),
-                        state_label = xabber.getString("verification_session_state__incoming_label");
+            if (this.model.get('hidden_active_session_sid') !== session_id) {
+                if ((session.active_verification_device && session.active_verification_device.peer_jid === this.contact.get('jid')) || session.session_check_jid === this.contact.get('jid')) {
+                    let state = this.account.omemo.xabber_trust.getVerificationState(session, true),
+                        state_label = this.account.omemo.xabber_trust.getVerificationStateLabel(session);
 
                     let item = {
                         jid: null,
@@ -3533,7 +3536,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
                     if (session.active_verification_device) {
                         item.jid = session.active_verification_device.peer_jid;
                         item.device_id = session.active_verification_device.device_id;
-                    } else if (session.session_check_jid){
+                    } else if (session.session_check_jid) {
                         item.jid = session.session_check_jid;
                         item.device_id = session.session_check_device_id;
                     }
@@ -3553,6 +3556,32 @@ xabber.ChatContentView = xabber.BasicView.extend({
         setTimeout(() => {
             this.updateActiveSessionHeight();
         }, 250)
+    },
+
+    cancelTrustSession: function (ev) {
+        if (!this.account || !this.account.omemo)
+            return;
+        let $item = $(ev.target).closest('.notification-trust-session');
+        if ($item.attr('data-sid')){
+            this.account.omemo.xabber_trust && this.account.omemo.xabber_trust.cancelSession($item.attr('data-sid'), $item.attr('data-jid'))
+        }
+    },
+
+    showCode: function (ev) {
+        if (!this.account || !this.account.omemo)
+            return;
+        let $item = $(ev.target).closest('.notification-trust-session');
+        if ($item.attr('data-sid')){
+            let view = new xabber.ActiveSessionModalView();
+            let contact = this.account.contacts.get(Strophe.getBareJidFromJid($item.attr('data-jid')));
+            if (!contact)
+                return;
+            view.show({
+                account: this.account,
+                contact: contact,
+                sid: $item.attr('data-sid')
+            });
+        }
     },
 
     acceptRequest: function (ev) {
@@ -3636,7 +3665,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
         if (!after_element.length)
             return;
         after_element = after_element[0];
-        let height = this.$('.notification-trust-session').height() + 78;
+        let height = this.$('.notification-trust-session').height() + 94;
         after_element.style.setProperty('--active-session-item-height', height + 'px')
 
     },
