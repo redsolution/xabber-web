@@ -3277,11 +3277,13 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
             return;
         let $item = $(ev.target).closest('.notification-trust-session');
         if ($item.attr('data-sid')){
-            let view = new xabber.ActiveSessionModalView();
-            view.show({
-                account: this.model,
-                sid: $item.attr('data-sid')
-            });
+            if (!$('#modals').find('.code-modal').length){
+                let view = new xabber.ActiveSessionModalView();
+                view.show({
+                    account: this.model,
+                    sid: $item.attr('data-sid')
+                });
+            }
         }
     },
 

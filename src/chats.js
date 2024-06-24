@@ -3572,15 +3572,17 @@ xabber.ChatContentView = xabber.BasicView.extend({
             return;
         let $item = $(ev.target).closest('.notification-trust-session');
         if ($item.attr('data-sid')){
-            let view = new xabber.ActiveSessionModalView();
             let contact = this.account.contacts.get(Strophe.getBareJidFromJid($item.attr('data-jid')));
             if (!contact)
                 return;
-            view.show({
-                account: this.account,
-                contact: contact,
-                sid: $item.attr('data-sid')
-            });
+            if (!$('#modals').find('.code-modal').length){
+                let view = new xabber.ActiveSessionModalView();
+                view.show({
+                    account: this.account,
+                    contact: contact,
+                    sid: $item.attr('data-sid')
+                });
+            }
         }
     },
 
@@ -3624,7 +3626,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
             to: to,
             from: this.account.get('jid'),
             type: 'chat',
-            id: uuid()
+            id: uuid(),
         });
         stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: sid, timestamp: Math.floor(Date.now() / 1000)});
         stanza.c('verification-rejected', {reason: 'Session cancelled'}).up().up();
@@ -3661,11 +3663,17 @@ xabber.ChatContentView = xabber.BasicView.extend({
     updateActiveSessionHeight: function () {
         if (!this.model.get('encrypted') || !this.$('.notification-trust-session').length)
             return;
+        this.$('.notification-trust-session').switchClass('low-width', this.$('.chat-incoming-session-notification').width() < 360 )
         let after_element = this.$('.chat-content');
         if (!after_element.length)
             return;
         after_element = after_element[0];
-        let height = this.$('.notification-trust-session').height() + 94;
+        let height;
+        if (this.$('.chat-incoming-session-notification').width() < 360){
+            height = this.$('.notification-trust-session').height() + 134;
+        } else {
+            height = this.$('.notification-trust-session').height() + 94;
+        }
         after_element.style.setProperty('--active-session-item-height', height + 'px')
 
     },
@@ -10823,12 +10831,14 @@ xabber.InvitationPanelView = xabber.SearchView.extend({
         Object.keys(active_sessions).forEach((session_id) => {
             let session = active_sessions[session_id];
             if ((session.active_verification_device && session.active_verification_device.peer_jid === this.contact.get('jid') ) || session.session_check_jid === this.contact.get('jid')){
-                let view = new xabber.ActiveSessionModalView();
-                view.show({
-                    account: this.account,
-                    contact: this.contact,
-                    sid: session_id
-                });
+                if (!$('#modals').find('.code-modal').length){
+                    let view = new xabber.ActiveSessionModalView();
+                    view.show({
+                        account: this.account,
+                        contact: this.contact,
+                        sid: session_id
+                    });
+                }
 
             }
         });

@@ -21036,6 +21036,16 @@ ul.restrictions-list-content>li {
     top: 8px;
     padding: 22px 56px 56px 96px;
 }
+.chat-incoming-session-notification .notification-trust-session.low-width{
+    padding: 22px 32px 96px 32px;
+}
+.chat-incoming-session-notification .notification-trust-session.low-width .active-session-icon{
+    display:none;
+}
+.chat-incoming-session-notification .notification-trust-session.low-width .accept-request-wrap{
+    left: 32px;
+    flex-direction: column;
+}
 .chat-incoming-session-notification .notification-trust-session .cancel-session{
     position: static;
     cursor: pointer;
@@ -21098,7 +21108,7 @@ ul.restrictions-list-content>li {
 .chat-incoming-session-notification .notification-trust-session .state{
     color: rgba(0, 0, 0, 0.60);
 }
-.encrypted .chat-content.active-incoming-session::before{
+.chat-content::before {
     padding-bottom: var(--active-session-item-height, 0);
     content: "";
     display: block;

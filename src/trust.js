@@ -1774,12 +1774,14 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                     msg_ttl: ttl,
                     message_timestamp: msg_timestamp,
                 });
-                let view = new xabber.ActiveSessionModalView();
-                view.show({
-                    account: this.account,
-                    contact: contact,
-                    sid: sid,
-                });
+                if (!$('#modals').find('.code-modal').length){
+                    let view = new xabber.ActiveSessionModalView();
+                    view.show({
+                        account: this.account,
+                        contact: contact,
+                        sid: sid,
+                    });
+                }
             }
             if ($message.find('verification-start').length && $message.find('verification-start').attr('device-id') && this.omemo.get('device_id') && !options.automated){
                 this.account.omemo.xabber_trust.addVerificationSessionData(sid, {
@@ -1809,12 +1811,15 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                 }
                 if (this.active_sessions_data[sid].verification_step === '1a' && !options.automated)
                     this.handleTrustVerificationSigned($message, contact, null, null, options.forced_code);
-                let view = new xabber.ActiveSessionModalView();
-                view.show({
-                    account: this.account,
-                    contact: contact,
-                    sid: sid,
-                });
+
+                if (options.automated && !$('#modals').find('.code-modal').length){
+                    let view = new xabber.ActiveSessionModalView();
+                    view.show({
+                        account: this.account,
+                        contact: contact,
+                        sid: sid,
+                    });
+                }
                 return;
             }
             if (this.active_sessions_data[sid] && this.active_sessions_data[sid].active_verification_code){
@@ -1886,12 +1891,14 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                     msg_ttl: ttl,
                     message_timestamp: msg_timestamp,
                 });
-                let view = new xabber.ActiveSessionModalView();
-                view.show({
-                    account: this.account,
-                    sid: sid,
-                    device_id: $message.find('verification-start').attr('device-id')
-                });
+                if (!$('#modals').find('.code-modal').length){
+                    let view = new xabber.ActiveSessionModalView();
+                    view.show({
+                        account: this.account,
+                        sid: sid,
+                        device_id: $message.find('verification-start').attr('device-id')
+                    });
+                }
                 // let view = new xabber.IncomingTrustSessionView();
                 // view.show({
                 //     account: this.account,

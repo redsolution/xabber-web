@@ -300,15 +300,17 @@ xabber.Fingerprints = xabber.BasicView.extend({
             return;
         let $item = $(ev.target).closest('.notification-trust-session');
         if ($item.attr('data-sid')){
-            let view = new xabber.ActiveSessionModalView();
             let contact = this.account.contacts.get(Strophe.getBareJidFromJid($item.attr('data-jid')));
             if (!contact)
                 return;
-            view.show({
-                account: this.account,
-                contact: contact,
-                sid: $item.attr('data-sid')
-            });
+            if (!$('#modals').find('.code-modal').length){
+                let view = new xabber.ActiveSessionModalView();
+                view.show({
+                    account: this.account,
+                    contact: contact,
+                    sid: $item.attr('data-sid')
+                });
+            }
         }
     },
 
