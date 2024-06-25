@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.3.5.45","version_description":"changed contact session card visuals and handling in chat, changed icon and button behaviour in encrypted chat head, fixed chat top padding height for session card, added contacts new trusted devices in final step of session modal, removed encrypted backgrounds from encrypted chat, added that type of background to message input"}'
+'{"version_number":"2.3.5.46","version_description":"changed text for closing session modal on final step, fixed selected encrypted message background, fixed z index of active session card in chat"}'
 )});
