@@ -1,9 +1,5 @@
 <div class="notification-trust-session" data-sid="{{sid}}" data-jid="{{jid}}">
-    {[if (!is_active_request) {]}
-    <div class="cancel-session">
-        <svg class="mdi mdi-24px mdi-svg-template" data-svgname="close"></svg>
-    </div>
-    {[}]}
+    <svg class="device-encryption-icon mdi mdi-40px mdi-svg-template" data-svgname="alert"></svg>
     {[if (chat_bottom) {]}
     <div class="hide-session {[if (is_active_request) {]}moved-right{[}]}">
         <svg class="mdi mdi-24px mdi-svg-template" data-svgname="player-mini"></svg>
@@ -12,23 +8,28 @@
     <div class="state-label">{{state_label}}</div>
     <div class="state">{{state}}</div>
     {[if (code) {]}
-    <div class="show-code text-color-500 dotted-underline" data-code="{{code}}">
+    <div class="show-code btn-flat btn-main-filled" data-code="{{code}}">
         {[print(xabber.getString("verification_session_show_code_button"))]}
     </div>
     {[}]}
     {[if (is_enter_code) {]}
-    <div class="enter-code text-color-500 dotted-underline">
+    <div class="enter-code btn-flat btn-main-filled">
         {[print(xabber.getString("verification_session_enter_code_button"))]}
     </div>
     {[}]}
     {[if (is_active_request) {]}
     <div class="accept-request-wrap">
-        <div class="accept-request text-color-500 dotted-underline">
+        <div class="accept-request btn-flat btn-main-filled">
             {[print(xabber.getString("accept"))]}
         </div>
-        <div class="decline-request text-color-500 dotted-underline">
+        <div class="decline-request btn-flat btn-main">
             {[print(xabber.getString("reject"))]}
         </div>
+    </div>
+    {[}]}
+    {[if (!is_active_request) {]}
+    <div class="cancel-session" data-code="{{code}}">
+        <svg class="mdi mdi-24px mdi-svg-template" data-svgname="close"></svg>
     </div>
     {[}]}
 </div>

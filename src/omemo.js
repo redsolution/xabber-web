@@ -317,6 +317,8 @@ xabber.Fingerprints = xabber.BasicView.extend({
     renderActiveTrustSession: function () {
 
         let active_sessions = this.omemo.xabber_trust.get('active_trust_sessions');
+        this.$(`.fingerprints-unverified-warning`).addClass('hidden');
+        let has_session;
         this.$(`.notification-trust-session`).remove();
 
         Object.keys(active_sessions).forEach((session_id) => {
@@ -349,10 +351,11 @@ xabber.Fingerprints = xabber.BasicView.extend({
                 if (session.verification_step === '0b') {
                     item.is_active_request = true;
                 }
-
+                has_session = true;
                 this.$('.fingerprints-active-trust-session').append($(templates.contact_verification_session(item)));
             }
         });
+        this.$('.fingerprints-unverified-warning').switchClass('hidden', !this.$('.row.btn-fingerprint-details[data-trust="unknown"]').length || has_session )
         this.$('.btn-verify').switchClass('hidden', this.$('.fingerprints-active-trust-session').children().length)
     },
 
@@ -527,7 +530,7 @@ xabber.Fingerprints = xabber.BasicView.extend({
             });
             $container.find('.preloader-wrapper').detach();
             this.$('.btn-revoke-trust').switchClass('hidden', !this.$('.row.btn-fingerprint-details[data-trust="trust"]').length)
-            this.$('.btn-verify').prop('disabled', !this.$('.row.btn-fingerprint-details[data-trust="unknown"]').length)
+            this.renderActiveTrustSession();
         });
         let rows = [];
         for (let device_id in devices) {

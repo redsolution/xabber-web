@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.3.5.46","version_description":"changed text for closing session modal on final step, fixed selected encrypted message background, fixed z index of active session card in chat"}'
+'{"version_number":"2.3.5.47","version_description":"changed visuals of active session cards, changed visuals of fingerprints list"}'
 )});

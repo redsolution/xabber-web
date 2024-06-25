@@ -4923,50 +4923,75 @@ input[type=text].simple-input-field:hover {
 }
 /* own devices trust session item */
 
+.fingerprints-active-trust-session .notification-trust-session,
 .devices-wrap .notification-trust-session{
     background: #fff8e1;
     padding: 16px 32px 16px 72px;
     margin: 0;
     border-radius: unset;
 }
+.fingerprints-active-trust-session .notification-trust-session .device-encryption-icon,
 .devices-wrap .notification-trust-session .device-encryption-icon{
+    left: 20px;
+    position: absolute;
+    top: 20px;
 }
-    .devices-wrap .notification-trust-session .state-label{
+.fingerprints-active-trust-session .notification-trust-session .device-encryption-icon path,
+.devices-wrap .notification-trust-session .device-encryption-icon path{
+    fill: #ffa000;
+}
+
+.fingerprints-active-trust-session .notification-trust-session .state-label,
+.devices-wrap .notification-trust-session .state-label{
     font-size: 16px;
     height: 24px;
     line-height: 24px;
     font-weight: 400;
+    text-transform: capitalize;
 }
+.fingerprints-active-trust-session .notification-trust-session .state,
 .devices-wrap .notification-trust-session .state{
     margin-bottom: 8px;
     color: #9e9e9e;
     font-size: 13px;
     line-height: 20px;
 }
+.fingerprints-active-trust-session .notification-trust-session .cancel-session,
+.devices-wrap .notification-trust-session .cancel-session{
+    position: absolute;
+    right: 12px;
+    top: 12px;
+    cursor: pointer;
+}
+.fingerprints-active-trust-session .notification-trust-session .btn-main-filled,
+.fingerprints-active-trust-session .notification-trust-session .btn-main,
 .devices-wrap .notification-trust-session .btn-main-filled,
 .devices-wrap .notification-trust-session .btn-main{
     line-height: 36px;
         font-size: 13px;
     font-weight: 700;
 }
+.fingerprints-active-trust-session .notification-trust-session .btn-main,
 .devices-wrap .notification-trust-session .btn-main{
     color: #ff9800;
 }
+.fingerprints-active-trust-session .notification-trust-session .btn-main-filled,
 .devices-wrap .notification-trust-session .btn-main-filled{
     background-color: #ff9800;
 }
+.fingerprints-active-trust-session .notification-trust-session .btn-main:hover,
 .devices-wrap .notification-trust-session .btn-main:hover{
     background: transparent;
     opacity: .8;
 }
+.fingerprints-active-trust-session .notification-trust-session .btn-main-filled:hover,
 .devices-wrap .notification-trust-session .btn-main-filled:hover{
     opacity: .8;
 }
-.devices-wrap .notification-trust-session .cancel-session{
-    position: static
-}
-.devices-wrap .notification-trust-session .cancel-session{
-}
+.fingerprints-active-trust-session .notification-trust-session .accept-request,
+.fingerprints-active-trust-session .notification-trust-session .decline-request,
+.fingerprints-active-trust-session .notification-trust-session .enter-code,
+.fingerprints-active-trust-session .notification-trust-session .show-code,
 .devices-wrap .notification-trust-session .accept-request,
 .devices-wrap .notification-trust-session .decline-request,
 .devices-wrap .notification-trust-session .enter-code,
@@ -5011,8 +5036,22 @@ input[type=text].simple-input-field:hover {
     align-items: baseline;
     margin: 0 !important;
     cursor: pointer;
-    padding: 8px 32px;
+    padding: 10px 72px;
     position: relative;
+    height: 64px;
+}
+
+.fingerprints-wrap .fingerprints-list-content .row .fingerprint-icon-wrap{
+    background: #e0e0e0;
+    border-radius: 50%;
+    height: 36px;
+    left: 22px;
+    padding: 6px;
+    position: absolute;
+    top: 14px;
+    width: 36px;
+    z-index: 1;
+    color: #616161;
 }
 .fingerprints-wrap .fingerprints-list-content .row:hover{
     background-color: rgba(0, 0, 0, .07) !important;
@@ -5030,7 +5069,7 @@ input[type=text].simple-input-field:hover {
     height: 24px;
     position: absolute;
     right: 27px;
-    top: 17px;
+    top: 20px;
     width: 24px;
 }
 .fingerprints-wrap .fingerprints-description-wrap{
@@ -9334,6 +9373,10 @@ input[type=text].simple-input-field:hover {
     z-index: 3;
 }
 
+.chat-content-wrap.encrypted .fixed-day-indicator-wrap {
+    padding-top: 8px !important;
+}
+
 .fixed-day-indicator {
     background-color: rgba(255, 255, 255, .9);
     display: inline-block;
@@ -12414,6 +12457,7 @@ input[type=range].voice-message-volume:focus {
 .settings-panel-wrap .settings-panel .blocked-contact .checkbox-field label{
     padding-left: 38px;
 }
+.fingerprints-unverified-warning,
 .settings-panel-wrap .settings-panel .device-encryption-warning{
     padding: 16px 32px 16px 72px;
     background: #fff8e1;
@@ -12422,6 +12466,7 @@ input[type=range].voice-message-volume:focus {
 .settings-panel-wrap .settings-panel .device-encryption-warning.warning-error{
     background: #FFEBEE;
 }
+.fingerprints-unverified-warning .device-encryption-icon,
 .settings-panel-wrap .settings-panel .device-encryption-icon{
     position: absolute;
     left: 20px;
@@ -12436,22 +12481,34 @@ input[type=range].voice-message-volume:focus {
 .settings-panel-wrap .settings-panel .device-encryption-icon.error-icon path{
     fill: #D32F2F;
 }
+.fingerprints-unverified-warning .device-encryption-icon path,
 .settings-panel-wrap .settings-panel .device-encryption-icon path{
     fill: #ffa000;
 }
+.fingerprints-unverified-warning .device-encryption-warning-name,
 .settings-panel-wrap .settings-panel .device-encryption-warning-name{
     font-size: 16px;
     line-height: 24px;
     height: 24px;
 }
+.fingerprints-unverified-warning .device-encryption-warning-label,
 .settings-panel-wrap .settings-panel .device-encryption-warning-label{
     color: #9E9E9E;
     font-size: 13px;
     line-height: 20px;
 }
+.fingerprints-unverified-warning .device-encryption-warning-label span,
 .settings-panel-wrap .settings-panel .device-encryption-warning-label span{
     /*color: #616161;*/
 }
+.fingerprints-unverified-warning .btn-verify{
+    background-color: #ff9800;
+    cursor: pointer;
+    margin-top: 8px;
+    width: fit-content;
+
+}
+.fingerprints-unverified-warning .device-encryption-warning-label hr,
 .settings-panel-wrap .settings-panel .device-encryption-warning-label hr{
     height: 2px;
     border: 0;

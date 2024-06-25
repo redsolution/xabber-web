@@ -3212,7 +3212,7 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
         });
     },
 
-    renderActiveTrustSession: function () { //34
+    renderActiveTrustSession: function () {
         this.$('.btn-verify-devices').removeClass('disabled');
         if (!this.model.omemo)
             return;

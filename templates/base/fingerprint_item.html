@@ -6,6 +6,9 @@
      {[if (old_fingerprint){]}data-old-fingerprint="{{old_fingerprint}}{[}]}"
      {[if (error){]}data-error="{{error}}{[}]}"
 >
+    <div class="fingerprint-icon-wrap">
+        <i class="mdi mdi-24px mdi-help"></i>
+    </div>
     <div title="{[print(xabber.getString('omemo__dialog_fingerprints__textfield_device_id_tooltip', [id, (label ? label : 'none')]))]}" class="device-wrap">
         <div class="one-line label">
             {[if (label) {]}{{label}}{[} else {]}{{id}}{[}]}
