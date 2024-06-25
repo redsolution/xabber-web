@@ -2884,3 +2884,193 @@
 [data-color=blue-grey] .linear-gradient-color-400-to-700{
   background-image: linear-gradient(135deg, #78909c 0%, #455a64 100%);
 }
+/* fills */
+.fill-color-red-700,
+.fill-color-red-700 path,
+.fill-color-red-700 use,
+.hover-fill-color-red-700:hover,
+[data-color=red] .fill-color-700 path,
+[data-color=red] .fill-color-700 use,
+[data-color=red] .hover-fill-color-700:hover {
+  fill: #d32f2f !important;
+}
+
+.fill-color-pink-700,
+.fill-color-pink-700 path,
+.fill-color-pink-700 use,
+.hover-fill-color-pink-700:hover,
+[data-color=pink] .fill-color-700 path,
+[data-color=pink] .fill-color-700 use,
+[data-color=pink] .hover-fill-color-700:hover {
+  fill: #c2185b !important;
+}
+
+.fill-color-purple-700,
+.fill-color-purple-700 path,
+.fill-color-purple-700 use,
+.hover-fill-color-purple-700:hover,
+[data-color=purple] .fill-color-700 path,
+[data-color=purple] .fill-color-700 use,
+[data-color=purple] .hover-fill-color-700:hover {
+  fill: #7b1fa2 !important;
+}
+
+.fill-color-deep-purple-700,
+.fill-color-deep-purple-700 path,
+.fill-color-deep-purple-700 use,
+.hover-fill-color-deep-purple-700:hover,
+[data-color=deep-purple] .fill-color-700 path,
+[data-color=deep-purple] .fill-color-700 use,
+[data-color=deep-purple] .hover-fill-color-700:hover {
+  fill: #512da8 !important;
+}
+
+.fill-color-indigo-700,
+.fill-color-indigo-700 path,
+.fill-color-indigo-700 use,
+.hover-fill-color-indigo-700:hover,
+[data-color=indigo] .fill-color-700 path,
+[data-color=indigo] .fill-color-700 use,
+[data-color=indigo] .hover-fill-color-700:hover {
+  fill: #303f9f !important;
+}
+
+.fill-color-blue-700,
+.fill-color-blue-700 path,
+.fill-color-blue-700 use,
+.hover-fill-color-blue-700:hover,
+[data-color=blue] .fill-color-700 path,
+[data-color=blue] .fill-color-700 use,
+[data-color=blue] .hover-fill-color-700:hover {
+  fill: #1976d2 !important;
+}
+
+.fill-color-light-blue-700,
+.fill-color-light-blue-700 path,
+.fill-color-light-blue-700 use,
+.hover-fill-color-light-blue-700:hover,
+[data-color=light-blue] .fill-color-700 path,
+[data-color=light-blue] .fill-color-700 use,
+[data-color=light-blue] .hover-fill-color-700:hover {
+  fill: #0288d1 !important;
+}
+
+.fill-color-cyan-700,
+.fill-color-cyan-700 path,
+.fill-color-cyan-700 use,
+.hover-fill-color-cyan-700:hover,
+[data-color=cyan] .fill-color-700 path,
+[data-color=cyan] .fill-color-700 use,
+[data-color=cyan] .hover-fill-color-700:hover {
+  fill: #0097a7 !important;
+}
+
+.fill-color-teal-700,
+.fill-color-teal-700 path,
+.fill-color-teal-700 use,
+.hover-fill-color-teal-700:hover,
+[data-color=teal] .fill-color-700 path,
+[data-color=teal] .fill-color-700 use,
+[data-color=teal] .hover-fill-color-700:hover {
+  fill: #00796b !important;
+}
+
+.fill-color-green-700,
+.fill-color-green-700 path,
+.fill-color-green-700 use,
+.hover-fill-color-green-700:hover,
+[data-color=green] .fill-color-700 path,
+[data-color=green] .fill-color-700 use,
+[data-color=green] .hover-fill-color-700:hover {
+  fill: #388e3c !important;
+}
+
+.fill-color-light-green-700,
+.fill-color-light-green-700 path,
+.fill-color-light-green-700 use,
+.hover-fill-color-light-green-700:hover,
+[data-color=light-green] .fill-color-700 path,
+[data-color=light-green] .fill-color-700 use,
+[data-color=light-green] .hover-fill-color-700:hover {
+  fill: #689f38 !important;
+}
+
+.fill-color-lime-700,
+.fill-color-lime-700 path,
+.fill-color-lime-700 use,
+.hover-fill-color-lime-700:hover,
+[data-color=lime] .fill-color-700 path,
+[data-color=lime] .fill-color-700 use,
+[data-color=lime] .hover-fill-color-700:hover {
+  fill: #afb42b !important;
+}
+
+.fill-color-yellow-700,
+.fill-color-yellow-700 path,
+.fill-color-yellow-700 use,
+.hover-fill-color-yellow-700:hover,
+[data-color=yellow] .fill-color-700 path,
+[data-color=yellow] .fill-color-700 use,
+[data-color=yellow] .hover-fill-color-700:hover {
+  fill: #fbc02d !important;
+}
+
+.fill-color-amber-700,
+.fill-color-amber-700 path,
+.fill-color-amber-700 use,
+.hover-fill-color-amber-700:hover,
+[data-color=amber] .fill-color-700 path,
+[data-color=amber] .fill-color-700 use,
+[data-color=amber] .hover-fill-color-700:hover {
+  fill: #ffa000 !important;
+}
+
+.fill-color-orange-700,
+.fill-color-orange-700 path,
+.fill-color-orange-700 use,
+.hover-fill-color-orange-700:hover,
+[data-color=orange] .fill-color-700 path,
+[data-color=orange] .fill-color-700 use,
+[data-color=orange] .hover-fill-color-700:hover {
+  fill: #f57c00 !important;
+}
+
+.fill-color-deep-orange-700,
+.fill-color-deep-orange-700 path,
+.fill-color-deep-orange-700 use,
+.hover-fill-color-deep-orange-700:hover,
+[data-color=deep-orange] .fill-color-700 path,
+[data-color=deep-orange] .fill-color-700 use,
+[data-color=deep-orange] .hover-fill-color-700:hover {
+  fill: #e64a19 !important;
+}
+
+.fill-color-brown-700,
+.fill-color-brown-700 path,
+.fill-color-brown-700 use,
+.hover-fill-color-brown-700:hover,
+[data-color=brown] .fill-color-700 path,
+[data-color=brown] .fill-color-700 use,
+[data-color=brown] .hover-fill-color-700:hover {
+  fill: #5d4037 !important;
+}
+
+.fill-color-grey-700,
+.fill-color-grey-700 path,
+.fill-color-grey-700 use,
+.hover-fill-color-grey-700:hover,
+[data-color=grey] .fill-color-700 path,
+[data-color=grey] .fill-color-700 use,
+[data-color=grey] .hover-fill-color-700:hover {
+  fill: #616161 !important;
+}
+
+.fill-color-blue-grey-700,
+.fill-color-blue-grey-700 path,
+.fill-color-blue-grey-700 use,
+.hover-fill-color-blue-grey-700:hover,
+[data-color=blue-grey] .fill-color-700 path,
+[data-color=blue-grey] .fill-color-700 use,
+[data-color=blue-grey] .hover-fill-color-700:hover {
+  fill: #455a64 !important;
+}

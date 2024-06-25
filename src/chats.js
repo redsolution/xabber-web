@@ -3664,15 +3664,15 @@ xabber.ChatContentView = xabber.BasicView.extend({
         if (!this.model.get('encrypted') || !this.$('.notification-trust-session').length)
             return;
         this.$('.notification-trust-session').switchClass('low-width', this.$('.chat-incoming-session-notification').width() < 360 )
+        this.$('.notification-trust-session').switchClass('vertical-buttons', this.$('.chat-incoming-session-notification').width() < 360 && this.$('.chat-incoming-session-notification .accept-request-wrap').children().length > 1)
+        this.$('.notification-trust-session').switchClass('no-buttons', !this.$('.chat-incoming-session-notification .accept-request-wrap').children().length)
         let after_element = this.$('.chat-content');
         if (!after_element.length)
             return;
         after_element = after_element[0];
-        let height;
-        if (this.$('.chat-incoming-session-notification').width() < 360){
-            height = this.$('.notification-trust-session').height() + 134;
-        } else {
-            height = this.$('.notification-trust-session').height() + 94;
+        let height = this.$('.notification-trust-session').height() + 64;
+        if (!this.$('.notification-trust-session').height()){
+            height = 0;
         }
         after_element.style.setProperty('--active-session-item-height', height + 'px')
 
@@ -10699,7 +10699,7 @@ xabber.InvitationPanelView = xabber.SearchView.extend({
         "click .btn-unblock-contact": "unblockContact",
         "click .btn-export-history": "exportHistory",
         "click .btn-show-fingerprints": "showFingerprints",
-        "click .btn-show-session": "onSessionButtonClick",
+        "click .btn-show-session": "startTrustVerification",
         "click .btn-start-encryption": "startEncryptedChat",
         "click .btn-open-encrypted-chat": "openEncryptedChat",
         "click .btn-open-regular-chat": "openRegularChat",
@@ -10752,6 +10752,7 @@ xabber.InvitationPanelView = xabber.SearchView.extend({
         this.contact.on("change:subscription", this.updateMenu, this);
         this.contact.on("change:in_roster", this.updateMenu, this);
         this.contact.on("update_trusted", this.updateEncryptedColor, this);
+        this.contact.on("update_trusted", this.renderActiveTrustSession, this);
         xabber._settings.on("change:jingle_calls", this.updateGroupChatHead, this);
         xabber.on('change:audio', this.updateGroupChatHead, this);
         xabber.on('plyr_player_updated', this.updatePlyrControls, this);
@@ -10798,29 +10799,68 @@ xabber.InvitationPanelView = xabber.SearchView.extend({
         return this;
     },
 
-    renderActiveTrustSession: function () {
+    renderActiveTrustSession: function (encrypted) {
         if (!this.model.get('encrypted') || !this.account.omemo || !this.account.omemo.xabber_trust)
             return;
 
 
         let active_sessions = this.account.omemo.xabber_trust.get('active_trust_sessions');
-        this.$('.btn-show-session').addClass('hidden');
-        this.$('.btn-show-session .background-element').removeClass('pulsating');
+        this.$('.btn-show-session').removeClass('hidden');
+        if (encrypted){
+            this.$('.btn-show-session').switchClass('hidden', (encrypted === true));
+        } else {
+            this.$('.btn-show-session').switchClass('hidden', (this.$el.attr('data-trust') === 'true'));
+        }
         this.$('.btn-show-session').removeClass('active-session');
 
         Object.keys(active_sessions).forEach((session_id) => {
             let session = active_sessions[session_id];
-            if (session.verification_step === '0b' && this.model.get('hidden_active_session_sid') !== session_id)
-                return;
             if ((session.active_verification_device && session.active_verification_device.peer_jid === this.contact.get('jid') ) || session.session_check_jid === this.contact.get('jid')){
-                this.$('.btn-show-session').removeClass('hidden');
-                this.$('.btn-show-session').addClass('active-session');
-                this.$('.btn-show-session .background-element').addClass('pulsating');
-                if (session.verification_step === '1a' && !(session.active_verification_device && session.active_verification_device.device_id))
-                    this.$('.btn-show-session .background-element').removeClass('pulsating');
+                this.$('.btn-show-session').addClass('hidden');
             }
         });
     },
+
+      startTrustVerification: function () {//34
+          if (!this.account.omemo || !this.account.omemo.get('device_id') || !this.account.server_features.get(Strophe.NS.XABBER_NOTIFY))
+              return;
+          let msg_id = uuid(),
+              sid = uuid(),
+              stanza = $iq({
+                  type: 'set',
+                  to: this.contact.get('jid'),
+                  id: msg_id
+              });
+          stanza.c('notify', {xmlns: Strophe.NS.XABBER_NOTIFY});
+          stanza.c('notification', {xmlns: Strophe.NS.XABBER_NOTIFY});
+          stanza.c('forwarded', {xmlns: Strophe.NS.FORWARD});
+          stanza.c('message', {
+              to: this.contact.get('jid'),
+              from: this.account.get('jid'),
+              type: 'chat',
+              id: uuid()
+          });
+          stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: sid, timestamp: Math.floor(Date.now() / 1000) }).c('verification-start', {'device-id': this.account.omemo.get('device_id'), 'ttl': 86400 }).up().up();
+          stanza.c('body').t(`Device Verification request from ${this.account.jid} A1`).up();
+          stanza.up().up().up();
+          stanza.c('fallback',{xmlns: Strophe.NS.XABBER_NOTIFY}).t(`device verification fallback text`).up();
+          stanza.c('addresses', {xmlns: Strophe.NS.ADDRESS}).c('address',{type: 'to', jid: this.contact.get('jid')}).up().up();
+          this.account.sendFast(stanza, () => {
+              let peer = this.account.omemo.getPeer(this.contact.get('jid'));
+              peer.updateDevicesKeys();
+              this.account.omemo.xabber_trust.addVerificationSessionData(sid, {
+                  verification_started: true,
+                  active_verification_device: {
+                      peer_jid: this.contact.get('jid'),
+                  },
+                  verification_step: '1a',
+                  session_check_jid: this.contact.get('jid'),
+                  msg_ttl: 86400,
+                  message_timestamp: Math.floor(Date.now() / 1000),
+              });
+              utils.callback_popup_message(xabber.getString("trust_verification_started"), 5000);
+          });
+      },
 
     onSessionButtonClick: function () {
         if (!this.model.get('encrypted') || !this.account.omemo || !this.account.omemo.xabber_trust)

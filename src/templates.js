@@ -279,6 +279,7 @@
     addSvgTemplate('svg.file-zip');
     addSvgTemplate('svg.file');
     addSvgTemplate('svg.file-pdf');
+    addSvgTemplate('svg.send-encrypted');
     addSvgTemplate('svg.close');
     addSvgTemplate('svg.link');
     addSvgTemplate('svg.picture-in-picture-minimize');

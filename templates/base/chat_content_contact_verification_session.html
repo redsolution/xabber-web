@@ -1,32 +1,34 @@
 <div class="notification-trust-session" data-sid="{{sid}}" data-jid="{{jid}}">
     <div class="active-session-icon">
-        <i class="mdi mdi-lock mdi-24px"></i>
+        <i class="mdi mdi-alert mdi-48px"></i>
     </div>
     <div class="state-label">{{state_label}}</div>
     <div class="state">{{state}}</div>
     <div class="accept-request-wrap">
     {[if (code) {]}
-    <div class="show-code btn-flat btn-main-filled one-line" data-code="{{code}}">
+    <div class="show-code text-color-500 dotted-underline one-line" data-code="{{code}}">
         {[print(xabber.getString("verification_session_show_code_button"))]}
     </div>
     {[}]}
     {[if (is_enter_code) {]}
-    <div class="enter-code btn-flat btn-main-filled one-line">
+    <div class="enter-code text-color-500 dotted-underline one-line">
         {[print(xabber.getString("verification_session_enter_code_button"))]}
     </div>
     {[}]}
     {[if (is_active_request) {]}
-    <div class="accept-request btn-flat btn-main-filled one-line">
+    <div class="accept-request text-color-500 dotted-underline one-line">
         {[print(xabber.getString("accept"))]}
     </div>
-    <div class="decline-request btn-flat btn-main one-line">
-        {[print(xabber.getString("reject"))]}
+    {[}]}
+    </div>
+    {[if (is_active_request) {]}
+    <div class="decline-request" data-code="{{code}}">
+        <svg class="mdi mdi-24px mdi-svg-template" data-svgname="close"></svg>
     </div>
     {[}]}
     {[if (!is_active_request) {]}
-    <div class="cancel-session btn-flat btn-main one-line" data-code="{{code}}">
-        {[print(xabber.getString("show_code__cancel_session"))]}
+    <div class="cancel-session" data-code="{{code}}">
+        <svg class="mdi mdi-24px mdi-svg-template" data-svgname="close"></svg>
     </div>
     {[}]}
-    </div>
 </div>

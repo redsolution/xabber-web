@@ -288,7 +288,12 @@ xabber.ActiveSessionModalView = xabber.BasicView.extend({
                         this.$('.new-trusted-devices-list').append($trust_device);
                         this.$('.new-trusted-devices-list .preloader-wrapper').remove();
                     } else {
-                        // trust_attrs.icon = 'contact';
+                        trust_attrs.ip = device_item.device_id;
+                        trust_attrs.last_auth = '';
+                        trust_attrs.icon = 'contact';
+                        let $trust_device = $(templates.trust_item_device_session(trust_attrs));
+                        this.$('.new-trusted-devices-list').append($trust_device);
+                        this.$('.new-trusted-devices-list .preloader-wrapper').remove();
                     }
                     // if (!this.contact){
                     // }
@@ -1774,14 +1779,6 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                     msg_ttl: ttl,
                     message_timestamp: msg_timestamp,
                 });
-                if (!$('#modals').find('.code-modal').length){
-                    let view = new xabber.ActiveSessionModalView();
-                    view.show({
-                        account: this.account,
-                        contact: contact,
-                        sid: sid,
-                    });
-                }
             }
             if ($message.find('verification-start').length && $message.find('verification-start').attr('device-id') && this.omemo.get('device_id') && !options.automated){
                 this.account.omemo.xabber_trust.addVerificationSessionData(sid, {
@@ -1811,15 +1808,6 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                 }
                 if (this.active_sessions_data[sid].verification_step === '1a' && !options.automated)
                     this.handleTrustVerificationSigned($message, contact, null, null, options.forced_code);
-
-                if (options.automated && !$('#modals').find('.code-modal').length){
-                    let view = new xabber.ActiveSessionModalView();
-                    view.show({
-                        account: this.account,
-                        contact: contact,
-                        sid: sid,
-                    });
-                }
                 return;
             }
             if (this.active_sessions_data[sid] && this.active_sessions_data[sid].active_verification_code){

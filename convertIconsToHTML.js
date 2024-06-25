@@ -131,6 +131,7 @@ let badges_names = [
         'file-zip',
         'file',
         'file-pdf',
+        'send-encrypted',
         'close',
         'link',
         'security',

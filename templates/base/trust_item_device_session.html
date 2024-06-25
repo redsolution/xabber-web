@@ -7,5 +7,5 @@
         {[}]}
     </div>
     <div class="trust-item-label">{[if (label) {]}{{label}}{[} else {]}{{device.device_id}}{[}]}</div>
-    <div class="trust-item-trust-type">{[if (ip) {]}{{ip}} • {[}]}{[if (last_auth) {]}{{last_auth}}{[}]}</div>
+    <div class="trust-item-trust-type">{[if (ip) {]}{{ip}}{[if (ip && last_auth) {]} • {[}]}{[}]}{[if (last_auth) {]}{{last_auth}}{[}]}</div>
 </div>
