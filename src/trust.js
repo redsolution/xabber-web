@@ -379,7 +379,9 @@ xabber.ActiveSessionModalView = xabber.BasicView.extend({
 
     openDevices: function () {
         if (this.contact) {
-
+            this.close();
+            let peer = this.account.omemo.getPeer(this.contact.get('jid'));
+            peer.fingerprints.open();
         } else {
             this.close();
             if (xabber.accounts.length === 1 && xabber.body.screen.get('name') === 'settings-modal' && xabber.settings_modal_view.settings_single_account_modal) {
@@ -1761,6 +1763,8 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
 
         if (contact){
             if ($message.find('verification-start').length && $message.find('verification-start').attr('device-id') && this.omemo.get('device_id') && options.automated){
+                if (this.isDeviceTrusted(contact.get('jid'), $message.find('verification-start').attr('device-id')))
+                    return;
 
                 let msg_timestamp = $message.find('authenticated-key-exchange').attr('timestamp'),
                     ttl;
