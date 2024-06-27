@@ -10699,7 +10699,7 @@ xabber.InvitationPanelView = xabber.SearchView.extend({
         "click .btn-unblock-contact": "unblockContact",
         "click .btn-export-history": "exportHistory",
         "click .btn-show-fingerprints": "showFingerprints",
-        "click .btn-show-session": "startTrustVerification",
+        "click .btn-show-session": "showFingerprints",
         "click .btn-start-encryption": "startEncryptedChat",
         "click .btn-open-encrypted-chat": "openEncryptedChat",
         "click .btn-open-regular-chat": "openRegularChat",
@@ -10804,21 +10804,21 @@ xabber.InvitationPanelView = xabber.SearchView.extend({
             return;
 
 
-        let active_sessions = this.account.omemo.xabber_trust.get('active_trust_sessions');
-        this.$('.btn-show-session').removeClass('hidden');
-        if (encrypted){
-            this.$('.btn-show-session').switchClass('hidden', (encrypted === true));
-        } else {
-            this.$('.btn-show-session').switchClass('hidden', (this.$el.attr('data-trust') === 'true'));
-        }
-        this.$('.btn-show-session').removeClass('active-session');
+        // let active_sessions = this.account.omemo.xabber_trust.get('active_trust_sessions');
+        // this.$('.btn-show-session').removeClass('hidden');
+        // if (encrypted){
+        //     this.$('.btn-show-session').switchClass('hidden', (encrypted === true));
+        // } else {
+        //     this.$('.btn-show-session').switchClass('hidden', (this.$el.attr('data-trust') === 'true'));
+        // }
+        // this.$('.btn-show-session').removeClass('active-session');
 
-        Object.keys(active_sessions).forEach((session_id) => {
-            let session = active_sessions[session_id];
-            if ((session.active_verification_device && session.active_verification_device.peer_jid === this.contact.get('jid') ) || session.session_check_jid === this.contact.get('jid')){
-                this.$('.btn-show-session').addClass('hidden');
-            }
-        });
+        // Object.keys(active_sessions).forEach((session_id) => {
+        //     let session = active_sessions[session_id];
+        //     if ((session.active_verification_device && session.active_verification_device.peer_jid === this.contact.get('jid') ) || session.session_check_jid === this.contact.get('jid')){
+        //         this.$('.btn-show-session').addClass('hidden');
+        //     }
+        // });
     },
 
       startTrustVerification: function () {//34

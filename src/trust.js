@@ -447,7 +447,11 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
 
         Object.keys(trusted_devices).forEach((item) => {
             trusted_devices[item].forEach((device_item) => {
-                this.omemo.updateFingerprints(item, device_item.device_id, device_item.fingerprint, true);
+                if (device_item.untrusted){
+                    this.omemo.deleteFingerprintTrust(item, device_item.device_id);
+                } else{
+                    this.omemo.updateFingerprints(item, device_item.device_id, device_item.fingerprint, true);
+                }
             });
         });
         this.account.trigger('trusting_updated');
@@ -1162,7 +1166,6 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                 });
 
             });
-
 
             let encoder = new TextEncoder(),
                 trusted_string_text_buffer = encoder.encode(trusted_string);

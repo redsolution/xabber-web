@@ -8095,7 +8095,7 @@ input[type=text].simple-input-field:hover {
 .chat-item.encrypted[data-trust=true] .chat-title-wrap .encrypted-icon.mdi-alert-circle {
     display: none !important;
 }
-.chat-head-wrap.encrypted[data-trust=true] .encrypted-icon.mdi-lock,
+/*.chat-head-wrap.encrypted[data-trust=true] .encrypted-icon.mdi-lock,*/
 .chat-item.encrypted[data-trust=true] .chat-title-wrap .encrypted-icon.mdi-lock{
     display: block !important;
 }
@@ -8113,7 +8113,7 @@ input[type=text].simple-input-field:hover {
 .chat-item.encrypted[data-trust=none] .chat-title-wrap .encrypted-icon.mdi-lock {
     display: none !important;
 }
-.chat-head-wrap.encrypted[data-trust=none] .encrypted-icon.mdi-alert,
+/*.chat-head-wrap.encrypted[data-trust=none] .encrypted-icon.mdi-alert,*/
 .chat-item.encrypted[data-trust=none] .chat-title-wrap .encrypted-icon.mdi-alert{
     display: block !important;
 }
@@ -8132,7 +8132,7 @@ input[type=text].simple-input-field:hover {
 .chat-item.encrypted[data-trust=error] .chat-title-wrap .encrypted-icon.mdi-lock {
     display: none !important;
 }
-.chat-head-wrap.encrypted[data-trust=error] .encrypted-icon.mdi-alert-circle,
+/*.chat-head-wrap.encrypted[data-trust=error] .encrypted-icon.mdi-alert-circle,*/
 .chat-item.encrypted[data-trust=error] .chat-title-wrap .encrypted-icon.mdi-alert-circle{
     display: block !important;
 }
@@ -8433,7 +8433,7 @@ input[type=text].simple-input-field:hover {
 }
 
 .chat-head-wrap.encrypted .encrypted-icon {
-    display: block !important;
+    display: none !important;
     color: #9E9E9E;
 }
 
@@ -12118,6 +12118,7 @@ input[type=range].voice-message-volume:focus {
 .settings-panel-wrap .settings-panel .main-info-wrap .picture-wrap .avatar-wrap .dropdown-content{
     left: 0 !important;
     top: 0 !important;
+    width: fit-content !important;
 }
 
 .settings-panel-wrap .settings-panel .main-info-wrap .name{
@@ -21219,6 +21220,15 @@ ul.restrictions-list-content>li {
     content: "";
     display: block;
     width: 100%;
+}
+
+.chat-head-wrap.encrypted[data-trust=none] .chat-tools-wrap .chat-tool.btn-show-session .mdi-lock,
+.chat-head-wrap.encrypted[data-trust=none] .chat-tools-wrap .chat-tool.btn-show-session .mdi-alert-circle,
+.chat-head-wrap.encrypted[data-trust=true] .chat-tools-wrap .chat-tool.btn-show-session .mdi-alert,
+.chat-head-wrap.encrypted[data-trust=true] .chat-tools-wrap .chat-tool.btn-show-session .mdi-alert-circle,
+.chat-head-wrap.encrypted[data-trust=error] .chat-tools-wrap .chat-tool.btn-show-session .mdi-lock,
+.chat-head-wrap.encrypted[data-trust=error] .chat-tools-wrap .chat-tool.btn-show-session .mdi-alert{
+    display:none;
 }
 .chat-tools-wrap .chat-tool.btn-show-session.active-session{
     position:relative;

@@ -254,14 +254,32 @@ xabber.Fingerprints = xabber.BasicView.extend({
                 msg_ttl: 86400,
                 message_timestamp: Math.floor(Date.now() / 1000),
             });
+            this.close();
             utils.callback_popup_message(xabber.getString("trust_verification_started"), 5000);
         });
     },
 
     revokeAllTrust: function () {
-        if (!this.account.omemo || !this.account.omemo.get('device_id') || !this.account.server_features.get(Strophe.NS.XABBER_NOTIFY))
+        if (!this.account.omemo || !this.account.omemo.xabber_trust ||  !this.account.omemo.get('device_id') || !this.account.server_features.get(Strophe.NS.XABBER_NOTIFY))
             return;
 
+        utils.dialogs.ask('not yet fully implemented, use at your own risk').done((result) => {
+            if (result) {
+                if (this.account.omemo.xabber_trust.get('trusted_devices')[this.jid] && this.account.omemo.xabber_trust.get('trusted_devices')[this.jid].length){
+
+                    let updated_trusted_devices = this.account.omemo.xabber_trust.get('trusted_devices'),
+                        contacts_trusted_devices = this.account.omemo.xabber_trust.get('trusted_devices')[this.jid];
+
+                    contacts_trusted_devices.forEach((trusted_device) => {
+                        let index = updated_trusted_devices[this.jid].indexOf(trusted_device);
+                        trusted_device.untrusted = true;
+                        updated_trusted_devices[this.jid][index] = trusted_device;
+                    });
+                    this.account.omemo.xabber_trust.save('trusted_devices', updated_trusted_devices);
+                    this.account.omemo.xabber_trust.trigger('trust_updated');
+                }
+            }
+        });
     },
 
     updateColorScheme: function () {
@@ -1574,6 +1592,20 @@ xabber.Omemo = Backbone.ModelWithStorage.extend({
         if (_.isArray(contact_fingerprints))
             contact_fingerprints = {};
         contact_fingerprints[device_id] = {fingerprint, trusted};
+        fingerprints[contact] = contact_fingerprints;
+        this.save('fingerprints', fingerprints);
+    },
+
+    deleteFingerprintTrust: function (contact, device_id) {
+        let fingerprints = _.clone(this.get('fingerprints'));
+        if (!fingerprints[contact])
+            fingerprints[contact] = {};
+        let contact_fingerprints = fingerprints[contact];
+        if (_.isArray(contact_fingerprints))
+            contact_fingerprints = {};
+        if (!contact_fingerprints[device_id])
+            return;
+        delete contact_fingerprints[device_id];
         fingerprints[contact] = contact_fingerprints;
         this.save('fingerprints', fingerprints);
     },
