@@ -12509,6 +12509,7 @@ input[type=range].voice-message-volume:focus {
     width: fit-content;
 
 }
+.chat-incoming-session-notification .notification-trust-session .state hr,
 .devices-wrap .notification-trust-session .state hr,
 .fingerprints-active-trust-session .notification-trust-session .state hr,
 .fingerprints-unverified-warning .device-encryption-warning-label hr,

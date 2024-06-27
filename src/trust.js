@@ -915,8 +915,8 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
             state = xabber.getString("verification_session_state__request_answered");
         } else if (step === '2a' || step === '2b'){
             state = xabber.getString("verification_session_state__request_proceeding");
-        } else if (step === '0b' && chat_content){
-            state = xabber.getString("chat_content__incoming_session_text");
+        // } else if (step === '0b' && chat_content){
+        //     state = xabber.getString("chat_content__incoming_session_text");
         } else if (step === '0b'){
             state = xabber.getString("verification_session_state__request_answer_needed");
         }
