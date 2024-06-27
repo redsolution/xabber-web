@@ -343,7 +343,7 @@ xabber.Fingerprints = xabber.BasicView.extend({
             let session = active_sessions[session_id];
             if ((session.active_verification_device && session.active_verification_device.peer_jid === this.jid ) || session.session_check_jid === this.jid){
                 let state = this.omemo.xabber_trust.getVerificationState(session),
-                    state_label = this.omemo.xabber_trust.getVerificationStateLabel(session);
+                    state_label = this.omemo.xabber_trust.getVerificationStateContactLabel(session);
 
                 let item = {
                     jid: null,

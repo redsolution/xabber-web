@@ -3520,7 +3520,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
             if (this.model.get('hidden_active_session_sid') !== session_id) {
                 if ((session.active_verification_device && session.active_verification_device.peer_jid === this.contact.get('jid')) || session.session_check_jid === this.contact.get('jid')) {
                     let state = this.account.omemo.xabber_trust.getVerificationState(session, true),
-                        state_label = this.account.omemo.xabber_trust.getVerificationStateLabel(session);
+                        state_label = this.account.omemo.xabber_trust.getVerificationStateContactLabel(session);
 
                     let item = {
                         jid: null,

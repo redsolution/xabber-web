@@ -960,6 +960,26 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
         return state;
     },
 
+    getVerificationStateContactLabel: function (session) {
+        let state,
+            step = session.verification_step;
+        if (step === '1a' && session.active_verification_device && session.active_verification_device.device_id){
+            state = xabber.getString("verification_session_state__verification_in_progress_label");
+        } else if (step === '1a'){
+            state = xabber.getString("verification_session_state__verification_in_progress_label");
+        } else if (step === '1b'){
+            state = xabber.getString("verification_session_state__verification_in_progress_label");
+        } else if (step === '2a'){
+            state = xabber.getString("verification_session_state__verification_in_progress_label");
+        } else if (step === '2b'){
+            state = xabber.getString("verification_session_state__verification_in_progress_label");
+        } else if (step === '0b'){
+            state = xabber.getString("verification_session_state__contact_request_answer_needed_label");
+        }
+
+        return state;
+    },
+
     clearData: function (sid) {
         // console.error('here')
         let active_sessions = this.get('active_trust_sessions');
