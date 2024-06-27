@@ -8084,6 +8084,7 @@ input[type=text].simple-input-field:hover {
 
 .chat-head-wrap.encrypted[data-trust=true] .contact-name,
 .chat-head-wrap.encrypted[data-trust=true] .encrypted-icon,
+.chat-head-wrap[data-trust=true] .btn-show-session i,
 .message-item[data-trust=true] .chat-title-wrap .encrypted-icon,
 .mention-item[data-trust=true] .chat-title-wrap .encrypted-icon,
 .chat-item[data-trust=true] .chat-title-wrap .encrypted-icon {
@@ -8103,6 +8104,7 @@ input[type=text].simple-input-field:hover {
 .chat-head-wrap.encrypted[data-trust=none] .contact-name,
 .chat-head-wrap.encrypted[data-trust=none] .encrypted-icon,
 .chat-head-wrap[data-trust=none] .encrypted-icon,
+.chat-head-wrap[data-trust=none] .btn-show-session i,
 .chat-item.encrypted[data-trust=none] .chat-title,
 .chat-item[data-trust=none] .chat-title-wrap .encrypted-icon {
     color: #FFA000 !important;
@@ -8121,6 +8123,7 @@ input[type=text].simple-input-field:hover {
 .chat-head-wrap.encrypted[data-trust=error] .contact-name,
 .chat-head-wrap.encrypted[data-trust=error] .encrypted-icon,
 .chat-head-wrap[data-trust=error] .encrypted-icon,
+.chat-head-wrap[data-trust=error] .btn-show-session i,
 .chat-item.encrypted[data-trust=error] .chat-title,
 .chat-item[data-trust=error] .chat-title-wrap .encrypted-icon {
     color: #d32f2f !important;
@@ -8536,6 +8539,17 @@ input[type=text].simple-input-field:hover {
     }
     100% {
         opacity: 0.5;
+    }
+}
+@-webkit-keyframes pulsate-background-gray-to-orange {
+    0% {
+        background: #F5F5F5;
+    }
+    50% {
+        background: #FFE0B2;
+    }
+    100% {
+        background: #F5F5F5;
     }
 }
 .chat-tools-wrap .chat-tool.btn-jingle-message.active-call[data-state=search],
@@ -12503,11 +12517,14 @@ input[type=range].voice-message-volume:focus {
     /*color: #616161;*/
 }
 .fingerprints-unverified-warning .btn-verify{
-    background-color: #ff9800;
+    background-color: #ff9800 !important;
     cursor: pointer;
     margin-top: 8px;
     width: fit-content;
 
+}
+.fingerprints-unverified-warning .btn-verify:hover{
+    opacity: 0.8;
 }
 .chat-incoming-session-notification .notification-trust-session .state hr,
 .devices-wrap .notification-trust-session .state hr,
@@ -21133,6 +21150,10 @@ ul.restrictions-list-content>li {
 }
 .chat-incoming-session-notification .notification-trust-session.low-width{
     padding: 16px 32px 16px 32px;
+}
+.chat-incoming-session-notification .notification-trust-session.enter-code-pulsate{
+    -webkit-animation: pulsate-background-gray-to-orange 1.5s ease-out;
+    -webkit-animation-iteration-count: infinite;
 }
 .chat-incoming-session-notification .notification-trust-session.no-buttons{
     padding: 16px 56px 16px 96px !important;
