@@ -46,7 +46,7 @@
                     if ($(err).find('error').attr('code') == 404 && !jid)
                         createDeviceNode.call(this, callback);
                     else
-                        errback && errback();
+                        errback && errback(err);
                 }.bind(this));
             }
 

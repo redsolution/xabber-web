@@ -1563,12 +1563,13 @@ xabber.Omemo = Backbone.ModelWithStorage.extend({
                         conn.omemo.getDevicesNode(null, (cb) => {
                             conn.omemo.devices = conn.omemo.parseUserDevices($(cb));
                             this._pending_own_devices = false;
-                            this._dfd_own_devices.resolve();
+                            this._dfd_own_devices && this._dfd_own_devices.resolve();
                             resolve();
-                        }, function () {
+                        }, function (err) {
+                            xabber.error(err);
                             this._pending_own_devices = false;
-                            this._dfd_own_devices.resolve();
-                            resolve();
+                            reject();
+                            // resolve();
                         });
                     } else
                         this._pending_own_devices = false;
