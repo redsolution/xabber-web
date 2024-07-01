@@ -471,9 +471,9 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
     },
 
     cancelSession: function (sid, to) {
-        console.error('herrrreeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee');
-        console.error(sid);
-        console.error(to);
+        // console.error('herrrreeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee');
+        // console.error(sid);
+        // console.error(to);
 
         if (to){
             let msg_id = uuid(),

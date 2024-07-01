@@ -1868,7 +1868,7 @@ xabber.Omemo = Backbone.ModelWithStorage.extend({
                 contact = this.account.contacts.get(options.conversation ? options.conversation : jid),
                 stanza_id = $msg.children(`stanza-id[by="${this.account.get('jid')}"]`).attr('id');
             let cached_msg;
-            if (Strophe.getBareJidFromJid($msg.attr('from')) != this.account.get('jid')){
+            if (!options.notification_msg && contact){
                 cached_msg = stanza_id && this.cached_messages && this.cached_messages.getMessage(contact, stanza_id);
             }
             if (options.notification_msg) {
