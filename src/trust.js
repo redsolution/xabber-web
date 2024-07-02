@@ -571,24 +571,28 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
             .c('item', {id: this.omemo.get('device_id')})
             .c('share', {xmlns: Strophe.NS.PUBSUB_TRUST_SHARING, usage: Strophe.NS.OMEMO})
             .c('identity', {id: my_saved_trusted_device.device_id}).t(my_saved_trusted_device.fingerprint).up()
-            .c('trusted-items', {timestamp: current_timestamp});
+            .c('items', {timestamp: current_timestamp});
 
         my_trusted_devices.forEach((trusted_device) => {
-            iq.c('trust', {timestamp: trusted_device.timestamp, xmlns: Strophe.NS.PUBSUB_TRUST_SHARING}).t(trusted_device.trusted_key).up();
+            if (trusted_device.is_revoked){
+                iq.c('revoked', {timestamp: trusted_device.timestamp, xmlns: Strophe.NS.PUBSUB_TRUST_SHARING}).t(trusted_device.trusted_key).up();
+            } else {
+                iq.c('trust', {timestamp: trusted_device.timestamp, xmlns: Strophe.NS.PUBSUB_TRUST_SHARING}).t(trusted_device.trusted_key).up();
+            }
         });
 
-        let $trusted_items = $(iq.tree()).find('trusted-items');
+        let $trusted_items = $(iq.tree()).find('items');
 
         // console.log($trusted_items[0]);
 
 
-        $trusted_items.find('trust').sort(function(a, b) {
+        $trusted_items.children().sort(function(a, b) {
             return +b.getAttribute('timestamp') - +a.getAttribute('timestamp');
         }).appendTo($trusted_items);
 
         let trusted_string = `${$trusted_items.attr('timestamp')}`;
 
-        $trusted_items.find('trust').each((idx, item) => {
+        $trusted_items.children().each((idx, item) => {
             let $item = $(item);
             trusted_string = trusted_string + `<${$item.attr('timestamp')}/${$item.text()}`;
         });
@@ -621,7 +625,8 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
 
             // console.log(utils.curveVerify(own_pubkey, trusted_string_text_buffer, signature));
             //
-            // console.log(iq.tree());
+            // console.error('PUBLIIIIIIIIIIIIISH');
+            // console.error(iq.tree());
             this.configNode(() => {
                 this.account.sendIQFast(iq,
                     (res) => {
@@ -677,7 +682,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
         Object.keys(trusted_devices).forEach((item) => {
             if (item === this.account.get('jid'))
                 return;
-            stanza.c('trusted-items', {owner: item, timestamp: Math.floor(Date.now() / 1000)});
+            stanza.c('items', {owner: item, timestamp: Math.floor(Date.now() / 1000)});
             trusted_devices[item].forEach((device_item) => {
                 stanza.c('trust', {timestamp: Math.floor(Date.now() / 1000)}).t(device_item.trusted_key).up();
                 counter++;
@@ -690,18 +695,18 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
         let $share = $(stanza.tree()).find('share'),
             trusted_string = '';
 
-        $share.children('trusted-items').sort(function(a, b) {
+        $share.children('items').sort(function(a, b) {
             return +b.getAttribute('timestamp') - +a.getAttribute('timestamp');
         }).appendTo($share);
 
-        $share.children('trusted-items').each((idx, trusted_items) => {
+        $share.children('items').each((idx, trusted_items) => {
             let $item = $(trusted_items);
             trusted_string = trusted_string + `${$item.attr('timestamp')}`;
 
-            $item.find('trust').sort(function(a, b) {
+            $item.children().sort(function(a, b) {
                 return +b.getAttribute('timestamp') - +a.getAttribute('timestamp');
             }).appendTo($item);
-            $item.find('trust').each((idx, trust_item) => {
+            $item.children().each((idx, trust_item) => {
                 let $trust = $(trust_item);
                 trusted_string = trusted_string + `<${$trust.attr('timestamp')}/${$trust.text()}`;
             });
@@ -815,7 +820,73 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
         }
     },
 
-    fixMyTrustedDeviceAndPublish: function (callback) { //34
+    iterateAndChangeTrustedDevices: function (jid, func) {
+        let jid_trusted_devices = this.get('trusted_devices')[jid],
+            changed;
+
+        jid_trusted_devices.forEach((trusted_device) => {
+            let index = jid_trusted_devices.indexOf(trusted_device),
+                func_result = func(trusted_device);
+            if (Boolean(func_result.func_changed)){
+                changed = true;
+                trusted_device = func_result.device;
+                jid_trusted_devices[index] = trusted_device;
+            }
+        });
+
+        if (changed){
+            let whole_trusted_devices = this.get('trusted_devices');
+
+            let deviceMap = new Map();
+            whole_trusted_devices[jid].forEach(item => {
+                deviceMap.set(item.trusted_key, { ...item });
+            });
+            jid_trusted_devices.forEach(item => {
+                deviceMap.set(item.trusted_key, { ...item });
+            });
+            whole_trusted_devices[jid] = Array.from(deviceMap.values());
+
+            this.save('trusted_devices', whole_trusted_devices);
+            this.trigger('trust_updated');
+        }
+        return changed;
+
+    },
+
+
+    findAndMarkRemovedTrustedDevices: function (devices_ids, peer_jid, callback) { //34
+        let jid = peer_jid ? peer_jid : this.account.get('jid');
+        let changed = this.iterateAndChangeTrustedDevices(jid, (device) => {
+            let func_changed;
+            if (devices_ids && devices_ids.length && device.device_id && devices_ids.includes(device.device_id) && !device.is_revoked){
+                device.is_revoked = true;
+                func_changed = true;
+            }
+            return {device, func_changed};
+        });
+
+        if (changed){
+            this.fixMyTrustedDeviceAndPublish(callback);
+        }
+    },
+
+    findAndMarkAllOwnTrustedDevices: function () {
+        let changed = this.iterateAndChangeTrustedDevices(this.account.get('jid'), (device) => {
+            let func_changed;
+            if (!device.is_me && !device.is_revoked){
+                device.is_revoked = true;
+                func_changed = true;
+            }
+            return {device, func_changed};
+        });
+
+        if (changed){
+            this.fixMyTrustedDeviceAndPublish();
+        }
+    },
+
+
+    fixMyTrustedDeviceAndPublish: function (callback) {
         let trusted_devices = this.get('trusted_devices'),
             own_trusted_devices =  trusted_devices[this.account.get('jid')];
 
@@ -1125,7 +1196,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
             received_device_id = options.device_id,
             is_new_devices = false,
             counter = 0,
-            total_count = $message.find('share trusted-items trust').length,
+            total_count = $message.find('share items trust').length,
             device_fingerprint = $message.find('share identity').text();
 
         let my_trusted_devices = this.get('trusted_devices')[this.account.get('jid')];
@@ -1171,18 +1242,18 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                 return;
 
 
-            $share.children('trusted-items').sort(function(a, b) {
+            $share.children('items').sort(function(a, b) {
                 return +b.getAttribute('timestamp') - +a.getAttribute('timestamp');
             }).appendTo($share);
 
-            $share.children('trusted-items').each((idx, trusted_items) => {
+            $share.children('items').each((idx, trusted_items) => {
                 let $item = $(trusted_items);
                 trusted_string = trusted_string + `${$item.attr('timestamp')}`;
 
-                $item.find('trust').sort(function(a, b) {
+                $item.children().sort(function(a, b) {
                     return +b.getAttribute('timestamp') - +a.getAttribute('timestamp');
                 }).appendTo($item);
-                $item.find('trust').each((idx, trust_item) => {
+                $item.children().each((idx, trust_item) => {
                     let $trust = $(trust_item);
                     trusted_string = trusted_string + `<${$trust.attr('timestamp')}/${$trust.text()}`;
                 });
@@ -1220,7 +1291,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
             if (!is_signature_verified)
                 return;
 
-            $share.children('trusted-items').each((idx, key_owner) => {
+            $share.children('items').each((idx, key_owner) => {
                 // console.log(key_owner);
                 let $key_owner = $(key_owner),
                     jid = $key_owner.attr('owner');
@@ -1365,11 +1436,23 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                         trusted_key: item.trusted_key,
                         from_device_id: item.from_device_id,
                         trust_reason_jid: item.trust_reason_jid,
+                        is_revoked: item.is_revoked,
                         timestamp: Math.floor(Date.now() / 1000),
                         fingerprint: item_fingerprint,
                         device_id: item_device_id,
                         public_key: utils.ArrayBuffertoBase64(item_device.get('ik'))
                     };
+                } else if (item.is_revoked){
+                    trusted_devices[idx] = {
+                        trusted_key: item.trusted_key,
+                        from_device_id: item.from_device_id,
+                        trust_reason_jid: item.trust_reason_jid,
+                        is_revoked: true,
+                        timestamp: Math.floor(Date.now() / 1000),
+                        fingerprint: item_fingerprint,
+                        device_id: item_device_id,
+                    };
+
                 } else {
                     trusted_devices[idx] = null;
                     was_removed = true;
@@ -1509,21 +1592,21 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
             }
 
             let trusted_item_signature = $item.find('signature').text(),
-                $trusted_items = $item.find('trusted-items');
+                $trusted_items = $item.find('items');
             // console.log($item[0].outerHTML);
             // console.log($item.find('share')[0].outerHTML);
             // console.log($item.find('trusted-items')[0].outerHTML);
             // console.log($item.find('trusted-items')[0].outerHTML);
             // console.log($trusted_items[0].outerHTML);
 
-            $trusted_items.find('trust').sort(function(a, b) {
+            $trusted_items.children().sort(function(a, b) {
                 return +b.getAttribute('timestamp') - +a.getAttribute('timestamp');
             }).appendTo($trusted_items);
 
             let trusted_string = `${$trusted_items.attr('timestamp')}`;
 
-            // console.log($trusted_items.find('trust'));
-            $trusted_items.find('trust').each((idx, trust_item) => {
+            // console.log($trusted_items.children());
+            $trusted_items.children().each((idx, trust_item) => {
                 let $item = $(trust_item);
                 trusted_string = trusted_string + `<${$item.attr('timestamp')}/${$item.text()}`;
             });
@@ -1541,7 +1624,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
             // console.log(is_signature_verified);
             if (is_signature_verified){
 
-                $trusted_items.find('trust').each((idx, trust_item) => {
+                $trusted_items.children().each((idx, trust_item) => {
 
                     let $trust_item = $(trust_item);
 
@@ -1553,15 +1636,27 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                     // console.log(!devices_to_remove.includes($trust_item.text()));
                     // console.log(Boolean(!(final_trusted_devices.filter(e => e.trusted_key === $trust_item.text()).length > 0) && !devices_to_remove.includes($trust_item.text())));
 
+                    // console.log($trust_item.prop("tagName"));
+                    // console.log(trust_item);
                     if (!(final_trusted_devices.filter(e => e.trusted_key === $trust_item.text()).length > 0) && !devices_to_remove.includes($trust_item.text())){
                         let trusted_new_saved_device = {
                             trusted_key: $trust_item.text(),
                             from_device_id: item_device_id,
                             trust_reason_jid: peer ? peer.get('jid') : this.account.get('jid'),
+                            is_revoked: $trust_item.prop("tagName") === 'revoked' ? true : undefined,
                         };
                         new_trusted_devices.push(trusted_new_saved_device);
                         // console.log(new_trusted_devices);
                         // console.log(new_trusted_devices.length);
+                    }
+                    // console.error(final_trusted_devices.filter(e => e.trusted_key === $trust_item.text() && !e.is_revoked).length > 0 && $trust_item.prop("tagName") === 'revoked');
+                    if (final_trusted_devices.filter(e => e.trusted_key === $trust_item.text() && !e.is_revoked).length > 0 && $trust_item.prop("tagName") === 'revoked'){
+                        let this_devices = final_trusted_devices.find(e => e.trusted_key === $trust_item.text() && !e.is_revoked);
+                        if (peer) {
+                            this.findAndMarkRemovedTrustedDevices([this_devices.device_id], peer.get('jid'));
+                        } else {
+                            this.findAndMarkRemovedTrustedDevices([this_devices.device_id]);
+                        }
                     }
                 });
                 // console.log(new_trusted_devices);
@@ -1768,8 +1863,13 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
 
                 let msg_timestamp = $message.find('authenticated-key-exchange').attr('timestamp'),
                     ttl;
-                if (msg_timestamp)
-                    ttl = $message.find('verification-start').attr('ttl');
+                if (msg_timestamp) {
+                    if ($message.find('verification-start').attr('ttl')){
+                        ttl = $message.find('verification-start').attr('ttl');
+                    } else {
+                        ttl = 86400;
+                    }
+                }
 
                 let ended_sessions = this.get('ended_sessions');
                 if (ended_sessions.includes(sid)){
@@ -1871,8 +1971,13 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
 
                 let msg_timestamp = $message.find('authenticated-key-exchange').attr('timestamp'),
                     ttl;
-                if (msg_timestamp)
-                    ttl = $message.find('verification-start').attr('ttl');
+                if (msg_timestamp) {
+                    if ($message.find('verification-start').attr('ttl')){
+                        ttl = $message.find('verification-start').attr('ttl');
+                    } else {
+                        ttl = 300;
+                    }
+                }
                 let ended_sessions = this.get('ended_sessions');
 
                 if (ended_sessions.includes(sid)){

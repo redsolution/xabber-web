@@ -1155,8 +1155,20 @@ xabber.Account = Backbone.Model.extend({
             }).c('revoke', {xmlns:Strophe.NS.AUTH_DEVICES});
             for (let token_num = 0; token_num < token_uid.length; token_num++)
                 iq.c('device', {id: token_uid[token_num]}).up();
+            let token;
+            if (this.omemo && this.omemo.xabber_trust && this.x_tokens_list){
+                token = this.x_tokens_list.find(token => token.token_uid == token_uid[0]);
+                if (!token.omemo_id)
+                    token = null;
+            }
             this.sendIQFast(iq, () => {
                 callback && callback();
+                if (token){
+                    if (this.omemo.xabber_trust.isDeviceTrusted(this.get('jid'), token.omemo_id)){
+                        let removed_device_ids = [token.omemo_id]
+                        this.omemo.xabber_trust.findAndMarkRemovedTrustedDevices(removed_device_ids)
+                    }
+                }
             });
         },
 
@@ -1167,22 +1179,36 @@ xabber.Account = Backbone.Model.extend({
             }).c('revoke-all', {xmlns:Strophe.NS.AUTH_DEVICES});
             this.sendIQFast(iq, (success) => {
                     callback & callback(success);
+                    if (this.omemo && this.omemo.xabber_trust && this.x_tokens_list) {
+                        this.omemo.xabber_trust.findAndMarkAllOwnTrustedDevices();
+                    }
                 },
                 function (error) {
                     errback && errback(error);
                 });
         },
 
-        deleteAccount: function (show_settings, dont_change_screen) {
-            this.show_settings_after_delete = show_settings;
-            this.dont_change_screen_after_delete = dont_change_screen;
-            let screen = xabber.body.screen;
-            if (screen.get('account') && screen.get('account') === this && screen.get('name') === 'account_settings_modal')
-                this.show_settings_after_delete = true;
-            if (this.get('x_token'))
-                this.revokeXToken([this.get('x_token').token_uid]);
-            this.session.set('delete', true);
-            this.deactivate();
+        deleteAccount: function (show_settings, dont_change_screen){ //34
+            let account_deletion_dfd = new $.Deferred();
+            account_deletion_dfd.done(() => {
+                this.show_settings_after_delete = show_settings;
+                this.dont_change_screen_after_delete = dont_change_screen;
+                let screen = xabber.body.screen;
+                if (screen.get('account') && screen.get('account') === this && screen.get('name') === 'account_settings_modal')
+                    this.show_settings_after_delete = true;
+                if (this.get('x_token'))
+                    this.revokeXToken([this.get('x_token').token_uid]);
+                this.session.set('delete', true);
+                this.deactivate();
+            });
+            if (this.omemo && this.omemo.xabber_trust && this.x_tokens_list && !this.session.get('on_token_revoked')){
+                let removed_device_ids = [`${this.omemo.get('device_id')}`];
+                this.omemo.xabber_trust.findAndMarkRemovedTrustedDevices(removed_device_ids, null, () => {
+                    account_deletion_dfd.resolve()
+                })
+            } else {
+                account_deletion_dfd.resolve()
+            }
         },
 
         activate: function () {
@@ -1765,9 +1791,26 @@ xabber.Accounts = Backbone.CollectionWithStorage.extend({
 
     onQuit: function () {
         _.each(_.clone(this.models), function (account) {
-            account.deleteAccount(true);
-            account.password_view.closeModal();
-            utils.modals.clear_queue();
+
+            if (!account.get('enabled')){
+                account._revoke_on_connect = $.Deferred(); //34
+                let revoke_timeout = setTimeout(() => {
+                    this.model._revoke_on_connect.resolve();
+                }, 5000);
+                account._revoke_on_connect.done(() => {
+                    clearTimeout(revoke_timeout);
+                    account._revoke_on_connect = undefined;
+                    account.deleteAccount(true);
+                    account.password_view.closeModal();
+                    utils.modals.clear_queue();
+                })
+                account.save('enabled', true);
+                account.activate();
+            } else {
+                account.deleteAccount(true);
+                account.password_view.closeModal();
+                utils.modals.clear_queue();
+            }
         });
         !this.models.length && xabber.body.setScreen('login', {chat_item: null});
     },

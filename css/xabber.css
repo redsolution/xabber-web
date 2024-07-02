@@ -20920,7 +20920,7 @@ ul.restrictions-list-content>li {
     font-size: 14px;
     position: relative;
     margin-left: 8px;
-    margin-bottom: 4px;
+    margin-bottom: 8px;
 }
 /*.code-modal .code-own-text,*/
 /*.code-modal .code-contact-text{*/
@@ -20972,11 +20972,13 @@ ul.restrictions-list-content>li {
     color: rgba(60, 60, 67, 0.6);
 }
 .code-modal .code-contact-text-tip ol {
-    margin: 0 4px 32px;
+    margin: 0 8px 32px;
     padding: 0 0 0 22px;
 }
 .code-modal .code-contact-text-tip ol li {
     margin-bottom: 8px;
+}
+.code-modal .code-contact-text-tip ol li::marker {
 }
 .code-modal .code-contact-text-tip .part-one b.text-color-500 {
     font-weight: 400;
