@@ -1476,14 +1476,17 @@ xabber.Device = Backbone.Model.extend({
 });
 
 xabber.Omemo = Backbone.ModelWithStorage.extend({
-    defaults: {
-        sessions: {},
-        fingerprints: {},
-        prekeys: {},
-        retract_version: 0,
-        used_prekeys: {},
-        own_used_prekeys: {},
-        device_id: ""
+
+    defaults: () => {
+        return {
+            sessions: {},
+            fingerprints: {},
+            prekeys: {},
+            retract_version: 0,
+            used_prekeys: {},
+            own_used_prekeys: {},
+            device_id: ""
+        }
     },
 
     _initialize: function (attrs, options) {
@@ -2532,8 +2535,11 @@ xabber.Omemo = Backbone.ModelWithStorage.extend({
 });
 
 xabber.DecryptedMessages = Backbone.ModelWithStorage.extend({
-    defaults: {
-        messages: {}
+
+    defaults: () => {
+        return {
+            messages: {}
+        }
     },
 
     getMessage: function (contact, stanza_id) {

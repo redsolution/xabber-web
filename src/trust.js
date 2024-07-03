@@ -287,7 +287,7 @@ xabber.ActiveSessionModalView = xabber.BasicView.extend({
                         let $trust_device = $(templates.trust_item_device_session(trust_attrs));
                         this.$('.new-trusted-devices-list').append($trust_device);
                         this.$('.new-trusted-devices-list .preloader-wrapper').remove();
-                    } else {
+                    } else if (this.contact) {
                         trust_attrs.ip = device_item.device_id;
                         trust_attrs.last_auth = '';
                         trust_attrs.icon = 'contact';
@@ -420,10 +420,13 @@ xabber.ActiveSessionModalView = xabber.BasicView.extend({
 });
 
 xabber.Trust = Backbone.ModelWithStorage.extend({
-    defaults: {
-        trusted_devices: {},
-        active_trust_sessions: {},
-        ended_sessions: [],
+
+    defaults: () => {
+        return {
+            trusted_devices: {},
+            active_trust_sessions: {},
+            ended_sessions: [],
+        }
     },
 
     _initialize: function (attrs, options) {
@@ -451,6 +454,8 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
             trusted_devices[item].forEach((device_item) => {
                 if (device_item.untrusted){
                     this.omemo.deleteFingerprintTrust(item, device_item.device_id);
+                } else if (device_item.is_revoked){
+                    // if revoked and exists
                 } else{
                     this.omemo.updateFingerprints(item, device_item.device_id, device_item.fingerprint, true);
                 }
@@ -684,7 +689,11 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                 return;
             stanza.c('items', {owner: item, timestamp: Math.floor(Date.now() / 1000)});
             trusted_devices[item].forEach((device_item) => {
-                stanza.c('trust', {timestamp: Math.floor(Date.now() / 1000)}).t(device_item.trusted_key).up();
+                if (device_item.is_revoked){
+                    stanza.c('revoked', {timestamp: Math.floor(Date.now() / 1000)}).t(device_item.trusted_key).up();
+                } else {
+                    stanza.c('trust', {timestamp: Math.floor(Date.now() / 1000)}).t(device_item.trusted_key).up();
+                }
                 counter++;
             });
             stanza.up();
@@ -738,7 +747,8 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
             stanza.c('from', {jid: this.account.get('jid')}).up().up();
 
             // console.log(stanza);
-            // console.log(stanza.tree());
+            // console.error('PUBLISH OWNNNN');
+            // console.error(stanza.tree());
             // console.log(stanza.tree().outerHTML);
 
             this.omemo.encrypt(null, stanza ,true).then((msg) => {
@@ -816,7 +826,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                     console.error(err);
                 });
         } else {
-            this.publishOwnTrustedDevices();
+            // this.publishOwnTrustedDevices();
         }
     },
 
@@ -867,6 +877,34 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
 
         if (changed){
             this.fixMyTrustedDeviceAndPublish(callback);
+        } else {
+            callback && callback();
+        }
+    },
+
+
+    findAndMarkRemovedContactsTrustedDevicesByJids: function (revoked_devices_list, revoked_devices_jid_list) { //34
+        let global_changed;
+        revoked_devices_jid_list.forEach((jid) => {
+            let devices_list = revoked_devices_list.filter(e => e.jid === jid);
+            if (devices_list.length){
+                revoked_devices_jid_list.forEach((device_id) => {
+                    let changed = this.iterateAndChangeTrustedDevices(jid, (device) => {
+                        let func_changed;
+                        if (device.device_id == device_id && !device.is_revoked){
+                            device.is_revoked = true;
+                            func_changed = true;
+                        }
+                        return {device, func_changed};
+                    });
+                    if (changed)
+                        global_changed = true;
+                });
+            }
+        });
+
+        if (global_changed){
+            this.publishContactsTrustedDevices();
         }
     },
 
@@ -1296,14 +1334,16 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                 let $key_owner = $(key_owner),
                     jid = $key_owner.attr('owner');
                 // console.log(key_owner);
-                $key_owner.children('trust').each((idx, trust_item) => {
+                $key_owner.children().each((idx, trust_item) => {
                     // console.log(trust_item);
                     let $trust_item = $(trust_item),
+                        tagname = $trust_item.prop("tagName"),
                         trusted_key = $trust_item.text();
 
                     let trustedKeyString = atob(trusted_key);
 
-                    let device_id = trustedKeyString.split('::')[0];
+                    let device_id = trustedKeyString.split('::')[0],
+                        fingerprint = trustedKeyString.split('::')[1];
 
                     // console.log(trusted_key);
                     // console.log(jid);
@@ -1311,7 +1351,13 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                     // console.log(identity_device_id);
                     let dfd = new $.Deferred();
 
-                    dfd.done((is_new) => {
+                    let revoked_devices_list = [], revoked_devices_jid_list = [];
+
+                    dfd.done((is_new, revoked_device) => {
+                        if (revoked_device){
+                            revoked_devices_list.push(revoked_device);
+                            revoked_devices_jid_list.push(revoked_device.jid)
+                        }
                         // console.log(is_new);
                         counter++;
                         if (is_new)
@@ -1325,7 +1371,11 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                             updated_trusted_devices[this.account.get('jid')][index] = this_trusted_device;
                             this.save('trusted_devices', updated_trusted_devices);
                             if (is_new_devices){
-                                this.publishContactsTrustedDevices();
+                                if (revoked_devices_jid_list.length){//34
+                                    this.findAndMarkRemovedContactsTrustedDevicesByJids(revoked_devices_list, revoked_devices_jid_list)
+                                } else {
+                                    this.publishContactsTrustedDevices();
+                                }
                             }
                             else {
                                 // console.log('no new devices')
@@ -1333,7 +1383,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                         }
                     });
 
-                    this.addNewContactsDevice(trusted_key, jid, device_id, identity_device_id, dfd);
+                    this.addNewContactsDevice(trusted_key, jid, device_id, identity_device_id, dfd, tagname, fingerprint);
                 });
 
             });
@@ -1341,33 +1391,80 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
 
     },
 
-    addNewContactsDevice: function (trusted_key, jid, device_id, from_device_id, counter_dfd) {
+    addNewContactsDevice: function (trusted_key, jid, device_id, from_device_id, counter_dfd, tagname, fingerprint) {
         let peer = this.omemo.getPeer(jid);
         // console.log(peer);
-        if (!peer)
+        // console.log(tagname);
+        if (!peer && tagname !== 'revoked')
             counter_dfd.resolve();
-        let device = peer.devices[device_id],
-            trusted_devices = this.get('trusted_devices'),
+        let device;
+        peer && (device = peer.devices[device_id]);
+
+        let trusted_devices = this.get('trusted_devices'),
             dfd = new $.Deferred();
 
         dfd.done(() => {
             device = peer.devices[device_id];
             if (!device){
-                counter_dfd.resolve();
+                // console.error(tagname);
+                if (tagname === 'revoked'){
+                    if (trusted_devices[jid] && _.isArray(trusted_devices[jid])){
+                        if (trusted_devices[jid].some(e => e.trusted_key === trusted_key && !e.is_revoked)) {
+                            counter_dfd.resolve(true, {device_id, jid});// add to list to update
+                            return;
+                        } else if (trusted_devices[jid].some(e => e.trusted_key === trusted_key && e.is_revoked)) {
+                            counter_dfd.resolve();
+                            return;
+                        } else if (!trusted_devices[jid].some(e => e.trusted_key === trusted_key)){
+                            trusted_devices[jid].push({
+                                trusted_key: trusted_key,
+                                from_device_id: from_device_id,
+                                trust_reason_jid: this.account.get('jid'),
+                                fingerprint: fingerprint,
+                                device_id: device_id,
+                                is_revoked: tagname === 'revoked',
+                                timestamp: Math.floor(Date.now() / 1000),
+                            });
+                        }
+                    } else {
+                        trusted_devices[jid] = [{
+                            trusted_key: trusted_key,
+                            from_device_id: from_device_id,
+                            trust_reason_jid: this.account.get('jid'),
+                            fingerprint: fingerprint,
+                            device_id: device_id,
+                            is_revoked: tagname === 'revoked',
+                            timestamp: Math.floor(Date.now() / 1000),
+                        }];
+                    }
+                    this.save('trusted_devices', trusted_devices);
+                    this.trigger('trust_updated');
+
+                    counter_dfd.resolve(true);
+                    return;
+                } else {
+                    counter_dfd.resolve();
+                    return;
+                }
             }
             if (trusted_devices[jid] && _.isArray(trusted_devices[jid])){
-                if (!trusted_devices[jid].some(e => e.trusted_key === trusted_key)){
+                if (trusted_devices[jid].some(e => e.trusted_key === trusted_key && !e.is_revoked) && tagname === 'revoked') {
+                    counter_dfd.resolve(true, {device_id, jid});// add to list to update
+                    return;
+                } else if (!trusted_devices[jid].some(e => e.trusted_key === trusted_key)){
                     trusted_devices[jid].push({
                         trusted_key: trusted_key,
                         from_device_id: from_device_id,
                         trust_reason_jid: this.account.get('jid'),
                         fingerprint: device.get('fingerprint'),
                         device_id: device.get('id'),
+                        is_revoked: tagname === 'revoked',
                         timestamp: Math.floor(Date.now() / 1000),
                         public_key: utils.ArrayBuffertoBase64(device.get('ik'))
                     });
                 } else {
                     counter_dfd.resolve();
+                    return;
                 }
             } else {
                 trusted_devices[jid] = [{
@@ -1376,6 +1473,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                     trust_reason_jid: this.account.get('jid'),
                     fingerprint: device.get('fingerprint'),
                     device_id: device.get('id'),
+                    is_revoked: tagname === 'revoked',
                     timestamp: Math.floor(Date.now() / 1000),
                     public_key: utils.ArrayBuffertoBase64(device.get('ik'))
                 }];
@@ -1395,7 +1493,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
 
         });
         // console.log(device);
-        if (!device){
+        if (!device && tagname !== 'revoked'){
             if (!Object.keys(peer.devices).length){
                 peer.getDevicesNode(dfd);
             }
@@ -1454,8 +1552,14 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                     };
 
                 } else {
-                    trusted_devices[idx] = null;
-                    was_removed = true;
+                    trusted_devices[idx] = {
+                        trusted_key: item.trusted_key,
+                        from_device_id: item.from_device_id,
+                        trust_reason_jid: item.trust_reason_jid,
+                        timestamp: Math.floor(Date.now() / 1000),
+                        fingerprint: item_fingerprint,
+                        device_id: item_device_id,
+                    };
                 }
                 // console.log(idx);
                 // console.log(trusted_devices[idx]);
@@ -1552,20 +1656,17 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
             }
 
             let item_device_id = trustedKeyString.split('::')[0],
-                item_device_fingerprint = trustedKeyString.split('::')[1],
-                item_device = peer ? peer.devices[item_device_id] : this.omemo.own_devices[item_device_id];
+                item_device_fingerprint = trustedKeyString.split('::')[1];
 
             // console.log(item_device_fingerprint);
             // console.log(item_device_id);
-            // console.log(item_device);
-
-            if (!item_device){
+            if (!item.public_key){
                 // console.error('herer');
                 dfd.resolve();
                 return;
             }
 
-            let item_public_key = item_device.get('ik');
+            let item_public_key = utils.fromBase64toArrayBuffer(item.public_key);
 
             // console.log(item_public_key);
             if (!item_public_key){
@@ -1615,7 +1716,6 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                 trusted_string_text_buffer = encoder.encode(trusted_string);
             // console.log(trusted_string);
             //
-            // console.log(item_device);
             // console.log(utils.ArrayBuffertoBase64(item_public_key));
             // console.log(trusted_item_signature);
 
@@ -1684,25 +1784,40 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
         // console.error($message);
         // console.error($message[0]);
         if (Strophe.getBareJidFromJid($message.attr('from')) === this.account.get('jid')){
-            // this.getTrustedDevices(this.account.get('jid'), null, (res) => {
+            if (this.get('trusted_devices')[this.account.get('jid')] && this.get('trusted_devices')[this.account.get('jid')].length){
 
                 let my_trusted_devices = this.get('trusted_devices')[this.account.get('jid')];
-
                 // console.log(my_trusted_devices);
-                // console.log(res);
-                my_trusted_devices && my_trusted_devices.length && this.getNewTrustedDevices(my_trusted_devices, $message, null, true);
-            // });
-        } else {
-            let from = Strophe.getBareJidFromJid($message.attr('from')),
-                device_id;
-            if (this.get('trusted_devices')[from] && this.get('trusted_devices')[from].length){
-                // this.getTrustedDevices(from, device_id, (res) => {
 
-                    let contact_trusted_devices = this.get('trusted_devices')[from],
-                        // $all_items_msg = $(res),
-                        peer = this.omemo.getPeer(from);
+                let device_id = $message.find(`item`).attr("id"),
+                    has_trusted_device = my_trusted_devices.some(e => e.device_id == device_id);
+                // console.error(device_id);
+                // console.error(has_trusted_device);
+                if (has_trusted_device){
+                    this.getNewTrustedDevices(my_trusted_devices, $message, null, true);
+                } else {
+                    this.getTrustedDevices(this.account.get('jid'), null, (res) => {
+                        // console.log(res);
+                        this.getNewTrustedDevices(my_trusted_devices, $(res), null, true);
+                    });
+                }
+            }
+        } else {
+            let from = Strophe.getBareJidFromJid($message.attr('from'));
+            if (this.get('trusted_devices')[from] && this.get('trusted_devices')[from].length){
+
+                let contact_trusted_devices = this.get('trusted_devices')[from],
+                    peer = this.omemo.getPeer(from),
+                    device_id = $message.find(`item`).attr("id"),
+                    has_trusted_device = contact_trusted_devices.some(e => e.device_id == device_id);
+
+                if (has_trusted_device){
                     this.getNewTrustedDevices(contact_trusted_devices, $message, null, true, peer);
-                // });
+                } else {
+                    this.getTrustedDevices(from, null, (res) => {
+                        this.getNewTrustedDevices(contact_trusted_devices, $(res), null, true,peer);
+                    });
+                }
 
             }
         }

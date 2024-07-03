@@ -739,15 +739,18 @@ xabber.EphemeralTimerSelector = xabber.BasicView.extend({
 });
 
   xabber.JingleMessage = Backbone.Model.extend({
-      defaults: {
-          duration: 0,
-          contact_full_jid: "",
-          session_id: 0,
-          audio: true,
-          volume_on: true,
-          video_in: false,
-          video_screen: false,
-          state: 0
+
+      defaults: () => {
+          return {
+              duration: 0,
+              contact_full_jid: "",
+              session_id: 0,
+              audio: true,
+              volume_on: true,
+              video_in: false,
+              video_screen: false,
+              state: 0
+          }
       },
 
       initialize: function (attrs, options) {
@@ -1203,18 +1206,21 @@ xabber.EphemeralTimerSelector = xabber.BasicView.extend({
   });
 
   xabber.Chat = Backbone.Model.extend({
-    defaults: {
-        opened: true,
-        active: false,
-        display: false,
-        displayed_sent: false,
-        last_displayed_id: 0,
-        last_delivered_id: 0,
-        unread: 0,
-        timestamp: 0,
-        const_unread: 0,
-        encrypted: false
-    },
+
+      defaults: () => {
+          return {
+              opened: true,
+              active: false,
+              display: false,
+              displayed_sent: false,
+              last_displayed_id: 0,
+              last_delivered_id: 0,
+              unread: 0,
+              timestamp: 0,
+              const_unread: 0,
+              encrypted: false
+          }
+      },
 
     initialize: function (attrs, options) {
         this.contact = options.contact;
@@ -14319,14 +14325,17 @@ xabber.ChatPlaceholderView = xabber.BasicView.extend({
 });
 
 xabber.ChatSettings = Backbone.ModelWithStorage.extend({
-    defaults: {
-        last_emoji: [],
-        muted: [],
-        archived: [],
-        group_chat: [],
-        cached_avatars: [],
-        group_chat_members_lists: [],
-        notifications_last_msg_id: null
+
+    defaults: () => {
+        return {
+            last_emoji: [],
+            muted: [],
+            archived: [],
+            group_chat: [],
+            cached_avatars: [],
+            group_chat_members_lists: [],
+            notifications_last_msg_id: null
+        }
     },
 
     _initialize: function (attrs, options) {

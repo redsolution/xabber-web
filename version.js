@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.3.5.54","version_description":"changed trust sharing tag names, added revoked state for publishing own trusted devices, added func to change local trusted devices by criteria, added revokation of own token on quit when account is disabled, added default ttl if none is sent, "}'
+'{"version_number":"2.3.5.55","version_description":"fixed defaults with wrong values after relogging, added parsing of revoked for contacts trusted devices, fixed exiting account, added handling of pubsub trusted items if there is saved public key in trusted devices for this device, added request for all trust items if handled message is from non trusted device, encrypted icon comeback for chat name, fixed contacts devices in list after trust session with own device"}'
 )});

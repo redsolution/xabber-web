@@ -18,14 +18,17 @@ let env = xabber.env,
 
 xabber.Contact = Backbone.Model.extend({
     idAttribute: 'jid',
-    defaults: {
-        status: "offline",
-        status_message: "",
-        subscription: undefined,
-        subscription_request_in: false,
-        subscription_request_out: false,
-        groups: [],
-        group_chat: false
+
+    defaults: () => {
+        return {
+            status: "offline",
+            status_message: "",
+            subscription: undefined,
+            subscription_request_in: false,
+            subscription_request_out: false,
+            groups: [],
+            group_chat: false
+        }
     },
 
     initialize: function (_attrs, options) {
@@ -6153,8 +6156,11 @@ xabber.Participants = Backbone.Collection.extend({
 });
 
 xabber.GroupChatSettings = Backbone.ModelWithStorage.extend({
-    defaults: {
-        participants_lists: []
+
+    defaults: () => {
+        return {
+            participants_lists: []
+        }
     },
 
     getParticipantsListVersion: function (jid) {
@@ -7917,8 +7923,11 @@ xabber.GroupContacts = xabber.ContactsBase.extend({
 });
 
 xabber.Group = Backbone.Model.extend({
-    defaults: {
-        counter: {all: 0, online: 0}
+
+    defaults: () => {
+        return {
+            counter: {all: 0, online: 0}
+        }
     },
 
     initialize: function (attrs, options) {
@@ -9694,14 +9703,17 @@ xabber.AddContactView = xabber.BasicView.extend({
 
 xabber.GroupSettings = Backbone.Model.extend({
     idAttribute: 'name',
-    defaults: {
-        expanded: true,
-        show_offline: 'default',
-        sorting: 'default',
-        custom_notifications: false,
-        notifications: false,
-        message_preview: false
-    }
+
+    defaults: () => {
+        return {
+            expanded: true,
+            show_offline: 'default',
+            sorting: 'default',
+            custom_notifications: false,
+            notifications: false,
+            message_preview: false
+        }
+    },
 });
 
 xabber.GroupsSettings = Backbone.CollectionWithStorage.extend({

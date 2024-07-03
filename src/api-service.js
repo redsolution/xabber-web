@@ -7,11 +7,13 @@ let env = xabber.env,
 xabber.AccountSettings = Backbone.Model.extend({
     idAttribute: 'jid',
 
-    defaults: {
-        timestamp: 0,
-        to_sync: false,
-        synced: false,
-        deleted: false
+    defaults: () => {
+        return {
+            timestamp: 0,
+            to_sync: false,
+            synced: false,
+            deleted: false
+        }
     },
 
     update_timestamp: function () {
@@ -39,9 +41,12 @@ xabber.AccountSettingsList = Backbone.CollectionWithStorage.extend({
 });
 
 xabber.AccountsOrderTimestamp = Backbone.ModelWithStorage.extend({
-    defaults: {
-        timestamp: 0
-    }
+
+    defaults: () => {
+        return {
+            timestamp: 0
+        }
+    },
 });
 
 xabber.once("start", function () {
