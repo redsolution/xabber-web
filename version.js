@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.3.5.55","version_description":"fixed defaults with wrong values after relogging, added parsing of revoked for contacts trusted devices, fixed exiting account, added handling of pubsub trusted items if there is saved public key in trusted devices for this device, added request for all trust items if handled message is from non trusted device, encrypted icon comeback for chat name, fixed contacts devices in list after trust session with own device"}'
+'{"version_number":"2.3.5.56","version_description":"added handling of distrust of contacts devices, changed setting of revoked and distrusted for contacts devices, fixed notification on update session error, returned and changed revoke trust button, fixed parsing of contacts trusted devices, added transition from distrust to trust by pubsub item handling, removed system message for incoming"}'
 )});

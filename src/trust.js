@@ -253,6 +253,8 @@ xabber.ActiveSessionModalView = xabber.BasicView.extend({
         this.$('.trust-item-device').remove();
         Object.keys(trusted_devices).forEach((item) => {
             trusted_devices[item].forEach((device_item) => {
+                if (device_item.untrusted)
+                    return;
                 if ((device_item.trust_reason_jid && (device_item.trust_reason_jid === this.device_jid)
                     && device_item.from_device_id && (device_item.from_device_id == this.device_id))
                     || item === this.device_jid && device_item.device_id == this.device_id && device_item.after_trust){
@@ -580,7 +582,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
 
         my_trusted_devices.forEach((trusted_device) => {
             if (trusted_device.is_revoked){
-                iq.c('revoked', {timestamp: trusted_device.timestamp, xmlns: Strophe.NS.PUBSUB_TRUST_SHARING}).t(trusted_device.trusted_key).up();
+                iq.c('revoked', {timestamp: trusted_device.revocation_timestamp, xmlns: Strophe.NS.PUBSUB_TRUST_SHARING}).t(trusted_device.trusted_key).up();
             } else {
                 iq.c('trust', {timestamp: trusted_device.timestamp, xmlns: Strophe.NS.PUBSUB_TRUST_SHARING}).t(trusted_device.trusted_key).up();
             }
@@ -690,7 +692,9 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
             stanza.c('items', {owner: item, timestamp: Math.floor(Date.now() / 1000)});
             trusted_devices[item].forEach((device_item) => {
                 if (device_item.is_revoked){
-                    stanza.c('revoked', {timestamp: Math.floor(Date.now() / 1000)}).t(device_item.trusted_key).up();
+                    stanza.c('revoked', {timestamp: device_item.revocation_timestamp}).t(device_item.trusted_key).up();
+                } else if (device_item.untrusted) {
+                    stanza.c('distrust', {timestamp: Math.floor(Date.now() / 1000)}).t(device_item.trusted_key).up();
                 } else {
                     stanza.c('trust', {timestamp: Math.floor(Date.now() / 1000)}).t(device_item.trusted_key).up();
                 }
@@ -834,9 +838,8 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
         let jid_trusted_devices = this.get('trusted_devices')[jid],
             changed;
 
-        jid_trusted_devices.forEach((trusted_device) => {
-            let index = jid_trusted_devices.indexOf(trusted_device),
-                func_result = func(trusted_device);
+        jid_trusted_devices.forEach((trusted_device, index) => {
+            let func_result = func(trusted_device);
             if (Boolean(func_result.func_changed)){
                 changed = true;
                 trusted_device = func_result.device;
@@ -864,12 +867,13 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
     },
 
 
-    findAndMarkRemovedTrustedDevices: function (devices_ids, peer_jid, callback) { //34
+    findAndMarkRemovedTrustedDevices: function (devices_ids, peer_jid, callback, revocation_timestamp) { //34
         let jid = peer_jid ? peer_jid : this.account.get('jid');
         let changed = this.iterateAndChangeTrustedDevices(jid, (device) => {
             let func_changed;
             if (devices_ids && devices_ids.length && device.device_id && devices_ids.includes(device.device_id) && !device.is_revoked){
                 device.is_revoked = true;
+                device.revocation_timestamp = revocation_timestamp;
                 func_changed = true;
             }
             return {device, func_changed};
@@ -882,37 +886,12 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
         }
     },
 
-
-    findAndMarkRemovedContactsTrustedDevicesByJids: function (revoked_devices_list, revoked_devices_jid_list) { //34
-        let global_changed;
-        revoked_devices_jid_list.forEach((jid) => {
-            let devices_list = revoked_devices_list.filter(e => e.jid === jid);
-            if (devices_list.length){
-                revoked_devices_jid_list.forEach((device_id) => {
-                    let changed = this.iterateAndChangeTrustedDevices(jid, (device) => {
-                        let func_changed;
-                        if (device.device_id == device_id && !device.is_revoked){
-                            device.is_revoked = true;
-                            func_changed = true;
-                        }
-                        return {device, func_changed};
-                    });
-                    if (changed)
-                        global_changed = true;
-                });
-            }
-        });
-
-        if (global_changed){
-            this.publishContactsTrustedDevices();
-        }
-    },
-
-    findAndMarkAllOwnTrustedDevices: function () {
+    findAndMarkAllOwnTrustedDevices: function (revocation_timestamp) {
         let changed = this.iterateAndChangeTrustedDevices(this.account.get('jid'), (device) => {
             let func_changed;
             if (!device.is_me && !device.is_revoked){
                 device.is_revoked = true;
+                device.revocation_timestamp = revocation_timestamp;
                 func_changed = true;
             }
             return {device, func_changed};
@@ -1233,9 +1212,18 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
         let $message = $(message),
             received_device_id = options.device_id,
             is_new_devices = false,
-            counter = 0,
-            total_count = $message.find('share items trust').length,
-            device_fingerprint = $message.find('share identity').text();
+            counter = 0, sharing_type;
+
+        let revoked_devices_list = [], changed_devices_jid_list = [],
+            distrusted_devices_list = [], retrusted_devices_list = [];
+
+        if ($message.find('share').length){
+            sharing_type = 'share'
+        } else if ($message.find('update').length){
+            sharing_type = 'update';
+        }
+        let total_count = $message.find(`${sharing_type} items`).children().length,
+            device_fingerprint = $message.find(`${sharing_type} identity`).text();
 
         let my_trusted_devices = this.get('trusted_devices')[this.account.get('jid')];
 
@@ -1261,7 +1249,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
             if (this_trusted_device.last_parsed_contacts_devices_timestamp && msg_timestamp <= this_trusted_device.last_parsed_contacts_devices_timestamp)
                 return;
 
-            let $share = $message.find('share'),
+            let $share = $message.find(`${sharing_type}`),
                 trusted_item_signature = $share.find('signature').text(),
                 trusted_string = '',
                 is_signature_verified,
@@ -1351,13 +1339,22 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                     // console.log(identity_device_id);
                     let dfd = new $.Deferred();
 
-                    let revoked_devices_list = [], revoked_devices_jid_list = [];
-
-                    dfd.done((is_new, revoked_device) => {
+                    dfd.done((is_new, revoked_device, distrusted_device, retrusted_device) => {
                         if (revoked_device){
                             revoked_devices_list.push(revoked_device);
-                            revoked_devices_jid_list.push(revoked_device.jid)
+                            changed_devices_jid_list.push(revoked_device.jid)
                         }
+                        if (distrusted_device){
+                            distrusted_devices_list.push(distrusted_device);
+                            changed_devices_jid_list.push(distrusted_device.jid)
+                        }
+                        if (retrusted_device){
+                            retrusted_devices_list.push(retrusted_device);
+                            changed_devices_jid_list.push(retrusted_device.jid)
+                        }
+
+                        changed_devices_jid_list = changed_devices_jid_list.filter((value, index, array) => array.indexOf(value) === index); // unique
+
                         // console.log(is_new);
                         counter++;
                         if (is_new)
@@ -1371,10 +1368,51 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                             updated_trusted_devices[this.account.get('jid')][index] = this_trusted_device;
                             this.save('trusted_devices', updated_trusted_devices);
                             if (is_new_devices){
-                                if (revoked_devices_jid_list.length){//34
-                                    this.findAndMarkRemovedContactsTrustedDevicesByJids(revoked_devices_list, revoked_devices_jid_list)
+                                if (changed_devices_jid_list.length){
+                                    let global_changed;
+                                    // console.error(revoked_devices_list);
+                                    // console.error(distrusted_devices_list);
+                                    // console.error(retrusted_devices_list);
+                                    // console.error(changed_devices_jid_list);
+
+                                    changed_devices_jid_list.forEach((jid) => {
+                                        let changed = this.iterateAndChangeTrustedDevices(jid, (device) => {
+                                            let func_changed;
+                                            if (revoked_devices_list && revoked_devices_list.length && device.device_id &&
+                                                revoked_device.some(e => e.device_id === device.device_id && e.jid === jid) && !device.is_revoked) {
+                                                let revocation_timestamp = revoked_device.find(e => e.device_id === device.device_id && e.jid === jid).trust_timestamp;
+                                                device.is_revoked = true;
+                                                device.revocation_timestamp = revocation_timestamp;
+                                                func_changed = true;
+                                                // console.log('REVOKED');
+                                                // console.log(device);
+                                                // console.log(revocation_timestamp);
+                                            }
+                                            if (distrusted_devices_list && distrusted_devices_list.length && device.device_id &&
+                                                distrusted_devices_list.some(e => e.device_id === device.device_id && e.jid === jid) && !device.untrusted && !device.is_revoked) {
+                                                device.untrusted = true;
+                                                func_changed = true;
+                                                // console.log('DISTRUSTED');
+                                                // console.log(device);
+                                            }
+                                            if (retrusted_devices_list && retrusted_devices_list.length && device.device_id &&
+                                                retrusted_devices_list.some(e => e.device_id === device.device_id && e.jid === jid) && device.untrusted && !device.is_revoked) {
+                                                device.untrusted = false;
+                                                func_changed = true;
+                                                // console.log('RETRUSTED');
+                                                // console.log(device);
+                                            }
+                                            return {device, func_changed};
+                                        });
+                                        if (changed)
+                                            global_changed = true;
+                                    });
+
+                                    if (global_changed){
+                                        this.publishContactsTrustedDevices(); //upd
+                                    }
                                 } else {
-                                    this.publishContactsTrustedDevices();
+                                    this.publishContactsTrustedDevices(); //upd
                                 }
                             }
                             else {
@@ -1383,7 +1421,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                         }
                     });
 
-                    this.addNewContactsDevice(trusted_key, jid, device_id, identity_device_id, dfd, tagname, fingerprint);
+                    this.addNewContactsDevice(trusted_key, jid, device_id, identity_device_id, dfd, tagname, fingerprint, $trust_item.attr('timestamp'));
                 });
 
             });
@@ -1391,11 +1429,11 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
 
     },
 
-    addNewContactsDevice: function (trusted_key, jid, device_id, from_device_id, counter_dfd, tagname, fingerprint) {
+    addNewContactsDevice: function (trusted_key, jid, device_id, from_device_id, counter_dfd, tagname, fingerprint, trust_timestamp) {
         let peer = this.omemo.getPeer(jid);
         // console.log(peer);
         // console.log(tagname);
-        if (!peer && tagname !== 'revoked')
+        if (!peer && (tagname !== 'revoked' || tagname !== 'distrust'))
             counter_dfd.resolve();
         let device;
         peer && (device = peer.devices[device_id]);
@@ -1406,11 +1444,10 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
         dfd.done(() => {
             device = peer.devices[device_id];
             if (!device){
-                // console.error(tagname);
                 if (tagname === 'revoked'){
                     if (trusted_devices[jid] && _.isArray(trusted_devices[jid])){
                         if (trusted_devices[jid].some(e => e.trusted_key === trusted_key && !e.is_revoked)) {
-                            counter_dfd.resolve(true, {device_id, jid});// add to list to update
+                            counter_dfd.resolve(true, {device_id, jid, trust_timestamp});// add to list to update
                             return;
                         } else if (trusted_devices[jid].some(e => e.trusted_key === trusted_key && e.is_revoked)) {
                             counter_dfd.resolve();
@@ -1423,6 +1460,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                                 fingerprint: fingerprint,
                                 device_id: device_id,
                                 is_revoked: tagname === 'revoked',
+                                revocation_timestamp: tagname === 'revoked' && trust_timestamp,
                                 timestamp: Math.floor(Date.now() / 1000),
                             });
                         }
@@ -1434,6 +1472,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                             fingerprint: fingerprint,
                             device_id: device_id,
                             is_revoked: tagname === 'revoked',
+                            revocation_timestamp: tagname === 'revoked' && trust_timestamp,
                             timestamp: Math.floor(Date.now() / 1000),
                         }];
                     }
@@ -1449,7 +1488,13 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
             }
             if (trusted_devices[jid] && _.isArray(trusted_devices[jid])){
                 if (trusted_devices[jid].some(e => e.trusted_key === trusted_key && !e.is_revoked) && tagname === 'revoked') {
-                    counter_dfd.resolve(true, {device_id, jid});// add to list to update
+                    counter_dfd.resolve(true, {device_id, jid, trust_timestamp}); // add to list to update
+                    return;
+                } else if (trusted_devices[jid].some(e => e.trusted_key === trusted_key && !e.untrusted) && tagname === 'distrust'){
+                    counter_dfd.resolve(true, null, {device_id, jid}); // add to list to update
+                    return;
+                } else if (trusted_devices[jid].some(e => e.trusted_key === trusted_key && e.untrusted) && tagname === 'trust'){
+                    counter_dfd.resolve(true, null, null, {device_id, jid}); // add to list to update
                     return;
                 } else if (!trusted_devices[jid].some(e => e.trusted_key === trusted_key)){
                     trusted_devices[jid].push({
@@ -1458,7 +1503,9 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                         trust_reason_jid: this.account.get('jid'),
                         fingerprint: device.get('fingerprint'),
                         device_id: device.get('id'),
+                        untrusted: tagname === 'distrust',
                         is_revoked: tagname === 'revoked',
+                        revocation_timestamp: tagname === 'revoked' && trust_timestamp,
                         timestamp: Math.floor(Date.now() / 1000),
                         public_key: utils.ArrayBuffertoBase64(device.get('ik'))
                     });
@@ -1473,7 +1520,10 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                     trust_reason_jid: this.account.get('jid'),
                     fingerprint: device.get('fingerprint'),
                     device_id: device.get('id'),
+                    untrusted: tagname === 'distrust',
                     is_revoked: tagname === 'revoked',
+                    revocation_timestamp: tagname === 'revoked' && trust_timestamp,
+                    revocation_timestamp: tagname === 'revoked' && trust_timestamp,
                     timestamp: Math.floor(Date.now() / 1000),
                     public_key: utils.ArrayBuffertoBase64(device.get('ik'))
                 }];
@@ -1504,11 +1554,13 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
 
     },
 
-    getNewTrustedDevices: function (trusted_devices, $message, final_trusted_devices, is_first, peer) {
+    getNewTrustedDevices: function (trusted_devices, $message, final_trusted_devices, is_first, peer, has_changes) {
         // console.error('here');
         // console.error(this.omemo.own_devices.length);
         // peer && console.error(peer);
         // peer && console.error(peer.devices);
+        has_changes = has_changes || false;
+
         let new_trusted_devices = [],
             counter = 0,
             was_removed;
@@ -1535,6 +1587,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                         from_device_id: item.from_device_id,
                         trust_reason_jid: item.trust_reason_jid,
                         is_revoked: item.is_revoked,
+                        revocation_timestamp: item.revocation_timestamp,
                         timestamp: Math.floor(Date.now() / 1000),
                         fingerprint: item_fingerprint,
                         device_id: item_device_id,
@@ -1546,6 +1599,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                         from_device_id: item.from_device_id,
                         trust_reason_jid: item.trust_reason_jid,
                         is_revoked: true,
+                        revocation_timestamp: item.revocation_timestamp,
                         timestamp: Math.floor(Date.now() / 1000),
                         fingerprint: item_fingerprint,
                         device_id: item_device_id,
@@ -1574,11 +1628,11 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
         if (!trusted_devices.length && !is_first && final_trusted_devices.length && was_removed){
             let saved_trusted_devices = this.get('trusted_devices');
             if (peer) {
-                if (final_trusted_devices.length === saved_trusted_devices[peer.get('jid')].length)
+                if (final_trusted_devices.length === saved_trusted_devices[peer.get('jid')].length && !has_changes)
                     return;
                 saved_trusted_devices[peer.get('jid')] = final_trusted_devices;
             } else {
-                if (final_trusted_devices.length === saved_trusted_devices[this.account.get('jid')].length)
+                if (final_trusted_devices.length === saved_trusted_devices[this.account.get('jid')].length && !has_changes)
                     return;
                 saved_trusted_devices[this.account.get('jid')] = final_trusted_devices;//
             }
@@ -1587,7 +1641,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
             this.save('trusted_devices', saved_trusted_devices);
             this.trigger('trust_updated');
             if (peer){
-                this.publishContactsTrustedDevices();
+                this.publishContactsTrustedDevices(); //upd
             } else {
                 this.fixMyTrustedDeviceAndPublish();
             }
@@ -1617,11 +1671,11 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                     // console.log(new_trusted_devices.length);
 
                     if (new_trusted_devices.length){
-                        this.getNewTrustedDevices(new_trusted_devices, $message, final_trusted_devices, null, peer)
+                        this.getNewTrustedDevices(new_trusted_devices, $message, final_trusted_devices, null, peer, has_changes)
                     } else {
                         // console.log(final_trusted_devices);
                         // console.log(!is_first);
-                        if (!is_first){
+                        if (!is_first || has_changes){
                             let saved_trusted_devices = this.get('trusted_devices');
                             if (peer) {
                                 saved_trusted_devices[peer.get('jid')] = final_trusted_devices;
@@ -1633,7 +1687,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                             this.save('trusted_devices', saved_trusted_devices);
                             this.trigger('trust_updated');
                             if (peer){
-                                this.publishContactsTrustedDevices();
+                                this.publishContactsTrustedDevices(); //upd
                             } else {
                                 this.fixMyTrustedDeviceAndPublish();
                             }
@@ -1647,6 +1701,13 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                 dfd.resolve();
                 return;
             }
+
+            if (item.is_revoked || item.untrusted){
+                // console.error('herer');
+                dfd.resolve();
+                return;
+            }
+
             let trustedKeyString = atob(item.trusted_key);
 
             if (trustedKeyString.split('::').length !== 2){
@@ -1744,19 +1805,27 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                             from_device_id: item_device_id,
                             trust_reason_jid: peer ? peer.get('jid') : this.account.get('jid'),
                             is_revoked: $trust_item.prop("tagName") === 'revoked' ? true : undefined,
+                            revocation_timestamp: $trust_item.prop("tagName") === 'revoked' ? $trust_item.attr('timestamp') : undefined,
                         };
                         new_trusted_devices.push(trusted_new_saved_device);
                         // console.log(new_trusted_devices);
                         // console.log(new_trusted_devices.length);
                     }
                     // console.error(final_trusted_devices.filter(e => e.trusted_key === $trust_item.text() && !e.is_revoked).length > 0 && $trust_item.prop("tagName") === 'revoked');
-                    if (final_trusted_devices.filter(e => e.trusted_key === $trust_item.text() && !e.is_revoked).length > 0 && $trust_item.prop("tagName") === 'revoked'){
-                        let this_devices = final_trusted_devices.find(e => e.trusted_key === $trust_item.text() && !e.is_revoked);
-                        if (peer) {
-                            this.findAndMarkRemovedTrustedDevices([this_devices.device_id], peer.get('jid'));
-                        } else {
-                            this.findAndMarkRemovedTrustedDevices([this_devices.device_id]);
-                        }
+                    if (final_trusted_devices.some(e => e.trusted_key === $trust_item.text() && !e.is_revoked) && $trust_item.prop("tagName") === 'revoked'){
+                        let this_device = final_trusted_devices.find(e => e.trusted_key === $trust_item.text() && !e.is_revoked),
+                            device_index = final_trusted_devices.indexOf(this_device);
+                        this_device.is_revoked = true;
+                        this_device.revocation_timestamp = $trust_item.attr('timestamp');
+                        final_trusted_devices[device_index] = this_device;
+                        has_changes = true;
+                    }
+                    if (final_trusted_devices.some(e => (e.trusted_key === $trust_item.text()) && !e.is_revoked && e.untrusted === true) && $trust_item.prop("tagName") === 'trust'){
+                        let this_device = final_trusted_devices.find(e => (e.trusted_key === $trust_item.text()) && !e.is_revoked && e.untrusted === true),
+                            device_index = final_trusted_devices.indexOf(this_device);
+                        this_device.untrusted = false;
+                        final_trusted_devices[device_index] = this_device;
+                        has_changes = true;
                     }
                 });
                 // console.log(new_trusted_devices);
@@ -1973,8 +2042,8 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
 
         if (contact){
             if ($message.find('verification-start').length && $message.find('verification-start').attr('device-id') && this.omemo.get('device_id') && options.automated){
-                if (this.isDeviceTrusted(contact.get('jid'), $message.find('verification-start').attr('device-id')))
-                    return;
+                // if (this.isDeviceTrusted(contact.get('jid'), $message.find('verification-start').attr('device-id')))
+                //     return;
 
                 let msg_timestamp = $message.find('authenticated-key-exchange').attr('timestamp'),
                     ttl;
@@ -3139,9 +3208,21 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
         this.getTrustedKey(device).then((trustedKeyBuffer) => {
             let trustedKeyBase64 = utils.ArrayBuffertoBase64(trustedKeyBuffer),
                 trusted_devices = this.get('trusted_devices'),
-                to = contact ? contact.get('jid') : this.account.get('jid');
+                to = contact ? contact.get('jid') : this.account.get('jid'), changed;
             if (trusted_devices[to] && _.isArray(trusted_devices[to])){
-                if (!trusted_devices[to].some(e => e.trusted_key === trustedKeyBase64)){
+                if (contact && trusted_devices[to].some(e => e.trusted_key === trustedKeyBase64 && e.untrusted)) {
+                    changed = this.iterateAndChangeTrustedDevices(to, (trusted_device) => {
+                        let func_changed;
+                        if (trusted_device.device_id === device.get('id') && trusted_device.untrusted && !trusted_device.is_revoked) {
+                            trusted_device.untrusted = false;
+                            func_changed = true;
+                        }
+                        return {
+                            device: trusted_device,
+                            func_changed
+                        };
+                    });
+                } else if (!trusted_devices[to].some(e => e.trusted_key === trustedKeyBase64)){
                     trusted_devices[to].push({
                         trusted_key: trustedKeyBase64,
                         fingerprint: device.get('fingerprint'),
@@ -3161,14 +3242,16 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                     public_key: utils.ArrayBuffertoBase64(device.get('ik'))
                 }];
             }
-            this.save('trusted_devices', trusted_devices);
-            this.trigger('trust_updated');
+            if (!changed){
+                this.save('trusted_devices', trusted_devices);
+                this.trigger('trust_updated');
+            }
             // console.log(this.get('trusted_devices'));
 
             this.sendVerificationSuccess(to, sid);
             if (contact){
                 this.getContactsTrustedDevices(to, device.get('id'));
-                this.publishContactsTrustedDevices(() => {
+                this.publishContactsTrustedDevices(() => { //upd
                 });
             } else {
                 this.fixMyTrustedDeviceAndPublish(() => {
@@ -3194,9 +3277,21 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
             // console.log(trustedKeyBuffer);
             let trustedKeyBase64 = utils.ArrayBuffertoBase64(trustedKeyBuffer);
             let trusted_devices = this.get('trusted_devices'),
-                to = contact ? contact.get('jid') : this.account.get('jid');
+                to = contact ? contact.get('jid') : this.account.get('jid'), changed;
             if (trusted_devices[to] && _.isArray(trusted_devices[to])){
-                if (!trusted_devices[to].some(e => e.trusted_key === trustedKeyBase64)){
+                if (contact && trusted_devices[to].some(e => e.trusted_key === trustedKeyBase64 && e.untrusted)) {
+                    changed = this.iterateAndChangeTrustedDevices(to, (trusted_device) => {
+                        let func_changed;
+                        if (trusted_device.device_id === device.get('id') && trusted_device.untrusted && !trusted_device.is_revoked) {
+                            trusted_device.untrusted = false;
+                            func_changed = true;
+                        }
+                        return {
+                            device: trusted_device,
+                            func_changed
+                        };
+                    });
+                } else if (!trusted_devices[to].some(e => e.trusted_key === trustedKeyBase64)){
                     trusted_devices[to].push({
                         trusted_key: trustedKeyBase64,
                         fingerprint: device.get('fingerprint'),
@@ -3216,14 +3311,16 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                     public_key: utils.ArrayBuffertoBase64(device.get('ik'))
                 }];
             }
-            this.save('trusted_devices', trusted_devices);
-            this.trigger('trust_updated');
+            if (!changed){
+                this.save('trusted_devices', trusted_devices);
+                this.trigger('trust_updated');
+            }
             // console.log(this.get('trusted_devices'));
 
 
             if (contact){
                 this.getContactsTrustedDevices(to, device.get('id'));
-                this.publishContactsTrustedDevices(() => {
+                this.publishContactsTrustedDevices(() => { //upd
                 });
                 this.clearData(sid);
             } else {

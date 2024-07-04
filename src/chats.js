@@ -1950,7 +1950,7 @@ xabber.EphemeralTimerSelector = xabber.BasicView.extend({
         let jid = this.get('jid');
         if (!this.contact.get('group_chat') && !this.contact.get('in_roster')) {
             if (type === 'subscribe') {
-                this.messages.createSystemMessage({
+                this.messages.createSystemMessage({ //change to chat timestamp update
                     from_jid: jid,
                     auth_request: true,
                     message: xabber.getString("action_subscription_received")

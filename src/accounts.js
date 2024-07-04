@@ -1166,7 +1166,7 @@ xabber.Account = Backbone.Model.extend({
                 if (token){
                     if (this.omemo.xabber_trust.isDeviceTrusted(this.get('jid'), token.omemo_id)){
                         let removed_device_ids = [token.omemo_id]
-                        this.omemo.xabber_trust.findAndMarkRemovedTrustedDevices(removed_device_ids)
+                        this.omemo.xabber_trust.findAndMarkRemovedTrustedDevices(removed_device_ids, null, null, Math.floor(Date.now() / 1000))
                     }
                 }
             });
@@ -1180,7 +1180,7 @@ xabber.Account = Backbone.Model.extend({
             this.sendIQFast(iq, (success) => {
                     callback & callback(success);
                     if (this.omemo && this.omemo.xabber_trust && this.x_tokens_list) {
-                        this.omemo.xabber_trust.findAndMarkAllOwnTrustedDevices();
+                        this.omemo.xabber_trust.findAndMarkAllOwnTrustedDevices(Math.floor(Date.now() / 1000));
                     }
                 },
                 function (error) {
@@ -1205,7 +1205,7 @@ xabber.Account = Backbone.Model.extend({
                 let removed_device_ids = [`${this.omemo.get('device_id')}`];
                 this.omemo.xabber_trust.findAndMarkRemovedTrustedDevices(removed_device_ids, null, () => {
                     account_deletion_dfd.resolve()
-                })
+                }, Math.floor(Date.now() / 1000))
             } else {
                 account_deletion_dfd.resolve()
             }

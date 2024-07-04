@@ -443,6 +443,8 @@ xabber.NotificationsChatContentView = xabber.ChatContentView.extend({
     },
 
     updateTrustSession: function (session_id, is_remove) {
+        if (!this.account || !this.account.omemo || !this.account.omemo.xabber_trust)
+            return;
         let active_sessions = this.account.omemo.xabber_trust.get('active_trust_sessions');
 
         let session = active_sessions[session_id];
