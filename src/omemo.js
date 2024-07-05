@@ -697,7 +697,7 @@ xabber.Fingerprints = xabber.BasicView.extend({
                             fingerprint_trust: true,
                             public_key: utils.ArrayBuffertoBase64(device.get('ik'))
                         }
-                        trusted_devices[to].push(item);
+                        trusted_devices[to] = [item];
                         changed_devices[to] = [item];
                     }
                     if (!changed) {

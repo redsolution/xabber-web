@@ -4260,6 +4260,9 @@ xabber.ChatContentView = xabber.BasicView.extend({
         iq.up().cnode(new Strophe.RSM(options).toXML());
         let deferred = new $.Deferred();
         account.chats.onStartedMAMRequest(deferred);
+        if (options.flip_page){
+            iq.up().c('flip-page').up();
+        }
         deferred.done(function () {
             let sendMAMRequest = function(func_conn) {
                 handler = func_conn.addHandler(function (message) {
@@ -4302,7 +4305,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
                         account.chats.onCompletedMAMRequest(deferred);
                         errback && errback(err);
                     };
-                console.log('trying to send')
+                console.error('trying to send')
                 if (is_fast)
                     account.sendFast(iq, callb, errb);
                 else
@@ -4355,19 +4358,19 @@ xabber.ChatContentView = xabber.BasicView.extend({
             if (options.missed_history && !rsm.complete && (rsm.count > messages.length))
                 this.getMessageArchive({after: rsm.last}, {missed_history: true});
 
-            if (options.notifications_last_msg && !rsm.complete && (rsm.count > messages.length))
+            if (options.notifications_last_msg && !rsm.complete && (rsm.count > messages.length)) {
                 this.getMessageArchive({
-                    fast: true,
-                    max: xabber.settings.mam_messages_limit,
-                    before: rsm.first,
-                    var: [
-                        {var: 'after-id', value: options.notifications_last_msg},
-                    ]
-                },
-                {
-                    notifications_last_msg: options.notifications_last_msg
-                });
-
+                        fast: true,
+                        max: xabber.settings.mam_messages_limit,
+                        before: rsm.first,
+                        var: [
+                            {var: 'after-id', value: options.notifications_last_msg},
+                        ]
+                    },
+                    {
+                        notifications_last_msg: options.notifications_last_msg
+                    });
+            }
             if (options.unread_history){
                 if (messages.length)
                     this.model.set('last_sync_unread_id', $(messages[messages.length - 1]).find(`result[xmlns="${Strophe.NS.MAM}"]`).attr('id'));
@@ -5004,13 +5007,23 @@ xabber.ChatContentView = xabber.BasicView.extend({
                         $message.addClass('security-content-msg');
                     }
                 }
-                if (this.account.omemo && this.account.omemo.xabber_trust)
-                    this.account.omemo.xabber_trust.receiveTrustVerificationMessage($notification_msg[0], {
-                        automated: true,
-                        notification_trust_msg: message.get('notification_trust_msg'),
-                        device_id: message.get('device_id'),
-                        msg_item: message
-                    });
+                if (this.account.omemo && this.account.omemo.xabber_trust){
+                    if (message.get('device_id')){
+                        this.account.omemo.xabber_trust.addToSequentialProcessingList($notification_msg[0], {
+                            automated: true,
+                            notification_trust_msg: message.get('notification_trust_msg'),
+                            device_id: message.get('device_id'),
+                            msg_item: message
+                        });
+                    } else {
+                        this.account.omemo.xabber_trust.receiveTrustVerificationMessage($notification_msg[0], {
+                            automated: true,
+                            notification_trust_msg: message.get('notification_trust_msg'),
+                            device_id: message.get('device_id'),
+                            msg_item: message
+                        });
+                    }
+                }
                 return;
             }
         }
@@ -7702,14 +7715,6 @@ xabber.ChatContentView = xabber.BasicView.extend({
         let $elem = $(ev.target);
 
         $elem.closest('.chat-message').removeClass('unread-message-background');
-        //     msg = this.model.messages.get($elem.closest('.chat-message').data('uniqueid')),
-        //     $notification_msg = $(msg.get('notification_msg_content'));
-        //
-        // if ($notification_msg.children(`authenticated-key-exchange[xmlns="${Strophe.NS.XABBER_TRUST}"]`).length) {
-        //     if (this.account.omemo && this.account.omemo.xabber_trust)
-        //         this.account.omemo.xabber_trust.receiveTrustVerificationMessage($notification_msg[0], {});
-        //     return;
-        // }
     },
 
     onClickMessage: function (ev) {

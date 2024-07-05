@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.3.5.56","version_description":"added incoming session system message, added update for contacts trusted devices sharing, added func to find difference to get updated devices, fixed edit group block width, hidden encrypted devices if contact has no fingeprints"}'
+'{"version_number":"2.3.5.57","version_description":"added ignore of last msg from notifications sync, fixed adding to trusted devices when trusting with fingerprint, fixed parser of devices being stuck on non existing devices, fixed parsing of own shared contacts devices, added sequential processing of encrypted notifications with shared contacts devices,"}'
 )});

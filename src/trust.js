@@ -421,6 +421,10 @@ xabber.ActiveSessionModalView = xabber.BasicView.extend({
     }
 });
 
+xabber.ProcessingMessages = Backbone.Collection.extend({
+    comparator: 'timestamp',
+});
+
 xabber.Trust = Backbone.ModelWithStorage.extend({
 
     defaults: () => {
@@ -435,6 +439,8 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
         this.account = options.account;
         this.omemo = options.omemo;
         this.account.omemo = this.omemo;
+        this.processing_messages = new xabber.ProcessingMessages();
+        this.processing_debounce = _.debounce(this.sequentialTrustVerificationMessageProcessing, 5000, false);
         this.account.on('peer_devices_updated', () => {
             this.updateVerificationData();
         });
@@ -1255,7 +1261,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
 
     },
 
-    parseContactsTrustedDevices: function (message, options) {
+    parseContactsTrustedDevices: function (message, options, callback) {
         let $message = $(message),
             received_device_id = options.device_id,
             is_new_devices = false,
@@ -1280,22 +1286,30 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
         // console.log(my_trusted_devices.some(e => e.device_id == received_device_id && e.fingerprint == device_fingerprint));
         // console.error(message);
 
-        if (my_trusted_devices.some(e => e.device_id == received_device_id && e.fingerprint == device_fingerprint)){
+        if (my_trusted_devices.some(e => e.device_id == received_device_id && e.fingerprint == device_fingerprint && !e.is_me)){
 
             let this_trusted_device = my_trusted_devices.find(e => e.device_id == received_device_id && e.fingerprint == device_fingerprint),
                 $whole_notification_msg = $message.parent().closest('message');
 
-            if (!$whole_notification_msg.length)
+            if (!$whole_notification_msg.length){
+                callback && callback();
                 return;
+            }
             let msg_timestamp = $whole_notification_msg.children('time').attr('stamp');
-            if (!msg_timestamp)
+            if (!msg_timestamp){
+                callback && callback();
                 return;
+            }
             msg_timestamp = Date.parse(msg_timestamp);
-            if (!msg_timestamp)
+            if (!msg_timestamp){
+                callback && callback();
                 return;
+            }
 
-            if (this_trusted_device.last_parsed_contacts_devices_timestamp && msg_timestamp <= this_trusted_device.last_parsed_contacts_devices_timestamp)
+            if (this_trusted_device.last_parsed_contacts_devices_timestamp && msg_timestamp <= this_trusted_device.last_parsed_contacts_devices_timestamp){
+                callback && callback();
                 return;
+            }
 
             let $share = $message.find(`${sharing_type}`),
                 trusted_item_signature = $share.find('signature').text(),
@@ -1303,8 +1317,10 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                 is_signature_verified,
                 identity_device_id;
 
-            if (!$share.find('identity').length)
+            if (!$share.find('identity').length){
+                callback && callback();
                 return;
+            }
 
 
             identity_device_id = $share.find('identity').attr('id');
@@ -1312,8 +1328,10 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
             // console.log(identity_device_id);
             // console.log(options.device_id);
 
-            if (options.device_id != identity_device_id)
+            if (options.device_id != identity_device_id){
+                callback && callback();
                 return;
+            }
 
 
             $share.children('items').sort(function(a, b) {
@@ -1340,15 +1358,19 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
             let item_device = this.omemo.own_devices[identity_device_id];
             // console.log(trusted_string);
             // console.log(item_device);
-            if (!item_device)
+            if (!item_device){
+                callback && callback();
                 return;
+            }
 
             let item_public_key = item_device.get('ik');
 
             // console.log(item_public_key);
 
-            if (!item_public_key){
+            if (!item_public_key){{
+                callback && callback();
                 return;
+            }
             }
 
             if (item_public_key.byteLength === 33)
@@ -1362,8 +1384,10 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
 
             // console.log(is_signature_verified);
 
-            if (!is_signature_verified)
+            if (!is_signature_verified){
+                callback && callback();
                 return;
+            }
 
             $share.children('items').each((idx, key_owner) => {
                 // console.log(key_owner);
@@ -1403,11 +1427,13 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
 
                         changed_devices_jid_list = changed_devices_jid_list.filter((value, index, array) => array.indexOf(value) === index); // unique
 
-                        // console.log(is_new);
                         counter++;
                         if (is_new)
                             is_new_devices = true;
 
+                        // console.log(is_new);
+                        // console.log(counter);
+                        // console.log(total_count);
                         if (counter === total_count){
 
                             let updated_trusted_devices = this.get('trusted_devices'),
@@ -1459,13 +1485,15 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                                     if (global_changed){
                                         let difference = this.findDifferenceInTrustedDevices(initial_trusted_devices, this.get('trusted_devices'));
                                         this.publishContactsTrustedDevices(difference); // передать полученные items
+                                        callback && callback();
                                     }
                                 } else {
                                     let difference = this.findDifferenceInTrustedDevices(initial_trusted_devices, this.get('trusted_devices'));
                                     this.publishContactsTrustedDevices(difference); // передать полученные items
+                                    callback && callback();
                                 }
-                            }
-                            else {
+                            } else {
+                                callback && callback();
                                 // console.log('no new devices')
                             }
                         }
@@ -1475,6 +1503,8 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                 });
 
             });
+        } else {
+            callback && callback();
         }
 
     },
@@ -1482,7 +1512,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
     addNewContactsDevice: function (trusted_key, jid, device_id, from_device_id, counter_dfd, tagname, fingerprint, trust_timestamp) {
         let peer = this.omemo.getPeer(jid);
         // console.log(peer);
-        // console.log(tagname);
+        // console.log(device_id);
         if (!peer && (tagname !== 'revoked' || tagname !== 'distrust'))
             counter_dfd.resolve();
         let device;
@@ -1492,10 +1522,14 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
             dfd = new $.Deferred();
 
         dfd.done(() => {
+            // console.log(device_id);
+            // console.log('here2');
             device = peer.devices[device_id];
             if (!device){
                 if (tagname === 'revoked'){
+                    // console.log(device_id);
                     if (trusted_devices[jid] && _.isArray(trusted_devices[jid])){
+                        // console.log(device_id);
                         if (trusted_devices[jid].some(e => e.trusted_key === trusted_key && !e.is_revoked)) {
                             counter_dfd.resolve(true, {device_id, jid, trust_timestamp});// add to list to update
                             return;
@@ -1515,6 +1549,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                             });
                         }
                     } else {
+                        // console.log(device_id);
                         trusted_devices[jid] = [{
                             trusted_key: trusted_key,
                             from_device_id: from_device_id,
@@ -1529,24 +1564,31 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                     this.save('trusted_devices', trusted_devices);
                     this.trigger('trust_updated');
 
+                    // console.log(device_id);
                     counter_dfd.resolve(true);
                     return;
                 } else {
+                    // console.log(device_id);
                     counter_dfd.resolve();
                     return;
                 }
             }
             if (trusted_devices[jid] && _.isArray(trusted_devices[jid])){
+                // console.log(device_id);
                 if (trusted_devices[jid].some(e => e.trusted_key === trusted_key && !e.is_revoked) && tagname === 'revoked') {
+                    // console.log(device_id);
                     counter_dfd.resolve(true, {device_id, jid, trust_timestamp}); // add to list to update
                     return;
                 } else if (trusted_devices[jid].some(e => e.trusted_key === trusted_key && !e.untrusted) && tagname === 'distrust'){
+                    // console.log(device_id);
                     counter_dfd.resolve(true, null, {device_id, jid}); // add to list to update
                     return;
                 } else if (trusted_devices[jid].some(e => e.trusted_key === trusted_key && e.untrusted) && tagname === 'trust'){
+                    // console.log(device_id);
                     counter_dfd.resolve(true, null, null, {device_id, jid}); // add to list to update
                     return;
                 } else if (!trusted_devices[jid].some(e => e.trusted_key === trusted_key)){
+                    // console.log(device_id);
                     trusted_devices[jid].push({
                         trusted_key: trusted_key,
                         from_device_id: from_device_id,
@@ -1560,10 +1602,12 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                         public_key: utils.ArrayBuffertoBase64(device.get('ik'))
                     });
                 } else {
+                    // console.log(device_id);
                     counter_dfd.resolve();
                     return;
                 }
             } else {
+                // console.log(device_id);
                 trusted_devices[jid] = [{
                     trusted_key: trusted_key,
                     from_device_id: from_device_id,
@@ -1589,15 +1633,20 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
             this.save('trusted_devices', trusted_devices);
             this.trigger('trust_updated');
 
+            // console.log(device_id);
             counter_dfd.resolve(true);
 
         });
         // console.log(device);
         if (!device && tagname !== 'revoked'){
+            // console.log(device_id);
             if (!Object.keys(peer.devices).length){
                 peer.getDevicesNode(dfd);
+            } else {
+                dfd.resolve();
             }
         } else {
+            // console.log(device_id);
             dfd.resolve()
         }
 
@@ -2027,6 +2076,48 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                 }
             });
         }
+    },
+
+    addToSequentialProcessingList: function (message, options) {
+        console.log(message);
+        let $whole_notification_msg = $(message).parent().closest('message');
+
+        if (!$whole_notification_msg.length)
+            return;
+        let msg_timestamp = $whole_notification_msg.children('time').attr('stamp');
+        if (!msg_timestamp)
+            return;
+        msg_timestamp = Date.parse(msg_timestamp);
+        if (!msg_timestamp)
+            return;
+
+        this.processing_messages.create({
+            timestamp: msg_timestamp,
+            message: message,
+            options: options
+
+        });
+
+        // console.error('debounce');
+        this.processing_debounce();
+    },
+
+    sequentialTrustVerificationMessageProcessing: function () {
+        console.error(this);
+        console.error(this.processing_messages);
+        console.error(this.processing_messages.length);
+        console.error(this.is_processing);
+        if (!this.processing_messages.length || this.is_processing)
+            return;
+        this.is_processing = true;
+        let msg_item = this.processing_messages.shift();
+
+        this.parseContactsTrustedDevices(msg_item.get('message'), msg_item.get('options'), () => {
+            this.is_processing = false;
+            console.log('processs neht');
+            this.sequentialTrustVerificationMessageProcessing();
+        });
+
     },
 
     receiveTrustVerificationMessage: function (message, options) {

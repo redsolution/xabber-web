@@ -8716,7 +8716,7 @@ xabber.Roster = xabber.ContactsBase.extend({
         unread_msgs_count && (options.is_unread = true);
         options.delay = message.children('time');
         (unread_msgs_count == 0) && (options.sync_timestamp = chat_timestamp);
-        message.length && (msg = this.account.chats.receiveChatMessage(message, options));
+        message.length && !chat.get('notifications') && (msg = this.account.chats.receiveChatMessage(message, options));
         if (msg) {
             if (!msg.get('is_unread') && $unread_messages.attr('count') > 0 && !msg.isSenderMe() && !(msg.get('type') === 'system') && ($unread_messages.attr('after') < msg.get('stanza_id') || $unread_messages.attr('after') < msg.get('contact_stanza_id')))//TODO: change to timestamp checking
                 msg.set('is_unread', true);
