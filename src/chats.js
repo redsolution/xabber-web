@@ -362,7 +362,7 @@ xabber.MessagesBase = Backbone.Collection.extend({
                     attrs.trust_device_id = $keyExchange.children('verification-start').attr('device-id');
                 }
             }
-            if ($notification_msg.children(`envelope`).length && $notification_msg.find(`content share[xmlns="${Strophe.NS.PUBSUB_TRUST_SHARING}"]`).length){
+            if ($notification_msg.children(`envelope`).length && ($notification_msg.find(`content share[xmlns="${Strophe.NS.PUBSUB_TRUST_SHARING}"]`).length || $notification_msg.find(`content update[xmlns="${Strophe.NS.PUBSUB_TRUST_SHARING}"]`).length)){
                 let msg_text = `${this.account.jid} updated their devices`;
                 attrs.original_message = body = msg_text;
                 attrs.notification_trust_msg = true;
@@ -1263,12 +1263,22 @@ xabber.EphemeralTimerSelector = xabber.BasicView.extend({
         if (!this.get('encrypted') || !this.account.omemo || !this.account.omemo.xabber_trust)
             return;
 
+        let original_value = this.get('active_verification_session');
         let active_sessions = this.account.omemo.xabber_trust.get('active_trust_sessions');
         this.set('active_verification_session', false);
 
         Object.keys(active_sessions).forEach((session_id) => {
             let session = active_sessions[session_id];
             if ((session.active_verification_device && session.active_verification_device.peer_jid === this.get('jid')) || session.session_check_jid === this.get('jid')){
+                if (!original_value){
+                    setTimeout(() => {
+                        this.messages.createSystemMessage({ //change to chat timestamp update
+                            from_jid: this.contact.get('jid'),
+                            auth_request: true,
+                            message: xabber.getString("verification_session_state__incoming_label")
+                        });
+                    }, 1000)
+                }
                 this.set('active_verification_session', true);
             }
         });

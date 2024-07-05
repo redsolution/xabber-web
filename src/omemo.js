@@ -267,12 +267,13 @@ xabber.Fingerprints = xabber.BasicView.extend({
 
             let updated_trusted_devices = this.account.omemo.xabber_trust.get('trusted_devices'),
                 contacts_trusted_devices = this.account.omemo.xabber_trust.get('trusted_devices')[this.jid],
-                changed;
-
+                changed, changed_devices = {};
+            changed_devices[this.jid] = [];
             contacts_trusted_devices.forEach((trusted_device, index) => {
                 if (!trusted_device.untrusted && !trusted_device.is_revoked){
                     trusted_device.untrusted = true;
                     updated_trusted_devices[this.jid][index] = trusted_device;
+                    changed_devices[this.jid].push(trusted_device);
                     changed = true;
                 }
             });
@@ -280,7 +281,7 @@ xabber.Fingerprints = xabber.BasicView.extend({
             this.account.omemo.xabber_trust.trigger('trust_updated');
 
             if (changed){
-                this.account.omemo.xabber_trust.publishContactsTrustedDevices();
+                this.account.omemo.xabber_trust.publishContactsTrustedDevices(changed_devices);// list of devices
             }
         }
     },
@@ -660,7 +661,7 @@ xabber.Fingerprints = xabber.BasicView.extend({
                 this.omemo.xabber_trust.getTrustedKey(device).then((trustedKeyBuffer) => {
                     let trustedKeyBase64 = utils.ArrayBuffertoBase64(trustedKeyBuffer),
                         trusted_devices = this.omemo.xabber_trust.get('trusted_devices'),
-                        to = this.jid, changed;
+                        to = this.jid, changed, changed_devices = {};
                     if (trusted_devices[to] && _.isArray(trusted_devices[to])){//34
                         if (trusted_devices[to].some(e => e.trusted_key === trustedKeyBase64 && e.untrusted)) {
                             changed = this.omemo.xabber_trust.iterateAndChangeTrustedDevices(to, (trusted_device) => {
@@ -668,6 +669,7 @@ xabber.Fingerprints = xabber.BasicView.extend({
                                 if (trusted_device.device_id === device.get('id') && trusted_device.untrusted && !trusted_device.is_revoked) {
                                     trusted_device.untrusted = false;
                                     func_changed = true;
+                                    changed_devices[to] = [trusted_device];
                                 }
                                 return {
                                     device: trusted_device,
@@ -675,32 +677,35 @@ xabber.Fingerprints = xabber.BasicView.extend({
                                 };
                             });
                         } else if (!trusted_devices[to].some(e => e.trusted_key === trustedKeyBase64)){
-                            trusted_devices[to].push({
+                            let item = {
                                 trusted_key: trustedKeyBase64,
                                 fingerprint: device.get('fingerprint'),
                                 device_id: device.get('id'),
                                 timestamp: Math.floor(Date.now() / 1000),
                                 fingerprint_trust: true,
                                 public_key: utils.ArrayBuffertoBase64(device.get('ik'))
-                            });
+                            }
+                            trusted_devices[to].push(item);
+                            changed_devices[to] = [item];
                         }
                     } else {
-                        trusted_devices[to] = [{
+                        let item = {
                             trusted_key: trustedKeyBase64,
                             fingerprint: device.get('fingerprint'),
                             device_id: device.get('id'),
                             timestamp: Math.floor(Date.now() / 1000),
                             fingerprint_trust: true,
                             public_key: utils.ArrayBuffertoBase64(device.get('ik'))
-                        }];
+                        }
+                        trusted_devices[to].push(item);
+                        changed_devices[to] = [item];
                     }
                     if (!changed) {
                         this.omemo.xabber_trust.save('trusted_devices', trusted_devices);
                         this.omemo.xabber_trust.trigger('trust_updated');
                     }
                     this.omemo.xabber_trust.getContactsTrustedDevices(to, device.get('id'));
-                    this.omemo.xabber_trust.publishContactsTrustedDevices(() => {
-                    });
+                    this.omemo.xabber_trust.publishContactsTrustedDevices(changed_devices); // one new device
             });
 
             }

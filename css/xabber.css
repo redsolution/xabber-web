@@ -15972,6 +15972,7 @@ input[type=range].voice-message-volume:focus {
 
 .details-panel-right .participant-view-wrap,
 .details-panel-right .restrictions-block-wrap,
+.details-panel-right .edit-group-wrap,
 .details-panel-right .edit-block-wrap {
     width: inherit;
 }
@@ -21248,6 +21249,8 @@ ul.restrictions-list-content>li {
     width: 100%;
 }
 
+.chat-head-wrap.encrypted[data-trust=nil] .chat-tools-wrap .btn-show-fingerprints,
+.chat-head-wrap.encrypted[data-trust=nil] .chat-tools-wrap .chat-tool.btn-show-session,
 .chat-head-wrap.encrypted[data-trust=none] .chat-tools-wrap .chat-tool.btn-show-session .mdi-lock,
 .chat-head-wrap.encrypted[data-trust=none] .chat-tools-wrap .chat-tool.btn-show-session .mdi-alert-circle,
 .chat-head-wrap.encrypted[data-trust=true] .chat-tools-wrap .chat-tool.btn-show-session .mdi-alert,
