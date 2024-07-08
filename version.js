@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.3.5.57","version_description":"added ignore of last msg from notifications sync, fixed adding to trusted devices when trusting with fingerprint, fixed parser of devices being stuck on non existing devices, fixed parsing of own shared contacts devices, added sequential processing of encrypted notifications with shared contacts devices,"}'
+'{"version_number":"2.3.5.58","version_description":"fixed last msg id setting for notifications, fixed loading missing history for notifications, changed history loading behaviour for notifications, fixed history loaded attr setting for notifications chat on new account login, disabled missing history usual loading for notifications chat, fixed notifications history loading after reconnect"}'
 )});

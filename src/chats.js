@@ -2370,7 +2370,7 @@ xabber.ChatItemView = xabber.BasicView.extend({
                     break;
             }
             this.model.last_message = last_message;
-            if (this.model.get('notifications'))
+            if (this.model.get('notifications') && last_message && last_message.get('stanza_id'))
                 this.account.trigger('notification_last_msg_updated', last_message.get('stanza_id'));
             this.updateLastMessage();
         }
@@ -4362,7 +4362,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
                 this.getMessageArchive({
                         fast: true,
                         max: xabber.settings.mam_messages_limit,
-                        before: rsm.first,
+                        after: rsm.last,
                         var: [
                             {var: 'after-id', value: options.notifications_last_msg},
                         ]
@@ -4370,6 +4370,21 @@ xabber.ChatContentView = xabber.BasicView.extend({
                     {
                         notifications_last_msg: options.notifications_last_msg
                     });
+            } else if (this.model.get('notifications') && !this.model.get('history_loaded') && !_.isUndefined(options.notifications_last_msg) && rsm.complete && (rsm.count == 0)) {
+                this.getMessageArchive({
+                    max: xabber.settings.mam_messages_limit,
+                    fast: true,
+                    before: ''
+                }, {previous_history: true});
+            } else if (!this.model.get('history_loaded') && options.notifications_last_msg && rsm.complete){
+                let normal_msgs_count = this.getFilteredMessages();
+                if (normal_msgs_count < xabber.settings.mam_messages_limit){
+                    this.getMessageArchive({
+                        max: xabber.settings.mam_messages_limit,
+                        fast: true,
+                        before: this.model.get('first_archive_id') || ''
+                    }, {previous_history: true});
+                }
             }
             if (options.unread_history){
                 if (messages.length)
@@ -4430,7 +4445,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
                     before: this.model.get('first_archive_id') || ''
                 }), {previous_history: true});
             }
-            if (this.model.get('notifications') && !this.model.get('history_loaded')) {
+            if (this.model.get('notifications') && !this.model.get('history_loaded') && _.isUndefined(options.notifications_last_msg)) {
                 let normal_msgs_count = this.getFilteredMessages();
                 if (normal_msgs_count < xabber.settings.mam_messages_limit){
                     this.getMessageArchive({
@@ -4516,17 +4531,25 @@ xabber.ChatContentView = xabber.BasicView.extend({
         let previous_last_msg = this.account.chat_settings.getNotificationsLastMsgId(),
             before = this.model.get('first_archive_id') || '';
 
-        this.getMessageArchive({
-                fast: true,
+        if (previous_last_msg){
+            this.getMessageArchive({
+                    fast: true,
+                    max: 3,
+                    var: [
+                        {var: 'after-id', value: previous_last_msg},
+                    ]
+                },
+                {
+                    notifications_last_msg: previous_last_msg
+                });
+        } else {
+            this.getMessageArchive({
                 max: xabber.settings.mam_messages_limit,
-                before: '',
-                var: [
-                    {var: 'after-id', value: previous_last_msg},
-                ]
-            },
-            {
-                notifications_last_msg: previous_last_msg
-            });
+                fast: true,
+                before: ''
+            }, {previous_history: true});
+        }
+
     },
 
     loadUnreadHistory: function () {

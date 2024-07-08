@@ -8627,7 +8627,9 @@ xabber.Roster = xabber.ContactsBase.extend({
                 }
                 chat.set('notifications', true);
                 contact.set('subscription', 'both');
-                chat.item_view.content.loadNotificationsHistoryToPreviousLastMsg();
+                if (!request_with_stamp) {
+                    chat.item_view.content.loadNotificationsHistoryToPreviousLastMsg();
+                }
                 xabber.accounts.trigger('notification_chat_created');
             }
         }
@@ -8711,7 +8713,11 @@ xabber.Roster = xabber.ContactsBase.extend({
             chat.trigger("get_retractions_list");
         msg_retraction_version && (chat.retraction_version = msg_retraction_version);
         if (request_with_stamp && chat.item_view && chat.item_view.content && !is_invite) {
-            chat.trigger('get_missed_history', request_with_stamp/1000);
+            if (chat.get('notifications')){
+                chat.item_view.content.loadNotificationsHistoryToPreviousLastMsg();
+            } else {
+                chat.trigger('get_missed_history', request_with_stamp/1000);
+            }
         }
         unread_msgs_count && (options.is_unread = true);
         options.delay = message.children('time');

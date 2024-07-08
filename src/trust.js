@@ -1483,13 +1483,13 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                                     });
 
                                     if (global_changed){
-                                        let difference = this.findDifferenceInTrustedDevices(initial_trusted_devices, this.get('trusted_devices'));
-                                        this.publishContactsTrustedDevices(difference); // передать полученные items
+                                        // let difference = this.findDifferenceInTrustedDevices(initial_trusted_devices, this.get('trusted_devices'));
+                                        // this.publishContactsTrustedDevices(difference); // передать полученные items
                                         callback && callback();
                                     }
                                 } else {
-                                    let difference = this.findDifferenceInTrustedDevices(initial_trusted_devices, this.get('trusted_devices'));
-                                    this.publishContactsTrustedDevices(difference); // передать полученные items
+                                    // let difference = this.findDifferenceInTrustedDevices(initial_trusted_devices, this.get('trusted_devices'));
+                                    // this.publishContactsTrustedDevices(difference); // передать полученные items
                                     callback && callback();
                                 }
                             } else {
