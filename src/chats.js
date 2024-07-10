@@ -610,6 +610,14 @@ xabber.MessagesBase = Backbone.Collection.extend({
                     attrs.displayed_time = cached_msg.displayed_time;
                 }
             }
+        } else if ($message.find('[xmlns="' + Strophe.NS.EPHEMERAL + '"]').length && $message.find('[xmlns="' + Strophe.NS.EPHEMERAL + '"]').closest('system-message').length && options.encrypted){
+            return this.createSystemMessage({
+                from_jid: from_jid,
+                time: options.delay && options.delay.attr('stamp') || $message.find('delay').attr('stamp') || $message.find('time').attr('stamp'),
+                stanza_id: options.stanza_id,
+                contact_stanza_id: options.contact_stanza_id,
+                message: body
+            });
         }
 
         if (!options.synced_msg && this.chat && this.chat.item_view && !this.chat.item_view.content){
@@ -723,6 +731,7 @@ xabber.EphemeralTimerSelector = xabber.BasicView.extend({
         this.$(`.btn-set-ephemeral-timer`).removeClass('selected');
         $el.addClass('selected')
         this.model.set('chat_ephemeral_timer', $el.attr('data-value'));
+        this.model.sendNewEphemeralTimer();
     },
 
     onHide: function () {
@@ -1382,11 +1391,50 @@ xabber.EphemeralTimerSelector = xabber.BasicView.extend({
         }
     },
 
-      setEphemeralTimer: function (ev) {
-          if (!this.get('encrypted'))
+    setEphemeralTimer: function (ev) {
+        if (!this.get('encrypted'))
+            return;
+        this.set('chat_ephemeral_timer', $(ev.target).closest('.btn-set-ephemeral-timer').attr('data-value'))
+        this.sendNewEphemeralTimer();
+    },
+
+      sendNewEphemeralTimer: function () { //34
+          if (!this.contact || !this.account)
               return;
-          this.set('chat_ephemeral_timer', $(ev.target).closest('.btn-set-ephemeral-timer').attr('data-value'))
-      },
+          let msg_id = uuid(),
+              to = this.contact.get('jid'),
+              stanza = $msg({
+                  to: to,
+                  from: this.account.get('jid'),
+                  type: 'chat',
+                  id: msg_id
+              });
+
+          stanza.c('origin-id', {id: uuid(), xmlns: 'urn:xmpp:sid:0'}).up();
+          stanza.c('envelope', {xmlns: Strophe.NS.SCE}).c('content');
+          if (this.get('chat_ephemeral_timer')){
+              stanza.c('body').t(`Self-destruct timer was set to ${utils.pretty_duration_ephemeral_timer_long(this.get('chat_ephemeral_timer'))}`).up();
+          } else {
+              stanza.c('body').t(`Self-destruct timer was disabled`).up();
+          }
+          stanza.c('reference', {xmlns: Strophe.NS.REFERENCE});
+          stanza.c('system-message', {xmlns: Strophe.NS.SYSTEM_MESSAGE});
+          stanza.c('ephemeral', {xmlns: Strophe.NS.EPHEMERAL, timer: this.get('chat_ephemeral_timer')}).up().up().up();
+          stanza.up().c('rpad').t('0'.repeat(200).slice(1, Math.floor((Math.random() * 198) + 1))).up();
+          stanza.c('from', {jid: this.account.get('jid')}).up().up();
+
+          this.messages.createFromStanza($(stanza.tree()), {
+              encrypted: true
+          });
+
+          this.account.omemo.encrypt(this.contact, stanza).then((msg) => {
+              if (msg) {
+                  stanza = msg.message;
+              }
+              this.account.sendFast(stanza, () => {
+              });
+          })
+    },
 
     onContactDestroyed: function () {
         this.resetUnread();
@@ -3324,7 +3372,8 @@ xabber.ChatItemView = xabber.BasicView.extend({
 
       events: {
           "click .btn-decline": "declineSubscription",
-          "click .btn-allow": "allowSubscription",
+          "click .btn-allow-dropdown": "allowSubscription",
+          "click .btn-allow-subscribe-dropdown": "allowAndRequestSubscription",
           "click .btn-add": "addContact",
           "click .btn-subscribe": "addContact",
           "click .btn-block": "blockContact"
@@ -3356,8 +3405,15 @@ xabber.ChatItemView = xabber.BasicView.extend({
           if (subscription === 'both' || this.contact.get('blocked'))
               return;
           else if (subscription === 'to' && in_request || (subscription === 'none' && in_request && in_roster)) {
-              this.$('.subscription-info').text(xabber.getString("subscription_status_in_request_incoming"));
+              this.$('.subscription-info').text('');
+              this.$('.dropdown-content').attr('id', `${this.cid}-incoming-subscription-dropdown`);
+              this.$('.button.btn-allow.dropdown-button').attr('data-activates', `${this.cid}-incoming-subscription-dropdown`);
               this.$('.button:not(.btn-allow)').addClass('hidden');
+              this.$('.button.btn-allow.dropdown-button').dropdown({
+                  inDuration: 100,
+                  outDuration: 100,
+                  hover: false
+              });
           } else if (!out_request && !in_roster && !in_request && (subscription === 'from' || subscription === 'none')) {
               this.$('.subscription-info').text(xabber.getString("chat_subscribe_request_outgoing"));
               this.$('.button:not(.btn-subscribe)').addClass('hidden');
@@ -3383,6 +3439,12 @@ xabber.ChatItemView = xabber.BasicView.extend({
 
       allowSubscription: function () {
           this.contact.acceptRequest();
+          this.hideElement();
+      },
+
+      allowAndRequestSubscription: function () {
+          this.contact.acceptRequest();
+          this.contact.askRequest();
           this.hideElement();
       },
 
@@ -8991,9 +9053,18 @@ xabber.AccountChats = xabber.ChatsBase.extend({
             return;
 
 
-        if (chat && chat.get('encrypted') && options.encrypted && !options.synced_msg && !options.is_archived){
+        if (chat && chat.get('encrypted') && options.encrypted){
             if ($message.find('[xmlns="' + Strophe.NS.EPHEMERAL + '"]').length){
-                chat.set('chat_ephemeral_timer', $message.find('[xmlns="' + Strophe.NS.EPHEMERAL + '"]').attr('timer'));
+                let ephemeral_timestamp = options.delay && options.delay.attr('stamp') || $message.find('delay').attr('stamp') || $message.find('time').attr('stamp');
+                if (options.synced_msg || options.is_archived){
+                    if (!chat.get('ephemeral_timer_timestamp') || chat.get('ephemeral_timer_timestamp') < Date.parse(ephemeral_timestamp)) {
+                        chat.set('ephemeral_timer_timestamp', Date.parse(ephemeral_timestamp));
+                        chat.set('chat_ephemeral_timer', $message.find('[xmlns="' + Strophe.NS.EPHEMERAL + '"]').attr('timer'));
+                    }
+                } else {
+                    chat.set('chat_ephemeral_timer', $message.find('[xmlns="' + Strophe.NS.EPHEMERAL + '"]').attr('timer'));
+                    chat.set('ephemeral_timer_timestamp', Date.parse(ephemeral_timestamp));
+                }
             } else {
                 chat.set('chat_ephemeral_timer', null);
             }
@@ -10865,7 +10936,7 @@ xabber.InvitationPanelView = xabber.SearchView.extend({
         // });
     },
 
-      startTrustVerification: function () {//34
+      startTrustVerification: function () {
           if (!this.account.omemo || !this.account.omemo.get('device_id') || !this.account.server_features.get(Strophe.NS.XABBER_NOTIFY))
               return;
           let msg_id = uuid(),

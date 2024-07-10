@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.3.5.58","version_description":"fixed last msg id setting for notifications, fixed loading missing history for notifications, changed history loading behaviour for notifications, fixed history loaded attr setting for notifications chat on new account login, disabled missing history usual loading for notifications chat, fixed notifications history loading after reconnect"}'
+'{"version_number":"2.3.5.59","version_description":"changed subscription buttons visuals and changed allow button behaviour, added sending of system message and setting of ephemeral timer from archived ephemeral messages"}'
 )});

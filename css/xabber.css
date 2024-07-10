@@ -9015,7 +9015,8 @@ input[type=text].simple-input-field:hover {
 .chat-content-wrap .subscription-buttons-wrap .button {
     margin-right: 24px;
     cursor: pointer;
-    text-transform: uppercase;
+    text-transform: capitalize;
+    margin-top: 2px;
 }
 
 .chat-content-wrap .subscription-buttons-wrap .btn-block {

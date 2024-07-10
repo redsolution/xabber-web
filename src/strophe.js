@@ -903,5 +903,6 @@ Strophe.addNamespace('DIGITAL_SIGNATURES_ATM', 'urn:xmpp:atm:1');
 Strophe.addNamespace('PUBSUB_TRUST_SHARING', 'urn:xmpp:trustsharing:0');
 Strophe.addNamespace('PUBSUB_TRUST_SHARING_ITEMS', 'urn:xmpp:trustsharing:0:items');
 Strophe.addNamespace('NICK', 'http://jabber.org/protocol/nick');
+Strophe.addNamespace('SYSTEM_MESSAGE', 'https://xabber.com/protocol/system-message');
 
 export default xabber;

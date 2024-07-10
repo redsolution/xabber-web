@@ -540,6 +540,40 @@ var utils = {
         return text;
     },
 
+    pretty_duration_ephemeral_timer_long: function (timer) {
+        let text = '';
+        switch (timer) {
+            case '5':
+                text = '5 seconds';
+                break;
+            case '10':
+                text = '10 seconds';
+                break;
+            case '15':
+                text = '15 seconds';
+                break;
+            case '30':
+                text = '30 seconds';
+                break;
+            case '60':
+                text = '1 minutes';
+                break;
+            case '300':
+                text = '5 minutes';
+                break;
+            case '600':
+                text = '10 minutes';
+                break;
+            case '900':
+                text = '15 minutes';
+                break;
+            default:
+                text = '';
+                break;
+        }
+        return text;
+    },
+
     pretty_name: function (name) {
         return name ? (name[0].toUpperCase() + name.replace(/-/,' ').substr(1).toLowerCase()) : "";
     },

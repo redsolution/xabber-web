@@ -1,8 +1,21 @@
 <div class="subscription-buttons">
     <div class="subscription-info"></div>
-    <div class="button text-color-500 btn-add">{[print(xabber.getString("contact_add"))]}</div>
-    <div class="button btn-block">{[print(xabber.getString("contact_bar_block"))]}</div>
-    <div class="button text-color-500 btn-allow">{[print(xabber.getString("chat_allow"))]}</div>
-    <div class="button text-color-500 btn-subscribe">{[print(xabber.getString("chat_subscribe"))]}</div>
+    <div class="button text-color-500 btn-add dotted-underline">{[print(xabber.getString("contact_add"))]}</div>
+    <div class="button btn-block dotted-underline">{[print(xabber.getString("contact_bar_block"))]}</div>
+    <div class="button text-color-500 btn-allow dropdown-button dotted-underline" data-activates="-incoming-subscription-dropdown">
+        {[print(xabber.getString("subscription_status_in_request_incoming"))]}
+    </div>
+    <div class="button text-color-500 btn-subscribe dotted-underline">{[print(xabber.getString("chat_subscribe"))]}</div>
     <i class="mdi-close btn-decline mdi mdi-24px"></i>
+    <div id="{{this.cid}}-incoming-subscription-dropdown" class="bootstrap-dropdown dropdown-content noselect">
+        <div class="btn-allow-subscribe-dropdown property-variant">
+            {[print(xabber.getString("chat_allow_and_subscribe"))]}
+        </div>
+        <div class="btn-allow-dropdown property-variant">
+            {[print(xabber.getString("chat_allow"))]}
+        </div>
+        <div class="btn-decline property-variant">
+            {[print(xabber.getString("decline"))]}
+        </div>
+    </div>
 </div>
