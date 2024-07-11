@@ -1999,7 +1999,16 @@ xabber.Omemo = Backbone.ModelWithStorage.extend({
                     }
                     else {
                         if (decrypted_msg === null) {
-                            this.account.chats.getChat(contact, 'encrypted').item_view.updateLastMessage();
+                            let chat = this.account.chats.getChat(contact, 'encrypted');
+                            if (chat && !chat.get('notifications') && contact && options.synced_msg && options.is_unread){
+                                if (!chat.item_view.content)
+                                    chat.item_view.content = new xabber.ChatContentView({chat_item: chat.item_view});
+                                let contact_stanza_id = $msg.children(`stanza-id[by="${contact.get('jid')}"]`).attr('id');
+                                chat.sendMarker($msg.attr('id'), 'displayed', stanza_id, contact_stanza_id);
+                                chat.item_view.content.readMessages();
+                                // reads this chats messages if last synced message is unread and cannot be decrypted
+                            }
+                            chat && chat.item_view.updateLastMessage();
                             return;
                         }
                         options.not_encrypted = true;

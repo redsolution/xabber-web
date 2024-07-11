@@ -1795,7 +1795,7 @@ xabber.Accounts = Backbone.CollectionWithStorage.extend({
             if (!account.get('enabled')){
                 account._revoke_on_connect = $.Deferred(); //34
                 let revoke_timeout = setTimeout(() => {
-                    this.model._revoke_on_connect.resolve();
+                    account._revoke_on_connect.resolve();
                 }, 5000);
                 account._revoke_on_connect.done(() => {
                     clearTimeout(revoke_timeout);
