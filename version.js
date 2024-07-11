@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.3.5.60","version_description":"fixed quiting accounts, changed verification session text strings, added reading and sending displayed to last synced message if it cannot be decrypted and is unread"}'
+'{"version_number":"2.3.5.61","version_description":"added unverified devices warning to account items, changed encrypted messages warning icon color"}'
 )});

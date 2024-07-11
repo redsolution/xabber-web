@@ -3707,6 +3707,15 @@ input[type=text].simple-input-field:hover {
     pointer-events: none;
 }
 
+.account-item .encryption-warning-icon {
+    position: absolute;
+    top: 27px;
+    right: 42px;
+    pointer-events: none;
+    color: #ffa000 !important;
+    display: none;
+}
+
 .account-item .auth-failed {
     position: absolute;
     top: 30px;
@@ -9968,6 +9977,27 @@ img.fwd-img-preview {
 .chat-message.not-decrypted .not-decrypted-icon svg{
     pointer-events: none;
 }
+.chat-content-wrap[data-trust=true] .chat-message.not-verified-previously .not-decrypted-icon svg path,
+.chat-content-wrap[data-trust=true] .chat-message.not-existing-device .not-decrypted-icon svg path,
+.chat-content-wrap[data-trust=true] .chat-message.not-verified .not-decrypted-icon svg path,
+.chat-content-wrap[data-trust=true] .chat-message.not-decrypted .not-decrypted-icon svg path{
+    fill: #388E3C !important;
+}
+
+.chat-content-wrap[data-trust=none] .chat-message.not-verified-previously .not-decrypted-icon svg path,
+.chat-content-wrap[data-trust=none] .chat-message.not-existing-device .not-decrypted-icon svg path,
+.chat-content-wrap[data-trust=none] .chat-message.not-verified .not-decrypted-icon svg path,
+.chat-content-wrap[data-trust=none] .chat-message.not-decrypted .not-decrypted-icon svg path{
+    fill: #FFA000 !important;
+}
+
+.chat-content-wrap[data-trust=error] .chat-message.not-verified-previously .not-decrypted-icon svg path,
+.chat-content-wrap[data-trust=error] .chat-message.not-existing-device .not-decrypted-icon svg path,
+.chat-content-wrap[data-trust=error] .chat-message.not-verified .not-decrypted-icon svg path,
+.chat-content-wrap[data-trust=error] .chat-message.not-decrypted .not-decrypted-icon svg path{
+    fill: #d32f2f !important;
+}
+
 .chat-message.not-existing-device .not-decrypted-icon svg path,
 .chat-message.not-verified .not-decrypted-icon svg path,
 .chat-message.not-decrypted .not-decrypted-icon svg path{
@@ -11772,6 +11802,14 @@ input[type=range].voice-message-volume:focus {
 
 .settings-panel-wrap .settings-panel .xmpp-account:last-of-type .account-info-wrap .text-info-wrap{
     border-bottom: none;
+}
+
+.settings-panel-wrap .settings-panel .account-info-wrap .encryption-warning-icon{
+    color: #ffa000 !important;
+    right: 64px;
+    pointer-events: none;
+    position: absolute;
+    top: 19px;
 }
 
 .settings-panel-wrap .settings-panel .xmpp-account .account-info-wrap .jid-wrap,

@@ -1941,11 +1941,27 @@ xabber.AccountToolbarItemView = xabber.BasicView.extend({
         this.model.on("change:image", this.updateAvatar, this);
         this.model.settings.on("change:color", this.updateColorScheme, this);
         this.model.on("open_settings", this.setActive, this);
+        this.model.on("trusting_updated", this.updateEncryptionWarning, this);
+        this.model.resources.on("change", this.updateEncryptionWarning, this);
+        this.model.resources.on("add", this.updateEncryptionWarning, this);
+        this.model.resources.on("destroy", this.updateEncryptionWarning, this);
     },
 
     updateConnected: function () {
         this.$el.switchClass('disconnected', !this.model.isConnected());
         xabber.updateFaviconConnected();
+    },
+
+    updateEncryptionWarning: function (unverified_count) { //34
+        if (!this.model || !this.model.omemo)
+            return;
+        this.model.omemo.checkOwnFingerprints().then((is_trusted) => {
+            if (is_trusted == 'none' || is_trusted == 'error') {
+                this.$('.encryption-warning-icon').removeClass('hidden');
+            } else {
+                this.$('.encryption-warning-icon').addClass('hidden');
+            }
+        });
     },
 
     updateAuthState: function () {
@@ -4389,6 +4405,10 @@ xabber.AccountSettingsItemModalView = xabber.BasicView.extend({
         this.$('.move-account-to-this')
             .on('move_xmpp_account', this.onMoveAccount.bind(this));
         this.model.settings.on("change:to_sync", this.updateSyncState, this);
+        this.model.on("trusting_updated", this.updateEncryptionWarning, this);
+        this.model.resources.on("change", this.updateEncryptionWarning, this);
+        this.model.resources.on("add", this.updateEncryptionWarning, this);
+        this.model.resources.on("destroy", this.updateEncryptionWarning, this);
     },
 
     updateNickname: function () {
@@ -4413,6 +4433,20 @@ xabber.AccountSettingsItemModalView = xabber.BasicView.extend({
             this.$('.nickname-wrap').addClass('single-row');
             this.$('.jid-wrap').addClass('hidden');
         }
+    },
+
+    updateEncryptionWarning: function (unverified_count) { //34
+        if (!this.model || !this.model.omemo)
+            return;
+        this.model.omemo.checkOwnFingerprints().then((is_trusted) => {
+            if (is_trusted == 'none' || is_trusted == 'error') {
+                this.$('.encryption-warning-icon').removeClass('hidden');
+                this.$('.account-info-wrap').addClass('encryption-warning');
+            } else {
+                this.$('.encryption-warning-icon').addClass('hidden');
+                this.$('.account-info-wrap').removeClass('encryption-warning');
+            }
+        });
     },
 
     updateAvatar: function () {
