@@ -3627,6 +3627,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
 
                     this.$('.chat-incoming-session-notification').append($(env.templates.base.chat_content_contact_verification_session(item)));
                     this.$('.chat-incoming-session-notification').removeClass('hidden');
+                    this.$('.notification-trust-session').switchClass('low-width', this.$('.chat-incoming-session-notification').width() < 360 )
                     this.$(`.chat-content`).addClass('active-incoming-session');
                 }
             }

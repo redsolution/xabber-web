@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.3.5.61","version_description":"added unverified devices warning to account items, changed encrypted messages warning icon color"}'
+'{"version_number":"2.3.5.62","version_description":"fixed width of active session card after its rendering, fixed emoji panel position so it is not cut by chat border"}'
 )});
