@@ -5357,8 +5357,8 @@ xabber.ChatContentView = xabber.BasicView.extend({
         }
         $message.prev('.chat-day-indicator').remove();
         let $next_msg = $message.next('.chat-message');
-        // console.error('MESSAGE REMOVED !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!11')
-        // console.error($message)
+        console.error('MESSAGE REMOVED !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!11')
+        console.error($message)
         $message.remove();
         $next_msg.length && this.updateMessageInChat($next_msg[0]);
         this.bottom.manageSelectedMessages();
@@ -9693,6 +9693,9 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
                             chat_item: view,
                             blocked: view.model.get('blocked')
                         },{right_contact_save: options.right_contact_save, right_force_close: options.right_force_close} );
+                        if (view.model.last_message && !view.content.isMessageAdded(view.model.last_message)){
+                            view.content.addMessage(view.model.last_message);
+                        }
                         view.content.scrollToUnread();
                         view.content._long_reading_timeout = true;
                         view.content._no_scrolling_event = false;
