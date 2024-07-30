@@ -706,8 +706,7 @@ xabber.Fingerprints = xabber.BasicView.extend({
                     }
                     this.omemo.xabber_trust.getContactsTrustedDevices(to, device.get('id'));
                     this.omemo.xabber_trust.publishContactsTrustedDevices(changed_devices); // one new device
-            });
-
+                });
             }
         }
     },
@@ -1045,6 +1044,43 @@ xabber.FingerprintsOwnDevices = xabber.BasicView.extend({
             device.is_session_initiated = false;
             device.preKeys = null;
             this.account.trigger('trusting_updated');
+            if (this.omemo.xabber_trust) {
+                this.omemo.xabber_trust.getTrustedKey(device).then((trustedKeyBuffer) => {
+                    let trustedKeyBase64 = utils.ArrayBuffertoBase64(trustedKeyBuffer),
+                        trusted_devices = this.omemo.xabber_trust.get('trusted_devices'),
+                        to = this.jid, changed;
+                    if (trusted_devices[to] && _.isArray(trusted_devices[to])) {
+                        if (!trusted_devices[to].some(e => e.trusted_key === trustedKeyBase64)) {
+                            let item = {
+                                trusted_key: trustedKeyBase64,
+                                fingerprint: device.get('fingerprint'),
+                                device_id: device.get('id'),
+                                timestamp: Math.floor(Date.now() / 1000),
+                                fingerprint_trust: true,
+                                public_key: utils.ArrayBuffertoBase64(device.get('ik'))
+                            }
+                            trusted_devices[to].push(item);
+                            changed = true;
+                        }
+                    } else {
+                        let item = {
+                            trusted_key: trustedKeyBase64,
+                            fingerprint: device.get('fingerprint'),
+                            device_id: device.get('id'),
+                            timestamp: Math.floor(Date.now() / 1000),
+                            fingerprint_trust: true,
+                            public_key: utils.ArrayBuffertoBase64(device.get('ik'))
+                        }
+                        trusted_devices[to] = [item];
+                        changed = true;
+                    }
+                    if (changed) {
+                        this.omemo.xabber_trust.save('trusted_devices', trusted_devices);
+                        this.omemo.xabber_trust.trigger('trust_updated');
+                        this.omemo.xabber_trust.fixMyTrustedDeviceAndPublish();
+                    }
+                });
+            }
         }
     },
 

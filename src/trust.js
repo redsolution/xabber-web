@@ -1593,7 +1593,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                         trusted_key: trusted_key,
                         from_device_id: from_device_id,
                         trust_reason_jid: this.account.get('jid'),
-                        fingerprint: device.get('fingerprint'),
+                        fingerprint: device.get('fingerprint') || fingerprint,
                         device_id: device.get('id'),
                         untrusted: tagname === 'distrust',
                         is_revoked: tagname === 'revoked',
@@ -1612,7 +1612,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                     trusted_key: trusted_key,
                     from_device_id: from_device_id,
                     trust_reason_jid: this.account.get('jid'),
-                    fingerprint: device.get('fingerprint'),
+                    fingerprint: device.get('fingerprint') || fingerprint,
                     device_id: device.get('id'),
                     untrusted: tagname === 'distrust',
                     is_revoked: tagname === 'revoked',
@@ -1646,8 +1646,16 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                 dfd.resolve();
             }
         } else {
-            // console.log(device_id);
-            dfd.resolve()
+            if (device && !device.get('ik')){
+                device.getBundle().then((bundle) => {
+                    device.set('ik', utils.fromBase64toArrayBuffer(bundle.ik));
+                    device.set('fingerprint', device.generateFingerprint());
+                    dfd.resolve()
+                });
+            } else {
+                // console.log(device_id);
+                dfd.resolve()
+            }
         }
 
 
