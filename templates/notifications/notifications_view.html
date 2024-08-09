@@ -1,53 +1,21 @@
 <div class="notifications-content-filters no-select">
     <div class="notifications-filter-main-header">{[print(xabber.getString("notifications_window__header"))]}</div>
-    <div class="notifications-account-filter">
-        <div class="notifications-filter-header">{[print(xabber.getString("notifications_window__account_filter_header"))]}</div>
-        <div class="notifications-account-filter-content">
-        </div>
-    </div>
     <div class="notifications-type-filter">
         <div class="notifications-filter-header">{[print(xabber.getString("notifications_window__filters_header"))]}</div>
         <div class="notifications-type-filter-content">
             <div class="filter-item-wrap selected-filter" data-filter="all">
-                <svg class="filter-icon fill-color-light-blue-500 mdi mdi-svg-template" data-svgname="bell"></svg>
+                <svg class="filter-icon mdi fill-color-grey-500 mdi-svg-template" data-svgname="bell"></svg>
                 <div class="name one-line">{[print(xabber.getString("notifications_window__type_filter_all"))]}</div>
             </div>
-            <div class="filter-item-wrap" data-filter="mentions">
-                <svg class="filter-icon fill-color-red-500 mdi mdi-svg-template" data-svgname="bell"></svg>
-                <div class="name one-line">{[print(xabber.getString("notifications_window__type_filter_mentions"))]}</div>
-            </div>
-            <div class="filter-item-wrap" data-filter="invites">
-                <svg class="filter-icon fill-color-deep-purple-500 mdi mdi-svg-template" data-svgname="group-public-add"></svg>
-                <div class="name one-line">{[print(xabber.getString("notifications_window__type_filter_invites"))]}</div>
-            </div>
-            <div class="filter-item-wrap" data-filter="birthdays">
-                <svg class="filter-icon fill-color-pink-500 mdi mdi-svg-template" data-svgname="birthday"></svg>
-                <div class="name one-line">{[print(xabber.getString("notifications_window__type_filter_birthdays"))]}</div>
-            </div>
             <div class="filter-item-wrap" data-filter="security">
-                <svg class="filter-icon fill-color-teal-500 mdi mdi-svg-template" data-svgname="security"></svg>
+                <svg class="filter-icon mdi fill-color-grey-500 mdi-svg-template" data-svgname="security"></svg>
                 <div class="name one-line">{[print(xabber.getString("notifications_window__type_filter_security"))]}</div>
             </div>
-            <div class="filter-item-wrap" data-filter="likes">
-                <svg class="filter-icon fill-color-indigo-500 mdi mdi-svg-template" data-svgname="heart-circle"></svg>
-                <div class="name one-line">{[print(xabber.getString("notifications_window__type_filter_likes"))]}</div>
-            </div>
-            <div class="filter-item-wrap" data-filter="payments">
-                <svg class="filter-icon fill-color-amber-500 mdi mdi-svg-template" data-svgname="bank-circle"></svg>
-                <div class="name one-line">{[print(xabber.getString("notifications_window__type_filter_payments"))]}</div>
-            </div>
-            <div class="filter-item-wrap" data-filter="bots">
-                <svg class="filter-icon fill-color-brown-500 mdi mdi-svg-template" data-svgname="bot"></svg>
-                <div class="name one-line">{[print(xabber.getString("notifications_window__type_filter_bots"))]}</div>
-            </div>
-            <div class="filter-item-wrap" data-filter="information">
-                <svg class="filter-icon fill-color-cyan-500 mdi mdi-svg-template" data-svgname="alert-circle"></svg>
-                <div class="name one-line">{[print(xabber.getString("notifications_window__type_filter_information"))]}</div>
-            </div>
-            <div class="filter-item-wrap" data-filter="subscription">
-                <svg class="filter-icon fill-color-blue-grey-500 mdi mdi-svg-template" data-svgname="vcard"></svg>
-                <div class="name one-line">{[print(xabber.getString("notifications_window__type_filter_subscription"))]}</div>
-            </div>
+        </div>
+    </div>
+    <div class="notifications-account-filter">
+        <div class="notifications-filter-header">{[print(xabber.getString("notifications_window__account_filter_header"))]}</div>
+        <div class="notifications-account-filter-content">
         </div>
     </div>
 </div>

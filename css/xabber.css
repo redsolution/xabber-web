@@ -20776,6 +20776,7 @@ ul.restrictions-list-content>li {
 .notifications-content-wrap .notifications-content{
     /*border: 3px solid;*/
     height: calc(100% - 64px);
+    height: 100%;
 }
 .notifications-content-wrap .notifications-content-filters{
     /*border: 2px solid;*/
@@ -20788,8 +20789,8 @@ ul.restrictions-list-content>li {
 }
 .notifications-content-wrap .notifications-utility{
     /*border: 1px solid;*/
-    height: 64px;
-    width: calc(100% - 0px);
+    /*height: 64px;*/
+    /*width: calc(100% - 0px);*/
 }
 .notifications-content-filters .notifications-filter-main-header{
     font-size: 24px;
@@ -20806,7 +20807,7 @@ ul.restrictions-list-content>li {
     cursor: pointer;
     font-size: 16px;
     line-height: 24px;
-    padding: 4px 42px 4px 52px;
+    padding: 4px 42px 4px 48px;
     position: relative;
 }
 .notifications-content-wrap .filter-item-wrap .filter-icon{
@@ -20820,11 +20821,12 @@ ul.restrictions-list-content>li {
     background: #EEEEEE;
 }
 .notifications-content-filters .notifications-filter-header{
-    margin-left: 14px;
-    font-size: 18px;
+    color: rgba(0, 0, 0, .54);
     font-weight: 500;
-    line-height: 24px;
-    margin-bottom: 8px;
+    margin-bottom: 2px;
+    margin-left: 14px;
+    font-size: 16px;
+    line-height: 32px;
 }
 .notifications-content-wrap .back-to-bottom{
     top: calc(64px + 64px);
@@ -20833,7 +20835,7 @@ ul.restrictions-list-content>li {
     rotate: 180deg;
 
 }
-.notifications-content-wrap .chat-day-indicator,
+/*.notifications-content-wrap .chat-day-indicator,*/
 .notifications-content-wrap .fixed-day-indicator-wrap{
     display: none;
 
@@ -20922,6 +20924,93 @@ ul.restrictions-list-content>li {
 }
 .chat-content-wrap.security-content .chat-message:not(.security-content-msg){
     display: none;
+}
+.chat-content-wrap.subscription-content-hidden .notification-subscriptions-wrap{
+    display: none;
+}
+.chat-content-wrap.subscription-content .chat-day-indicator,
+.chat-content-wrap.subscription-content .chat-message{
+    display: none;
+}
+.notifications-content-wrap .chat-message.hidden-account-filter{
+    display: none;
+}
+.notifications-content .chat-content{
+    padding-top: 15px;
+}
+.notifications-content-wrap .notification-subscriptions-wrap{
+    margin: 0 auto;
+    max-width: 768px;
+    padding: 7px 0 40px;
+}
+.notifications-content-wrap .notification-subscriptions-wrap .notification-subscriptions-header{
+    font-size: 20px;
+    line-height: 22px;
+    margin: 0px 48px 16px;
+    padding: 0 8px 4px;
+    border-bottom: 1px solid #E0E0E0;
+    font-weight: 500;
+}
+.notifications-content-wrap .notification-subscriptions-wrap .notification-subscription-item{
+    display: flex;
+    height: 96px;
+    margin-bottom: 16px;
+}
+.notifications-content-wrap .notification-subscriptions-wrap .notification-subscription-item .avatar-wrap{
+    width: 128px;
+    position: absolute;
+}
+.notifications-content-wrap .notification-subscriptions-wrap .notification-subscription-item .avatar-wrap .circle-avatar{
+    height: 64px;
+    left: unset;
+    right: 8px;
+    top: 16px;
+    width: 64px;
+    position: absolute;
+}
+.notifications-content-wrap .notification-subscriptions-wrap .notification-subscription-item .subcription-main-wrap{
+    padding: 0 96px 0 134px;
+}
+.notifications-content-wrap .notification-subscriptions-wrap .notification-subscription-item .subcription-main-wrap .subscription-item-name{
+    font-size: 15px;
+    line-height: 24px;
+    font-weight: 500;
+}
+.notifications-content-wrap .notification-subscriptions-wrap .notification-subscription-item .subcription-main-wrap .subscription-item-jid{
+    font-size: 14px;
+    color: rgba(60, 60, 67, 0.6);
+    margin-bottom: 8px;
+}
+.notifications-content-wrap .notification-subscriptions-wrap .notification-subscription-item .subscription-item-buttons-wrap{
+    /*height: 28px;*/
+}
+.notifications-content-wrap .notification-subscriptions-wrap .notification-subscription-item .subscription-item-buttons-wrap .btn-flat{
+    /*height: 28px;*/
+    margin-right: 4px;
+    min-width: 72px;
+    text-align: center;
+}
+.notifications-content-wrap .notification-subscriptions-wrap .notification-subscription-item .subscription-item-buttons-wrap .btn-block{
+    display: inline-block;
+}
+.notifications-content-wrap .notification-subscriptions-wrap .notification-subscriptions-button{
+    position: absolute;
+    left: 50%;
+    transform: translate(-50%, 0);
+    font-size: 17px;
+    line-height: 22px;
+    cursor: pointer;
+}
+.notifications-content-wrap .chat-day-indicator{
+    border-bottom: 1px solid #e0e0e0;
+    color: #000;
+    font-size: 20px;
+    font-weight: 500;
+    line-height: 22px;
+    margin: 32px auto 16px;
+    padding: 0 8px 4px;
+    text-align: left;
+    max-width: 672px;
 }
 /* Code Modal */
 .code-modal{

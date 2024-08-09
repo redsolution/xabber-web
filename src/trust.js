@@ -448,6 +448,36 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
         this.updateVerificationData();
     },
 
+
+    sendTestNotification: function () {
+        let msg_id = uuid(),
+            to = this.account.get('jid'),
+            stanza = $iq({
+                type: 'set',
+                to: to,
+                id: msg_id
+            });
+        stanza.c('notify', {xmlns: Strophe.NS.XABBER_NOTIFY});
+        stanza.c('notification', {xmlns: Strophe.NS.XABBER_NOTIFY});
+        stanza.c('forwarded', {xmlns: Strophe.NS.FORWARD});
+        stanza.c('message', {
+            to: to,
+            from: this.account.get('jid'),
+            type: 'chat',
+            id: uuid()
+        });
+        stanza.c('body').t(`time is - ${new Date()}`).up();
+
+        stanza.up().up().up();
+        stanza.c('addresses', {xmlns: Strophe.NS.ADDRESS}).c('address',{type: 'to', jid: to}).up().up();
+
+        console.log($(stanza.tree()));
+        console.log(stanza.tree());
+        this.account.sendFast(stanza, () => {
+            utils.callback_popup_message(xabber.getString("trust_verification_decrypt_failed"), 5000);
+        });
+    },
+
     onConnected: function () {
         this.populateOwnTrustedDevices();
     },
@@ -2142,10 +2172,10 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
         if (Strophe.getBareJidFromJid($message.attr('from')) === this.account.get('jid'))
             contact = undefined;
 
-        console.log(sid);
+        // console.log(sid);
         // console.log(contact);
         // console.log(options);
-        console.log(message);
+        // console.log(message);
         if (options.notification_trust_msg && options.device_id){
             // console.log(options.device_id);
             // console.log(this.omemo.get('device_id'));

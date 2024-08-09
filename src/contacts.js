@@ -8616,21 +8616,28 @@ xabber.Roster = xabber.ContactsBase.extend({
         if (!chat.item_view.content && (chat.get('sync_type') === Strophe.NS.XABBER_NOTIFY || is_invite || encrypted && this.account.omemo)) {
             chat.item_view.content = new xabber.ChatContentView({chat_item: chat.item_view});
             if (chat.get('sync_type') === Strophe.NS.XABBER_NOTIFY && this.account.server_features.get(Strophe.NS.XABBER_NOTIFY) && jid === this.account.server_features.get(Strophe.NS.XABBER_NOTIFY).get('from')){
-                if (xabber.notifications_view){
-                    let content;
-                    if (!xabber.notifications_view.notifications_chats.some(item => item.account.get('jid') === chat.account.get('jid'))){
-                        content = new xabber.NotificationsChatContentView({chat_item: chat.item_view});
-                        this.account.notifications_content = content;
-                        xabber.notifications_view.notifications_chats.push(content);
-                        content.data.set('notification_content', true);
-                    }
-                }
                 chat.set('notifications', true);
                 contact.set('subscription', 'both');
                 if (!request_with_stamp) {
                     chat.item_view.content.loadNotificationsHistoryToPreviousLastMsg();
                 }
                 xabber.accounts.trigger('notification_chat_created');
+                this.account.cached_notifications.getAllFromCachedNotifications((res) => {
+                    if (res.length){
+                        let parser = new DOMParser();
+                        _.each(res, (msg_item) => {
+                            let xml = parser.parseFromString(msg_item.xml, "text/xml")
+                            msg_item.is_unread && console.error(msg_item.is_unread)
+                            this.account.chats.receiveChatMessage(xml.firstChild,
+                                _.extend({
+                                    is_archived: true,
+                                    is_cached: true,
+                                    is_cached_unread: msg_item.is_unread,
+                                }, {})
+                            )
+                        })
+                    }
+                });
             }
         }
         if ($item.attr('pinned') || $item.attr('pinned') === '0'){
@@ -8722,10 +8729,19 @@ xabber.Roster = xabber.ContactsBase.extend({
         unread_msgs_count && (options.is_unread = true);
         options.delay = message.children('time');
         (unread_msgs_count == 0) && (options.sync_timestamp = chat_timestamp);
-        message.length && !chat.get('notifications') && (msg = this.account.chats.receiveChatMessage(message, options));
+        message.length && (msg = this.account.chats.receiveChatMessage(message, options));
         if (msg) {
-            if (!msg.get('is_unread') && $unread_messages.attr('count') > 0 && !msg.isSenderMe() && !(msg.get('type') === 'system') && ($unread_messages.attr('after') < msg.get('stanza_id') || $unread_messages.attr('after') < msg.get('contact_stanza_id')))//TODO: change to timestamp checking
+            if (!msg.get('is_unread') && $unread_messages.attr('count') > 0 && !msg.isSenderMe() && !(msg.get('type') === 'system') && ($unread_messages.attr('after') < msg.get('stanza_id') || $unread_messages.attr('after') < msg.get('contact_stanza_id'))) {//TODO: change to timestamp checking
                 msg.set('is_unread', true);
+                if (chat.get('notifications')){
+                    msg.get('xml') && this.account.cached_notifications.putInCachedNotifications({
+                        stanza_id: msg.get('unique_id'),
+                        xml: msg.get('xml').outerHTML,
+                        is_unread: true,
+                    });
+                }
+            }
+
             if(!(is_invite || encrypted && this.account.omemo)) {
                 if (msg.isSenderMe() && ((msg.get('stanza_id') == last_displayed_msg) || saved))
                     msg.set('state', constants.MSG_DISPLAYED);
@@ -9815,6 +9831,40 @@ xabber.CachedSyncСonversations = Backbone.ModelWithDataBase.extend({
     }
 });
 
+xabber.CachedNotifications = Backbone.ModelWithDataBase.extend({
+    putInCachedNotifications: function (value, callback) {
+        this.database.put('notification_items', value, function (response_value) {
+            callback && callback(response_value);
+        });
+    },
+
+    getFromCachedNotifications: function (value, callback) {
+        this.database.get('notification_items', value, function (response_value) {
+            callback && callback(response_value);
+        });
+    },
+
+    getAllFromCachedNotifications: function (callback) {
+        this.database.get_all('notification_items', null, function (response_value) {
+            callback && callback(response_value || []);
+        });
+    },
+
+    removeFromCachedNotifications: function (value, callback) {
+        this.database.remove('notification_items', value, function (response_value) {
+            callback && callback(response_value);
+        });
+    },
+
+    clearDataBase: function () {
+        this.database.clear_database('notification_items');
+    },
+
+    deleteDataBase: function () {
+        this.database.delete_database('notification_items');
+    }
+});
+
 xabber.CachedServerFeatures = Backbone.ModelWithDataBase.extend({
     putInCachedFeatures: function (value, callback) {
         this.database.put('server_features_items', value, function (response_value) {
@@ -9863,6 +9913,11 @@ xabber.Account.addInitPlugin(function () {
         name:'cached-conversation-list-v108-' + this.get('jid') + '-' + this.get('account_unique_id'),
         objStoreName: 'conversation_items',
         primKey: 'account_conversation_type'
+    });
+    this.cached_notifications = new xabber.CachedNotifications(null, {
+        name:'cached-notification-list-v108-' + this.get('jid') + '-' + this.get('account_unique_id'),
+        objStoreName: 'notification_items',
+        primKey: 'stanza_id'
     });
     this.cached_server_features = new xabber.CachedServerFeatures(null, {
         name:'cached-features-list-' + this.get('jid') + '-' + this.get('account_unique_id'),

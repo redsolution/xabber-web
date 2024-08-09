@@ -1234,7 +1234,7 @@ xabber.ToolbarView = xabber.BasicView.extend({
         xabber.trigger('add_group_chat', {public: true, right: null});
     },
 
-    setAllMessageCounter: function (log) {
+    setAllMessageCounter: function () {
         let count_msg = 0, count_all_msg = 0, count_group_msg = 0, mentions = 0;
         let all_unread_list = []
         xabber.accounts.each((account) => {
@@ -1257,6 +1257,8 @@ xabber.ToolbarView = xabber.BasicView.extend({
 
             incoming_subscriptions && all_unread_list.push({is_subs:true, inc_subs: account.contacts.filter(item => (item.get('invitation') && !item.get('removed')) || (item.get('subscription_request_in') && item.get('subscription') != 'both'))});
 
+            incoming_subscriptions && (mentions += incoming_subscriptions);
+
             count_all_msg += incoming_subscriptions;
             if (account.omemo && account.omemo.xabber_trust){
                 let trust = account.omemo.xabber_trust,
@@ -1266,8 +1268,8 @@ xabber.ToolbarView = xabber.BasicView.extend({
             }
         });
         if (all_unread_list.length){
-            console.error('TOOLBARS UNREAD');
-            console.error(all_unread_list);
+            // console.error('TOOLBARS UNREAD');
+            // console.error(all_unread_list);
         }
         return { msgs: count_msg, all_msgs: count_all_msg, group_msgs: count_group_msg, mentions: mentions };
     },

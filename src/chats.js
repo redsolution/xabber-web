@@ -546,6 +546,11 @@ xabber.MessagesBase = Backbone.Collection.extend({
         attrs.message = body;
 
         options.echo_msg && ($delay = $message.children('time'));
+        options.is_cached && ($delay = $message.children('time'));
+        if (options.is_cached && options.is_cached_unread){
+            attrs.is_unread = true;
+            attrs.is_unread_archived = true;
+        }
         $delay.length && (attrs.time = $delay.attr('stamp'));
         (attrs.carbon_copied || from_jid == this.account.get('jid') && (options.is_archived || options.synced_msg)) && (attrs.state = constants.MSG_SENT);
         options.synced_msg && (attrs.synced_from_server = true);
@@ -2316,6 +2321,7 @@ xabber.ChatItemView = xabber.BasicView.extend({
     updateIncomingSubscription: function () {
         this.$('.msg-incoming-subscription').showIf(this.contact.get('invitation') || (this.contact.get('subscription_request_in') && this.contact.get('subscription') != 'both'));
         this.updateTextClipping();
+        xabber.trigger('new_incoming_subscription');
     },
 
     updateChatError: function () {
@@ -4434,20 +4440,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
                         notifications_last_msg: options.notifications_last_msg
                     });
             } else if (this.model.get('notifications') && !this.model.get('history_loaded') && !_.isUndefined(options.notifications_last_msg) && rsm.complete && (rsm.count == 0)) {
-                this.getMessageArchive({
-                    max: xabber.settings.mam_messages_limit,
-                    fast: true,
-                    before: ''
-                }, {previous_history: true});
             } else if (!this.model.get('history_loaded') && options.notifications_last_msg && rsm.complete){
-                let normal_msgs_count = this.getFilteredMessages();
-                if (normal_msgs_count < xabber.settings.mam_messages_limit){
-                    this.getMessageArchive({
-                        max: xabber.settings.mam_messages_limit,
-                        fast: true,
-                        before: this.model.get('first_archive_id') || ''
-                    }, {previous_history: true});
-                }
             }
             if (options.unread_history){
                 if (messages.length)
@@ -4487,14 +4480,35 @@ xabber.ChatContentView = xabber.BasicView.extend({
             if (options.last_history || !this.model.get('last_archive_id')) {
                 rsm.last && this.model.set('last_archive_id', rsm.last);
             }
-            _.each(messages, function (message) {
+            _.each(messages, (message) => {
                 let loaded_message = account.chats.receiveChatMessage(message,
                     _.extend({
                         is_archived: true,
                         is_unread_archived: options.unread_history ? true : undefined,
                     }, options)
                 );
-                if (loaded_message) counter++;
+                if (loaded_message) {
+                    counter++;
+                    if (this.model.get('notifications') && this.model.get('last_read_msg')){
+                        let last_read_msg_item = this.model.messages.get(this.model.get('last_read_msg'));
+                        if (last_read_msg_item) {
+                            let unread_msgs = this.model.messages.filter(m => m.get('timestamp') > last_read_msg_item.get('timestamp') && !m.get('is_unread'));
+                            unread_msgs.forEach(message => {
+                                message.set('is_unread_archived', true);
+                                message.set('is_unread', true);
+                                if (message.collection && message.collection.account){
+                                    message.get('xml') && message.collection.account.cached_notifications.putInCachedNotifications({
+                                        stanza_id: message.get('unique_id'),
+                                        xml: message.get('xml').outerHTML,
+                                        is_unread: true,
+                                    },(res) => {
+
+                                    })
+                                }
+                            });
+                        }
+                    }
+                }
             });
             if (options.is_scrollToTop){
                 this.scrollToTop();
@@ -4507,16 +4521,6 @@ xabber.ChatContentView = xabber.BasicView.extend({
                     max: xabber.settings.mam_messages_limit,
                     before: this.model.get('first_archive_id') || ''
                 }), {previous_history: true});
-            }
-            if (this.model.get('notifications') && !this.model.get('history_loaded') && _.isUndefined(options.notifications_last_msg)) {
-                let normal_msgs_count = this.getFilteredMessages();
-                if (normal_msgs_count < xabber.settings.mam_messages_limit){
-                    this.getMessageArchive({
-                        max: xabber.settings.mam_messages_limit,
-                        fast: true,
-                        before: this.model.get('first_archive_id') || ''
-                    }, {previous_history: true});
-                }
             }
             if (options.unread_history_before){
                 if (this.model.get('encrypted')){
@@ -4597,7 +4601,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
         if (previous_last_msg){
             this.getMessageArchive({
                     fast: true,
-                    max: 3,
+                    max: xabber.settings.mam_messages_limit,
                     var: [
                         {var: 'after-id', value: previous_last_msg},
                     ]
@@ -4606,11 +4610,6 @@ xabber.ChatContentView = xabber.BasicView.extend({
                     notifications_last_msg: previous_last_msg
                 });
         } else {
-            this.getMessageArchive({
-                max: xabber.settings.mam_messages_limit,
-                fast: true,
-                before: ''
-            }, {previous_history: true});
         }
 
     },
@@ -4633,14 +4632,6 @@ xabber.ChatContentView = xabber.BasicView.extend({
     },
 
     getFilteredMessages: function () {
-        let msgs_count,
-            active_chat_filter = this.model.get('notifications_filter');
-        if (!active_chat_filter || active_chat_filter === 'all'){
-            msgs_count = this.model.messages.filter(m => !m.get('ignored')).length;
-        } else if (active_chat_filter === 'security'){
-            msgs_count = this.model.messages.filter(m => m.get('security_notification')).length;
-        }
-        return msgs_count;
     },
 
     showHistoryFeedback: function (is_error) {
@@ -4899,19 +4890,6 @@ xabber.ChatContentView = xabber.BasicView.extend({
             scrolled_from_bottom = this.getScrollBottom(),
             $notification_msg, ignored, verification_failed;
 
-        if (message.get('notification_msg') && message.get('notification_msg_content') && this.data.get('notification_content')){
-            $notification_msg = $(message.get('notification_msg_content'));
-            if (message.get('notification_trust_msg') || $notification_msg.children(`authenticated-key-exchange[xmlns="${Strophe.NS.XABBER_TRUST}"]`).length) {
-                if (!$notification_msg.find('verification-successful').length && !$notification_msg.find('verification-failed').length && !$notification_msg.find('verification-rejected').length){
-                    ignored = true;
-                }
-                if ($notification_msg.find('verification-failed').length || $notification_msg.find('verification-rejected').length){
-                    ignored = true;
-                    verification_failed = true;
-                }
-            }
-        }
-
         if (!_.isUndefined(message.get('is_accepted'))) {
             this.model.set('is_accepted', false);
         }
@@ -4966,7 +4944,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
                     if (!xabber.get('focused')) {
                         if (this.model.get('saved') || this.model.isMuted())
                             message.set('muted', true);
-                        else if (!message.get('synced_invitation_from_server') && !((message.get('notification_msg') && message.get('notification_msg_content') && !this.data.get('notification_content'))))
+                        else if (!message.get('synced_invitation_from_server') && !((message.get('notification_msg') && message.get('notification_msg_content'))))
                             this.notifyMessage(message);
                     }
                     this.model.setMessagesDisplayed(message.get('timestamp'));
@@ -5080,37 +5058,17 @@ xabber.ChatContentView = xabber.BasicView.extend({
 
 
 
-        if (message.get('notification_msg') && message.get('notification_msg_content') && this.data.get('notification_content')){
+        if (message.get('notification_msg') && message.get('notification_msg_content')){
 
-            if (message.get('notification_trust_msg') || $notification_msg.children(`authenticated-key-exchange[xmlns="${Strophe.NS.XABBER_TRUST}"]`).length) {
-                if (ignored){
-                    message.set('ignored', true);
-                    message.set('is_unread', false);
-                    $message.addClass('hidden');
-                    if (verification_failed){
-                        message.set('security_notification', true);
-                        $message.removeClass('hidden');
-                        $message.addClass('security-content-msg');
-                    }
-                }
-                if (this.account.omemo && this.account.omemo.xabber_trust){
-                    if (message.get('device_id')){
-                        this.account.omemo.xabber_trust.addToSequentialProcessingList($notification_msg[0], {
-                            automated: true,
-                            notification_trust_msg: message.get('notification_trust_msg'),
-                            device_id: message.get('device_id'),
-                            msg_item: message
-                        });
-                    } else {
-                        this.account.omemo.xabber_trust.receiveTrustVerificationMessage($notification_msg[0], {
-                            automated: true,
-                            notification_trust_msg: message.get('notification_trust_msg'),
-                            device_id: message.get('device_id'),
-                            msg_item: message
-                        });
-                    }
-                }
-                return;
+            if (this.model.get('notifications') && xabber.notifications_view && xabber.notifications_view.current_content && xabber.notifications_view.current_content.notification_messages){
+                message.get('xml') && this.account.cached_notifications.putInCachedNotifications({
+                    stanza_id: message.get('unique_id'),
+                    xml: message.get('xml').outerHTML,
+                    is_unread: message.get('is_unread'),
+                },(res) => {
+                    message.collection = this.model.messages;
+                    xabber.notifications_view.current_content.notification_messages.add(message);
+                })
             }
         }
     },
@@ -10960,7 +10918,7 @@ xabber.InvitationPanelView = xabber.SearchView.extend({
               id: uuid()
           });
           stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: sid, timestamp: Math.floor(Date.now() / 1000) }).c('verification-start', {'device-id': this.account.omemo.get('device_id'), 'ttl': 86400 }).up().up();
-          stanza.c('body').t(`Device Verification request from ${this.account.jid} A1`).up();
+          stanza.c('body').t(``).up();
           stanza.up().up().up();
           stanza.c('fallback',{xmlns: Strophe.NS.XABBER_NOTIFY}).t(`device verification fallback text`).up();
           stanza.c('addresses', {xmlns: Strophe.NS.ADDRESS}).c('address',{type: 'to', jid: this.contact.get('jid')}).up().up();

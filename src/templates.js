@@ -240,6 +240,8 @@
     addTemplate('notifications.notifications_view');
     addTemplate('notifications.account_filter_item');
     addTemplate('notifications.current_verification_sessions');
+    addTemplate('notifications.incoming_subscriptions_container');
+    addTemplate('notifications.incoming_subscriptions_item');
     addTemplate('notifications.verification_session');
 
     addTemplate('mentions.mentions_panel');

@@ -237,7 +237,7 @@ xabber.Fingerprints = xabber.BasicView.extend({
             id: uuid()
         });
         stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: sid, timestamp: Math.floor(Date.now() / 1000) }).c('verification-start', {'device-id': this.account.omemo.get('device_id'), 'ttl': 86400 }).up().up();
-        stanza.c('body').t(`Device Verification request from ${this.account.jid} A1`).up();
+        stanza.c('body').t(``).up();
         stanza.up().up().up();
         stanza.c('fallback',{xmlns: Strophe.NS.XABBER_NOTIFY}).t(`device verification fallback text`).up();
         stanza.c('addresses', {xmlns: Strophe.NS.ADDRESS}).c('address',{type: 'to', jid: this.jid}).up().up();
@@ -835,7 +835,7 @@ xabber.FingerprintsOwnDevices = xabber.BasicView.extend({
             id: uuid()
         });
         stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: sid, timestamp: Math.floor(Date.now() / 1000) }).c('verification-start', {'device-id': this.account.omemo.get('device_id'), 'to-device-id': this.device_id, 'ttl': 300 }).up().up();
-        stanza.c('body').t(`Device Verification request from ${this.account.jid} A1`).up();
+        stanza.c('body').t(``).up();
         stanza.up().up().up();
         stanza.c('fallback',{xmlns: Strophe.NS.XABBER_NOTIFY}).t(`device verification fallback text`).up();
         stanza.c('addresses', {xmlns: Strophe.NS.ADDRESS}).c('address',{type: 'to', jid: this.account.get('jid')}).up().up();

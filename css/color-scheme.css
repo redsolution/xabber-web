@@ -3074,3 +3074,9 @@
 [data-color=blue-grey] .hover-fill-color-700:hover {
   fill: #455a64 !important;
 }
+.fill-color-grey-500,
+.fill-color-grey-500 path,
+.fill-color-grey-500 use,
+.hover-fill-color-grey-500:hover{
+  fill: #9E9E9E !important;
+}

@@ -1227,11 +1227,6 @@ xabber.Account = Backbone.Model.extend({
             } else {
                 this.onDisconnected();
             }
-            xabber.notifications_view.notifications_chats = xabber.notifications_view.notifications_chats.filter(item => item.account.get('jid') !== this.get('jid'));
-            if (xabber.notifications_view && xabber.notifications_view.current_content && xabber.notifications_view.current_content.account.get('jid') === this.get('jid')) {
-                xabber.notifications_view.current_content.destroyView();
-                xabber.notifications_view.current_content = null;
-            }
         },
 
         onDestroy: function () {
@@ -1260,13 +1255,9 @@ xabber.Account = Backbone.Model.extend({
                 if (this.fast_conn_manager) this.fast_connection.disconnect();
             }
             this.cached_sync_conversations && this.cached_sync_conversations.deleteDataBase();
+            this.cached_notifications && this.cached_notifications.deleteDataBase();
             this.cached_roster && this.cached_roster.deleteDataBase();
             this.cached_server_features && this.cached_server_features.deleteDataBase();
-            xabber.notifications_view.notifications_chats = xabber.notifications_view.notifications_chats.filter(item => item.account.get('jid') !== this.get('jid'));
-            if (xabber.notifications_view && xabber.notifications_view.current_content && xabber.notifications_view.current_content.account.get('jid') === this.get('jid')) {
-                xabber.notifications_view.current_content.destroyView();
-                xabber.notifications_view.current_content = null;
-            }
             this.trigger('remove_saved_chat');
         },
 

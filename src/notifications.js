@@ -11,7 +11,21 @@ let env = xabber.env,
     _ = env._,
     moment = env.moment,
     uuid = env.uuid,
-    pretty_date = (timestamp) => { return utils.pretty_date(timestamp, (xabber.settings.language == 'ru-RU' || xabber.settings.language == 'default' && xabber.get("default_language") == 'ru-RU') && 'dddd, D MMMM YYYY')},
+    pretty_date = (timestamp) => {
+        let date = new Date(timestamp),
+            today = new Date(),
+            yesterday = new Date();
+
+        yesterday.setDate(today.getDate() - 1);
+
+        if (date.toDateString() === today.toDateString()) {
+            return xabber.getString("today");
+        } else if (date.toDateString() === yesterday.toDateString()) {
+            return xabber.getString("yesterday");
+        } else {
+            return utils.pretty_date(timestamp, (xabber.settings.language == 'ru-RU' || xabber.settings.language == 'default' && xabber.get("default_language") == 'ru-RU') && 'dddd, D MMMM YYYY')
+        }
+    },
     pretty_datetime = (timestamp) => { return utils.pretty_datetime(timestamp, (xabber.settings.language == 'ru-RU' || xabber.settings.language == 'default' && xabber.get("default_language") == 'ru-RU') && 'D MMMM YYYY HH:mm:ss')};
 
 
@@ -26,78 +40,82 @@ xabber.NotificationsView = xabber.BasicView.extend({
     avatar_size: constants.AVATAR_SIZES.SYNCHRONIZE_ACCOUNT_ITEM,
 
     events: {
-        "click .notifications-account-filter-content .filter-item-wrap": "selectAccount",
-        "click .cancel-session": "cancelTrustSession",
-        "click .enter-code": "enterCode",
-        "click .filter-item-wrap": "filterContent",
+        "click .notifications-account-filter-content .filter-item-wrap": "selectAccounts",
+        "click .notifications-type-filter-content .filter-item-wrap": "filterContent",
+        "click .notification-subscriptions-button": "filterContent",
 
     },
 
     _initialize: function () {
-        this.notifications_chats = [];
-        xabber.accounts.on("list_changed connected_list_changed notification_chat_created account_color_updated add change:enabled destroy", this.updateAccountsFilter, this);
+        xabber.accounts.on("list_changed connected_list_changed notification_chat_created account_color_updated add destroy", this.updateAccountsFilter, this);
+        xabber.accounts.on("change:enabled", this.updateAccountsFilter, this);
+        xabber.accounts.on("change:connected", this.updateAccountsFilter, this);
         return this;
     },
 
     render: function (options) {
         // console.log(options);
         this.updateAccountsFilter();
+        if (this.current_content){
+            let clear;
+            if (this.current_content.filter_type !== 'all'){
+                this.current_content.filter_type = 'all';
+                this.$('.notifications-type-filter-content .filter-item-wrap').removeClass('selected-filter');
+                this.$('.notifications-type-filter-content .filter-item-wrap[data-filter="all"]').addClass('selected-filter');
+                this.current_content.$el.removeClass('security-content');
+                this.current_content.$el.removeClass('subscription-content');
+                clear = true;
+            }
+            this.current_content.filterByAccounts([], clear);
+        }
     },
 
     onShowNotificationsTab: function () {
-        if (!this.account || !this.account.omemo){
-            return;
-        }
         if (this.current_content){
             this.current_content.onShowNotificationsTab();
         }
     },
 
     cancelTrustSession: function (ev) {
-        if (!this.account || !this.account.omemo)
-            return;
-        let $item = $(ev.target).closest('.notification-trust-session');
-        if ($item.attr('data-sid')){
-            this.account.omemo.xabber_trust && this.account.omemo.xabber_trust.cancelSession($item.attr('data-sid'), $item.attr('data-jid'))
-        }
     },
 
     enterCode: function (ev) {
-        if (!this.account || !this.account.omemo)
-            return;
-        let $item = $(ev.target).closest('.notification-trust-session');
-        if ($item.attr('data-sid')){
-            this.account.omemo.xabber_trust && this.account.omemo.xabber_trust.handleAcceptedMsgBySid($item.attr('data-sid'))
-        }
     },
 
     filterContent: function (ev) {
-        if (!this.current_content || !this.account)
+        if (!this.current_content)
             return;
         let $item = $(ev.target).closest('.filter-item-wrap'),
-            filter_type = $item.attr('data-filter');
-        this.$('.filter-item-wrap').removeClass('selected-filter');
-        this.$('.filter-item-wrap[data-filter="all"').addClass('selected-filter');
-        this.current_content.$el.removeClass('security-content');
-        if (filter_type === 'all'){
-
-        } else if (filter_type === 'security'){
+            filter_type = $item.attr('data-filter'),
+            clear_account;
+        if ($item.hasClass('selected-filter')){
             this.$('.filter-item-wrap').removeClass('selected-filter');
-            this.$(`.filter-item-wrap[data-filter="${filter_type}"`).addClass('selected-filter');
-            this.current_content.$el.addClass('security-content');
+            clear_account = true
         }
-        this.current_content.model.set('notifications_filter', filter_type);
-        this.current_content.backToBottom();
-        if (!this.current_content.model.get('history_loaded')) {
-            let normal_msgs_count = this.current_content.getFilteredMessages();
-            if (normal_msgs_count < xabber.settings.mam_messages_limit){
-                this.current_content.getMessageArchive({
-                    max: xabber.settings.mam_messages_limit,
-                    fast: true,
-                    before: this.current_content.model.get('first_archive_id') || ''
-                }, {previous_history: true});
+        this.$('.notifications-type-filter-content .filter-item-wrap').removeClass('selected-filter');
+        this.$('.notifications-type-filter-content .filter-item-wrap[data-filter="all"]').addClass('selected-filter');
+        this.$('.notification-subscriptions-button').removeClass('hidden');
+        this.$('.notification-subscription-item').slice(2).addClass('hidden');
+        this.current_content.$el.removeClass('subscription-content');
+        this.current_content.$el.removeClass('security-content');
+        this.current_content.$el.removeClass('subscription-content-hidden');
+        if (filter_type !== 'all') {
+            if (filter_type === 'subscription') {
+                this.current_content.$el.addClass('subscription-content');
+                this.$('.notification-subscription-item').removeClass('hidden');
+                this.$('.notification-subscriptions-button').addClass('hidden');
+            } else if (filter_type === 'security') {
+                this.current_content.$el.addClass('security-content');
+                this.current_content.$el.addClass('subscription-content-hidden');
             }
+            this.$('.notifications-type-filter-content .filter-item-wrap').removeClass('selected-filter');
+            this.$(`.notifications-type-filter-content .filter-item-wrap[data-filter="${filter_type}"]`).addClass('selected-filter');
         }
+
+        if (!clear_account){
+            this.$('.notifications-account-filter-content .filter-item-wrap').removeClass('selected-filter');
+        }
+        this.current_content.filterByProperty(filter_type, clear_account);
     },
 
     updateAccountsFilter: function () {
@@ -117,8 +135,6 @@ xabber.NotificationsView = xabber.BasicView.extend({
                 _.each(accounts, (account) => {
                     this.$('.notifications-account-filter-content').append(this.renderAccountItem(account));
                 });
-                this.$('.notifications-account-filter-content .filter-item-wrap').first().addClass('selected-filter');
-                this.account = accounts[0];
 
                 // this.$('.account-dropdown-wrap').dropdown({
                 //     inDuration: 100,
@@ -154,78 +170,183 @@ xabber.NotificationsView = xabber.BasicView.extend({
         return $item;
     },
 
-    selectAccount: function (ev) {
+    selectAccounts: function (ev) {
 
         let $item = $(ev.target).closest('.filter-item-wrap');
         if (!$item.attr('data-jid')) {
             $item.remove();
             return;
         }
-        this.$('.notifications-account-filter-content .filter-item-wrap').removeClass('selected-filter');
-        $item.addClass('selected-filter');
-        // console.log($item);
-        // console.log($item.attr('data-jid'));
-        this.account = xabber.accounts.connected.filter(item => item.get('jid') === $item.attr('data-jid'));
-        if (this.account.length){
-            this.account = this.account[0];
-            this.updateCurrentNotifications();
+        if(!$item.hasClass('selected-filter')){
+            this.$('.notifications-account-filter-content .filter-item-wrap').removeClass('selected-filter');
+        }
+        $item.switchClass('selected-filter');
+
+
+        let accounts  = this.$('.notifications-account-filter-content .filter-item-wrap.selected-filter').map(function(){return $(this).attr("data-jid");}).get();
+        if (this.current_content){
+            this.current_content.filterByAccounts(accounts);
         }
     },
 
     updateCurrentNotifications: function () {
-        let content;
-        // console.log(this.account);
-        // console.log(this.account.get('jid'));
-        if (this.account){
-            if (!xabber.accounts.enabled.length || !xabber.accounts.connected.length)
-                return;
-            let chat = this.account.chats.filter(item => item.get('jid') === this.account.server_features.get(Strophe.NS.XABBER_NOTIFY).get('from') && item.get('notifications'));
-            if (chat.length){
-                chat = chat[0];
-            }
-            // console.log(chat);
-            if (!chat || !chat.item_view){
-                console.log('no chat!');
+        let notifications_chats = [];
+        if (!this.current_content){
+            this.$('.notifications-content').html('');
+            this.current_content = new xabber.NotificationsChatContentView();
+            this.current_content.show();
+        }
+        if (this.current_content){
+            if (!xabber.accounts.enabled.length || !xabber.accounts.connected.length){
+                this.current_content.addChats(notifications_chats); // push list to content
                 return;
             }
-            if (!this.notifications_chats.some(item => item.account.get('jid') === chat.account.get('jid'))){
-                content = new xabber.NotificationsChatContentView({chat_item: chat.item_view});
-                this.account.notifications_content = content;
-                this.notifications_chats.push(content);
-                content.data.set('notification_content', true);
-                // console.log(content);
-            } else {
-                content = this.notifications_chats.filter(item => item.account.get('jid') === chat.account.get('jid'));
-                if (content.length)
-                    content = content[0];
-                // console.log(content);
-            }
-            // console.log(this.notifications_chats);
-            //
-            // console.log(content);
-            if (content){
-                // console.log(content.$el);
-                // console.log(this);
-                // console.log(this.current_content);
-                if (this.current_content){
-                    if (this.current_content.account.get('jid') === content.account.get('jid')){
-                        return;
-                    }
-                    this.current_content.hide();
+            let accounts = xabber.accounts.enabled;
+            accounts = accounts.filter(item => item.server_features.get(Strophe.NS.XABBER_NOTIFY));
+            _.each(accounts, (account) => {
+                let chat = account.chats.filter(item => item.get('jid') === account.server_features.get(Strophe.NS.XABBER_NOTIFY).get('from') && item.get('notifications'));
+                if (chat.length){
+                    chat = chat[0];
                 }
-                this.$('.notifications-content').html('');
-                this.current_content = content;
-                this.current_content.show();
-            }
+                if (!chat || !chat.item_view){
+                    console.log('no chat!');
+                    return;
+                }
+                notifications_chats.push(chat);
+            });
+            this.current_content.addChats(notifications_chats); // push list to content
         }
     },
 });
 
-xabber.NotificationsChatContentView = xabber.ChatContentView.extend({
+xabber.NotificationsChatContentView = xabber.BasicView.extend({
+    className: 'chat-content-wrap',
+    template: env.templates.chats.chat_content,
+    ps_selector: '.chat-content',
+    ps_settings: {
+        wheelPropagation: true
+    },
+    avatar_size: constants.AVATAR_SIZES.CHAT_MESSAGE,
+
+    events: {
+        'click .chat-message': 'onClickNotification',
+        "click .back-to-bottom": "backToBottom",
+        "click .back-to-unread:not(.back-to-bottom)": "scrollToUnreadWithButton",
+        "click .btn-decline": "declineSubscription",
+        "click .btn-add": "addContact",
+        "click .btn-block": "blockContact"
+    },
+
+    _initialize: function (options) {
+
+        this.current_day_indicator = null;
+        this.$history_feedback = this.$('.load-history-feedback');
+
+        this._scrolltop = this.getScrollTop();
+        this._is_scrolled_bottom = true;
+        this._long_reading_timeout = false;
+        let wheel_ev = this.defineMouseWheelEvent();
+        this.$el.on(wheel_ev, this.onMouseWheel.bind(this));
+        this.ps_container.on("ps-scroll-up ps-scroll-down", this.onScroll.bind(this));
+        this.ps_container.on("ps-scroll-y", this.onScrollY.bind(this));
+        this.filtered_accounts = [];
+        this.filtered_messages = [];
+        this.filter_type = 'all';
+        this.notifications_chats = [];
+        this.notification_messages = new xabber.Messages(null, {});
+        this.notification_messages.on("change:last_replace_time", this.updateMessage, this);
+        this.notification_messages.on("add", this.addMessage, this);
+        this.notification_messages.on("change:is_unread", this.onChangedReadState, this);
+        this.notification_messages.on("change:timestamp", this.onChangedMessageTimestamp, this);
+        xabber.on('new_incoming_subscription', this.updateAllIncomingSubscriptions, this);
+
+        return this;
+    },
+
+    render: function () {
+        if (this._prev_scrolltop)
+            this.scrollTo(this._prev_scrolltop);
+        else
+            this.scrollToBottom();
+        this.onScroll();
+
+        this.$el.addClass('chat-body-container-notifications');
+    },
+
+    onClickNotification: function (ev) {
+        let $elem = $(ev.target);
+
+        $elem.closest('.chat-message').removeClass('unread-message-background');
+    },
+
+    defineMouseWheelEvent: function () {
+        if (!_.isUndefined(window.onwheel)) {
+            return "wheel";
+        } else if (!_.isUndefined(window.onmousewheel)) {
+            return "mousewheel";
+        } else {
+            return "MozMousePixelScroll";
+        }
+    },
+
+    addContact: function (ev) {
+        let $item = $(ev.target).closest('.notification-subscription-item');
+        if (!$item.attr('data-jid') || !$item.attr('data-account-jid'))
+            return;
+        let account = xabber.accounts.enabled.find(acc => acc.get('jid') === $item.attr('data-account-jid'));
+        if (!account)
+            return;
+        let contact = account.contacts.get($item.attr('data-jid'));
+        if (!contact)
+            return;
+
+        if (contact.get('subscription') === undefined)
+            contact.pushInRoster(null, () => {
+                this.sendAndAskSubscription(contact);
+            });
+        else
+            this.sendAndAskSubscription(contact);
+    },
+
+    sendAndAskSubscription: function (contact) {
+        contact.askRequest();
+        contact.acceptRequest();
+    },
+
+    declineSubscription: function (ev) {
+        let $item = $(ev.target).closest('.notification-subscription-item');
+        if (!$item.attr('data-jid') || !$item.attr('data-account-jid'))
+            return;
+        let account = xabber.accounts.enabled.find(acc => acc.get('jid') === $item.attr('data-account-jid'));
+        if (!account)
+            return;
+        let contact = account.contacts.get($item.attr('data-jid'));
+        if (!contact)
+            return;
+
+        contact.declineSubscribe();
+        contact.set('subscription_request_in', false);
+    },
+
+    blockContact: function (ev) {
+        let $item = $(ev.target).closest('.notification-subscription-item');
+        if (!$item.attr('data-jid') || !$item.attr('data-account-jid'))
+            return;
+        let account = xabber.accounts.enabled.find(acc => acc.get('jid') === $item.attr('data-account-jid'));
+        if (!account)
+            return;
+        let contact = account.contacts.get($item.attr('data-jid'));
+        if (!contact)
+            return;
+
+        contact.declineSubscribe();
+        contact.set('subscription_request_in', false);
+        setTimeout(()=> {
+            contact.blockRequest();
+        }, 1000);
+    },
 
     onShow: function (attrs) {
-        // console.log(attrs);
-        // console.log('shooooowwwwwwwwwwwwwwwwwwww');
         xabber.notifications_view.$('.notifications-content').append(this.$el);
         this.onScroll();
         setTimeout(() => {
@@ -234,11 +355,37 @@ xabber.NotificationsChatContentView = xabber.ChatContentView.extend({
         if (!this.$('.chat-content .notification-sessions-wrap').length){
             this.addTrustSessionsContainer()
         }
+        if (!this.$('.chat-content .notification-subscriptions-wrap').length){
+            this.addIncomingSubscriptionContainer()
+        }
+    },
+
+    addChats: function (notifications_chats) {
+        let account_jids = [];
+        this.notifications_chats = [];
+        _.each(notifications_chats, (chat) => {
+            account_jids.push(chat.account.get('jid'));
+            let messages = chat.messages.models;
+            _.each(messages, (msg) => {
+                msg.collection = chat.messages;
+            });
+            this.notifications_chats.push({jid: chat.account.get('jid'), chat:chat});
+            this.notification_messages.add(messages);
+        });
+        let remove_list = this.notification_messages.filter(msg => msg.collection && msg.collection.account && !account_jids.includes(msg.collection.account.get('jid'))),
+            new_list = this.notification_messages.filter(msg => msg.collection && msg.collection.account && account_jids.includes(msg.collection.account.get('jid')));
+
+        _.each(remove_list, (msg) => {
+            this.removeMessageFromDOM(msg);
+        });
+        remove_list.length && new_list.length && this.notification_messages.reset(new_list);
+
+        this.updateAllIncomingSubscriptions();
     },
 
     isVisible: function () {
         let is_visible = false;
-        if (xabber.notifications_view && xabber.notifications_view.current_content && xabber.notifications_view.current_content.account.get('jid') === this.account.get('jid')){
+        if (xabber.notifications_view && xabber.notifications_view.current_content){
             if (xabber.notifications_body.data.get('visible')){
                 is_visible = true;
             }
@@ -246,8 +393,7 @@ xabber.NotificationsChatContentView = xabber.ChatContentView.extend({
         return is_visible;
     },
 
-    onHide: function (attrs) {
-        // console.log(attrs);
+    onHide: function () {
         this.$el.detach();
 
     },
@@ -261,233 +407,139 @@ xabber.NotificationsChatContentView = xabber.ChatContentView.extend({
         setTimeout(() => {
             this.onScroll();
         }, 1500);
-        let unread_count_sync = this.model.get('const_unread');
-        if (unread_count_sync){
-            this.model.set('const_unread', 0);
-
-            if (this.model.get('unread'))
-                this.readMessages();
-            unread_count_sync--;
-            for (let step = 0; step < unread_count_sync; step++) {
-                let read_messages = this.$('.chat-message:not(.unread-message-background)');
-                if (read_messages.length){
-                    read_messages.first().addClass('unread-message-background');
-                }
-            }
-
-        }
     },
 
-    readVisibleMessages: function (is_context) {
-        let self = is_context ? this.model.messages_view : this;
-        if (!self.isVisible())
+    readNotifications: function () {
+        if (!this.isVisible() || !xabber.get('focused'))
             return;
-        if (self.$('.chat-message.unread-message').length && xabber.get('focused') && !xabber.get('idle')){
-            let first_visible_unread_msg;
-            self.$('.chat-message.unread-message').each((idx, msg) => {
-                if ($(msg).isVisibleInContainer(self.$('.chat-content'))) {
-                    first_visible_unread_msg = msg;
-                    return false;
-                }
-            });
-            if (first_visible_unread_msg){
-                this.readMessage(this.model.messages.get($(first_visible_unread_msg).data('uniqueid')), $(first_visible_unread_msg), is_context);
+        _.each(this.notifications_chats, (chat_item) => {
+            if (!chat_item.chat)
+                return;
+            if (chat_item.chat.item_view && !chat_item.chat.item_view.content)
+                chat_item.chat.item_view.content = new xabber.ChatContentView({chat_item: chat_item.chat.item_view});
+            if ((chat_item.chat.get('unread') || chat_item.chat.get('const_unread')) && chat_item.chat.last_message){
+                chat_item.chat.item_view.content.readMessages();
             }
-        }
+        })
     },
-
     onChangedReadState: function (message) {
         let is_unread = message.get('is_unread'),
-            is_synced = message.get('synced_from_server'),
-            is_unread_archived = message.get('is_unread_archived'),
-            is_missed_msg = message.get('missed_msg'),
             $msg = this.$(`.chat-message[data-uniqueid="${message.get("unique_id")}"]`);
         if (is_unread) {
-            if (!is_unread_archived && !is_synced && !is_missed_msg)
-                this.model.messages_unread.add(message);
             if (!message.get('was_readen')){
                 $msg.addClass('unread-message');
                 $msg.addClass('unread-message-background');
             }
-            if (message.get('ignored')){
-                message.set('is_unread', false)
-            }
-            this.model.recountUnread();
         } else {
-            if ((!is_unread_archived && !is_synced && !is_missed_msg) || this.model.messages_unread.indexOf(message) > -1)
-                this.model.messages_unread.remove(message);
-            message.set('was_readen', true);
             $msg.removeClass('unread-message');
-            // setTimeout(() => {
-            //     $msg.removeClass('unread-message-background');
-            // }, 1000);
-            this.model.recountUnread();
-            if (!message.get('muted')) {
-                xabber.recountAllMessageCounter();
-            }
-            if (message.get('ephemeral_timer')) {
-                message.set('displayed_time', new Date());
-                message.collection.checkEphemeralTimers();
+            if (message.collection && message.collection.account){
+                message.get('xml') && message.collection.account.cached_notifications.putInCachedNotifications({
+                    stanza_id: message.get('unique_id'),
+                    xml: message.get('xml').outerHTML,
+                    is_unread: false,
+                },(res) => {
+
+                })
             }
         }
+    },
+
+    filterByAccounts: function (accounts, cleared) {
+        this.filtered_accounts.length && !accounts.length && (cleared = true);
+        this.filtered_accounts = accounts;
+        this.FilterMessagesInChat(cleared);
+    },
+
+    filterByProperty: function (filter_type, clear_account) {
+        if (clear_account)
+            this.filterByAccounts([]);
+        if (this.filter_type === filter_type)
+            return;
+        this.filtered_accounts = [];
+        this.filter_type = filter_type;
+        this.FilterMessagesInChat(true);
     },
 
     readMessage: function (last_visible_msg, $last_visible_msg, is_context) {
-        clearTimeout(this._read_last_message_timeout);
-        this._read_last_message_timeout = setTimeout(() => {
-            this.model.sendMarker(last_visible_msg.get('msgid'), 'displayed', last_visible_msg.get('stanza_id'), last_visible_msg.get('contact_stanza_id'), last_visible_msg.get('encrypted') && last_visible_msg.get('ephemeral_timer'));
-            this.model.set('last_read_msg', last_visible_msg.get('stanza_id'));
-            this.model.set('prev_last_read_msg', last_visible_msg.get('stanza_id'));
-
-            if (is_context){
-                let unread_context_messages = _.clone(this.account.context_messages.models).filter(item => Boolean(item.get('is_unread')) || Boolean(item.get('is_unread_archived')));
-                _.each(unread_context_messages, (msg) => {
-                    let msg_item = this.model.messages.find(message => message.get('stanza_id') == msg.get('stanza_id') || message.get('contact_stanza_id') == msg.get('stanza_id'));
-                    if (msg_item) {
-                        msg.set('is_unread', msg_item.get('is_unread'));
-                        msg.set('is_unread_archived', msg_item.get('is_unread_archived'));
-                    }
-                });
-                // setTimeout(() => {
-                //     $last_visible_msg.removeClass('unread-message-background');
-                // }, 1000);
-            }
-
-            xabber.toolbar_view.recountAllMessageCounter();
-        }, 1000);
-
-        if (last_visible_msg.get('is_unread_archived') || this.model.last_message && (last_visible_msg.get('unique_id') === this.model.last_message.get('unique_id')) || this.model.get('const_unread')){
-            let unread_messages = _.clone(this.model.messages.models).filter(item => Boolean(item.get('is_unread'))),
-                read_count = 0;
-
-            _.each(unread_messages, (msg) => {
-                if (msg.get('timestamp') <= last_visible_msg.get('timestamp')) {
-                    msg.set('is_unread', false);
-                    read_count++;
-                }
-            });
-            read_count = this.model.get('const_unread') - read_count;
-            (read_count < 0) && (read_count = 0);
-            this.model.set('unread', 0);
-            this.model.set('const_unread', read_count);
-        } else {
-            let unread_messages = _.clone(this.model.messages_unread.models);
-            _.each(unread_messages, (msg) => {
-                if (msg.get('timestamp') <= last_visible_msg.get('timestamp')) {
-                    msg.set('is_unread', false);
-                }
-            });
-        }
-        xabber.toolbar_view.recountAllMessageCounter();
-
-        // if (!is_context){
-        //     setTimeout(() => {
-        //         $last_visible_msg.removeClass('unread-message-background');
-        //     }, 1000);
-        // }
     },
 
     removeMessage: function (item) {
-        let message, $message, $message_in_chat;
-        if (item instanceof xabber.Message) {
-            message = item;
-            $message_in_chat = this.$(`.chat-message[data-uniqueid="${item.get('unique_id')}"]`);
-            (this.bottom.content_view) && ($message = this.bottom.content_view.$(`.chat-message[data-uniqueid="${item.get('unique_id')}"]`));
-        } else {
-            $message = item;
-            if (!$message.length) return;
-            message = this.model.messages.get($message.data('uniqueid'));
-        }
-        message && message.destroy();
-        if ($message_in_chat) {
-            this.removeMessageFromDOM($message_in_chat);
-        }
-        if ($message && ($message !== $message_in_chat))
-            this.removeMessageFromDOM($message);
     },
 
     addTrustSessionsContainer: function () {
-        this.$('.chat-content').prepend($(templates.current_verification_sessions()));
-        if (this.account.omemo && this.account.omemo.xabber_trust) {
-            this.updateAllTrustSessions();
+    },
+
+    addIncomingSubscriptionContainer: function () {
+        this.$('.chat-content').prepend($(templates.incoming_subscriptions_container()));
+        this.updateAllIncomingSubscriptions();
+    },
+
+    updateAllIncomingSubscriptions: function () {
+        this.$('.notification-subscriptions-content-wrap').html('');
+        let accounts = xabber.accounts.enabled;
+        let counter = 0;
+        _.each(accounts, (account) => {
+            let contacts = account.contacts.filter(item => item.get('subscription_request_in'));
+                _.each(contacts, (contact) => {
+                    let $template = $(templates.incoming_subscriptions_item({
+                        name: contact.get('name'),
+                        jid: contact.get('jid'),
+                        account: account.get('jid'),
+                    }));
+                    this.$('.notification-subscriptions-content-wrap').append($template);
+                    let image = contact.cached_image;
+                    $template.find('.circle-avatar').setAvatar(image, 64);
+                    counter++;
+                });
+        });
+        if (counter > 2 && this.filter_type !== 'subscription'){
+            this.$('.notification-subscriptions-button').removeClass('hidden');
+            this.$('.notification-subscription-item').slice(2).addClass('hidden');
+        } else {
+            this.$('.notification-subscriptions-button').addClass('hidden');
+            this.$('.notification-subscription-item').removeClass('hidden');
         }
+        this.$('.notification-subscriptions-wrap').switchClass('hidden', this.$('.notification-subscription-item:not(.hidden)').length === 0);
+        xabber.toolbar_view.recountAllMessageCounter()
     },
 
     updateAllTrustSessions: function () {
-        let active_sessions = this.account.omemo.xabber_trust.get('active_trust_sessions');
-        this.$(`.notification-trust-session`).remove();
-
-        Object.keys(active_sessions).forEach((session_id) => {
-            let session = active_sessions[session_id];
-
-            let state = this.account.omemo.xabber_trust.getVerificationState(session);
-
-            let item = {
-                jid: null,
-                device_id: null,
-                sid: session_id,
-                state: state,
-                code: session.active_verification_code,
-                is_enter_code: null,
-            };
-            if (session.active_verification_device) {
-                item.jid = session.active_verification_device.peer_jid;
-                item.device_id = session.active_verification_device.device_id;
-            }
-            if (session.verification_step === '1a' && session.verification_accepted_msg_xml) {
-                item.is_enter_code = true;
-            }
-
-            this.$('.notification-sessions-wrap').append($(templates.verification_session(item)));
-        });
     },
 
     updateTrustSession: function (session_id, is_remove) {
-        if (!this.account || !this.account.omemo || !this.account.omemo.xabber_trust)
-            return;
-        let active_sessions = this.account.omemo.xabber_trust.get('active_trust_sessions');
-
-        let session = active_sessions[session_id];
-        this.$(`.notification-trust-session[data-sid="${session_id}"]`).remove();
-        if (!session || !session.verification_step)
-            return;
-        if (is_remove){
-            return;
-        }
-        let state = this.account.omemo.xabber_trust.getVerificationState(session);
-
-        let item = {
-            jid: null,
-            device_id: null,
-            sid: session_id,
-            state: state,
-            code: session.active_verification_code,
-            is_enter_code: null,
-        };
-        if (session.active_verification_device) {
-            item.jid = session.active_verification_device.peer_jid;
-            item.device_id = session.active_verification_device.device_id;
-        }
-        if (session.verification_step === '1a' && session.verification_accepted_msg_xml) {
-            item.is_enter_code = true;
-        }
-
-        this.$('.notification-sessions-wrap').prepend($(templates.verification_session(item)));
     },
 
-    addMessage: function (message) {
-        let $message = this.buildMessageHtml(message),
-            index = this.model.messages.indexOf(message);
+    addMessage: function (message, collection, event, is_filtered) {
+        let chat;
+        if (message.collection && message.collection.chat) {
+            chat = message.collection.chat;
+        }
+        if (chat && chat.item_view && !chat.item_view.content)
+            chat.item_view.content = new xabber.ChatContentView({chat_item: chat.item_view});
+
+        if (!chat || !chat.item_view|| !chat.item_view.content) {
+            console.error(message);
+            return;
+        }
+        let $message = chat.item_view.content.buildMessageHtml(message),
+            index = this.filtered_messages.length && is_filtered ? this.filtered_messages.indexOf(message)  : this.notification_messages.indexOf(message);
         if (index === 0) {
             // if (this.$('.chat-content .notification-sessions-wrap').length){
             //     $message.insertAfter(this.$('.chat-content .notification-sessions-wrap'));
             // } else {
                 $message.appendTo(this.$('.chat-content'));
             // }
-        } else if (this.model.messages.models.length && this.model.messages.models[index - 1]) {
-            let $prev_message = this.$(`.chat-message[data-uniqueid="${this.model.messages.models[index - 1].get('unique_id')}"]`);
+        } else if (is_filtered && this.filtered_messages.length && this.filtered_messages[index - 1]) {
+            let $prev_message = this.$(`.chat-message[data-uniqueid="${this.filtered_messages[index - 1].get('unique_id')}"]`);
             if (!$prev_message.length) {
-                $prev_message = this.addMessage(this.model.messages.models[index - 1]);
+                $prev_message = this.addMessage(this.filtered_messages[index - 1], null, null, true);
+            }
+            $message.insertBefore($prev_message);
+
+        } else if (!is_filtered && !this.filtered_messages.length && this.notification_messages.models.length && this.notification_messages.models[index - 1]) {
+            let $prev_message = this.$(`.chat-message[data-uniqueid="${this.notification_messages.models[index - 1].get('unique_id')}"]`);
+            if (!$prev_message.length) {
+                $prev_message = this.addMessage(this.notification_messages.models[index - 1]);
             }
             $message.insertBefore($prev_message);
         }
@@ -497,17 +549,104 @@ xabber.NotificationsChatContentView = xabber.ChatContentView.extend({
         if ($next_message.length) {
             this.updateMessageInChat($next_message[0]);
         }
-        this.initPopup($message);
-        this.bottom.showChatNotification();
+        chat.item_view.content.initPopup($message);
         xabber.toolbar_view.recountAllMessageCounter();
+
+        let $notification_msg, ignored, verification_failed;
+
+        if (message.get('notification_msg') && message.get('notification_msg_content')){
+            $notification_msg = $(message.get('notification_msg_content'));
+            if (message.get('notification_trust_msg') || $notification_msg.children(`authenticated-key-exchange[xmlns="${Strophe.NS.XABBER_TRUST}"]`).length) {
+                if (!$notification_msg.find('verification-successful').length && !$notification_msg.find('verification-failed').length && !$notification_msg.find('verification-rejected').length){
+                    ignored = true;
+                }
+                if ($notification_msg.find('verification-failed').length || $notification_msg.find('verification-rejected').length){
+                    ignored = true;
+                    verification_failed = true;
+                }
+            }
+        }
+
+        if (message.get('notification_msg') && message.get('notification_msg_content')){
+            if (message.get('notification_trust_msg') || $notification_msg.children(`authenticated-key-exchange[xmlns="${Strophe.NS.XABBER_TRUST}"]`).length) {
+                if (ignored){
+                    message.set('ignored', true);
+                    message.set('is_unread', false);
+                    $message.addClass('hidden');
+                    if (verification_failed){
+                        message.set('security_notification', true);
+                        $message.removeClass('hidden');
+                        $message.addClass('security-content-msg');
+                    }
+                }
+                if (chat.account.omemo && chat.account.omemo.xabber_trust){
+                    if (message.get('device_id')){
+                        chat.account.omemo.xabber_trust.addToSequentialProcessingList($notification_msg[0], {
+                            automated: true,
+                            notification_trust_msg: message.get('notification_trust_msg'),
+                            device_id: message.get('device_id'),
+                            msg_item: message
+                        });
+                    } else {
+                        chat.account.omemo.xabber_trust.receiveTrustVerificationMessage($notification_msg[0], {
+                            automated: true,
+                            notification_trust_msg: message.get('notification_trust_msg'),
+                            device_id: message.get('device_id'),
+                            msg_item: message
+                        });
+                    }
+                }
+            }
+        }
         return $message;
     },
 
+    removeMessageFromDOM: function (message) {
+        let $message = this.$(`.chat-message[data-uniqueid="${message.get('unique_id')}"]`);
+        if (!$message.length)
+            return;
+        $message.prev('.chat-day-indicator').remove();
+        let $next_msg = $message.next('.chat-message');
+        $message.remove();
+        $next_msg.length && this.updateMessageInChat($next_msg[0]);
+        this.updateScrollBar();
+    },
+
+    getDateIndicator: function (date) {
+        let day_date = moment(date).startOf('day');
+        return $('<div class="chat-day-indicator one-line noselect" data-time="'+
+            day_date.format('x')+'">'+pretty_date(day_date)+'</div>');
+    },
+
     updateMessageInChat: function (msg_elem, msg) {
-        let $msg = $(msg_elem);
-        $msg.prev('.chat-day-indicator').remove();
+        let chat,
+            $msg = $(msg_elem);
+        !msg && (msg = this.notification_messages.get($msg.data('uniqueid')));
+        if (msg && msg.collection && msg.collection.chat) {
+            chat = msg.collection.chat;
+        }
+        if (chat && chat.item_view && !chat.item_view.content)
+            chat.item_view.content = new xabber.ChatContentView({chat_item: chat.item_view});
+
+        if (!chat || !chat.item_view|| !chat.item_view.content) {
+            console.error(msg);
+            return;
+        }
+        if (!$msg.hasClass('hidden')){
+            $msg.prev('.chat-day-indicator').remove();
+            let $prev_msg = $msg.prevAll('.chat-message:not(.hidden)').first();
+            if (!$prev_msg.length) {
+                this.getDateIndicator($msg.data('time')).insertBefore($msg);
+            } else {
+                let is_same_date = moment($msg.data('time')).startOf('day')
+                    .isSame(moment($prev_msg.data('time')).startOf('day'));
+                if (!is_same_date) {
+                    this.getDateIndicator($msg.data('time')).insertBefore($msg);
+                }
+            }
+        }
         if ($msg.find('.plyr-video-container').length) {
-            this.initPlyrEmbedPlayer($msg, msg);
+            chat.item_view.content.initPlyrEmbedPlayer($msg, msg);
         }
         if ($msg.hasClass('forwarding')) {
             let $fwd_message = $msg.find('.fwd-message');
@@ -519,23 +658,83 @@ xabber.NotificationsChatContentView = xabber.ChatContentView.extend({
                 if ($prev_fwd_message.length) {
                     let is_same_fwded_sender = ($fwd_msg_item.data('from') === $prev_fwd_message.data('from'));
                     if (is_same_fwded_sender) {
-                        this.hideFwdMessageAuthor($fwd_msg_item);
+                        chat.item_view.content.hideFwdMessageAuthor($fwd_msg_item);
                     } else {
-                        this.showFwdMessageAuthor($fwd_msg_item);
+                        chat.item_view.content.showFwdMessageAuthor($fwd_msg_item);
                     }
                 } else {
-                    this.showMessageAuthor($msg);
-                    this.showFwdMessageAuthor($fwd_msg_item);
+                    chat.item_view.content.showMessageAuthor($msg);
+                    chat.item_view.content.showFwdMessageAuthor($fwd_msg_item);
                 }
             });
         }
-        if (this.model.get('notifications')){
-            !msg && (msg = this.model.messages.get($msg.data('uniqueid')));
-            if (msg && msg.get('ntf_new_device_msg')){
-                this.hideAuthorUsername($msg);
-            }
-            this.showMessageAuthor($msg);
+        if (msg && msg.get('ntf_new_device_msg')){
+            this.hideAuthorUsername($msg);
         }
+        chat.item_view.content.showMessageAuthor($msg);
+    },
+
+    FilterMessagesInChat: function (is_cleared) {
+        if (!this.filtered_accounts.length && is_cleared){
+            this.filtered_messages = [];
+            this.$(`.chat-message`).remove();
+            this.$('.chat-day-indicator').remove();
+            this.backToBottom();
+            this.$('.notification-subscription-item').removeClass('hidden');
+            if (this.filter_type === 'all'){
+                _.each(this.notification_messages.models, (msg) => {
+                    this.addMessage(msg);
+                });
+                if (this.$(`.notification-subscription-item`).length > 2){
+                    this.$(`.notification-subscription-item`).slice(2).addClass('hidden');
+                    this.$('.notification-subscriptions-button').removeClass('hidden');
+                } else {
+                    this.$('.notification-subscriptions-button').addClass('hidden');
+                }
+            } else {
+                if (this.filter_type === 'security'){
+                    this.filtered_messages = this.notification_messages.filter((msg) => msg.get('security_notification'));
+                    this.filtered_messages.length && this.addMessage(this.filtered_messages[this.filtered_messages.length - 1], null, null, true);
+                }
+            }
+
+            this.$('.notification-subscriptions-wrap').switchClass('hidden', this.$('.notification-subscription-item:not(.hidden)').length === 0);
+        } else if (this.filtered_accounts.length) {
+            this.filtered_messages = this.notification_messages.filter((msg) => msg.collection && msg.collection.account && this.filtered_accounts.includes(msg.collection.account.get('jid')));
+            if (this.filter_type !== 'all'){
+                if (this.filter_type === 'security'){
+                    this.filtered_messages = this.filtered_messages.filter((msg) => msg.get('security_notification'));
+                }
+            }
+            this.$(`.chat-message`).remove();
+            this.$('.chat-day-indicator').remove();
+            this.backToBottom();
+            this.filtered_messages.length && this.addMessage(this.filtered_messages[this.filtered_messages.length - 1], null, null, true);
+
+            this.$('.notification-subscription-item').addClass('hidden');
+            _.each(this.filtered_accounts, (jid) => {
+                this.$(`.notification-subscription-item[data-account-jid="${jid}"]`).removeClass('hidden');
+                if (this.filter_type !== 'subscription'){
+                    if (this.$(`.notification-subscription-item[data-account-jid="${jid}"]:not(.hidden)`).length > 2){
+                        this.$(`.notification-subscription-item[data-account-jid="${jid}"]:not(.hidden)`).slice(2).addClass('hidden');
+                        this.$('.notification-subscriptions-button').removeClass('hidden');
+                    } else {
+                        this.$('.notification-subscriptions-button').addClass('hidden');
+                    }
+                }
+            });
+
+            this.$('.notification-subscriptions-wrap').switchClass('hidden', this.$('.notification-subscription-item:not(.hidden)').length === 0);
+
+        }
+    },
+
+    reRenderMessages: function () {
+        this.$(`.chat-message`).remove();
+        this.$('.chat-day-indicator').remove();
+        _.each(this.notification_messages.models, (msg) => {
+            this.addMessage(msg);
+        });
     },
 
     hideAuthorUsername: function ($msg) {
@@ -546,6 +745,7 @@ xabber.NotificationsChatContentView = xabber.ChatContentView.extend({
         let $msg = $(msg_elem);
         // $msg.find('.msg-time').text(xabber.getString("time_since_with_time", [utils.pretty_time_since($msg.data('time')), utils.pretty_time($msg.data('time'))]));
         $msg.find('.msg-time').text(pretty_datetime($msg.data('time')));
+        $msg.find('.msg-time').append(`<div>${msg.collection.chat.account.get('jid')}</div>`);
     },
 
     scrollToUnreadWithButton: function () {
@@ -563,71 +763,16 @@ xabber.NotificationsChatContentView = xabber.ChatContentView.extend({
     },
 
     backToBottom: function () {
-        // this.model.set('last_sync_unread_id', undefined);
-        // this.hideMessagesAfterSkipping();
-        // this._no_scrolling_event = true;
-        // this.removeAllMessagesExceptLast();
-        // this.readMessages();
-        // this.model.resetUnread();
-        // this.model.set('history_loaded', false);
-        // this.loadPreviousHistory(true, true);
-        // this._long_reading_timeout = false;
-        // this._no_scrolling_event = false;
         this.scrollToTop();
     },
 
     loadPreviousHistory: function (no_before, is_scrollToTop) {
-        console.error('load');
-        if (this.contact) {
-            if (!xabber.settings.load_history || (!this.contact.get('subscription') || this.contact.get('subscription') !== 'both') && this.contact.get('group_chat')) {
-                return;
-            }
-        }
-        let before = this.model.get('first_archive_id') || '';
-        if (no_before)
-            before = '';
-        this.getMessageArchive({
-                fast: true,
-                max: xabber.settings.mam_messages_limit,
-                before: before
-            },
-            {
-                previous_history: true,
-                is_scrollToTop: is_scrollToTop
-            });
     },
-
-    // scrollToUnread: function () { // change it for inverted
-    //     let $last_read_msg = this.$(`.chat-message.unread-message:first`);
-    //     $last_read_msg.length && (this.scrollTo(this.getScrollTop()
-    //         - (this.$el.height() * 0.2) + $last_read_msg.offset().top));
-    //     if (this.model.get('last_sync_unread_id')) {
-    //         let mam_query = {
-    //             fast: true,
-    //             max: xabber.settings.mam_messages_limit,
-    //             after: this.model.get('last_sync_unread_id'),
-    //         };
-    //         if (this.model.get('synced_msg')) {
-    //             mam_query.var = [
-    //                 {var: 'after-id', value: this.model.get('last_sync_unread_id')},
-    //                 {var: 'before-id', value: this.model.get('synced_msg').get('stanza_id')},
-    //             ];
-    //         }
-    //         this.getMessageArchive(mam_query, {
-    //             unread_history: true,
-    //         });
-    //     }
-    // },
 
     onScrollY: function () {
         this._prev_scrolltop = this._scrolltop || this._prev_scrolltop || 0;
         this._scrolltop = this.getScrollTop() || this._scrolltop || this._prev_scrolltop || 0;
         this._is_scrolled_bottom = this.isScrolledToBottom();// mb
-        if (this._scrolltop === 0 && this.$('.subscription-buttons-wrap').hasClass('hidden')) {
-            this.$('.fixed-day-indicator-wrap').css('opacity', 1);
-            this.current_day_indicator = pretty_date(parseInt(this.$('.chat-content').children().first().data('time')));
-            this.showDayIndicator(this.current_day_indicator);
-        }
         this.$('.back-to-bottom').hideIf(this.isScrolledToTop());
     },
 
@@ -635,129 +780,32 @@ xabber.NotificationsChatContentView = xabber.ChatContentView.extend({
         if (this._no_scrolling_event)
             return;
         this.$('.back-to-bottom').hideIf(this.isScrolledToTop());
-        // let $chatday_indicator = this.$('.chat-day-indicator'),
-        //     $messages = this.$('.chat-message'),
-        //     indicator_idx = undefined,
-        //     opacity_value;
-        // if (this.$('.unread-marker').length) {
-        //     let marker = this.$('.unread-marker');
-        //     if (marker[0].offsetTop < this._scrolltop)
-        //         marker.remove();
-        // }
-        // $chatday_indicator.each((idx, indicator) => {
-        //     if (this.$('.subscription-buttons-wrap').hasClass('hidden')) {
-        //         if (this._scrolltop < this._prev_scrolltop) {
-        //             if ((indicator.offsetTop <= this._scrolltop) && (indicator.offsetTop >= this._scrolltop - 30)) {
-        //                 indicator_idx = idx;
-        //                 opacity_value = 0;
-        //                 return false;
-        //             }
-        //             if ((indicator.offsetTop >= this._scrolltop) && (indicator.offsetTop <= this._scrolltop - 30)) {
-        //                 indicator_idx = idx && (idx - 1);
-        //                 opacity_value = 1;
-        //                 return false;
-        //             }
-        //         }
-        //         else {
-        //             if ((indicator.offsetTop <= this._scrolltop + 30) && (indicator.offsetTop >= this._scrolltop)) {
-        //                 indicator_idx = idx && (idx - 1);
-        //                 opacity_value = 0;
-        //                 return false;
-        //             }
-        //             if ((indicator.offsetTop >= this._scrolltop - 30) && (indicator.offsetTop <= this._scrolltop)) {
-        //                 indicator_idx = idx;
-        //                 opacity_value = 1;
-        //                 return false;
-        //             }
-        //         }
-        //     }
-        //     else if (!$(indicator).hasClass('fixed-day-indicator-wrap')) {
-        //         if (this._scrolltop < this._prev_scrolltop) {
-        //             if ((indicator.offsetTop >= this._scrolltop + 30) && (indicator.offsetTop <= this._scrolltop + 62)) {
-        //                 indicator_idx = idx;
-        //                 opacity_value = 0;
-        //                 return false;
-        //             }
-        //             if ((indicator.offsetTop >= this._scrolltop) && (indicator.offsetTop <= this._scrolltop + 62)) {
-        //                 indicator_idx = idx;
-        //                 opacity_value = 1;
-        //                 return false;
-        //             }
-        //         }
-        //         else {
-        //             if ((indicator.offsetTop <= this._scrolltop + 62) && (indicator.offsetTop >= this._scrolltop + 30)) {
-        //                 indicator_idx = idx && (idx - 1);
-        //                 opacity_value = 0;
-        //                 return false;
-        //             }
-        //             if ((indicator.offsetTop >= this._scrolltop - 62) && (indicator.offsetTop <= this._scrolltop + 30)) {
-        //                 indicator_idx = idx;
-        //                 opacity_value = 1;
-        //                 return false;
-        //             }
-        //         }
-        //     }
-        // });
-        // if (indicator_idx) {
-        //     this.$('.fixed-day-indicator-wrap').css('opacity', opacity_value);
-        //     this.current_day_indicator = pretty_date(parseInt($($chatday_indicator[indicator_idx]).attr('data-time')));
-        // }
-        // else {
-        //     $messages.each((idx, msg) => {
-        //         if ((msg.offsetTop + $(msg).height() > this._scrolltop) && (msg.offsetTop < this._scrolltop)) {
-        //             indicator_idx = idx;
-        //             opacity_value = 1;
-        //             return false;
-        //         }
-        //     });
-        //     if (indicator_idx) {
-        //         this.$('.fixed-day-indicator-wrap').css('opacity', opacity_value);
-        //         this.current_day_indicator = pretty_date(parseInt($($messages[indicator_idx]).attr('data-time')));
-        //     }
-        //     else if (!this.$('.subscription-buttons-wrap').hasClass('hidden') && this._scrolltop == 0){
-        //         opacity_value = 0;
-        //         this.$('.fixed-day-indicator-wrap').css('opacity', opacity_value);
-        //     }
-        // }
-        // if (this.current_day_indicator !== null) {
-        //     this.showDayIndicator(this.current_day_indicator);
-        // }
+
         let scroll_read_timer = this._long_reading_timeout || is_focused ? 100 : 100;
         clearTimeout(this._onscroll_read_messages_timeout);
         this._onscroll_read_messages_timeout = setTimeout(() => {
-            this.readVisibleMessages();
+            this.readNotifications();
         }, scroll_read_timer);
         this._long_reading_timeout = false;
-        if (this._scrolltop > this._prev_scrolltop &&
-            (this.getPercentScrolled() > 0.8)) {
-            this.loadPreviousHistory();
-        }
-        this.hideMessagesAfterSkipping();
-        if (this._scrolltop < this._prev_scrolltop && this.model.get('last_sync_unread_id') && this.getPercentScrolled() < 0.2) {
-            let mam_query = {
-                fast: true,
-                max: xabber.settings.mam_messages_limit,
-                after: this.model.get('last_sync_unread_id'),
-            };
-            if (this.model.get('synced_msg')) {
-                mam_query.var = [
-                    {var: 'after-id', value: this.model.get('last_sync_unread_id')},
-                    {var: 'before-id', value: this.model.get('synced_msg').get('stanza_id')},
-                ];
-            }
-            this.getMessageArchive(mam_query, {
-                unread_history: true,
-            });
-        }
     },
 
     onMouseWheel: function (ev) {
-        if (ev.originalEvent.deltaY > 0)
-            this.loadPreviousHistory();
         this.$('.back-to-bottom').hideIf(this.isScrolledToTop());
     },
 
     onChangedMessageTimestamp: function (message) {
+        let chat;
+        if (message.collection && message.collection.chat) {
+            chat = message.collection.chat;
+        }
+        if (chat && chat.item_view && !chat.item_view.content)
+            chat.item_view.content = new xabber.ChatContentView({chat_item: chat.item_view});
+
+        if (!chat || !chat.item_view|| !chat.item_view.content) {
+            console.log(message);
+            return;
+        }
+
         let $message = this.$(`.chat-message[data-uniqueid="${message.get('unique_id')}"]`),
             $next_msg = $message.next(),
             $old_prev_msg = $message.prev();
@@ -767,8 +815,8 @@ xabber.NotificationsChatContentView = xabber.ChatContentView.extend({
         $message.detach();
         $message.children('.right-side').find('.msg-time').attr({title: pretty_datetime(message.get('time'))}).text(utils.pretty_time(message.get('time')));
         message.get('user_info') && $message.attr('data-from-id', message.get('user_info').id);
-        this.model.messages.sort();
-        let index = this.model.messages.indexOf(message);
+        this.notification_messages.sort();
+        let index = this.notification_messages.indexOf(message);
         if (index === 0) {
             if ($old_prev_msg.hasClass('chat-day-indicator'))
                 $old_prev_msg.after($message);
@@ -780,25 +828,45 @@ xabber.NotificationsChatContentView = xabber.ChatContentView.extend({
                 is_same_date = moment($message.data('time')).startOf('day')
                     .isSame(moment($prev_msg.data('time')).startOf('day'));
             if (($old_prev_msg.data('from') !== $message.data('from')) && ($next_msg.data('from') === $message.data('from')) && (($next_msg.children('.right-side').find('.msg-delivering-state').attr('data-state') === 'delivered') || ($next_msg.children('.right-side').find('.msg-delivering-state').attr('data-state') === 'displayed')))
-                this.showMessageAuthor($next_msg);
+                chat.item_view.content.showMessageAuthor($next_msg);
             if ($prev_msg.next().hasClass('chat-day-indicator') && (moment($prev_msg.next().data('time')).format('DD.MM.YY') === moment(message.get('timestamp')).format('DD.MM.YY'))) {
                 $message.insertAfter($prev_msg.next());
-                this.showMessageAuthor($message);
+                chat.item_view.content.showMessageAuthor($message);
             }
             else
                 $message.insertAfter($prev_msg);
             if (message.get('data_form') || message.get('forwarded_message') || !is_same_date || !is_same_sender || $prev_msg.hasClass('system') || $prev_msg.hasClass('saved-main'))
-                this.showMessageAuthor($message);
+                chat.item_view.content.showMessageAuthor($message);
             else
-                this.hideMessageAuthor($message);
+                chat.item_view.content.hideMessageAuthor($message);
         }
-        let last_message = this.model.last_message;
-        if (!last_message || message.get('timestamp') > last_message.get('timestamp')) {
-            this.model.last_message = message;
-            if (this.model.get('notifications'))
-                this.account.trigger('notification_last_msg_updated', message.get('stanza_id'));
-            this.chat_item.updateLastMessage();
+    },
+
+    updateMessage: function (item) {
+        let $message, images = item.get('images'), emoji = item.get('only_emoji'), $new_message,
+            files =  item.get('files');
+        if (item instanceof xabber.Message) {
+            this.updateMentions(item);
+            $new_message = this.buildMessageHtml(item);
+            $message = this.$(`.chat-message[data-uniqueid="${item.get('unique_id')}"]`);
         }
+        else
+            return;
+        $message.replaceWith($new_message);
+        $message = this.$(`.chat-message[data-uniqueid="${item.get('unique_id')}"]`);
+        this.updateMessageInChat($message[0], item);
+        this.initPopup($message);
+        this.bottom.showChatNotification();
+
+        if (item.get('data_form')) {
+            let data_form = utils.render_data_form(item.get('data_form'));
+            $message.find('.chat-msg-content').append(data_form);
+        }
+        let short_datetime = utils.pretty_short_datetime(item.get('last_replace_time')),
+            datetime = moment(item.get('last_replace_time')).format('D MMMM, YYYY HH:mm:ss'),
+            new_title = `${pretty_datetime(item.get('time'))} ${xabber.getString("edited", [moment(item.get('timestamp')).startOf('day').isSame(moment(item.get('last_replace_time')).startOf('day')) ? short_datetime : datetime])}`;
+        $message.find('.msg-time').prop('title', new_title);
+        $message.find('.edited-info').removeClass('hidden').text(xabber.getString("chat_screen__message__label_edited")).prop('title', new_title);
     },
 
 });
