@@ -459,16 +459,40 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
             });
         stanza.c('notify', {xmlns: Strophe.NS.XABBER_NOTIFY});
         stanza.c('notification', {xmlns: Strophe.NS.XABBER_NOTIFY});
-        stanza.c('forwarded', {xmlns: Strophe.NS.FORWARD});
-        stanza.c('message', {
-            to: to,
-            from: this.account.get('jid'),
-            type: 'chat',
-            id: uuid()
-        });
-        stanza.c('body').t(`time is - ${new Date()}`).up();
 
-        stanza.up().up().up();
+
+        stanza.c('info', {xmlns: Strophe.NS.XABBER_INFO}).t('The server will not be restarted');
+
+        stanza.up().up();
+
+
+        stanza.c('addresses', {xmlns: Strophe.NS.ADDRESS}).c('address',{type: 'to', jid: to}).up().up();
+
+        console.log($(stanza.tree()));
+        console.log(stanza.tree());
+        this.account.sendFast(stanza, () => {
+            utils.callback_popup_message(xabber.getString("trust_verification_decrypt_failed"), 5000);
+        });
+    },
+
+
+    sendTestNotification2: function () {
+        let msg_id = uuid(),
+            to = this.account.get('jid'),
+            stanza = $iq({
+                type: 'set',
+                to: to,
+                id: msg_id
+            });
+        stanza.c('notify', {xmlns: Strophe.NS.XABBER_NOTIFY});
+        stanza.c('notification', {xmlns: Strophe.NS.XABBER_NOTIFY});
+
+
+        stanza.c('mention', {xmlns: Strophe.NS.MARKUP}).t('xmpp:mychat@capulet.it?id=ex2ogo0jma4tshwi');
+
+        stanza.up().up();
+
+
         stanza.c('addresses', {xmlns: Strophe.NS.ADDRESS}).c('address',{type: 'to', jid: to}).up().up();
 
         console.log($(stanza.tree()));

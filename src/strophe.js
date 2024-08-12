@@ -897,6 +897,7 @@ Strophe.addNamespace('EPHEMERAL', 'urn:xmpp:ephemeral:0');
 Strophe.addNamespace('XABBER_FAVORITES', 'urn:xabber:favorites:0');
 Strophe.addNamespace('XABBER_NOTIFY', 'urn:xabber:xen:0');
 Strophe.addNamespace('XABBER_TRUST', 'urn:xabber:trust');
+Strophe.addNamespace('XABBER_INFO', 'https://xabber.com/protocol/info');
 Strophe.addNamespace('DIGITAL_SIGNATURES', 'urn:xmpp:signed:0');
 Strophe.addNamespace('TRUSTED_MESSAGES', 'urn:xmpp:tm:1');
 Strophe.addNamespace('DIGITAL_SIGNATURES_ATM', 'urn:xmpp:atm:1');

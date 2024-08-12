@@ -315,16 +315,34 @@ xabber.MessagesBase = Backbone.Collection.extend({
 
         let $notification_msg;
         if (options.notification_msg){
-            $notification_msg = $message.children(`notification[xmlns="${Strophe.NS.XABBER_NOTIFY}"]`).children('forwarded').children('message');
+            if ($message.children(`notification[xmlns="${Strophe.NS.XABBER_NOTIFY}"]`).children('info').length){
+                $notification_msg = $message.children(`notification[xmlns="${Strophe.NS.XABBER_NOTIFY}"]`).children('info');
 
-            full_jid = $notification_msg.attr('from');
-            from_jid = Strophe.getBareJidFromJid(full_jid);
-            body = $notification_msg.children('body').text();
-            let notification_from = Strophe.getBareJidFromJid($notification_msg.attr('from')),
-                notification_from_address = $message.children(`addresses[xmlns="${Strophe.NS.ADDRESS}"]`).children('address[type="ofrom"]').attr('jid');
-            if (!notification_from_address || notification_from_address !== notification_from){
-                this.account.retractMessageById(options.stanza_id, this.account.get('jid'), from_jid, this.chat.get('sync_type'))
-                return;
+                from_jid = $message.children(`addresses[xmlns="${Strophe.NS.ADDRESS}"]`).children('address[type="ofrom"]').attr('jid');
+
+                body = $notification_msg.text();
+
+                options.is_info = true;
+            } else if ($message.children(`notification[xmlns="${Strophe.NS.XABBER_NOTIFY}"]`).children(`mention[xmlns="${Strophe.NS.MARKUP}"]`).length) {
+                $notification_msg = $message.children(`notification[xmlns="${Strophe.NS.XABBER_NOTIFY}"]`).children(`mention[xmlns="${Strophe.NS.MARKUP}"]`);
+
+                from_jid = $message.children(`addresses[xmlns="${Strophe.NS.ADDRESS}"]`).children('address[type="ofrom"]').attr('jid');
+
+                body = $notification_msg.text();
+
+                options.is_notification_mention = true;
+            } else {
+                $notification_msg = $message.children(`notification[xmlns="${Strophe.NS.XABBER_NOTIFY}"]`).children('forwarded').children('message');
+
+                full_jid = $notification_msg.attr('from');
+                from_jid = Strophe.getBareJidFromJid(full_jid);
+                body = $notification_msg.children('body').text();
+                let notification_from = Strophe.getBareJidFromJid($notification_msg.attr('from')),
+                    notification_from_address = $message.children(`addresses[xmlns="${Strophe.NS.ADDRESS}"]`).children('address[type="ofrom"]').attr('jid');
+                if (!notification_from_address || notification_from_address !== notification_from){
+                    this.account.retractMessageById(options.stanza_id, this.account.get('jid'), from_jid, this.chat.get('sync_type'))
+                    return;
+                }
             }
         }
 
@@ -339,6 +357,8 @@ xabber.MessagesBase = Backbone.Collection.extend({
                 from_jid: from_jid,
                 contact_stanza_id: options.contact_stanza_id,
                 is_archived: options.is_archived,
+                notification_info: options.is_info,
+                notification_mention: options.is_notification_mention,
                 is_unread_archived: options.is_unread_archived,
                 is_between_anchors: options.is_between_anchors,
                 notification_msg: options.notification_msg,
@@ -349,6 +369,16 @@ xabber.MessagesBase = Backbone.Collection.extend({
             },
             mentions = [], blockquotes = [], markups = [], mutable_content = [], files = [], images = [], videos = [], locations = [], link_references = [];
 
+        if (options.is_notification_mention) {
+            let regex = /^xmpp:([^?]+)\?id=(.+)$/;
+
+            let match = body.match(regex);
+
+            if (match) {
+                attrs.notification_mention_jid = match[1];
+                attrs.notification_mention_id = match[2];
+            }
+        }
         if (options.notification_msg && $notification_msg.length){
             attrs.notification_msg_content = $notification_msg[0];
             attrs.not_verified_device = null;
@@ -1403,7 +1433,7 @@ xabber.EphemeralTimerSelector = xabber.BasicView.extend({
         this.sendNewEphemeralTimer();
     },
 
-      sendNewEphemeralTimer: function () { //34
+      sendNewEphemeralTimer: function () {
           if (!this.contact || !this.account)
               return;
           let msg_id = uuid(),
@@ -5580,6 +5610,12 @@ xabber.ChatContentView = xabber.BasicView.extend({
                 markup_body = markup_body.replace(/\n/g, " ");;
             }
         }
+        if (attrs.notification_info){//34
+            markup_body = xabber.getString("notification_info_message", [attrs.from_jid, `<i class="text-color-grey-500">${markup_body}</i>`]);
+        }
+        if (attrs.notification_mention && attrs.notification_mention_jid && attrs.notification_mention_id){
+            markup_body = xabber.getString("notification_mention_message", ['placeholder name', attrs.notification_mention_jid, '<i class="text-color-grey-500">Tempora mutantur, nos et mutamur in illis</i>']);
+        }
 
         if (this.model.get('saved') && !markup_body.length && attrs.forwarded_message && attrs.forwarded_message.length == 1) {
             $message = $(templates.messages.saved_main(_.extend(attrs, {
@@ -8868,26 +8904,27 @@ xabber.AccountChats = xabber.ChatsBase.extend({
             });
         }
 
-        if ($forwarded.length && !options.xml) {
-            let $notify = $message.children(`notification[xmlns="${Strophe.NS.XABBER_NOTIFY}"]`);
-            if ($notify.length){
-                if (!this.account.server_features.get(Strophe.NS.XABBER_NOTIFY))
-                    return;
+        let $notify = $message.children(`notification[xmlns="${Strophe.NS.XABBER_NOTIFY}"]`);
+        if ($notify.length){
+            if (!this.account.server_features.get(Strophe.NS.XABBER_NOTIFY))
+                return;
 
-                if ($message.find(`encrypted[xmlns="${Strophe.NS.OMEMO}"]`).length && !options.forwarded) {
-                    if (this.account.omemo)
-                        this.account.omemo.receiveChatMessage(message, _.extend(options, {
-                            notification_msg: true,
-                            conversation: this.account.server_features.get(Strophe.NS.XABBER_NOTIFY).get('from')
-                        }));
-                    return;
-                } else {
-                    options.encrypted = false;
-                    return this.receiveNotification($message, _.extend(options, {
-                        notification_msg: true
+            if ($message.find(`encrypted[xmlns="${Strophe.NS.OMEMO}"]`).length && !options.forwarded) {
+                if (this.account.omemo)
+                    this.account.omemo.receiveChatMessage(message, _.extend(options, {
+                        notification_msg: true,
+                        conversation: this.account.server_features.get(Strophe.NS.XABBER_NOTIFY).get('from')
                     }));
-                }
+                return;
+            } else {
+                options.encrypted = false;
+                return this.receiveNotification($message, _.extend(options, {
+                    notification_msg: true
+                }));
             }
+        }
+
+        if ($forwarded.length && !options.xml) {
             let $mam = $message.find(`result[xmlns="${Strophe.NS.MAM}"]`);
             if ($mam.length) {
                 if (!Object.keys(options).length)

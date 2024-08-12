@@ -107,6 +107,8 @@ xabber.NotificationsView = xabber.BasicView.extend({
             } else if (filter_type === 'security') {
                 this.current_content.$el.addClass('security-content');
                 this.current_content.$el.addClass('subscription-content-hidden');
+            } else {
+                this.current_content.$el.addClass('subscription-content-hidden');
             }
             this.$('.notifications-type-filter-content .filter-item-wrap').removeClass('selected-filter');
             this.$(`.notifications-type-filter-content .filter-item-wrap[data-filter="${filter_type}"]`).addClass('selected-filter');
@@ -671,6 +673,23 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
         if (msg && msg.get('ntf_new_device_msg')){
             this.hideAuthorUsername($msg);
         }
+        if (!$msg.find('.left-side .notification-icon').length){
+
+            let $icon = $(templates.notification_icon_container());
+            if (msg){
+                if (msg.get('security_notification')) {
+                    $icon.append(env.templates.svg['security']())
+                } else if (msg.get('notification_info')){
+                    $icon.text('!');
+                    // $icon.append(env.templates.svg['alert-circle']())
+                } else if (msg.get('notification_mention')){
+                    $icon.append(env.templates.svg['bell-mention']())
+                } else if (msg.get('ntf_new_device_msg')){
+                    $icon.append(env.templates.svg['lock']())
+                }
+            }
+            $msg.find('.left-side').append($icon);
+        }
         chat.item_view.content.showMessageAuthor($msg);
     },
 
@@ -695,6 +714,12 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
                 if (this.filter_type === 'security'){
                     this.filtered_messages = this.notification_messages.filter((msg) => msg.get('security_notification'));
                     this.filtered_messages.length && this.addMessage(this.filtered_messages[this.filtered_messages.length - 1], null, null, true);
+                } else if (this.filter_type === 'information'){
+                    this.filtered_messages = this.notification_messages.filter((msg) => msg.get('notification_info'));
+                    this.filtered_messages.length && this.addMessage(this.filtered_messages[this.filtered_messages.length - 1], null, null, true);
+                } else if (this.filter_type === 'mentions'){
+                    this.filtered_messages = this.notification_messages.filter((msg) => msg.get('notification_mention'));
+                    this.filtered_messages.length && this.addMessage(this.filtered_messages[this.filtered_messages.length - 1], null, null, true);
                 }
             }
 
@@ -704,6 +729,10 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
             if (this.filter_type !== 'all'){
                 if (this.filter_type === 'security'){
                     this.filtered_messages = this.filtered_messages.filter((msg) => msg.get('security_notification'));
+                } else if (this.filter_type === 'information'){
+                    this.filtered_messages = this.filtered_messages.filter((msg) => msg.get('notification_info'));
+                } else if (this.filter_type === 'mentions'){
+                    this.filtered_messages = this.filtered_messages.filter((msg) => msg.get('notification_mention'));
                 }
             }
             this.$(`.chat-message`).remove();

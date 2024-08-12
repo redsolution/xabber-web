@@ -243,6 +243,7 @@
     addTemplate('notifications.incoming_subscriptions_container');
     addTemplate('notifications.incoming_subscriptions_item');
     addTemplate('notifications.verification_session');
+    addTemplate('notifications.notification_icon_container');
 
     addTemplate('mentions.mentions_panel');
     addTemplate('mentions.mentions_placeholder');
@@ -328,6 +329,7 @@
     addSvgTemplate('svg.devices');
     addSvgTemplate('svg.bell');
     addSvgTemplate('svg.bell-sleep');
+    addSvgTemplate('svg.bell-mention');
     addSvgTemplate('svg.bell-off');
     addSvgTemplate('svg.cancel');
     addSvgTemplate('svg.trash');

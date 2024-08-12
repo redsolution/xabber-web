@@ -3080,3 +3080,7 @@
 .hover-fill-color-grey-500:hover{
   fill: #9E9E9E !important;
 }
+.text-color-grey-500,
+.hover-text-color-grey-500:hover{
+  color: #9E9E9E !important;
+}

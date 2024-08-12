@@ -20946,10 +20946,11 @@ ul.restrictions-list-content>li {
 .notifications-content-wrap .notification-subscriptions-wrap .notification-subscriptions-header{
     font-size: 20px;
     line-height: 22px;
-    margin: 0px 48px 16px;
+    margin: 0 auto 16px;
     padding: 0 8px 4px;
     border-bottom: 1px solid #E0E0E0;
     font-weight: 500;
+    max-width: 672px;
 }
 .notifications-content-wrap .notification-subscriptions-wrap .notification-subscription-item{
     display: flex;
@@ -20959,6 +20960,7 @@ ul.restrictions-list-content>li {
 .notifications-content-wrap .notification-subscriptions-wrap .notification-subscription-item .avatar-wrap{
     width: 128px;
     position: absolute;
+    height: 96px;
 }
 .notifications-content-wrap .notification-subscriptions-wrap .notification-subscription-item .avatar-wrap .circle-avatar{
     height: 64px;
@@ -20967,6 +20969,38 @@ ul.restrictions-list-content>li {
     top: 16px;
     width: 64px;
     position: absolute;
+}
+.notifications-content-wrap .chat-message .left-side .notification-icon,
+.notifications-content-wrap .notification-subscriptions-wrap .notification-subscription-item .avatar-wrap .notification-icon{
+    background: #2196F3;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    color: #fff;
+    line-height: 16px;
+    text-align: center;
+    font-size: 16px;
+    position: absolute;
+    right: 8px;
+    bottom: 16px;
+    outline: 1px solid #fff;
+}
+.notifications-content-wrap .chat-message .left-side .notification-icon{
+    top: 64px;
+    font-size: 14px;
+}
+.notifications-content-wrap .chat-message .left-side .notification-icon svg{
+    width: 12px;
+    height: 12px;
+    left: 2px;
+    pointer-events: none;
+    position: absolute;
+    top: 2px;
+}
+.notifications-content-wrap .chat-message .left-side .notification-icon path,
+.notifications-content-wrap .chat-message .left-side .notification-icon polygon{
+    fill: #fff;
+
 }
 .notifications-content-wrap .notification-subscriptions-wrap .notification-subscription-item .subcription-main-wrap{
     padding: 0 96px 0 134px;

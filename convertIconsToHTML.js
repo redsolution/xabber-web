@@ -91,6 +91,7 @@ let badges_names = [
         'bell',
         'bell-off',
         'bell-sleep',
+        'bell-mention',
         'cancel',
         'edit',
         'edit-outline',
