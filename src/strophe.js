@@ -490,6 +490,19 @@ let utf16to8 = function (str) {
     return out;
 };
 
+function generateChallenge() {
+    let array = new Uint8Array(5);
+    window.crypto.getRandomValues(array);
+
+    let challenge = '';
+    array.forEach(byte => {
+        // Преобразуем каждый байт в двухсимвольное шестнадцатеричное значение
+        challenge += byte.toString(16).padStart(2, '0').toUpperCase();
+    });
+
+    return challenge; // 10-значный Challenge
+}
+
 Strophe.SASLHOTP = function() {};
 Strophe.SASLHOTP.prototype = new Strophe.SASLMechanism("HOTP", true, 100);
 
@@ -501,6 +514,53 @@ Strophe.SASLHOTP.prototype.onChallenge = function (connection) {
     let auth_str = String.fromCharCode(0) + connection.authcid +
         String.fromCharCode(0) + connection.hotp_pass;
     return utf16to8(auth_str);
+};
+
+Strophe.SASLOCRA = function() {};
+Strophe.SASLOCRA.prototype = new Strophe.SASLMechanism("DEVICES-OCRA", true, 100);
+
+Strophe.SASLOCRA.prototype.test = function (connection) {
+    return true;
+};
+
+Strophe.SASLOCRA.prototype.onChallenge = function (connection, server_challenge) {
+    if (server_challenge){
+        return new Promise((resolve, reject) => {
+            server_challenge = server_challenge.split(String.fromCharCode(0))
+            let sv_response = server_challenge[0],
+                suite = server_challenge[1],
+                sv_challenge = server_challenge[2];
+            utils.OCRA.generateOCRAasync(
+                constants.OCRA_SUITE,
+                connection.x_token.token,
+                0,
+                connection.cl_challenge
+            ).then((cl_OCRA) => {
+                connection.cl_OCRA = btoa(cl_OCRA);
+                if (sv_response === connection.cl_OCRA){
+                    utils.OCRA.generateOCRAasync(
+                        suite,
+                        connection.x_token.token,
+                        connection.counter,
+                        sv_challenge
+                    ).then((sv_OCRA) => {
+                        connection.sv_OCRA = btoa(sv_OCRA);
+                        resolve(utf16to8(connection.sv_OCRA)); // сделать ocra из своего челленджа и проверять респонс сервера
+                    });
+                } else {
+                    reject('Challenge does not match');
+                }
+            });
+        })
+    } else {
+        let auth_str = 'n,,' +
+            String.fromCharCode(0) + connection.authcid +
+            String.fromCharCode(0) + connection.x_token.token_uid +
+            String.fromCharCode(0) + constants.OCRA_SUITE +
+            String.fromCharCode(0) + connection.cl_challenge +
+            String.fromCharCode(0) + connection.x_token.validation_key;
+        return utf16to8(auth_str);
+    }
 };
 
 Strophe.ConnectionManager = function (CONNECTION_URL, options) {
@@ -519,13 +579,10 @@ Strophe.ConnectionManager.prototype = {
                 Strophe.SASLPlain,
                 Strophe.SASLSHA1]);
         } else if (this.auth_type === 'x-token') {
-            this.connection.registerSASLMechanism(Strophe.SASLHOTP);
+            this.connection.registerSASLMechanisms([Strophe.SASLOCRA]);
             delete this.connection._sasl_data["server-signature"];
-            utils.generateHOTP(utils.fromBase64toArrayBuffer(password), this.connection.counter).then((pass) => {
-                this.connection.hotp_pass = pass;
-            }).then(() => {
-                this.connection.connect(jid, password, callback)
-            });
+            this.connection.cl_challenge = generateChallenge();
+            this.connection.connect(jid, password, callback)
             return;
         } else {
             this.connection.registerSASLMechanisms([Strophe.SASLXOAuth2]);
@@ -536,17 +593,14 @@ Strophe.ConnectionManager.prototype = {
 
     reconnect: function (callback) {
         if (this.auth_type === 'x-token') {
-            if (!this.connection.mechanisms["HOTP"]) {
-                this.connection.registerSASLMechanism(Strophe.SASLHOTP);
+            if (!this.connection.mechanisms["OCRA"]) {
+                this.connection.registerSASLMechanism(Strophe.SASLOCRA);
                 delete this.connection._sasl_data["server-signature"];
             }
             if (this.connection.account && this.connection.account.get('hotp_counter'))
                 this.connection.counter = this.connection.account.get('hotp_counter');
-            utils.generateHOTP(utils.fromBase64toArrayBuffer(this.connection.pass), this.connection.counter).then((pass) => {
-                this.connection.hotp_pass = pass;
-            }).then(() => {
-                this.connection.connect(this.connection.jid, this.connection.pass, callback)
-            });
+            this.connection.cl_challenge = generateChallenge();
+            this.connection.connect(this.connection.jid, this.connection.pass, callback)
             return;
         }
         this.connection.connect(this.connection.jid, this.connection.pass, callback);
@@ -596,6 +650,41 @@ _.extend(Strophe.Connection.prototype, {
         return mechanism_found;
     },
 
+    _sasl_challenge_cb: function(elem) {
+        var challenge = atob(Strophe.getText(elem));
+        if (this._sasl_mechanism.name === 'DEVICES-OCRA'){
+            this._sasl_mechanism.onChallenge(this, challenge).then((response)=> {
+                var stanza = $build('response', {
+                    'xmlns': Strophe.NS.SASL
+                });
+                if (response !== "") {
+                    stanza.t(btoa(response));
+                }
+                this.send(stanza.tree());
+                if (this.account && this.counter && this.account.get('x_token')) {
+                    this.counter++;
+                    this.account.save({
+                        hotp_counter: this.counter,
+                    });
+                }
+                return true;
+            }, (err)=> {
+                throw new Error(err);
+            });
+
+        } else {
+            var response = this._sasl_mechanism.onChallenge(this, challenge);
+            var stanza = $build('response', {
+                'xmlns': Strophe.NS.SASL
+            });
+            if (response !== "") {
+                stanza.t(btoa(response));
+            }
+            this.send(stanza.tree());
+            return true;
+        }
+    },
+
     _sasl_auth1_cb: function (elem) {
         this.features = elem;
         let i, child;
@@ -641,8 +730,9 @@ _.extend(Strophe.Connection.prototype, {
                 this.getXToken((success) => {
                     let token = $(success).find('secret').text(),
                         expires_at = $(success).find('expire').text(),
+                        validation_key = $(success).find('validation-key').text(),
                         token_uid = $(success).find('device').attr('id');
-                    this.x_token = {token: token, expire: expires_at, token_uid: token_uid,};
+                    this.x_token = {token: token, expire: expires_at, validation_key: validation_key, token_uid: token_uid,};
                     this.counter = 1;
                     this.pass = token;
                     this._send_auth_bind();

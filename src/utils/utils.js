@@ -1304,6 +1304,286 @@ var utils = {
         return buffer;
     },
 
+
+    stringToUint8Array: function (string) {
+        const encoder = new TextEncoder(); // Создаем экземпляр TextEncoder
+        return encoder.encode(string); // Кодируем строку и возвращаем Uint8Array
+    },
+
+
+    uint8ArrayToString: function (uint8Array) {
+        const decoder = new TextDecoder(); // Создаем экземпляр TextDecoder
+        return decoder.decode(uint8Array); // Декодируем Uint8Array и возвращаем строку
+    },
+
+    hexToUint8Array: function (hexString) {
+        // Убедимся, что строка имеет четное количество символов
+        if (hexString.length % 2 !== 0) {
+            throw new Error("Invalid hex string");
+        }
+
+        // Создаем Uint8Array соответствующей длины
+        let array = new Uint8Array(hexString.length / 2);
+
+        for (let i = 0; i < hexString.length; i += 2) {
+            // Преобразуем каждый парный символ из HEX строки в число и помещаем его в массив
+            array[i / 2] = parseInt(hexString.substr(i, 2), 16);
+        }
+
+        return array;
+    },
+
+    numToUint8Array: function (num) {
+        num = num.toString(16);
+        num = num.padEnd(num.length + num.length % 2, '0');
+        return utils.hexToUint8Array(num);
+    },
+
+
+    OCRA: {
+
+        hmacAsyncWeb_hash : function(hashAlgo, hashKey, hashText,codeDigits) {
+            var hmacSha = {name: 'HMAC', hash: {name: hashAlgo.toUpperCase()}};
+
+            var crypto = window.crypto || window.msCrypto;
+
+            return crypto.subtle.importKey("raw", hashKey, hmacSha, false, ["sign", "verify"])
+                .then(function(cryptokey){
+                        return crypto.subtle.sign({name: 'HMAC'}, cryptokey, hashText);
+                    },
+                    function(err){
+                        throw new Error(err);
+                    })
+                .then(function(hash) {
+                    hash = new Uint8Array(hash);
+
+                    if (codeDigits === 0){
+                        return Promise.resolve(String.fromCharCode(...hash));
+                    }
+
+                    var offset = hash[hash.byteLength - 1] & 0xf;
+
+                    var binary =
+                        ((hash[offset + 0] & 0x7f) << 24) |
+                        ((hash[offset + 1] & 0xff) << 16) |
+                        ((hash[offset + 2] & 0xff) << 8) |
+                        (hash[offset + 3] & 0xff);
+
+                    var DIGITS_POWER = [0, 10, 100, 1000, 10000, 100000, 1000000, 10000000, 100000000, 1000000000, 10000000000];
+
+                    let otp = binary % DIGITS_POWER[codeDigits];
+
+                    var result = otp.toString();
+                    while (result.length < codeDigits) {
+                        result = "0" + result;
+                    }
+                    return Promise.resolve(result);
+                });
+        },
+
+        // OCRA method
+        getOCRAmsg : function(ocraSuite, counter, question, password, sessionInformation, timeStamp, server_question) {
+            var codeDigits = 0;
+            var crypto = "";
+            var result = null;
+            var ocraSuiteLength = ocraSuite.length;
+            var counterLength = 0;
+            var questionLength = 0;
+            var serverQuestionLength = 0;
+            var passwordLength = 0;
+            var sessionInformationLength = 0;
+            var timeStampLength = 0;
+
+            let server_question_value;
+
+            // The OCRASuites components
+            var CryptoFunction = ocraSuite.split(":")[1];
+            var DataInput = ocraSuite.split(":")[2];
+
+            if(CryptoFunction.toLowerCase().indexOf("sha1") > 1) crypto = "SHA-1";
+            else if(CryptoFunction.toLowerCase().indexOf("sha256") > 1) crypto = "SHA-256";
+            else if(CryptoFunction.toLowerCase().indexOf("sha512") > 1) crypto = "SHA-512";
+            else {
+                throw new Error("SHA algorithme unknown -  \"" + CryptoFunction + "\"");
+                return null;
+            }
+
+            codeDigits = parseInt(CryptoFunction.substring(CryptoFunction.lastIndexOf("-")+1));
+
+            let DataInput_parts = DataInput.split('-');
+
+
+
+            if(DataInput.toLowerCase().startsWith("c")) {
+                counter = utils.padCounter(Number(counter));
+                counterLength=8;
+            }
+
+            let qElement = DataInput_parts.find(part => part.startsWith('Q'));
+
+            // Question - always 128 bytes
+            if(qElement) {
+
+                let numberAfterType = qElement.slice(2);
+                if (question.toString().length !== Number(numberAfterType))
+                    throw new Error("wrong challenge length!");
+                if (qElement[1].toLowerCase() === 'a'){
+                    question = utils.stringToUint8Array(question);
+                } else if (qElement[1].toLowerCase() === 'n') {
+                    if (Number(question) === NaN)
+                        throw new Error("challenge is NaN!");
+                    question = utils.numToUint8Array(question);
+                } else if (qElement[1].toLowerCase() === 'h') {
+                    question = utils.hexToUint8Array(question);
+                }
+                let extendedArray = new Uint8Array(128)
+                extendedArray.set(question)
+                question = extendedArray;
+                questionLength=128;
+            }
+
+
+            // Password - sha1
+            if(DataInput.toLowerCase().indexOf("psha1") > 1){
+                passwordLength=20;
+            }
+
+            // Password - sha256
+            if(DataInput.toLowerCase().indexOf("psha256") > 1){
+                passwordLength=32;
+            }
+
+            // Password - sha512
+            if(DataInput.toLowerCase().indexOf("psha512") > 1){
+                passwordLength=64;
+            }
+
+
+
+            let sElement = DataInput_parts.find(part => part.startsWith('S'));
+
+
+            // Question - always 128 bytes
+            if(sElement) {
+
+                let numberAfterType = sElement.slice(1);
+                if (Number(numberAfterType) === NaN)
+                    throw new Error("wrong session length in suite!");
+
+                sessionInformation = utils.hexToUint8Array(sessionInformation);
+                if (sessionInformation.length > Number(numberAfterType))
+                    throw new Error("session information length is bigger than allowed!");
+                let extendedArray = new Uint8Array(Number(numberAfterType))
+                extendedArray.set(question)
+                sessionInformation = extendedArray;
+                sessionInformationLength = Number(numberAfterType);
+            }
+
+            let tElement = DataInput_parts.find(part => part.startsWith('T'));
+
+
+            if(tElement) {
+
+                let numberAfterType = tElement.slice(1),
+                    time_type = numberAfterType.substring(numberAfterType - 1),
+                    time_type_ms, interval_time_type, interval_ms;
+                numberAfterType = numberAfterType.substring(0, numberAfterType.length - 1);
+
+                if (numberAfterType  == 0)
+                    throw new Error(` 0 is not supported time value`);
+
+                if (time_type === 'S'){
+                    time_type_ms = 1000;
+
+                } else if (time_type === 'M'){
+                    time_type_ms = 1000 * 60;
+
+                } else if (time_type === 'H') {
+                    time_type_ms = 1000 * 60 * 60;
+                } else {
+                    throw new Error(`Not valid time type in Suite! - ${tElement}`);
+                }
+                timeStamp = Math.floor((Date.now() / time_type_ms) / numberAfterType);
+
+                timeStamp = utils.padCounter(Number(counter));
+                timeStampLength=8;
+
+            }
+
+            // create a new array of Uint8Array with lenght of all zone
+            // Remember to add "1" for the "00" byte delimiter
+            var msgArrayBuffer = new ArrayBuffer(ocraSuiteLength +
+                counterLength +
+                questionLength +
+                passwordLength +
+                sessionInformationLength +
+                timeStampLength +
+                1);
+
+            // creat view of ab
+            var msg = new Uint8Array(msgArrayBuffer);
+
+            // Put the bytes of "ocraSuite" parameters into the message
+            var bArray = utils.stringToUint8Array(ocraSuite);
+            for (var i=0;i<bArray.length;i++)
+                msg [i] = bArray[i];
+
+            // Delimiter
+            msg[bArray.length] = 0x00;
+
+            // Put the bytes of "Counter" to the message
+            if(counterLength > 0 ){
+                bArray = new Uint8Array(counter);
+                for (var i=0;i<bArray.length;i++)
+                    msg [i + ocraSuiteLength + 1] = bArray[i];
+            }
+
+            // Put the bytes of "question" to the message
+            if(questionLength > 0 ){
+                bArray = question;
+                for (var i=0;i<bArray.length;i++)
+                    msg [i + ocraSuiteLength + 1 + counterLength] = bArray[i];
+            }
+
+            // Put the bytes of "password" to the message
+            // Input is HEX encoded
+            if(passwordLength > 0){
+                bArray = utils.hexToUint8Array(password);
+                if (bArray.length !== passwordLength)
+                    throw new Error('Wrong password length!')
+                for (var i=0;i<bArray.length;i++)
+                    msg [i + ocraSuiteLength + 1 + counterLength + questionLength] = bArray[i];
+            }
+
+            // Put the bytes of "sessionInformation" to the message
+            // Input is text encoded
+            if(sessionInformationLength > 0 ){
+                bArray = sessionInformation;
+                for (var i=0;i<bArray.length;i++)
+                    msg [i + ocraSuiteLength + 1 + counterLength + questionLength + passwordLength] = bArray[i];
+            }
+            //
+            // Put the bytes of "time" to the message
+            // Input is text value of minutes
+            if(timeStampLength > 0){
+                bArray = timeStamp;
+                for (var i=0;i<bArray.length;i++)
+                    msg [i + ocraSuiteLength + 1 + counterLength + questionLength + passwordLength + sessionInformationLength] = bArray[i];
+            }
+            return { msg: new Uint8Array(msg), hashmethod: crypto, codedigits: codeDigits};
+        },
+
+        generateOCRAasync : function(ocraSuite, key, counter, question, password, sessionInformation, timeStamp, server_question) {
+            var result = this.getOCRAmsg(ocraSuite, counter, question, password, sessionInformation, timeStamp, server_question);
+            var crypto  = result.hashmethod;
+            var msgBuff = result.msg.buffer;
+            var codeDigits = result.codedigits;
+            var keyBuff = utils.fromBase64toArrayBuffer(key);
+
+            return this.hmacAsyncWeb_hash(crypto, keyBuff, msgBuff, codeDigits);
+        }
+    },
+
     AES: {
         ALGO_NAME: 'AES-GCM',
 

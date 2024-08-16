@@ -445,6 +445,7 @@ var constants = {
     PROJECT_CROWDIN_URL: 'https://crowdin.com/project/xabber',
     CLIENT_LICENSE_GITHUB_URL: 'https://github.com/redsolution/xabber-web/blob/master/LICENSE',
     DEFAULT_EMOJI_FONT: 'system',
+    OCRA_SUITE: 'OCRA-1:HOTP-SHA256-8:QA10',
 
 };
 
