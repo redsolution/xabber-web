@@ -43,6 +43,7 @@ xabber.NotificationsView = xabber.BasicView.extend({
         "click .notifications-account-filter-content .filter-item-wrap": "selectAccounts",
         "click .notifications-type-filter-content .filter-item-wrap": "filterContent",
         "click .notification-subscriptions-button": "filterContent",
+        "click .btn-read-all": "readAll",
 
     },
 
@@ -71,12 +72,26 @@ xabber.NotificationsView = xabber.BasicView.extend({
             this.current_content.filterByAccounts([], clear);
         }
         this.$('.notifications-utility .notifications-header').text(xabber.getString("notifications_window__type_filter_all"));
+        this.showReadAllBtn();
     },
 
     onShowNotificationsTab: function () {
         if (this.current_content){
             this.current_content.onShowNotificationsTab();
         }
+    },
+
+    showReadAllBtn: function () {
+        this.$('.btn-read-all').switchClass('hidden', !this.$('.unread-message-background').length);
+    },
+
+    readAll: function () {
+        if (!this.current_content)
+            return;
+        _.each(this.$('.unread-message-background'),(item) => {
+            this.current_content.onClickNotification({target: item});
+
+        })
     },
 
     cancelTrustSession: function (ev) {
@@ -314,6 +329,7 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
             const_unread = --const_unread;
             chat.set('const_unread', const_unread);
         }
+        xabber.notifications_view.showReadAllBtn();
         xabber.toolbar_view.recountAllMessageCounter();
     },
 
@@ -494,6 +510,7 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
                 })
             }
         }
+        xabber.notifications_view.showReadAllBtn();
     },
 
     filterByAccounts: function (accounts, cleared) {
@@ -651,6 +668,7 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
                 }
             }
         }
+        xabber.notifications_view.showReadAllBtn();
         return $message;
     },
 

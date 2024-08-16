@@ -20801,6 +20801,11 @@ ul.restrictions-list-content>li {
     padding: 20px 6px 24px;
     width: 100%;
 }
+.notifications-content-wrap .notifications-utility .btn-read-all{
+    position: absolute;
+    top: 16px;
+    right: 16px;
+}
 .notifications-content-filters .notifications-filter-main-header{
     font-size: 24px;
     line-height: 32px;
