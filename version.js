@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.3.5.71","version_description":"extended connect func in connection to save server auth mechanisms, added condition that server supports ocra to add device type in device token"}'
+'{"version_number":"2.3.5.72","version_description":"removed sending of secret on updating existing device token, fixed old device token id saving, fixed double show of auth fail modal which created errors afterwards, removed reconnection tries after auth fail"}'
 )});

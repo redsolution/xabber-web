@@ -558,12 +558,12 @@ xabber.Account = Backbone.Model.extend({
                 this.session.set({connected: true, reconnected: false});
             } else if (status === Strophe.Status.AUTHFAIL || ((status === Strophe.Status.ERROR) && (condition === 'not-authorized'))) {
                 if ((this.get('auth_type') === 'x-token' || this.connection.x_token)){
-                    if (this.session.get('conn_retries') <= 3 && $(elem).find('credentials-expired').length === 0)
-                        this.reconnect(true);
-                    else
+                    if ($(elem).find('credentials-expired').length > 0)
                         this.onTokenRevoked();
+                    else if (!this.session.get('auth_failed'))
+                        this.onAuthFailed();
                 }
-                else
+                else if (!this.session.get('auth_failed'))
                     this.onAuthFailed();
             } else if (status === Strophe.Status.DISCONNECTED) {
                 this.connection && clearTimeout(this.connection.openCheckTimeout);
@@ -610,12 +610,10 @@ xabber.Account = Backbone.Model.extend({
                 if ((this.get('auth_type') === 'x-token' || this.connection.x_token)) {
                     if ($(elem).find('credentials-expired').length > 0)
                         this.onTokenRevoked();
-                    else if (this.session.get('conn_retries') > 2 )
+                    else if (!this.session.get('auth_failed'))
                         this.onAuthFailed();
-                    else
-                        this.reconnect(true);
                 }
-                else
+                else if (!this.session.get('auth_failed'))
                     this.onAuthFailed();
             } else if (status === Strophe.Status.DISCONNECTED) {
                 this.connection && clearTimeout(this.connection.openCheckTimeout);
@@ -798,7 +796,8 @@ xabber.Account = Backbone.Model.extend({
                 ready_to_send: false,
                 no_reconnect: true
             });
-            this.save({old_device_token: this.get('x_token'), auth_type: 'password', password: null, x_token: null});
+            this.get('x_token') && this.save({old_device_token: this.get('x_token').token_uid});
+            this.save({auth_type: 'password', password: null, x_token: null});
             this.connection.pass = "";
             this.trigger('deactivate', this);
             this.connFeedback(xabber.getString("connection__error__text_authentication_failed_short"));

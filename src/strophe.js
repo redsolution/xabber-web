@@ -796,10 +796,9 @@ _.extend(Strophe.Connection.prototype, {
         } else {
             public_label = utils.generateDeviceName();
         }
-        if (old_token && old_token.token && old_token.token_uid){
-            iq.c('device', { xmlns: Strophe.NS.AUTH_DEVICES, id: old_token.token_uid})
+        if (old_token){
+            iq.c('device', { xmlns: Strophe.NS.AUTH_DEVICES, id: old_token})
                 .c('client').t(client_name).up()
-                .c('secret').t(old_token.token).up()
                 .c('public-label').t(public_label).up();
             if (this.server_mechanisms.includes('DEVICES-OCRA')){
                 iq.c('type').t('xabber-web').up()
