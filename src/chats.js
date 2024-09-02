@@ -4086,9 +4086,9 @@ xabber.ChatContentView = xabber.BasicView.extend({
             this.model.set('last_read_msg', msg.get('stanza_id'));
             this.model.set('prev_last_read_msg', msg.get('stanza_id'));
         }
-        this.model.set('const_unread', 0);
+        !this.model.get('notifications') && this.model.set('const_unread', 0);
         this.model.set('show_new_unread', false);
-        _.each(unread_messages, (msg) => {
+        !this.model.get('notifications') && _.each(unread_messages, (msg) => {
             if (!timestamp || msg.get('timestamp') <= timestamp) {
                 msg.set('is_unread', false);
             }
@@ -4112,7 +4112,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
         }
         if (!unread_messages.length) {
             let unread_messages = _.clone(this.model.messages.models).filter(item => Boolean(item.get('is_unread')));
-            _.each(unread_messages, (msg) => {
+            !this.model.get('notifications') && _.each(unread_messages, (msg) => {
                 msg.set('is_unread', false);
             });
         }
@@ -7640,7 +7640,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
                 this.model.messages_unread.remove(message);
             message.set('was_readen', true);
             $msg.removeClass('unread-message');
-            if (this.model.last_message && this.model.last_message === message){
+            if (this.model.last_message && this.model.last_message === message && !this.model.get('notifications')){
                 this.model.set('const_unread', 0)
             }
             setTimeout(() => {

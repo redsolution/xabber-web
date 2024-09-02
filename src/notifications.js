@@ -43,6 +43,7 @@ xabber.NotificationsView = xabber.BasicView.extend({
         "click .notifications-account-filter-content .filter-item-wrap": "selectAccounts",
         "click .notifications-type-filter-content .filter-item-wrap": "filterContent",
         "click .notification-subscriptions-button": "filterContent",
+        "click .btn-read-all": "readAll",
 
     },
 
@@ -64,16 +65,33 @@ xabber.NotificationsView = xabber.BasicView.extend({
                 this.$('.notifications-type-filter-content .filter-item-wrap[data-filter="all"]').addClass('selected-filter');
                 this.current_content.$el.removeClass('security-content');
                 this.current_content.$el.removeClass('subscription-content');
+                this.$el.removeClass('subscription-content');
+                this.$('.notifications-utility .notifications-header').text(xabber.getString("notifications_window__type_filter_all"));
                 clear = true;
             }
             this.current_content.filterByAccounts([], clear);
         }
+        this.$('.notifications-utility .notifications-header').text(xabber.getString("notifications_window__type_filter_all"));
+        this.showReadAllBtn();
     },
 
     onShowNotificationsTab: function () {
         if (this.current_content){
             this.current_content.onShowNotificationsTab();
         }
+    },
+
+    showReadAllBtn: function () {
+        this.$('.btn-read-all').switchClass('hidden', !this.$('.unread-message-background').length);
+    },
+
+    readAll: function () {
+        if (!this.current_content)
+            return;
+        _.each(this.$('.unread-message-background'),(item) => {
+            this.current_content.onClickNotification({target: item});
+
+        })
     },
 
     cancelTrustSession: function (ev) {
@@ -97,11 +115,14 @@ xabber.NotificationsView = xabber.BasicView.extend({
         this.$('.notification-subscriptions-button').removeClass('hidden');
         this.$('.notification-subscription-item').slice(2).addClass('hidden');
         this.current_content.$el.removeClass('subscription-content');
+        this.$el.removeClass('subscription-content');
         this.current_content.$el.removeClass('security-content');
         this.current_content.$el.removeClass('subscription-content-hidden');
         if (filter_type !== 'all') {
             if (filter_type === 'subscription') {
                 this.current_content.$el.addClass('subscription-content');
+                this.$el.addClass('subscription-content');
+                this.$('.notifications-utility').addClass('subscription-content');
                 this.$('.notification-subscription-item').removeClass('hidden');
                 this.$('.notification-subscriptions-button').addClass('hidden');
             } else if (filter_type === 'security') {
@@ -117,6 +138,7 @@ xabber.NotificationsView = xabber.BasicView.extend({
         if (!clear_account){
             this.$('.notifications-account-filter-content .filter-item-wrap').removeClass('selected-filter');
         }
+        this.$('.notifications-utility .notifications-header').text(this.$('.notifications-type-filter-content .filter-item-wrap.selected-filter .name').text());
         this.current_content.filterByProperty(filter_type, clear_account);
     },
 
@@ -260,12 +282,13 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
         this.notification_messages.on("add", this.addMessage, this);
         this.notification_messages.on("change:is_unread", this.onChangedReadState, this);
         this.notification_messages.on("change:timestamp", this.onChangedMessageTimestamp, this);
+        xabber.accounts.on('account_color_updated', this.updateColorScheme, this);
         xabber.on('new_incoming_subscription', this.updateAllIncomingSubscriptions, this);
 
         return this;
     },
 
-    render: function () {
+    render: function () { //34
         if (this._prev_scrolltop)
             this.scrollTo(this._prev_scrolltop);
         else
@@ -275,10 +298,39 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
         this.$el.addClass('chat-body-container-notifications');
     },
 
-    onClickNotification: function (ev) {
-        let $elem = $(ev.target);
+    updateColorScheme: function () {
+        _.each(xabber.accounts.models, (account) => {
+            this.$(`div[data-account-jid="${account.get('jid')}"`).attr('data-color', account.settings.get('color'));
+        });
+    },
 
-        $elem.closest('.chat-message').removeClass('unread-message-background');
+    onClickNotification: function (ev) { //34
+        let $elem = $(ev.target).closest('.chat-message');
+
+        $elem.removeClass('unread-message-background');
+        let unique_id = $elem.attr('data-uniqueid'),
+            msg = this.notification_messages.get(unique_id);
+
+        let chat;
+        if (msg.collection && msg.collection.chat) {
+            chat = msg.collection.chat;
+        }
+        if (chat && chat.item_view && !chat.item_view.content)
+            chat.item_view.content = new xabber.ChatContentView({chat_item: chat.item_view});
+
+        if (!chat || !chat.item_view|| !chat.item_view.content) {
+            return;
+        }
+        let is_in_unread = chat.messages_unread.get(msg);
+        if (msg.get('is_unread'))
+            msg.set('is_unread', false);
+        if (!is_in_unread && chat.get('const_unread') !== 0 && Number(chat.get('const_unread')) !== NaN) {
+            let const_unread = chat.get('const_unread');
+            const_unread = --const_unread;
+            chat.set('const_unread', const_unread);
+        }
+        xabber.notifications_view.showReadAllBtn();
+        xabber.toolbar_view.recountAllMessageCounter();
     },
 
     defineMouseWheelEvent: function () {
@@ -421,6 +473,20 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
                 chat_item.chat.item_view.content = new xabber.ChatContentView({chat_item: chat_item.chat.item_view});
             if ((chat_item.chat.get('unread') || chat_item.chat.get('const_unread')) && chat_item.chat.last_message){
                 chat_item.chat.item_view.content.readMessages();
+                chat_item.chat.account.cached_notifications.getAllFromCachedNotifications((res) => {
+                    if (res.length){
+                        res = res.filter(item => item.is_unread);
+                        _.each(res, (msg_item) => {
+                            if (msg_item.is_unread){
+                                chat_item.chat.account.cached_notifications.putInCachedNotifications({
+                                    stanza_id: msg_item.stanza_id,
+                                    xml: msg_item.xml,
+                                    is_unread: false,
+                                });
+                            }
+                        })
+                    }
+                });
             }
         })
     },
@@ -444,6 +510,7 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
                 })
             }
         }
+        xabber.notifications_view.showReadAllBtn();
     },
 
     filterByAccounts: function (accounts, cleared) {
@@ -491,6 +558,7 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
                     this.$('.notification-subscriptions-content-wrap').append($template);
                     let image = contact.cached_image;
                     $template.find('.circle-avatar').setAvatar(image, 64);
+                    $template.attr('data-color', contact.account.settings.get('color'));
                     counter++;
                 });
         });
@@ -600,6 +668,7 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
                 }
             }
         }
+        xabber.notifications_view.showReadAllBtn();
         return $message;
     },
 
@@ -690,6 +759,8 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
             }
             $msg.find('.left-side').append($icon);
         }
+        $msg.attr('data-account-jid',chat.account.get('jid'));
+        $msg.attr('data-color', chat.account.settings.get('color'));
         chat.item_view.content.showMessageAuthor($msg);
     },
 

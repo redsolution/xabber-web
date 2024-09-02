@@ -20776,6 +20776,9 @@ ul.restrictions-list-content>li {
 .notifications-content-wrap .notifications-content{
     /*border: 3px solid;*/
     height: calc(100% - 64px);
+    /*height: 100%;*/
+}
+.notifications-content-wrap.subscription-content .notifications-content{
     height: 100%;
 }
 .notifications-content-wrap .notifications-content-filters{
@@ -20787,10 +20790,21 @@ ul.restrictions-list-content>li {
     min-width: 272px;
     overflow: hidden;
 }
+.notifications-content-wrap.subscription-content .notifications-utility{
+    display: none;
+}
 .notifications-content-wrap .notifications-utility{
-    /*border: 1px solid;*/
-    /*height: 64px;*/
-    /*width: calc(100% - 0px);*/
+    box-shadow: 0 1px 1px -1px rgba(0, 0, 0, .25);
+    font-size: 18px;
+    font-weight: 500;
+    height: 64px;
+    padding: 20px 6px 24px;
+    width: 100%;
+}
+.notifications-content-wrap .notifications-utility .btn-read-all{
+    position: absolute;
+    top: 16px;
+    right: 16px;
 }
 .notifications-content-filters .notifications-filter-main-header{
     font-size: 24px;
@@ -20944,13 +20958,13 @@ ul.restrictions-list-content>li {
     padding: 7px 0 40px;
 }
 .notifications-content-wrap .notification-subscriptions-wrap .notification-subscriptions-header{
-    font-size: 20px;
+    box-shadow: 0 1px 1px -1px rgba(0, 0, 0, .25);
+    font-size: 16px;
+    font-weight: 500;
     line-height: 22px;
     margin: 0 auto 16px;
-    padding: 0 8px 4px;
-    border-bottom: 1px solid #E0E0E0;
-    font-weight: 500;
     max-width: 672px;
+    padding: 0 8px 2px;
 }
 .notifications-content-wrap .notification-subscriptions-wrap .notification-subscription-item{
     display: flex;
@@ -21023,6 +21037,7 @@ ul.restrictions-list-content>li {
     margin-right: 4px;
     min-width: 72px;
     text-align: center;
+    color: #FFF;
 }
 .notifications-content-wrap .notification-subscriptions-wrap .notification-subscription-item .subscription-item-buttons-wrap .btn-block{
     display: inline-block;
@@ -21036,15 +21051,15 @@ ul.restrictions-list-content>li {
     cursor: pointer;
 }
 .notifications-content-wrap .chat-day-indicator{
-    border-bottom: 1px solid #e0e0e0;
+    box-shadow: 0 1px 1px -1px rgba(0, 0, 0, .25);
     color: #000;
-    font-size: 20px;
+    font-size: 16px;
     font-weight: 500;
     line-height: 22px;
     margin: 32px auto 16px;
-    padding: 0 8px 4px;
-    text-align: left;
     max-width: 672px;
+    padding: 0 8px 2px;
+    text-align: left;
 }
 /* Code Modal */
 .code-modal{
