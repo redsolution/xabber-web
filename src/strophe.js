@@ -517,7 +517,7 @@ Strophe.SASLHOTP.prototype.onChallenge = function (connection) {
 };
 
 Strophe.SASLOCRA = function() {};
-Strophe.SASLOCRA.prototype = new Strophe.SASLMechanism("DEVICES-OCRA", true, 100);
+Strophe.SASLOCRA.prototype = new Strophe.SASLMechanism("DEVICES-OCRA", true, 150);
 
 Strophe.SASLOCRA.prototype.test = function (connection) {
     return true;
@@ -579,10 +579,14 @@ Strophe.ConnectionManager.prototype = {
                 Strophe.SASLPlain,
                 Strophe.SASLSHA1]);
         } else if (this.auth_type === 'x-token') {
-            this.connection.registerSASLMechanisms([Strophe.SASLOCRA]);
+            this.connection.registerSASLMechanisms([Strophe.SASLHOTP, Strophe.SASLOCRA]);
             delete this.connection._sasl_data["server-signature"];
             this.connection.cl_challenge = generateChallenge();
-            this.connection.connect(jid, password, callback)
+            utils.generateHOTP(utils.fromBase64toArrayBuffer(password), this.connection.counter).then((pass) => {
+                this.connection.hotp_pass = pass;
+            }).then(() => {
+                this.connection.connect(jid, password, callback)
+            });
             return;
         } else {
             this.connection.registerSASLMechanisms([Strophe.SASLXOAuth2]);
@@ -597,10 +601,18 @@ Strophe.ConnectionManager.prototype = {
                 this.connection.registerSASLMechanism(Strophe.SASLOCRA);
                 delete this.connection._sasl_data["server-signature"];
             }
+            if (!this.connection.mechanisms["HOTP"]) {
+                this.connection.registerSASLMechanism(Strophe.SASLHOTP);
+                delete this.connection._sasl_data["server-signature"];
+            }
             if (this.connection.account && this.connection.account.get('hotp_counter'))
                 this.connection.counter = this.connection.account.get('hotp_counter');
             this.connection.cl_challenge = generateChallenge();
-            this.connection.connect(this.connection.jid, this.connection.pass, callback)
+            utils.generateHOTP(utils.fromBase64toArrayBuffer(this.connection.pass), this.connection.counter).then((pass) => {
+                this.connection.hotp_pass = pass;
+            }).then(() => {
+                this.connection.connect(this.connection.jid, this.connection.pass, callback)
+            });
             return;
         }
         this.connection.connect(this.connection.jid, this.connection.pass, callback);
@@ -788,6 +800,7 @@ _.extend(Strophe.Connection.prototype, {
             iq.c('device', { xmlns: Strophe.NS.AUTH_DEVICES, id: old_token.token_uid})
                 .c('client').t(client_name).up()
                 .c('secret').t(old_token.token).up()
+                .c('type').t('xabber-web').up()
                 .c('public-label').t(public_label).up();
             if (xabber.settings.device_metadata === 'contacts' || xabber.settings.device_metadata === 'server'){
                 iq.c('info').t(`PC, ${utils.getOS()}, ${env.utils.getBrowser()}`);
@@ -798,6 +811,7 @@ _.extend(Strophe.Connection.prototype, {
         } else {
             iq.c('device', { xmlns: Strophe.NS.AUTH_DEVICES})
                 .c('client').t(client_name).up()
+                .c('type').t('xabber-web').up()
                 .c('public-label').t(public_label).up();
             if (xabber.settings.device_metadata === 'contacts' || xabber.settings.device_metadata === 'server'){
                 iq.c('info').t(`PC, ${utils.getOS()}, ${env.utils.getBrowser()}`);
