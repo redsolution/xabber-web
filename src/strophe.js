@@ -800,8 +800,10 @@ _.extend(Strophe.Connection.prototype, {
             iq.c('device', { xmlns: Strophe.NS.AUTH_DEVICES, id: old_token.token_uid})
                 .c('client').t(client_name).up()
                 .c('secret').t(old_token.token).up()
-                .c('type').t('xabber-web').up()
                 .c('public-label').t(public_label).up();
+            if (this.server_mechanisms.includes('DEVICES-OCRA')){
+                iq.c('type').t('xabber-web').up()
+            }
             if (xabber.settings.device_metadata === 'contacts' || xabber.settings.device_metadata === 'server'){
                 iq.c('info').t(`PC, ${utils.getOS()}, ${env.utils.getBrowser()}`);
             } else {
@@ -811,8 +813,10 @@ _.extend(Strophe.Connection.prototype, {
         } else {
             iq.c('device', { xmlns: Strophe.NS.AUTH_DEVICES})
                 .c('client').t(client_name).up()
-                .c('type').t('xabber-web').up()
                 .c('public-label').t(public_label).up();
+            if (this.server_mechanisms.includes('DEVICES-OCRA')){
+                iq.c('type').t('xabber-web').up()
+            }
             if (xabber.settings.device_metadata === 'contacts' || xabber.settings.device_metadata === 'server'){
                 iq.c('info').t(`PC, ${utils.getOS()}, ${env.utils.getBrowser()}`);
             } else {
@@ -840,7 +844,82 @@ _.extend(Strophe.Connection.prototype, {
         this._addSysHandler(handler.bind(this), Strophe.NS.AUTH_DEVICES, 'iq', 'result' , uniq_id);
 
         this.send(iq.tree());
-    }
+    },
+
+    _connect_cb: function (req, _callback, raw) {
+        Strophe.info("_connect_cb was called");
+        this.connected = true;
+
+        var bodyWrap;
+        try {
+            bodyWrap = this._proto._reqToData(req);
+        } catch (e) {
+            if (e !== "badformat") { throw e; }
+            this._changeConnectStatus(
+                Strophe.Status.CONNFAIL,
+                Strophe.ErrorCondition.BAD_FORMAT
+            );
+            this._doDisconnect(Strophe.ErrorCondition.BAD_FORMAT);
+        }
+        if (!bodyWrap) { return; }
+
+        if (this.xmlInput !== Strophe.Connection.prototype.xmlInput) {
+            if (bodyWrap.nodeName === this._proto.strip && bodyWrap.childNodes.length) {
+                this.xmlInput(bodyWrap.childNodes[0]);
+            } else {
+                this.xmlInput(bodyWrap);
+            }
+        }
+        if (this.rawInput !== Strophe.Connection.prototype.rawInput) {
+            if (raw) {
+                this.rawInput(raw);
+            } else {
+                this.rawInput(Strophe.serialize(bodyWrap));
+            }
+        }
+
+        var conncheck = this._proto._connect_cb(bodyWrap);
+        if (conncheck === Strophe.Status.CONNFAIL) {
+            return;
+        }
+
+        // Check for the stream:features tag
+        var hasFeatures;
+        if (bodyWrap.getElementsByTagNameNS) {
+            hasFeatures = bodyWrap.getElementsByTagNameNS(Strophe.NS.STREAM, "features").length > 0;
+        } else {
+            hasFeatures = bodyWrap.getElementsByTagName("stream:features").length > 0 ||
+                bodyWrap.getElementsByTagName("features").length > 0;
+        }
+        if (!hasFeatures) {
+            this._proto._no_auth_received(_callback);
+            return;
+        }
+
+        var matched = [], i, mech, server_mechanisms = [];
+        var mechanisms = bodyWrap.getElementsByTagName("mechanism");
+        if (mechanisms.length > 0) {
+            for (i = 0; i < mechanisms.length; i++) {
+                mech = Strophe.getText(mechanisms[i]);
+                server_mechanisms.push(mech);
+                if (this.mechanisms[mech]) matched.push(this.mechanisms[mech]);
+            }
+        }
+
+        this.server_mechanisms = server_mechanisms; // to check if server supports OCRA
+
+        if (matched.length === 0) {
+            if (bodyWrap.getElementsByTagName("auth").length === 0) {
+                // There are no matching SASL mechanisms and also no legacy
+                // auth available.
+                this._proto._no_auth_received(_callback);
+                return;
+            }
+        }
+        if (this.do_authentication !== false) {
+            this.authenticate(matched);
+        }
+    },
 });
 
 _.extend(Strophe.Websocket.prototype, {
