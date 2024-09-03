@@ -112,8 +112,10 @@ xabber.NotificationsView = xabber.BasicView.extend({
         }
         this.$('.notifications-type-filter-content .filter-item-wrap').removeClass('selected-filter');
         this.$('.notifications-type-filter-content .filter-item-wrap[data-filter="all"]').addClass('selected-filter');
-        this.$('.notification-subscriptions-button').removeClass('hidden');
-        this.$('.notification-subscription-item').slice(2).addClass('hidden');
+        if (this.$(`.notification-subscription-item`).length > 2){
+            this.$(`.notification-subscription-item`).slice(2).addClass('hidden');
+            this.$('.notification-subscriptions-button').removeClass('hidden');
+        }
         this.current_content.$el.removeClass('subscription-content');
         this.$el.removeClass('subscription-content');
         this.current_content.$el.removeClass('security-content');
@@ -306,8 +308,6 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
 
     onClickNotification: function (ev) { //34
         let $elem = $(ev.target).closest('.chat-message');
-
-        $elem.removeClass('unread-message-background');
         let unique_id = $elem.attr('data-uniqueid'),
             msg = this.notification_messages.get(unique_id);
 
@@ -500,6 +500,8 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
             }
         } else {
             $msg.removeClass('unread-message');
+            $msg.removeClass('unread-message-background');
+
             if (message.collection && message.collection.account){
                 message.get('xml') && message.collection.account.cached_notifications.putInCachedNotifications({
                     stanza_id: message.get('unique_id'),
@@ -604,23 +606,23 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
             if (!$prev_message.length) {
                 $prev_message = this.addMessage(this.filtered_messages[index - 1], null, null, true);
             }
-            $message.insertBefore($prev_message);
+            if ($prev_message.prev('.chat-day-indicator').length){
+                $message.insertBefore($prev_message.prev('.chat-day-indicator'));
+            } else {
+                $message.insertBefore($prev_message);
+            }
 
         } else if (!is_filtered && !this.filtered_messages.length && this.notification_messages.models.length && this.notification_messages.models[index - 1]) {
             let $prev_message = this.$(`.chat-message[data-uniqueid="${this.notification_messages.models[index - 1].get('unique_id')}"]`);
             if (!$prev_message.length) {
                 $prev_message = this.addMessage(this.notification_messages.models[index - 1]);
             }
-            $message.insertBefore($prev_message);
+            if ($prev_message.prev('.chat-day-indicator').length){
+                $message.insertBefore($prev_message.prev('.chat-day-indicator'));
+            } else {
+                $message.insertBefore($prev_message);
+            }
         }
-        let $next_message = $message.nextAll('.chat-message').first();
-        this.updateMessageInChat($message[0], message);
-        this.updateNotificationDate($message[0], message);
-        if ($next_message.length) {
-            this.updateMessageInChat($next_message[0]);
-        }
-        chat.item_view.content.initPopup($message);
-        xabber.toolbar_view.recountAllMessageCounter();
 
         let $notification_msg, ignored, verification_failed;
 
@@ -644,9 +646,6 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
                     message.set('is_unread', false);
                     $message.addClass('hidden');
                     if (verification_failed){
-                        message.set('security_notification', true);
-                        $message.removeClass('hidden');
-                        $message.addClass('security-content-msg');
                     }
                 }
                 if (chat.account.omemo && chat.account.omemo.xabber_trust){
@@ -668,6 +667,15 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
                 }
             }
         }
+        let $next_message = $message.nextAll('.chat-message:not(.hidden)').first();
+        this.updateMessageInChat($message[0], message);
+        this.updateNotificationDate($message[0], message);
+        if ($next_message.length) {
+            this.updateMessageInChat($next_message[0]);
+        }
+        chat.item_view.content.initPopup($message);
+        xabber.toolbar_view.recountAllMessageCounter();
+
         xabber.notifications_view.showReadAllBtn();
         return $message;
     },
@@ -703,17 +711,21 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
             console.error(msg);
             return;
         }
-        if (!$msg.hasClass('hidden')){
-            $msg.prev('.chat-day-indicator').remove();
-            let $prev_msg = $msg.prevAll('.chat-message:not(.hidden)').first();
-            if (!$prev_msg.length) {
+        if (!$msg.hasClass('hidden')) {
+            let day_date = moment($msg.data('time')).startOf('day');
+
+            let next_date = $msg.nextAll('.chat-day-indicator').first(),
+                prev_date = $msg.prevAll('.chat-day-indicator').first();
+            if (next_date.attr('data-time') === day_date.format('x')) {
+                next_date.remove();
+            }
+            if (prev_date.attr('data-time') < day_date.format('x')) {
+                prev_date.remove();
                 this.getDateIndicator($msg.data('time')).insertBefore($msg);
-            } else {
-                let is_same_date = moment($msg.data('time')).startOf('day')
-                    .isSame(moment($prev_msg.data('time')).startOf('day'));
-                if (!is_same_date) {
-                    this.getDateIndicator($msg.data('time')).insertBefore($msg);
-                }
+            } else if (prev_date.attr('data-time') === day_date.format('x')){
+
+            } else{
+                this.getDateIndicator($msg.data('time')).insertBefore($msg);
             }
         }
         if ($msg.find('.plyr-video-container').length) {
@@ -741,6 +753,7 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
         }
         if (msg && msg.get('ntf_new_device_msg')){
             this.hideAuthorUsername($msg);
+            msg.set('security_notification', true);
         }
         if (!$msg.find('.left-side .notification-icon').length){
 

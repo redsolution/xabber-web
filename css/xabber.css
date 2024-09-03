@@ -20936,9 +20936,9 @@ ul.restrictions-list-content>li {
 .chat-content-wrap:not(.security-content) .security-content-msg{
     display: none;
 }
-.chat-content-wrap.security-content .chat-message:not(.security-content-msg){
-    display: none;
-}
+/*.chat-content-wrap.security-content .chat-message:not(.security-content-msg){*/
+    /*display: none;*/
+/*}*/
 .chat-content-wrap.subscription-content-hidden .notification-subscriptions-wrap{
     display: none;
 }

@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.3.5.72","version_description":"removed sending of secret on updating existing device token, fixed old device token id saving, fixed double show of auth fail modal which created errors afterwards, removed reconnection tries after auth fail"}'
+'{"version_number":"2.3.5.73","version_description":"fixed date indicator placing in notifications, fixed show subscriptions button in notifications, fixed msg reading state after reconnect, added new device notifications to security filtering"}'
 )});

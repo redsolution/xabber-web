@@ -8783,6 +8783,13 @@ xabber.Roster = xabber.ContactsBase.extend({
                     chat.sendMarker(last_readen_unread_msg.get('msgid'), 'displayed', last_readen_unread_msg.get('stanza_id'), last_readen_unread_msg.get('contact_stanza_id'), last_readen_unread_msg.get('encrypted') && last_readen_unread_msg.get('ephemeral_timer'), true)
                 }
             }
+            if (chat.get('notifications') && chat.messages_unread.length && last_read_msg_item){
+                let unread_messages = _.clone(chat.messages_unread.models);
+                _.each(unread_messages, (msg_item) => {
+                    if (msg_item.get('timestamp') <= last_read_msg_item.get('timestamp'))
+                        msg_item.set('is_unread', false);
+                })
+            }
             chat.messages_unread.reset();
             chat.set('unread', 0);
             chat.set('const_unread', unread_msgs_count);
