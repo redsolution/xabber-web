@@ -52,7 +52,7 @@ String.prototype.emojify = function (options) {
     let emoji_size = options.emoji_size || 20,
         title = options.title ? ` title="${options.title}" ` :"";
     return this.replace(emoji_regexp, function (emoji) {
-        return `<span ${title} class="emoji emoji-w${emoji_size}" data-emoji="${emoji}"><span class="positioned-emoji">${emoji}</span></span>`;
+        return `<span ${title} href="#${options.href}" class="emoji emoji-w${emoji_size}" data-emoji="${emoji}"><span class="positioned-emoji">${emoji}</span></span>`;
     });
 };
 

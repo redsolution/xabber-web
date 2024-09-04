@@ -416,9 +416,6 @@ xabber.Account = Backbone.Model.extend({
                 password = this.getPassword();
             }
             if (!password) {
-                let attrs = {login: true};
-                options.token_invalidated && (attrs.token_invalidated = true);
-                this.password_view.show(attrs);
                 return;
             }
             if (!this.fast_conn_manager) {
@@ -470,7 +467,8 @@ xabber.Account = Backbone.Model.extend({
             }
             if (!password) {
                 let attrs = {login: true};
-                options.token_invalidated && (attrs.token_invalidated = true);
+                if (auth_type === 'x-token' && this.get('x_token') && this.get('x_token').token_uid)
+                    this.set('old_device_token', this.get('x_token').token_uid);
                 this.password_view.show(attrs);
                 return;
             }
@@ -558,7 +556,7 @@ xabber.Account = Backbone.Model.extend({
                 this.session.set({connected: true, reconnected: false});
             } else if (status === Strophe.Status.AUTHFAIL || ((status === Strophe.Status.ERROR) && (condition === 'not-authorized'))) {
                 if ((this.get('auth_type') === 'x-token' || this.connection.x_token)){
-                    if ($(elem).find('credentials-expired').length > 0)
+                    if ($(elem).find('account-disabled').length > 0)
                         this.onTokenRevoked();
                     else if (!this.session.get('auth_failed'))
                         this.onAuthFailed();
@@ -608,7 +606,7 @@ xabber.Account = Backbone.Model.extend({
                 this.onAuthFailed(condition);
             } else if (status === Strophe.Status.AUTHFAIL || ((status === Strophe.Status.ERROR) && (condition === 'not-authorized'))) {
                 if ((this.get('auth_type') === 'x-token' || this.connection.x_token)) {
-                    if ($(elem).find('credentials-expired').length > 0)
+                    if ($(elem).find('account-disabled').length > 0)
                         this.onTokenRevoked();
                     else if (!this.session.get('auth_failed'))
                         this.onAuthFailed();
@@ -1009,7 +1007,7 @@ xabber.Account = Backbone.Model.extend({
         getVCard: function (callback) {
             let jid = this.get('jid'),
                 is_callback = _.isFunction(callback);
-            if (this.connection && this.connection.connected) {
+            if (this.connection && this.connection.connected && !this.session.get('auth_failed')) {
                 this.getConnectionForIQ().vcard.get(jid,
                     (vcard) => {
                         let attrs = {
@@ -1224,6 +1222,8 @@ xabber.Account = Backbone.Model.extend({
                 this.connection.disconnect();
                 if (this.fast_conn_manager) this.fast_connection.disconnect();
             } else {
+                if (this.session.get('no_reconnect') && this.session.get('auth_failed'))
+                    this.connection.disconnect();
                 this.onDisconnected();
             }
         },
@@ -5411,7 +5411,6 @@ xabber.ChangePasswordView = xabber.BasicView.extend({
     render: function (options) {
         options || (options = {});
         this.is_login = options.login;
-        this.token_invalidated = options.token_invalidated;
         this.$('.modal-header span').text(this.is_login ? xabber.getString("xabber_account__social_links__button_log_in") : xabber.getString("button_set_pass"));
         this.$('.btn-cancel').text(this.is_login ? xabber.getString("skip") : xabber.getString("cancel"));
         this.$('.btn-change').text(this.is_login ? xabber.getString("xabber_account__social_links__button_log_in") : xabber.getString("set"));
@@ -5511,8 +5510,6 @@ xabber.ChangePasswordView = xabber.BasicView.extend({
     close: function () {
         if (this.is_login)
             this.model.save('enabled', false);
-        if (this.token_invalidated)
-            this.model.deleteAccount();
         this.cancel();
         this.closeModal();
     },

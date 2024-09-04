@@ -12399,7 +12399,8 @@ xabber.ChatBottomView = xabber.BasicView.extend({
         $emoji_panel.perfectScrollbar(
                 _.extend({theme: 'item-list'}, xabber.ps_settings));
         this.$('.emoji-menu .emoji').click((ev) => {
-            $emoji_panel[0].scrollTop = this.$('.emoji-list-wrap ' + ev.target.attributes.href.value)[0].offsetTop - 4;
+            let $item = $(ev.target).closest('.emoji');
+            $emoji_panel[0].scrollTop = this.$('.emoji-list-wrap ' + $item.attr('href'))[0].offsetTop - 4;
         });
         $insert_emoticon.click((ev) => {
             if (_timeout)
