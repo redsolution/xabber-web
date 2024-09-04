@@ -2709,6 +2709,7 @@ xabber.ChatItemView = xabber.BasicView.extend({
         this.model.recountUnread();
         delete this.contact.attributes.invitation;
         this.updateIcon();
+        this.content.head && this.content.head.updateIcon();
     },
 
     onClosed: function () {
@@ -10847,6 +10848,7 @@ xabber.InvitationPanelView = xabber.SearchView.extend({
         this.updateNotifications();
         this.updateArchived();
         this.updatePinned();
+        this.updateIcon();
         this.account.on("change:omemo_enabled", this.updateMenu, this);
         this.model.on("change:encrypted", this.updateEncrypted, this);
         this.model.on("close_chat", this.closeChat, this);
@@ -10867,6 +10869,9 @@ xabber.InvitationPanelView = xabber.SearchView.extend({
         this.contact.on("change:in_roster", this.updateMenu, this);
         this.contact.on("update_trusted", this.updateEncryptedColor, this);
         this.contact.on("update_trusted", this.renderActiveTrustSession, this);
+        this.contact.on("change:private_chat", this.updateIcon, this);
+        this.contact.on("change:invitation", this.updateIcon, this);
+        this.contact.on("change:incognito_chat", this.updateIcon, this);
         xabber._settings.on("change:jingle_calls", this.updateGroupChatHead, this);
         xabber.on('change:audio', this.updateGroupChatHead, this);
         xabber.on('plyr_player_updated', this.updatePlyrControls, this);
@@ -10908,6 +10913,7 @@ xabber.InvitationPanelView = xabber.SearchView.extend({
         this.updatePlyrControls();
         this.updatePlyrTime();
         this.updateJingleButton();
+        this.updateIcon();
         if (this.model.get('encrypted'))
             this.renderActiveTrustSession();
         return this;

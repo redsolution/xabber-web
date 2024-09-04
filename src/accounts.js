@@ -798,6 +798,7 @@ xabber.Account = Backbone.Model.extend({
             this.save({auth_type: 'password', password: null, x_token: null});
             this.connection.pass = "";
             this.trigger('deactivate', this);
+            this.deactivate()
             this.connFeedback(xabber.getString("connection__error__text_authentication_failed_short"));
         },
 
