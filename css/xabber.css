@@ -12323,6 +12323,15 @@ input[type=range].voice-message-volume:focus {
 .settings-panel-wrap .settings-column .devices-wrap .token-wrap .device-encryption:not(.active){
     display: none;
 }
+.settings-panel-wrap .settings-column .devices-load-wrap{
+    height: 150px;
+    position: relative;
+}
+.settings-panel-wrap .settings-column .devices-load-wrap .preloader-wrapper{
+    position: absolute;
+    left: calc(50% - 8px);
+    top: calc(50% - 8px);
+}
 
 .settings-panel-wrap .settings-column .devices-wrap .token-wrap .device-encryption.is-own svg path{
     fill: #388E3C;

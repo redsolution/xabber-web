@@ -1847,7 +1847,7 @@ xabber.Accounts = Backbone.CollectionWithStorage.extend({
             if (no_accounts) {
                 xabber.body.setScreen('login');
             } else if (account.show_settings_after_delete) {
-                xabber.body.setScreen('settings-modal', {account_block_name: null});
+                xabber.body.setScreen('settings-modal', {account_block_name: null, block_name: null});
             } else if (account.dont_change_screen_after_delete) {
                 return;
             } else {
@@ -1979,7 +1979,7 @@ xabber.AccountToolbarItemView = xabber.BasicView.extend({
         ev.stopPropagation();
         let is_single = $(ev.target).closest('.single-item').length;
         if (is_single){
-            xabber.body.setScreen('settings-modal', {account_block_name: null});
+            xabber.body.setScreen('settings-modal', {account_block_name: null, block_name: null});
             xabber.trigger('update_placeholder');
             return;
         }
@@ -1990,7 +1990,7 @@ xabber.AccountToolbarItemView = xabber.BasicView.extend({
     },
 
     showSettings: function () {
-        xabber.body.setScreen('settings-modal', {account_block_name: null});
+        xabber.body.setScreen('settings-modal', {account_block_name: null, block_name: null});
         xabber.trigger('update_placeholder');
     },
 });
@@ -3564,7 +3564,7 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
     },
 
     showSettings: function () {
-        xabber.body.setScreen('settings-modal', {account_block_name: null});
+        xabber.body.setScreen('settings-modal', {account_block_name: null, block_name: null});
         xabber.trigger('update_placeholder');
     },
 
@@ -3799,7 +3799,8 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
             this.$('.active-sessions-label').addClass('hidden');
             this.$('.btn-revoke-all-tokens').addClass('hidden');
         }
-        this.$('.devices-wrap').removeClass('hidden')
+        this.$('.devices-wrap').removeClass('hidden');
+        this.$('.devices-load-wrap').addClass('hidden');
         !this._single_account  && this.$('.token-wrap').attr('data-subblock-parent-name', '');
         this.updateHeight();
     },

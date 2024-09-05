@@ -8016,7 +8016,7 @@ xabber.Group = Backbone.Model.extend({
     },
 
     showSettings: function () {
-        xabber.body.setScreen('settings-modal', {account_block_name: null});
+        xabber.body.setScreen('settings-modal', {account_block_name: null, block_name: null});
         xabber.trigger('update_placeholder');
     }
 });

@@ -1197,12 +1197,12 @@ xabber.ToolbarView = xabber.BasicView.extend({
     },
 
     showSettings: function () {
-        xabber.body.setScreen('settings-modal', {account_block_name: null});
+        xabber.body.setScreen('settings-modal', {account_block_name: null, block_name: null});
         xabber.trigger('update_placeholder');
     },
 
     showSettingsModal: function () {
-        xabber.body.setScreen('settings-modal', {account_block_name: null});
+        xabber.body.setScreen('settings-modal', {account_block_name: null, block_name: null});
         xabber.trigger('update_placeholder');
     },
 
@@ -2082,7 +2082,7 @@ xabber.SettingsModalView = xabber.BasicView.extend({
         this.updateAccounts(options);
         this.updateHeight();
         this.updateSliders();
-        if (options && options.block_name) {
+        if (options && options.block_name && !options.account_block_name) {
             let $elem = this.$(`.settings-tab[data-block-name="${options.block_name}"]`);
             if ($elem.length)
                 this.jumpToBlock({target: $elem[0]});
