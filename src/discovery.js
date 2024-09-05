@@ -261,7 +261,7 @@ xabber.Account.addConnPlugin(function () {
         if (this.last_ping_timestamp){
             downtime_ping = (moment.now() - this.last_ping_timestamp) / 1000;
         }
-        if (!navigator.onLine || downtime > (constants.DOWNTIME_RECONNECTION_TIMEOUT || 15) && downtime_ping && downtime_ping <= (constants.DOWNTIME_RECONNECTION_TIMEOUT || 15)) {
+        if (!navigator.onLine || downtime > (constants.DOWNTIME_RECONNECTION_TIMEOUT || 15) && downtime_ping && downtime_ping <= (constants.DOWNTIME_RECONNECTION_TIMEOUT || 15) && downtime_ping > 5) {
             if (!navigator.onLine){
                 console.log('navigator: ' + navigator.onLine)
                 console.log('this.connection.connected: ' + this.connection.connected)
@@ -281,7 +281,9 @@ xabber.Account.addConnPlugin(function () {
             console.log('downtime main to ping: ' + downtime);
             downtime_ping && console.log('downtime main from last ping: ' + downtime_ping);
             this.connection && this.connection.ping.ping(this.get('domain'));
-            this.last_ping_timestamp = moment.now();
+            if (!this.last_ping_timestamp || this.last_ping_timestamp >= 10){
+                this.last_ping_timestamp = moment.now();
+            }
         }
     };
 
@@ -315,7 +317,7 @@ xabber.Account.addFastConnPlugin(function () {
         if (this.last_fast_ping_timestamp){
             downtime_ping = (moment.now() - this.last_fast_ping_timestamp) / 1000;
         }
-        if (!navigator.onLine || downtime > (constants.DOWNTIME_RECONNECTION_TIMEOUT || 15) && downtime_ping && downtime_ping <= (constants.DOWNTIME_RECONNECTION_TIMEOUT || 15)) {
+        if (!navigator.onLine || downtime > (constants.DOWNTIME_RECONNECTION_TIMEOUT || 15) && downtime_ping && downtime_ping <= (constants.DOWNTIME_RECONNECTION_TIMEOUT || 15) && downtime_ping > 5) {
             if (!navigator.onLine){
                 console.log('navigator: ' + navigator.onLine)
                 console.log('this.connection.connected: ' + this.fast_connection.connected)
@@ -335,7 +337,9 @@ xabber.Account.addFastConnPlugin(function () {
             console.log('downtime fast to ping: ' + downtime);
             downtime_ping && console.log('downtime fast from last ping: ' + downtime_ping);
             this.fast_connection && this.fast_connection.ping.ping(this.get('domain'));
-            this.fast_connection && (this.last_fast_ping_timestamp = moment.now());
+            if (!this.last_fast_ping_timestamp || this.last_fast_ping_timestamp >= 10){
+                this.fast_connection && (this.last_fast_ping_timestamp = moment.now());
+            }
         }
     };
 }, true, true);
