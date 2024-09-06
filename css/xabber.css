@@ -940,7 +940,8 @@ input[type=file] {
     -webkit-transition: background-color 500ms linear;
     -ms-transition: background-color 500ms linear;
     transition: background-color 500ms linear;
-    position: fixed;
+    position: sticky;
+    top: 0;
     width: inherit;
     z-index: 1000;
     height: 64px;
@@ -1273,6 +1274,7 @@ body {
     z-index: 1005;
 }
 
+.right-contact-panel-wrap .details-panel-right .panel-background-clickable.forced-background,
 .right-contact-panel-wrap.background-click .details-panel-right .panel-background-clickable{
     position: fixed;
     left: 0;
@@ -11586,7 +11588,7 @@ input[type=range].voice-message-volume:focus {
 
 .settings-panel-wrap .settings-panel {
     background: #fff;
-    border-radius: 10px;
+    border-radius: 8px;
     box-shadow: 0 16px 28px 0 rgba(0,0,0,.22), 0 25px 55px 0 rgba(0,0,0,.21);
     height: unset;
     left: 50%;
@@ -15901,7 +15903,7 @@ input[type=range].voice-message-volume:focus {
 
 .details-panel-right .search-wrap .block-header .close-search-icon {
     right: 20px;
-    top: 21px !important;
+    top: 20px !important;
     z-index: 1;
     position: absolute;
     color: #9E9E9E;
@@ -17970,7 +17972,7 @@ input[type=range].voice-message-volume:focus {
 }
 
 .details-panel-right .vcard-header .vcard-header-title {
-    position: fixed;
+    position: sticky;
     z-index: 4;
     top: 0;
     height: 64px !important;
@@ -18271,9 +18273,12 @@ input[type=range].voice-message-volume:focus {
 
 .omemo-enable-view .main-info .circle-avatar,
 .invitation-view .main-info .circle-avatar,
-.details-panel-right .main-info .avatar-wrap,
 .details-panel .main-info .avatar-wrap {
     margin: 48px 0 12px 0 !important;
+    position: relative;
+}
+.details-panel-right .main-info .avatar-wrap{
+    margin: 0 0 12px 0 !important;
     position: relative;
 }
 

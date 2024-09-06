@@ -97,7 +97,6 @@ xabber.once("start", function () {
         }
         if (right_panel_width < 512 ){
             right_panel_width = panel_width - left_panel_width;
-            this.right_contact_panel_saveable = false;
             right_contact_panel_styles = {
                 position : 'absolute',
                 right : 0,
@@ -113,7 +112,6 @@ xabber.once("start", function () {
             }
         }
         else {
-            this.right_contact_panel_saveable = true;
             right_contact_panel_styles = {
                 position : 'static',
                 'z-index' : 0,
@@ -121,7 +119,6 @@ xabber.once("start", function () {
             this.right_contact_panel.$el.removeClass('background-click')
 
         }
-        this.right_contact_panel_width = right_contact_panel_width;
 
         if (!this.body.screen.get('right_contact')) {
             right_contact_panel_width = 0;
@@ -134,6 +131,18 @@ xabber.once("start", function () {
         }
         if (right_panel_width < 768) {
             chat_bottom_panel_width = right_panel_width;
+        }
+
+        if (this.body.screen.get('right_contact_modal')){
+            right_panel_width = panel_width - left_panel_width;
+            right_contact_panel_styles = {
+                position : 'absolute',
+                right : 0,
+                'z-index' : 499,
+            };
+            let modal_width = Math.min(640, Math.max(384, this.body.$el.width() / 2)) ;
+            this.right_contact_panel.$el.attr('data-width', modal_width);
+            right_contact_panel_width = 0;
         }
 
         right_contact_panel_styles.width = right_contact_panel_width;

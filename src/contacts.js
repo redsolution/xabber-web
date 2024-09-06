@@ -1078,9 +1078,9 @@ xabber.Contact = Backbone.Model.extend({
         }
         else {
             if (options.encrypted)
-                xabber.body.setScreen(screen, {right_contact: 'contact_details_encrypted', contact: this});
+                xabber.body.setScreen(screen, {right_contact: 'contact_details_encrypted', contact: this, right_contact_modal: true,});
             else
-                xabber.body.setScreen(screen, {right_contact: 'contact_details', contact: this});
+                xabber.body.setScreen(screen, {right_contact: 'contact_details', contact: this, right_contact_modal: true,});
             if (this.details_view_right && this.details_view_right.contact_searched_messages_view){
                 this.details_view_right.contact_searched_messages_view.hideSearch();
                 if (options.type === 'search') {
@@ -1526,7 +1526,7 @@ xabber.ContactRightVCardView = xabber.VCardRightView.extend({
             this.update();
         });
         this.parent.$('.buttons-wrap.fixed-scroll').addClass('hidden2');
-        this.$('.vcard-header').css({width: xabber.right_contact_panel.$el.find('.details-panel-right').width()});
+        this.$('.vcard-header').css({width: xabber.right_contact_panel.$el.find('.panel-content-wrap').width()});
         this.parent.scrollToTop();
         if (this.parent.ps_container.length) {
             this.parent.ps_container.perfectScrollbar('destroy')
@@ -1610,6 +1610,7 @@ xabber.ContactDetailsViewRight = xabber.BasicView.extend({
         this.chat.on("change:muted", this.updateNotifications, this);
         xabber.on("change:video", this.updateJingleButtons, this);
         xabber.on("change:audio", this.updateJingleButtons, this);
+        xabber.on("update_layout", this.updateIndicator, this);
     },
 
     render: function (options) {
@@ -1644,7 +1645,8 @@ xabber.ContactDetailsViewRight = xabber.BasicView.extend({
         this.updateNotifications();
         this.setButtonsWidth();
         this.updateList('image');
-        xabber.once("update_css", this.updateIndicator, this);
+        if (options && options.right_contact_modal)
+            this.makeModal();
         this.onScroll();
         this.model.resources.models.forEach((resource) => {this.model.resources.requestInfo(resource)});
         $(window).bind("keydown.contact_panel", this.keydownHandler.bind(this));
@@ -1661,6 +1663,19 @@ xabber.ContactDetailsViewRight = xabber.BasicView.extend({
         this.$('.tabs .indicator').remove();
         this.$('.tabs').tabs();
         this.$('.indicator').addClass('ground-color-500');
+
+        setTimeout(() => {
+            this.$('.tabs.not-edit .indicator').remove();
+            this.$('.tabs.not-edit').tabs();
+            this.$('.tabs.not-edit .indicator').addClass('ground-color-500');
+        }, 500);
+        if (xabber.body.screen.get('right_contact_modal') && this.$('.panel-content-wrap').css('width') !== `${xabber.right_contact_panel.$el.attr('data-width')}px`) {
+            this.$('.panel-content-wrap').attr('style', function (i, s) {
+                return (s || '') + `width: ${xabber.right_contact_panel.$el.attr('data-width')}px !important;`
+            });
+        } else if (!xabber.body.screen.get('right_contact_modal')) {
+            this.$('.panel-content-wrap').attr('style', '');
+        }
     },
 
 
@@ -1743,7 +1758,7 @@ xabber.ContactDetailsViewRight = xabber.BasicView.extend({
 
         if(this.ps_container[0].scrollTop >= 250) {
             this.$('.header-buttons').attr('style', 'background-color: rgba(255,255,255,1) !important; -webkit-transition: none; -ms-transition: none;transition: none;');
-            this.$('.main-info').css({width: xabber.right_contact_panel.$el.find('.details-panel-right').width()});
+            this.$('.main-info').css({width: xabber.right_contact_panel.$el.find('.panel-content-wrap').width()});
             this.$('.header-buttons .block-name:not(.second-text)').removeClass('fade-out');
             this.$('.header-buttons .block-name.second-text').addClass('fade-out');
         }
@@ -1755,7 +1770,7 @@ xabber.ContactDetailsViewRight = xabber.BasicView.extend({
             this.$('.header-buttons').attr( 'style', 'background-color: rgba(255,255,255,0) !important;');
             this.$('.header-buttons .block-name').addClass('fade-out');
         }
-        if (!_.isUndefined(bottom_block_scroll) && bottom_block_scroll <= 160){
+        if (!_.isUndefined(bottom_block_scroll) && bottom_block_scroll <= 215){
             this.$('.btn-escape').addClass('btn-top');
             this.$('.btn-escape i').addClass('mdi-arrow-right').removeClass('mdi-close');
             this.$('.buttons-wrap').hideIf(true);
@@ -1919,8 +1934,47 @@ xabber.ContactDetailsViewRight = xabber.BasicView.extend({
             this.ps_container.perfectScrollbar('destroy');
         }
         this.model.set('search_hidden', false);
+        this.makeStatic();
         this.$('.search-wrap').hideIf(this.model.get('search_hidden'));
         this.contact_searched_messages_view.$search_form.find('input').focus();
+    },
+
+    makeModal: function () {
+        let styles = {
+            height: '80%',
+            'box-shadow': '0 16px 28px 0 rgba(0, 0, 0, .22), 0 25px 55px 0 rgba(0, 0, 0, .21)',
+            position: 'fixed',
+            left: '50%',
+            transform: 'translate(-50%, 0)',
+            top: '10%',
+            'background': '#FFF',
+            'border-radius': '8px',
+            'z-index': '1000',
+            'overflow': 'hidden',
+        };
+        this.$('.panel-content-wrap').css(styles);
+        this.$('.panel-background-clickable').addClass('forced-background');
+        xabber.trigger('update_layout');
+    },
+
+    makeStatic: function () {
+        xabber.body.screen.set('right_contact_modal', false, {silent: true});
+        let styles = {
+            height: '',
+            'box-shadow': '',
+            position: '',
+            left: '',
+            transform: '',
+            top: '',
+            'background': '',
+            'border-radius': '',
+            'z-index': '',
+            'overflow': '',
+            'width': '',
+        };
+        this.$('.panel-content-wrap').css(styles);
+        this.$('.panel-background-clickable').removeClass('forced-background');
+        xabber.trigger('update_layout');
     },
 
     addContact: function () {
@@ -2043,9 +2097,10 @@ xabber.GroupChatDetailsViewRight = xabber.BasicView.extend({
         this.chat.on("change:muted", this.updateNotifications, this);
         this.model.on("permissions_changed", this.updateButtons, this);
         this.model.on("change:subscription", this.updateButtons, this);
+        xabber.on("update_layout", this.updateIndicator, this);
     },
 
-    render: function () {
+    render: function (options) {
         this.updateName();
         this.updateButtons();
         if (!this.model.my_rights)
@@ -2084,7 +2139,8 @@ xabber.GroupChatDetailsViewRight = xabber.BasicView.extend({
         this.updateNotifications();
         this.updateList('participants');
         this.setButtonsWidth();
-        xabber.once("update_css", this.updateIndicator, this);
+        if (options && options.right_contact_modal)
+            this.makeModal();
         $(window).bind("keydown.contact_panel", this.keydownHandler.bind(this));
         return this;
     },
@@ -2093,6 +2149,20 @@ xabber.GroupChatDetailsViewRight = xabber.BasicView.extend({
         this.$('.tabs.not-edit .indicator').remove();
         this.$('.tabs.not-edit').tabs();
         this.$('.tabs.not-edit .indicator').addClass('ground-color-500');
+
+        setTimeout(() => {
+            this.$('.tabs.not-edit .indicator').remove();
+            this.$('.tabs.not-edit').tabs();
+            this.$('.tabs.not-edit .indicator').addClass('ground-color-500');
+        }, 500);
+
+        if (xabber.body.screen.get('right_contact_modal') && this.$('.panel-content-wrap').css('width') !== `${xabber.right_contact_panel.$el.attr('data-width')}px`) {
+            this.$('.panel-content-wrap').attr('style', function (i, s) {
+                return (s || '') + `width: ${xabber.right_contact_panel.$el.attr('data-width')}px !important;`
+            });
+        } else if (!xabber.body.screen.get('right_contact_modal')) {
+            this.$('.panel-content-wrap').attr('style', '');
+        }
     },
 
     updateChilds: function () {
@@ -2207,8 +2277,47 @@ xabber.GroupChatDetailsViewRight = xabber.BasicView.extend({
             this.ps_container.perfectScrollbar('destroy');
         }
         this.model.set('search_hidden', false);
+        this.makeStatic();
         this.$('.search-wrap').hideIf(this.model.get('search_hidden'));
         this.contact_searched_messages_view.$search_form.find('input').focus();
+    },
+
+    makeModal: function () {
+        let styles = {
+            height: '80%',
+            'box-shadow': '0 16px 28px 0 rgba(0, 0, 0, .22), 0 25px 55px 0 rgba(0, 0, 0, .21)',
+            position: 'fixed',
+            left: '50%',
+            transform: 'translate(-50%, 0)',
+            top: '10%',
+            'background': '#FFF',
+            'border-radius': '8px',
+            'z-index': '1000',
+            'overflow': 'hidden',
+        };
+        this.$('.panel-content-wrap').css(styles);
+        this.$('.panel-background-clickable').addClass('forced-background');
+        xabber.trigger('update_layout');
+    },
+
+    makeStatic: function () {
+        xabber.body.screen.set('right_contact_modal', false, {silent: true});
+        let styles = {
+            height: '',
+            'box-shadow': '',
+            position: '',
+            left: '',
+            transform: '',
+            top: '',
+            'background': '',
+            'z-index': '',
+            'border-radius': '',
+            'overflow': '',
+            'width': '',
+        };
+        this.$('.panel-content-wrap').css(styles);
+        this.$('.panel-background-clickable').removeClass('forced-background');
+        xabber.trigger('update_layout');
     },
 
     onScroll: function () {
@@ -2222,7 +2331,7 @@ xabber.GroupChatDetailsViewRight = xabber.BasicView.extend({
 
         if(this.ps_container[0].scrollTop >= 250) {
             this.$('.header-buttons').attr( 'style', 'background-color: rgba(255,255,255,1) !important; -webkit-transition: none; -ms-transition: none;transition: none;');
-            this.$('.main-info').css({width: xabber.right_contact_panel.$el.find('.details-panel-right').width()});
+            this.$('.main-info').css({width: xabber.right_contact_panel.$el.find('.panel-content-wrap').width()});
             this.$('.header-buttons .block-name:not(.second-text)').removeClass('fade-out');
             this.$('.header-buttons .block-name.second-text').addClass('fade-out');
         }
@@ -2234,7 +2343,7 @@ xabber.GroupChatDetailsViewRight = xabber.BasicView.extend({
             this.$('.header-buttons').attr( 'style', 'background-color: rgba(255,255,255,0) !important;');
             this.$('.header-buttons .block-name').addClass('fade-out');
         }
-        if (!_.isUndefined(bottom_block_scroll) && bottom_block_scroll <= 160) {
+        if (!_.isUndefined(bottom_block_scroll) && bottom_block_scroll <= 215) {
             this.$('.btn-escape').addClass('btn-top');
             this.$('.btn-escape i').addClass('mdi-arrow-right').removeClass('mdi-close');
             this.$('.buttons-wrap').hideIf(true);
@@ -2686,7 +2795,7 @@ xabber.GroupChatPropertiesViewRight = xabber.BasicView.extend({
             this.update();
         });
         this.parent.$('.buttons-wrap.fixed-scroll').addClass('hidden2');
-        this.$('.vcard-header').css({width: xabber.right_contact_panel.$el.find('.details-panel-right').width()});
+        this.$('.vcard-header').css({width: xabber.right_contact_panel.$el.find('.panel-content-wrap').width()});
         this.parent.scrollToTop();
         if (this.parent.ps_container.length) {
             this.parent.ps_container.perfectScrollbar('destroy')
@@ -3237,6 +3346,7 @@ xabber.MediaBaseView = xabber.BasicView.extend({
             let $file = $elem.closest('.gallery-file');
             this.parent.saveScrollBarOffset()
             xabber.body.data.set('contact_details_view', this.parent)
+            this.parent.openChat();
             this.chat.getMessageContext($file.data('uniqueid'), {searched_messages: true, encrypted: this.encrypted});
         }
     },
@@ -4691,6 +4801,10 @@ xabber.ParticipantPropertiesViewRight = xabber.BasicView.extend({
         this.$('.block-name:not(.second-text)').hideIf(true);
     },
 
+    openChat: function (ev) {
+        this.model.showDetailsRight('all-chats');
+    },
+
     updateIndicator: function () {
         this.$('.tabs .indicator').remove();
         this.$('.tabs').tabs();
@@ -4916,8 +5030,9 @@ xabber.ParticipantPropertiesViewRight = xabber.BasicView.extend({
         let chat = this.account.chats.getChat(this.contact);
         chat.messages_view = new xabber.ParticipantMessagesView({ model: chat, contact: this.contact, participant: this.participant.attributes });
         chat.messages_view.messagesRequest(options, () => {
-            xabber.body.setScreen('all-chats', {right: 'participant_messages', model: chat});
+            xabber.body.setScreen('all-chats', {right: 'participant_messages', model: chat}); //34
             this.open(this.participant, this.data_form);
+            this.openChat();
         });
     },
 

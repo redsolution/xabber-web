@@ -1816,8 +1816,9 @@ xabber.EphemeralTimerSelector = xabber.BasicView.extend({
                     xabber.body.setScreen(screen, {
                         right: 'message_context',
                         model: this,
+                        right_contact_modal: false,
                     }, {
-                        right_contact_save: true
+                        right_contact_save: true,
                     });
                 });
             }
@@ -3294,6 +3295,7 @@ xabber.ChatItemView = xabber.BasicView.extend({
               );
           }
           this.$('.search-wrap').hideIf(this.parent.model.get('search_hidden'))
+          ev && this.parent.openChat();
       },
 
       onClickMessage: function (ev) {
@@ -8672,14 +8674,14 @@ xabber.AccountChats = xabber.ChatsBase.extend({
         }
 
         let $token_revoke = $message.children(`revoke[xmlns="${Strophe.NS.AUTH_DEVICES}"]`);
-        if ($token_revoke.length) {
+        if ($token_revoke.length && msg_from === this.account.domain) {
             $token_revoke.children('device').each((idx, token) => {
                 let $token = $(token),
                     token_uid = $token.attr('id');
                 if (!token_uid)
                     return;
                 if (this.account.get('x_token') && this.account.get('x_token').token_uid === token_uid) {
-                    this.account.deleteAccount();
+                    this.account.deleteAccount(null, null, true);
                     return;
                 }
                 if (this.account.x_tokens_list) {
@@ -9643,8 +9645,6 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
             )) {
                 if (view.model.get('saved'))
                     xabber.body.setScreen((options.screen || 'all-chats'), {right_contact: ''});
-                else if(xabber.right_contact_panel_saveable)
-                    view.contact.showDetailsRight('all-chats', {right_saved: true, encrypted: view.model.get('encrypted')});
                 else
                     view.contact.showDetailsRight('all-chats', {right_saved: false});
             }
@@ -10028,11 +10028,8 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
           this.$el.addClass('active');
           xabber.chats_view.openChat(chat.item_view, {right_contact_save: true, clear_search: false});
           xabber.body.setScreen(xabber.body.screen.get('name'), {right: 'message_context', model: chat });
-          if (xabber.right_contact_panel_saveable && xabber.body.screen.get('right_contact') && xabber.body.screen.get('right') === 'message_context') {
-              if (xabber.right_contact_panel_saveable)
-                  chat.contact.showDetailsRight('all-chats', {right_saved: true});
-              else
-                  chat.contact.showDetailsRight('all-chats', {right_saved: false});
+          if (xabber.body.screen.get('right_contact') && xabber.body.screen.get('right') === 'message_context') {
+              chat.contact.showDetailsRight('all-chats', {right_saved: false});
           }
           this.model.get('unique_id') && chat.getMessageContext(this.model.get('unique_id'), {message: true});
       }

@@ -554,7 +554,7 @@ xabber.Account = Backbone.Model.extend({
                 }
                 this.createFastConnection();
                 this.session.set({connected: true, reconnected: false});
-            } else if (status === Strophe.Status.AUTHFAIL || ((status === Strophe.Status.ERROR) && (condition === 'not-authorized'))) {
+            } else if (status === Strophe.Status.AUTHFAIL) {
                 if ((this.get('auth_type') === 'x-token' || this.connection.x_token)){
                     if ($(elem).find('account-disabled').length > 0)
                         this.onTokenRevoked();
@@ -1107,9 +1107,11 @@ xabber.Account = Backbone.Model.extend({
                 if(this.get('x_token'))
                     stanza.c('device', {xmlns: Strophe.NS.AUTH_DEVICES, id: this.get('x_token').token_uid}).up();
             }
-            stanza.cnode(this.connection.caps.createCapsNode({
-                node: 'https://www.xabber.com/clients/xabber/web'
-            }).tree());
+            if (type !== 'offline'){
+                stanza.cnode(this.connection.caps.createCapsNode({
+                    node: 'https://www.xabber.com/clients/xabber/web'
+                }).tree());
+            }
             return this.sendPres(stanza);
         },
 
@@ -1186,7 +1188,7 @@ xabber.Account = Backbone.Model.extend({
                 });
         },
 
-        deleteAccount: function (show_settings, dont_change_screen){ //34
+        deleteAccount: function (show_settings, dont_change_screen, already_removed){
             let account_deletion_dfd = new $.Deferred();
             account_deletion_dfd.done(() => {
                 this.show_settings_after_delete = show_settings;
@@ -1194,12 +1196,12 @@ xabber.Account = Backbone.Model.extend({
                 let screen = xabber.body.screen;
                 if (screen.get('account') && screen.get('account') === this && screen.get('name') === 'account_settings_modal')
                     this.show_settings_after_delete = true;
-                if (this.get('x_token'))
+                if (this.get('x_token') && !already_removed)
                     this.revokeXToken([this.get('x_token').token_uid]);
                 this.session.set('delete', true);
                 this.deactivate();
             });
-            if (this.omemo && this.omemo.xabber_trust && this.x_tokens_list && !this.session.get('on_token_revoked')){
+            if (this.omemo && this.omemo.xabber_trust && this.x_tokens_list && !this.session.get('on_token_revoked') && !already_removed){
                 let removed_device_ids = [`${this.omemo.get('device_id')}`];
                 this.omemo.xabber_trust.findAndMarkRemovedTrustedDevices(removed_device_ids, null, () => {
                     account_deletion_dfd.resolve()
