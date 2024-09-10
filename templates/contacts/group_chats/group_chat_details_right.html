@@ -90,6 +90,22 @@
         <div class="block-wrap groups-block-wrap"></div>
         <div class="block-wrap search-messages-block-wrap"></div>
         <div class="block-wrap participant-view-wrap"></div>
+        <div class="block-wrap qr-code-wrap">
+            <div class="qr-code-content-wrap">
+                <div class="block-header">
+                    <i class="details-icon btn-back-qr mdi mdi-24px mdi-arrow-left"></i>
+                    <span class="block-name">{[print(xabber.getString("dialog_show_qr_code__header"))]}</span>
+                </div>
+                <div class="qr-code-content">
+                    <div class="qr-code-canvas">
+                    </div>
+                    <div class="qr-code-text">
+                        <div class="qr-code-name"></div>
+                        <div class="qr-code-jid"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
     <ul class="tabs not-edit bottom-block-tabs">
         <li data-value="participants" class="list-variant tab"><a class="text-color-700">{[print(xabber.getString("group_settings__members_list__header"))]}</a></li>

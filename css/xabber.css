@@ -16032,6 +16032,7 @@ input[type=range].voice-message-volume:focus {
 .details-panel-right .participant-view-wrap,
 .details-panel-right .restrictions-block-wrap,
 .details-panel-right .edit-group-wrap,
+.details-panel-right .qr-code-wrap,
 .details-panel-right .edit-block-wrap {
     width: inherit;
 }
@@ -16159,6 +16160,7 @@ input[type=range].voice-message-volume:focus {
 
 .details-panel-right .participant-details-wrap,
 .details-panel-right .participant-details-wrap .participant-details-edit-wrap,
+.details-panel-right .qr-code-content-wrap,
 .details-panel-right .edit-wrap {
     width: inherit;
     height: 100%;
@@ -16186,6 +16188,7 @@ input[type=range].voice-message-volume:focus {
 }
 
 .details-panel-right .participant-details-wrap .block-header,
+.details-panel-right .qr-code-content-wrap .block-header,
 .details-panel-right .edit-wrap .block-header {
     display: block;
     position: fixed;
@@ -16250,7 +16253,34 @@ input[type=range].voice-message-volume:focus {
     margin-bottom: 20px;
     letter-spacing: 0.17px;
 }
-
+.details-panel-right .qr-code-content-wrap .qr-code-content{
+    margin-top: 128px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.details-panel-right .qr-code-content-wrap .qr-code-content .qr-code-canvas{
+    margin-bottom: 16px;
+}
+.details-panel-right .qr-code-content-wrap .qr-code-content .qr-code-text{
+    align-items: center;
+    color: #616161;
+    display: flex;
+    flex-direction: column;
+    font-size: 14px;
+    justify-content: center;
+    margin-bottom: 32px;
+    -webkit-user-select: text !important;
+    -moz-user-select: text !important;
+    -ms-user-select: text !important;
+    user-select: text !important;
+}
+.details-panel-right .qr-code-content-wrap .qr-code-content .qr-code-text .qr-code-name{
+    color: #212121;
+    font-size: 18px;
+    font-weight: 700;
+}
+.details-panel-right .qr-code-content-wrap .block-header .block-name,
 .details-panel-right .participant-details-item .block-header .block-name,
 .details-panel-right .edit-wrap .block-header .block-name {
     position: absolute;
@@ -16259,6 +16289,7 @@ input[type=range].voice-message-volume:focus {
     left: 72px;
 }
 
+.details-panel-right .qr-code-content-wrap .block-header .details-icon,
 .details-panel-right .participant-details-item .block-header .details-icon,
 .details-panel-right .edit-wrap .block-header .details-icon {
     left: 20px;

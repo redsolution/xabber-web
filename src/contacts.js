@@ -1572,6 +1572,7 @@ xabber.ContactDetailsViewRight = xabber.BasicView.extend({
         "click .btn-delete": "deleteContact",
         "click .btn-block": "blockContact",
         "click .btn-qr-code": "showQRCode",
+        "click .btn-back-qr": "hideQRCode",
         "click .btn-unblock": "unblockContact",
         "click .btn-mute-dropdown": "muteChat",
         "click .btn-start-encryption": "startEncryptedChat",
@@ -1654,6 +1655,7 @@ xabber.ContactDetailsViewRight = xabber.BasicView.extend({
         this.updateNotifications();
         this.setButtonsWidth();
         this.updateButtons();
+        this.hideQRCode();
         this.updateList('image');
         if (options && options.right_contact_modal)
             this.makeModal();
@@ -1868,8 +1870,22 @@ xabber.ContactDetailsViewRight = xabber.BasicView.extend({
             url: 'xmpp:' + this.model.get('jid'),
             noBorder: true
         });
-        utils.dialogs.ask(xabber.getString("dialog_show_qr_code__header"), null, {escape_button: true, canvas: qrcode.domElement, bottom_text: ('<div class="name">' + this.model.get('name') + '</div><div class="jid">' + this.model.get('jid') + '</div>')}, { cancel_button_text: ' ', ok_button_text: ' '}, 'hidden').done((result) => {
-        });
+        this.$('.qr-code-canvas').html("")[0].appendChild(qrcode.domElement);
+        this.$('.qr-code-name').text(this.model.get('name'));
+        this.$('.qr-code-jid').text(this.model.get('jid'));
+        this.$('.qr-code-content-wrap').removeClass('hidden');
+        this.scrollToTop();
+        this.ps_container.perfectScrollbar('destroy');
+    },
+
+    hideQRCode: function () {
+        if (this.ps_container.length) {
+            this.ps_container.perfectScrollbar(
+                _.extend(this.ps_settings || {}, xabber.ps_settings)
+            );
+        }
+        this.scrollToTop();
+        this.$('.qr-code-content-wrap').addClass('hidden');
     },
 
     updateSubscriptions: function () {
@@ -2078,6 +2094,7 @@ xabber.GroupChatDetailsViewRight = xabber.BasicView.extend({
         "click .btn-search": "showSearchMessages",
         "click .btn-clear-history-chat": "clearHistory",
         "click .btn-qr-code": "showQRCode",
+        "click .btn-back-qr": "hideQRCode",
         "click .btn-leave": "leaveGroupChat",
         "click .btn-invite": "inviteUser",
         "click .btn-delete-group": "deleteGroup",
@@ -2175,6 +2192,7 @@ xabber.GroupChatDetailsViewRight = xabber.BasicView.extend({
         this.updateNotifications();
         this.updateList('participants');
         this.setButtonsWidth();
+        this.hideQRCode();
         if (options && options.right_contact_modal)
             this.makeModal();
         $(window).bind("keydown.contact_panel", this.keydownHandler.bind(this));
@@ -2411,8 +2429,22 @@ xabber.GroupChatDetailsViewRight = xabber.BasicView.extend({
             url: 'xmpp:' + this.model.get('jid'),
             noBorder: true
         });
-        utils.dialogs.ask(xabber.getString("dialog_show_qr_code__header"), null, {escape_button: true, canvas: qrcode.domElement, bottom_text: ('<div class="name">' + this.model.get('name') + '</div><div class="jid">' + this.model.get('jid') + '</div>')}, { cancel_button_text: ' ', ok_button_text: ' '}, 'hidden').done((result) => {
-        });
+        this.$('.qr-code-canvas').html("")[0].appendChild(qrcode.domElement);
+        this.$('.qr-code-name').text(this.model.get('name'));
+        this.$('.qr-code-jid').text(this.model.get('jid'));
+        this.$('.qr-code-content-wrap').removeClass('hidden');
+        this.scrollToTop();
+        this.ps_container.perfectScrollbar('destroy');
+    },
+
+    hideQRCode: function () {
+        if (this.ps_container.length) {
+            this.ps_container.perfectScrollbar(
+                _.extend(this.ps_settings || {}, xabber.ps_settings)
+            );
+        }
+        this.scrollToTop();
+        this.$('.qr-code-content-wrap').addClass('hidden');
     },
 
     editProperties: function (ev) {
