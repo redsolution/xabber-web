@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.3.5.78","version_description":"changed contacts details to modal window, changed stream error handle for not-authorized, fixed revoke to handle only if its from accounts server, changed revoke behaviour for account deletion and unavailable presence"}'
+'{"version_number":"2.3.5.79","version_description":"hidden search button in encrypted chat head, changed buttons in contact and group details, added new buttons in contact and group details, changed header scroll button behaviour in contact and group details"}'
 )});

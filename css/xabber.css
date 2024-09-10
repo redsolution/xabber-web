@@ -8812,6 +8812,15 @@ input[type=text].simple-input-field:hover {
     max-width: 272px !important;
     overflow-y: visible;
 }
+.right-contact-panel-wrap .details-panel-right .panel-content-wrap .buttons-wrap .contact-mute-dropdown {
+    left: auto !important;
+    min-width: 200px !important;
+    overflow: hidden;
+    right: 100.5% !important;
+    width: fit-content !important;
+    top: 0 !important;
+    margin-top: 0 !important;
+}
 .chat-tools-wrap .contact-mute-dropdown {
     top: 101px !important;
     left: initial !important;
@@ -18218,8 +18227,8 @@ input[type=range].voice-message-volume:focus {
 }
 
 .edit-rights .participant-details-item .buttons-wrap .btn-kick-participant,
-.edit-rights .participant-details-item .buttons-wrap .btn-block-participant,
-.groupchat-details-panel .buttons-wrap.sticky-details-wrap .btn-leave {
+.edit-rights .participant-details-item .buttons-wrap .btn-block-participant{
+/*.groupchat-details-panel .buttons-wrap.sticky-details-wrap .btn-leave {*/
     background-color: #e0e0e0 !important;
     fill: #9e9e9e;
     color: #9e9e9e;

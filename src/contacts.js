@@ -1574,7 +1574,10 @@ xabber.ContactDetailsViewRight = xabber.BasicView.extend({
         "click .btn-qr-code": "showQRCode",
         "click .btn-unblock": "unblockContact",
         "click .btn-mute-dropdown": "muteChat",
-        "click .btn-mute.muted": "unmuteChat",
+        "click .btn-start-encryption": "startEncryptedChat",
+        "click .btn-open-encrypted-chat": "openEncryptedChat",
+        "click .btn-open-regular-chat": "openRegularChat",
+        "click .btn-notifications.muted": "unmuteChat",
         "click .list-variant": "changeList",
         "click .btn-auth-request": "requestAuthorization",
     },
@@ -1637,6 +1640,12 @@ xabber.ContactDetailsViewRight = xabber.BasicView.extend({
             this.$('.btn-edit').remove()
             this.$('.btn-qr-code').remove()
         }
+        this.$('.btn-notifications').dropdown({
+            inDuration: 100,
+            outDuration: 100,
+            hover: true, // Activate on hover
+            belowOrigin: true, // Displays dropdown below the button
+        });
         this.updateChilds();
         this.updateSubscriptions();
         this.updateJingleButtons();
@@ -1644,6 +1653,7 @@ xabber.ContactDetailsViewRight = xabber.BasicView.extend({
         this.updateName();
         this.updateNotifications();
         this.setButtonsWidth();
+        this.updateButtons();
         this.updateList('image');
         if (options && options.right_contact_modal)
             this.makeModal();
@@ -1678,6 +1688,20 @@ xabber.ContactDetailsViewRight = xabber.BasicView.extend({
         }
     },
 
+    startEncryptedChat: function () {
+        this.account.chats.openChat(this.model, {encrypted: true});
+        let chat = this.account.chats.get(this.model.hash_id + ':encrypted');
+        chat.set('timestamp', moment.now());
+        chat.item_view.updateLastMessage();
+    },
+
+    openEncryptedChat: function () {
+        this.account.chats.openChat(this.model, {encrypted: true});
+    },
+
+    openRegularChat: function () {
+        this.account.chats.openChat(this.model);
+    },
 
     keydownHandler: function (ev) {
         if (!xabber.body.$el.siblings('.mfp-ready').length && !$.magnificPopup.instance.isOpen && ev.keyCode === constants.KEY_ESCAPE && !xabber.body.$el.siblings('#modals').children('.open').length) {
@@ -1698,6 +1722,7 @@ xabber.ContactDetailsViewRight = xabber.BasicView.extend({
         this.$('.header-buttons').attr( 'style', 'background-color: rgba(255,255,255,0) !important;');
         this.$('.header-buttons .block-name').addClass('fade-out');
         this.$('.btn-escape').removeClass('btn-top');
+        this.$('.btn-escape').addClass('hidden');
         this.$('.btn-escape i').addClass('mdi-close').removeClass('mdi-arrow-right');
         this.$('.buttons-wrap').hideIf(false);
         this.$('.btn-edit').hideIf(false);
@@ -1761,18 +1786,25 @@ xabber.ContactDetailsViewRight = xabber.BasicView.extend({
             this.$('.main-info').css({width: xabber.right_contact_panel.$el.find('.panel-content-wrap').width()});
             this.$('.header-buttons .block-name:not(.second-text)').removeClass('fade-out');
             this.$('.header-buttons .block-name.second-text').addClass('fade-out');
+            this.$('.btn-escape').addClass('btn-top');
+            this.$('.btn-escape').removeClass('hidden');
+            this.$('.btn-escape i').addClass('mdi-arrow-right').removeClass('mdi-close');
         }
         else if(this.ps_container[0].scrollTop >= 40) {
             this.$('.header-buttons').attr('style', 'background-color: rgba(255,255,255,0.5) !important;');
             this.$('.header-buttons .block-name').addClass('fade-out');
+            this.$('.btn-escape').removeClass('btn-top');
+            this.$('.btn-escape').addClass('hidden');
+            this.$('.btn-escape i').addClass('mdi-close').removeClass('mdi-arrow-right');
         }
         else{
             this.$('.header-buttons').attr( 'style', 'background-color: rgba(255,255,255,0) !important;');
             this.$('.header-buttons .block-name').addClass('fade-out');
+            this.$('.btn-escape').removeClass('btn-top');
+            this.$('.btn-escape').addClass('hidden');
+            this.$('.btn-escape i').addClass('mdi-close').removeClass('mdi-arrow-right');
         }
         if (!_.isUndefined(bottom_block_scroll) && bottom_block_scroll <= 215){
-            this.$('.btn-escape').addClass('btn-top');
-            this.$('.btn-escape i').addClass('mdi-arrow-right').removeClass('mdi-close');
             this.$('.buttons-wrap').hideIf(true);
             this.$('.btn-edit').hideIf(true);
             this.$('.btn-qr-code').hideIf(true);
@@ -1781,8 +1813,6 @@ xabber.ContactDetailsViewRight = xabber.BasicView.extend({
             this.$('.header-buttons .block-name.second-text').text(this.$('.list-variant .active').text())
         }
         else {
-            this.$('.btn-escape').removeClass('btn-top');
-            this.$('.btn-escape i').addClass('mdi-close').removeClass('mdi-arrow-right');
             this.$('.buttons-wrap').hideIf(false);
             this.$('.btn-edit').hideIf(false);
             this.$('.btn-qr-code').hideIf(false);
@@ -1815,19 +1845,19 @@ xabber.ContactDetailsViewRight = xabber.BasicView.extend({
         this.$('.contact-mute-dropdown').hideIf(is_blocked);
         this.$('.btn-auth-request').showIf(!is_server && in_roster && !is_blocked &&
             subscription !== 'both' && subscription !== 'to');
+        this.$('.btn-start-encryption').showIf(this.account.omemo && !this.encrypted && !this.account.chats.get(`${this.model.hash_id}:encrypted`));
+        this.$('.btn-open-encrypted-chat').showIf(this.account.omemo && !this.encrypted && this.account.chats.get(`${this.model.hash_id}:encrypted`));
+        this.$('.btn-open-regular-chat').showIf(this.encrypted);
     },
 
     updateNotifications: function () {
         if (this.chat.isMuted()) {
-            if (this.chat.isMuted() > 4800000000)
-                this.$('.btn-mute').html(env.templates.svg['bell-off']());
-            else
-                this.$('.btn-mute').html(env.templates.svg['bell-sleep']());
-            this.$('.btn-mute').addClass('muted').addClass('active')
+            this.$('.btn-notifications .one-line').text(xabber.getString("unmute_chat"));
+            this.$('.btn-notifications').addClass('muted');
         }
         else {
-            this.$('.btn-mute').html(env.templates.svg['bell']());
-            this.$('.btn-mute').removeClass('muted')
+            this.$('.btn-notifications .one-line').text(xabber.getString("mute_chat"));
+            this.$('.btn-notifications').removeClass('muted');
         }
         this.$('.btn-mute-dropdown').hideIf(this.chat.isMuted());
         this.$('.btn-unmute-dropdown').hideIf(!this.chat.isMuted());
@@ -2043,7 +2073,7 @@ xabber.GroupChatDetailsViewRight = xabber.BasicView.extend({
 
     events: {
         "click .btn-mute-dropdown": "muteChat",
-        "click .btn-mute.muted": "unmuteChat",
+        "click .btn-notifications.muted": "unmuteChat",
         "click .btn-edit": "showEdit",
         "click .btn-search": "showSearchMessages",
         "click .btn-clear-history-chat": "clearHistory",
@@ -2134,6 +2164,12 @@ xabber.GroupChatDetailsViewRight = xabber.BasicView.extend({
         this.$('.select-users-list-wrap .dropdown-button').dropdown(dropdown_settings);
         this.$('.circle-avatar.dropdown-button').dropdown(dropdown_settings);
         this.$('.dropdown-button').dropdown(dropdown_settings);
+        this.$('.btn-notifications').dropdown({
+            inDuration: 100,
+            outDuration: 100,
+            hover: true, // Activate on hover
+            belowOrigin: true, // Displays dropdown below the button
+        });
         this.onScroll();
         this.updateChilds();
         this.updateNotifications();
@@ -2200,15 +2236,12 @@ xabber.GroupChatDetailsViewRight = xabber.BasicView.extend({
 
     updateNotifications: function () {
         if (this.chat.isMuted()) {
-            if (this.chat.isMuted() > 4800000000)
-                this.$('.btn-mute').html(env.templates.svg['bell-off']());
-            else
-                this.$('.btn-mute').html(env.templates.svg['bell-sleep']());
-            this.$('.btn-mute').addClass('muted').addClass('active')
+            this.$('.btn-notifications .one-line').text(xabber.getString("unmute_chat"));
+            this.$('.btn-notifications').addClass('muted');
         }
         else {
-            this.$('.btn-mute').html(env.templates.svg['bell']());
-            this.$('.btn-mute').removeClass('muted')
+            this.$('.btn-notifications .one-line').text(xabber.getString("mute_chat"));
+            this.$('.btn-notifications').removeClass('muted');
         }
         this.$('.btn-mute-dropdown').hideIf(this.chat.isMuted());
     },
@@ -2334,18 +2367,25 @@ xabber.GroupChatDetailsViewRight = xabber.BasicView.extend({
             this.$('.main-info').css({width: xabber.right_contact_panel.$el.find('.panel-content-wrap').width()});
             this.$('.header-buttons .block-name:not(.second-text)').removeClass('fade-out');
             this.$('.header-buttons .block-name.second-text').addClass('fade-out');
+            this.$('.btn-escape').addClass('btn-top');
+            this.$('.btn-escape').removeClass('hidden');
+            this.$('.btn-escape i').addClass('mdi-arrow-right').removeClass('mdi-close');
         }
         else if(this.ps_container[0].scrollTop >= 40) {
             this.$('.header-buttons').attr( 'style', 'background-color: rgba(255,255,255,0.5) !important;');
             this.$('.header-buttons .block-name').addClass('fade-out');
+            this.$('.btn-escape').removeClass('btn-top');
+            this.$('.btn-escape').addClass('hidden');
+            this.$('.btn-escape i').addClass('mdi-close').removeClass('mdi-arrow-right');
         }
         else{
             this.$('.header-buttons').attr( 'style', 'background-color: rgba(255,255,255,0) !important;');
             this.$('.header-buttons .block-name').addClass('fade-out');
+            this.$('.btn-escape').removeClass('btn-top');
+            this.$('.btn-escape').addClass('hidden');
+            this.$('.btn-escape i').addClass('mdi-close').removeClass('mdi-arrow-right');
         }
         if (!_.isUndefined(bottom_block_scroll) && bottom_block_scroll <= 215) {
-            this.$('.btn-escape').addClass('btn-top');
-            this.$('.btn-escape i').addClass('mdi-arrow-right').removeClass('mdi-close');
             this.$('.buttons-wrap').hideIf(true);
             this.$('.btn-edit').hideIf(true);
             this.$('.btn-qr-code').hideIf(true);
@@ -2354,8 +2394,6 @@ xabber.GroupChatDetailsViewRight = xabber.BasicView.extend({
             this.$('.header-buttons .block-name.second-text').text(this.$('.tabs:not(.participant-tabs) .list-variant .active').text())
         }
         else {
-            this.$('.btn-escape').removeClass('btn-top');
-            this.$('.btn-escape i').addClass('mdi-close').removeClass('mdi-arrow-right');
             this.$('.buttons-wrap').hideIf(false);
             this.$('.btn-edit').hideIf(false);
             this.$('.btn-qr-code').hideIf(false);
@@ -2422,6 +2460,7 @@ xabber.GroupChatDetailsViewRight = xabber.BasicView.extend({
         this.$('.header-buttons').attr( 'style', 'background-color: rgba(255,255,255,0) !important;');
         this.$('.header-buttons .block-name').addClass('fade-out');
         this.$('.btn-escape').removeClass('btn-top');
+        this.$('.btn-escape').addClass('hidden');
         this.$('.btn-escape i').addClass('mdi-close').removeClass('mdi-arrow-right');
         this.$('.buttons-wrap').hideIf(false);
         this.$('.btn-edit').hideIf(false);
@@ -5030,7 +5069,7 @@ xabber.ParticipantPropertiesViewRight = xabber.BasicView.extend({
         let chat = this.account.chats.getChat(this.contact);
         chat.messages_view = new xabber.ParticipantMessagesView({ model: chat, contact: this.contact, participant: this.participant.attributes });
         chat.messages_view.messagesRequest(options, () => {
-            xabber.body.setScreen('all-chats', {right: 'participant_messages', model: chat}); //34
+            xabber.body.setScreen('all-chats', {right: 'participant_messages', model: chat});
             this.open(this.participant, this.data_form);
             this.openChat();
         });

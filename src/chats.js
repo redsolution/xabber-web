@@ -11056,6 +11056,7 @@ xabber.InvitationPanelView = xabber.SearchView.extend({
         this.$('.btn-show-fingerprints').showIf(!is_group_chat && this.account.omemo && this.model.get('encrypted'));
         !this.model.get('encrypted') && this.$('.btn-show-session').addClass('hidden');
         this.$('.btn-retract-own-messages').showIf(is_group_chat);
+        this.$('.btn-search-messages').hideIf(this.model.get('encrypted'));
         this.$('.btn-block-contact').hideIf(this.contact.get('blocked'));
         this.$('.btn-unblock-contact').showIf(this.contact.get('blocked'));
         this.$('.btn-delete-contact').showIf(this.contact.get('in_roster') && !is_group_chat);
