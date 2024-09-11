@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.3.5.80","version_description":"changed qr-code in contact and group details"}'
+'{"version_number":"2.3.5.81","version_description":"fixed overscrolling in account settings, changed qr-code in account settings, changed icon for chat message searching exit, added fading background to chat message search when its opened from contact details, fixed error with chat message search breaking client screens, fixed contact details qr-code error, returned draggable account items and account order changing, changed styling for settings account item"}'
 )});

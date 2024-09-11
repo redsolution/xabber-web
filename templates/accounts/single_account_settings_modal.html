@@ -1,6 +1,7 @@
 
 <div class="left-column settings-column noselect">
     <div class="settings-account-head">
+        <div class="settings-account-head-background"></div>
         <svg class="btn-add-account mdi mdi-24px mdi-svg-template" data-svgname="contact-add"></svg>
         <div class="name one-line"></div>
         <svg class="btn-color-picker dropdown-button mdi mdi-24px mdi-svg-template" data-activates="color-picker-dropdown" data-svgname="palette"></svg>
@@ -57,7 +58,7 @@
                 <span class="one-line text-color-blue-grey-700">{[print(xabber.getString("account_color_name_blue_grey").replace(/-/g, " "))]}</span>
             </div>
         </ul>
-        <svg class="btn-qr-code mdi mdi-24px mdi-svg-template" data-svgname="qrcode"></svg>
+        <svg class="btn-qr-code settings-tab mdi mdi-24px mdi-svg-template" data-block-name="qr-code" data-svgname="qrcode"></svg>
         <div class="field clickable-field enabled-state switch normal">
             <label class="field-value">
                 <input type="checkbox">
@@ -512,6 +513,19 @@
             <div data-header='{[print(xabber.getString("settings_account__trust"))]}' class="settings-block-wrap trust">
                 <div class="settings-trust-wrap">
                     <div class="settings-trust-items-wrap">
+                    </div>
+                </div>
+            </div>
+
+            <div data-header='{[print(xabber.getString("dialog_show_qr_code__header"))]}' class="settings-block-wrap qr-code">
+                <div class="qr-code-content-wrap">
+                    <div class="qr-code-content">
+                        <div class="qr-code-canvas">
+                        </div>
+                        <div class="qr-code-text">
+                            <div class="qr-code-name"></div>
+                            <div class="qr-code-jid"></div>
+                        </div>
                     </div>
                 </div>
             </div>

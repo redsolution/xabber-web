@@ -1286,6 +1286,23 @@ body {
     background: #000;
 }
 
+.right-contact-panel-wrap .details-panel-right .panel-background-clickable.temporary-fading-search-background,
+.right-contact-panel-wrap .details-panel-right .panel-background-clickable.fading-search-background{
+    background-color: transparent;
+    height: 100%;
+    left: 0;
+    pointer-events: none;
+    position: fixed;
+    transition: background-color 0.25s linear;
+    width: 100%;
+    z-index: 498;
+    opacity: 0.3;
+}
+.right-contact-panel-wrap .details-panel-right .panel-background-clickable.temporary-fading-search-background{
+    background: #000 !important;
+    background-color: #000 !important;
+    transition: background-color 0.25s linear;
+}
 .right-contact-panel-wrap.background-click .details-panel-right .panel-content-wrap{
     z-index: 499;
     overflow: hidden;
@@ -11794,7 +11811,7 @@ input[type=range].voice-message-volume:focus {
 }
 
 .settings-panel-wrap .settings-panel .xmpp-account .account-info-wrap{
-    padding: 11px 0 0 72px;
+    padding: 8px 0 0 72px;
     height: 100%;
 }
 
@@ -11811,7 +11828,7 @@ input[type=range].voice-message-volume:focus {
     border-bottom: 1px solid #f5f5f5;
 }
 
-.settings-panel-wrap .settings-panel .xmpp-account:last-of-type .account-info-wrap .text-info-wrap{
+.settings-panel-wrap .settings-panel div:nth-last-child(1 of .xmpp-account) .account-info-wrap .text-info-wrap{
     border-bottom: none;
 }
 
@@ -12088,8 +12105,19 @@ input[type=range].voice-message-volume:focus {
     transition: background 0.5s;
 }
 .settings-panel-wrap .settings-panel .settings-account-head.head-scrolled{
-    background: #FFF;
+}
+.settings-panel-wrap .settings-panel .settings-account-head .settings-account-head-background{
+    transition: background 0.5s;
+    position: absolute;
+    top: 0;
     height: 64px;
+    background: transparent;
+    width: 100%;
+    pointer-events: none;
+}
+.settings-panel-wrap .settings-panel .settings-account-head.head-scrolled .settings-account-head-background{
+    background: #fff;
+    pointer-events: unset;
 }
 
 .settings-panel-wrap .settings-panel .settings-account-head .name{
@@ -12215,7 +12243,7 @@ input[type=range].voice-message-volume:focus {
     display: none;
 }
 
-.settings-panel-wrap .settings-panel .settings-tab:not(.token-wrap) {
+.settings-panel-wrap .settings-panel .settings-tab:not(.token-wrap):not(.btn-qr-code) {
     height: 64px;
     padding: 10px 16px 0px 72px;
 }
@@ -12223,7 +12251,7 @@ input[type=range].voice-message-volume:focus {
     padding: 2px;
 }
 
-.settings-panel-wrap .settings-panel .left-column .settings-tab:not(.settings-deletion-button):not(.token-wrap):last-of-type {
+.settings-panel-wrap .settings-panel .left-column .settings-tab:not(.settings-deletion-button):not(.token-wrap):not(.btn-qr-code):last-of-type {
     border-bottom: 1px solid #f5f5f5;
 }
 .settings-panel-wrap .settings-panel .settings-tab.disabled {
@@ -13179,7 +13207,7 @@ input[type=range].voice-message-volume:focus {
     transition: background-color 100ms linear;
 }
 
-.settings-panel .settings-tab:not(.token-wrap) {
+.settings-panel .settings-tab:not(.token-wrap):not(.btn-qr-code) {
     position: relative;
     width: 100%;
     height: 48px;
@@ -13482,7 +13510,7 @@ input[type=range].voice-message-volume:focus {
 }
 
 
-.settings-block-wrap.xmpp-accounts .move-account-to-bottom {
+.settings-panel-wrap .settings-panel .accounts-info-wrap .move-account-to-bottom {
     width: 100%;
     height: 6px;
 }
@@ -13631,14 +13659,14 @@ input[type=range].voice-message-volume:focus {
 }
 
 .xmpp-account .move-account-to-this.drag-on,
-.settings-block-wrap.xmpp-accounts .move-account-to-bottom.drag-on {
+.settings-panel-wrap .settings-panel .accounts-info-wrap .move-account-to-bottom.drag-on {
     background-color: #C0C0C0;
     border-radius: 3px;
 }
 
 .xmpp-account .drag-item {
     position: absolute;
-    top: 12px;
+    top: 18px;
     left: 0;
     border-radius: 50%;
     color: #9E9E9E;
@@ -13704,10 +13732,8 @@ input[type=range].voice-message-volume:focus {
     right: 10px;
 }
 
-
 .xmpp-account.dragging {
-    background-color: rgba(240,240,240,0.7);
-    outline: 1px solid #E0E0E0;
+    background-color: transparent;
     opacity: 0.7;
 }
 
@@ -16160,7 +16186,7 @@ input[type=range].voice-message-volume:focus {
 
 .details-panel-right .participant-details-wrap,
 .details-panel-right .participant-details-wrap .participant-details-edit-wrap,
-.details-panel-right .qr-code-content-wrap,
+.qr-code-content-wrap,
 .details-panel-right .edit-wrap {
     width: inherit;
     height: 100%;
@@ -16171,6 +16197,14 @@ input[type=range].voice-message-volume:focus {
     padding: 0;
 }
 
+.settings-block-wrap .qr-code-content-wrap{
+    position: unset;
+}
+
+.settings-block-wrap .qr-code-content-wrap .qr-code-content{
+    margin-top: 64px;
+    margin-bottom: 64px;
+}
 .details-panel-right .participant-details-wrap .participant-details-edit-wrap{
     padding-top: 48px;
 }
@@ -16253,16 +16287,16 @@ input[type=range].voice-message-volume:focus {
     margin-bottom: 20px;
     letter-spacing: 0.17px;
 }
-.details-panel-right .qr-code-content-wrap .qr-code-content{
+.qr-code-content-wrap .qr-code-content{
     margin-top: 128px;
     display: flex;
     flex-direction: column;
     align-items: center;
 }
-.details-panel-right .qr-code-content-wrap .qr-code-content .qr-code-canvas{
+.qr-code-content-wrap .qr-code-content .qr-code-canvas{
     margin-bottom: 16px;
 }
-.details-panel-right .qr-code-content-wrap .qr-code-content .qr-code-text{
+.qr-code-content-wrap .qr-code-content .qr-code-text{
     align-items: center;
     color: #616161;
     display: flex;
@@ -16275,12 +16309,12 @@ input[type=range].voice-message-volume:focus {
     -ms-user-select: text !important;
     user-select: text !important;
 }
-.details-panel-right .qr-code-content-wrap .qr-code-content .qr-code-text .qr-code-name{
+.qr-code-content-wrap .qr-code-content .qr-code-text .qr-code-name{
     color: #212121;
     font-size: 18px;
     font-weight: 700;
 }
-.details-panel-right .qr-code-content-wrap .block-header .block-name,
+.qr-code-content-wrap .block-header .block-name,
 .details-panel-right .participant-details-item .block-header .block-name,
 .details-panel-right .edit-wrap .block-header .block-name {
     position: absolute;
@@ -16289,7 +16323,7 @@ input[type=range].voice-message-volume:focus {
     left: 72px;
 }
 
-.details-panel-right .qr-code-content-wrap .block-header .details-icon,
+.qr-code-content-wrap .block-header .details-icon,
 .details-panel-right .participant-details-item .block-header .details-icon,
 .details-panel-right .edit-wrap .block-header .details-icon {
     left: 20px;

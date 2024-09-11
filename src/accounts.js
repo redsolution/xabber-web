@@ -3063,7 +3063,7 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
         "change .sync-account": "changeSyncSetting",
         "click .btn-delete-settings": "deleteSettings",
         "click .color-picker-button": "changeColor",
-        "click .btn-qr-code": "showQRCode",
+        "click .btn-qr-code": "jumpToBlock",
         "click .btn-revoke-token": "revokeXToken",
         "click .devices-wrap .btn-revoke-all-tokens": "revokeAllXTokens",
         "click .devices-wrap .btn-verify-devices": "verifyDevices",
@@ -3163,6 +3163,7 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
         this.updateGroupsLabel();
         this.updateTrustItems();
         this.updateView();
+        this.showQRCode();
         this.$('.main-resource .client').text(constants.CLIENT_NAME);
         this.$('.main-resource .resource').text(this.model.resource);
         this.$('.main-resource .priority').text(this.model.get('priority'));
@@ -4185,12 +4186,14 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
     },
 
     showQRCode: function () {
+        if (!this.$('.qr-code-canvas').length)
+            return;
         let qrcode = new VanillaQR({
             url: 'xmpp:' + this.model.get('jid'),
             noBorder: true
         });
-        utils.dialogs.ask(xabber.getString("dialog_show_qr_code__header"), null, {escape_button: true, canvas: qrcode.domElement, bottom_text: ('<div class="name">' + this.model.get('jid') + '</div>')}, { cancel_button_text: ' ', ok_button_text: ' '}, 'hidden').done((result) => {
-        });
+        this.$('.qr-code-canvas').html("")[0].appendChild(qrcode.domElement);
+        this.$('.qr-code-name').text(this.model.get('jid'));
     },
 
     openBlockWindow: function () {
@@ -4267,6 +4270,7 @@ xabber.AccountSettingsSingleModalView = xabber.AccountSettingsModalView.extend({
         this.updateXTokens();
         this.updateGroupsLabel();
         this.updateView();
+        this.showQRCode();
         this.$('.main-resource .client').text(constants.CLIENT_NAME);
         this.$('.main-resource .resource').text(this.model.resource);
         this.$('.main-resource .priority').text(this.model.get('priority'));

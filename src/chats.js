@@ -3294,6 +3294,7 @@ xabber.ChatItemView = xabber.BasicView.extend({
                   _.extend(this.parent.ps_settings || {}, xabber.ps_settings)
               );
           }
+          this.parent.$('.panel-background-clickable').removeClass('fading-search-background');
           this.$('.search-wrap').hideIf(this.parent.model.get('search_hidden'))
           ev && this.parent.openChat();
       },
@@ -9643,10 +9644,7 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
             if (!options.right_force_close && (
                 xabber.body.screen.get('right_contact') && (xabber.body.screen.get('right') === 'chat' || xabber.body.screen.get('right') === 'message_context' )
             )) {
-                if (view.model.get('saved'))
-                    xabber.body.setScreen((options.screen || 'all-chats'), {right_contact: ''});
-                else
-                    view.contact.showDetailsRight('all-chats', {right_saved: false});
+                xabber.body.setScreen((options.screen || 'all-chats'), {right_contact: ''});
             }
             if (!view.model.get('loading_unread_history')){
                 let current_scrolling = view.content.getScrollTop() || view.content._scrolltop,

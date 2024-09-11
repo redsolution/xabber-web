@@ -1085,7 +1085,7 @@ xabber.Contact = Backbone.Model.extend({
                 this.details_view_right.contact_searched_messages_view.hideSearch();
                 if (options.type === 'search') {
                     this.details_view_right.contact_searched_messages_view.clearSearch();
-                    this.details_view_right.showSearchMessages();
+                    this.details_view_right.showSearchMessages(null, true);
                 }
                 if (options.type === 'members') {
                     this.details_view_right.$('.tabs:not(.participant-tabs) .list-variant[data-value="participants"]').click()
@@ -1879,12 +1879,12 @@ xabber.ContactDetailsViewRight = xabber.BasicView.extend({
     },
 
     hideQRCode: function () {
-        if (this.ps_container.length) {
+        if (this.ps_container.length && this.model.get('search_hidden')) {
             this.ps_container.perfectScrollbar(
                 _.extend(this.ps_settings || {}, xabber.ps_settings)
             );
+            this.scrollToTop();
         }
-        this.scrollToTop();
         this.$('.qr-code-content-wrap').addClass('hidden');
     },
 
@@ -1974,7 +1974,14 @@ xabber.ContactDetailsViewRight = xabber.BasicView.extend({
         this.chat.muteChat('');
     },
 
-    showSearchMessages: function (ev) {
+    showSearchMessages: function (ev, is_chat_head) {
+        if (xabber.body.screen.get('right_contact_modal') && !is_chat_head){
+            this.$('.panel-background-clickable').addClass('temporary-fading-search-background');
+            this.$('.panel-background-clickable').addClass('fading-search-background');
+            setTimeout(() => {
+                this.$('.panel-background-clickable').removeClass('temporary-fading-search-background');
+            }, 20);
+        }
         this.scrollToTop();
         if (this.ps_container.length) {
             this.ps_container.perfectScrollbar('destroy');
@@ -2322,7 +2329,14 @@ xabber.GroupChatDetailsViewRight = xabber.BasicView.extend({
         this.chat.muteChat('');
     },
 
-    showSearchMessages: function (ev) {
+    showSearchMessages: function (ev, is_chat_head) {
+        if (xabber.body.screen.get('right_contact_modal') && !is_chat_head){
+            this.$('.panel-background-clickable').addClass('temporary-fading-search-background');
+            this.$('.panel-background-clickable').addClass('fading-search-background');
+            setTimeout(() => {
+                this.$('.panel-background-clickable').removeClass('temporary-fading-search-background');
+            }, 20);
+        }
         this.scrollToTop();
         if (this.ps_container.length) {
             this.ps_container.perfectScrollbar('destroy');
@@ -2438,12 +2452,12 @@ xabber.GroupChatDetailsViewRight = xabber.BasicView.extend({
     },
 
     hideQRCode: function () {
-        if (this.ps_container.length) {
+        if (this.ps_container.length && this.model.get('search_hidden')) {
             this.ps_container.perfectScrollbar(
                 _.extend(this.ps_settings || {}, xabber.ps_settings)
             );
+            this.scrollToTop();
         }
-        this.scrollToTop();
         this.$('.qr-code-content-wrap').addClass('hidden');
     },
 
