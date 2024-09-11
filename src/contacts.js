@@ -1975,7 +1975,8 @@ xabber.ContactDetailsViewRight = xabber.BasicView.extend({
     },
 
     showSearchMessages: function (ev, is_chat_head) {
-        if (xabber.body.screen.get('right_contact_modal') && !is_chat_head){
+        let is_modal = xabber.body.screen.get('right_contact_modal');
+        if (is_modal && !is_chat_head){
             this.$('.panel-background-clickable').addClass('temporary-fading-search-background');
             this.$('.panel-background-clickable').addClass('fading-search-background');
             setTimeout(() => {
@@ -1989,6 +1990,13 @@ xabber.ContactDetailsViewRight = xabber.BasicView.extend({
         this.model.set('search_hidden', false);
         this.makeStatic();
         this.$('.search-wrap').hideIf(this.model.get('search_hidden'));
+        if (is_modal && !is_chat_head){
+            xabber.right_contact_panel.setCustomCss({'z-index' : 499});
+            this.modal_z_index_timeout = setTimeout(() => {
+                xabber.right_contact_panel.setCustomCss({'z-index' : 0});
+                3
+            }, 2000);
+        }
         this.contact_searched_messages_view.$search_form.find('input').focus();
     },
 
@@ -2007,6 +2015,7 @@ xabber.ContactDetailsViewRight = xabber.BasicView.extend({
         };
         this.$('.panel-content-wrap').css(styles);
         this.$('.panel-background-clickable').addClass('forced-background');
+        clearTimeout(this.modal_z_index_timeout);
         xabber.trigger('update_layout');
     },
 
@@ -2027,6 +2036,7 @@ xabber.ContactDetailsViewRight = xabber.BasicView.extend({
         };
         this.$('.panel-content-wrap').css(styles);
         this.$('.panel-background-clickable').removeClass('forced-background');
+        clearTimeout(this.modal_z_index_timeout);
         xabber.trigger('update_layout');
     },
 
@@ -2330,7 +2340,8 @@ xabber.GroupChatDetailsViewRight = xabber.BasicView.extend({
     },
 
     showSearchMessages: function (ev, is_chat_head) {
-        if (xabber.body.screen.get('right_contact_modal') && !is_chat_head){
+        let is_modal = xabber.body.screen.get('right_contact_modal');
+        if (is_modal && !is_chat_head){
             this.$('.panel-background-clickable').addClass('temporary-fading-search-background');
             this.$('.panel-background-clickable').addClass('fading-search-background');
             setTimeout(() => {
@@ -2344,6 +2355,12 @@ xabber.GroupChatDetailsViewRight = xabber.BasicView.extend({
         this.model.set('search_hidden', false);
         this.makeStatic();
         this.$('.search-wrap').hideIf(this.model.get('search_hidden'));
+        if (is_modal && !is_chat_head){
+            xabber.right_contact_panel.setCustomCss({'z-index' : 499});
+            setTimeout(() => {
+                xabber.right_contact_panel.setCustomCss({'z-index' : 0});
+            }, 2000);
+        }
         this.contact_searched_messages_view.$search_form.find('input').focus();
     },
 
@@ -2362,6 +2379,7 @@ xabber.GroupChatDetailsViewRight = xabber.BasicView.extend({
         };
         this.$('.panel-content-wrap').css(styles);
         this.$('.panel-background-clickable').addClass('forced-background');
+        clearTimeout(this.modal_z_index_timeout);
         xabber.trigger('update_layout');
     },
 
@@ -2382,6 +2400,7 @@ xabber.GroupChatDetailsViewRight = xabber.BasicView.extend({
         };
         this.$('.panel-content-wrap').css(styles);
         this.$('.panel-background-clickable').removeClass('forced-background');
+        clearTimeout(this.modal_z_index_timeout);
         xabber.trigger('update_layout');
     },
 

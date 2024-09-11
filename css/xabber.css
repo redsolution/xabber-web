@@ -1293,7 +1293,7 @@ body {
     left: 0;
     pointer-events: none;
     position: fixed;
-    transition: background-color 0.25s linear;
+    transition: background-color 2s cubic-bezier(0.65, 0.05, 0.36, 1);
     width: 100%;
     z-index: 498;
     opacity: 0.3;

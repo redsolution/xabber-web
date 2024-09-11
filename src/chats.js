@@ -3167,6 +3167,9 @@ xabber.ChatItemView = xabber.BasicView.extend({
 
       keyupSearch: function (ev) {
           this.$('.close-search-icon').hideIf(!this.$search_form.find('input').val());
+          if (this.$search_form.find('input').val()){
+              this.parent.$('.panel-background-clickable').removeClass('fading-search-background');
+          }
           if (ev.keyCode === constants.KEY_ENTER) {
               this.emptyChat();
               let query = this.$search_form.find('input').val();

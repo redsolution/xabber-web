@@ -281,7 +281,7 @@ xabber.Account.addConnPlugin(function () {
             console.log('downtime main to ping: ' + downtime);
             downtime_ping && console.log('downtime main from last ping: ' + downtime_ping);
             this.connection && this.connection.ping.ping(this.get('domain'));
-            if (!this.last_ping_timestamp || this.last_ping_timestamp >= 10){
+            if (!this.last_ping_timestamp || downtime_ping >= 10){
                 this.last_ping_timestamp = moment.now();
             }
         }
@@ -337,7 +337,7 @@ xabber.Account.addFastConnPlugin(function () {
             console.log('downtime fast to ping: ' + downtime);
             downtime_ping && console.log('downtime fast from last ping: ' + downtime_ping);
             this.fast_connection && this.fast_connection.ping.ping(this.get('domain'));
-            if (!this.last_fast_ping_timestamp || this.last_fast_ping_timestamp >= 10){
+            if (!this.last_fast_ping_timestamp || downtime_ping >= 10){
                 this.fast_connection && (this.last_fast_ping_timestamp = moment.now());
             }
         }

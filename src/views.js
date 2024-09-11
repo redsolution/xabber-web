@@ -685,11 +685,13 @@ xabber.SearchView = xabber.BasicView.extend({
                       let message_from_stanza = account.chats.receiveChatMessage(message,
                           _.extend({is_searched: true}, options)
                           ),
-                          msg_idx = xabber.all_searched_messages.indexOf(message_from_stanza), $message_item_view;
-                          if (!message_from_stanza)
-                              return;
-                          else
-                              $message_item_view = new xabber.MessageItemView({model: message_from_stanza});
+                          msg_idx = xabber.all_searched_messages.indexOf(message_from_stanza),
+                          $message_item_view;
+                      if (!message_from_stanza) {
+                          return;
+                      } else {
+                          $message_item_view = new xabber.MessageItemView({model: message_from_stanza});
+                      }
                       if (msg_idx === 0) {
                           $message_item_view.$el.appendTo(this.$('.messages-list-wrap .messages-list'));
                       } else {
@@ -715,7 +717,16 @@ xabber.SearchView = xabber.BasicView.extend({
                   .c('value').t(Strophe.NS.MAM).up().up()
                   .c('field', {'var': 'withtext'})
                   .c('value').t(query).up().up().up().cnode(new Strophe.RSM(options).toXML()),
-              handler = account.connection.addHandler((message) => {
+              conn;
+
+          let res = account.fast_connection && !account.fast_connection.disconnecting && account.fast_connection.authenticated && account.fast_connection.connected && account.get('status') !== 'offline';
+          if (res) {
+              conn = account.fast_connection;
+          } else{
+              conn = account.connection;
+          }
+
+          let handler = conn.addHandler((message) => {
                   let $msg = $(message);
                   if ($msg.find('result').attr('queryid') === queryid && options.query_id === this.queryid) {
                       messages.push(message);
