@@ -4103,7 +4103,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
         if (this.model.last_message && this.model.last_message.get('is_unread') && !unread_messages.length){
             let msg = this.model.last_message;
             this.model.sendMarker(msg.get('msgid'), 'displayed', msg.get('stanza_id'), msg.get('contact_stanza_id'), msg.get('encrypted') && msg.get('ephemeral_timer'));
-            msg.set('is_unread', false);
+            !this.model.get('notifications') && msg.set('is_unread', false);
             msg.get('stanza_id') && this.model.set('last_read_msg', msg.get('stanza_id'));
             msg.get('stanza_id') && this.model.set('prev_last_read_msg', msg.get('stanza_id'));
         }
@@ -9393,7 +9393,7 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
         let chats = this.model,
             active_toolbar = xabber.toolbar_view.$('.active');
         if (active_toolbar.hasClass('chats')) {
-            let private_chats = chats.filter(chat => chat.get('saved') || !chat.contact.get('group_chat') && chat.get('timestamp') && !chat.get('archived') && chat.last_message && !chat.last_message.get('invite') && (chat.get('unread') || chat.get('const_unread')));
+            let private_chats = chats.filter(chat => chat.get('saved') || !chat.contact.get('group_chat') && chat.get('timestamp') && !chat.get('archived') && !chat.get('notifications') && chat.last_message && !chat.last_message.get('invite') && (chat.get('unread') || chat.get('const_unread')));
             private_chats.forEach((chat) => {
                 if (!chat.item_view.content)
                     chat.item_view.content = new xabber.ChatContentView({chat_item: chat.item_view});
@@ -9401,7 +9401,7 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
             });
         }
         if (active_toolbar.hasClass('all-chats')) {
-            let all_chats = chats.filter(chat => chat.get('saved') || chat.get('timestamp') && !chat.get('archived') && chat.last_message && !chat.last_message.get('invite') && (chat.get('unread') || chat.get('const_unread')));
+            let all_chats = chats.filter(chat => chat.get('saved') || chat.get('timestamp') && !chat.get('archived') && !chat.get('notifications') && chat.last_message && !chat.last_message.get('invite') && (chat.get('unread') || chat.get('const_unread')));
             all_chats.forEach((chat) => {
                 if (!chat.item_view.content)
                     chat.item_view.content = new xabber.ChatContentView({chat_item: chat.item_view});
@@ -9409,7 +9409,7 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
             });
         }
         if (active_toolbar.hasClass('group-chats')) {
-            let group_chats = chats.filter(chat => chat.get('saved') || chat.contact.get('group_chat') && chat.get('timestamp') && !chat.get('archived') && chat.last_message && !chat.last_message.get('invite') && (chat.get('unread') || chat.get('const_unread')));
+            let group_chats = chats.filter(chat => chat.get('saved') || chat.contact.get('group_chat') && chat.get('timestamp') && !chat.get('archived') && !chat.get('notifications') && chat.last_message && !chat.last_message.get('invite') && (chat.get('unread') || chat.get('const_unread')));
             group_chats.forEach((chat) => {
                 if (!chat.item_view.content)
                     chat.item_view.content = new xabber.ChatContentView({chat_item: chat.item_view});
@@ -9560,7 +9560,7 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
             active_toolbar = xabber.toolbar_view.$('.active');
         if (!view)
             return;
-        if (active_toolbar.hasClass('unread') && !(item.get('unread') || item.get('const_unread')))
+        if (active_toolbar.hasClass('unread') && (item.get('notifications') || !(item.get('unread') || item.get('const_unread'))))
             return;
         if (active_toolbar.hasClass('account-item') && view.account.get('jid') !== active_toolbar.attr('data-jid')){
             return;

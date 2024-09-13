@@ -1286,8 +1286,8 @@ body {
     background: #000;
 }
 
-.right-contact-panel-wrap .details-panel-right .panel-background-clickable.temporary-fading-search-background,
-.right-contact-panel-wrap .details-panel-right .panel-background-clickable.fading-search-background{
+.right-contact-panel-wrap:not(.background-click) .details-panel-right .panel-background-clickable.temporary-fading-search-background,
+.right-contact-panel-wrap:not(.background-click) .details-panel-right .panel-background-clickable.fading-search-background{
     background-color: transparent;
     height: 100%;
     left: 0;
@@ -1298,10 +1298,10 @@ body {
     z-index: 498;
     opacity: 0.3;
 }
-.right-contact-panel-wrap .details-panel-right .panel-background-clickable.temporary-fading-search-background{
+.right-contact-panel-wrap:not(.background-click) .details-panel-right .panel-background-clickable.temporary-fading-search-background{
     background: #000 !important;
     background-color: #000 !important;
-    transition: background-color 0.25s linear;
+    transition: background-color 2s linear;
 }
 .right-contact-panel-wrap.background-click .details-panel-right .panel-content-wrap{
     z-index: 499;
@@ -21526,6 +21526,12 @@ ul.restrictions-list-content>li {
 .chat-head-wrap.encrypted[data-trust=true] .chat-tools-wrap .chat-tool.btn-show-session .mdi-alert-circle,
 .chat-head-wrap.encrypted[data-trust=nil] .chat-tools-wrap .chat-tool.btn-show-session .mdi-alert,
 .chat-head-wrap.encrypted[data-trust=nil] .chat-tools-wrap .chat-tool.btn-show-session .mdi-alert-circle,
+.chat-head-wrap.encrypted[data-trust=null] .chat-tools-wrap .chat-tool.btn-show-session .mdi-alert,
+.chat-head-wrap.encrypted[data-trust=null] .chat-tools-wrap .chat-tool.btn-show-session .mdi-alert-circle,
+.chat-head-wrap.encrypted[data-trust=''] .chat-tools-wrap .chat-tool.btn-show-session .mdi-alert,
+.chat-head-wrap.encrypted[data-trust=''] .chat-tools-wrap .chat-tool.btn-show-session .mdi-alert-circle,
+.chat-head-wrap.encrypted:not([data-trust]) .chat-tools-wrap .chat-tool.btn-show-session .mdi-alert,
+.chat-head-wrap.encrypted:not([data-trust]) .chat-tools-wrap .chat-tool.btn-show-session .mdi-alert-circle,
 .chat-head-wrap.encrypted[data-trust=error] .chat-tools-wrap .chat-tool.btn-show-session .mdi-lock,
 .chat-head-wrap.encrypted[data-trust=error] .chat-tools-wrap .chat-tool.btn-show-session .mdi-alert{
     display:none;

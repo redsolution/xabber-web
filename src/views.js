@@ -4469,6 +4469,7 @@ _.extend(xabber, {
         if (this._blink_interval && is_disconnected === undefined)
             return;
         clearInterval(this._blink_interval);
+        clearInterval(this._extended_blink_interval);
         this._blink_interval = setInterval(() => {
             let $icon = $("link[rel='shortcut icon']"), url;
             if ($icon.attr('href').indexOf(this.cache.favicon) > -1 || $icon.attr('href').indexOf(constants.FAVICON_DEFAULT) > -1 || $icon.attr('href').indexOf(this.cache.favicon_gray) > -1 || $icon.attr('href').indexOf(constants.FAVICON_DEFAULT_GREY) > -1)
@@ -4479,17 +4480,47 @@ _.extend(xabber, {
         }, 1000);
     },
 
+    startExtendedBlinkingFavicon: function (is_disconnected) {
+        if (this._extended_blink_interval && is_disconnected === undefined)
+            return;
+        clearInterval(this._blink_interval);
+        clearInterval(this._extended_blink_interval);
+        this._blink_state = 0
+        this._extended_blink_interval = setInterval(() => {
+            let $icon = $("link[rel='shortcut icon']"), url,
+            state = this._blink_state;
+            if (this._blink_state === 0 && this.get('all_msg_counter') || this._blink_state === 3 && this.get('all_msg_counter')) {
+                url = this.cache.favicon_message || constants.FAVICON_MESSAGE;
+                state = 1
+            } else if ((this._blink_state === 1 && this.get('all_mentions_counter')) || ((this._blink_state === 0 || this._blink_state === 3) && this.get('all_mentions_counter') && !this.get('all_msg_counter'))){
+                url = this.cache.favicon_notification || constants.FAVICON_NOTIFICATION;
+                state = 2
+            }
+            else{
+                url = is_disconnected ? this.cache.favicon_gray || constants.FAVICON_DEFAULT_GREY : this.cache.favicon || constants.FAVICON_DEFAULT;
+                state = 3
+            }
+            this._blink_state = state;
+            $icon.attr('href', url);
+        }, 1000);
+    },
+
     stopBlinkingFavicon: function (is_disconnected) {
-        if (this._blink_interval || is_disconnected !== undefined) {
+        if (this._blink_interval || this._extended_blink_interval || is_disconnected !== undefined) {
+            clearInterval(this._extended_blink_interval);
             clearInterval(this._blink_interval);
             this._blink_interval = null;
+            this._extended_blink_interval = null;
             let url = is_disconnected ? this.cache.favicon_gray || constants.FAVICON_DEFAULT_GREY : this.cache.favicon || constants.FAVICON_DEFAULT;
             $("link[rel='shortcut icon']").attr("href", url);
         }
     },
 
     onChangedAllMessageCounter: function () {
-        if (this.get('all_msg_counter')) {
+        if (this.get('all_mentions_counter')){
+            this.startExtendedBlinkingFavicon();
+            window.document.title = xabber.getString("notofications__desktop_notification__text", [this.get('all_msg_counter') + this.get('all_mentions_counter')]);
+        } else if (this.get('all_msg_counter')) {
             this.startBlinkingFavicon();
             window.document.title = xabber.getString("notofications__desktop_notification__text", [this.get('all_msg_counter')]);
         } else {
@@ -4499,7 +4530,10 @@ _.extend(xabber, {
     },
 
     updateAllMessageCounterOnDisconnect: function (is_disconnected) {
-        if (this.get('all_msg_counter')) {
+        if (this.get('all_mentions_counter')){
+            this.startExtendedBlinkingFavicon(is_disconnected);
+            window.document.title = xabber.getString("notofications__desktop_notification__text", [this.get('all_msg_counter') + this.get('all_mentions_counter')]);
+        } else if (this.get('all_msg_counter')) {
             this.startBlinkingFavicon(is_disconnected);
             window.document.title = xabber.getString("notofications__desktop_notification__text", [this.get('all_msg_counter')]);
         } else {
@@ -4564,8 +4598,20 @@ _.extend(xabber, {
         let count_msg = 0;
         xabber.accounts.each((account) => {
             account.chats.each((chat) => {
-                if (chat.contact && !chat.isMuted())
+                if (chat.contact && !chat.isMuted() && !chat.get('notifications'))
                     count_msg += chat.get('unread') + chat.get('const_unread');
+            });
+        });
+        return count_msg;
+    },
+
+    setAllMentionsCounter: function () {
+        let count_msg = 0;
+        xabber.accounts.each((account) => {
+            account.chats.each((chat) => {
+                if (chat.contact && !chat.isMuted() && chat.get('notifications')){
+                    count_msg += chat.get('unread') + chat.get('const_unread');
+                }
             });
             let incoming_subscriptions = account.contacts.filter(item => (item.get('invitation') && !item.get('removed')) || (item.get('subscription_request_in') && item.get('subscription') != 'both')).length;
             count_msg += incoming_subscriptions;
@@ -4576,11 +4622,13 @@ _.extend(xabber, {
     recountAllMessageCounter: function () {
         if (!this.get('focused')) {
             this.set('all_msg_counter', this.setAllMessageCounter());
+            this.set('all_mentions_counter', this.setAllMentionsCounter());
         }
     },
 
     resetMessageCounter: function () {
         this.set('all_msg_counter', 0);
+        this.set('all_mentions_counter', 0);
     },
 
     onChangedFocusState: function () {
@@ -4689,7 +4737,9 @@ _.extend(xabber, {
 
 xabber.once("start", function () {
     this.set('all_msg_counter', 0);
+    this.set('all_mentions_counter', 0);
     this.on("change:all_msg_counter", this.onChangedAllMessageCounter, this);
+    this.on("change:all_mentions_counter", this.onChangedAllMessageCounter, this);
     this.on("change:focused", this.onChangedFocusState, this);
     this._settings.on("change:idling_time", this.initIdleJS, this);
     this._settings.on("change:desktop_autostart", this.autostartHandler, this);

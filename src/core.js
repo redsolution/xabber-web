@@ -240,6 +240,7 @@ let Xabber = Backbone.Model.extend({
         this._cache.save('favicon', URL.createObjectURL(await fetch(constants.FAVICON_DEFAULT).then(r => r.blob())));
         this._cache.save('favicon_gray', URL.createObjectURL(await fetch(constants.FAVICON_DEFAULT_GREY).then(r => r.blob())));
         this._cache.save('favicon_message', URL.createObjectURL(await fetch(constants.FAVICON_MESSAGE).then(r => r.blob())));
+        this._cache.save('favicon_notification', URL.createObjectURL(await fetch(constants.FAVICON_NOTIFICATION).then(r => r.blob())));
     },
 
     detectMediaDevices: function () {

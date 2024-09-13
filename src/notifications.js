@@ -458,6 +458,7 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
 
     onShowNotificationsTab: function () {
         this.onScroll();
+        this.reRenderMessages();
         setTimeout(() => {
             this.onScroll();
         }, 1500);

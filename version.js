@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.3.5.82","version_description":"fixed fading background z-index, added hiding of fading search background onkeyup in search field, fixed wrong variable error in pinging, fixed search msg handler"}'
+'{"version_number":"2.3.5.83","version_description":"fixed last notification being read on tab open, fixed notifications beign read on read all button, fixed notifications chat appearing in unread chats, added favicon blinking with notification, added notifications rerendering on tab opening, changed scroll hiding value for contacts details buttons, fixed z-index for contacts details on narrow window width and its background styling"}'
 )});

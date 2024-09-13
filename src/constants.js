@@ -9,6 +9,7 @@ var constants = {
     FAVICON_DEFAULT: "assets/images/favicon.png",
     FAVICON_DEFAULT_GREY: "assets/images/favicon-grey.png",
     FAVICON_MESSAGE: "assets/images/favicon-message.png",
+    FAVICON_NOTIFICATION: "assets/images/favicon-notification.png",
     BACKGROUND_IMAGE: "assets/images/background.png",
 
     WIDTH_MEDIUM: 1650,

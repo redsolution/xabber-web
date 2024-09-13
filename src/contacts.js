@@ -1806,7 +1806,7 @@ xabber.ContactDetailsViewRight = xabber.BasicView.extend({
             this.$('.btn-escape').addClass('hidden');
             this.$('.btn-escape i').addClass('mdi-close').removeClass('mdi-arrow-right');
         }
-        if (!_.isUndefined(bottom_block_scroll) && bottom_block_scroll <= 215){
+        if (!_.isUndefined(bottom_block_scroll) && bottom_block_scroll <= 240){
             this.$('.buttons-wrap').hideIf(true);
             this.$('.btn-edit').hideIf(true);
             this.$('.btn-qr-code').hideIf(true);
@@ -1990,7 +1990,7 @@ xabber.ContactDetailsViewRight = xabber.BasicView.extend({
         this.model.set('search_hidden', false);
         this.makeStatic();
         this.$('.search-wrap').hideIf(this.model.get('search_hidden'));
-        if (is_modal && !is_chat_head){
+        if (is_modal && !is_chat_head && xabber.right_contact_panel.$el.css('z-index') === '0'){
             xabber.right_contact_panel.setCustomCss({'z-index' : 499});
             this.modal_z_index_timeout = setTimeout(() => {
                 xabber.right_contact_panel.setCustomCss({'z-index' : 0});
@@ -2355,7 +2355,7 @@ xabber.GroupChatDetailsViewRight = xabber.BasicView.extend({
         this.model.set('search_hidden', false);
         this.makeStatic();
         this.$('.search-wrap').hideIf(this.model.get('search_hidden'));
-        if (is_modal && !is_chat_head){
+        if (is_modal && !is_chat_head && xabber.right_contact_panel.$el.css('z-index') === '0'){
             xabber.right_contact_panel.setCustomCss({'z-index' : 499});
             setTimeout(() => {
                 xabber.right_contact_panel.setCustomCss({'z-index' : 0});
@@ -2436,7 +2436,7 @@ xabber.GroupChatDetailsViewRight = xabber.BasicView.extend({
             this.$('.btn-escape').addClass('hidden');
             this.$('.btn-escape i').addClass('mdi-close').removeClass('mdi-arrow-right');
         }
-        if (!_.isUndefined(bottom_block_scroll) && bottom_block_scroll <= 215) {
+        if (!_.isUndefined(bottom_block_scroll) && bottom_block_scroll <= 240) {
             this.$('.buttons-wrap').hideIf(true);
             this.$('.btn-edit').hideIf(true);
             this.$('.btn-qr-code').hideIf(true);
