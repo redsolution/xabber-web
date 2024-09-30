@@ -126,6 +126,10 @@
 
     addTemplate('contacts.roster_right');
     addTemplate('contacts.roster_left');
+    addTemplate('contacts.roster_fullscreen');
+    addTemplate('contacts.roster_contact_item');
+    addTemplate('contacts.roster_filter_item');
+    addTemplate('contacts.group_filter_item');
     addTemplate('contacts.account_roster_right');
     addTemplate('contacts.account_roster_left');
     addTemplate('contacts.group_right');
@@ -313,6 +317,7 @@
     addSvgTemplate('svg.address-outline');
     addSvgTemplate('svg.email');
     addSvgTemplate('svg.email-outline');
+    addSvgTemplate('svg.label');
     addSvgTemplate('svg.description');
     addSvgTemplate('svg.description-outline');
     addSvgTemplate('svg.contact-add');

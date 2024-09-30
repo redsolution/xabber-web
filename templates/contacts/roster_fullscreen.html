@@ -1,0 +1,56 @@
+<div class="contacts-panel-wrap">
+    <div class="contacts-panel-left-side no-select">
+        <div class="contacts-filter-main-header">{[print(xabber.getString("contacts"))]}</div>
+        <div class="contacts-account-filter">
+            <div class="contacts-filter-header">{[print(xabber.getString("notifications_window__account_filter_header"))]}</div>
+            <div class="contacts-account-filter-content">
+            </div>
+        </div>
+        <div class="contacts-type-filter">
+            <div class="contacts-filter-header">{[print(xabber.getString("notifications_window__filters_header"))]}</div>
+            <div class="contacts-type-filter-content">
+                <div class="filter-item-wrap selected-filter" data-filter="all">
+                    <svg class="filter-icon mdi fill-color-grey-500 mdi-svg-template" data-svgname="account"></svg>
+                    <div class="name one-line">{[print(xabber.getString("contacts"))]}</div>
+                </div>
+                <div class="filter-item-wrap" data-filter="groupchat">
+                    <svg class="filter-icon mdi fill-color-grey-500 mdi-svg-template" data-svgname="contacts"></svg>
+                    <div class="name one-line">{[print(xabber.getString("contacts_window__type_filter_groupchat"))]}</div>
+                </div>
+                <!--<div class="filter-item-wrap" data-filter="online">-->
+                    <!--<svg class="filter-icon mdi fill-color-grey-500 mdi-svg-template" data-svgname="alert-circle"></svg>-->
+                    <!--<div class="name one-line">{[print(xabber.getString("contacts_window__type_filter_online"))]}</div>-->
+                <!--</div>-->
+            </div>
+        </div>
+        <div class="contacts-type-filter contacts-group-filter">
+            <div class="contacts-filter-header">{[print(xabber.getString("contact_circle"))]}</div>
+            <div class="contacts-group-filter-content">
+            </div>
+        </div>
+    </div>
+    <div class="contacts-panel-right-side">
+        <div class="contacts-panel">
+            <div class="contacts-search-form search-form panel-head">
+                <i class="search-icon mdi mdi-24px mdi-magnify"></i>
+                <input type="text" class="search-input simple-input-field" tabindex="1" placeholder='{[print(xabber.getString("search"))]}'>
+                <i class="close-search-icon mdi mdi-24px mdi-close"></i>
+            </div>
+            <div class="contacts-active-filters-wrap hidden">
+
+            </div>
+
+            <div class="contact-list-wrap left-panel-list-wrap">
+                <div class="contact-list item-list">
+                </div>
+                <!--<div class="searched-lists-wrap">-->
+                    <!--<div class="contacts-list-wrap hidden">-->
+                        <!--<div class="account-indicator"></div>-->
+                        <!--<div class="contacts-title">{[print(xabber.getString("category_title_contacts"))]}</div>-->
+                        <!--<div class="contacts-list roster-left-container"></div>-->
+                    <!--</div>-->
+                <!--</div>-->
+            </div>
+        </div>
+    </div>
+</div>

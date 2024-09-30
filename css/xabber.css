@@ -5775,7 +5775,6 @@ input[type=text].simple-input-field:hover {
     bottom: 0;
     width: 100%;
 }
-
 .account-roster-wrap {
     position: relative;
 }
@@ -6020,7 +6019,223 @@ input[type=text].simple-input-field:hover {
 
 
 /* ----------------- LEFT ROSTER PANEL ----------------------- */
+.roster-left-container.container{
+    max-width: unset;
+}
+.contacts-panel-wrap{
+    display: flex;
+    height: 100%;
+    width: 100%;
+}
+.contacts-panel-wrap .contacts-panel-left-side{
+    position: relative;
+    height: 100%;
+    margin-left: 24px;
+    margin-right: 24px;
+    margin-top: 16px;
+    min-width: 272px;
+    overflow: hidden;
+    padding-bottom: 40px;
+    width: 30%;
+}
+.contacts-panel-wrap .contacts-panel-left-side .contacts-filter-main-header{
+    font-size: 24px;
+    line-height: 32px;
+    margin-bottom: 33px;
+    margin-left: 14px;
+}
+.contacts-panel-wrap .contacts-panel-left-side .contacts-type-filter,
+.contacts-panel-wrap .contacts-panel-left-side .contacts-account-filter{
+    margin-bottom: 16px;
+}
+.contacts-panel-wrap .contacts-panel-left-side .contacts-filter-header{
+    color: rgba(0, 0, 0, .54);
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 32px;
+    margin-bottom: 2px;
+    margin-left: 14px;
+}
+.contacts-panel-wrap .contacts-panel-left-side .filter-item-wrap.selected-filter{
+    background: #eee;
+}
+.contacts-panel-wrap .contacts-panel-left-side .filter-item-wrap{
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+    line-height: 24px;
+    padding: 4px 42px 4px 48px;
+    position: relative;
+}
+.contacts-panel-wrap .contacts-panel-left-side .filter-item-wrap .filter-icon{
+    height: 20px;
+    left: 14px;
+    position: absolute;
+    top: 6px;
+    width: 20px;
+}
+.contacts-panel-wrap .contacts-panel-left-side .filter-item-wrap span{
+    position: absolute;
+    right: 16px;
+    font-size: 14px;
+    line-height: 24px;
+    color: #BDBDBD;
+}
+.contacts-panel-wrap .contacts-panel{
+    display: flex;
+    flex-direction: column;
+}
+.contacts-panel-wrap .contacts-search-form{
+    position: relative;
+    border: none;
+    box-shadow: none;
+}
+.contacts-panel-wrap .contacts-search-form{
+    position: relative;
+    border: none;
+    box-shadow: none;
+}
+.contacts-panel-wrap .contacts-active-filters-wrap{
+    display: flex;
+    padding: 0 52px;
+    position: relative;
+    flex-wrap: wrap;
+    align-items: center;
+}
+.contacts-panel-wrap .contacts-active-filters-wrap .roster-filter-item{
+    align-items: center;
+    background: #eeeeee;
+    border-radius: 20px;
+    display: flex;
+    font-size: 14px;
+    line-height: 16px;
+    margin-right: 8px;
+    max-width: 300px;
+    padding: 0 8px;
+    width: fit-content;
+    cursor: pointer;
+    height: 24px;
+    margin: 8px 8px 8px 0;
+}
+.contacts-panel-wrap .contacts-active-filters-wrap .roster-filter-item:hover{
+    opacity: 0.7
 
+}
+.contacts-panel-wrap .contacts-active-filters-wrap .roster-filter-item .roster-filter-item-text{
+    margin: 8px;
+}
+.contacts-panel-wrap .contacts-active-filters-wrap .roster-filter-item .remove-filter{
+    margin-bottom: 1px;
+    opacity: 0.5;
+}
+.contacts-panel-wrap .contact-list-wrap{
+    position: relative;
+    border: none;
+    top: 0;
+    height: inherit;
+}
+.contacts-panel-wrap .contacts-panel-right-side{
+    height: 100%;
+    overflow: hidden;
+    position: relative;
+    width: 100%;
+}
+.contacts-panel-wrap .contact-list-wrap {
+}
+.contacts-panel-wrap .contact-list-wrap .roster-contact-item-wrap{
+    display: flex;
+    justify-content: flex-start;
+    font-size: 14px;
+    min-height: 48px;
+    align-items: flex-start;
+    position: relative;
+}
+.contacts-panel-wrap .contact-list-wrap .roster-contact-item-wrap .circle-avatar{
+    height: 32px;
+    width: 32px;
+    margin-left: 16px;
+    cursor: pointer;
+    margin-top: 8px;
+}
+.contacts-panel-wrap .contact-list-wrap .roster-contact-item-wrap .contact-name{
+    width: 20%;
+    margin-left: 16px;
+    margin-top: 14px;
+}
+.contacts-panel-wrap .contact-list-wrap .roster-contact-item-wrap .contact-jid{
+    width: 35%;
+    margin-left: 16px;
+    margin-top: 14px;
+    font-size: 14px;
+}
+.contacts-panel-wrap .contact-list-wrap .roster-contact-item-wrap .contact-jid .contact-domain:hover{
+    color: #757575;
+    cursor: pointer;
+    text-decoration: underline;
+}
+.contacts-panel-wrap .contact-list-wrap .roster-contact-item-wrap .status{
+    border: 1.125px solid #fff;
+    border-radius: 50%;
+    height: 10px;
+    left: 37px;
+    pointer-events: none;
+    position: absolute;
+    top: 31px;
+    width: 10px;
+}
+.contacts-panel-wrap .contact-list-wrap .roster-contact-item-wrap .status svg{
+    position: absolute;
+}
+.contacts-panel-wrap .contact-list-wrap .roster-contact-item-wrap .contact-groups-wrap{
+    display: flex;
+    flex-wrap: nowrap;
+    width: 25%;
+    margin: 12px 0 8px 16px;
+}
+.contacts-panel-wrap .contact-list-wrap .roster-contact-item-wrap .contact-expanded-groups-wrap .group,
+.contacts-panel-wrap .contact-list-wrap .roster-contact-item-wrap .contact-groups-wrap .group{
+    background-color: #eee;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    letter-spacing: .15px;
+    line-height: 22px;
+    margin-bottom: 4px;
+    margin-right: 8px;
+    padding: 0 6px;
+    transition: all .15s ease-in;
+    max-height: 22px;
+    max-width: 100%;
+}
+.contacts-panel-wrap .contact-list-wrap .roster-contact-item-wrap .contact-groups-wrap .group:not(.group-expand){
+    min-width: 40px;
+}
+.contacts-panel-wrap .contact-list-wrap .roster-contact-item-wrap .contact-groups-wrap .group.group-expand{
+    opacity: 0.5;
+}
+.contacts-panel-wrap .contact-list-wrap .roster-contact-item-wrap .contact-expanded-groups-wrap .group:hover,
+.contacts-panel-wrap .contact-list-wrap .roster-contact-item-wrap .contact-groups-wrap .group:hover{
+    color: #757575;
+}
+.contacts-panel-wrap .contact-list-wrap .roster-contact-item-wrap .contact-expanded-groups-wrap{
+
+    background: #fafafa;
+    border: 1px solid #f5f5f5;
+    border-radius: .25rem;
+    min-height: 100px;
+    padding: 0 5px;
+    position: absolute;
+    left: calc(55% + 90px);
+    top: 80%;
+    width: 30%;
+    z-index: 999;
+    display: flex;
+    flex-wrap: wrap;
+    align-content: flex-start;
+}
+.contacts-panel-wrap .contact-list-wrap .roster-contact-item-wrap .contact-expanded-groups-wrap.hidden:hover{
+    display: flex !important;
+}
 .roster-left-container .ps-scrollbar-y-rail {
     z-index: 5;
 }
@@ -6517,6 +6732,7 @@ input[type=text].simple-input-field:hover {
 }
 .details-panel-right .groups-block-wrap .groups-wrap .checkbox-list .input-field.checkbox-field{
     cursor:pointer;
+    max-width: 100%;
 }
 .details-panel-right .groups-block-wrap .groups-wrap .checkbox-list .new-group-field-wrap .new-group-checkbox,
 .add-contact-modal .input-field.checkbox-field.new-group-checkbox{
@@ -6537,6 +6753,7 @@ input[type=text].simple-input-field:hover {
 }
 .details-panel-right .groups-block-wrap .groups-wrap .checkbox-list .input-field.checkbox-field label{
     color: unset;
+    max-width: 100%;
 }
 .add-contact-modal .input-field.checkbox-field label:hover{
     outline: 1px solid #e5e5e5;

@@ -979,6 +979,8 @@ xabber.Body = xabber.NodeView.extend({
                 new_attrs.previous_screen = undefined;
             }
         }
+        if (this.screen.get('right') === 'contacts' && !attrs.right)
+            attrs.right = null;
         (!attrs || !attrs.notifications) && (new_attrs.notifications = false);
         this.screen.set(_.extend(new_attrs, attrs), options);
     },
@@ -1198,7 +1200,8 @@ xabber.ToolbarView = xabber.BasicView.extend({
     },
 
     showContacts: function () {
-        xabber.body.setScreen('contacts', {right_contact: null});
+        xabber.chats_view.active_chat = null;
+        xabber.body.setScreen('contacts', {right: 'contacts', right_contact: null, chat_item: null, contact: null});
         xabber.trigger('update_placeholder');
     },
 
@@ -2426,7 +2429,7 @@ xabber.SettingsModalView = xabber.BasicView.extend({
         if (xabber.body.screen && xabber.body.screen.get('previous_screen')){
 
             let previous_screen = xabber.body.screen.get('previous_screen');
-            if (previous_screen.name === 'notifications' && previous_screen.open_all_chats ){
+            if ((previous_screen.name === 'notifications' || previous_screen.name === 'contacts') && previous_screen.open_all_chats){
                 xabber.toolbar_view.showAllChats();
             } else {
                 previous_screen.close_settings = true;

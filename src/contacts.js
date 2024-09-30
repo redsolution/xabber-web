@@ -1074,13 +1074,28 @@ xabber.Contact = Backbone.Model.extend({
         screen || (screen = 'contacts');
         if (xabber.body.screen.get('right_contact') && options.type != 'search' && options.type != 'members' && options.type != 'participant' && !options.right_saved) {
             this.set('search_hidden', true)
-            xabber.body.setScreen(screen, {right_contact: '', contact: this});
+            let attrs = {right_contact: '', contact: this};
+            (screen === 'contacts') && (attrs.chat_item = null);
+            xabber.body.setScreen(screen, attrs);
         }
         else {
-            if (options.encrypted)
-                xabber.body.setScreen(screen, {right_contact: 'contact_details_encrypted', contact: this, right_contact_modal: true,});
-            else
-                xabber.body.setScreen(screen, {right_contact: 'contact_details', contact: this, right_contact_modal: true,});
+            if (options.encrypted) {
+                let attrs = {
+                    right_contact: 'contact_details_encrypted',
+                    contact: this,
+                    right_contact_modal: true,
+                };
+                (screen === 'contacts') && (attrs.chat_item = null);
+                xabber.body.setScreen(screen, attrs);
+            } else {
+                let attrs = {
+                    right_contact: 'contact_details',
+                    contact: this,
+                    right_contact_modal: true,
+                };
+                (screen === 'contacts') && (attrs.chat_item = null);
+                xabber.body.setScreen(screen, attrs);
+            }
             if (this.details_view_right && this.details_view_right.contact_searched_messages_view){
                 this.details_view_right.contact_searched_messages_view.hideSearch();
                 if (options.type === 'search') {
@@ -1565,7 +1580,7 @@ xabber.ContactDetailsViewRight = xabber.BasicView.extend({
         "click .btn-escape.btn-top": "scrollToTopSmooth",
         "click .btn-edit": "showEdit",
         "click .btn-chat": "openChat",
-        "click .panel-background-clickable": "openChat",
+        "click .panel-background-clickable": "closeDetails",
         "click .btn-search": "showSearchMessages",
         "click .btn-voice-call": "voiceCall",
         "click .btn-add": "addContact",
@@ -1690,19 +1705,25 @@ xabber.ContactDetailsViewRight = xabber.BasicView.extend({
         }
     },
 
-    startEncryptedChat: function () {
+    startEncryptedChat: function (ev, no_close) {
+        let is_contacts = xabber.body.screen.get('name') === 'contacts';
         this.account.chats.openChat(this.model, {encrypted: true});
         let chat = this.account.chats.get(this.model.hash_id + ':encrypted');
         chat.set('timestamp', moment.now());
         chat.item_view.updateLastMessage();
+        is_contacts && !no_close && this.closeDetails();
     },
 
-    openEncryptedChat: function () {
+    openEncryptedChat: function (ev, no_close) {
+        let is_contacts = xabber.body.screen.get('name') === 'contacts';
         this.account.chats.openChat(this.model, {encrypted: true});
+        is_contacts && !no_close && this.closeDetails();
     },
 
-    openRegularChat: function () {
+    openRegularChat: function (ev, no_close) {
+        let is_contacts = xabber.body.screen.get('name') === 'contacts';
         this.account.chats.openChat(this.model);
+        is_contacts && !no_close && this.closeDetails();
     },
 
     keydownHandler: function (ev) {
@@ -1712,8 +1733,16 @@ xabber.ContactDetailsViewRight = xabber.BasicView.extend({
         }
     },
 
-    openChat: function (ev) {
-        this.model.showDetailsRight('all-chats');
+    openChat: function (ev) { //34
+        if (this.encrypted){
+            this.openEncryptedChat();
+        } else {
+            this.openRegularChat();
+        }
+    },
+
+    closeDetails: function (ev) { //34
+        this.model.showDetailsRight(xabber.body.screen.get('name'));
     },
 
     updateColorScheme: function () {
@@ -1975,6 +2004,9 @@ xabber.ContactDetailsViewRight = xabber.BasicView.extend({
     },
 
     showSearchMessages: function (ev, is_chat_head) {
+        if (xabber.body.screen.get('name') === 'contacts'){
+            this.openRegularChat(null, true);
+        }
         let is_modal = xabber.body.screen.get('right_contact_modal');
         if (is_modal && !is_chat_head){
             this.$('.panel-background-clickable').addClass('temporary-fading-search-background');
@@ -2118,7 +2150,7 @@ xabber.GroupChatDetailsViewRight = xabber.BasicView.extend({
         "click .btn-edit-settings": "editProperties",
         "click .btn-default-restrictions": "showRestrictions",
         "click .btn-chat": "openChat",
-        "click .panel-background-clickable": "openChat",
+        "click .panel-background-clickable": "closeDetails",
         "click .btn-escape:not(.btn-top)": "openChat",
         "click .btn-escape.btn-top": "scrollToTopSmooth",
         "click .btn-clear-history": "retractAllMessages",
@@ -2340,6 +2372,9 @@ xabber.GroupChatDetailsViewRight = xabber.BasicView.extend({
     },
 
     showSearchMessages: function (ev, is_chat_head) {
+        if (xabber.body.screen.get('name') === 'contacts'){
+            this.openRegularChat();
+        }
         let is_modal = xabber.body.screen.get('right_contact_modal');
         if (is_modal && !is_chat_head){
             this.$('.panel-background-clickable').addClass('temporary-fading-search-background');
@@ -2631,8 +2666,18 @@ xabber.GroupChatDetailsViewRight = xabber.BasicView.extend({
         this.$('.main-info .circle-avatar').setAvatar(image, this.avatar_size);
     },
 
-    openChat: function (ev) {
-        this.model.showDetailsRight('all-chats');
+    openRegularChat: function () {
+        this.account.chats.openChat(this.model);
+    },
+
+    openChat: function (ev) { //34
+        let is_contacts = xabber.body.screen.get('name') === 'contacts';
+        this.openRegularChat();
+        is_contacts && this.closeDetails();
+    },
+
+    closeDetails: function (ev) { //34
+        this.model.showDetailsRight(xabber.body.screen.get('name'));
     },
 
     chooseAvatar: function () {
@@ -7209,8 +7254,9 @@ xabber.ContactEditGroupsView = xabber.BasicView.extend({
             this.$('.groups-wrap').hideIf(false)
             this.$('.input-field input').focus();
         }
-        else
+        else {
             this.$('.groups-wrap').hideIf(true)
+        }
         this._update_template = false;
         this.parent.updateScrollBar();
     },
@@ -7275,6 +7321,10 @@ xabber.ContactEditGroupsView = xabber.BasicView.extend({
         let $input = this.$('.new-group-name input'),
             name = $input.val();
         if (ev.keyCode === constants.KEY_ENTER && name) {
+            if (name == constants.GENERAL_GROUP_ID || name == constants.NON_ROSTER_GROUP_ID){
+                $input.val('') //todo: show error that this name in not acceptable
+                return;
+            }
             this.addNewGroup();
         }
     },
@@ -7295,8 +7345,14 @@ xabber.ContactEditGroupsView = xabber.BasicView.extend({
 
     focusoutAddNewGroup: function (ev) {
         this.$('.empty-groups').hideIf(false)
-        if (this.$('.new-group-name input').val())
+        if (this.$('.new-group-name input').val()){
+            let name = this.$('.new-group-name input').val();
+            if (name == constants.GENERAL_GROUP_ID || name == constants.NON_ROSTER_GROUP_ID){
+                $input.val('') //todo: show error that this name in not acceptable
+                return;
+            }
             this.addNewGroup();
+        }
         this._hide_timeout = setTimeout(() => {
             this.$('.groups-wrap').hideIf(true)
             this.$('.new-group-name input').val('')
@@ -8532,6 +8588,7 @@ xabber.Contacts = xabber.ContactsBase.extend({
         _.each(this.collections, function (collection) {
             collection.update(contact, event);
         });
+        xabber.accounts.trigger('contacts_updated');
     },
 
     mergeContact: function (attrs) {
@@ -8835,6 +8892,7 @@ xabber.Roster = xabber.ContactsBase.extend({
             chat.item_view.content = new xabber.ChatContentView({chat_item: chat.item_view});
             if (chat.get('sync_type') === Strophe.NS.XABBER_NOTIFY && this.account.server_features.get(Strophe.NS.XABBER_NOTIFY) && jid === this.account.server_features.get(Strophe.NS.XABBER_NOTIFY).get('from')){
                 chat.set('notifications', true);
+                contact.set('notifications', true);
                 contact.set('subscription', 'both');
                 if (!request_with_stamp) {
                     chat.item_view.content.loadNotificationsHistoryToPreviousLastMsg();
@@ -9619,6 +9677,504 @@ xabber.RosterLeftView = xabber.RosterView.extend({
     }
 });
 
+
+xabber.RosterFullScreenView = xabber.BasicView.extend({ //34
+    className: 'roster-left-container container',
+    template: templates.roster_fullscreen,
+    ps_selector: '.contact-list-wrap',
+    ps_settings: {theme: 'item-list'},
+    events: {
+        "click .roster-contact-item-wrap .circle-avatar": "onClickItem",
+        "click .contacts-type-filter-content .filter-item-wrap": "filterContent",
+        "click .contacts-account-filter-content .filter-item-wrap": "filterAccount",
+        "click .contacts-group-filter-content .filter-item-wrap": "filterByGroup",
+        "click .contact-groups-wrap .group:not(.group-expand)": "filterByGroup",
+        "click .contact-expanded-groups-wrap .group:not(.group-expand)": "filterByGroup",
+        "click .contact-domain": "filterByDomain",
+        "click .roster-filter-item": "removeFilter",
+        "click .contact-groups-wrap .group.group-expand": "expandGroups",
+        "mouseout .contact-expanded-groups-wrap": "closeGroups",
+        "keyup .search-input": "keyUpSearch",
+    },
+
+    _initialize: function () {
+        this._settings = xabber._roster_settings;
+        this.contacts = [];
+        this.accounts = [];
+        this.previous_filter = {};
+        this.current_filter = {};
+        this.current_filter_groups_list = [];
+        this._current_expanded_groups_item = {};
+        this.processing_debounce = _.debounce(this.processAccounts, 1000, false);
+        this.update_debounce = _.debounce(this.processUpdateContacts, 1000, false);
+        this.model.on("activate", this.updateOneRosterView, this);
+        this.model.on("deactivate destroy", this.removeRosterView, this);
+        this.model.on("list_changed", this.updateLeftIndicator, this);
+        this.model.on("list_changed connected_list_changed account_color_updated add destroy", this.updateAccountsFilter, this);
+        this.model.on("contacts_updated", this.onContactsUpdated, this);
+        this.updateAccountsFilter();
+        if (!_.isUndefined(this.ps_selector)) {
+            this.ps_container2 = this.$('.contacts-panel-left-side');
+            if (this.ps_container2.length) {
+                this.ps_container2.perfectScrollbar(
+                    _.extend(this.ps_settings || {}, xabber.ps_settings)
+                );
+            }
+        }
+    },
+
+    render: function (options) {
+        console.error(this.saved_scroll);
+        if (_.isUndefined(this.saved_scroll) || _.isNull(this.saved_scroll) ){
+            this.current_filter = {};
+            this.$('.contacts-type-filter-content .filter-item-wrap').removeClass('selected-filter');
+            this.$('.contacts-type-filter-content .filter-item-wrap[data-filter="all"]').addClass('selected-filter');
+            this.updateAccountsFilter();
+            this.processUpdateContacts(true, true);
+        } else {
+            this.scrollTo(this.saved_scroll);
+            this.saved_scroll = null
+        }
+    },
+
+    updateScrollBar2: function () {
+        if (this.ps_container2 && this.isVisible()) {
+                this.ps_container2.perfectScrollbar('update');
+        }
+        return this;
+    },
+
+    updateAccountsFilter: function () {
+        let accounts = xabber.accounts.enabled,
+            selected_jid;
+        if (this.$('.contacts-account-filter-content .filter-item-wrap.selected-filter').length){
+            selected_jid = this.$('.contacts-account-filter-content .filter-item-wrap.selected-filter').attr('data-jid');
+        }
+        this.$('.contacts-account-filter').switchClass('hidden', accounts.length === 1 || !accounts.length);
+        if (accounts.length){
+            try{
+                this.$('.contacts-account-filter-content').empty();
+                _.each(accounts, (account) => {
+                    this.$('.contacts-account-filter-content').append(this.renderAccountItem(account));
+                });
+                if (selected_jid && this.$(`.contacts-account-filter-content .filter-item-wrap[data-jid="${selected_jid}"]`).length){
+                    this.$(`.contacts-account-filter-content .filter-item-wrap[data-jid="${selected_jid}"]`).addClass('selected-filter');
+                    this.current_filter_account = selected_jid;
+                    this.updateGroupsFilter();
+                    this.processUpdateContacts(null, true);
+                } else {
+                    this.$('.contacts-account-filter-content .filter-item-wrap').first().addClass('selected-filter');
+                    this.current_filter_account = this.$('.contacts-account-filter-content .filter-item-wrap').first().attr('data-jid');
+                    this.updateGroupsFilter();
+                    this.processUpdateContacts(true, true);
+                }
+            } catch (e) {
+                console.error(e)
+            }
+        } else {
+            if (!xabber.accounts.enabled.length){
+                if (xabber.body.screen.get('name') === 'contacts'){
+                    xabber.toolbar_view.showAllChats(null, true);
+                } else if (xabber.body.screen.get('previous_screen') && xabber.body.screen.get('previous_screen').name === 'contacts') {
+                    this.$el.detach();
+                    xabber.toolbar_view.$('.toolbar-item:not(.account-item):not(.toolbar-logo)').removeClass('active');
+                    let previous_chat = xabber.body.screen.get('previous_screen');
+                    previous_chat.open_all_chats = true;
+                    xabber.body.screen.set('previous_screen', previous_chat);
+                }
+            }
+        }
+    },
+
+    updateGroupsFilter: function () {
+        let accounts = xabber.accounts.enabled,
+            selected_group,
+            account = accounts.find(item => item.get('jid') === this.current_filter_account);
+
+        if (account){
+                this.$('.contacts-group-filter-content').empty();
+                _.each(account.groups.models, (group) => {
+                    if (group.get('id') == constants.GENERAL_GROUP_ID && group.get('name') === xabber.settings.roster.general_group_name)
+                        return;
+                    if (group.get('id') == constants.NON_ROSTER_GROUP_ID && group.get('name') === xabber.settings.roster.non_roster_group_name)
+                        return;
+                    this.$('.contacts-group-filter-content').append(this.renderGroupFilterItem(group));
+                });
+        } else {
+
+        }
+        this.$('.contacts-group-filter').switchClass('hidden', !this.$('.contacts-group-filter-content .filter-item-wrap').length);
+        this.updateScrollBar2();
+    },
+
+    renderAccountItem: function (account) {
+        let $item = $(env.templates.notifications.account_filter_item({jid: account.get('jid'), color: account.settings.get('color')}));
+        return $item;
+    },
+
+    renderGroupFilterItem: function (group) {
+        let $item = $(templates.group_filter_item({id: group.get('id'), name: group.get('name'), counter: group.get('counter').all}));
+        return $item;
+    },
+
+    filterContent: function (ev) {
+        let $item = $(ev.target).closest('.filter-item-wrap'),
+            filter_type = $item.attr('data-filter');
+
+        this.$('.contacts-type-filter-content .filter-item-wrap').removeClass('selected-filter');
+        this.$('.contacts-type-filter-content .filter-item-wrap[data-filter="all"]').addClass('selected-filter');
+
+        if (filter_type === 'all') {
+            this.current_filter = {};
+        } else {
+            this.current_filter = { type: filter_type };
+            this.$('.contacts-type-filter-content .filter-item-wrap').removeClass('selected-filter');
+            this.$(`.contacts-type-filter-content .filter-item-wrap[data-filter="${filter_type}"]`).addClass('selected-filter');
+        }
+
+        this.contacts = [];
+        this.processUpdateContacts(true, true);
+    },
+
+    filterAccount: function (ev) {
+        let $item = $(ev.target).closest('.filter-item-wrap'),
+            filter_type = $item.attr('data-jid');
+
+        this.current_filter_account = filter_type;
+
+        this.$('.contacts-account-filter-content .filter-item-wrap').removeClass('selected-filter');
+        this.$(`.contacts-account-filter-content .filter-item-wrap[data-jid="${filter_type}"]`).addClass('selected-filter');
+
+        // если фильтрация по кругу то отключать её
+
+        this.current_filter_groups_list = [];
+        this.current_filter_domain = null;
+        this.current_filter_query = null;
+        this.$(`.contacts-active-filters-wrap .roster-filter-item`).remove();
+        this.$('.contacts-active-filters-wrap').switchClass('hidden', !this.$('.contacts-active-filters-wrap').children('.roster-filter-item').length)
+        this.updateGroupsFilter();
+        this.contacts = [];
+        this.processUpdateContacts(true, true);
+    },
+
+    keyUpSearch: function (ev) {
+        let $item = $(ev.target).closest('.search-input'),
+            value = $item.val();
+        if (value && ev.keyCode == constants.KEY_ENTER) {
+            ev.preventDefault();
+        }
+        if (value){
+            this.filterSearch(value);
+        } else {
+            this.$(`.roster-filter-item[data-type="query"]`).remove();
+            this.current_filter_query = null;
+            this.contacts = [];
+            this.processUpdateContacts(true, true);
+        }
+    },
+
+    filterSearch: function (query) {
+
+        this.$(`.roster-filter-item[data-type="query"]`).remove();
+
+        this.current_filter_query = query;
+
+        this.$('.contacts-active-filters-wrap').append($(templates.roster_filter_item({
+            value: query,
+            type: 'query',
+            text: query
+        })));
+
+        this.$('.contacts-active-filters-wrap').removeClass('hidden');
+
+        this.contacts = [];
+        this.processUpdateContacts(true, true);
+
+    },
+
+    filterByGroup: function (ev) {
+        let $item = $(ev.target).closest('.filter-item-wrap').length ? $(ev.target).closest('.filter-item-wrap') : $(ev.target).closest('.group'),
+            filter_name = $item.attr('data-groupname');
+
+
+        if (!filter_name)
+            return;
+
+        this._current_expanded_groups_item = {};
+        this.$('.contact-expanded-groups-wrap').addClass('hidden');
+
+        if (!this.current_filter_groups_list.includes(filter_name)){
+            this.current_filter_groups_list.push(filter_name);
+            this.$('.contacts-active-filters-wrap').append($(templates.roster_filter_item({
+                value: filter_name,
+                type: 'circle',
+                text: filter_name
+            })));
+            this.$('.contacts-active-filters-wrap').removeClass('hidden');
+        } else {
+            this.current_filter_groups_list = this.current_filter_groups_list.filter(i => i !== filter_name);
+
+            this.$(`.roster-filter-item[data-type="circle"][data-value="${filter_name}"]`).remove();
+            this.$('.contacts-active-filters-wrap').switchClass('hidden', !this.$('.contacts-active-filters-wrap').children('.roster-filter-item').length)
+        }
+
+        this.contacts = [];
+        this.processUpdateContacts(true, true);
+    },
+
+    filterByDomain: function (ev) {
+        let $item = $(ev.target).closest('.contact-domain'),
+            filter_domain = $item.attr('data-domain');
+
+
+        if (!filter_domain)
+            return;
+
+        this.$(`.contacts-active-filters-wrap .roster-filter-item[data-type="domain"]`).remove();
+        this.current_filter_domain = filter_domain;
+        this.$('.contacts-active-filters-wrap').append($(templates.roster_filter_item({
+            value: filter_domain,
+            type: 'domain',
+            text: filter_domain
+        })));
+        this.$('.contacts-active-filters-wrap').removeClass('hidden');
+
+        this.contacts = [];
+        this.processUpdateContacts(true, true);
+    },
+
+    removeFilter: function (ev) {
+        let $item = $(ev.target).closest('.roster-filter-item'),
+            filter_type = $item.attr('data-type'),
+            filter_value = $item.attr('data-value');
+
+        if (filter_type === 'domain'){
+            this.current_filter_domain = null;
+        }
+        if (filter_type === 'circle'){ //34
+            this.current_filter_groups_list = this.current_filter_groups_list.filter(i => i !== filter_value);
+        }
+        if (filter_type === 'query'){ //34
+            this.current_filter_query = null;
+        }
+        $item.remove()
+        this.$('.contacts-active-filters-wrap').switchClass('hidden', !this.$('.contacts-active-filters-wrap').children('.roster-filter-item').length)
+
+        this.contacts = [];
+        this.processUpdateContacts(true, true);
+    },
+
+    updateOneRosterView: function (account) {
+        this.accounts.push(account);
+        if (account.get('jid') !== this.current_filter_account)
+            return;
+        if (this.current_filter.type || this.current_filter_groups_list.length || this.current_filter_domain) {
+            return this.getFilteredContacts();
+        }
+        _.each(account.contacts.models, (contact)=>{
+            if (this.contacts.some(item => (item.account.get('jid') === contact.account.get('jid') && item.get('jid') === contact.get('jid')))
+                || contact.get('group_chat') || contact.get('notifications') || contact.get('server') || !Strophe.getNodeFromJid(contact.get('jid')))
+                return;
+           this.contacts.push(contact);
+        });
+        this.processing_debounce();
+    },
+
+    onClickItem: function (ev) {
+        let $item = $(ev.target).closest('.roster-contact-item-wrap'),
+            account_jid = $item.attr('data-account-jid'),
+            contact_jid = $item.attr('data-jid');
+
+        let contact = this.contacts.find(item => item.get('jid') === contact_jid && item.account.get('jid') === account_jid);
+        if (contact){
+            let scrolled_top = this.getScrollTop();
+            this.saved_scroll = scrolled_top;
+            contact.showDetailsRight('contacts') //34
+            this.saved_scroll = scrolled_top;
+            this.scrollTo(scrolled_top);
+        } else {
+            $item.remove();
+        }
+    },
+
+    expandGroups: function (ev) {
+        let $item = $(ev.target).closest('.roster-contact-item-wrap'),
+            account_jid = $item.attr('data-account-jid'),
+            contact_jid = $item.attr('data-jid');
+
+        this._current_expanded_groups_item = {account_jid, contact_jid};
+        this.$('.contact-expanded-groups-wrap').addClass('hidden');
+        $item.find('.contact-expanded-groups-wrap').removeClass('hidden');
+    },
+
+    closeGroups: function (ev) {
+        this._current_expanded_groups_item = {};
+        this.$('.contact-expanded-groups-wrap').addClass('hidden')
+    },
+
+    onContactsUpdated: function () {
+        this.updateGroupsFilter()
+        this.update_debounce();
+    },
+
+    processUpdateContacts: function (force_scroll, not_debounced) {
+        if (this.current_filter.type || this.current_filter_groups_list.length || this.current_filter_domain || this.current_filter_query) {
+            return this.getFilteredContacts();
+        }
+        this.contacts = [];
+        _.each(this.model.enabled, (account) => {
+            if (account.get('jid') !== this.current_filter_account)
+                return;
+            _.each(account.contacts.models, (contact) => {
+                if (this.contacts.some(item => (item.account.get('jid') === contact.account.get('jid') && item.get('jid') === contact.get('jid')))
+                    || contact.get('group_chat') || contact.get('notifications') || contact.get('server') || !Strophe.getNodeFromJid(contact.get('jid')))
+                    return;
+                this.contacts.push(contact);
+            });
+        });
+        if (not_debounced){
+            this.sortContacts();
+            this.renderContacts();
+            force_scroll && this.scrollToTop();
+        } else {
+            this.processing_debounce(force_scroll);
+        }
+    },
+
+    processAccounts: function (scroll) {
+        this.sortContacts();
+        this.renderContacts();
+        scroll && this.scrollToTop();
+    },
+
+    removeRosterView: function (account) {
+        let contacts = this.contacts.filter(item => item.account.get('jid') !== account.get('jid')),
+            accounts = this.accounts.filter(item => item.get('jid') !== account.get('jid'));
+        this.contacts = contacts;
+        this.processing_debounce(true);
+    },
+
+    sortContacts: function () {
+        this.contacts.sort((contact1, contact2) => {
+            if (xabber.settings.roster.sorting === 'online-first') {
+                let s1 = contact1.get('status'),
+                    s2 = contact2.get('status'),
+                    sw1 = constants.STATUS_WEIGHTS[s1],
+                    sw2 = constants.STATUS_WEIGHTS[s2],
+                    sw1_offline = sw1 >= constants.STATUS_WEIGHTS.offline,
+                    sw2_offline = sw2 >= constants.STATUS_WEIGHTS.offline;
+                if (sw1_offline ^ sw2_offline) {
+                    return sw1_offline ? 1 : -1;
+                }
+            }
+            let name1, name2;
+            name1 = contact1.get('name').toLowerCase();
+            name2 = contact2.get('name').toLowerCase();
+            return name1 < name2 ? -1 : (name1 > name2 ? 1 : 0);
+        });
+    },
+
+    getFilteredContacts: function () {
+        this.contacts = [];
+        let checker = (arr, target) => target.every(v => arr.includes(v));
+
+        _.each(this.model.enabled, (account) => {
+            if (account.get('jid') !== this.current_filter_account)
+                return;
+            _.each(account.contacts.models, (contact) => {
+                if (contact.get('notifications') || contact.get('server') || !Strophe.getNodeFromJid(contact.get('jid')))
+                    return;
+                if (this.current_filter_groups_list.length){
+                    if (!contact.get('groups') || !contact.get('groups').length || !checker(contact.get('groups'), this.current_filter_groups_list))
+                        return;
+                }
+                if (this.current_filter_domain){
+                    if (Strophe.getDomainFromJid(contact.get('jid')) !== this.current_filter_domain)
+                        return;
+                }
+                if (this.current_filter_query){
+                    if (!contact.get('jid').includes(this.current_filter_query) && !contact.get('name').includes(this.current_filter_query))
+                        return;
+                }
+                if (this.current_filter.type === 'groupchat' && contact.get('group_chat')){
+                    this.contacts.push(contact);
+                    return;
+                } else if (contact.get('group_chat'))
+                    return;
+                if (this.current_filter.type === 'online' && constants.STATUS_WEIGHTS[contact.get('status')] < 6){
+                    this.contacts.push(contact);
+                    return;
+                }
+                if (this.current_filter.type === 'domain' && this.current_filter.domain_name){
+                    if (Strophe.getDomainFromJid(contact.get('jid')) === this.current_filter.domain_name)
+                        this.contacts.push(contact);
+                    return;
+                }
+                if (!this.current_filter.type){
+                    this.contacts.push(contact);
+                }
+            });
+        });
+        this.sortContacts();
+        this.renderContacts();
+        this.scrollToTop();
+    },
+
+    renderContacts: function () {
+        this.$('.contact-list').html('');
+        _.each(this.contacts, (contact) => {
+            let $template = $(templates.roster_contact_item({
+                status: contact.get('status'),
+                jid: contact.get('jid'),
+                jid_content: `${Strophe.getNodeFromJid(contact.get('jid'))}@<span class="contact-domain" data-domain="${Strophe.getDomainFromJid(contact.get('jid'))}">${Strophe.getDomainFromJid(contact.get('jid'))}</span>`,
+                name: contact.get('jid') === contact.get('name') ? Strophe.getNodeFromJid(contact.get('jid')) : contact.get('name'),
+                account_jid: contact.account.get('jid'),
+            }));
+            let image = contact.cached_image;
+            $template.find('.circle-avatar').setAvatar(image, 32);
+
+            let ic_name = contact.getIcon();
+            ic_name && $template.find('.chat-icon').switchClass(ic_name, (ic_name == 'group-invite' || ic_name == 'server' || ic_name == 'blocked')).html(env.templates.svg[ic_name]());
+
+            if (contact.get('groups') && contact.get('groups').length){
+                if (contact.get('groups').length) {
+                    let counter = 0
+                    _.each(contact.get('groups'), (group) => {
+                        if (counter < 2) {
+                            $template.find('.contact-groups-wrap').append($(`
+                                <div data-groupname="${group}" title="${group}" class="group ground-color-50">
+                                    <div class="one-line">${group}</div>
+                                </div> `
+                            ));
+                        }  else if (counter === 2) {
+                            $template.find('.contact-groups-wrap').append($(`
+                                <div class="group group-expand ground-color-50">
+                                    <div class="one-line">+ ${contact.get('groups').length - 2}</div>
+                                </div> `
+                            ));
+                        }
+                        $template.find('.contact-expanded-groups-wrap').append($(`
+                                <div data-groupname="${group}" title="${group}" class="group ground-color-50">
+                                    <div class="one-line">${group}</div>
+                                </div> `
+                        ));
+                        counter++;
+                    })
+                }
+
+            }
+            $template.find('.circle-avatar').setAvatar(image, 32);
+            this.$('.contact-list').append($template);
+        });
+        if (this._current_expanded_groups_item.account_jid && this._current_expanded_groups_item.contact_jid) {
+            this.$(`.roster-contact-item-wrap[data-jid="${this._current_expanded_groups_item.contact_jid}"][data-account-jid="${this._current_expanded_groups_item.account_jid}"] .contact-expanded-groups-wrap`).removeClass('hidden');
+        }
+    },
+
+    updateLeftIndicator: function () {
+    },
+});
+
 xabber.RosterSettingsView = xabber.BasicView.extend({
     className: 'roster-settings-wrap',
     template: templates.roster_settings,
@@ -9684,22 +10240,22 @@ xabber.AccountGroupView = xabber.BasicView.extend({
     }
 });
 
-xabber.ContactPlaceholderView = xabber.BasicView.extend({
-    className: 'placeholder-wrap contact-placeholder-wrap noselect',
-    template: templates.contact_placeholder,
-
-    _initialize: function (options) {
-        xabber.on('update_placeholder',this.onPlaceholderUpdate, this);
-    },
-
-    onPlaceholderUpdate: function () {
-        if (xabber.toolbar_view.$('.toolbar-item.jingle-calls.active').length || xabber.toolbar_view.$('.toolbar-item.geolocation-chats.active').length){
-            this.$('.text').text(xabber.getString("message_manager_error_not_implemented"));
-        } else {
-            this.$('.text').text(xabber.getString("contact_list__placeholder"));
-        }
-    },
-});
+// xabber.ContactPlaceholderView = xabber.BasicView.extend({
+//     className: 'placeholder-wrap contact-placeholder-wrap noselect',
+//     template: templates.contact_placeholder,
+//
+//     _initialize: function (options) {
+//         xabber.on('update_placeholder',this.onPlaceholderUpdate, this);
+//     },
+//
+//     onPlaceholderUpdate: function () {
+//         if (xabber.toolbar_view.$('.toolbar-item.jingle-calls.active').length || xabber.toolbar_view.$('.toolbar-item.geolocation-chats.active').length){
+//             this.$('.text').text(xabber.getString("message_manager_error_not_implemented"));
+//         } else {
+//             this.$('.text').text(xabber.getString("contact_list__placeholder"));
+//         }
+//     },
+// });
 
 xabber.AddContactView = xabber.BasicView.extend({
     className: 'modal main-modal add-contact-modal',
@@ -10236,12 +10792,12 @@ xabber.once("start", function () {
     this._roster_settings = new this.RosterSettings({id: 'roster-settings'},
         {storage_name: this.getStorageName(), fetch: 'after'});
     this.settings.roster = this._roster_settings.attributes;
-    this.contacts_view = this.left_panel.addChild('contacts', this.RosterLeftView,
+    this.contacts_view = this.right_panel.addChild('contacts', this.RosterFullScreenView,
         {model: this.accounts});
     this.contact_container = this.right_panel.addChild('details', this.Container);
     this.details_container = this.right_contact_panel.addChild('details', this.Container);
-    this.contact_placeholder = this.right_panel.addChild('contact_placeholder',
-        this.ContactPlaceholderView);
+    // this.contact_placeholder = this.right_panel.addChild('contact_placeholder',
+    //     this.ContactPlaceholderView);
     this.add_contact_view = new this.AddContactView();
     this.on("add_contact", function () {
         this.add_contact_view.show();
