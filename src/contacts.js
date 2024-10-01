@@ -9685,13 +9685,16 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({ //34
     ps_settings: {theme: 'item-list'},
     events: {
         "click .roster-contact-item-wrap .circle-avatar": "onClickItem",
+        "click .roster-contact-item-wrap .contact-name": "onClickItem",
         "click .contacts-type-filter-content .filter-item-wrap": "filterContent",
         "click .contacts-account-filter-content .filter-item-wrap": "filterAccount",
         "click .contacts-group-filter-content .filter-item-wrap": "filterByGroup",
         "click .contact-groups-wrap .group:not(.group-expand)": "filterByGroup",
         "click .contact-expanded-groups-wrap .group:not(.group-expand)": "filterByGroup",
         "click .contact-domain": "filterByDomain",
+        "click .roster-sorting-item": "chooseSorting",
         "click .roster-filter-item": "removeFilter",
+        "click .close-search-icon": "clearSearch",
         "click .contact-groups-wrap .group.group-expand": "expandGroups",
         "mouseout .contact-expanded-groups-wrap": "closeGroups",
         "keyup .search-input": "keyUpSearch",
@@ -9705,6 +9708,7 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({ //34
         this.current_filter = {};
         this.current_filter_groups_list = [];
         this._current_expanded_groups_item = {};
+        this.sorting_type = 'name';
         this.processing_debounce = _.debounce(this.processAccounts, 1000, false);
         this.update_debounce = _.debounce(this.processUpdateContacts, 1000, false);
         this.model.on("activate", this.updateOneRosterView, this);
@@ -9832,6 +9836,13 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({ //34
             this.$(`.contacts-type-filter-content .filter-item-wrap[data-filter="${filter_type}"]`).addClass('selected-filter');
         }
 
+        this.current_filter_groups_list = [];
+        this.current_filter_domain = null;
+        this.sorting_type = 'name';
+        this.clearSearch();
+        this.$(`.contacts-active-filters-wrap .roster-filter-item`).remove();
+        this.$('.contacts-active-filters-wrap').switchClass('hidden', !this.$('.contacts-active-filters-wrap').children('.roster-filter-item').length)
+
         this.contacts = [];
         this.processUpdateContacts(true, true);
     },
@@ -9845,11 +9856,10 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({ //34
         this.$('.contacts-account-filter-content .filter-item-wrap').removeClass('selected-filter');
         this.$(`.contacts-account-filter-content .filter-item-wrap[data-jid="${filter_type}"]`).addClass('selected-filter');
 
-        // если фильтрация по кругу то отключать её
-
         this.current_filter_groups_list = [];
         this.current_filter_domain = null;
-        this.current_filter_query = null;
+        this.sorting_type = 'name';
+        this.clearSearch();
         this.$(`.contacts-active-filters-wrap .roster-filter-item`).remove();
         this.$('.contacts-active-filters-wrap').switchClass('hidden', !this.$('.contacts-active-filters-wrap').children('.roster-filter-item').length)
         this.updateGroupsFilter();
@@ -9863,29 +9873,13 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({ //34
         if (value && ev.keyCode == constants.KEY_ENTER) {
             ev.preventDefault();
         }
-        if (value){
-            this.filterSearch(value);
-        } else {
-            this.$(`.roster-filter-item[data-type="query"]`).remove();
-            this.current_filter_query = null;
-            this.contacts = [];
-            this.processUpdateContacts(true, true);
-        }
+        $item.closest('.search-form').switchClass('active', value);
+        this.filterSearch(value || null);
     },
 
     filterSearch: function (query) {
 
-        this.$(`.roster-filter-item[data-type="query"]`).remove();
-
         this.current_filter_query = query;
-
-        this.$('.contacts-active-filters-wrap').append($(templates.roster_filter_item({
-            value: query,
-            type: 'query',
-            text: query
-        })));
-
-        this.$('.contacts-active-filters-wrap').removeClass('hidden');
 
         this.contacts = [];
         this.processUpdateContacts(true, true);
@@ -9943,6 +9937,28 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({ //34
         this.processUpdateContacts(true, true);
     },
 
+    chooseSorting: function (ev) {
+        let $item = $(ev.target).closest('.roster-sorting-item'),
+            sort_name = $item.attr('data-sort'),
+            current_sort = this.sorting_type;
+
+        if (!sort_name)
+            return;
+
+        this.sorting_type = sort_name;
+
+        if (current_sort === this.sorting_type){
+            if (this.sorting_type.includes('-')){
+                this.sorting_type = this.sorting_type.replace('-', '')
+            } else {
+                this.sorting_type = '-' + this.sorting_type;
+            }
+        }
+
+        this.contacts = [];
+        this.processUpdateContacts(true, true);
+    },
+
     removeFilter: function (ev) {
         let $item = $(ev.target).closest('.roster-filter-item'),
             filter_type = $item.attr('data-type'),
@@ -9954,12 +9970,17 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({ //34
         if (filter_type === 'circle'){ //34
             this.current_filter_groups_list = this.current_filter_groups_list.filter(i => i !== filter_value);
         }
-        if (filter_type === 'query'){ //34
-            this.current_filter_query = null;
-        }
         $item.remove()
         this.$('.contacts-active-filters-wrap').switchClass('hidden', !this.$('.contacts-active-filters-wrap').children('.roster-filter-item').length)
 
+        this.contacts = [];
+        this.processUpdateContacts(true, true);
+    },
+
+    clearSearch: function () {
+        this.$('.search-input').val('');
+        this.$('.search-form').removeClass('active');
+        this.current_filter_query = null;
         this.contacts = [];
         this.processUpdateContacts(true, true);
     },
@@ -10056,21 +10077,39 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({ //34
 
     sortContacts: function () {
         this.contacts.sort((contact1, contact2) => {
-            if (xabber.settings.roster.sorting === 'online-first') {
-                let s1 = contact1.get('status'),
-                    s2 = contact2.get('status'),
-                    sw1 = constants.STATUS_WEIGHTS[s1],
-                    sw2 = constants.STATUS_WEIGHTS[s2],
-                    sw1_offline = sw1 >= constants.STATUS_WEIGHTS.offline,
-                    sw2_offline = sw2 >= constants.STATUS_WEIGHTS.offline;
-                if (sw1_offline ^ sw2_offline) {
-                    return sw1_offline ? 1 : -1;
-                }
+            // if (xabber.settings.roster.sorting === 'online-first') {
+            //     let s1 = contact1.get('status'),
+            //         s2 = contact2.get('status'),
+            //         sw1 = constants.STATUS_WEIGHTS[s1],
+            //         sw2 = constants.STATUS_WEIGHTS[s2],
+            //         sw1_offline = sw1 >= constants.STATUS_WEIGHTS.offline,
+            //         sw2_offline = sw2 >= constants.STATUS_WEIGHTS.offline;
+            //     if (sw1_offline ^ sw2_offline) {
+            //         return sw1_offline ? 1 : -1;
+            //     }
+            // }
+
+            if (this.sorting_type === 'name'){
+                let name1, name2;
+                name1 = contact1.get('name').toLowerCase();
+                name2 = contact2.get('name').toLowerCase();
+                return name1 < name2 ? -1 : (name1 > name2 ? 1 : 0);
+            } else if (this.sorting_type === '-name'){
+                let name1, name2;
+                name1 = contact1.get('name').toLowerCase();
+                name2 = contact2.get('name').toLowerCase();
+                return name1 > name2 ? -1 : (name1 < name2 ? 1 : 0);
+            } else if (this.sorting_type === 'jid'){
+                let name1, name2;
+                name1 = contact1.get('jid').toLowerCase();
+                name2 = contact2.get('jid').toLowerCase();
+                return name1 < name2 ? -1 : (name1 > name2 ? 1 : 0);
+            } else if (this.sorting_type === '-jid'){
+                let name1, name2;
+                name1 = contact1.get('jid').toLowerCase();
+                name2 = contact2.get('jid').toLowerCase();
+                return name1 > name2 ? -1 : (name1 < name2 ? 1 : 0);
             }
-            let name1, name2;
-            name1 = contact1.get('name').toLowerCase();
-            name2 = contact2.get('name').toLowerCase();
-            return name1 < name2 ? -1 : (name1 > name2 ? 1 : 0);
         });
     },
 
@@ -10122,6 +10161,13 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({ //34
 
     renderContacts: function () {
         this.$('.contact-list').html('');
+        if (this.contacts.length){
+            this.$('.contact-list').append($(templates.roster_sorting()));
+            this.$(`.roster-sorting-item[data-sort="${this.sorting_type.replace('-', '')}"]`).addClass('selected-sorting')
+            this.$(`.roster-sorting-item.selected-sorting`).switchClass('reverted-sorting', this.sorting_type.includes('-'));
+        } else {
+            this.$('.contact-list').append($(`<div class="roster-empty-text">${[xabber.getString("roster_empty")]}</div>`));
+        }
         _.each(this.contacts, (contact) => {
             let $template = $(templates.roster_contact_item({
                 status: contact.get('status'),
@@ -10166,6 +10212,14 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({ //34
             $template.find('.circle-avatar').setAvatar(image, 32);
             this.$('.contact-list').append($template);
         });
+        let current_account = xabber.accounts.enabled.find(item => item.get('jid') === this.current_filter_account);
+        if (current_account){
+            let account_contacts = current_account.contacts.models;
+            account_contacts = account_contacts.filter(contact => !contact.get('notifications') && !contact.get('server') && Strophe.getNodeFromJid(contact.get('jid')));
+            this.$('.filter-item-wrap[data-filter="all"] span').text(account_contacts.filter(contact => !contact.get('group_chat')).length)
+            this.$('.filter-item-wrap[data-filter="groupchat"] span').text(account_contacts.filter(contact => contact.get('group_chat')).length)
+        }
+        this.$('.contact-list').switchClass('groupchat-list', this.current_filter.type && this.current_filter.type === 'groupchat');
         if (this._current_expanded_groups_item.account_jid && this._current_expanded_groups_item.contact_jid) {
             this.$(`.roster-contact-item-wrap[data-jid="${this._current_expanded_groups_item.contact_jid}"][data-account-jid="${this._current_expanded_groups_item.account_jid}"] .contact-expanded-groups-wrap`).removeClass('hidden');
         }

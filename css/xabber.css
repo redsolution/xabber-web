@@ -6090,14 +6090,15 @@ input[type=text].simple-input-field:hover {
     border: none;
     box-shadow: none;
 }
-.contacts-panel-wrap .contacts-search-form{
-    position: relative;
-    border: none;
-    box-shadow: none;
+.contacts-panel-wrap .contacts-search-form .search-input{
+    padding-left: 72px;
+}
+.contacts-panel-wrap .contacts-search-form .search-icon{
+    left: 24px;
 }
 .contacts-panel-wrap .contacts-active-filters-wrap{
     display: flex;
-    padding: 0 52px;
+    padding: 0 56px;
     position: relative;
     flex-wrap: wrap;
     align-items: center;
@@ -6140,48 +6141,99 @@ input[type=text].simple-input-field:hover {
     position: relative;
     width: 100%;
 }
+.contacts-panel-wrap .roster-sorting-wrap{
+    display: flex;
+}
+.contacts-panel-wrap .roster-sorting-wrap .roster-sorting-item{
+    display: flex;
+    margin-left: 72px;
+    width: 20%;
+    opacity: 0.8;
+    cursor: pointer;
+    align-items: center;
+}
+
+.contacts-panel-wrap .roster-sorting-wrap .roster-sorting-item .mdi-arrow-down-slim{
+    display: none;
+    line-height: 20px;
+    width: 16px;
+    text-align: center;
+}
+.contacts-panel-wrap .roster-sorting-wrap .roster-sorting-item .mdi-arrow-down-slim:before {
+    content: "↓";
+}
+.contacts-panel-wrap .roster-sorting-wrap .roster-sorting-item.selected-sorting .mdi-arrow-down-slim{
+    display: block;
+}
+.contacts-panel-wrap .roster-sorting-wrap .roster-sorting-item.reverted-sorting .mdi-arrow-down-slim{
+    rotate: 180deg;
+}
+.contacts-panel-wrap .roster-sorting-wrap .roster-sorting-item.sort-jid{
+    margin-left: 16px;
+}
+.contacts-panel-wrap .roster-empty-text{
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, 0);
+    font-size: 24px;
+}
 .contacts-panel-wrap .contact-list-wrap {
 }
 .contacts-panel-wrap .contact-list-wrap .roster-contact-item-wrap{
     display: flex;
     justify-content: flex-start;
     font-size: 14px;
-    min-height: 48px;
+    min-height: 56px;
     align-items: flex-start;
     position: relative;
 }
+.contacts-panel-wrap .contact-list-wrap .roster-contact-item-wrap:hover{
+    background: #FAFAFA;
+}
 .contacts-panel-wrap .contact-list-wrap .roster-contact-item-wrap .circle-avatar{
-    height: 32px;
-    width: 32px;
-    margin-left: 16px;
     cursor: pointer;
+    height: 40px;
+    margin-left: 16px;
     margin-top: 8px;
+    width: 40px;
 }
 .contacts-panel-wrap .contact-list-wrap .roster-contact-item-wrap .contact-name{
     width: 20%;
     margin-left: 16px;
-    margin-top: 14px;
+    margin-top: 18px;
+    font-weight: 500;
+    cursor: pointer;
+}
+.contacts-panel-wrap .contact-list-wrap .roster-contact-item-wrap .contact-name:hover{
+    opacity: 0.8;
 }
 .contacts-panel-wrap .contact-list-wrap .roster-contact-item-wrap .contact-jid{
     width: 35%;
     margin-left: 16px;
-    margin-top: 14px;
+    margin-top: 18px;
     font-size: 14px;
+    opacity: 0.8;
 }
 .contacts-panel-wrap .contact-list-wrap .roster-contact-item-wrap .contact-jid .contact-domain:hover{
     color: #757575;
     cursor: pointer;
-    text-decoration: underline;
 }
 .contacts-panel-wrap .contact-list-wrap .roster-contact-item-wrap .status{
     border: 1.125px solid #fff;
     border-radius: 50%;
-    height: 10px;
-    left: 37px;
+    height: 12px;
+    left: 44px;
     pointer-events: none;
     position: absolute;
-    top: 31px;
-    width: 10px;
+    top: 37px;
+    width: 12px;
+}
+.contacts-panel-wrap .contact-list-wrap .groupchat-list .roster-contact-item-wrap .status{
+    height: 16px;
+    left: 42px;
+    top: 34px;
+    width: 16px;
 }
 .contacts-panel-wrap .contact-list-wrap .roster-contact-item-wrap .status svg{
     position: absolute;
@@ -6190,7 +6242,7 @@ input[type=text].simple-input-field:hover {
     display: flex;
     flex-wrap: nowrap;
     width: 25%;
-    margin: 12px 0 8px 16px;
+    margin: 16px 0 8px 16px;
 }
 .contacts-panel-wrap .contact-list-wrap .roster-contact-item-wrap .contact-expanded-groups-wrap .group,
 .contacts-panel-wrap .contact-list-wrap .roster-contact-item-wrap .contact-groups-wrap .group{
@@ -6225,7 +6277,7 @@ input[type=text].simple-input-field:hover {
     min-height: 100px;
     padding: 0 5px;
     position: absolute;
-    left: calc(55% + 90px);
+    left: calc(55% + 98px);
     top: 80%;
     width: 30%;
     z-index: 999;
