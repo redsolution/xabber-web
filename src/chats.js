@@ -681,7 +681,7 @@ xabber.MessagesBase = Backbone.Collection.extend({
                                       HMACData = key.slice(32);
                                   utils.AES.decrypt(exportedMasterKey, HMACData, arrayBuffer).then((enc_file) => {
                                       resolve(enc_file);
-                                  });                                  
+                                  });
                               } catch (e) {
                                   resolve(null)
                               }
@@ -4202,6 +4202,9 @@ xabber.ChatContentView = xabber.BasicView.extend({
     onScroll: function (ev, is_focused) {
         if (!this.isVisible() || this._no_scrolling_event)
             return;
+        if (this.model.last_message && !this.isMessageAdded(this.model.last_message)){
+            this.addMessage(this.model.last_message);
+        }
         this.$('.back-to-bottom:not(.back-to-unread)').hideIf(this.isScrolledToBottom() || this.$(`.chat-message.unread-message`).length);
         this.$('.back-to-unread').showIf(!this.isScrolledToBottom() && this.$(`.chat-message.unread-message`).length);
         this.$('.back-to-unread').removeClass('back-to-bottom');
