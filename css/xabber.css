@@ -6116,6 +6116,17 @@ input[type=text].simple-input-field:hover {
 .roster-left-container.container{
     max-width: unset;
 }
+.roster-left-container.narrow-panel .contacts-panel-wrap .contact-list-wrap .roster-contact-item-wrap .contact-groups-wrap {
+    display:none;
+}
+.roster-left-container.narrow-panel .contacts-panel-wrap .contact-list-wrap .roster-sorting-item,
+.roster-left-container.narrow-panel .contacts-panel-wrap .contact-list-wrap .roster-contact-item-wrap .contact-name{
+    width: 35%;
+}
+.roster-left-container.narrow-panel .contacts-panel-wrap .contact-list-wrap .roster-contact-item-wrap .contact-jid{
+    width: 45%;
+    padding-right: 48px;
+}
 .contacts-panel-wrap{
     display: flex;
     height: 100%;

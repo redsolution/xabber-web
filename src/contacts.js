@@ -9683,7 +9683,7 @@ xabber.RosterLeftView = xabber.RosterView.extend({
 });
 
 
-xabber.editContactsGroupsModalView = xabber.BasicView.extend({
+xabber.EditContactsGroupsModalView = xabber.BasicView.extend({
     className: 'modal main-modal edit-groups-modal',
     template: templates.edit_groups_modal,
     ps_selector: '.modal-content',
@@ -9961,7 +9961,7 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
 
         let contact = this.account.contacts.models.find(item => item.get('jid') === contact_jid);
 
-        let edit_contacts_groups = new xabber.editContactsGroupsModalView();
+        let edit_contacts_groups = new xabber.EditContactsGroupsModalView();
         edit_contacts_groups.open({contact: contact, account: this.account});
     },
 
@@ -10142,7 +10142,7 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
 
     processUpdateContacts: function (force_scroll, not_debounced) {
         if (this.current_filter.type || this.current_filter_groups_list.length || this.current_filter_domain || this.current_filter_query || this.current_type_subfilter) {
-            return this.getFilteredContacts();
+            return this.getFilteredContacts(force_scroll);
         }
         this.contacts = [];
         _.each(this.model.enabled, (account) => {
@@ -10215,7 +10215,7 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
         });
     },
 
-    getFilteredContacts: function () {
+    getFilteredContacts: function (force_scroll) {
         this.contacts = [];
         let checker = (arr, target) => target.every(v => arr.includes(v));
 
@@ -10266,7 +10266,7 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
         });
         this.sortContacts();
         this.renderContacts();
-        this.scrollToTop();
+        force_scroll && this.scrollToTop();
     },
 
     renderContacts: function () {

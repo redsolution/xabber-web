@@ -154,6 +154,7 @@ xabber.once("start", function () {
         this.chat_head.$el.switchClass('chat-head-normal', (right_panel_width < 850 && right_panel_width >= 750));
         this.chat_head.$el.switchClass('chat-head-normal-wide', (right_panel_width < 1000 && right_panel_width >= 850));
         this.chat_head.$el.switchClass('chat-head-wide', right_panel_width > 1000);
+        this.contacts_view.$el.switchClass('narrow-panel', right_panel_width < 1000);
         this.main_panel.setCustomCss({
             width: panel_width,
         });
