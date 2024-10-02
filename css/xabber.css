@@ -3497,6 +3497,100 @@ body {
 [data-main-color=blue-grey] .toolbar .toolbar-item:hover svg.toolbar-icon path {
     fill: #455A64 !important;
 }
+/* Red */
+[data-main-color=red] .main-ground-color-50 {
+    background: #FFEBEE !important;
+}
+
+/* Pink */
+[data-main-color=pink] .main-ground-color-50 {
+    background: #FCE4EC !important;
+}
+
+/* Purple */
+[data-main-color=purple] .main-ground-color-50 {
+    background: #F3E5F5 !important;
+}
+
+/* Deep Purple */
+[data-main-color=deep-purple] .main-ground-color-50 {
+    background: #EDE7F6 !important;
+}
+
+/* Indigo */
+[data-main-color=indigo] .main-ground-color-50 {
+    background: #E8EAF6 !important;
+}
+
+/* Blue */
+[data-main-color=blue] .main-ground-color-50 {
+    background: #E3F2FD !important;
+}
+
+/* Light Blue */
+[data-main-color=light-blue] .main-ground-color-50 {
+    background: #E1F5FE !important;
+}
+
+/* Cyan */
+[data-main-color=cyan] .main-ground-color-50 {
+    background: #E0F7FA !important;
+}
+
+/* Teal */
+[data-main-color=teal] .main-ground-color-50 {
+    background: #E0F2F1 !important;
+}
+
+/* Green */
+[data-main-color=green] .main-ground-color-50 {
+    background: #E8F5E9 !important;
+}
+
+/* Light Green */
+[data-main-color=light-green] .main-ground-color-50 {
+    background: #F1F8E9 !important;
+}
+
+/* Lime */
+[data-main-color=lime] .main-ground-color-50 {
+    background: #F9FBE7 !important;
+}
+
+/* Yellow */
+[data-main-color=yellow] .main-ground-color-50 {
+    background: #FFFDE7 !important;
+}
+
+/* Amber */
+[data-main-color=amber] .main-ground-color-50 {
+    background: #FFF8E1 !important;
+}
+
+/* Orange */
+[data-main-color=orange] .main-ground-color-50 {
+    background: #FFF3E0 !important;
+}
+
+/* Deep Orange */
+[data-main-color=deep-orange] .main-ground-color-50 {
+    background: #FBE9E7 !important;
+}
+
+/* Brown */
+[data-main-color=brown] .main-ground-color-50 {
+    background: #EFEBE9 !important;
+}
+
+/* Grey */
+[data-main-color=grey] .main-ground-color-50 {
+    background: #FAFAFA !important;
+}
+
+/* Blue Grey */
+[data-main-color=blue-grey] .main-ground-color-50 {
+    background: #ECEFF1 !important;
+}
 /* -------------------------------------------- */
 
 input[type=text].simple-input-field,
@@ -6103,6 +6197,7 @@ input[type=text].simple-input-field:hover {
     flex-wrap: wrap;
     align-items: center;
 }
+.contacts-panel-wrap .contacts-active-filters-wrap .roster-additional-filter-item,
 .contacts-panel-wrap .contacts-active-filters-wrap .roster-filter-item{
     align-items: center;
     background: #eeeeee;
@@ -6118,16 +6213,32 @@ input[type=text].simple-input-field:hover {
     height: 24px;
     margin: 8px 8px 8px 0;
 }
+.contacts-panel-wrap .contacts-active-filters-wrap .roster-additional-filter-item{
+    min-width: 120px;
+    justify-content: space-between;
+}
+.contacts-panel-wrap .contacts-active-filters-wrap .roster-additional-filter-item:hover,
 .contacts-panel-wrap .contacts-active-filters-wrap .roster-filter-item:hover{
     opacity: 0.7
 
 }
+.contacts-panel-wrap .contacts-active-filters-wrap .roster-additional-filter-item .roster-filter-item-text,
 .contacts-panel-wrap .contacts-active-filters-wrap .roster-filter-item .roster-filter-item-text{
     margin: 8px;
 }
+.contacts-panel-wrap .contacts-active-filters-wrap .roster-additional-filter-item .roster-filter-item-text{
+    margin-right: 2px;
+}
+.contacts-panel-wrap .contacts-active-filters-wrap .roster-additional-filter-item .mdi-triangle,
 .contacts-panel-wrap .contacts-active-filters-wrap .roster-filter-item .remove-filter{
     margin-bottom: 1px;
     opacity: 0.5;
+}
+.contacts-panel-wrap .contacts-active-filters-wrap .roster-additional-filter-item .mdi-triangle{
+    rotate: 180deg;
+}
+.contacts-panel-wrap .contacts-active-filters-wrap .dropdown-content{
+    top: 32px !important;
 }
 .contacts-panel-wrap .contact-list-wrap{
     position: relative;
@@ -6151,6 +6262,7 @@ input[type=text].simple-input-field:hover {
     opacity: 0.8;
     cursor: pointer;
     align-items: center;
+    font-weight: 500;
 }
 
 .contacts-panel-wrap .roster-sorting-wrap .roster-sorting-item .mdi-arrow-down-slim{
@@ -6170,6 +6282,7 @@ input[type=text].simple-input-field:hover {
 }
 .contacts-panel-wrap .roster-sorting-wrap .roster-sorting-item.sort-jid{
     margin-left: 16px;
+    text-transform: uppercase;
 }
 .contacts-panel-wrap .roster-empty-text{
     position: absolute;
@@ -6228,6 +6341,21 @@ input[type=text].simple-input-field:hover {
     position: absolute;
     top: 37px;
     width: 12px;
+}
+.contacts-panel-wrap .contact-list-wrap .roster-contact-item-wrap .btn-edit{
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translate(0, -50%);
+    display:none;
+    cursor: pointer;
+}
+.contacts-panel-wrap .contact-list-wrap .roster-contact-item-wrap:hover .btn-edit{
+    display:block;
+}
+.contacts-panel-wrap .contact-list-wrap .roster-contact-item-wrap .contact-edit-groups-wrap{
+    width:25%;
+    display: none;
 }
 .contacts-panel-wrap .contact-list-wrap .groupchat-list .roster-contact-item-wrap .status{
     height: 16px;
@@ -6288,6 +6416,145 @@ input[type=text].simple-input-field:hover {
 .contacts-panel-wrap .contact-list-wrap .roster-contact-item-wrap .contact-expanded-groups-wrap.hidden:hover{
     display: flex !important;
 }
+/* edit contacts groups modal //34*/
+.edit-groups-modal {
+    width: 50% !important;
+    height: 60%;
+}
+.edit-groups-modal .modal-content-wrap{
+    position: relative;
+    height: 100%;
+}
+.edit-groups-modal .modal-footer{
+    position: absolute;
+    bottom: 0;
+}
+.edit-groups-modal .modal-content{
+    max-height: calc(100% - 112px);
+}
+.edit-groups-modal .details-icon-wrap{
+    display: none;
+}
+.edit-groups-modal .groups-list-wrap {
+    height: 100%;
+    padding: 8px;
+}
+.edit-groups-modal .new-group-checkbox{
+    display: none;
+}
+.edit-groups-modal .new-group-name{
+    margin:0;
+    padding:0;
+}
+.edit-groups-modal .new-group-field-wrap .new-group-name input{
+    border-radius: .25rem;
+    color: #212529;
+    font-size: 14px;
+    height: 24px;
+    margin: 0 0 8px !important;
+    padding: 0 12px 0 6px;
+    transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+    width: 163px !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+.edit-groups-modal .groups-list-wrap .details-icon {
+    top: 19px !important;
+}
+
+.edit-groups-modal .groups {
+    display: flex;
+    padding: 19px 0 0 0;
+    flex-wrap: wrap;
+}
+
+.edit-groups-modal .groups .empty-groups {
+    display: none;
+}
+
+.edit-groups-modal .groups .group {
+    display: flex;
+    background-color: #EEEEEE;
+    padding: 0 6px;
+    border-radius: 4px;
+    margin-right: 8px;
+    margin-bottom: 8px;
+    line-height: 24px;
+    font-size: 14px;
+    letter-spacing: 0.15px;
+    cursor: pointer;
+    transition: all .15s ease-in;
+    height: 24px;
+    max-width: 100%;
+}
+.edit-groups-modal .groups-block-wrap .groups-wrap .checkbox-list .input-field.checkbox-field:hover label,
+.edit-groups-modal .groups .group:hover {
+    color: #757575;
+}
+
+.edit-groups-modal .groups-list-wrap:hover .groups .group {
+    background-color: #BDBDBD;
+}
+.edit-groups-modal .groups-wrap{
+    background: #fafafa;
+    border: 1px solid #f5f5f5;
+    border-radius: .25rem;
+    min-height: 100px;
+    padding: 0 5px;
+    /*position: absolute;*/
+    /*left: 25px;*/
+    /*top: 100%;*/
+    /*width: calc(100% - 52px);*/
+    /*z-index: 999;*/
+}
+.edit-groups-modal .groups-wrap:hover{
+    display: block !important;
+}
+.edit-groups-modal .groups-wrap.empty-groups-wrap{
+    display: none !important;
+}
+.edit-groups-modal .groups-wrap .checkbox-list .new-group-field-wrap{
+    height: 30px;
+}
+.edit-groups-modal .groups-wrap .checkbox-list{
+    display: flex;
+    flex-wrap: wrap;
+}
+.edit-groups-modal .groups-wrap .checkbox-list .input-field.checkbox-field{
+    width: fit-content !important;
+    margin: 0;
+    padding: 0;
+}
+.edit-groups-modal .groups-wrap .checkbox-list .input-field.checkbox-field{
+    cursor:pointer;
+    max-width: 100%;
+}
+.edit-groups-modal .groups-wrap .checkbox-list .new-group-field-wrap .new-group-checkbox{
+    display: none;
+}
+.edit-groups-modal .groups-wrap .checkbox-list .input-field.checkbox-field label{
+    background-color: #e5e5e5;
+    outline: 0px solid #e5e5e5;
+    padding: 0.3em 0.5em;
+    margin: 5px 5px 5px 0;
+    width: fit-content !important;
+    border-radius: 0.25rem;
+    transition: all .15s ease-in;
+}
+.edit-groups-modal .groups-wrap .checkbox-list .input-field.checkbox-field label{
+    color: unset;
+    max-width: 100%;
+}
+.edit-groups-modal .groups-wrap .checkbox-list .input-field.checkbox-field label:before{
+    content: none;
+}
+.edit-groups-modal .groups-wrap .checkbox-list .input-field.checkbox-field label:after{
+    content: none;
+}
+.edit-groups-modal .groups-wrap .checkbox-list .new-group-field-wrap .new-group-name{
+    padding: 0 !important;
+}
+/**/
 .roster-left-container .ps-scrollbar-y-rail {
     z-index: 5;
 }
@@ -17151,6 +17418,7 @@ input[type=range].voice-message-volume:focus {
     letter-spacing: 0.15px;
     cursor: pointer;
     transition: all .15s ease-in;
+    max-width: calc(100% - 16px);
 }
 .details-panel-right .groups-block-wrap .groups-wrap .checkbox-list .input-field.checkbox-field:hover label,
 .details-panel-right .groups .group:hover {

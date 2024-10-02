@@ -1,7 +1,7 @@
 {[ for (var i = 0; i < groups.length; i++) { var name = groups[i].name, checked = groups[i].checked, group_id = groups[i].id; ]}
     {[ if (checked) {]}
         <div data-groupname="{{name}}" title="{[print(xabber.getString('contact_tooltip_remove_by_click'))]}" class="group ground-color-50">
-            <div>{{name}}</div>
+            <div class="one-line">{{name}}</div>
         </div>
     {[}]}
 

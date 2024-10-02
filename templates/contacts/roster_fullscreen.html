@@ -34,10 +34,35 @@
             <div class="contacts-search-form search-form panel-head">
                 <i class="search-icon mdi mdi-24px mdi-magnify"></i>
                 <input type="text" class="search-input simple-input-field" tabindex="1" placeholder='{[print(xabber.getString("search"))]}'>
-                <i class="close-search-icon mdi mdi-24px mdi-close"></i>
             </div>
-            <div class="contacts-active-filters-wrap hidden">
-
+            <div class="contacts-active-filters-wrap">
+                <div class="roster-additional-filter-item dropdown-button ground-color-50" data-type="contacts" data-activates="{{view.cid}}-contacts-filters">
+                    <div class="roster-filter-item-text one-line">{[print(xabber.getString("contacts"))]}</div>
+                    <i class="mdi mdi-8px mdi-triangle"></i>
+                </div>
+                <ul id="{{view.cid}}-contacts-filters" class="dropdown-content bootstrap-dropdown noselect">
+                    <div class="property-variant btn-subfilter" data-subfilter="contacts" data-parent-type="contacts">
+                        <span class="one-line">{[print(xabber.getString("contacts"))]}</span>
+                    </div>
+                    <div class="property-variant btn-subfilter" data-subfilter="online" data-parent-type="contacts">
+                        <span class="one-line">{[print(xabber.getString("online"))]}</span>
+                    </div>
+                </ul>
+                <div class="roster-additional-filter-item dropdown-button ground-color-50 hidden" data-type="groups" data-activates="{{view.cid}}-groups-filters">
+                    <div class="roster-filter-item-text one-line">{[print(xabber.getString("contacts_window__type_filter_groupchat"))]}</div>
+                    <i class="mdi mdi-8px mdi-triangle"></i>
+                </div>
+                <ul id="{{view.cid}}-groups-filters" class="dropdown-content bootstrap-dropdown noselect">
+                    <div class="property-variant btn-subfilter" data-subfilter="groups" data-parent-type="groups">
+                        <span class="one-line">{[print(xabber.getString("contacts_window__type_filter_groupchat"))]}</span>
+                    </div>
+                    <div class="property-variant btn-subfilter" data-subfilter="public" data-parent-type="groups">
+                        <span class="one-line">{[print(xabber.getString("groupchat_privacy_type_public"))]}</span>
+                    </div>
+                    <div class="property-variant btn-subfilter" data-subfilter="incognito" data-parent-type="groups">
+                        <span class="one-line">{[print(xabber.getString("groupchat_privacy_type_incognito"))]}</span>
+                    </div>
+                </ul>
             </div>
 
             <div class="contact-list-wrap left-panel-list-wrap">

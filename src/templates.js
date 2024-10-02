@@ -127,6 +127,7 @@
     addTemplate('contacts.roster_right');
     addTemplate('contacts.roster_left');
     addTemplate('contacts.roster_fullscreen');
+    addTemplate('contacts.edit_groups_modal');
     addTemplate('contacts.roster_contact_item');
     addTemplate('contacts.roster_filter_item');
     addTemplate('contacts.roster_sorting');
