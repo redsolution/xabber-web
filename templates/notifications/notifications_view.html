@@ -1,5 +1,10 @@
 <div class="notifications-content-filters no-select">
     <div class="notifications-filter-main-header">{[print(xabber.getString("notifications_window__header"))]}</div>
+    <div class="notifications-account-filter">
+        <div class="notifications-filter-header">{[print(xabber.getString("notifications_window__account_filter_header"))]}</div>
+        <div class="notifications-account-filter-content">
+        </div>
+    </div>
     <div class="notifications-type-filter">
         <div class="notifications-filter-header">{[print(xabber.getString("notifications_window__filters_header"))]}</div>
         <div class="notifications-type-filter-content">
@@ -19,11 +24,6 @@
                 <svg class="filter-icon mdi fill-color-grey-500 mdi-svg-template" data-svgname="bell-mention"></svg>
                 <div class="name one-line">{[print(xabber.getString("notifications_window__type_filter_mentions"))]}</div>
             </div>
-        </div>
-    </div>
-    <div class="notifications-account-filter">
-        <div class="notifications-filter-header">{[print(xabber.getString("notifications_window__account_filter_header"))]}</div>
-        <div class="notifications-account-filter-content">
         </div>
     </div>
 </div>

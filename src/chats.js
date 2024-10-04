@@ -4465,8 +4465,12 @@ xabber.ChatContentView = xabber.BasicView.extend({
             this._loading_history = false;
             this.hideHistoryFeedback();
             if (options.missed_history && !rsm.complete && (rsm.count > messages.length))
-                this.getMessageArchive({after: rsm.last}, {missed_history: true});
-
+                this.getMessageArchive({after: rsm.last}, {missed_history: true, notificications_month: options.notificications_month || null});
+            if (options.missed_history) {
+            }
+            if (options.missed_history && options.notificications_month && rsm.complete) {
+                account.settings.update_settings({last_month_notifications_loaded: true});
+            }
             if (options.notifications_last_msg && !rsm.complete && (rsm.count > messages.length)) {
                 this.getMessageArchive({
                         fast: true,
@@ -4593,6 +4597,16 @@ xabber.ChatContentView = xabber.BasicView.extend({
         let query = {};
         query.var = [{var: 'start', value: moment(timestamp).format()}];
         this.getMessageArchive(query, {missed_history: true});
+    },
+
+    requestToMonthMissedMessages: function (date) {
+        date = date || Date.now();
+        let query = {};
+        query.var = [
+            {var: 'start', value: moment(date).subtract(1, 'months').startOf('month').format()},
+            ];
+        this.getMessageArchive(query, {missed_history: true, notificications_month: true});
+        return moment(date).subtract(1, 'months').startOf('month').format();
     },
 
     loadLastHistory: function () {

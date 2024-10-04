@@ -435,6 +435,16 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
         remove_list.length && new_list.length && this.notification_messages.reset(new_list);
 
         this.updateAllIncomingSubscriptions();
+
+        _.each(notifications_chats, (chat) => {
+            if (chat.account.settings.get('last_month_notifications_loaded'))
+                return;
+            if (chat.item_view && !chat.item_view.content)
+                chat.item_view.content = new xabber.ChatContentView({chat_item: chat.item_view});
+            if (!chat.get('last_notifications_month_loaded'))
+                chat.set('last_notifications_month_loaded', chat.item_view.content.requestToMonthMissedMessages());
+
+        });
     },
 
     isVisible: function () {
@@ -900,11 +910,60 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
         this._onscroll_read_messages_timeout = setTimeout(() => {
             this.readNotifications();
         }, scroll_read_timer);
+        this.handleOnScrollLoading();
         this._long_reading_timeout = false;
     },
 
     onMouseWheel: function (ev) {
         this.$('.back-to-bottom').hideIf(this.isScrolledToTop());
+    },
+
+    handleOnScrollLoading: function () {
+        let newest_first_msg;
+        if (this.filtered_messages.length){
+            // let accounts_list =
+            //
+            // _.each(this.notifications_chats, (chat) => {
+            //
+            //     let chat_filtered_messages = this.filtered_messages.filter(item => item.collection && item.)
+            // });
+            //
+            // _.each(this.filtered_messages, (chat) => {
+            //     chat = chat.chat;
+            //     if (!chat.messages.models.length)
+            //         return;
+            //     let first_msg = chat.messages.models[0];
+            //     if (!newest_first_msg || (newest_first_msg.get('timestamp') < first_msg.get('timestamp'))) {
+            //         newest_first_msg = first_msg;
+            //     }
+            // });
+
+        } else {
+            _.each(this.notifications_chats, (chat) => {
+                chat = chat.chat;
+                if (!chat.messages.models.length)
+                    return;
+                let first_msg = chat.messages.models[0];
+                if (!newest_first_msg || (newest_first_msg.get('timestamp') < first_msg.get('timestamp'))) {
+                    newest_first_msg = first_msg;
+                }
+            });
+        }
+
+        if (newest_first_msg) {
+
+            let $msg = this.$(`.chat-message[data-uniqueid="${newest_first_msg.get('unique_id')}"]`);
+
+            if (!$msg.length)
+                return;
+
+            if ($msg.isAlmostScrolledInContainer(this.$('.chat-content'), 2000)) {
+                let chat = newest_first_msg.collection.chat;
+                if (chat.item_view && !chat.item_view.content)
+                    chat.item_view.content = new xabber.ChatContentView({chat_item: chat.item_view});
+                chat.item_view.content.loadPreviousHistory();
+            }
+        }
     },
 
     onChangedMessageTimestamp: function (message) {
