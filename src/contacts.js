@@ -10100,7 +10100,7 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
     },
 
     updateAccountColor: function (account) {
-        this.$('.contacts-panel-right-side').attr('data-color', account.settings.get('color'));
+        account && this.$('.contacts-panel-right-side').attr('data-color', account.settings.get('color'));
     },
 
     onClickItem: function (ev) {

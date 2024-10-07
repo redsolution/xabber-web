@@ -979,7 +979,7 @@ xabber.Body = xabber.NodeView.extend({
                 new_attrs.previous_screen = undefined;
             }
         }
-        if (this.screen.get('right') === 'contacts' && !attrs.right)
+        if (this.screen.get('right') === 'contacts' && (!attrs || !attrs.right))
             attrs.right = null;
         (!attrs || !attrs.notifications) && (new_attrs.notifications = false);
         this.screen.set(_.extend(new_attrs, attrs), options);

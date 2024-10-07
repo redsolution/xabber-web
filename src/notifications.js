@@ -605,13 +605,10 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
             return;
         }
         let $message = chat.item_view.content.buildMessageHtml(message),
-            index = this.filtered_messages.length && is_filtered ? this.filtered_messages.indexOf(message)  : this.notification_messages.indexOf(message);
+            index = this.filtered_messages.length && is_filtered ? this.filtered_messages.indexOf(message)  : this.notification_messages.indexOf(message),
+            scrolled_top = this.getScrollTop();
         if (index === 0) {
-            // if (this.$('.chat-content .notification-sessions-wrap').length){
-            //     $message.insertAfter(this.$('.chat-content .notification-sessions-wrap'));
-            // } else {
-                $message.appendTo(this.$('.chat-content'));
-            // }
+            $message.appendTo(this.$('.chat-content'));
         } else if (is_filtered && this.filtered_messages.length && this.filtered_messages[index - 1]) {
             let $prev_message = this.$(`.chat-message[data-uniqueid="${this.filtered_messages[index - 1].get('unique_id')}"]`);
             if (!$prev_message.length) {
@@ -688,6 +685,31 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
         xabber.toolbar_view.recountAllMessageCounter();
 
         xabber.notifications_view.showReadAllBtn();
+        if (this.filtered_messages.length && !is_filtered){
+            let is_rerender, no_rerender,
+                account_jid = chat.account.get('jid');
+            if (this.filtered_accounts.length){
+                if (!this.filtered_accounts.includes(account_jid)){
+                    no_rerender = true;
+                } else if (this.filtered_accounts.includes(account_jid) && this.filter_type === 'all') {
+                    is_rerender = true;
+                }
+            }
+
+            if (this.filter_type !== 'all'){
+                if (this.filter_type === 'security' && message.get('security_notification')){
+                    is_rerender = true;
+                } else if (this.filter_type === 'information' && message.get('notification_info')){
+                    is_rerender = true;
+                } else if (this.filter_type === 'mentions' && message.get('notification_mention')){
+                    is_rerender = true;
+                }
+            }
+            if (is_rerender && !no_rerender){
+                this.FilterMessagesInChat(Boolean(true));
+                this.scrollTo(scrolled_top);
+            }
+        }
         return $message;
     },
 
@@ -867,9 +889,7 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
 
     updateNotificationDate: function (msg_elem, msg) {
         let $msg = $(msg_elem);
-        // $msg.find('.msg-time').text(xabber.getString("time_since_with_time", [utils.pretty_time_since($msg.data('time')), utils.pretty_time($msg.data('time'))]));
-        $msg.find('.msg-time').text(pretty_datetime($msg.data('time')));
-        $msg.find('.msg-time').append(`<div>${msg.collection.chat.account.get('jid')}</div>`);
+        $msg.find('.msg-time').text(utils.pretty_time($msg.data('time')));
     },
 
     scrollToUnreadWithButton: function () {
@@ -921,22 +941,22 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
     handleOnScrollLoading: function () {
         let newest_first_msg;
         if (this.filtered_messages.length){
-            // let accounts_list =
-            //
-            // _.each(this.notifications_chats, (chat) => {
-            //
-            //     let chat_filtered_messages = this.filtered_messages.filter(item => item.collection && item.)
-            // });
-            //
-            // _.each(this.filtered_messages, (chat) => {
-            //     chat = chat.chat;
-            //     if (!chat.messages.models.length)
-            //         return;
-            //     let first_msg = chat.messages.models[0];
-            //     if (!newest_first_msg || (newest_first_msg.get('timestamp') < first_msg.get('timestamp'))) {
-            //         newest_first_msg = first_msg;
-            //     }
-            // });
+            let filtered_chats_messages = [];
+
+            _.each(this.notifications_chats, (chat) => {
+                chat = chat.chat;
+                let chat_filtered_messages = this.filtered_messages.filter(item => item.collection && item.collection.account.get('jid') === chat.account.get('jid'));
+                filtered_chats_messages.push(chat_filtered_messages)
+            });
+
+            _.each(filtered_chats_messages, (list) => {
+                if (!list.length)
+                    return;
+                let first_msg = list[0];
+                if (!newest_first_msg || (newest_first_msg.get('timestamp') < first_msg.get('timestamp'))) {
+                    newest_first_msg = first_msg;
+                }
+            });
 
         } else {
             _.each(this.notifications_chats, (chat) => {
