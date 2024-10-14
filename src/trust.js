@@ -449,9 +449,9 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
     },
 
 
-    sendTestNotification: function () {
+    sendTestNotification: function (to) {
+        to = to || this.account.get('jid');
         let msg_id = uuid(),
-            to = this.account.get('jid'),
             stanza = $iq({
                 type: 'set',
                 to: to,
@@ -476,9 +476,9 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
     },
 
 
-    sendTestNotification2: function () {
+    sendTestNotification2: function (to) {
+        to = to || this.account.get('jid');
         let msg_id = uuid(),
-            to = this.account.get('jid'),
             stanza = $iq({
                 type: 'set',
                 to: to,

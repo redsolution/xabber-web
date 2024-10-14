@@ -71,6 +71,17 @@ $.fn.isAlmostScrolledInContainer = function(container, offset) {
     return ((eleTop - offset) < containerBottom);
 };
 
+$.fn.isAlmostScrolledInContainerBottomToTop = function(container, offset) {
+    if (!this.length || !container.length)
+        return;
+    offset = offset || 0;
+    container = container[0];
+    let eleTop = this[0].offsetTop;
+
+    let containerBottom = container.scrollTop + container.clientHeight;
+    return ((eleTop + offset) > containerBottom);
+};
+
 $.fn.isFullyVisibleInContainer = function(container) {
     if (!this.length || !container.length)
         return;

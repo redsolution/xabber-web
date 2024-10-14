@@ -384,6 +384,7 @@ xabber.MessagesBase = Backbone.Collection.extend({
             attrs.not_verified_device = null;
             if (from_jid === this.account.domain){
                 attrs.ntf_new_device_msg = true;
+                attrs.security_notification = true;
             }
             let $keyExchange = $notification_msg.children(`authenticated-key-exchange[xmlns="${Strophe.NS.XABBER_TRUST}"]`)
             if ($keyExchange.length){
@@ -396,6 +397,15 @@ xabber.MessagesBase = Backbone.Collection.extend({
                 let msg_text = `${this.account.jid} updated their devices`;
                 attrs.original_message = body = msg_text;
                 attrs.notification_trust_msg = true;
+            }
+
+            if (attrs.notification_trust_msg || $notification_msg.children(`authenticated-key-exchange[xmlns="${Strophe.NS.XABBER_TRUST}"]`).length) {
+                if (!$notification_msg.find('verification-successful').length && !$notification_msg.find('verification-failed').length && !$notification_msg.find('verification-rejected').length){
+                    attrs.ignored = true;
+                }
+                if ($notification_msg.find('verification-failed').length || $notification_msg.find('verification-rejected').length){
+                    attrs.ignored = true;
+                }
             }
         }
         options.encrypted && _.extend(attrs, {encrypted: true});
@@ -577,6 +587,9 @@ xabber.MessagesBase = Backbone.Collection.extend({
 
         options.echo_msg && ($delay = $message.children('time'));
         options.is_cached && ($delay = $message.children('time'));
+        if (options.is_cached){
+            attrs.is_cached = true
+        }
         if (options.is_cached && options.is_cached_unread){
             attrs.is_unread = true;
             attrs.is_unread_archived = true;
@@ -585,6 +598,7 @@ xabber.MessagesBase = Backbone.Collection.extend({
         (attrs.carbon_copied || from_jid == this.account.get('jid') && (options.is_archived || options.synced_msg)) && (attrs.state = constants.MSG_SENT);
         options.synced_msg && (attrs.synced_from_server = true);
         options.missed_history && (attrs.missed_msg = true);
+        options.notificications_month && (attrs.notificications_month_missed_msg = true);
         if (options.is_unread_archived && (attrs.type !== 'system')){
             let last_read_msg = this.find(m => this.chat.get('last_read_msg') && (m.get('stanza_id') === this.chat.get('last_read_msg') || m.get('contact_stanza_id') === this.chat.get('last_read_msg')));
             if (last_read_msg){
@@ -4470,6 +4484,9 @@ xabber.ChatContentView = xabber.BasicView.extend({
             }
             if (options.missed_history && options.notificications_month && rsm.complete) {
                 account.settings.update_settings({last_month_notifications_loaded: true});
+                if (xabber.notifications_view.current_content && xabber.notifications_view.current_content.isVisible()){
+                    xabber.notifications_view.current_content && xabber.notifications_view.current_content.onShowNotificationsTab();
+                }
             }
             if (options.notifications_last_msg && !rsm.complete && (rsm.count > messages.length)) {
                 this.getMessageArchive({
@@ -4524,6 +4541,9 @@ xabber.ChatContentView = xabber.BasicView.extend({
             if (options.last_history || !this.model.get('last_archive_id')) {
                 rsm.last && this.model.set('last_archive_id', rsm.last);
             }
+            if (options.previous_history && options.notifications_dfd && success) {
+                success = false;
+            }
             _.each(messages, (message) => {
                 let loaded_message = account.chats.receiveChatMessage(message,
                     _.extend({
@@ -4553,7 +4573,20 @@ xabber.ChatContentView = xabber.BasicView.extend({
                         }
                     }
                 }
+                if (loaded_message && options.previous_history && options.notifications_dfd) {
+                    !loaded_message.get('ignored') && (success = true)
+                }
             });
+            if (options.previous_history && options.notifications_dfd && success) {
+                options.notifications_dfd.resolve();
+            } else if (options.previous_history && options.notifications_dfd && !success) {
+                this.loadPreviousHistory(null, options.notifications_dfd && options.notifications_dfd);
+            }
+            if (options.missed_history && options.notificications_month && rsm.complete) {
+                if (xabber.notifications_view.current_content && xabber.notifications_view.current_content.isVisible()){
+                    xabber.notifications_view.current_content && xabber.notifications_view.current_content.onShowNotificationsTab();
+                }
+            }
             if (options.is_scrollToTop){
                 this.scrollToTop();
             }
@@ -4624,7 +4657,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
         this.getMessageArchive(query, {last_history: true});
     },
 
-    loadPreviousHistory: function (no_before) {
+    loadPreviousHistory: function (no_before, notifications_dfd) {
         if (this.contact) {
             if (!xabber.settings.load_history || (!this.contact.get('subscription') || this.contact.get('subscription') !== 'both') && this.contact.get('group_chat')) {
                 return;
@@ -4639,7 +4672,8 @@ xabber.ChatContentView = xabber.BasicView.extend({
                 before: before
             },
             {
-                previous_history: true
+                previous_history: true,
+                notifications_dfd: notifications_dfd
             });
     },
 
@@ -5114,15 +5148,18 @@ xabber.ChatContentView = xabber.BasicView.extend({
 
         if (message.get('notification_msg') && message.get('notification_msg_content')){
 
+
             if (this.model.get('notifications') && xabber.notifications_view && xabber.notifications_view.current_content && xabber.notifications_view.current_content.notification_messages){
-                message.get('xml') && this.account.cached_notifications.putInCachedNotifications({
-                    stanza_id: message.get('unique_id'),
-                    xml: message.get('xml').outerHTML,
-                    is_unread: message.get('is_unread'),
-                },(res) => {
-                    message.collection = this.model.messages;
-                    xabber.notifications_view.current_content.notification_messages.add(message);
-                })
+                if (!message.get('is_cached')){
+                    message.get('xml') && this.account.cached_notifications.putInCachedNotifications({
+                        stanza_id: message.get('unique_id'),
+                        xml: message.get('xml').outerHTML,
+                        is_unread: message.get('is_unread'),
+                    },(res) => {
+                    })
+                }
+                message.collection = this.model.messages;
+                xabber.notifications_view.current_content.notification_messages.add(message);
             }
         }
     },
@@ -5634,7 +5671,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
                 markup_body = markup_body.replace(/\n/g, " ");;
             }
         }
-        if (attrs.notification_info){//34
+        if (attrs.notification_info){
             markup_body = xabber.getString("notification_info_message", [attrs.from_jid, `<i class="text-color-grey-500">${markup_body}</i>`]);
         }
         if (attrs.notification_mention && attrs.notification_mention_jid && attrs.notification_mention_id){

@@ -1733,7 +1733,7 @@ xabber.ContactDetailsViewRight = xabber.BasicView.extend({
         }
     },
 
-    openChat: function (ev) { //34
+    openChat: function (ev) {
         if (this.encrypted){
             this.openEncryptedChat();
         } else {
@@ -1741,7 +1741,7 @@ xabber.ContactDetailsViewRight = xabber.BasicView.extend({
         }
     },
 
-    closeDetails: function (ev) { //34
+    closeDetails: function (ev) {
         this.model.showDetailsRight(xabber.body.screen.get('name'));
     },
 
@@ -2670,13 +2670,13 @@ xabber.GroupChatDetailsViewRight = xabber.BasicView.extend({
         this.account.chats.openChat(this.model);
     },
 
-    openChat: function (ev) { //34
+    openChat: function (ev) {
         let is_contacts = xabber.body.screen.get('name') === 'contacts';
         this.openRegularChat();
         is_contacts && this.closeDetails();
     },
 
-    closeDetails: function (ev) { //34
+    closeDetails: function (ev) {
         this.model.showDetailsRight(xabber.body.screen.get('name'));
     },
 
@@ -8899,6 +8899,7 @@ xabber.Roster = xabber.ContactsBase.extend({
                 chat.set('notifications', true);
                 contact.set('notifications', true);
                 contact.set('subscription', 'both');
+                chat.set('last_read_msg', last_read_msg);
                 if (!request_with_stamp) {
                     chat.item_view.content.loadNotificationsHistoryToPreviousLastMsg();
                 }
@@ -8916,7 +8917,10 @@ xabber.Roster = xabber.ContactsBase.extend({
                                     is_cached_unread: msg_item.is_unread,
                                 }, {})
                             )
-                        })
+                        });
+                        if (xabber.notifications_view.current_content && xabber.notifications_view.current_content.isVisible() && is_first_sync){
+                            xabber.notifications_view.current_content.onShowNotificationsTab();
+                        }
                     }
                 });
             }
@@ -9020,6 +9024,11 @@ xabber.Roster = xabber.ContactsBase.extend({
                         xml: msg.get('xml').outerHTML,
                         is_unread: true,
                     });
+                }
+            }
+            if (chat.get('notifications')){
+                if (xabber.notifications_view.current_content && xabber.notifications_view.current_content.isVisible() && is_first_sync){
+                    xabber.notifications_view.current_content.onShowNotificationsTab();
                 }
             }
 
