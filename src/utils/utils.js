@@ -348,6 +348,11 @@ var utils = {
         return datetime.format(format || 'dddd, MMMM D, YYYY');
     },
 
+    pretty_month: function (timestamp, format) {
+        var datetime = timestamp ? moment(timestamp) : moment();
+        return datetime.format(format || 'MMMM YYYY');
+    },
+
     pretty_datetime: function (timestamp, format) {
         var datetime = timestamp ? moment(timestamp) : moment();
         return datetime.format(format || 'MMMM D, YYYY HH:mm:ss');

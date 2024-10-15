@@ -36,7 +36,7 @@ xabber.NotificationsBodyContainer = xabber.Container.extend({
 xabber.NotificationsView = xabber.BasicView.extend({
     className: 'notifications-content-wrap',
     template: templates.notifications_view,
-    // ps_selector: '.notifications-content',
+    ps_selector: '.notifications-content-filters',
     avatar_size: constants.AVATAR_SIZES.SYNCHRONIZE_ACCOUNT_ITEM,
 
     events: {
@@ -60,6 +60,8 @@ xabber.NotificationsView = xabber.BasicView.extend({
         this.updateAccountsFilter();
         this.$('.notifications-utility .notifications-header').text(xabber.getString("notifications_window__type_filter_all"));
         this.showReadAllBtn();
+        this.renderCalendar();
+        this.updateScrollBar();
     },
 
     clearFilter: function () {
@@ -78,6 +80,76 @@ xabber.NotificationsView = xabber.BasicView.extend({
             this.current_content.filterByAccounts([], clear);
         }
     },
+
+    renderCalendar: function () {
+        this.$('.notifications-calendar-activity').html('');
+
+        let currentDate = new Date(),
+            lastMonthDate = new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1);
+
+        // Контейнер для календарей
+        let $calendarContainer = $('<div class="notifications-calendars-wrap"></div>');
+
+        // Генерация календаря для двух месяцев
+        let calendars = [lastMonthDate, currentDate];
+
+        calendars.forEach(date => {
+            let $calendar = $('<table class="calendar"></table>'),
+                $rows_containter = $('<div class="calendar-rows-wrap"></div>');
+
+            // Заголовок месяца
+            let monthName = date.toLocaleString('default', { month: 'long'}),
+                $monthHeader = $('<thead><tr><th colspan="7">' + monthName + '</th></tr></thead>');
+            $calendar.append($monthHeader);
+
+            // Дни месяца
+            let firstDay = (new Date(date.getFullYear(), date.getMonth(), 1).getDay() + 6) % 7,  // Перерасчет с воскресенья на понедельник
+                lastDate = new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
+
+            let prevMonthLastDate = new Date(date.getFullYear(), date.getMonth(), 0).getDate(),  // Последний день предыдущего месяца
+                nextMonthFirstDate = 1;
+
+            let $currentRow = $('<tr></tr>'),
+                dayCounter = 1;
+
+            // Пустые ячейки перед началом месяца с днями предыдущего месяца
+            for (let i = 0; i < firstDay; i++) {
+                $currentRow.append('<td class="prev-month">' + (prevMonthLastDate - firstDay + i + 1) + '</td>');
+            }
+
+            // Дни текущего месяца
+            for (let i = firstDay; i < 7; i++) {
+                let dayTimestamp = new Date(date.getFullYear(), date.getMonth(), dayCounter).getTime();
+                let isFuture = dayTimestamp > currentDate.getTime();
+                let futureClass = isFuture ? ' future' : '';
+                $currentRow.append('<td><div class="notifications-calendar-day' + futureClass + '" data-timestamp="' + dayTimestamp + '">' + dayCounter++ + '</div></td>');
+            }
+            $rows_containter.append($currentRow);
+
+            // Следующие недели
+            while (dayCounter <= lastDate) {
+                $currentRow = $('<tr></tr>');
+                for (let i = 0; i < 7; i++) {
+                    if (dayCounter <= lastDate) {
+                        const dayTimestamp = new Date(date.getFullYear(), date.getMonth(), dayCounter).getTime();
+                        let isFuture = dayTimestamp > currentDate.getTime();
+                        let futureClass = isFuture ? ' future' : '';
+                        $currentRow.append('<td><div class="notifications-calendar-day' + futureClass + '" data-timestamp="' + dayTimestamp + '">' + dayCounter++ + '</div></td>');
+                    } else {
+                        // Добавление дней следующего месяца
+                        $currentRow.append('<td class="next-month">' + nextMonthFirstDate++ + '</td>');
+                    }
+                }
+                $rows_containter.append($currentRow);
+            }
+            $calendar.append($rows_containter);
+
+            $calendarContainer.append($calendar);
+        });
+
+        this.$('.notifications-calendar-activity').append($calendarContainer);
+    },
+
 
     onShowNotificationsTab: function () {
         if (this.current_content){
@@ -193,6 +265,7 @@ xabber.NotificationsView = xabber.BasicView.extend({
                 }
             }
         }
+        this.updateScrollBar();
     },
 
     renderAccountItem: function (account) {
@@ -351,6 +424,28 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
         } else {
             return "MozMousePixelScroll";
         }
+    },
+
+    findCalendarCellByDate: function (timestamp) {
+        // Создаем объект даты на основе таймштампа
+        let date = new Date(timestamp);
+
+        // Обнуляем время (часы, минуты, секунды, миллисекунды)
+        date.setHours(0, 0, 0, 0);
+
+        // Получаем таймштамп без времени
+        let dateOnlyTimestamp = date.getTime();
+
+        // Ищем элемент с соответствующим таймштампом
+        let $element = xabber.notifications_view.$('.notifications-calendar-day').filter(function() {
+            // Обнуляем время в атрибуте data-timestamp ячейки
+            let cellTimestamp = parseInt($(this).attr('data-timestamp'), 10),
+                cellDate = new Date(cellTimestamp);
+            cellDate.setHours(0, 0, 0, 0);
+
+            return cellDate.getTime() === dateOnlyTimestamp;
+        });
+        return $element;
     },
 
     addContact: function (ev) {
@@ -848,18 +943,21 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
                     if (this.filtered_messages.length) {
                         this.rendered_messages = this.filtered_messages.slice(Math.max(this.filtered_messages.length - 20, 0));
                         this.renderMessage(this.rendered_messages[this.rendered_messages.length - 1], this.rendered_messages);
+                        this.updateCalendarCellsActivity(this.filtered_messages);
                     }
                 } else if (this.filter_type === 'information'){
                     this.filtered_messages = this.notification_messages.filter((msg) => msg.get('notification_info') && !msg.get('ignored'));
                     if (this.filtered_messages.length) {
                         this.rendered_messages = this.filtered_messages.slice(Math.max(this.filtered_messages.length - 20, 0));
                         this.renderMessage(this.rendered_messages[this.rendered_messages.length - 1], this.rendered_messages);
+                        this.updateCalendarCellsActivity(this.filtered_messages);
                     }
                 } else if (this.filter_type === 'mentions'){
                     this.filtered_messages = this.notification_messages.filter((msg) => msg.get('notification_mention') && !msg.get('ignored'));
                     if (this.filtered_messages.length) {
                         this.rendered_messages = this.filtered_messages.slice(Math.max(this.filtered_messages.length - 20, 0));
                         this.renderMessage(this.rendered_messages[this.rendered_messages.length - 1], this.rendered_messages);
+                        this.updateCalendarCellsActivity(this.filtered_messages);
                     }
                 }
             }
@@ -883,6 +981,7 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
             if (this.filtered_messages.length) {
                 this.rendered_messages = this.filtered_messages.slice(Math.max(this.filtered_messages.length - 20, 0));
                 this.renderMessage(this.rendered_messages[this.rendered_messages.length - 1], this.rendered_messages);
+                this.updateCalendarCellsActivity(this.filtered_messages);
             }
 
             this.$('.notification-subscription-item').addClass('hidden');
@@ -937,6 +1036,21 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
         this.load_history_dfd = null;
         this.rendered_messages = this.notification_messages.filter(msg => !msg.get('ignored')).slice(Math.max(this.notification_messages.filter(msg => !msg.get('ignored')).length - 20, 0));
         this.rendered_messages.length && this.renderMessage(this.rendered_messages[this.rendered_messages.length - 1], this.rendered_messages);
+        this.updateCalendarCellsActivity(this.notification_messages.filter(msg => !msg.get('ignored')));
+    },
+
+    updateCalendarCellsActivity: function (messages) { //34
+        if (!messages || !messages.length)
+            return;
+        messages = messages.filter(item => item.get('timestamp') >= Number(moment(Date.now()).subtract(1, 'months').startOf('month')));
+        xabber.notifications_view.$('.notifications-calendar-day').attr('data-activity-value', 0);
+
+        _.each(messages, (msg) => {
+            let $cell = this.findCalendarCellByDate(msg.get('timestamp'));
+            if ($cell.attr('data-activity-value') && $cell.attr('data-activity-value') > 4)
+                return;
+            $cell.attr('data-activity-value', $cell.attr('data-activity-value') && Number($cell.attr('data-activity-value')) ? (Number($cell.attr('data-activity-value')) + 1) : 1);
+        })
     },
 
     hideAuthorUsername: function ($msg) {

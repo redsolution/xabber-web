@@ -3592,6 +3592,348 @@ body {
     background: #ECEFF1 !important;
 }
 /* -------------------------------------------- */
+/* CALENDAR ACTIVITY COLORS */[data-main-color=red] .notifications-calendar-day[data-activity-value='1']{
+                                  background: #FFCDD2;
+                              }
+[data-main-color=red] .notifications-calendar-day[data-activity-value='2']{
+    background: #EF9A9A;
+}
+[data-main-color=red] .notifications-calendar-day[data-activity-value='3']{
+    background: #E57373;
+}
+[data-main-color=red] .notifications-calendar-day[data-activity-value='4']{
+    background: #EF5350;
+    color: #FFF;
+}
+[data-main-color=red] .notifications-calendar-day[data-activity-value='5']{
+    background: #F44336;
+    color: #FFF;
+}
+
+[data-main-color=pink] .notifications-calendar-day[data-activity-value='1']{
+    background: #F8BBD0;
+}
+[data-main-color=pink] .notifications-calendar-day[data-activity-value='2']{
+    background: #F48FB1;
+}
+[data-main-color=pink] .notifications-calendar-day[data-activity-value='3']{
+    background: #F06292;
+}
+[data-main-color=pink] .notifications-calendar-day[data-activity-value='4']{
+    background: #EC407A;
+    color: #FFF;
+}
+[data-main-color=pink] .notifications-calendar-day[data-activity-value='5']{
+    background: #E91E63;
+    color: #FFF;
+}
+
+[data-main-color=purple] .notifications-calendar-day[data-activity-value='1']{
+    background: #E1BEE7;
+}
+[data-main-color=purple] .notifications-calendar-day[data-activity-value='2']{
+    background: #D1C4E9;
+}
+[data-main-color=purple] .notifications-calendar-day[data-activity-value='3']{
+    background: #B39DDB;
+}
+[data-main-color=purple] .notifications-calendar-day[data-activity-value='4']{
+    background: #9575CD;
+    color: #FFF;
+}
+[data-main-color=purple] .notifications-calendar-day[data-activity-value='5']{
+    background: #673AB7;
+    color: #FFF;
+}
+
+[data-main-color=deep-purple] .notifications-calendar-day[data-activity-value='1']{
+    background: #D1C4E9;
+}
+[data-main-color=deep-purple] .notifications-calendar-day[data-activity-value='2']{
+    background: #B39DDB;
+}
+[data-main-color=deep-purple] .notifications-calendar-day[data-activity-value='3']{
+    background: #9575CD;
+}
+[data-main-color=deep-purple] .notifications-calendar-day[data-activity-value='4']{
+    background: #7E57C2;
+    color: #FFF;
+}
+[data-main-color=deep-purple] .notifications-calendar-day[data-activity-value='5']{
+    background: #673AB7;
+    color: #FFF;
+}
+
+[data-main-color=indigo] .notifications-calendar-day[data-activity-value='1']{
+    background: #BBDEFB;
+}
+[data-main-color=indigo] .notifications-calendar-day[data-activity-value='2']{
+    background: #90CAF9;
+}
+[data-main-color=indigo] .notifications-calendar-day[data-activity-value='3']{
+    background: #64B5F6;
+}
+[data-main-color=indigo] .notifications-calendar-day[data-activity-value='4']{
+    background: #42A5F5;
+    color: #FFF;
+}
+[data-main-color=indigo] .notifications-calendar-day[data-activity-value='5']{
+    background: #2196F3;
+    color: #FFF;
+}
+
+[data-main-color=blue] .notifications-calendar-day[data-activity-value='1']{
+    background: #BBDEFB;
+}
+[data-main-color=blue] .notifications-calendar-day[data-activity-value='2']{
+    background: #90CAF9;
+}
+[data-main-color=blue] .notifications-calendar-day[data-activity-value='3']{
+    background: #64B5F6;
+}
+[data-main-color=blue] .notifications-calendar-day[data-activity-value='4']{
+    background: #42A5F5;
+    color: #FFF;
+}
+[data-main-color=blue] .notifications-calendar-day[data-activity-value='5']{
+    background: #2196F3;
+    color: #FFF;
+}
+
+[data-main-color=light-blue] .notifications-calendar-day[data-activity-value='1']{
+    background: #B3E5FC;
+}
+[data-main-color=light-blue] .notifications-calendar-day[data-activity-value='2']{
+    background: #81D4FA;
+}
+[data-main-color=light-blue] .notifications-calendar-day[data-activity-value='3']{
+    background: #4FC3F7;
+}
+[data-main-color=light-blue] .notifications-calendar-day[data-activity-value='4']{
+    background: #29B6F6;
+    color: #FFF;
+}
+[data-main-color=light-blue] .notifications-calendar-day[data-activity-value='5']{
+    background: #03A9F4;
+    color: #FFF;
+}
+
+[data-main-color=cyan] .notifications-calendar-day[data-activity-value='1']{
+    background: #B2EBF2;
+}
+[data-main-color=cyan] .notifications-calendar-day[data-activity-value='2']{
+    background: #80DEEA;
+}
+[data-main-color=cyan] .notifications-calendar-day[data-activity-value='3']{
+    background: #4DD0E1;
+}
+[data-main-color=cyan] .notifications-calendar-day[data-activity-value='4']{
+    background: #26C6DA;
+    color: #FFF;
+}
+[data-main-color=cyan] .notifications-calendar-day[data-activity-value='5']{
+    background: #00BCD4;
+    color: #FFF;
+}
+
+[data-main-color=teal] .notifications-calendar-day[data-activity-value='1']{
+    background: #B2DFDB;
+}
+[data-main-color=teal] .notifications-calendar-day[data-activity-value='2']{
+    background: #80CBC4;
+}
+[data-main-color=teal] .notifications-calendar-day[data-activity-value='3']{
+    background: #4DB6AC;
+}
+[data-main-color=teal] .notifications-calendar-day[data-activity-value='4']{
+    background: #26A69A;
+    color: #FFF;
+}
+[data-main-color=teal] .notifications-calendar-day[data-activity-value='5']{
+    background: #009688;
+    color: #FFF;
+}
+
+[data-main-color=green] .notifications-calendar-day[data-activity-value='1']{
+    background: #C8E6C9;
+}
+[data-main-color=green] .notifications-calendar-day[data-activity-value='2']{
+    background: #A5D6A7;
+}
+[data-main-color=green] .notifications-calendar-day[data-activity-value='3']{
+    background: #81C784;
+}
+[data-main-color=green] .notifications-calendar-day[data-activity-value='4']{
+    background: #66BB6A;
+    color: #FFF;
+}
+[data-main-color=green] .notifications-calendar-day[data-activity-value='5']{
+    background: #4CAF50;
+    color: #FFF;
+}
+
+[data-main-color=light-green] .notifications-calendar-day[data-activity-value='1']{
+    background: #DCE775;
+}
+[data-main-color=light-green] .notifications-calendar-day[data-activity-value='2']{
+    background: #D4E157;
+}
+[data-main-color=light-green] .notifications-calendar-day[data-activity-value='3']{
+    background: #CDDC39;
+}
+[data-main-color=light-green] .notifications-calendar-day[data-activity-value='4']{
+    background: #C0CA33;
+    color: #FFF;
+}
+[data-main-color=light-green] .notifications-calendar-day[data-activity-value='5']{
+    background: #A4D600;
+    color: #FFF;
+}
+
+[data-main-color=lime] .notifications-calendar-day[data-activity-value='1']{
+    background: #F0EA7E;
+}
+[data-main-color=lime] .notifications-calendar-day[data-activity-value='2']{
+    background: #E6EE9C;
+}
+[data-main-color=lime] .notifications-calendar-day[data-activity-value='3']{
+    background: #DCE775;
+}
+[data-main-color=lime] .notifications-calendar-day[data-activity-value='4']{
+    background: #D4E157;
+    color: #FFF;
+}
+[data-main-color=lime] .notifications-calendar-day[data-activity-value='5']{
+    background: #CDDC39;
+    color: #FFF;
+}
+
+[data-main-color=yellow] .notifications-calendar-day[data-activity-value='1']{
+    background: #FFF9C4;
+}
+[data-main-color=yellow] .notifications-calendar-day[data-activity-value='2']{
+    background: #FFF59D;
+}
+[data-main-color=yellow] .notifications-calendar-day[data-activity-value='3']{
+    background: #FFF176;
+}
+[data-main-color=yellow] .notifications-calendar-day[data-activity-value='4']{
+    background: #FFD54F;
+    color: #000; /* Чёрный шрифт, так как фон светлый */
+}
+[data-main-color=yellow] .notifications-calendar-day[data-activity-value='5']{
+    background: #FFEB3B;
+    color: #000; /* Чёрный шрифт, так как фон светлый */
+}
+
+[data-main-color=amber] .notifications-calendar-day[data-activity-value='1']{
+    background: #FFE082;
+}
+[data-main-color=amber] .notifications-calendar-day[data-activity-value='2']{
+    background: #FFD54F;
+}
+[data-main-color=amber] .notifications-calendar-day[data-activity-value='3']{
+    background: #FFCA28;
+}
+[data-main-color=amber] .notifications-calendar-day[data-activity-value='4']{
+    background: #FFC107;
+    color: #000; /* Чёрный шрифт, так как фон светлый */
+}
+[data-main-color=amber] .notifications-calendar-day[data-activity-value='5']{
+    background: #FFB300;
+    color: #000; /* Чёрный шрифт, так как фон светлый */
+}
+
+[data-main-color=orange] .notifications-calendar-day[data-activity-value='1']{
+    background: #FFE0B2;
+}
+[data-main-color=orange] .notifications-calendar-day[data-activity-value='2']{
+    background: #FFCC80;
+}
+[data-main-color=orange] .notifications-calendar-day[data-activity-value='3']{
+    background: #FFB74D;
+}
+[data-main-color=orange] .notifications-calendar-day[data-activity-value='4']{
+    background: #FFA726;
+    color: #FFF;
+}
+[data-main-color=orange] .notifications-calendar-day[data-activity-value='5']{
+    background: #FF9800;
+    color: #FFF;
+}
+
+[data-main-color=deep-orange] .notifications-calendar-day[data-activity-value='1']{
+    background: #FFCCBC;
+}
+[data-main-color=deep-orange] .notifications-calendar-day[data-activity-value='2']{
+    background: #FFAB91;
+}
+[data-main-color=deep-orange] .notifications-calendar-day[data-activity-value='3']{
+    background: #FF8A65;
+}
+[data-main-color=deep-orange] .notifications-calendar-day[data-activity-value='4']{
+    background: #FF7043;
+    color: #FFF;
+}
+[data-main-color=deep-orange] .notifications-calendar-day[data-activity-value='5']{
+    background: #FF5722;
+    color: #FFF;
+}
+
+[data-main-color=brown] .notifications-calendar-day[data-activity-value='1']{
+    background: #D7CCC8;
+}
+[data-main-color=brown] .notifications-calendar-day[data-activity-value='2']{
+    background: #BCAAA4;
+}
+[data-main-color=brown] .notifications-calendar-day[data-activity-value='3']{
+    background: #A1887F;
+}
+[data-main-color=brown] .notifications-calendar-day[data-activity-value='4']{
+    background: #8D6E63;
+    color: #FFF;
+}
+[data-main-color=brown] .notifications-calendar-day[data-activity-value='5']{
+    background: #795548;
+    color: #FFF;
+}
+
+[data-main-color=grey] .notifications-calendar-day[data-activity-value='1']{
+    background: #EEEEEE;
+}
+[data-main-color=grey] .notifications-calendar-day[data-activity-value='2']{
+    background: #E0E0E0;
+}
+[data-main-color=grey] .notifications-calendar-day[data-activity-value='3']{
+    background: #BDBDBD;
+}
+[data-main-color=grey] .notifications-calendar-day[data-activity-value='4']{
+    background: #9E9E9E;
+    color: #FFF;
+}
+[data-main-color=grey] .notifications-calendar-day[data-activity-value='5']{
+    background: #757575;
+    color: #FFF;
+}
+
+[data-main-color=blue-grey] .notifications-calendar-day[data-activity-value='1']{
+    background: #B0BEC5;
+}
+[data-main-color=blue-grey] .notifications-calendar-day[data-activity-value='2']{
+    background: #90A4AE;
+}
+[data-main-color=blue-grey] .notifications-calendar-day[data-activity-value='3']{
+    background: #78909C;
+}
+[data-main-color=blue-grey] .notifications-calendar-day[data-activity-value='4']{
+    background: #607D8B;
+    color: #FFF;
+}
+[data-main-color=blue-grey] .notifications-calendar-day[data-activity-value='5']{
+    background: #546E7A;
+    color: #FFF;
+}
+/* -------------------------------------------- */
 
 input[type=text].simple-input-field,
 input[type=text].simple-input-field:focus,
@@ -6203,7 +6545,7 @@ input[type=text].simple-input-field:hover {
 }
 .contacts-panel-wrap .contacts-active-filters-wrap{
     display: flex;
-    padding: 0 16px;
+    padding: 0 8px;
     position: relative;
     flex-wrap: wrap;
     align-items: center;
@@ -6225,7 +6567,7 @@ input[type=text].simple-input-field:hover {
     margin: 8px 8px 8px 0;
 }
 .contacts-panel-wrap .contacts-active-filters-wrap .roster-additional-filter-item{
-    min-width: 120px;
+    min-width: 100px;
     justify-content: space-between;
 }
 .contacts-panel-wrap .contacts-active-filters-wrap .roster-additional-filter-item:hover,
@@ -21425,6 +21767,7 @@ ul.restrictions-list-content>li {
     margin-top: 16px;
     min-width: 272px;
     overflow: hidden;
+    position: relative;
 }
 .notifications-content-wrap.subscription-content .notifications-utility{
     display: none;
@@ -21450,7 +21793,7 @@ ul.restrictions-list-content>li {
 }
 .notifications-content-filters .notifications-type-filter{
     margin-top: 28px;
-    margin-bottom: 56px;
+    margin-bottom: 28px;
 }
 .notifications-content-filters .filter-item-wrap{
     border-radius: 8px;
@@ -21699,6 +22042,61 @@ ul.restrictions-list-content>li {
     /*padding: 0 8px 2px;*/
     /*text-align: left;*/
 /*}*/
+/* - notifications calendar - */
+.notifications-calendar-activity{
+
+}
+.notifications-calendars-wrap{
+    display: flex;
+    flex-direction: column-reverse;
+}
+.notifications-calendars-wrap table{
+    width: fit-content;
+    margin-bottom: 16px;
+}
+.notifications-calendars-wrap thead{
+    border: none
+}
+.notifications-calendars-wrap thead th{
+    text-align: start;
+    color: rgba(0, 0, 0, .54);
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 32px;
+    margin-bottom: 2px;
+    padding-left: 14px;
+    text-transform: capitalize;
+}
+.notifications-calendars-wrap th,
+.notifications-calendars-wrap td{
+    padding: 3px;
+    font-size: 12px;
+    text-align: center;
+    /*border: 1px solid #BDBDBD;*/
+    min-width: 32px;
+    font-weight: 500;
+}
+.notifications-calendars-wrap .prev-month{
+    color:#757575;
+    opacity: 0;
+}
+.notifications-calendars-wrap .next-month{
+    color:#BDBDBD;
+    opacity: 0;
+}
+.notifications-calendars-wrap .future{
+    font-weight: 400;
+    color: #BDBDBD;
+}
+.notifications-calendars-wrap .calendar-rows-wrap{
+    display: flex;
+    flex-direction: column-reverse;
+    margin-left: 15px;
+}
+.notifications-calendars-wrap td .notifications-calendar-day{
+    border-radius: 50%;
+    line-height: 25px;
+}
 /* Code Modal */
 .code-modal{
     position: relative;
