@@ -251,6 +251,9 @@
     addTemplate('notifications.verification_session');
     addTemplate('notifications.notification_icon_container');
 
+    addTemplate('calls.calls_view');
+    addTemplate('calls.call_item');
+
     addTemplate('mentions.mentions_panel');
     addTemplate('mentions.mentions_placeholder');
     addTemplate('mentions.mention_item');
@@ -327,6 +330,10 @@
     addSvgTemplate('svg.check');
     addSvgTemplate('svg.call-outline');
     addSvgTemplate('svg.call');
+    addSvgTemplate('svg.call-missed');
+    addSvgTemplate('svg.call-received');
+    addSvgTemplate('svg.call-noanswer');
+    addSvgTemplate('svg.call-made');
     addSvgTemplate('svg.search');
     addSvgTemplate('svg.device-cellphone');
     addSvgTemplate('svg.device-console');

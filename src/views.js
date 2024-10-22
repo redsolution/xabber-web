@@ -982,6 +982,7 @@ xabber.Body = xabber.NodeView.extend({
         if (this.screen.get('right') === 'contacts' && (!attrs || !attrs.right))
             attrs.right = null;
         (!attrs || !attrs.notifications) && (new_attrs.notifications = false);
+        (!attrs || !attrs.calls) && (new_attrs.calls = false);
         this.screen.set(_.extend(new_attrs, attrs), options);
     },
 
@@ -1030,7 +1031,7 @@ xabber.ToolbarView = xabber.BasicView.extend({
         "click .mentions":              "showNotifications",
         "click .settings":              "showSettings",
         "click .settings-modal":              "showSettingsModal",
-        "click .jingle-calls":              "showPlaceholder",
+        "click .jingle-calls":              "showCalls",
         "click .geolocation-chats":              "showPlaceholder",
         "click .add-variant.contact":   "showAddContactView",
         "click .add-variant.account":   "showAddAccountView",
@@ -1091,6 +1092,10 @@ xabber.ToolbarView = xabber.BasicView.extend({
         this.$('.toolbar-item:not(.toolbar-logo):not(.account-item)').removeClass('active unread');
         if (name === 'notifications'){
             this.$('.toolbar-item:not(.toolbar-logo).mentions').addClass('active');
+            return;
+        }
+        if (name === 'calls'){
+            this.$('.toolbar-item:not(.toolbar-logo).jingle-calls').addClass('active');
             return;
         }
         if (_.contains(['all-chats', 'contacts',
@@ -1188,11 +1193,8 @@ xabber.ToolbarView = xabber.BasicView.extend({
             this.showSavedChats(null, true);
             return;
         }
-        if (this.$('.toolbar-item:not(.toolbar-logo).mentions').hasClass('active')) {
-            this.showNotifications(null, true);
-            return;
-        }
         if (this.$('.toolbar-item:not(.toolbar-logo).jingle-calls').hasClass('active') ||
+            this.$('.toolbar-item:not(.toolbar-logo).mentions').hasClass('active') ||
             this.$('.toolbar-item:not(.toolbar-logo).geolocation-chats').hasClass('active')){
             this.showAllChats(null, true);
             return;
@@ -1202,6 +1204,14 @@ xabber.ToolbarView = xabber.BasicView.extend({
     showContacts: function () {
         xabber.chats_view.active_chat = null;
         xabber.body.setScreen('contacts', {right: 'contacts', right_contact: null, chat_item: null, contact: null});
+        xabber.trigger('update_placeholder');
+    },
+
+    showCalls: function () {
+        if (!xabber.accounts.enabled.length || !xabber.accounts.connected.length)
+            return;
+        xabber.chats_view.active_chat = null;
+        xabber.body.setScreen('calls', {right: 'calls', calls: xabber.calls_view});
         xabber.trigger('update_placeholder');
     },
 
@@ -2429,7 +2439,7 @@ xabber.SettingsModalView = xabber.BasicView.extend({
         if (xabber.body.screen && xabber.body.screen.get('previous_screen')){
 
             let previous_screen = xabber.body.screen.get('previous_screen');
-            if ((previous_screen.name === 'notifications' || previous_screen.name === 'contacts') && previous_screen.open_all_chats){
+            if ((previous_screen.name === 'notifications' || previous_screen.name === 'calls' || previous_screen.name === 'contacts') && previous_screen.open_all_chats){
                 xabber.toolbar_view.showAllChats();
             } else {
                 previous_screen.close_settings = true;

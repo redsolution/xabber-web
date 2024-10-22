@@ -74,7 +74,7 @@ xabber.Message = Backbone.Model.extend({
             if (!this.account.isOnline())
                 state = xabber.getString("account_is_offline");
         }
-        else if (!this.collection.account.isOnline())
+        else if (this.collection.account && !this.collection.account.isOnline())
             state = xabber.getString("account_is_offline");
         return state;
     },
@@ -256,8 +256,9 @@ xabber.MessagesBase = Backbone.Collection.extend({
         return invite_msg;
     },
 
-    createFromStanza: function ($message, options) {
+    createFromStanza: function ($message, options, account) {
         options || (options = {});
+        account = account || this.account
         let $delay = options.delay || $message.children('delay'),
             full_jid = $message.attr('from') || options.from_jid,
             from_jid = Strophe.getBareJidFromJid(full_jid),
@@ -280,8 +281,8 @@ xabber.MessagesBase = Backbone.Collection.extend({
             let conversation = $message.children('replace').attr('conversation');
             if ($message.children('replace').children('message').children(`encrypted[xmlns="${Strophe.NS.SYNCHRONIZATION_OLD_OMEMO}"]`).length)
                 return;
-            if ($message.children('replace').children('message').children(`encrypted[xmlns="${Strophe.NS.OMEMO}"]`).length && this.account.omemo && !options.forwarded) {
-                this.account.omemo.receiveChatMessage($message, _.extend(options, {from_jid: conversation, conversation: conversation}));
+            if ($message.children('replace').children('message').children(`encrypted[xmlns="${Strophe.NS.OMEMO}"]`).length && account.omemo && !options.forwarded) {
+                account.omemo.receiveChatMessage($message, _.extend(options, {from_jid: conversation, conversation: conversation}));
                 return;
             }
             $message = $message.children('replace').children('message');
@@ -303,7 +304,7 @@ xabber.MessagesBase = Backbone.Collection.extend({
                 message.set('ephemeral_timer', $message.find('[xmlns="' + Strophe.NS.EPHEMERAL + '"]').attr('timer'));
                 options.sync_timestamp && message.set('displayed_time', options.sync_timestamp)
                 if (this.chat.contact){
-                    let cached_msg = this.account.omemo.cached_messages.getMessage(this.chat.contact, $message.find(`stanza-id[by="${this.account.get('jid')}"]`).attr('id'));
+                    let cached_msg = account.omemo.cached_messages.getMessage(this.chat.contact, $message.find(`stanza-id[by="${account.get('jid')}"]`).attr('id'));
                     if (cached_msg && cached_msg.envelope && cached_msg.displayed_time){
                         message.set('displayed_time', cached_msg.displayed_time)
                     }
@@ -340,7 +341,7 @@ xabber.MessagesBase = Backbone.Collection.extend({
                 let notification_from = Strophe.getBareJidFromJid($notification_msg.attr('from')),
                     notification_from_address = $message.children(`addresses[xmlns="${Strophe.NS.ADDRESS}"]`).children('address[type="ofrom"]').attr('jid');
                 if (!notification_from_address || notification_from_address !== notification_from){
-                    this.account.retractMessageById(options.stanza_id, this.account.get('jid'), from_jid, this.chat.get('sync_type'))
+                    account.retractMessageById(options.stanza_id, account.get('jid'), from_jid, this.chat.get('sync_type'))
                     return;
                 }
             }
@@ -379,10 +380,18 @@ xabber.MessagesBase = Backbone.Collection.extend({
                 attrs.notification_mention_id = match[2];
             }
         }
+        options.jingle_iniator && (attrs.jingle_iniator = options.jingle_iniator)
+        options.jingle_duration && (attrs.jingle_duration = options.jingle_duration)
+        options.call_contact && (attrs.call_contact = options.call_contact)
+        options.call_chat && (attrs.call_chat = options.call_chat)
+        if (options.jingle_call_status) {
+            attrs.jingle_call_status = options.jingle_call_status;
+            attrs.jingle_call_status_text = xabber.getString(`calls_window__call_status_${options.jingle_call_status}`);
+        }
         if (options.notification_msg && $notification_msg.length){
             attrs.notification_msg_content = $notification_msg[0];
             attrs.not_verified_device = null;
-            if (from_jid === this.account.domain){
+            if (from_jid === account.domain){
                 attrs.ntf_new_device_msg = true;
                 attrs.security_notification = true;
             }
@@ -394,7 +403,7 @@ xabber.MessagesBase = Backbone.Collection.extend({
                 }
             }
             if ($notification_msg.children(`envelope`).length && ($notification_msg.find(`content share[xmlns="${Strophe.NS.PUBSUB_TRUST_SHARING}"]`).length || $notification_msg.find(`content update[xmlns="${Strophe.NS.PUBSUB_TRUST_SHARING}"]`).length)){
-                let msg_text = `${this.account.jid} updated their devices`;
+                let msg_text = `${account.jid} updated their devices`;
                 attrs.original_message = body = msg_text;
                 attrs.notification_trust_msg = true;
             }
@@ -575,7 +584,7 @@ xabber.MessagesBase = Backbone.Collection.extend({
                 let $address = $(address);
                 addresses.push({type: $address.attr('type'), jid: $address.attr('jid')});
             });
-            attrs.data_form = _.extend(this.account.parseDataForm($message.children(`x[xmlns="${Strophe.NS.DATAFORM}"]`)), {addresses: addresses});
+            attrs.data_form = _.extend(account.parseDataForm($message.children(`x[xmlns="${Strophe.NS.DATAFORM}"]`)), {addresses: addresses});
         }
 
         body && (body = utils.slice_pretty_body(body, mutable_content));
@@ -595,7 +604,7 @@ xabber.MessagesBase = Backbone.Collection.extend({
             attrs.is_unread_archived = true;
         }
         $delay.length && (attrs.time = $delay.attr('stamp'));
-        (attrs.carbon_copied || from_jid == this.account.get('jid') && (options.is_archived || options.synced_msg)) && (attrs.state = constants.MSG_SENT);
+        (attrs.carbon_copied || from_jid == account.get('jid') && (options.is_archived || options.synced_msg)) && (attrs.state = constants.MSG_SENT);
         options.synced_msg && (attrs.synced_from_server = true);
         options.missed_history && (attrs.missed_msg = true);
         options.notificications_month && (attrs.notificications_month_missed_msg = true);
@@ -611,7 +620,7 @@ xabber.MessagesBase = Backbone.Collection.extend({
         if (options.echo_msg) {
             attrs.state = constants.MSG_DELIVERED;
             attrs.timestamp = Number(moment(attrs.time));
-            attrs.from_jid = this.account.get('jid');
+            attrs.from_jid = account.get('jid');
         }
         (options.context_message || options.participant_message || options.searched_message || options.is_searched) && (attrs.state = constants.MSG_ARCHIVED);
 
@@ -619,19 +628,19 @@ xabber.MessagesBase = Backbone.Collection.extend({
             this.chat.item_view.content = new xabber.ChatContentView({chat_item: this.chat.item_view});
 
         if (options.pinned_message)
-            return this.account.pinned_messages.create(attrs);
+            return account.pinned_messages.create(attrs);
 
         if (options.participant_message)
-            return this.account.participant_messages.create(attrs);
+            return account.participant_messages.create(attrs);
 
         if (options.searched_message) {
             options.query && (attrs.query = options.query);
             options.searched_in_contact_messages && (attrs.searched_in_contact_messages = options.searched_in_contact_messages)
-            return this.account.searched_messages.create(attrs);
+            return account.searched_messages.create(attrs);
         }
 
         if (options.context_message)
-            return this.account.context_messages.create(attrs);
+            return account.context_messages.create(attrs);
 
         if (options.echo_msg && message) {
             message.destroyOnEcho();
@@ -643,10 +652,10 @@ xabber.MessagesBase = Backbone.Collection.extend({
 
         if (options.is_searched) {
             let msg_contact = Strophe.getBareJidFromJid($message.attr('from'));
-            (msg_contact === this.account.get('jid')) && (msg_contact = Strophe.getBareJidFromJid($message.attr('to')));
+            (msg_contact === account.get('jid')) && (msg_contact = Strophe.getBareJidFromJid($message.attr('to')));
             message = xabber.all_searched_messages.create(attrs);
-            message.contact = this.account.contacts.mergeContact(msg_contact);
-            message.account = this.account;
+            message.contact = account.contacts.mergeContact(msg_contact);
+            message.account = account;
             return message;
         }
 
@@ -654,7 +663,7 @@ xabber.MessagesBase = Backbone.Collection.extend({
             attrs.ephemeral_timer = $message.find('[xmlns="' + Strophe.NS.EPHEMERAL + '"]').attr('timer');
             options.sync_timestamp && (attrs.displayed_time = options.sync_timestamp);
             if (this.chat.contact){
-                let cached_msg = this.account.omemo.cached_messages.getMessage(this.chat.contact, $message.find(`stanza-id[by="${this.account.get('jid')}"]`).attr('id'));
+                let cached_msg = account.omemo.cached_messages.getMessage(this.chat.contact, $message.find(`stanza-id[by="${account.get('jid')}"]`).attr('id'));
                 if (cached_msg && cached_msg.envelope && cached_msg.displayed_time){
                     attrs.displayed_time = cached_msg.displayed_time;
                 }
@@ -1154,7 +1163,7 @@ xabber.EphemeralTimerSelector = xabber.BasicView.extend({
       reject: function (reason) {
           if (this.get('status') === 'disconnected' || this.get('status') === 'disconnecting')
               return;
-          let $reject_msg = $msg({type: 'chat', to: this.get('contact_full_jid') || this.contact.get('jid')})
+          let $reject_msg = $msg({type: 'chat', to: this.get('contact_full_jid') || this.contact.get('jid'), from: this.account.get('jid')})
               .c('reject', {xmlns: Strophe.NS.JINGLE_MSG, id: this.get('session_id')});
           if (this.get('jingle_start')) {
               let end = moment.now(),
@@ -1164,11 +1173,17 @@ xabber.EphemeralTimerSelector = xabber.BasicView.extend({
                   _.extend(call_attrs, {start: moment(this.get('jingle_start')).format(), end: moment(end).format(), duration: duration});
               reason && (call_attrs.reason = reason);
               $reject_msg.c('call', call_attrs).up();
+          } else {
+              let call_attrs = {initiator: this.get('call_initiator')};
+              $reject_msg.c('call', call_attrs).up();
           }
           $reject_msg.up().c('store', {xmlns: Strophe.NS.HINTS}).up()
               .c('markable').attrs({'xmlns': Strophe.NS.CHAT_MARKERS}).up()
               .c('origin-id', {id: uuid(), xmlns: 'urn:xmpp:sid:0'});
           this.account.sendMsg($reject_msg);
+          if (xabber.calls_view) {
+              xabber.calls_view.receiveChatMessage(this.account, $reject_msg.tree());
+          }
           this.createSystemMessage($reject_msg);
           this.set('status', 'disconnected');
           xabber.trigger('update_jingle_button');
@@ -1559,7 +1574,7 @@ xabber.EphemeralTimerSelector = xabber.BasicView.extend({
                 to: msg_to
             })
                 .c('reject', {xmlns: Strophe.NS.JINGLE_MSG, id: options.session_id})
-                .c('call', {reason: options.reason}).up().up()
+                .c('call', {reason: options.reason, initiator: options.initiator}).up().up()
                 .c('store', {xmlns: Strophe.NS.HINTS}).up()
                 .c('markable').attrs({'xmlns': Strophe.NS.CHAT_MARKERS}).up()
                 .c('origin-id', {id: uuid(), xmlns: 'urn:xmpp:sid:0'});
@@ -1632,7 +1647,7 @@ xabber.EphemeralTimerSelector = xabber.BasicView.extend({
                 this.getCallingAvailability(iq_to, session_id, () => {
                     if (xabber.current_voip_call) {
                         let reason = from_bare_jid === Strophe.getBareJidFromJid(xabber.current_voip_call.get('contact_full_jid')) ? 'device_busy' : 'busy';
-                        this.sendReject({session_id: session_id, reason: reason});
+                        this.sendReject({session_id: session_id, reason: reason, iniator: xabber.current_voip_call.call_initiator});
                         this.messages.createSystemMessage({
                             from_jid: this.account.get('jid'),
                             message: xabber.getString("jingle__system_message__cancelled_call")
@@ -1669,6 +1684,9 @@ xabber.EphemeralTimerSelector = xabber.BasicView.extend({
             }
         }
         if ($jingle_msg_reject.length) {
+            if (xabber.calls_view) {
+                xabber.calls_view.receiveChatMessage(this.account, $message[0], options);
+            }
             if (this.messages.filter(m => m.get('session_id') === $jingle_msg_reject.attr('id')).length)
                 return;
             let time = options.delay && options.delay.attr('stamp') || $message.find('delay').attr('stamp') || $message.find('time').attr('stamp'), message, msg_text = "";
@@ -4605,7 +4623,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
                     setTimeout(() => {
                         this.model._wait_load_unread_history.resolve();
                     }, 1000);
-                } else{
+                } else {
                     this.model._wait_load_unread_history.resolve();
                 }
             }
@@ -8881,6 +8899,19 @@ xabber.AccountChats = xabber.ChatsBase.extend({
             if (!chat)
                 return;
             let all_messages = chat.messages.models;
+            let call_messages;
+
+            if (xabber.calls_view){
+                call_messages = xabber.calls_view.calls_messages;
+                let remove_call_messages = call_messages.filter(item => item.get('call_contact') && item.get('call_contact').get('jid') === contact.get('jid')),
+                    new_list = call_messages.filter(item => (item.get('call_contact') && item.get('call_contact').get('jid') !== contact.get('jid')) || !item.get('call_contact'));
+                _.each(remove_call_messages, (msg) => {
+                    this.account.cached_calls.removeFromCachedCalls(msg.get('unique_id'), () => {
+                    });
+                    xabber.calls_view.removeMessageFromDOM(msg);
+                });
+                remove_call_messages.length && new_list.length && xabber.calls_view.calls_messages.reset(new_list)
+            }
             $(all_messages).each((idx, item) => {
                 if (!chat.item_view.content)
                     chat.item_view.content = new xabber.ChatContentView({chat_item: chat.item_view});

@@ -8979,7 +8979,7 @@ xabber.Roster = xabber.ContactsBase.extend({
             chat.getCallingAvailability(full_jid, session_id, () => {
                 if (xabber.current_voip_call) {
                     let reason = Strophe.getBareJidFromJid(full_jid) === Strophe.getBareJidFromJid(xabber.current_voip_call.get('contact_full_jid')) ? 'device_busy' : 'busy';
-                    chat.sendReject({session_id: session_id, reason: reason});
+                    chat.sendReject({session_id: session_id, reason: reason, iniator: xabber.current_voip_call.call_initiator});
                     chat.messages.createSystemMessage({
                         from_jid: this.account.get('jid'),
                         message: xabber.getString("jingle__system_message__cancelled_call")
@@ -10819,6 +10819,40 @@ xabber.CachedNotifications = Backbone.ModelWithDataBase.extend({
     }
 });
 
+xabber.CachedCalls = Backbone.ModelWithDataBase.extend({
+    putInCachedCalls: function (value, callback) {
+        this.database.put('call_items', value, function (response_value) {
+            callback && callback(response_value);
+        });
+    },
+
+    getFromCachedCalls: function (value, callback) {
+        this.database.get('call_items', value, function (response_value) {
+            callback && callback(response_value);
+        });
+    },
+
+    getAllFromCachedCalls: function (callback) {
+        this.database.get_all('call_items', null, function (response_value) {
+            callback && callback(response_value || []);
+        });
+    },
+
+    removeFromCachedCalls: function (value, callback) {
+        this.database.remove('call_items', value, function (response_value) {
+            callback && callback(response_value);
+        });
+    },
+
+    clearDataBase: function () {
+        this.database.clear_database('call_items');
+    },
+
+    deleteDataBase: function () {
+        this.database.delete_database('call_items');
+    }
+});
+
 xabber.CachedServerFeatures = Backbone.ModelWithDataBase.extend({
     putInCachedFeatures: function (value, callback) {
         this.database.put('server_features_items', value, function (response_value) {
@@ -10871,6 +10905,11 @@ xabber.Account.addInitPlugin(function () {
     this.cached_notifications = new xabber.CachedNotifications(null, {
         name:'cached-notification-list-v108-' + this.get('jid') + '-' + this.get('account_unique_id'),
         objStoreName: 'notification_items',
+        primKey: 'stanza_id'
+    });
+    this.cached_calls = new xabber.CachedCalls(null, {
+        name:'cached-calls-list-v108-' + this.get('jid') + '-' + this.get('account_unique_id'),
+        objStoreName: 'call_items',
         primKey: 'stanza_id'
     });
     this.cached_server_features = new xabber.CachedServerFeatures(null, {

@@ -2888,6 +2888,8 @@
 .fill-color-red-700,
 .fill-color-red-700 path,
 .fill-color-red-700 use,
+.fill-color-red-700 polyline,
+.fill-color-red-700 polygon,
 .hover-fill-color-red-700:hover,
 [data-color=red] .fill-color-700 path,
 [data-color=red] .fill-color-700 use,
@@ -2938,6 +2940,8 @@
 .fill-color-blue-700,
 .fill-color-blue-700 path,
 .fill-color-blue-700 use,
+.fill-color-blue-700 polyline,
+.fill-color-blue-700 polygon,
 .hover-fill-color-blue-700:hover,
 [data-color=blue] .fill-color-700 path,
 [data-color=blue] .fill-color-700 use,
@@ -2978,6 +2982,8 @@
 .fill-color-green-700,
 .fill-color-green-700 path,
 .fill-color-green-700 use,
+.fill-color-green-700 polyline,
+.fill-color-green-700 polygon,
 .hover-fill-color-green-700:hover,
 [data-color=green] .fill-color-700 path,
 [data-color=green] .fill-color-700 use,
@@ -3077,6 +3083,8 @@
 .fill-color-grey-500,
 .fill-color-grey-500 path,
 .fill-color-grey-500 use,
+.fill-color-grey-500 polyline,
+.fill-color-grey-500 polygon,
 .hover-fill-color-grey-500:hover{
   fill: #9E9E9E !important;
 }

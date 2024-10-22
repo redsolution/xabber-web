@@ -1,0 +1,33 @@
+<div class="chat-message main {{classlist}}"
+     data-time="{{timestamp}}"
+     data-uniqueid="{{unique_id}}"
+     data-from="{{from_jid}}"
+>
+    <div class="left-side noselect">
+        <div class="circle-avatar"></div>
+    </div>
+
+    <div class="msg-wrap">
+        <div class="chat-msg-author-wrap">
+            <div class="chat-msg-author text-color-700 one-line">{{username}}</div>
+        </div>
+
+        {[ if (jingle_call_status === 'outgoing') {]}
+        <svg class="call-icon mdi fill-color-blue-700 mdi-svg-template" data-svgname="call-made"></svg>
+        {[} else if (jingle_call_status === 'missed') {]}
+        <svg class="call-icon mdi fill-color-red-700 mdi-svg-template" data-svgname="call-missed"></svg>
+        {[} else if (jingle_call_status === 'incoming') {]}
+        <svg class="call-icon mdi fill-color-green-700 mdi-svg-template" data-svgname="call-received"></svg>
+        {[} else if (jingle_call_status === 'declined') {]}
+        <svg class="call-icon mdi fill-color-grey-500 mdi-svg-template" data-svgname="call-noanswer"></svg>
+        {[}]}
+        <div class="chat-msg-content chat-text-content">{{message}}{[if (jingle_duration){]}, {{jingle_duration}} {[}]}</div>
+        <div class="btn-send-jingle ">
+            <svg class="mdi fill-color-green-700 mdi-svg-template" data-svgname="call"></svg>
+        </div>
+    </div>
+
+    <div class="right-side noselect">
+        <div class="msg-time selectable-text" title="{{time}}{[ if (device_id) {]}&#013;{[print(xabber.getString('omemo__dialog_fingerprints__label_device_id'))]}: {{device_id}}{[}]}">{{short_time}}</div>
+    </div>
+</div>

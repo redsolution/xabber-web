@@ -126,6 +126,7 @@ xabber.once("start", function () {
         }
 
         if ((this.body.screen.get('notifications') || (this.body.screen.get('previous_screen') && this.body.screen.get('previous_screen').notifications))
+            || (this.body.screen.get('calls') || (this.body.screen.get('previous_screen') && this.body.screen.get('previous_screen').calls))
         || (this.body.screen.get('name') === 'contacts' || (this.body.screen.get('previous_screen') && this.body.screen.get('previous_screen').name === 'contacts'))) {
             left_panel_width = 0;
             right_panel_width = panel_width;
@@ -148,6 +149,7 @@ xabber.once("start", function () {
 
         right_contact_panel_styles.width = right_contact_panel_width;
         this.left_panel.$el.switchClass('hidden', (this.body.screen.get('notifications')  || (this.body.screen.get('previous_screen') && this.body.screen.get('previous_screen').notifications))
+            || (this.body.screen.get('calls') || (this.body.screen.get('previous_screen') && this.body.screen.get('previous_screen').calls))
             || (this.body.screen.get('name') === 'contacts' || (this.body.screen.get('previous_screen') && this.body.screen.get('previous_screen').name === 'contacts')));
         this.chat_head.$el.switchClass('chat-head-ultra-narrow', right_panel_width <= 650);
         this.chat_head.$el.switchClass('chat-head-narrow', right_panel_width < 750);
@@ -220,6 +222,7 @@ xabber.once("start", function () {
         path_group_invitation = new this.ViewPath('contact.invitation'),
         path_enable_view = new this.ViewPath('omemo_item.account.omemo_enable_view'),
         path_contacts = new this.ViewPath('contacts'),
+        path_calls_body = new this.ViewPath('calls'),
         path_contact_details_right = new this.ViewPath('contact.details_view_right'),
         path_contact_details_right_encrypted = new this.ViewPath('contact.details_view_right_encrypted'),
         path_participant_messages = new this.ViewPath('model.messages_view'),
@@ -281,6 +284,16 @@ xabber.once("start", function () {
         // roster: null
     });
 
+    this.body.addScreen('calls', {
+        blur_overlay: null,
+        toolbar: null,
+        main: {
+            right: { calls_body: null },
+            // right_contact: {},
+        },
+        // roster: null
+    });
+
 
     this.right_panel.patchTree = function (tree, options) {
         if (options.right === undefined)
@@ -294,6 +307,7 @@ xabber.once("start", function () {
             };
         }
         if (options.notifications && options.right === 'notifications') {
+            console.error(path_notifications_body);
             return {
                 notifications_body: path_notifications_body,
             };
@@ -301,6 +315,12 @@ xabber.once("start", function () {
         if (options.right === 'contacts') {
             return {
                 contacts: path_contacts,
+            };
+        }
+        if (options.calls && options.right === 'calls') {
+            console.error(path_calls_body);
+            return {
+                calls_body: path_calls_body,
             };
         }
         if ((options.right === 'message_context') || (options.right === 'participant_messages') || (options.right === 'searched_messages')) {

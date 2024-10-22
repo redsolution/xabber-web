@@ -1290,7 +1290,6 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
         $message = this.$(`.chat-message[data-uniqueid="${item.get('unique_id')}"]`);
         this.updateMessageInChat($message[0], item);
         this.initPopup($message);
-        this.bottom.showChatNotification();
 
         if (item.get('data_form')) {
             let data_form = utils.render_data_form(item.get('data_form'));

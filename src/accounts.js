@@ -1258,6 +1258,7 @@ xabber.Account = Backbone.Model.extend({
             }
             this.cached_sync_conversations && this.cached_sync_conversations.deleteDataBase();
             this.cached_notifications && this.cached_notifications.deleteDataBase();
+            this.cached_calls && this.cached_calls.deleteDataBase();
             this.cached_roster && this.cached_roster.deleteDataBase();
             this.cached_server_features && this.cached_server_features.deleteDataBase();
             this.trigger('remove_saved_chat');

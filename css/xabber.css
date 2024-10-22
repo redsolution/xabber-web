@@ -21733,6 +21733,103 @@ ul.restrictions-list-content>li {
     display: block;
 }
 
+/* ------------------ CALLS VIEW ---------------------- */
+.calls-body-container,
+.calls-content-wrap{
+    width: 100%;
+    height: 100%;
+
+}
+.calls-content-wrap{
+    display: flex;
+
+}
+.calls-content-wrap .calls-content-filters{
+    height: calc(100% - 32px);
+    margin-left: 24px;
+    margin-right: 24px;
+    margin-top: 16px;
+    min-width: 272px;
+    overflow: hidden;
+    position: relative;
+}
+.calls-content-filters .calls-filter-main-header{
+    font-size: 24px;
+    line-height: 32px;
+    margin-bottom: 33px;
+    margin-left: 14px;
+}
+.calls-content-filters .calls-filter-header{
+    color: rgba(0, 0, 0, .54);
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 32px;
+    margin-bottom: 2px;
+    margin-left: 14px;
+}
+.calls-content-filters .filter-item-wrap{
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+    line-height: 24px;
+    padding: 4px 42px 4px 48px;
+    position: relative;
+}
+.calls-content-filters .filter-item-wrap.selected-filter{
+    background: #eee;
+}
+.calls-content-wrap .filter-item-wrap .filter-icon {
+    height: 20px;
+    left: 14px;
+    position: absolute;
+    top: 6px;
+    width: 20px;
+}
+.calls-right-wrap{
+    height: 100%;
+    overflow: hidden;
+    position: relative;
+    width: 100%;
+}
+.calls-content-wrap .calls-content{
+    height: calc(100% - 64px);
+}
+.calls-content .chat-content{
+    padding-top: 15px;
+}
+.calls-content .chat-content .chat-msg-content{
+    padding-left: 32px;
+}
+.calls-content .chat-content .btn-send-jingle{
+    width: 24px;
+    height: 24px;
+    position: absolute;
+    top: 16px;
+    right: 96px;
+}
+.calls-content .chat-content .btn-send-jingle:hover{
+    opacity: 0.7;
+}
+.calls-content .chat-content .btn-send-jingle svg{
+    width: 24px;
+    height: 24px;
+}
+.calls-content .chat-content .call-icon{
+    position: absolute;
+    width: 24px;
+    height: 24px;
+    top: 24px;
+}
+.calls-content-wrap .back-to-bottom{
+    bottom: unset;
+    right: 36px;
+    rotate: 180deg;
+    top: 128px;
+}
+.calls-content-filters .calls-type-filter{
+    margin-bottom: 28px;
+    margin-top: 28px;
+}
 /* ------------------ NOTIFICATIONS VIEW ---------------------- */
 .notifications-body-container,
 .notifications-content-wrap{

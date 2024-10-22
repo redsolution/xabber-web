@@ -1,0 +1,42 @@
+<div class="calls-content-filters no-select">
+    <div class="calls-filter-main-header">{[print(xabber.getString("calls_window__header"))]}</div>
+    <div class="calls-account-filter">
+        <div class="calls-filter-header">{[print(xabber.getString("notifications_window__account_filter_header"))]}</div>
+        <div class="calls-account-filter-content">
+        </div>
+    </div>
+    <div class="calls-type-filter">
+        <div class="calls-filter-header">{[print(xabber.getString("calls_window__filters_header"))]}</div>
+        <div class="calls-type-filter-content">
+            <div class="filter-item-wrap selected-filter" data-filter="all">
+                <svg class="filter-icon mdi fill-color-grey-500 mdi-svg-template" data-svgname="call"></svg>
+                <div class="name one-line">{[print(xabber.getString("calls_window__type_filter_all"))]}</div>
+            </div>
+            <div class="filter-item-wrap" data-filter="missed">
+                <svg class="filter-icon mdi fill-color-grey-500 mdi-svg-template" data-svgname="call-missed"></svg>
+                <div class="name one-line">{[print(xabber.getString("calls_window__type_filter_missed"))]}</div>
+            </div>
+            <div class="filter-item-wrap" data-filter="incoming">
+                <svg class="filter-icon mdi fill-color-grey-500 mdi-svg-template" data-svgname="call-received"></svg>
+                <div class="name one-line">{[print(xabber.getString("calls_window__type_filter_incoming"))]}</div>
+            </div>
+            <div class="filter-item-wrap" data-filter="outgoing">
+                <svg class="filter-icon mdi fill-color-grey-500 mdi-svg-template" data-svgname="call-made"></svg>
+                <div class="name one-line">{[print(xabber.getString("calls_window__type_filter_outgoing"))]}</div>
+            </div>
+            <div class="filter-item-wrap" data-filter="declined">
+                <svg class="filter-icon mdi fill-color-grey-500 mdi-svg-template" data-svgname="call-noanswer"></svg>
+                <div class="name one-line">{[print(xabber.getString("calls_window__type_filter_declined"))]}</div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="calls-right-wrap">
+    <div class="calls-content">
+        <div class="chat-content-wrap">
+            <div class="chat-content">
+            </div>
+            <i class="mdi mdi-36px back-to-bottom mdi-chevron-down"></i>
+        </div>
+    </div>
+</div>
