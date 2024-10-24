@@ -6533,9 +6533,11 @@ input[type=text].simple-input-field:hover {
     flex-direction: column;
 }
 .contacts-panel-wrap .contacts-search-form{
-    position: relative;
     border: none;
     box-shadow: none;
+    position: relative;
+    padding: 22px 0 8px;
+    height: 48px;
 }
 .contacts-panel-wrap .contacts-search-form .search-input{
     padding-left: 72px;
@@ -6607,6 +6609,7 @@ input[type=text].simple-input-field:hover {
 }
 .contacts-panel-wrap .roster-sorting-wrap{
     display: flex;
+    box-shadow: 0 1px 1px -1px rgba(0, 0, 0, .25);
 }
 .contacts-panel-wrap .roster-sorting-wrap .roster-sorting-item{
     display: flex;
@@ -6616,6 +6619,7 @@ input[type=text].simple-input-field:hover {
     cursor: pointer;
     align-items: center;
     font-weight: 500;
+    margin-bottom: 4px;
 }
 
 .contacts-panel-wrap .roster-sorting-wrap .roster-sorting-item .mdi-arrow-down-slim{

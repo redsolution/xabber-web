@@ -10320,7 +10320,7 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
     renderContacts: function () {
         this.$('.contact-list').html('');
         if (this.contacts.length){
-            this.$('.contact-list').append($(templates.roster_sorting()));
+            this.$(`.roster-sorting-item`).removeClass('selected-sorting')
             this.$(`.roster-sorting-item[data-sort="${this.sorting_type.replace('-', '')}"]`).addClass('selected-sorting')
             this.$(`.roster-sorting-item.selected-sorting`).switchClass('reverted-sorting', this.sorting_type.includes('-'));
         } else {
