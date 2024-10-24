@@ -258,6 +258,8 @@ xabber.MessagesBase = Backbone.Collection.extend({
 
     createFromStanza: function ($message, options, account) {
         options || (options = {});
+        if ((options.synced_msg || options.is_archived) && options.jingle_call_status && !options.is_calls_archived)
+            return;
         account = account || this.account
         let $delay = options.delay || $message.children('delay'),
             full_jid = $message.attr('from') || options.from_jid,

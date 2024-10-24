@@ -9108,6 +9108,45 @@ xabber.Roster = xabber.ContactsBase.extend({
             this.account.chats.getSavedChat();
         if (is_first_sync)
             this.account.set('first_sync', sync_timestamp);
+
+
+        if (this.account.server_features.get(Strophe.NS.XABBER_NOTIFY)
+            && this.account.server_features.get(Strophe.NS.XABBER_NOTIFY).get('from')
+            && !this.account.chats.some(item => item.get('jid') === this.account.server_features.get(Strophe.NS.XABBER_NOTIFY).get('from'))){
+            let contact = this.contacts.mergeContact({jid: this.account.server_features.get(Strophe.NS.XABBER_NOTIFY).get('from')}),
+                chat = this.account.chats.getChat(contact, null, true);
+
+            if (!chat.item_view.content)
+                chat.item_view.content = new xabber.ChatContentView({chat_item: chat.item_view});
+
+            chat.set('notifications', true);
+            contact.set('notifications', true);
+            contact.set('subscription', 'both');
+            if (!request_with_stamp) {
+                chat.item_view.content.loadNotificationsHistoryToPreviousLastMsg();
+            }
+            xabber.accounts.trigger('notification_chat_created');
+            this.account.cached_notifications.getAllFromCachedNotifications((res) => {
+                if (res.length){
+                    let parser = new DOMParser();
+                    _.each(res, (msg_item) => {
+                        let xml = parser.parseFromString(msg_item.xml, "text/xml")
+                        msg_item.is_unread && console.error(msg_item.is_unread)
+                        this.account.chats.receiveChatMessage(xml.firstChild,
+                            _.extend({
+                                is_archived: true,
+                                is_cached: true,
+                                is_cached_unread: msg_item.is_unread,
+                            }, {})
+                        )
+                    });
+                    if (xabber.notifications_view.current_content && xabber.notifications_view.current_content.isVisible() && is_first_sync){
+                        xabber.notifications_view.current_content.onShowNotificationsTab();
+                    }
+                }
+            });
+        }
+
         if (!$(iq).find('conversation').length || $(iq).find('conversation').length < constants.SYNCHRONIZATION_RSM_MAX ){
             this.account.cached_sync_conversations.getAllFromCachedConversations((res) => {
                 if (!is_last_sync){

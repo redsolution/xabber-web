@@ -519,6 +519,7 @@ xabber.CallsView = xabber.BasicView.extend({
                 let loaded_message = this.receiveChatMessage(account, message,
                     _.extend({
                         is_archived: true,
+                        is_calls_archived: true,
                     }, options)
                 );
                 if (loaded_message) {
@@ -540,7 +541,6 @@ xabber.CallsView = xabber.BasicView.extend({
         }, (err) => {
             if (options.previous_history) {
                 this._loading_history = false;
-                this.showHistoryFeedback(true);
             }
         });
     },
