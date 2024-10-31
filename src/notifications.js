@@ -43,6 +43,7 @@ xabber.NotificationsView = xabber.BasicView.extend({
         "click .notifications-account-filter-content .filter-item-wrap": "selectAccounts",
         "click .notifications-type-filter-content .filter-item-wrap": "filterContent",
         "click .notification-subscriptions-button": "filterContent",
+        "click .notifications-calendar-day": "showDay",
         "click .btn-read-all": "readAll",
 
     },
@@ -218,6 +219,10 @@ xabber.NotificationsView = xabber.BasicView.extend({
         }
         this.$('.notifications-utility .notifications-header').text(this.$('.notifications-type-filter-content .filter-item-wrap.selected-filter .name').text());
         this.current_content.filterByProperty(filter_type, clear_account);
+    },
+
+    showDay: function (ev) {
+        this.current_content && this.current_content.showDay(ev);
     },
 
     updateAccountsFilter: function () {
@@ -648,6 +653,31 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
         this.FilterMessagesInChat(true);
     },
 
+    showDay: function (ev) {
+        let $item = $(ev.target).closest('.notifications-calendar-day');
+
+
+        let startOfDayTimestamp = parseInt($item.attr('data-timestamp'), 10),
+            endOfDayTimestamp = startOfDayTimestamp + 86400000;
+
+        let firstElementInDay = $('.chat-message[data-time]').filter(function() {
+            let elementTime = parseInt($(this).attr("data-time"), 10);
+            return elementTime >= startOfDayTimestamp && elementTime < endOfDayTimestamp;
+        }).first();
+
+
+        if (firstElementInDay.length) {
+            this.handleOnScrollRendering('bottom', true);
+            this.scrollTo(firstElementInDay.position().top + this.getScrollTop());
+            this.handleOnScrollRendering('bottom');
+        } else {
+            let fully_rendered = this.handleOnScrollRendering('bottom', true);
+            if (!fully_rendered){
+                this.showDay(ev);
+            }
+        }
+    },
+
     readMessage: function (last_visible_msg, $last_visible_msg, is_context) {
     },
 
@@ -1051,7 +1081,7 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
 
         _.each(messages, (msg) => {
             let $cell = this.findCalendarCellByDate(msg.get('timestamp'));
-            if ($cell.attr('data-activity-value') && $cell.attr('data-activity-value') > 4)
+            if ($cell.attr('data-activity-value') && $cell.attr('data-activity-value') > 2)
                 return;
             $cell.attr('data-activity-value', $cell.attr('data-activity-value') && Number($cell.attr('data-activity-value')) ? (Number($cell.attr('data-activity-value')) + 1) : 1);
         })
@@ -1104,9 +1134,7 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
         this._onscroll_read_messages_timeout = setTimeout(() => {
             this.readNotifications();
         }, scroll_read_timer);
-        if (this._scrolltop > this._prev_scrolltop) {
-            this.handleOnScrollRendering('bottom');
-        }
+        this.handleOnScrollRendering('bottom');
         this._long_reading_timeout = false;
     },
 
@@ -1114,8 +1142,8 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
         this.$('.back-to-bottom').hideIf(this.isScrolledToTop());
     },
 
-    handleOnScrollRendering: function (scroll_direction) {
-        if (!scroll_direction || this._scroll_rendering)
+    handleOnScrollRendering: function (scroll_direction, force_render) {
+        if (!scroll_direction || this._scroll_rendering || !this.isVisible())
             return;
         if (!this.rendered_messages)
             this.rendered_messages = [];
@@ -1169,7 +1197,7 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
             }
 
             if ($msg.length){
-                if ($msg.isAlmostScrolledInContainer(this.$('.chat-content'), 1500)) {
+                if ($msg.isAlmostScrolledInContainer(this.$('.chat-content'), 1500) || force_render) {
                     let index = whole_msgs_list.indexOf(msg),
                         new_rendered_msgs = whole_msgs_list.slice(Math.max(0, index - 5), index);
                     if (new_rendered_msgs.length && !force_load && !this.load_history_dfd){
@@ -1183,8 +1211,10 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
                                 this.renderMessage(new_rendered_msgs[i], this.rendered_messages);
                             }
                         }
-                    } else {
-                        if (!this.load_history_dfd){
+                    } else if (force_render) {
+                        return true;
+                    } else if (!force_render) {
+                            if (!this.load_history_dfd){
                             this.handleOnScrollLoading(msg);
                         }
                     }

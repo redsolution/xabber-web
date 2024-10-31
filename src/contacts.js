@@ -9120,6 +9120,7 @@ xabber.Roster = xabber.ContactsBase.extend({
                 chat.item_view.content = new xabber.ChatContentView({chat_item: chat.item_view});
 
             chat.set('notifications', true);
+            chat.set('sync_type', Strophe.NS.XABBER_NOTIFY);
             contact.set('notifications', true);
             contact.set('subscription', 'both');
             if (!request_with_stamp) {
@@ -9176,6 +9177,7 @@ xabber.Roster = xabber.ContactsBase.extend({
                     this.account.sendPresence();
                     this.account.dfd_presence.resolve();
                     this.account.get('first_sync') && this.syncFromServer({stamp: this.account.get('first_sync'), max: constants.SYNCHRONIZATION_RSM_MAX, last_version_sync: true}, true);
+                    xabber.calls_view && xabber.calls_view.updateAccountsFilter(null,null,null,true);
                 }
             });
         }

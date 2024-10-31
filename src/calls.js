@@ -69,6 +69,7 @@ xabber.CallsView = xabber.BasicView.extend({
 
     render: function (options) {
         this.clearFilter();
+        this.data.set('visible', true);
         this.updateAccountsFilter();
         this.onScroll();
         this.updateScrollBar2();
@@ -219,9 +220,7 @@ xabber.CallsView = xabber.BasicView.extend({
         if (!this.isVisible())
             return;
         this.$('.back-to-bottom').hideIf(this.isScrolledToTop());
-        if (this._scrolltop > this._prev_scrolltop) {
-            this.handleOnScrollRendering();
-        }
+        this.handleOnScrollRendering();
     },
 
     handleOnScrollRendering: function () {
@@ -430,7 +429,7 @@ xabber.CallsView = xabber.BasicView.extend({
         $avatar.setAvatar(image, this.avatar_size);
     },
 
-    updateAccountsFilter: function () {
+    updateAccountsFilter: function (item, collection, options, force_render) {
         let accounts = xabber.accounts.enabled;
         this.$('.calls-account-filter').switchClass('hidden', accounts.length === 1 || !accounts.length);
         if (accounts.length){
@@ -440,7 +439,8 @@ xabber.CallsView = xabber.BasicView.extend({
                     this.$('.calls-account-filter-content').append(this.renderAccountItem(account));
                 });
                 this.calls_accounts = accounts;
-                this.updateCurrentCalls();
+                !this.current_account && (this.current_account = this.calls_accounts[0]);
+                (this.isVisible() || force_render) && this.updateCurrentCalls();
             } catch (e) {
                 console.error(e)
             }

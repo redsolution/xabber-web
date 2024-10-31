@@ -4504,9 +4504,6 @@ xabber.ChatContentView = xabber.BasicView.extend({
             }
             if (options.missed_history && options.notificications_month && rsm.complete) {
                 account.settings.update_settings({last_month_notifications_loaded: true});
-                if (xabber.notifications_view.current_content && xabber.notifications_view.current_content.isVisible()){
-                    xabber.notifications_view.current_content && xabber.notifications_view.current_content.onShowNotificationsTab();
-                }
             }
             if (options.notifications_last_msg && !rsm.complete && (rsm.count > messages.length)) {
                 this.getMessageArchive({
@@ -8913,6 +8910,9 @@ xabber.AccountChats = xabber.ChatsBase.extend({
                     xabber.calls_view.removeMessageFromDOM(msg);
                 });
                 remove_call_messages.length && new_list.length && xabber.calls_view.calls_messages.reset(new_list)
+                if (!xabber.calls_view.calls_messages.filter(msg => msg.get('call_chat').account.get('jid') === this.account.get('jid')).length){
+                    xabber.calls_view.loadPreviousHistory(this.account);
+                }
             }
             $(all_messages).each((idx, item) => {
                 if (!chat.item_view.content)

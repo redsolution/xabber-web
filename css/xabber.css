@@ -22197,6 +22197,7 @@ ul.restrictions-list-content>li {
 .notifications-calendars-wrap td .notifications-calendar-day{
     border-radius: 50%;
     line-height: 25px;
+    cursor: pointer;
 }
 /* Code Modal */
 .code-modal{
