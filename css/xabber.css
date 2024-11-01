@@ -21807,6 +21807,7 @@ ul.restrictions-list-content>li {
 }
 .calls-content .chat-content .chat-msg-content{
     padding-left: 20px;
+    font-size: 14px;
 }
 .calls-content .chat-content .chat-message{
         margin: 4px auto;
@@ -21824,6 +21825,7 @@ ul.restrictions-list-content>li {
 }
 .calls-content .chat-content .chat-msg-author{
     font-weight: 500;
+    font-size: 14px;
 }
 .calls-content .chat-content .btn-send-jingle{
     height: 36px;
@@ -22154,6 +22156,9 @@ ul.restrictions-list-content>li {
     font-size: 17px;
     line-height: 22px;
     cursor: pointer;
+}
+.notifications-content-wrap .chat-msg-content{
+    font-size: 14px;
 }
 /*.notifications-content-wrap .chat-day-indicator{*/
     /*box-shadow: 0 1px 1px -1px rgba(0, 0, 0, .25);*/

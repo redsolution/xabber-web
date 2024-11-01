@@ -928,6 +928,7 @@ xabber.EphemeralTimerSelector = xabber.BasicView.extend({
               if (conn_state === 'disconnected') {
                   this.set('status', conn_state);
                   xabber.trigger('update_jingle_button');
+                  this.reject('disconnected');
                   this.destroy();
                   xabber.current_voip_call = null;
               }
@@ -999,9 +1000,17 @@ xabber.EphemeralTimerSelector = xabber.BasicView.extend({
           let value = this.get('video_live'),
               default_video = this.conn.getSenders().find(sender => sender.track && (sender.track.default || sender.track.screen));
           value && this.set('video_screen', false);
-          (default_video && value) && this.createVideoStream();
-          (!default_video && this.local_stream) && (this.local_stream.getVideoTracks()[0].enabled = value);
-          this.set('video', value || this.get('video_screen'));
+          try {
+              (default_video && value) && this.createVideoStream(() => {
+                  (!default_video && this.local_stream) && (this.local_stream.getVideoTracks()[0].enabled = value);
+                  this.set('video', value || this.get('video_screen'));
+              });
+              if (!value){
+                  this.set('video', value || this.get('video_screen'));
+              }
+          } catch (e){
+              console.error(e)
+          }
       },
 
       onDestroy: function () {
@@ -1018,9 +1027,17 @@ xabber.EphemeralTimerSelector = xabber.BasicView.extend({
           let value = this.get('video_screen'),
               default_video = this.conn.getSenders().find(sender => sender.track && !sender.track.screen);
           value && this.set('video_live', false);
-          (default_video && value) && this.createScreenShareVideoStream();
-          (!default_video && this.local_stream) && (this.local_stream.getVideoTracks()[0].enabled = value);
-          this.set('video', value || this.get('video_live'));
+          try {
+              (default_video && value) && this.createScreenShareVideoStream(() => {
+                  (!default_video && this.local_stream) && (this.local_stream.getVideoTracks()[0].enabled = value);
+                  this.set('video', value || this.get('video_live'));
+              });
+              if (!value){
+                  this.set('video', value || this.get('video_live'));
+              }
+          } catch (e){
+              console.error(e)
+          }
       },
 
       onChangedVideoValue: function () {
@@ -1029,7 +1046,7 @@ xabber.EphemeralTimerSelector = xabber.BasicView.extend({
           this.onChangedMediaType();
       },
 
-      createScreenShareVideoStream: function () {
+      createScreenShareVideoStream: function (callback) {
           navigator.mediaDevices.getDisplayMedia({video: true}).then((media_stream) => {
               this.$local_video[0].srcObject = media_stream;
               media_stream.getVideoTracks().forEach((track) => {
@@ -1038,6 +1055,10 @@ xabber.EphemeralTimerSelector = xabber.BasicView.extend({
                   this.conn.addTrack(track, this.local_stream);
                   this.conn.getSenders().find(sender => !sender.track || sender.track && sender.track.kind === 'video').replaceTrack(track);
               });
+              callback && callback()
+          }).catch((e) => {
+              console.error(e)
+              this.set('video_screen', false);
           });
       },
 
@@ -1113,7 +1134,7 @@ xabber.EphemeralTimerSelector = xabber.BasicView.extend({
           }
       },
 
-      createVideoStream: function () {
+      createVideoStream: function (callback) {
           try {
               navigator.mediaDevices.getUserMedia({video: true}).then((media_stream) => {
                   this.$local_video[0].srcObject = media_stream;
@@ -1122,9 +1143,12 @@ xabber.EphemeralTimerSelector = xabber.BasicView.extend({
                       this.conn.addTrack(track, this.local_stream);
                       this.conn.getSenders().find(sender => !sender.track || sender.track && sender.track.kind === 'video').replaceTrack(track);
                   });
+                  callback && callback()
               });
           } catch (e) {
                   utils.dialogs.error(e);
+                  console.error(e)
+                  this.set('video_live', false);
               }
           },
 
@@ -1163,7 +1187,7 @@ xabber.EphemeralTimerSelector = xabber.BasicView.extend({
       },
 
       reject: function (reason) {
-          if (this.get('status') === 'disconnected' || this.get('status') === 'disconnecting')
+          if ((this.get('status') === 'disconnected' && reason !== 'disconnected') || this.get('status') === 'disconnecting')
               return;
           let $reject_msg = $msg({type: 'chat', to: this.get('contact_full_jid') || this.contact.get('jid'), from: this.account.get('jid')})
               .c('reject', {xmlns: Strophe.NS.JINGLE_MSG, id: this.get('session_id')});
@@ -1183,6 +1207,7 @@ xabber.EphemeralTimerSelector = xabber.BasicView.extend({
               .c('markable').attrs({'xmlns': Strophe.NS.CHAT_MARKERS}).up()
               .c('origin-id', {id: uuid(), xmlns: 'urn:xmpp:sid:0'});
           this.account.sendMsg($reject_msg);
+          $reject_msg.up().c('time').attrs({'xmlns': Strophe.NS.DELIVERY, by: this.account.get('jid'), stamp: new Date().toISOString() });
           if (xabber.calls_view) {
               xabber.calls_view.receiveChatMessage(this.account, $reject_msg.tree());
           }

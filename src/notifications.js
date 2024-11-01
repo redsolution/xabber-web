@@ -668,7 +668,7 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
 
         if (firstElementInDay.length) {
             this.handleOnScrollRendering('bottom', true);
-            this.scrollTo(firstElementInDay.position().top + this.getScrollTop());
+            this.scrollTo(firstElementInDay.position().top + this.getScrollTop() - 40);
             this.handleOnScrollRendering('bottom');
         } else {
             let fully_rendered = this.handleOnScrollRendering('bottom', true);
@@ -1144,7 +1144,7 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
 
     handleOnScrollRendering: function (scroll_direction, force_render) {
         if (!scroll_direction || this._scroll_rendering || !this.isVisible())
-            return;
+            return true;
         if (!this.rendered_messages)
             this.rendered_messages = [];
         this._scroll_rendering = true;
@@ -1176,7 +1176,7 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
                 }
             });
             if (!msg)
-                return;
+                return true;
 
             let $msg = this.$(`.chat-message[data-uniqueid="${msg.get('unique_id')}"]`),
                 whole_msgs_list = [],
@@ -1220,9 +1220,12 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
                     }
 
                 }
+            } else if (force_render) {
+                return true;
             }
 
         } else if (scroll_direction === 'top') {
+            return true;
         }
         this._scroll_rendering = false;
 
