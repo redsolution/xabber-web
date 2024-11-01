@@ -2331,13 +2331,16 @@ xabber.ChatItemView = xabber.BasicView.extend({
                 'data-state': message.getState(),
                 'title': message.getVerboseState()
             });
-            ($elem.attr('data-state') === constants.MSG_STATE[constants.MSG_ERROR]) && $elem.dropdown({
-                inDuration: 100,
-                outDuration: 100,
-                constrainWidth: false,
-                hover: false,
-                alignment: 'left'
-            });
+            if ($elem.attr('data-state') === constants.MSG_STATE[constants.MSG_ERROR]) {
+                $elem.dropdown({
+                    inDuration: 100,
+                    outDuration: 100,
+                    constrainWidth: false,
+                    hover: false,
+                    alignment: 'left'
+                });
+                $message.find('.dropdown-content.retry-send-message').removeClass('hidden');
+            }
         }
         if (message === this.model.last_message) {
             this.updateLastMessage();

@@ -36,11 +36,12 @@ xabber.CallsView = xabber.BasicView.extend({
     className: 'calls-content-wrap',
     template: templates.calls_view,
     ps_selector: '.chat-content',
-    avatar_size: constants.AVATAR_SIZES.SYNCHRONIZE_ACCOUNT_ITEM,
+    avatar_size: constants.AVATAR_SIZES.CHAT_ITEM,
 
     events: {
         "click .calls-account-filter-content .filter-item-wrap": "filterAccount",
         "click .calls-type-filter-content .filter-item-wrap": "filterType",
+        "click .chat-message": "openChat",
         "click .chat-message .btn-send-jingle": "sendJingleMessage",
 
     },
@@ -309,6 +310,19 @@ xabber.CallsView = xabber.BasicView.extend({
         xabber.trigger('update_jingle_button');
     },
 
+    openChat: function (ev) {
+        if ($(ev.target).closest('.btn-send-jingle').length)
+            return;
+
+        let $item = $(ev.target).closest('.chat-message'),
+            msg_id = $item.attr('data-uniqueid');
+        let message = this.calls_messages.find(item => item.get('unique_id') === msg_id);
+        if (!message || !message.get('call_contact') || !this.current_account)
+            return;
+
+        this.current_account.chats.openChat(message.get('call_contact'));
+    },
+
     addMessage: function (message) {
         let msg_account = message.get('call_chat').account;
         message.get('xml') && !message.get('is_cached') && msg_account.cached_calls.putInCachedCalls({
@@ -552,7 +566,7 @@ xabber.CallsView = xabber.BasicView.extend({
 
         _.extend(attrs, {
             username: username,
-            time: pretty_datetime(attrs.time),
+            time: utils.pretty_datetime(attrs.time, 'MMMM D, YYYY, HH:mm:ss'),
             short_time: utils.pretty_time(attrs.time),
         });
 
@@ -568,6 +582,7 @@ xabber.CallsView = xabber.BasicView.extend({
             jingle_duration: attrs.jingle_duration || '',
             jingle_call_status: attrs.jingle_call_status || '',
             message: attrs.jingle_call_status_text,
+            time: attrs.time || '',
             classlist: classes.join(' ')
         })));
 

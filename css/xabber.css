@@ -6637,6 +6637,10 @@ input[type=text].simple-input-field:hover {
 .contacts-panel-wrap .roster-sorting-wrap .roster-sorting-item.reverted-sorting .mdi-arrow-down-slim{
     rotate: 180deg;
 }
+.roster-left-container.narrow-panel .contacts-panel-wrap .roster-sorting-wrap .roster-sorting-item.sort-name,
+.roster-left-container.narrow-panel .contacts-panel-wrap .roster-sorting-wrap .roster-sorting-item.sort-jid{
+    width: 35%;
+}
 .contacts-panel-wrap .roster-sorting-wrap .roster-sorting-item.sort-jid{
     margin-left: 16px;
     text-transform: uppercase;
@@ -21796,33 +21800,52 @@ ul.restrictions-list-content>li {
     width: 100%;
 }
 .calls-content-wrap .calls-content{
-    height: calc(100% - 64px);
+    height: 100%;
 }
 .calls-content .chat-content{
     padding-top: 15px;
 }
 .calls-content .chat-content .chat-msg-content{
-    padding-left: 32px;
+    padding-left: 20px;
+}
+.calls-content .chat-content .chat-message{
+        margin: 4px auto;
+}
+.calls-content .chat-content .chat-message:hover{
+    background: #F5F5F5;
+}
+.calls-content .chat-content .circle-avatar{
+    width: 40px;
+    height: 40px;
+    top: 6px;
+}
+.calls-content .chat-content .chat-day-indicator{
+    display: none;
+}
+.calls-content .chat-content .chat-msg-author{
+    font-weight: 500;
 }
 .calls-content .chat-content .btn-send-jingle{
-    width: 24px;
-    height: 24px;
+    height: 36px;
     position: absolute;
-    top: 16px;
-    right: 96px;
+    top: 8px;
+    width: 36px;
+    border-radius: 50%;
+    padding: 6px;
 }
 .calls-content .chat-content .btn-send-jingle:hover{
     opacity: 0.7;
+    background: #E0E0E0;
 }
 .calls-content .chat-content .btn-send-jingle svg{
     width: 24px;
     height: 24px;
 }
 .calls-content .chat-content .call-icon{
+    height: 16px;
     position: absolute;
-    width: 24px;
-    height: 24px;
-    top: 24px;
+    top: 27px;
+    width: 16px;
 }
 .calls-content-wrap .back-to-bottom{
     bottom: unset;
