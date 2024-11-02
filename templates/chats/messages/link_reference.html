@@ -9,7 +9,7 @@
         <div class="link-site one-line">{{domain}}</div>
         {[if (item.description) {]}
             <div class="link-title{[if (item.description.length <= 25) {]} link-title-short{[}]}">{{item.description}}</div>
-        {[} else {]}
+        {[} else if (item.title) {]}
             <div class="link-title{[if (item.title.length <= 25) {]} link-title-short{[}]}">{{item.title}}</div>
         {[}]}
     </div>
@@ -18,7 +18,7 @@
         <div class="link-site one-line">{{domain}}</div>
         {[if (item.description) {]}
             <div class="link-title{[if (item.description.length <= 29) {]} link-title-short{[}]}">{{item.description}}</div>
-        {[} else {]}
+        {[} else if (item.title) {]}
             <div class="link-title{[if (item.title.length <= 29) {]} link-title-short{[}]}">{{item.title}}</div>
         {[}]}
     </div>

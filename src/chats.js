@@ -1144,6 +1144,9 @@ xabber.EphemeralTimerSelector = xabber.BasicView.extend({
                       this.conn.getSenders().find(sender => !sender.track || sender.track && sender.track.kind === 'video').replaceTrack(track);
                   });
                   callback && callback()
+              }).catch((e) => {
+                  console.error(e)
+                  this.set('video_live', false);
               });
           } catch (e) {
                   utils.dialogs.error(e);
@@ -13230,7 +13233,7 @@ xabber.ChatBottomView = xabber.BasicView.extend({
     updateOpenGraphReference: function (text) {
         if (!(this.account.get('gallery_token') && this.account.get('gallery_url')))
             return;
-        let url_regexp = /(((ftp|http|https):\/\/)|(www\.))(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/g,
+        let url_regexp = /((((ftp|http|https):\/\/)|(www\.))(\w+:{0,1}\w*@)?([^\s"<>{}|\\^~\[\]`]+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?)|((\b)(([\w#:.@\-]+))?(\.net|\.edu|\.cloud|\.top|\.vip|\.cash|\.im|\.online|\.chat|\.com|\.org|\.ru|\.travel|\.info|\.tv|\.biz|\.mobi|\.tel|\.ar|\.al|\.asia|\.np|\.ng|\.io|\.bb|\.br|\.ca|\.tr|\.co|\.ec|\.fr|\.ht|\.in|\.eg|\.ie|\.et|\.jo|\.mr|\.id|\.iq|\.nl|\.ps|\.ph|\.sl|\.si|\.se|\.af|\.ag|\.be|\.bd|\.bg|\.cl|\.cd|\.my|\.mz|\.mx|\.cz|\.eu|\.dz|\.de|\.hk|\.it|\.la|\.no|\.pl|\.ro|\.sg|\.ke|\.kr|\.ch|\.ug|\.us|\.ve|\.vn|\.at|\.bo|\.cm|\.cn|\.cg|\.dk|\.fi|\.gr|\.gh|\.is|\.ir|\.jp|\.lv|\.ma|\.me|\.pk|\.pe|\.pt|\.sa|\.sk|\.es|\.tz|\.tw|\.ua|\.uz|\.ye)((\/[\w#!:;.?+=&%@!\-\/]+)|(\b)|\/))/gim,
             list = text && text.match(url_regexp);
         list = _.difference(list, this.link_reference_exempted);
         list = _.difference(list, this.currently_loaded_link_references);

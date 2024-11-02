@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.3.5.98","version_description":"fixed reject on call disconnect, fixed video and desktop share buttons in call modal, fixed time on local cached reject call msgs, fixed scrolling on date click, fixed recursion on date click notifications rendering, changed calls and notifications font size"}'
+'{"version_number":"2.3.5.99","version_description":"contacts view design, fixed urls regex to handle prohibited symbols, fixed calls modal video btn to handle if permission is denied, fixed link reference template"}'
 )});

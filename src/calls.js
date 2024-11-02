@@ -543,11 +543,11 @@ xabber.CallsView = xabber.BasicView.extend({
 
             if (options.previous_history && options.calls_load_dfd && success) {
                 account.settings.update_settings({calls_first_history_loaded: moment().format()});
-                options.calls_load_dfd.resolve(); //34
+                options.calls_load_dfd.resolve();
             }
             if (options.missed_history && options.calls_missed_load_dfd && rsm.complete) {
                 account.settings.update_settings({calls_first_history_loaded: moment().format()});
-                options.calls_missed_load_dfd.resolve(); //34
+                options.calls_missed_load_dfd.resolve();
             }
             if (options.previous_history && this.load_history_dfd) {
                 this.load_history_dfd.resolve();
