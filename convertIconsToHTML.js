@@ -81,6 +81,7 @@ let badges_names = [
         'check',
         'call-outline',
         'call',
+        'call-hangup',
         'call-missed',
         'call-received',
         'call-noanswer',

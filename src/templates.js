@@ -253,6 +253,7 @@
 
     addTemplate('calls.calls_view');
     addTemplate('calls.call_item');
+    addTemplate('calls.call_contact_item');
 
     addTemplate('mentions.mentions_panel');
     addTemplate('mentions.mentions_placeholder');
@@ -331,6 +332,7 @@
     addSvgTemplate('svg.call-outline');
     addSvgTemplate('svg.call');
     addSvgTemplate('svg.call-missed');
+    addSvgTemplate('svg.call-hangup');
     addSvgTemplate('svg.call-received');
     addSvgTemplate('svg.call-noanswer');
     addSvgTemplate('svg.call-made');

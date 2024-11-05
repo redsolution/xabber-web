@@ -6690,6 +6690,7 @@ input[type=text].simple-input-field:hover {
     margin-top: 18px;
     font-size: 14px;
     opacity: 0.8;
+    cursor:pointer;
 }
 .contacts-panel-wrap .contact-list-wrap .roster-contact-item-wrap .contact-jid .contact-domain:hover{
     color: #757575;
@@ -21795,6 +21796,60 @@ ul.restrictions-list-content>li {
     top: 6px;
     width: 20px;
 }
+.calls-content-filters .calls-contacts-wrap{
+    margin-bottom: 56px;
+}
+.calls-content-filters .call-contact-item{
+    position: relative;
+    width: 100%;
+    cursor: pointer;
+    border-radius: 8px;
+    min-height: 56px;
+    padding: 17px 48px 12px 72px;
+}
+.calls-content-filters .call-contact-item:hover{
+    background: #f5f5f5;
+}
+.calls-content-filters .call-contact-item .circle-avatar{
+    height: 40px;
+    top: 6px;
+    width: 40px;
+    left: 18px;
+    position: absolute;
+}
+.calls-content-filters .call-contact-item .call-contact-name{
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 16px;
+    display: inline-block;
+    max-width: 95%;
+}
+.calls-content-filters .call-contact-item .btn-send-jingle{
+    border-radius: 50%;
+    height: 36px;
+    padding: 6px;
+    position: absolute;
+    right: 16px;
+    top: 8px;
+    width: 36px;
+}
+.calls-content-filters .call-contact-item .btn-send-jingle{
+    height: 36px;
+    position: absolute;
+    top: 8px;
+    width: 36px;
+    border-radius: 50%;
+    padding: 6px;
+    right: 16px;
+}
+.calls-content-filters .call-contact-item .btn-send-jingle:hover{
+    opacity: 0.7;
+    background: #E0E0E0;
+}
+.calls-content-filters .call-contact-item .btn-send-jingle svg{
+    width: 24px;
+    height: 24px;
+}
 .calls-right-wrap{
     height: 100%;
     overflow: hidden;
@@ -21803,6 +21858,68 @@ ul.restrictions-list-content>li {
 }
 .calls-content-wrap .calls-content{
     height: 100%;
+}
+.calls-content-wrap .calls-right-wrap.active-call .calls-content{
+    height: calc(100% - 80px);
+}
+.calls-content-wrap .active-call-container{
+    display: none;
+}
+.calls-content-wrap .calls-right-wrap.active-call .active-call-container{
+    box-shadow: 0 1px 1px -1px rgba(0, 0, 0, .25);
+    display: block;
+    height: 80px;
+    padding: 8px 0;
+    padding-right: 24px;
+}
+.calls-content-wrap .calls-right-wrap.active-call .active-call-container .active-call-item{
+    border-radius: 8px;
+    margin: 0 auto;
+    max-width: 768px;
+    height: 100%;
+    padding: 7px 0;
+    position: relative;
+    width: 100%;
+}
+.calls-content-wrap .calls-right-wrap.active-call .active-call-container .circle-avatar{
+    height: 40px;
+    top: 6px;
+    width: 40px;
+    left: 18px;
+}
+.calls-content-wrap .calls-right-wrap.active-call .active-call-container .call-contact-name{
+    font-size: 14px;
+    font-weight: 500;
+    position: absolute;
+    top: 14px;
+    line-height: 16px;
+    left: 70px;
+}
+.calls-content-wrap .calls-right-wrap.active-call .active-call-container .call-duration{
+    font-size: 14px;
+    position: absolute;
+    top: 35px;
+    line-height: 16px;
+    left: 70px;
+}
+.calls-content-wrap .calls-right-wrap.active-call .active-call-container .btn-end-call{
+    border-radius: 50%;
+    height: 36px;
+    padding: 6px;
+    position: absolute;
+    right: 16px;
+    top: 14px;
+    width: 36px;
+    cursor: pointer;
+}
+.calls-content-wrap .calls-right-wrap.active-call .active-call-container .btn-end-call:hover{
+    opacity: 0.7;
+    background: #E0E0E0;
+}
+.calls-content-wrap .calls-right-wrap.active-call .active-call-container .btn-end-call svg{
+    width: 24px;
+    height: 24px;
+
 }
 .calls-content .chat-content{
     padding-top: 15px;

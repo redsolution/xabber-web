@@ -146,7 +146,7 @@ $.fn.hyperlinkify = function (options) {
             }
             else {
                 if (node.nodeName === '#text')
-                    x = $node.text();
+                    x = _.escape($node.text());
                 let list = x && x.match(url_regexp);
                 list = Array.from(new Set(list));
                 if (!list || list.length === 0) {

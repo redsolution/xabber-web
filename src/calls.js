@@ -42,7 +42,10 @@ xabber.CallsView = xabber.BasicView.extend({
         "click .calls-account-filter-content .filter-item-wrap": "filterAccount",
         "click .calls-type-filter-content .filter-item-wrap": "filterType",
         "click .chat-message": "openChat",
+        "click .call-contact-item": "openChatContact",
         "click .chat-message .btn-send-jingle": "sendJingleMessage",
+        "click .call-contact-item .btn-send-jingle": "sendJingleMessageContact",
+        "click .btn-end-call": "endCall",
 
     },
 
@@ -50,6 +53,7 @@ xabber.CallsView = xabber.BasicView.extend({
         xabber.accounts.on("list_changed connected_list_changed notification_chat_created account_color_updated add destroy", this.updateAccountsFilter, this);
         xabber.accounts.on("change:enabled", this.updateAccountsFilter, this);
         xabber.accounts.on("change:connected", this.updateAccountsFilter, this);
+        xabber.on("update_jingle_button", this.updateActiveCall, this);
 
         this.rendered_messages = [];
         this.calls_accounts = [];
@@ -73,7 +77,118 @@ xabber.CallsView = xabber.BasicView.extend({
         this.data.set('visible', true);
         this.updateAccountsFilter();
         this.onScroll();
+        this.updateActiveCall();
+        this.updateCallContacts();
         this.updateScrollBar2();
+    },
+
+    updateActiveCall: function () {
+        this.$('.calls-right-wrap').switchClass('active-call', xabber.current_voip_call);
+        this.$('.active-call-container .call-duration').text('');
+        clearInterval(this._duration_Interval);
+        if (xabber.current_voip_call){
+            let contact = xabber.current_voip_call.contact;
+
+            if (!contact){
+                this.$('.calls-right-wrap').removeClass('active-call');
+                return;
+            }
+
+            let author = contact || $msg.find('.msg-wrap .chat-msg-author').text() || $msg.data('from'),
+                image = author && author.cached_image || utils.images.getDefaultAvatar(author);
+            this.$('.active-call-container .circle-avatar').setAvatar(image, this.avatar_size);
+            this.$('.active-call-container .call-contact-name').text(contact.get('name'));
+            xabber.current_voip_call.current_timer && this.$('.active-call-container .call-duration').text(utils.pretty_duration(xabber.current_voip_call.current_timer));
+            this._duration_Interval = setInterval(() => {
+                if (!xabber.current_voip_call || !xabber.current_voip_call.current_timer){
+                    clearInterval(this._duration_Interval);
+                    return;
+                }
+                this.$('.active-call-container .call-duration').text(utils.pretty_duration(xabber.current_voip_call.current_timer));
+            }, 1000);
+
+            let voip_status = xabber.current_voip_call.get('status');
+
+            if (voip_status === 'disconnected'){
+                this.$('.calls-right-wrap').removeClass('active-call');
+                clearInterval(this._duration_Interval);
+            }
+        }
+    },
+
+    endCall: function () {
+        if (xabber.current_voip_call && xabber.current_voip_call.modal_view){
+            xabber.current_voip_call.modal_view.cancel();
+            this.$('.calls-right-wrap').removeClass('active-call');
+        }
+    },
+
+    updateCallContacts: function () {
+        this.$('.calls-contacts-container').html('');
+        console.log(this.calls_messages.length)
+        if (!this.calls_messages.length)
+            return;
+        let contacts_list = [];
+        _.each(_.clone(this.calls_messages.models).reverse(), (msg) => {
+            if (contacts_list.length > 4){
+                return;
+            }
+            if (msg.get('call_contact')) {
+                let contact = msg.get('call_contact');
+                console.log(!contacts_list.some(item => item.get('jid') === contact.get('jid')));
+                if (!contacts_list.length || !contacts_list.some(item => item.get('jid') === contact.get('jid'))) {
+                    contacts_list.push(contact);
+                }
+            }
+        });
+        console.log(contacts_list);
+        if (contacts_list.length){
+            _.each(contacts_list, (item) => {
+                let $template = $(templates.call_contact_item({jid: item.get('jid'), name: item.get('name')}));
+                $template.find('.circle-avatar').setAvatar(item.cached_image || utils.images.getDefaultAvatar(item), this.avatar_size);
+                this.$('.calls-contacts-container').append($template);
+            });
+        }
+    },
+
+    openChatContact: function (ev) {
+        if ($(ev.target).closest('.btn-send-jingle').length)
+            return;
+
+        let $item = $(ev.target).closest('.call-contact-item'),
+            jid = $item.attr('data-jid');
+        if (!this.current_account)
+            return;
+        let contact = this.current_account.contacts.get(jid);
+        if (!contact)
+            return;
+
+        this.current_account.chats.openChat(contact);
+    },
+
+    sendJingleMessageContact: function (ev) {
+        if (!xabber.settings.jingle_calls){
+            return;
+        }
+        if (xabber.current_voip_call) {
+            xabber.current_voip_call.modal_view.collapse();
+            return;
+        }
+        let $item = $(ev.target).closest('.call-contact-item'),
+            jid = $item.attr('data-jid');
+        if (!this.current_account)
+            return;
+        let contact = this.current_account.contacts.get(jid);
+        if (!contact)
+            return;
+
+
+        let session_id = uuid();
+
+        xabber.current_voip_call = new xabber.JingleMessage({session_id: session_id, video_live: false}, {contact: contact});
+        xabber.current_voip_call.startCall();
+        xabber.current_voip_call.modal_view.show({status: constants.JINGLE_MSG_PROPOSE});
+        xabber.trigger('update_jingle_button');
     },
 
     updateScrollBar2: function () {

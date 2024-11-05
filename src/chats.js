@@ -997,12 +997,14 @@ xabber.EphemeralTimerSelector = xabber.BasicView.extend({
       },
 
       setEnabledVideoTrack: function () {
-          let value = this.get('video_live'),
-              default_video = this.conn.getSenders().find(sender => sender.track && (sender.track.default || sender.track.screen));
+          let value = this.get('video_live');
+              // default_video = this.conn.getSenders().find(send;r => sender.track && (sender.track.default || sender.track.screen));
           value && this.set('video_screen', false);
           try {
-              (default_video && value) && this.createVideoStream(() => {
-                  (!default_video && this.local_stream) && (this.local_stream.getVideoTracks()[0].enabled = value);
+              (value) && this.createVideoStream(() => {
+                  (this.local_stream) && (this.local_stream.getVideoTracks()[0].enabled = value);
+              // (default_video && value) && this.createVideoStream(() => { // video didnt work on second enable
+              //     (!default_video && this.local_stream) && (this.local_stream.getVideoTracks()[0].enabled = value);
                   this.set('video', value || this.get('video_screen'));
               });
               if (!value){

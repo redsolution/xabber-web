@@ -9792,6 +9792,7 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
         "mouseout .contact-expanded-groups-wrap": "closeGroups",
         "keyup .search-input": "keyUpSearch",
         "click .btn-edit": "editContactsGroups",
+        "click .contact-jid": "onClickJid",
     },
 
     _initialize: function () {
@@ -9847,6 +9848,14 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
                 this.ps_container2.perfectScrollbar('update');
         }
         return this;
+    },
+
+    onClickJid: function (ev) {
+        if ($(ev.target).closest('.contact-domain').length)
+            return;
+        let $target_info = $(ev.target).closest('.roster-contact-item-wrap'),
+            $target_value = $target_info.attr('data-jid');
+        $target_value && utils.copyTextToClipboard($target_value, xabber.getString("toast__copied_in_clipboard"), xabber.getString("toast__not_copied_in_clipboard"));
     },
 
     updateAccountsFilter: function () {
