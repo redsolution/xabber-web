@@ -390,6 +390,9 @@ xabber.MessagesBase = Backbone.Collection.extend({
             attrs.jingle_call_status = options.jingle_call_status;
             attrs.jingle_call_status_text = xabber.getString(`calls_window__call_status_${options.jingle_call_status}`);
         }
+        if (options.jingle_call_type) {
+            attrs.jingle_call_type = options.jingle_call_type;
+        }
         if (options.notification_msg && $notification_msg.length){
             attrs.notification_msg_content = $notification_msg[0];
             attrs.not_verified_device = null;
@@ -1044,6 +1047,7 @@ xabber.EphemeralTimerSelector = xabber.BasicView.extend({
 
       onChangedVideoValue: function () {
           let video_state = this.get('video') ? 'enable' : 'disable';
+          this.get('video') && this.set('had_video', true);
           this.sendVideoStreamState(video_state);
           this.onChangedMediaType();
       },
@@ -1209,8 +1213,11 @@ xabber.EphemeralTimerSelector = xabber.BasicView.extend({
               $reject_msg.c('call', call_attrs).up();
           }
           $reject_msg.up().c('store', {xmlns: Strophe.NS.HINTS}).up()
-              .c('markable').attrs({'xmlns': Strophe.NS.CHAT_MARKERS}).up()
+              .c('markable').attrs({'xmlns': Strophe.NS.CHAT_MARKERS}).up()//34
               .c('origin-id', {id: uuid(), xmlns: 'urn:xmpp:sid:0'});
+          if (this.get('had_video')){
+              $reject_msg.up().c('tags').c('tag').attrs({name: 'video_call'}).up();
+          }
           this.account.sendMsg($reject_msg);
           $reject_msg.up().c('time').attrs({'xmlns': Strophe.NS.DELIVERY, by: this.account.get('jid'), stamp: new Date().toISOString() });
           if (xabber.calls_view) {
@@ -1606,7 +1613,7 @@ xabber.EphemeralTimerSelector = xabber.BasicView.extend({
                 to: msg_to
             })
                 .c('reject', {xmlns: Strophe.NS.JINGLE_MSG, id: options.session_id})
-                .c('call', {reason: options.reason, initiator: options.initiator}).up().up()
+                .c('call', {reason: options.reason, initiator: options.initiator}).up().up()//34
                 .c('store', {xmlns: Strophe.NS.HINTS}).up()
                 .c('markable').attrs({'xmlns': Strophe.NS.CHAT_MARKERS}).up()
                 .c('origin-id', {id: uuid(), xmlns: 'urn:xmpp:sid:0'});
@@ -8761,6 +8768,8 @@ xabber.AccountChats = xabber.ChatsBase.extend({
                     return;
                 let chat = this.account.chats.get(pending_message.chat_hash_id);
                 if (chat && chat.get('group_chat'))
+                    return;
+                if (chat && (!chat.messages || !chat.messages.get(pending_message.unique_id)))
                     return;
                 if (!msg.get('stanza_id') && msg.get('locations'))
                     msg.set({'stanza_id': stanza_id})

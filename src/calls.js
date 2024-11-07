@@ -109,9 +109,18 @@ xabber.CallsView = xabber.BasicView.extend({
 
             let voip_status = xabber.current_voip_call.get('status');
 
-            if (voip_status === 'disconnected'){
+            if (voip_status === 'disconnected' || voip_status === 'calling' || voip_status === 'connecting' || !voip_status){
                 this.$('.calls-right-wrap').removeClass('active-call');
                 clearInterval(this._duration_Interval);
+            }
+            this.$('.active-call-container').attr('data-color', contact.account.settings.get('color'))
+            if (xabber.current_voip_call.get('call_initiator') === contact.account.get('jid')){
+                this.$('.outgoing-icon').removeClass('hidden');
+                this.$('.incoming-icon').addClass('hidden');
+            } else {
+                this.$('.outgoing-icon').addClass('hidden');
+                this.$('.incoming-icon').removeClass('hidden');
+
             }
         }
     },
@@ -697,6 +706,7 @@ xabber.CallsView = xabber.BasicView.extend({
             jingle_duration: attrs.jingle_duration || '',
             jingle_call_status: attrs.jingle_call_status || '',
             message: attrs.jingle_call_status_text,
+            call_type: attrs.jingle_call_type || '',
             time: attrs.time || '',
             classlist: classes.join(' ')
         })));
@@ -897,6 +907,13 @@ xabber.CallsView = xabber.BasicView.extend({
                 }
             } else {
                 options.jingle_call_status = 'declined';
+            }
+
+            if ($message.children('tags').length){
+                let $tags = $message.children('tags');
+                if ($tags.children('tag[name="video_call"]').length){
+                    options.jingle_call_type = 'video';
+                }
             }
         }
 

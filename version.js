@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.3.5.100","version_description":"returned msg text escaping, added active call item in calls view, added recent call contacts under filters in calls view, added openchat and call btns for calls contacts, fixed video not working for second enable in jingle call, added jid copying on clicking jid in contacts view, "}'
+'{"version_number":"2.3.5.101","version_description":"fixed stuck on each other jingle modals, added account text coloring for active call, added call status icon for active call, added tagging for reject msg if call had video enabled at some point, fixed active call visibility in calling and connecting states, fixed minor pending messages error, changed minimized jingle modal design, "}'
 )});

@@ -26,7 +26,11 @@
 
     <div class="right-side noselect">
         <div class="btn-send-jingle">
-            <svg class="mdi fill-color-grey-500 mdi-svg-template" data-svgname="call"></svg>
+            {[ if (call_type === 'video') {]}
+                <svg class="mdi fill-color-grey-500 mdi-svg-template" data-svgname="video"></svg>
+            {[} else {]}
+                <svg class="mdi fill-color-grey-500 mdi-svg-template" data-svgname="call"></svg>
+            {[}]}
         </div>
     </div>
 </div>

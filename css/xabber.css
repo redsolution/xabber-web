@@ -567,9 +567,10 @@ button.btn-float-left {
     width: 33%;
 }
 
-.main-modal:not(.plyr-player-popup-view):not(.collapsed-video) {
+.main-modal:not(.plyr-player-popup-view):not(.collapsed) {
     top: 50% !important;
     width: 400px;
+    position: absolute;
     transform: translate(0, -50%) !important;
 }
 
@@ -642,35 +643,35 @@ button.btn-float-left {
 
 
 .main-modal.collapsed {
-    display: none !important;
-    height: 48px;
-    position: absolute;
-    top: 64px;
+    border-radius: 8px;
+    height: 15vh;
     left: unset;
     margin: 0;
+    position: absolute;
+    top: 64px;
     transition: width .1s;
     z-index: 1001 !important;
-    border-radius: 8px;
+    width: 20vh;
 }
 
 .main-modal.collapsed.collapsed-video {
     display: block !important;
-    width: 16vh;
-    height: 12vh;
+    width: 20vh;
+    height: 15vh;
     cursor: pointer;
     overflow: hidden;
     background-color: transparent;
 }
 
 .main-modal.collapsed.collapsed-video.multiple-videos{
-    height: 24vh;
+    height: 30vh;
 }
 
-.main-modal:not(.collapsed-video) .collapsed-movable {
+.main-modal:not(.collapsed) .collapsed-movable {
     display: none !important;
 }
 
-.main-modal.collapsed-video .collapsed-movable {
+.main-modal.collapsed .collapsed-movable {
     height: 100%;
     width: 100%;
     cursor: grabbing;
@@ -7875,7 +7876,7 @@ input[type=text].simple-input-field:hover {
     background-color: rgba(255, 255, 255, .8);
     position: relative;
 }
-.jingle-message-view:not(.collapsed-video) {
+.jingle-message-view:not(.collapsed) {
     top: 50% !important;
     width: 800px !important;
 }
@@ -7935,11 +7936,33 @@ input[type=text].simple-input-field:hover {
     font-size: 16px;
 }
 
-.jingle-message-view.collapsed .video-wrap,
 .jingle-message-view.collapsed .contact-info,
-.jingle-message-view.collapsed .buttons-panel,
+.jingle-message-view.collapsed .btn-share-screen,
+.jingle-message-view.collapsed .btn-full-screen,
 .jingle-message-view.collapsed .call-header {
     display: none !important;
+}
+.jingle-message-view.collapsed .buttons-panel .buttons-wrap{
+    z-index: 1001;
+    transition: all .3s ease;
+}
+.jingle-message-view.collapsed-video .buttons-panel .buttons-wrap{
+    opacity: 0;
+    transition: all .3s ease;
+}
+.jingle-message-view.collapsed:hover .buttons-panel .buttons-wrap{
+    opacity: 1;
+}
+.jingle-message-view.collapsed .buttons-panel i {
+    width: 24px !important;
+    height: 24px !important;
+    margin: 0 6px;
+    line-height: 18px;
+    font-size: 12px !important;
+    padding: 3px;
+}
+.jingle-message-view.collapsed .buttons-panel i:before {
+    font-size: 18px !important;
 }
 
 .jingle-message-view:not([data-state]) .default-screen .name,
@@ -8077,12 +8100,6 @@ input[type=text].simple-input-field:hover {
 .jingle-message-view>i {
     border-radius: inherit;
     padding: 0;
-
-
-    animation-duration: 1.5s;
-    animation-name: slidein;
-    animation-iteration-count: infinite;
-    animation-direction: alternate;
 }
 
 .jingle-message-view>i.btn-collapse {
@@ -8102,12 +8119,19 @@ input[type=text].simple-input-field:hover {
     flex-direction: column;
     justify-content: space-evenly;
 }
-
-.jingle-message-view.collapsed .default-screen,
+.jingle-message-view.collapsed.collapsed-video .webrtc-local-video{
+    z-index: 1;
+}
 .jingle-message-view.collapsed-video>i.btn-collapse,
 .jingle-message-view.collapsed svg.btn-collapse {
     display: none !important;
 }
+.jingle-message-view.collapsed .default-screen .circle-avatar{
+    width: 40px;
+    height: 40px;
+    margin-bottom: 36px;
+}
+
 
 .jingle-message-view>i.btn-collapse {
     display: none;
@@ -9927,7 +9951,7 @@ input[type=text].simple-input-field:hover {
     /*position: absolute;*/
     width: 100%;
     top: 8px;
-    z-index: 3;
+    z-index: 4;
     margin-top: 8px;
     background-color: transparent;
     display: flex;
@@ -21900,7 +21924,14 @@ ul.restrictions-list-content>li {
     position: absolute;
     top: 35px;
     line-height: 16px;
+    left: 90px;
+}
+.calls-content-wrap .calls-right-wrap.active-call .active-call-container .active-call-icon{
+    position: absolute;
+    top: 35px;
     left: 70px;
+    height: 16px;
+    width: 16px;
 }
 .calls-content-wrap .calls-right-wrap.active-call .active-call-container .btn-end-call{
     border-radius: 50%;

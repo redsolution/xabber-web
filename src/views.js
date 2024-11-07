@@ -1395,8 +1395,11 @@ xabber.JingleMessageView = xabber.BasicView.extend({
                     document.onmouseup = (e) => {
                         document.onmouseup = null;
                         document.onmousemove = null;
-                        if (!didDrag)
+                        if (!didDrag){
+                            if ($(e.target).closest('.buttons-wrap').length)
+                                return;
                             this.collapse();
+                        }
                     };
                     // call a function whenever the cursor moves:
                     document.onmousemove = (e) => {
@@ -1520,6 +1523,8 @@ xabber.JingleMessageView = xabber.BasicView.extend({
     },
 
     clickOnWindow: function (ev) {
+        if ($(ev.target).closest('.buttons-wrap').length)
+            return;
         if ($(ev.target).closest('.collapsed-movable').length)
             return;
         if ($(ev.target).closest('.video-wrap').length && this.$el.hasClass('collapsed') && this.$el.hasClass('collapsed-video'))
@@ -1537,7 +1542,12 @@ xabber.JingleMessageView = xabber.BasicView.extend({
         this.$el.toggleClass('collapsed');
         if (this.$el.hasClass('collapsed')) {
             this.$el.switchClass('collapsed-video', (this.model.get('video') || this.model.get('video_in')));
+            let had_class = this.$el.hasClass('multiple-videos');
             this.$el.switchClass('multiple-videos', this.model.get('video') && this.model.get('video_in'));
+            if (!had_class && this.model.get('video') && this.model.get('video_in'))
+                this.$el.css('top', `calc(${this.$el.css('top')} - 15vh)`);
+            if (had_class && !(this.model.get('video') && this.model.get('video_in')))
+                this.$el.css('top', `calc(${this.$el.css('top')} + 15vh)`);
         }
         else {
             this.$el.css('right', "");
@@ -1553,7 +1563,12 @@ xabber.JingleMessageView = xabber.BasicView.extend({
         this.updateButtons();
         if (this.$el.hasClass('collapsed')) {
             this.$el.switchClass('collapsed-video', (this.model.get('video') || this.model.get('video_in')));
+            let had_class = this.$el.hasClass('multiple-videos');
             this.$el.switchClass('multiple-videos', this.model.get('video') && this.model.get('video_in'));
+            if (!had_class && this.model.get('video') && this.model.get('video_in'))
+                this.$el.css('top', `calc(${this.$el.css('top')} - 15vh)`);
+            if (had_class && !(this.model.get('video') && this.model.get('video_in')))
+                this.$el.css('top', `calc(${this.$el.css('top')} + 15vh)`);
         }
     },
 
