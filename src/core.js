@@ -478,62 +478,72 @@ let Xabber = Backbone.Model.extend({
                 this.check_config.resolve(false);
                 return;
             }
+            let broadcast_dfd = new $.Deferred();
+            broadcast_dfd.done(() => {
+                if (bc && bc.disabled_client){
+                    utils.dialogs.error(this.getString("client_error__another_tab_active"));
+                    this.check_config.resolve(false);
+                    return;
+                }
+
+                let self = this;
+                if (!Backbone.useLocalStorage && !this.cache.ignore_localstorage_warning) {
+                    utils.dialogs.warning(this.getString("client_warning__no_local_storage"),
+                        [{name: this.getString("ignore"), text: this.getString("client_error__option_show_msg_again")}]
+                    ).done(function (res) {
+                        res && res.ignore && self._cache.save('ignore_localstorage_warning', true);
+                    });
+                }
+
+                this.requestNotifications().done(function (granted) {
+                    let emoji_dfd = new $.Deferred();
+                    emoji_dfd.done(() => {
+                        self._cache.save('notifications', granted);
+                        self._cache.save('endpoint_key', undefined);
+                        self.check_config.resolve(true);
+                    })
+                    if (self._settings.get("emoji_font") === 'system' || !Object.keys(constants.EMOJI_FONTS_LIST).length)
+                        emoji_dfd.resolve();
+                    else {
+                        let emoji_obj = constants.EMOJI_FONTS_LIST[self._settings.get("emoji_font")],
+                            emoji_url;
+                        if (emoji_obj && emoji_obj.url) {
+                            emoji_url = emoji_obj.url;
+                            self.loadEmojiFont(emoji_url, emoji_dfd);
+                        }
+                        else {
+                            emoji_dfd.resolve();
+                        }
+                    }
+                });
+            })
             let bc;
             if (constants.USE_TAB_SIGNALS){
                 try {
                     bc = new BroadcastChannel("xabber-web");
                 } catch (e) {
-                    console.log(e);
+                    console.error(e);
                 }
                 if (bc){
+                    let bc_message_timeout = setTimeout(() => {
+                        broadcast_dfd.resolve();
+                    }, 1000);
                     bc.onmessage = (event) => {
                         if (event.data === `1` && !bc.disabled_client) {
                             bc.postMessage(`2`);
                         }
                         if (event.data === `2`) {
                             bc.disabled_client = true
+                            clearTimeout(bc_message_timeout);
+                            broadcast_dfd.resolve();
                         }
                     };
 
                     bc.postMessage(`1`);
                 }
+            } else {
+                broadcast_dfd.resolve();
             }
-            if (bc && bc.disabled_client){
-                utils.dialogs.error(this.getString("client_error__another_tab_active"));
-                this.check_config.resolve(false);
-                return;
-            }
-
-            let self = this;
-            if (!Backbone.useLocalStorage && !this.cache.ignore_localstorage_warning) {
-                utils.dialogs.warning(this.getString("client_warning__no_local_storage"),
-                    [{name: this.getString("ignore"), text: this.getString("client_error__option_show_msg_again")}]
-                ).done(function (res) {
-                    res && res.ignore && self._cache.save('ignore_localstorage_warning', true);
-                });
-            }
-
-            this.requestNotifications().done(function (granted) {
-                let emoji_dfd = new $.Deferred();
-                emoji_dfd.done(() => {
-                    self._cache.save('notifications', granted);
-                    self._cache.save('endpoint_key', undefined);
-                    self.check_config.resolve(true);
-                })
-                if (self._settings.get("emoji_font") === 'system' || !Object.keys(constants.EMOJI_FONTS_LIST).length)
-                    emoji_dfd.resolve();
-                else {
-                    let emoji_obj = constants.EMOJI_FONTS_LIST[self._settings.get("emoji_font")],
-                        emoji_url;
-                    if (emoji_obj && emoji_obj.url) {
-                        emoji_url = emoji_obj.url;
-                        self.loadEmojiFont(emoji_url, emoji_dfd);
-                    }
-                    else {
-                        emoji_dfd.resolve();
-                    }
-                }
-            });
         });
     },
 
