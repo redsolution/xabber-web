@@ -8058,6 +8058,10 @@ input[type=text].simple-input-field:hover {
     font-weight: 500;
 }
 
+.jingle-message-view.collapsed .name {
+    display: none !important;
+}
+
 .jingle-message-view .circle-avatar {
     width: 128px;
     height: 128px;
@@ -9468,6 +9472,21 @@ input[type=text].simple-input-field:hover {
     background-color: #81D4FA;
     outline-color: #81D4FA;
 }
+
+.toolbar-item.jingle-calls.active-call .jingle-toolbar-icon-background {
+    -webkit-animation: pulsate 1.5s ease-out;
+    -webkit-animation-iteration-count: infinite;
+    height: 24px;
+    width: 24px;
+    left: 20px;
+    position: absolute;
+    outline: 7px;
+    outline-style: solid;
+    outline-offset: -1px;
+    border-radius: 50%;
+    background-color: #81D4FA;
+    outline-color: #81D4FA;
+}
 .chat-tools-wrap .chat-tool.btn-jingle-message.active-call i{
     color: #0277BD;
 }
@@ -9504,6 +9523,12 @@ input[type=text].simple-input-field:hover {
         background: #F5F5F5;
     }
 }
+.toolbar-item.jingle-calls.active-call[data-state=search] .jingle-toolbar-icon-background,
+.toolbar-item.jingle-calls.active-call[data-state=calling] .jingle-toolbar-icon-background{
+
+    background-color: #03A9F4;
+    outline-color: #03A9F4;
+}
 .chat-tools-wrap .chat-tool.btn-jingle-message.active-call[data-state=search],
 .chat-tools-wrap .chat-tool.btn-jingle-message.active-call[data-state=calling] {
     background-color: #81D4FA;
@@ -9513,6 +9538,11 @@ input[type=text].simple-input-field:hover {
 .chat-tools-wrap .chat-tool.btn-jingle-message.active-call[data-state=calling] i{
     color: #0277BD;
 }
+.toolbar-item.jingle-calls.active-call[data-state=connecting] .jingle-toolbar-icon-background{
+
+    background-color: #00BCD4;
+    outline-color: #00BCD4;
+}
 .chat-tools-wrap .chat-tool.btn-jingle-message.active-call[data-state=connecting] {
     background-color: #80DEEA;
     outline-color: #80DEEA;
@@ -9521,6 +9551,10 @@ input[type=text].simple-input-field:hover {
     color: #00838F;
 }
 
+.toolbar-item.jingle-calls.active-call[data-state=connected] .jingle-toolbar-icon-background{
+    background-color: #4CAF50;
+    outline-color: #4CAF50;
+}
 .chat-tools-wrap .chat-tool.btn-jingle-message.active-call[data-state=connected] {
     background-color: #A5D6A7;
     outline-color: #A5D6A7;
@@ -9530,6 +9564,10 @@ input[type=text].simple-input-field:hover {
 }
 
 
+.toolbar-item.jingle-calls.active-call[data-state=disconnected] .jingle-toolbar-icon-background{
+    background-color: #F44336;
+    outline-color: #F44336;
+}
 .chat-tools-wrap .chat-tool.btn-jingle-message.active-call[data-state=disconnected] {
     background-color: #EF9A9A;
     outline-color: #EF9A9A;
@@ -9538,6 +9576,11 @@ input[type=text].simple-input-field:hover {
     color: #C62828;
 }
 
+.toolbar-item.jingle-calls.active-call[data-state=busy] .jingle-toolbar-icon-background,
+.toolbar-item.jingle-calls.active-call[data-state=device_busy] .jingle-toolbar-icon-background{
+    background-color: #FF9800;
+    outline-color: #FF9800;
+}
 .chat-tools-wrap .chat-tool.btn-jingle-message.active-call[data-state=busy],
 .chat-tools-wrap .chat-tool.btn-jingle-message.active-call[data-state=device_busy]{
     background-color: #FFCC80;

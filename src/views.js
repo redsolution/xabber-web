@@ -1054,6 +1054,7 @@ xabber.ToolbarView = xabber.BasicView.extend({
         });
 
         xabber.on("update_screen", this.onUpdatedScreen, this);
+        xabber.on("update_jingle_button", this.updateJingleButton, this);
         this.data.on("change:all_msg_counter", this.onChangedAllMessageCounter, this);
         this.data.on("change:group_msg_counter", this.onChangedGroupMessageCounter, this);
         this.data.on("change:mentions_counter", this.onChangedMentionsCounter, this);
@@ -1076,6 +1077,19 @@ xabber.ToolbarView = xabber.BasicView.extend({
     },
 
     updateColor: function (color) {
+    },
+
+    updateJingleButton: function () {
+        this.$('.toolbar-item.jingle-calls').switchClass('active-call', xabber.current_voip_call);
+        if (xabber.current_voip_call){
+            let voip_status = xabber.current_voip_call.get('status');
+            if (voip_status)
+                this.$('.toolbar-item.jingle-calls').attr('data-state', voip_status);
+            else
+                this.$('.toolbar-item.jingle-calls').attr('data-state', '');
+            if (voip_status === 'disconnected')
+                this.$('.toolbar-item.jingle-calls').removeClass('active-call');
+        }
     },
 
     onUpdatedScreen: function (name) {
