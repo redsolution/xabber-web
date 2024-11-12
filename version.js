@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.3.5.103","version_description":"jingle toolbar pulse on active call"}'
+'{"version_number":"2.3.6.1","version_description":"chats and tabs redesign, contacts fix, invitations fix, "}'
 )});

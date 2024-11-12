@@ -26,6 +26,7 @@
             </div>
         </div>
     </div>
+    <div class="notifications-filter-header">{[print(xabber.getString("notifications_window__calendar_header"))]}</div>
     <div class="notifications-calendar-activity">
 
     </div>
@@ -33,7 +34,9 @@
 <div class="notifications-right-wrap">
     <div class="notifications-utility">
         <div class="notifications-header"></div>
-        <div class="btn-flat btn-read-all btn-main-filled">{[print(xabber.getString("mark_all_as_read_button"))]}</div>
+        <div class="btn-read-all">
+            <svg class="mdi mdi-24px mdi-svg-template" data-svgname="check-all"></svg>
+        </div>
 
     </div>
     <div class="notifications-content">

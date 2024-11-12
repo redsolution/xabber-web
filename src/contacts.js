@@ -1668,7 +1668,6 @@ xabber.ContactDetailsViewRight = xabber.BasicView.extend({
         this.updateStatusMsg();
         this.updateName();
         this.updateNotifications();
-        this.setButtonsWidth();
         this.updateButtons();
         this.hideQRCode();
         this.updateList('image');
@@ -1766,11 +1765,11 @@ xabber.ContactDetailsViewRight = xabber.BasicView.extend({
             });
     },
 
-    setButtonsWidth: function () {
-        let widths = [];
-        this.$('.button-wrap').each((i, button) => {widths.push(button.clientWidth)});
-        this.$('.button-wrap').css('width', `${Math.max.apply(null, widths)}px`);
-    },
+    // setButtonsWidth: function () {
+    //     let widths = [];
+    //     this.$('.button-wrap').each((i, button) => {widths.push(button.clientWidth)});
+    //     this.$('.button-wrap').css('width', `${Math.max.apply(null, widths)}px`);
+    // },
 
     onChangedVisibility: function () {
         this.model.set('display', this.isVisible());
@@ -2240,7 +2239,6 @@ xabber.GroupChatDetailsViewRight = xabber.BasicView.extend({
         this.updateChilds();
         this.updateNotifications();
         this.updateList('participants');
-        this.setButtonsWidth();
         this.hideQRCode();
         if (options && options.right_contact_modal)
             this.makeModal();
@@ -2325,11 +2323,11 @@ xabber.GroupChatDetailsViewRight = xabber.BasicView.extend({
         this.$el.attr('data-color', this.account.settings.get('color'));
     },
 
-    setButtonsWidth: function () {
-        let widths = [];
-        this.$('.button-wrap').each((i, button) => {widths.push(button.clientWidth)});
-        this.$('.button-wrap').css('width', `${Math.max.apply(null, widths)}px`);
-    },
+    // setButtonsWidth: function () {
+    //     let widths = [];
+    //     this.$('.button-wrap').each((i, button) => {widths.push(button.clientWidth)});
+    //     this.$('.button-wrap').css('width', `${Math.max.apply(null, widths)}px`);
+    // },
 
     updateButtons: function () {
         let is_owner = this.model.my_rights && this.model.my_rights.fields.find(permission => permission.var == 'owner' && permission.values),
@@ -11055,6 +11053,8 @@ xabber.once("start", function () {
         {storage_name: this.getStorageName(), fetch: 'after'});
     this.settings.roster = this._roster_settings.attributes;
     this.contacts_view = this.right_panel.addChild('contacts', this.RosterFullScreenView,
+        {model: this.accounts});
+    this.contacts_left_view = this.left_panel.addChild('contacts-left', this.RosterLeftView,
         {model: this.accounts});
     this.contact_container = this.right_panel.addChild('details', this.Container);
     this.details_container = this.right_contact_panel.addChild('details', this.Container);

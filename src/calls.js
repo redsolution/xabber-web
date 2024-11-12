@@ -154,7 +154,7 @@ xabber.CallsView = xabber.BasicView.extend({
         if (contacts_list.length){
             _.each(contacts_list, (item) => {
                 let $template = $(templates.call_contact_item({jid: item.get('jid'), name: item.get('name')}));
-                $template.find('.circle-avatar').setAvatar(item.cached_image || utils.images.getDefaultAvatar(item), this.avatar_size);
+                $template.find('.circle-avatar').setAvatar(item.cached_image || utils.images.getDefaultAvatar(item), 32);
                 this.$('.calls-contacts-container').append($template);
             });
         }

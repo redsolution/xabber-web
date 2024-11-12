@@ -1198,6 +1198,8 @@ body {
     margin: 0 auto;
     display: flex;
     box-shadow: rgba(0, 0, 0, 0.15) 1px 6px 20px 4px;
+    justify-content: space-evenly;
+    background: #fff;
 }
 
 .main-overlay-wrap {
@@ -1328,7 +1330,7 @@ body {
 }
 
 .chat-head-container.panel-head {
-    box-shadow: 0 1px 1px -1px rgb(0 0 0 / 25%)
+    /*box-shadow: 0 1px 1px -1px rgb(0 0 0 / 25%);*/
 }
 
 .chat-body-container {
@@ -1387,8 +1389,8 @@ body {
 .panel-head {
     position: absolute;
     width: 100%;
-    height: 64px;
-    box-shadow: 0 0 1px 0 rgba(0,0,0,0.25);
+    height: 72px;
+    /*box-shadow: 0 0 1px 0 rgba(0,0,0,0.25);*/
     z-index: 100;
 }
 
@@ -6474,61 +6476,55 @@ input[type=text].simple-input-field:hover {
     display: flex;
     height: 100%;
     width: 100%;
+    justify-content: space-evenly;
 }
 .contacts-panel-wrap .contacts-panel-left-side{
-    position: relative;
-    height: 100%;
-    margin-left: 24px;
-    margin-right: 24px;
-    margin-top: 16px;
-    min-width: 272px;
+    padding: 0 16px;
+    max-width: 384px;
+    min-width: 288px;
     overflow: hidden;
-    padding-bottom: 40px;
-    width: 30%;
+    position: relative;
+    width: 26%;
 }
 .contacts-panel-wrap .contacts-panel-left-side .contacts-filter-main-header{
     font-size: 24px;
     line-height: 32px;
-    margin-bottom: 33px;
-    margin-left: 14px;
+    height: 64px;
+    padding: 16px 8px;
+}
+.contacts-panel-wrap .contacts-panel-left-side .contacts-type-filter{
+    margin-top: 28px;
 }
 .contacts-panel-wrap .contacts-panel-left-side .contacts-type-filter,
 .contacts-panel-wrap .contacts-panel-left-side .contacts-account-filter{
     margin-bottom: 16px;
 }
-.contacts-panel-wrap .contacts-panel-left-side .contacts-filter-header{
-    color: rgba(0, 0, 0, .54);
-    font-size: 16px;
-    font-weight: 500;
-    line-height: 32px;
-    margin-bottom: 2px;
-    margin-left: 14px;
-}
-.contacts-panel-wrap .contacts-panel-left-side .filter-item-wrap.selected-filter{
-    background: #eee;
-}
-.contacts-panel-wrap .contacts-panel-left-side .filter-item-wrap{
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 16px;
-    line-height: 24px;
-    padding: 4px 42px 4px 48px;
-    position: relative;
-}
-.contacts-panel-wrap .contacts-panel-left-side .filter-item-wrap .filter-icon{
-    height: 20px;
-    left: 14px;
-    position: absolute;
-    top: 6px;
-    width: 20px;
-}
-.contacts-panel-wrap .contacts-panel-left-side .filter-item-wrap span{
-    position: absolute;
-    right: 16px;
-    font-size: 14px;
-    line-height: 24px;
-    color: #BDBDBD;
-}
+/*.contacts-panel-wrap .contacts-panel-left-side .contacts-filter-header{*/
+    /*color: rgba(0, 0, 0, .54);*/
+    /*font-size: 16px;*/
+    /*font-weight: 500;*/
+    /*line-height: 32px;*/
+    /*margin-bottom: 2px;*/
+    /*margin-left: 14px;*/
+/*}*/
+/*.contacts-panel-wrap .contacts-panel-left-side .filter-item-wrap.selected-filter{*/
+    /*background: #eee;*/
+/*}*/
+/*.contacts-panel-wrap .contacts-panel-left-side .filter-item-wrap{*/
+    /*border-radius: 8px;*/
+    /*cursor: pointer;*/
+    /*font-size: 16px;*/
+    /*line-height: 24px;*/
+    /*padding: 4px 42px 4px 48px;*/
+    /*position: relative;*/
+/*}*/
+/*.contacts-panel-wrap .contacts-panel-left-side .filter-item-wrap .filter-icon{*/
+    /*height: 20px;*/
+    /*left: 14px;*/
+    /*position: absolute;*/
+    /*top: 6px;*/
+    /*width: 20px;*/
+/*}*/
 .contacts-panel-wrap .contacts-panel{
     display: flex;
     flex-direction: column;
@@ -6608,6 +6604,7 @@ input[type=text].simple-input-field:hover {
     overflow: hidden;
     position: relative;
     width: 100%;
+    max-width: 1024px;
 }
 .contacts-panel-wrap .roster-sorting-wrap{
     display: flex;
@@ -8347,8 +8344,8 @@ input[type=text].simple-input-field:hover {
 /* -------------- RECENT CHATS PANEL ------------------ */
 
 .search-form {
-    padding: 22px 0;
-    border-right: 1px solid #EEEEEE;
+    padding: 22px 16px;
+    /*border-right: 1px solid #EEEEEE;*/
 }
 
 .search-form input.simple-input-field {
@@ -8389,6 +8386,12 @@ input[type=text].simple-input-field:hover {
      top: 20px;
      left: 26px;
 }
+.chats-search-form {
+     height: 64px;
+}
+.chats-search-form.search-form .search-icon {
+     left: 42px;
+}
 .search-wide.search-form .close-search-icon,
 .contacts-search-form.search-form .close-search-icon,
 .chats-search-form.search-form .close-search-icon {
@@ -8414,10 +8417,11 @@ input[type=text].simple-input-field:hover {
 
 .left-panel-list-wrap {
     position: absolute;
-    top: 64px;
+    top: 128px;
     bottom: 0;
     width: 100% !important;
-    border-right: 1px solid #F5F5F5;
+    /*border-right: 1px solid #F5F5F5;*/
+    padding: 0 16px;
 }
 
 .mention-item {
@@ -8458,6 +8462,8 @@ input[type=text].simple-input-field:hover {
     height: 56px;
     padding: 11px 7px 11px 60px;
     cursor: pointer;
+    margin-top: 4px;
+    border-radius: 8px;
 }
 
 .chat-list-wrap.left-panel-list-wrap .chat-item {
@@ -8468,8 +8474,7 @@ input[type=text].simple-input-field:hover {
 }
 
 .pinned-chat-list:not(.forward-chats-list) .chat-item{
-    background-color: #f5f5f5;
-
+    /*background-color: #f5f5f5;*/
 }
 
 .pinned-chat-list .chat-item .chat-icon,
@@ -20029,6 +20034,12 @@ input[type=range].voice-message-volume:focus {
     max-width: 200px;
 }
 
+.recent-chats-panel .recent-chats-main-header {
+    font-size: 24px;
+    line-height: 32px;
+    height: 64px;
+    padding: 16px 24px;
+}
 .recent-chats-panel .read-all-button {
     position: absolute;
     bottom: 16px;
@@ -20041,6 +20052,10 @@ input[type=range].voice-message-volume:focus {
     cursor: pointer;
 }
 
+.chat-list-wrap .pinned-chat-list {
+    background: #FAFAFA;
+    border-radius: 8px;
+}
 .chat-list-wrap .load-chats-feedback {
     height: 28px;
     line-height: 18px;
@@ -21007,18 +21022,19 @@ input[type=range].voice-message-volume:focus {
 
 .left-panel-wrap .left-panel-list-wrap .chats-title,
 .left-panel-wrap .left-panel-list-wrap .messages-title,
-.left-panel-wrap .left-panel-list-wrap .contacts-title,
-.forward-panel-modal .forward-panel-list-title {
-    height: 32px;
-    padding: 8px 0 3px 24px;
-    color: #757575;
+.left-panel-wrap .left-panel-list-wrap .contacts-title{
+    font-size: 18px;
     font-weight: 500;
+    height: 48px;
+    line-height: 32px;
+    padding: 12px 8px;
+    color: rgba(0, 0, 0, .87);
 }
-
-.left-panel-wrap .left-panel-list-wrap .messages-title,
-.left-panel-wrap .left-panel-list-wrap .chats-title,
-.left-panel-wrap .left-panel-list-wrap .contacts-title {
-    padding: 8px 0 3px 16px;
+.forward-panel-modal .forward-panel-list-title{
+    padding: 12px 24px;
+}
+.forward-panel-modal .pinned-chat-list{
+    background:#fff;
 }
 
 .forward-panel-modal .account-indicator {
@@ -21036,6 +21052,7 @@ input[type=range].voice-message-volume:focus {
     width: 100%;
     border: 0;
     margin: 0 0 18px 0;
+    height: unset;
 }
 
 .add-user-group-chat .group-head {
@@ -21070,6 +21087,7 @@ input[type=range].voice-message-volume:focus {
     border: 0;
     position: relative;
     padding:0;
+    height: unset;
 }
 
 .forward-panel-modal .chats-search-form .search-icon,
@@ -21110,6 +21128,9 @@ input[type=range].voice-message-volume:focus {
     max-height: calc(48px * 8);
     margin: 18px 0 4px 0;
     padding: 0;
+}
+.forward-panel-modal .chat-list-wrap {
+    padding: 0 16px;
 }
 
 .add-user-group-chat .contacts-list-wrap {
@@ -21820,76 +21841,75 @@ ul.restrictions-list-content>li {
 }
 .calls-content-wrap{
     display: flex;
+    justify-content: space-evenly;
 
 }
 .calls-content-wrap .calls-content-filters{
-    height: calc(100% - 32px);
-    margin-left: 24px;
-    margin-right: 24px;
-    margin-top: 16px;
-    min-width: 272px;
+    padding: 0 16px;
+    max-width: 384px;
+    min-width: 288px;
     overflow: hidden;
     position: relative;
+    width: 26%;
 }
 .calls-content-filters .calls-filter-main-header{
     font-size: 24px;
     line-height: 32px;
-    margin-bottom: 33px;
-    margin-left: 14px;
+    height: 64px;
+    padding: 16px 8px;
 }
-.calls-content-filters .calls-filter-header{
-    color: rgba(0, 0, 0, .54);
-    font-size: 16px;
-    font-weight: 500;
-    line-height: 32px;
-    margin-bottom: 2px;
-    margin-left: 14px;
-}
-.calls-content-filters .filter-item-wrap{
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 16px;
-    line-height: 24px;
-    padding: 4px 42px 4px 48px;
-    position: relative;
-}
-.calls-content-filters .filter-item-wrap.selected-filter{
-    background: #eee;
-}
-.calls-content-wrap .filter-item-wrap .filter-icon {
-    height: 20px;
-    left: 14px;
-    position: absolute;
-    top: 6px;
-    width: 20px;
-}
+/*.calls-content-filters .calls-filter-header{*/
+    /*color: rgba(0, 0, 0, .54);*/
+    /*font-size: 16px;*/
+    /*font-weight: 500;*/
+    /*line-height: 32px;*/
+    /*margin-bottom: 2px;*/
+    /*margin-left: 14px;*/
+/*}*/
+/*.calls-content-filters .filter-item-wrap{*/
+    /*border-radius: 8px;*/
+    /*cursor: pointer;*/
+    /*font-size: 16px;*/
+    /*line-height: 24px;*/
+    /*padding: 4px 42px 4px 48px;*/
+    /*position: relative;*/
+/*}*/
+/*.calls-content-filters .filter-item-wrap.selected-filter{*/
+    /*background: #eee;*/
+/*}*/
+/*.calls-content-wrap .filter-item-wrap .filter-icon {*/
+    /*height: 20px;*/
+    /*left: 14px;*/
+    /*position: absolute;*/
+    /*top: 6px;*/
+    /*width: 20px;*/
+/*}*/
 .calls-content-filters .calls-contacts-wrap{
     margin-bottom: 56px;
 }
 .calls-content-filters .call-contact-item{
+    border-radius: 8px;
+    cursor: pointer;
+    height: 48px;
+    padding: 12px 16px 12px 80px;
     position: relative;
     width: 100%;
-    cursor: pointer;
-    border-radius: 8px;
-    min-height: 56px;
-    padding: 17px 48px 12px 72px;
 }
 .calls-content-filters .call-contact-item:hover{
     background: #f5f5f5;
 }
 .calls-content-filters .call-contact-item .circle-avatar{
-    height: 40px;
-    top: 6px;
-    width: 40px;
-    left: 18px;
+    height: 32px;
+    left: 24px;
     position: absolute;
+    top: 8px;
+    width: 32px;
 }
 .calls-content-filters .call-contact-item .call-contact-name{
-    font-size: 14px;
-    font-weight: 500;
-    line-height: 16px;
     display: inline-block;
-    max-width: 95%;
+    font-size: 16px;
+    line-height: 24px;
+    max-width: 82%;
 }
 .calls-content-filters .call-contact-item .btn-send-jingle{
     border-radius: 50%;
@@ -21922,6 +21942,24 @@ ul.restrictions-list-content>li {
     overflow: hidden;
     position: relative;
     width: 100%;
+    max-width: 1024px;
+}
+.calls-header-container{
+    font-size: 20px;
+    height: 72px;
+    padding: 20px 6px 28px 32px;
+    width: 100%;
+}
+.calls-header-container .btn-check-all{
+    position: absolute;
+    cursor: pointer;
+    top: 20px;
+    right: 44px;
+    width: 24px;
+    height: 24px;
+}
+.calls-header-container .btn-check-all svg path{
+    fill: #BDBDBD;
 }
 .calls-content-wrap .calls-content{
     height: 100%;
@@ -22064,6 +22102,7 @@ ul.restrictions-list-content>li {
 }
 .notifications-content-wrap{
     display: flex;
+    justify-content: space-evenly;
 
 }
 .notifications-right-wrap{
@@ -22071,6 +22110,7 @@ ul.restrictions-list-content>li {
     height: 100%;
     position: relative;
     overflow: hidden;
+    max-width: 1024px;
 
 }
 .notifications-content-wrap .notifications-content{
@@ -22082,66 +22122,82 @@ ul.restrictions-list-content>li {
     height: 100%;
 }
 .notifications-content-wrap .notifications-content-filters{
-    /*border: 2px solid;*/
-    height: calc(100% - 32px);
-    margin-left: 24px;
-    margin-right: 24px;
-    margin-top: 16px;
-    min-width: 272px;
+    padding: 0 16px;
+    max-width: 384px;
+    min-width: 288px;
     overflow: hidden;
     position: relative;
+    width: 26%;
 }
 .notifications-content-wrap.subscription-content .notifications-utility{
     display: none;
 }
 .notifications-content-wrap .notifications-utility{
-    box-shadow: 0 1px 1px -1px rgba(0, 0, 0, .25);
-    font-size: 18px;
-    font-weight: 500;
-    height: 64px;
-    padding: 20px 6px 24px;
+    font-size: 20px;
+    height: 72px;
+    padding: 20px 6px 28px 32px;
     width: 100%;
 }
 .notifications-content-wrap .notifications-utility .btn-read-all{
     position: absolute;
-    top: 16px;
-    right: 16px;
+    cursor: pointer;
+    top: 20px;
+    right: 44px;
+    width: 24px;
+    height: 24px;
+}
+.notifications-content-wrap .notifications-utility .btn-read-all svg path{
+    fill: #BDBDBD;
 }
 .notifications-content-filters .notifications-filter-main-header{
     font-size: 24px;
     line-height: 32px;
-    margin-left: 14px;
-    margin-bottom: 33px;
+    height: 64px;
+    padding: 16px 8px;
 }
 .notifications-content-filters .notifications-type-filter{
     margin-top: 28px;
     margin-bottom: 28px;
 }
+.contacts-panel-wrap .contacts-panel-left-side .filter-item-wrap,
+.calls-content-filters .filter-item-wrap,
 .notifications-content-filters .filter-item-wrap{
     border-radius: 8px;
     cursor: pointer;
     font-size: 16px;
     line-height: 24px;
-    padding: 4px 42px 4px 48px;
+    padding: 12px 16px 12px 80px;
     position: relative;
 }
+.contacts-panel-wrap .contacts-panel-left-side .filter-item-wrap .filter-icon,
+.calls-content-filters .filter-item-wrap .filter-icon,
 .notifications-content-wrap .filter-item-wrap .filter-icon{
-    width: 20px;
-    height: 20px;
+    left: 28px;
     position: absolute;
-    left: 14px;
-    top: 6px;
+    top: 12px;
+    width: 24px;
+    height: 24px;
 }
+.contacts-panel-wrap .contacts-panel-left-side .filter-item-wrap.selected-filter,
+.calls-content-filters .filter-item-wrap.selected-filter,
 .notifications-content-filters .filter-item-wrap.selected-filter{
     background: #EEEEEE;
 }
+.contacts-panel-wrap .contacts-panel-left-side .contacts-filter-header,
+.calls-content-filters .calls-filter-header,
 .notifications-content-filters .notifications-filter-header{
-    color: rgba(0, 0, 0, .54);
+    height: 48px;
+    font-size: 18px;
     font-weight: 500;
-    margin-bottom: 2px;
-    margin-left: 14px;
-    font-size: 16px;
     line-height: 32px;
+    padding: 12px 8px;
+}
+.contacts-panel-wrap .contacts-panel-left-side .filter-item-wrap span{
+    color: #757575;
+    font-size: 16px;
+    line-height: 24px;
+    position: absolute;
+    right: 16px;
 }
 .notifications-content-wrap .back-to-bottom{
     top: calc(64px + 64px);
@@ -22383,13 +22439,11 @@ ul.restrictions-list-content>li {
     border: none
 }
 .notifications-calendars-wrap thead th{
+    font-size: 14px;
+    line-height: 20px;
+    height: 32px;
+    padding: 0 8px 12px 8px;
     text-align: start;
-    color: rgba(0, 0, 0, .54);
-    font-size: 16px;
-    font-weight: 500;
-    line-height: 32px;
-    margin-bottom: 2px;
-    padding-left: 14px;
     text-transform: capitalize;
 }
 .notifications-calendars-wrap th,
@@ -22416,7 +22470,7 @@ ul.restrictions-list-content>li {
 .notifications-calendars-wrap .calendar-rows-wrap{
     display: flex;
     flex-direction: column-reverse;
-    margin-left: 15px;
+    margin-left: 8px;
 }
 .notifications-calendars-wrap td .notifications-calendar-day{
     border-radius: 50%;

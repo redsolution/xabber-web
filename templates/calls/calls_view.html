@@ -6,7 +6,7 @@
         </div>
     </div>
     <div class="calls-type-filter">
-        <div class="calls-filter-header">{[print(xabber.getString("calls_window__filters_header"))]}</div>
+        <div class="calls-filter-header">{[print(xabber.getString("notifications_window__filters_header"))]}</div>
         <div class="calls-type-filter-content">
             <div class="filter-item-wrap selected-filter" data-filter="all">
                 <svg class="filter-icon mdi fill-color-grey-500 mdi-svg-template" data-svgname="call"></svg>
@@ -37,6 +37,12 @@
     </div>
 </div>
 <div class="calls-right-wrap">
+    <div class="calls-header-container">
+        <div class="call-header-text">{[print(xabber.getString("calls_window__header"))]}</div>
+        <div class="btn-check-all">
+            <svg class="mdi mdi-24px mdi-svg-template" data-svgname="check-all"></svg>
+        </div>
+    </div>
     <div class="active-call-container">
         <div class="active-call-item no-select">
             <div class="circle-avatar"></div>

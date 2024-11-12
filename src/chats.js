@@ -2740,8 +2740,9 @@ xabber.ChatItemView = xabber.BasicView.extend({
             }
             this.$('.last-msg').prepend(msg_from);
         }
-        if (msg.get('not_encrypted'))
+        if (msg.get('not_encrypted')) {
             this.$('.last-msg').html(this.$('.last-msg').html().italics());
+        }
         this.$el.emojify('.last-msg', {emoji_size: 16}).hyperlinkify({decode_uri: true});
         this.$('.last-msg-date').text(utils.pretty_short_datetime_recent_chat(msg_time))
         this.$('.msg-delivering-state').showIf(msg.get('type') !== 'system' && msg.isSenderMe() && (msg.get('state') !== constants.MSG_ARCHIVED) && !msg.get('notification_msg'))
@@ -10141,7 +10142,7 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
               this.$('.last-msg').html("").append(msg_from).append(msg_text);
           }
           else {
-              this.$('.last-msg').text("").append(msg_text);
+              this.$('.last-msg').text("").append(_.escape(msg_text));
               if (msg_from)
                   this.$('.last-msg').prepend($('<span class=text-color-700>' + msg_from + ': ' + '</span>'));
           }
@@ -10266,7 +10267,7 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
                 is_match = (name.indexOf(query) < 0 && jid.indexOf(query) < 0) ? true : false;
             if (!is_match) {
                 if (!this.$('.chat-list-wrap .chat-item[data-id="' + chat_id + '"]').length) {
-                    let contact_list_item = xabber.contacts_view.$(`.account-roster-wrap[data-jid="${this.account.get('jid')}"] .roster-contact[data-jid="${jid}"]`).first().clone();
+                    let contact_list_item = xabber.contacts_left_view.$(`.account-roster-wrap[data-jid="${this.account.get('jid')}"] .roster-contact[data-jid="${jid}"]`).first().clone();
                     contact_list_item.find('.muted-icon').hide();
                     this.$('.chat-list-wrap .contact-list').append(contact_list_item);
                 }
@@ -10346,7 +10347,7 @@ xabber.InvitationPanelView = xabber.SearchView.extend({
         this.clearPanel();
         this.$(`textarea[name="invitation_text"]`).val('');
         this.$('.invitation-reason-wrap').addClass('hidden');
-        xabber.contacts_view.$(`.account-roster-wrap[data-jid="${this.account.get('jid')}"] .roster-group`).each((idx, item) => {
+        xabber.contacts_left_view.$(`.account-roster-wrap[data-jid="${this.account.get('jid')}"] .roster-group`).each((idx, item) => {
             let group_node = $(item).clone();
             $(group_node).find('.list-item').each((i, list_item) => {
                 let contact_node = this.account.contacts.get($(list_item).attr('data-jid'));

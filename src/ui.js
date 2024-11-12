@@ -147,7 +147,25 @@ xabber.once("start", function () {
             right_contact_panel_width = 0;
         }
 
+        if (left_panel_width > 384){
+            left_panel_width = 384;
+        }
+
+        if (right_panel_width > 1024){
+            right_panel_width = 1024;
+        }
+
+        if (left_panel_width === 0){
+            right_panel_width = panel_width;
+        }
+
+
         right_contact_panel_styles.width = right_contact_panel_width;
+        if (right_contact_panel_width === 0 && ((right_contact_panel_styles.position && right_contact_panel_styles.position === 'static') || !right_contact_panel_styles.position) ){
+            right_contact_panel_styles.display = 'none';
+        } else {
+            right_contact_panel_styles.display = '';
+        }
         this.left_panel.$el.switchClass('hidden', (this.body.screen.get('notifications')  || (this.body.screen.get('previous_screen') && this.body.screen.get('previous_screen').notifications))
             || (this.body.screen.get('calls') || (this.body.screen.get('previous_screen') && this.body.screen.get('previous_screen').calls))
             || (this.body.screen.get('name') === 'contacts' || (this.body.screen.get('previous_screen') && this.body.screen.get('previous_screen').name === 'contacts')));
