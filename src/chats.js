@@ -1213,7 +1213,7 @@ xabber.EphemeralTimerSelector = xabber.BasicView.extend({
               $reject_msg.c('call', call_attrs).up();
           }
           $reject_msg.up().c('store', {xmlns: Strophe.NS.HINTS}).up()
-              .c('markable').attrs({'xmlns': Strophe.NS.CHAT_MARKERS}).up()//34
+              .c('markable').attrs({'xmlns': Strophe.NS.CHAT_MARKERS}).up()
               .c('origin-id', {id: uuid(), xmlns: 'urn:xmpp:sid:0'});
           if (this.get('had_video')){
               $reject_msg.up().c('tags').c('tag').attrs({name: 'video_call'}).up();
@@ -10232,6 +10232,8 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
         this.$el.openModal({
             ready: () => {
                 this.updateScrollBar();
+                this.updateLeftIndicator(xabber.accounts);
+                this.updateColorScheme(xabber.accounts);
                 this.$('.search-input').focus();
             },
             complete: () => {
@@ -10249,6 +10251,15 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
             deferred.resolve();
         }});
         return deferred.promise();
+    },
+
+    updateColorScheme: function () {
+        let color = this.account.settings.get('color');
+        this.$el.attr('data-color', color);
+    },
+
+    updateLeftIndicator: function (accounts) {
+        this.$el.attr('data-indicator', accounts.connected.length > 1);
     },
 
     onClickItem: function (ev) {
@@ -11006,6 +11017,7 @@ xabber.InvitationPanelView = xabber.SearchView.extend({
         xabber.on('update_layout', this.updatePlyrTitle, this);
         xabber.on('plyr_player_time_updated', this.updatePlyrTime, this);
         xabber.on("update_jingle_button", this.updateJingleButton, this);
+        xabber.accounts.on("list_changed", this.updateLeftIndicator, this);
         if (this.model.get('encrypted'))
             this.account.on('active_session_change', this.renderActiveTrustSession, this);
     },
@@ -11042,9 +11054,14 @@ xabber.InvitationPanelView = xabber.SearchView.extend({
         this.updatePlyrTime();
         this.updateJingleButton();
         this.updateIcon();
+        this.updateLeftIndicator(xabber.accounts);
         if (this.model.get('encrypted'))
             this.renderActiveTrustSession();
         return this;
+    },
+
+    updateLeftIndicator: function (accounts) {
+        this.$el.attr('data-indicator', accounts.connected.length > 1);
     },
 
     renderActiveTrustSession: function (encrypted) {
@@ -12476,6 +12493,7 @@ xabber.ChatBottomView = xabber.BasicView.extend({
         this.model.on("edit_selected_message", this.showEditPanel, this);
         this.model.on("pin_selected_message", this.pinMessage, this);
         this.model.on("reset_selected_messages", this.resetSelectedMessages, this);
+        xabber.accounts.on("list_changed", this.updateLeftIndicator, this);
         this.content_view = (this.view.data.get('visible') ? this.view : this.model.messages_view) || this.view;
         let $rich_textarea = this.$('.input-message .rich-textarea'),
             rich_textarea = $rich_textarea[0],
@@ -12611,6 +12629,7 @@ xabber.ChatBottomView = xabber.BasicView.extend({
         }
         this.focusOnInput();
         this.manageSelectedMessages();
+        this.updateLeftIndicator(xabber.accounts);
         xabber.chat_body.updateHeight();
         return this;
     },
@@ -12619,6 +12638,10 @@ xabber.ChatBottomView = xabber.BasicView.extend({
         let widths = [];
         this.$('.message-actions-panel .button-wrap').each((i, button) => {widths.push(button.clientWidth)});
         (Math.max.apply(null, widths) !== 0) && this.$('.message-actions-panel .button-wrap').css('width', `${Math.max.apply(null, widths)}px`);
+    },
+
+    updateLeftIndicator: function (accounts) {
+        this.$el.attr('data-indicator', accounts.connected.length > 1);
     },
 
     showEphemeralTimerSelector: function () {

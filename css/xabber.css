@@ -480,40 +480,98 @@ button.btn-float-left {
 .non-circle-avatars .circle-avatar{
     border-radius: 0;
 }
+.account-indicator-background-exclude{
+    -webkit-mask-image: url(../assets/images/masks/circle/circle176.png);
+    mask-image: url(../assets/images/masks/circle/circle176.png);
+    -webkit-mask-repeat: round;
+    mask-repeat: round;
+}
 .circle-avatar,
 .circle-avatar-wrap {
     -webkit-mask-repeat: round;
     mask-repeat: round;
+}
+.chat-item .account-indicator {
+    -webkit-mask-image: url(../assets/images/masks/circle/indicator128.png);
+    mask-image: url(../assets/images/masks/circle/indicator128.png);
+}
+.octagon-avatars .account-indicator-background-exclude{
+    -webkit-mask-image: url(../assets/images/masks/octagon/octagon176.png);
+    mask-image: url(../assets/images/masks/octagon/octagon176.png);
 }
 .octagon-avatars .circle-avatar,
 .octagon-avatars .circle-avatar-wrap {
     -webkit-mask-image: url(../assets/images/masks/octagon/octagon176.png);
     mask-image: url(../assets/images/masks/octagon/octagon176.png);
 }
+.octagon-avatars .chat-item .account-indicator {
+    -webkit-mask-image: url(../assets/images/masks/octagon/indicator128.png);
+    mask-image: url(../assets/images/masks/octagon/indicator128.png);
+}
+.hexagon-avatars .account-indicator-background-exclude{
+    -webkit-mask-image: url(../assets/images/masks/hexagon/hexagon176.png);
+    mask-image: url(../assets/images/masks/hexagon/hexagon176.png);
+}
 .hexagon-avatars .circle-avatar,
 .hexagon-avatars .circle-avatar-wrap {
     -webkit-mask-image: url(../assets/images/masks/hexagon/hexagon176.png);
     mask-image: url(../assets/images/masks/hexagon/hexagon176.png);
+}
+.hexagon-avatars .account-indicator {
+    -webkit-mask-image: url(../assets/images/masks/hexagon/indicator128.png);
+    mask-image: url(../assets/images/masks/hexagon/indicator128.png);
+}
+.pentagon-avatars .account-indicator-background-exclude{
+    -webkit-mask-image: url(../assets/images/masks/pentagon/pentagon176.png);
+    mask-image: url(../assets/images/masks/pentagon/pentagon176.png);
 }
 .pentagon-avatars .circle-avatar,
 .pentagon-avatars .circle-avatar-wrap {
     -webkit-mask-image: url(../assets/images/masks/pentagon/pentagon176.png);
     mask-image: url(../assets/images/masks/pentagon/pentagon176.png);
 }
+.pentagon-avatars .account-indicator {
+    -webkit-mask-image: url(../assets/images/masks/pentagon/indicator128.png);
+    mask-image: url(../assets/images/masks/pentagon/indicator128.png);
+}
+.rounded-avatars .account-indicator-background-exclude{
+    -webkit-mask-image: url(../assets/images/masks/rounded/rounded176.png);
+    mask-image: url(../assets/images/masks/rounded/rounded176.png);
+}
 .rounded-avatars .circle-avatar,
 .rounded-avatars .circle-avatar-wrap {
     -webkit-mask-image: url(../assets/images/masks/rounded/rounded176.png);
     mask-image: url(../assets/images/masks/rounded/rounded176.png);
+}
+.rounded-avatars .account-indicator{
+    -webkit-mask-image: url(../assets/images/masks/rounded/indicator128.png);
+    mask-image: url(../assets/images/masks/rounded/indicator128.png);
+}
+.star-avatars .account-indicator-background-exclude {
+    -webkit-mask-image: url(../assets/images/masks/star/star176.png);
+    mask-image: url(../assets/images/masks/star/star176.png);
 }
 .star-avatars .circle-avatar,
 .star-avatars .circle-avatar-wrap {
     -webkit-mask-image: url(../assets/images/masks/star/star176.png);
     mask-image: url(../assets/images/masks/star/star176.png);
 }
+.star-avatars .account-indicator {
+    -webkit-mask-image: url(../assets/images/masks/star/indicator128.png);
+    mask-image: url(../assets/images/masks/star/indicator128.png);
+}
+.squircle-avatars .account-indicator-background-exclude{
+    -webkit-mask-image: url(../assets/images/masks/squircle/squircle176.png);
+    mask-image: url(../assets/images/masks/squircle/squircle176.png);
+}
 .squircle-avatars .circle-avatar,
 .squircle-avatars .circle-avatar-wrap {
     -webkit-mask-image: url(../assets/images/masks/squircle/squircle176.png);
     mask-image: url(../assets/images/masks/squircle/squircle176.png);
+}
+.squircle-avatars .account-indicator {
+    -webkit-mask-image: url(../assets/images/masks/squircle/indicator128.png);
+    mask-image: url(../assets/images/masks/squircle/indicator128.png);
 }
 
 .circle-avatar.circle-image-fix {
@@ -798,7 +856,7 @@ input[type=file] {
 }
 
 [data-indicator=false] .account-indicator {
-    display: none;
+    display: none !important;
 }
 
 .mdi.mdi-72px {
@@ -4144,11 +4202,29 @@ input[type=text].simple-input-field:hover {
 }
 
 .toolbar-item.account-item .circle-avatar-wrap {
+    height: 32px!important;
+    width: 32px;
+    background: none !important;
+}
+
+.toolbar-item.account-item .account-indicator-background-exclude {
     display: inline-grid;
     height: 32px!important;
     margin: 12px 0 12px 16px;
     width: 32px;
     background: none !important;
+    -webkit-mask-repeat: round;
+    mask-repeat: round;
+    position: relative;
+}
+
+.toolbar-item.account-item .account-indicator {
+    display: block;
+    position: absolute;
+    width: 32px;
+    height: 32px;
+    -webkit-mask-repeat: round;
+    mask-repeat: round;
 }
 
 .non-circle-avatars .account-item .circle-avatar-wrap {
@@ -7007,11 +7083,26 @@ input[type=text].simple-input-field:hover {
 
 .roster-left-container .roster-contact .circle-avatar,
 .forward-panel-modal .roster-contact .circle-avatar {
+    position: static;
+    width: 32px;
+    height: 32px;
+}
+
+.roster-left-container .roster-contact .account-indicator-background-exclude,
+.forward-panel-modal .roster-contact .account-indicator-background-exclude {
     position: absolute;
     top: 12px;
     left: 16px;
-    width: 32px;
-    height: 32px;
+    width: 32px !important;
+    height: 32px !important;
+}
+
+.roster-left-container .roster-contact .account-indicator,
+.forward-panel-modal .roster-contact .account-indicator {
+    display: block;
+    position: absolute;
+    width: 32px !important;
+    height: 32px !important;
 }
 
 .roster-left-container .roster-contact .name,
@@ -8471,6 +8562,7 @@ input[type=text].simple-input-field:hover {
     height: 72px;
     padding: 13px 8px 14px 82px;
     cursor: pointer;
+    overflow: hidden;
 }
 
 .pinned-chat-list:not(.forward-chats-list) .chat-item{
@@ -8848,15 +8940,57 @@ input[type=text].simple-input-field:hover {
     background-image: url(../assets/images/loading.png);
     background-size: 50%;
 }
+.chat-item .circle-avatar{
+    position: static !important;
+}
 .chat-list-wrap.left-panel-list-wrap .chat-item .circle-avatar {
     position: absolute;
-    left: 16px;
-    top: 12px;
+    left: unset;
+    top: unset;
     width: 48px;
     height: 48px;
     background-color: #E0E0E0;
     background-image: url(../assets/images/loading.png);
     background-size: 50%;
+}
+.account-indicator{
+    display: none;
+    -webkit-mask-repeat: round;
+    mask-repeat: round;
+}
+.chat-list-wrap.left-panel-list-wrap .chat-item .account-indicator {
+    display: block;
+    position: absolute;
+    width: 48px;
+    height: 48px;
+    -webkit-mask-repeat: round;
+    mask-repeat: round;
+}
+.chat-list-wrap.left-panel-list-wrap .chat-item .account-indicator-background-exclude {
+    position: absolute;
+    left: 16px;
+    top: 12px;
+    width: 48px;
+    height: 48px;
+    z-index: 1;
+}
+.forward-panel-modal .list-item .account-indicator-background-exclude{
+    position: absolute;
+    left: 24px;
+    top: 8px;
+    width: 40px;
+    height: 40px;
+    z-index: 1;
+}
+.forward-panel-modal .list-item .account-indicator{
+    width: 40px;
+    height: 40px;
+    position: absolute;
+    display: block;
+}
+.pinned-chat-list .chat-item:not(:hover) .account-indicator-background-exclude {
+}
+.chat-list-wrap.left-panel-list-wrap .chat-item:hover .account-indicator-background-exclude {
 }
 
 .chat-item.saved-chat .status,
@@ -8894,6 +9028,10 @@ input[type=text].simple-input-field:hover {
     margin: 0;
 }
 
+.chat-item .chat-icon,
+.chat-item .status{
+    z-index: 5;
+}
 .chat-item .status,
 .chat-head-wrap .contact-status {
     position: absolute;
@@ -9346,6 +9484,27 @@ input[type=text].simple-input-field:hover {
 }
 
 .chat-head-wrap .circle-avatar {
+    position: absolute;
+    top: 8px;
+    left: 20px;
+    width: 48px;
+    height: 48px;
+    cursor: pointer;
+}
+
+.chat-head-wrap .account-indicator-background-exclude .circle-avatar {
+    position: static;
+    width: 48px;
+    height: 48px;
+    cursor: pointer;
+}
+.chat-head-wrap .account-indicator {
+    width: 48px;
+    height: 48px;
+    position: absolute;
+    display: block;
+}
+.chat-head-wrap .account-indicator-background-exclude {
     position: absolute;
     top: 8px;
     left: 20px;
@@ -11550,6 +11709,25 @@ img.fwd-img-preview {
     height: 48px;
 }
 
+.message-input-panel .account-indicator-background-exclude .circle-avatar {
+    position: static;
+    width: 48px;
+    height: 48px;
+}
+.message-input-panel .account-indicator {
+    width: 48px;
+    height: 48px;
+    position: absolute;
+    display: block;
+}
+.message-input-panel .account-indicator-background-exclude {
+    position: absolute;
+    bottom: 56px;
+    left: 10px;
+    width: 48px;
+    height: 48px;
+}
+
 .message-input-panel .circle-avatar:hover {
     cursor: pointer;
 }
@@ -12792,6 +12970,24 @@ input[type=range].voice-message-volume:focus {
     top: 14px;
     margin: 0;
     left: 24px;
+}
+
+.settings-panel-wrap .settings-panel .xmpp-account .account-info-wrap .account-indicator-background-exclude .circle-avatar {
+    position: static;
+}
+.settings-panel-wrap .settings-panel .xmpp-account .account-info-wrap .account-indicator {
+    width: 32px;
+    height: 32px;
+    position: absolute;
+    display: block;
+}
+.settings-panel-wrap .settings-panel .xmpp-account .account-info-wrap .account-indicator-background-exclude {
+    position: absolute;
+    top: 14px;
+    margin: 0;
+    left: 24px;
+    width: 32px;
+    height: 32px;
 }
 
 .settings-panel-wrap .settings-panel .xmpp-account .account-info-wrap .text-info-wrap{
@@ -21154,7 +21350,11 @@ input[type=range].voice-message-volume:focus {
     background-color: #F5F5F5;
 }
 
-.forward-panel-modal .list-item .circle-avatar {
+.forward-panel-modal .list-item .account-indicator-background-exclude {
+    left: 24px;
+}
+
+.forward-panel-modal .list-item.roster-contact .account-indicator-background-exclude {
     left: 24px;
 }
 
