@@ -491,7 +491,7 @@ button.btn-float-left {
     -webkit-mask-repeat: round;
     mask-repeat: round;
 }
-.chat-item .account-indicator {
+.account-indicator {
     -webkit-mask-image: url(../assets/images/masks/circle/indicator128.png);
     mask-image: url(../assets/images/masks/circle/indicator128.png);
 }
