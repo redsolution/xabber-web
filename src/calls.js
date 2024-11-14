@@ -35,7 +35,7 @@ xabber.CallsBodyContainer = xabber.Container.extend({
 xabber.CallsView = xabber.BasicView.extend({
     className: 'calls-content-wrap',
     template: templates.calls_view,
-    ps_selector: '.chat-content',
+    ps_selector: '.calls-right-container',
     avatar_size: constants.AVATAR_SIZES.CHAT_ITEM,
 
     events: {
@@ -134,27 +134,29 @@ xabber.CallsView = xabber.BasicView.extend({
 
     updateCallContacts: function () {
         this.$('.calls-contacts-container').html('');
-        console.log(this.calls_messages.length)
-        if (!this.calls_messages.length)
+        let calls_messages =  this.calls_messages.filter(msg => msg.get('call_chat').account.get('jid') === this.current_account.get('jid'));
+        if (!calls_messages.length)
             return;
         let contacts_list = [];
-        _.each(_.clone(this.calls_messages.models).reverse(), (msg) => {
-            if (contacts_list.length > 4){
-                return;
-            }
+        _.each(calls_messages, (msg) => {
             if (msg.get('call_contact')) {
-                let contact = msg.get('call_contact');
-                console.log(!contacts_list.some(item => item.get('jid') === contact.get('jid')));
-                if (!contacts_list.length || !contacts_list.some(item => item.get('jid') === contact.get('jid'))) {
-                    contacts_list.push(contact);
+                let count = 1,
+                    contact = msg.get('call_contact');
+
+                if (!contacts_list.length || !contacts_list.some(item => item.contact.get('jid') === contact.get('jid'))) {
+                    contacts_list.push({contact: contact, count: count});
+                } else if (contacts_list.some(item => item.contact.get('jid') === contact.get('jid'))) {
+                    let list_item = contacts_list.find(item => item.contact.get('jid') === contact.get('jid'));
+                    list_item.count = list_item.count + 1;
                 }
             }
         });
-        console.log(contacts_list);
         if (contacts_list.length){
+            contacts_list.sort((x,y) => y.count - x.count);
+            contacts_list = contacts_list.slice(0,5);
             _.each(contacts_list, (item) => {
-                let $template = $(templates.call_contact_item({jid: item.get('jid'), name: item.get('name')}));
-                $template.find('.circle-avatar').setAvatar(item.cached_image || utils.images.getDefaultAvatar(item), 32);
+                let $template = $(templates.call_contact_item({jid: item.contact.get('jid'), name: item.contact.get('name'), count: item.count}));
+                $template.find('.circle-avatar').setAvatar(item.contact.cached_image || utils.images.getDefaultAvatar(item.contact), 32);
                 this.$('.calls-contacts-container').append($template);
             });
         }
@@ -288,6 +290,7 @@ xabber.CallsView = xabber.BasicView.extend({
         this.$(`.calls-account-filter-content .filter-item-wrap[data-jid="${filter_type}"]`).addClass('selected-filter');
 
         this.renderCalls();
+        this.updateCallContacts();
     },
 
     filterType: function (ev) {
@@ -579,6 +582,7 @@ xabber.CallsView = xabber.BasicView.extend({
                 this.calls_accounts = accounts;
                 !this.current_account && (this.current_account = this.calls_accounts[0]);
                 (this.isVisible() || force_render) && this.updateCurrentCalls();
+                (this.isVisible() || force_render) && this.updateCallContacts();
             } catch (e) {
                 console.error(e)
             }

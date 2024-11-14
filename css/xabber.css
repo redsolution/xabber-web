@@ -22122,6 +22122,10 @@ ul.restrictions-list-content>li {
     line-height: 24px;
     max-width: 82%;
 }
+.calls-content-filters .call-contact-item .call-contact-frequency{
+    color: rgba(0, 0, 0, 0.54);
+    float: right;
+}
 .calls-content-filters .call-contact-item .btn-send-jingle{
     border-radius: 50%;
     height: 36px;
@@ -22175,6 +22179,11 @@ ul.restrictions-list-content>li {
 .calls-content-wrap .calls-content{
     height: 100%;
 }
+.calls-content-wrap .calls-right-container{
+    height: 100%;
+    width: 100%;
+    position: relative;
+}
 .calls-content-wrap .calls-right-wrap.active-call .calls-content{
     height: calc(100% - 80px);
 }
@@ -22182,11 +22191,12 @@ ul.restrictions-list-content>li {
     display: none;
 }
 .calls-content-wrap .calls-right-wrap.active-call .active-call-container{
-    box-shadow: 0 1px 1px -1px rgba(0, 0, 0, .25);
     display: block;
-    height: 80px;
+    height: 54px;
     padding: 8px 0;
     padding-right: 24px;
+    margin-top: 5px;
+    margin-bottom: -1px;
 }
 .calls-content-wrap .calls-right-wrap.active-call .active-call-container .active-call-item{
     border-radius: 8px;
