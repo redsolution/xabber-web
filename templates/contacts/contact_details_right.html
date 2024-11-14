@@ -7,11 +7,11 @@
         </div>
         <span class="block-name">{[print(xabber.getString("contact_viewer"))]}</span>
         <span class="block-name second-text"></span>
+        <div class="btn-search-messages btn-search">
+            <svg class="mdi mdi-24px mdi-svg-template" data-svgname="search"></svg>
+        </div>
         <div class="btn-qr-code">
             <svg class="mdi mdi-24px mdi-svg-template" data-svgname="qrcode"></svg>
-        </div>
-        <div class="btn-edit">
-            <svg class="mdi mdi-24px mdi-svg-template" data-svgname="edit-outline"></svg>
         </div>
     </div>
     <div class="main-info">
@@ -31,31 +31,13 @@
             <div class="contact-btn btn-voice-call  fill-color-500"><svg class="mdi mdi-24px mdi-svg-template" data-svgname="call"></svg></div>
             <div class="btn-name">{[print(xabber.getString("contact_bar_call"))]}</div>
         </div>
-        <div class="button-wrap btn-search-messages">
-            <div class="contact-btn btn-search fill-color-500"><svg class="mdi mdi-24px mdi-svg-template" data-svgname="search"></svg></div>
-            <div class="btn-name">{[print(xabber.getString("search"))]}</div>
+        <div class="button-wrap btn-notifications-wrap" >
+            <div class="contact-btn btn-notifications fill-color-500 dropdown-button" data-activates="{{view.cid}}-mute-more">
+                <svg class="mdi mdi-24px mdi-svg-template" data-svgname="bell"></svg>
+                <svg class="mdi mdi-24px mdi-svg-template details-muted-icon" data-svgname="bell-off"></svg>
+            </div>
+            <div class="btn-name">{[print(xabber.getString("settings__menu_item__sounds"))]}</div>
         </div>
-        <div class="button-wrap btn-mute-wrap">
-            <i class="mdi mdi-24px btn-mute mdi-dots-vertical dropdown-button text-color-500" data-activates="{{view.cid}}-more"></i>
-            <div class="btn-name">{[print(xabber.getString("chat_more_actions"))]}</div>
-        </div>
-        <ul id="{{view.cid}}-more" class="chat-head-menu dropdown-content noselect">
-            <li class="btn-notifications active-hover" data-activates="{{view.cid}}-mute-more">
-                <span class="one-line"></span>
-            </li>
-            <li class="btn-start-encryption">
-                <span class="one-line">{[print(xabber.getString("omemo__chat_settings__button_start_encrypted_chat"))]}</span>
-            </li>
-            <li class="btn-open-encrypted-chat">
-                <span class="one-line">{[print(xabber.getString("omemo__chat_settings__button_open_encrypted_chat"))]}</span>
-            </li>
-            <li class="btn-open-regular-chat">
-                <span class="one-line">{[print(xabber.getString("omemo__chat_settings__button_open_regular_chat"))]}</span>
-            </li>
-            <li class="btn-block">
-                <span class="one-line">{[print(xabber.getString("contact_bar_block"))]}</span>
-            </li>
-        </ul>
         <ul id="{{view.cid}}-mute-more" class="contact-mute-dropdown dropdown-content noselect">
             <li class="btn-mute-dropdown" data-mute="minutes15">
                 <span class="one-line">{[print(xabber.getString("mute_15_min"))]}</span>
@@ -71,6 +53,27 @@
             </li>
             <li class="btn-mute-dropdown" data-mute="forever">
                 <span class="one-line">{[print(xabber.getString("mute_forever"))]}</span>
+            </li>
+        </ul>
+        <div class="button-wrap btn-mute-wrap">
+            <i class="mdi mdi-24px btn-mute mdi-dots-vertical dropdown-button text-color-500" data-activates="{{view.cid}}-more"></i>
+            <div class="btn-name">{[print(xabber.getString("chat_more_actions"))]}</div>
+        </div>
+        <ul id="{{view.cid}}-more" class="chat-head-menu dropdown-content noselect">
+            <li class="btn-edit">
+                <span class="one-line">{[print(xabber.getString("edit_contact"))]}</span>
+            </li>
+            <li class="btn-start-encryption">
+                <span class="one-line">{[print(xabber.getString("omemo__chat_settings__button_start_encrypted_chat"))]}</span>
+            </li>
+            <li class="btn-open-encrypted-chat">
+                <span class="one-line">{[print(xabber.getString("omemo__chat_settings__button_open_encrypted_chat"))]}</span>
+            </li>
+            <li class="btn-open-regular-chat">
+                <span class="one-line">{[print(xabber.getString("omemo__chat_settings__button_open_regular_chat"))]}</span>
+            </li>
+            <li class="btn-block">
+                <span class="one-line">{[print(xabber.getString("contact_bar_block"))]}</span>
             </li>
         </ul>
     </div>

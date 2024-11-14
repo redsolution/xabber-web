@@ -3858,12 +3858,16 @@ xabber.ChatContentView = xabber.BasicView.extend({
     },
 
     updateActiveSessionHeight: function () {
-        if (!this.model.get('encrypted') || !this.$('.notification-trust-session').length)
+        if (!this.model.get('encrypted'))
             return;
+        let after_element = this.$('.chat-content');
+        if (!this.$('.notification-trust-session').length) {
+            after_element.length && after_element[0].style.setProperty('--active-session-item-height', '0px');
+            return;
+        }
         this.$('.notification-trust-session').switchClass('low-width', this.$('.chat-incoming-session-notification').width() < 360 )
         this.$('.notification-trust-session').switchClass('vertical-buttons', this.$('.chat-incoming-session-notification').width() < 360 && this.$('.chat-incoming-session-notification .accept-request-wrap').children().length > 1)
         this.$('.notification-trust-session').switchClass('no-buttons', !this.$('.chat-incoming-session-notification .accept-request-wrap').children().length)
-        let after_element = this.$('.chat-content');
         if (!after_element.length)
             return;
         after_element = after_element[0];
@@ -11250,12 +11254,12 @@ xabber.InvitationPanelView = xabber.SearchView.extend({
 
     updateNotifications: function () {
         if (this.model.isMuted()) {
-            this.$('.btn-notifications .one-line').text(xabber.getString("chat_action_unmute"));
             this.$('.btn-notifications').addClass('muted');
+            this.$('.btn-notifications').addClass('active');
         }
         else {
-            this.$('.btn-notifications .one-line').text(xabber.getString("chat_action_mute"));
             this.$('.btn-notifications').removeClass('muted');
+            this.$('.btn-notifications').removeClass('active');
         }
         this.$('.btn-mute-dropdown').hideIf(this.model.isMuted());
         this.$('.btn-unmute-dropdown').hideIf(!this.model.isMuted());
@@ -15001,7 +15005,7 @@ xabber.once("start", function () {
     this.on("change:focused", function () {
         if (this.get('focused')) {
             let view = this.chats_view.active_chat;
-            if (view && view.model.get('display')) {
+            if (view && view.content && view.content.data.get('visible')) {
                 view.content.onScroll(null, true);
                 if (view.model.get('is_accepted') !== false)
                     view.content.bottom.focusOnInput();

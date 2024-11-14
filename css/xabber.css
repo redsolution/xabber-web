@@ -1040,14 +1040,14 @@ input[type=file] {
 .details-panel-right .btn-qr-code,
 .details-panel-right .edit-bottom-block .btn-add-block,
 .details-panel-right .edit-bottom-block .btn-invite,
-.details-panel-right .btn-edit {
+.details-panel-right .btn-search-messages {
     position: absolute;
     z-index: 1;
     top: 20px;
     right: 20px;
     cursor: pointer;
 }
-.details-panel-right .btn-qr-code{
+.details-panel-right .btn-search-messages{
     right: 68px;
 }
 
@@ -1089,7 +1089,9 @@ input[type=file] {
 .details-panel-right .edit-bottom-block .btn-add-block svg,
 .details-panel-right .edit-bottom-block .btn-add-block svg path,
 .details-panel-right .btn-edit svg,
-.details-panel-right .btn-edit svg path{
+.details-panel-right .btn-edit svg path,
+.details-panel-right .btn-search-messages svg,
+.details-panel-right .btn-search-messages svg path{
     color: #9E9E9E;
     fill: #9E9E9E;
     pointer-events: none;
@@ -9971,14 +9973,17 @@ input[type=text].simple-input-field:hover {
     max-width: 272px !important;
     overflow-y: visible;
 }
+.right-contact-panel-wrap .details-panel-right .panel-content-wrap .buttons-wrap .btn-notifications .mdi.details-muted-icon,
+.right-contact-panel-wrap .details-panel-right .panel-content-wrap .buttons-wrap .btn-notifications.muted .mdi:not(.details-muted-icon) {
+    display: none;
+}
+.right-contact-panel-wrap .details-panel-right .panel-content-wrap .buttons-wrap .btn-notifications.muted .mdi.details-muted-icon{
+    display: block;
+}
 .right-contact-panel-wrap .details-panel-right .panel-content-wrap .buttons-wrap .contact-mute-dropdown {
-    left: auto !important;
     min-width: 200px !important;
     overflow: hidden;
-    right: 100.5% !important;
     width: fit-content !important;
-    top: 0 !important;
-    margin-top: 0 !important;
 }
 .chat-tools-wrap .contact-mute-dropdown {
     top: 101px !important;
