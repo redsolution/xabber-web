@@ -9968,6 +9968,15 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
             chat.item_view.$(`.last-msg`).text(chat.account.get('jid'));
             chat.item_view.$(`.msg-delivering-state`).addClass('hidden');
         });
+        if (!saved_chats.length)
+            return;
+
+        let saved_chat = saved_chats[0];
+        saved_chat.item_view && saved_chat.item_view.open({right_contact_save: true, clear_search: false, scroll_to_chat: true});
+        saved_chat.once("change:active", () => {
+            xabber.toolbar_view.$('.toolbar-item:not(.toolbar-logo):not(.account-item)').removeClass('active unread');
+            xabber.toolbar_view.$('.toolbar-item:not(.toolbar-logo).'+xabber.body.screen.get('name')).addClass('active');
+        });
     },
 
     showNotifications: function (no_unread) {
@@ -14580,13 +14589,18 @@ xabber.ChatPlaceholderView = xabber.BasicView.extend({
 
     _initialize: function (options) {
         xabber.on('update_placeholder',this.onPlaceholderUpdate, this);
+        xabber.on("update_screen", this.onPlaceholderUpdate, this);
+        xabber.on("update_css", this.onPlaceholderUpdate, this);
     },
 
     onPlaceholderUpdate: function () {
-        if (xabber.toolbar_view.$('.toolbar-item.jingle-calls.active').length || xabber.toolbar_view.$('.toolbar-item.geolocation-chats.active').length){
+        if (xabber.toolbar_view.$('.toolbar-item.geolocation-chats.active').length){
             this.$('.text').text(xabber.getString("message_manager_error_not_implemented"));
+            this.$el.css('width', xabber.main_panel.$el.css('width'));
+            this.$el.addClass('fullscreen-placeholder');
         } else {
             this.$('.text').text(xabber.getString("chat_list__placeholder"));
+            this.$el.removeClass('fullscreen-placeholder');
         }
     },
 });
