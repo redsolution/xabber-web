@@ -36,6 +36,15 @@
                 <input type="text" class="search-input simple-input-field" tabindex="1" placeholder='{[print(xabber.getString("search"))]}'>
                 <i class="close-search-icon mdi mdi-16px mdi-close-circle"></i>
                 <i class="btn-add-contact mdi mdi-24px mdi-account-plus"></i>
+                <i class="btn-dropdown-groups mdi mdi-24px mdi-dots-vertical" data-activates="{{view.cid}}-more"></i>
+                <ul id="{{view.cid}}-more" class="bootstrap-dropdown dropdown-content noselect">
+                    <div class="btn-create-group property-variant">
+                        {[print(xabber.getString("create_group"))]}
+                    </div>
+                    <div class="btn-create-incognito property-variant">
+                        {[print(xabber.getString("create_incognito_group"))]}
+                    </li>
+                </ul>
                 <div class="chat-tools-wrap">
                     <div class="chat-tool chat-tool-player">
                         <div class="chat-tool-player-containter">

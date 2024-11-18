@@ -1,11 +1,13 @@
 <div class="recent-chats-panel noselect">
     <div class="recent-chats-main-header">{[print(xabber.getString("toolbar__menu_item__chats"))]}</div>
-    <div class="chats-search-form search-form panel-head">
-        <i class="search-icon mdi mdi-24px mdi-magnify"></i>
-        <input type="text" class="search-input simple-input-field" tabindex="1" placeholder='{[print(xabber.getString("search"))]}'>
-        <i class="close-search-icon mdi mdi-16px mdi-close-circle"></i>
-    </div>
+    <i class="btn-unread mdi mdi-24px mdi-nature"></i>
+    <i class="btn-unread unread-active-btn mdi mdi-24px mdi-nature-people"></i>
     <div class="chat-list-wrap left-panel-list-wrap">
+        <div class="chats-search-form search-form panel-head">
+            <i class="search-icon mdi mdi-24px mdi-magnify"></i>
+            <input type="text" class="search-input simple-input-field" tabindex="1" placeholder='{[print(xabber.getString("search"))]}'>
+            <i class="close-search-icon mdi mdi-16px mdi-close-circle"></i>
+        </div>
         <div class="pinned-chat-list item-list">
         </div>
         <div class="chat-list item-list">

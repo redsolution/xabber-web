@@ -1095,6 +1095,9 @@ xabber.ToolbarView = xabber.BasicView.extend({
     onUpdatedScreen: function (name) {
         if (this.$('.toolbar-item:not(.toolbar-logo).saved-chats').hasClass('active')) {
             xabber.chats_view.$('.recent-chats-main-header').text(xabber.getString("toolbar__menu_item__saved_chats"));
+        } else if (this.$('.toolbar-item:not(.toolbar-logo):not(.account-item).all-chats.unread').hasClass('active'))  {
+            xabber.chats_view.$('.recent-chats-main-header').text(xabber.getString("unread_chats"));
+
         } else if (this.$('.toolbar-item:not(.toolbar-logo).archive-chats').hasClass('active'))  {
             xabber.chats_view.$('.recent-chats-main-header').text(xabber.getString("toolbar__menu_item__archive_chats"));
         } else {

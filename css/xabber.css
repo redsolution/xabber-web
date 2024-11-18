@@ -1455,6 +1455,11 @@ body {
     z-index: 100;
 }
 
+.chat-list-wrap .panel-head {
+    top: 0;
+    left: 0;
+}
+
 .wide-placeholders-wrap {
     bottom: 0;
     position: absolute;
@@ -6628,11 +6633,15 @@ input[type=text].simple-input-field:hover {
     position: relative;
     top: 1px !important;
 }
+.contacts-panel-wrap .contacts-search-form .btn-dropdown-groups,
 .contacts-panel-wrap .contacts-search-form .btn-add-contact{
     position: absolute;
     right: 44px;
     top: 20px;
     cursor: pointer;
+}
+.contacts-panel-wrap .contacts-search-form .btn-add-contact{
+    right: 94px;
 }
 .contacts-panel-wrap .contacts-search-form .search-icon{
     left: 24px;
@@ -8527,11 +8536,11 @@ input[type=text].simple-input-field:hover {
 
 .left-panel-list-wrap {
     position: absolute;
-    top: 128px;
+    top: 64px;
     bottom: 0;
     width: 100% !important;
     /*border-right: 1px solid #F5F5F5;*/
-    padding: 0 16px;
+    padding: 64px 16px 0;
 }
 
 .mention-item {
@@ -20299,12 +20308,28 @@ input[type=range].voice-message-volume:focus {
 .recent-chats-plaheholder .placeholder-text {
     max-width: 200px;
 }
-
 .recent-chats-panel .recent-chats-main-header {
     font-size: 24px;
     line-height: 32px;
     height: 64px;
     padding: 16px 24px;
+    cursor:pointer;
+}
+
+.recent-chats-panel .btn-unread {
+    position: absolute;
+    color: #9e9e9e;
+    top: 20px;
+    right: 16px;
+    cursor: pointer;
+}
+
+.unread-active-chats.recent-chats-panel .btn-unread:not(.unread-active-btn),
+.recent-chats-panel .btn-unread.unread-active-btn {
+    display: none;
+}
+.unread-active-chats.recent-chats-panel .btn-unread.unread-active-btn{
+    display: block;
 }
 .recent-chats-panel .read-all-button {
     position: absolute;

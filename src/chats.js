@@ -9490,6 +9490,16 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
     main_container: '.chat-list',
     template: templates.chats_panel,
 
+    events: {
+        "keydown .search-input": "keyUpOnSearch",
+        "focusout .search-input": "clearSearchSelection",
+        "click .close-search-icon": "clearSearch",
+        "click .list-item": "onClickItem",
+        "click .btn-search-messages": "updateSearchWithMessages",
+        "click .btn-unread": "clickUnread",
+        "click .recent-chats-main-header": "clickScrollToTop",
+    },
+
     _initialize: function () {
         this.active_chat = null;
         this.model.on("add", this.onChatAdded, this);
@@ -9555,6 +9565,17 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
 
     onUpdatedScreen: function (name) {
         this.$('.read-all-button').switchClass('hidden', !xabber.toolbar_view.$('.toolbar-item:not(.account-item):not(.toolbar-logo).active.unread').length);
+        this.$('.recent-chats-panel').switchClass('unread-active-chats', xabber.toolbar_view.$('.toolbar-item:not(.account-item):not(.toolbar-logo).active.unread').length);
+    },
+
+    clickUnread: function () {
+        xabber.toolbar_view.clickAllChats();
+    },
+
+    clickScrollToTop: function (ev) {
+        if ($(ev.target).closest('.btn-unread').length)
+            return;
+        this.scrollToTop();
     },
 
     // onWindowResized: function (options) {

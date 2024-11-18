@@ -9801,6 +9801,8 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
         "click .btn-stop-plyr": "stopPlyr",
         "click .chat-tool-player-containter": "popupPlyr",
         "click .btn-add-contact": "showAddContactView",
+        "click .btn-create-group": "showAddPublicGroupChatView",
+        "click .btn-create-incognito": "showAddIncognitoGroupChatView",
     },
 
     _initialize: function () {
@@ -9852,12 +9854,26 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
             hover: false,
             belowOrigin: true,
         });
+        this.$('.btn-dropdown-groups').dropdown({
+            inDuration: 100,
+            outDuration: 100,
+            hover: false,
+            belowOrigin: true,
+        });
         this.updatePlyrControls();
         this.updatePlyrTime();
     },
 
     showAddContactView: function () {
         xabber.trigger('add_contact', {right: null});
+    },
+
+    showAddPublicGroupChatView: function () {
+        xabber.trigger('add_group_chat', {public: true, right: null});
+    },
+
+    showAddIncognitoGroupChatView: function () {
+        xabber.trigger('add_group_chat', {incognito: true, right: null});
     },
 
     playPausePlyr: function () {
