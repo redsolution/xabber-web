@@ -601,6 +601,201 @@ let Xabber = Backbone.Model.extend({
         return result.promise();
     },
 
+    playPausePlyr: function () {
+        if (!this.current_plyr_player)
+            return;
+        if (this.current_plyr_player.$audio_elem){
+            if (!this.current_plyr_player.$audio_elem.voice_message){
+                let f_url = $(this.current_plyr_player.$audio_elem).find('.file-link-download').attr('href');
+                $(this.current_plyr_player.$audio_elem).find('.mdi-play').removeClass('no-uploaded')
+                this.current_plyr_player.$audio_elem.voice_message = this.current_plyr_player.chat_item.content.renderVoiceMessage($(this.current_plyr_player.$audio_elem).find('.file-container')[0], f_url);
+            } else {
+                this.current_plyr_player.$audio_elem.voice_message.playPause()
+            }
+        } else
+            this.current_plyr_player.togglePlay();
+        this.trigger('plyr_player_updated');
+    },
+
+    stopPlyr: function () {
+        if (!this.current_plyr_player && this.plyr_player_popup)
+            return;
+        this.plyr_players.forEach((item) => {
+            if (item.$audio_elem){
+                if (item.$audio_elem.voice_message)
+                    item.$audio_elem.voice_message.stopTime();
+            }
+        });
+        if (this.plyr_player_popup)
+            this.plyr_player_popup.closePopup();
+        else {
+            this.current_plyr_player = null;
+            this.trigger('plyr_player_updated');
+        }
+    },
+
+    popupPlyr: function (ev) {
+        let $item = $(ev.target);
+        if ($item.closest('.chat-tool-plyr-controls').length){
+            return;
+        }
+        if (this.plyr_player_popup)
+            this.plyr_player_popup.minimizePopup();
+    },
+
+    nextPlyr: function () {
+        let player_index = this.current_plyr_player.chat_item.model.plyr_players.indexOf(this.current_plyr_player);
+        if (player_index === -1 && this.current_plyr_player.player_item)
+            player_index = this.current_plyr_player.chat_item.model.plyr_players.indexOf(this.current_plyr_player.player_item);
+        if (!this.current_plyr_player || !(player_index >= 0 && player_index < this.current_plyr_player.chat_item.model.plyr_players.length - 1))
+            return;
+        if (this.current_plyr_player.chat_item.model.plyr_players[player_index + 1].$audio_elem){
+            let next_item = this.current_plyr_player.chat_item.model.plyr_players[player_index + 1];
+            if (!next_item.$audio_elem.voice_message){
+                let f_url = $(next_item.$audio_elem).find('.file-link-download').attr('href');
+                $(next_item.$audio_elem).find('.mdi-play').removeClass('no-uploaded');
+                next_item.$audio_elem.voice_message = this.current_plyr_player.chat_item.content.renderVoiceMessage($(next_item.$audio_elem).find('.file-container')[0], f_url, this.current_plyr_player.chat_item.model);
+            } else {
+                next_item.$audio_elem.voice_message.play()
+            }
+        } else{
+            if (!this.plyr_player_popup){
+                this.plyr_player_popup = new this.PlyrPlayerPopupView({});
+                this.plyr_player_popup.show({player: this.current_plyr_player.chat_item.model.plyr_players[player_index + 1]});
+            } else
+                this.plyr_player_popup.showNewVideo({player: this.current_plyr_player.chat_item.model.plyr_players[player_index + 1]});
+        }
+        setTimeout(() => {
+            this.trigger('plyr_player_updated');
+        }, 500);
+    },
+
+    previousPlyr: function () {
+        let player_index = this.current_plyr_player.chat_item.model.plyr_players.indexOf(this.current_plyr_player);
+        if (player_index === -1 && this.current_plyr_player.player_item)
+            player_index = this.current_plyr_player.chat_item.model.plyr_players.indexOf(this.current_plyr_player.player_item);
+        if (!this.current_plyr_player || !(player_index <= this.current_plyr_player.chat_item.model.plyr_players.length && player_index > 0))
+            return;
+        if (this.current_plyr_player.chat_item.model.plyr_players[player_index - 1].$audio_elem){
+            let prev_item = this.current_plyr_player.chat_item.model.plyr_players[player_index - 1];
+            if (!prev_item.$audio_elem.voice_message){
+                let f_url = $(prev_item.$audio_elem).find('.file-link-download').attr('href');
+                $(prev_item.$audio_elem).find('.mdi-play').removeClass('no-uploaded');
+                prev_item.$audio_elem.voice_message = this.current_plyr_player.chat_item.content.renderVoiceMessage($(prev_item.$audio_elem).find('.file-container')[0], f_url, this.current_plyr_player.chat_item.model);
+            } else {
+                prev_item.$audio_elem.voice_message.play()
+            }
+        } else{
+            if (!this.plyr_player_popup){
+                this.plyr_player_popup = new this.PlyrPlayerPopupView({});
+                this.plyr_player_popup.show({player: this.current_plyr_player.chat_item.model.plyr_players[player_index - 1]});
+            } else
+                this.plyr_player_popup.showNewVideo({player: this.current_plyr_player.chat_item.model.plyr_players[player_index - 1]});
+        }
+        setTimeout(() => {
+            this.trigger('plyr_player_updated');
+        }, 500);
+    },
+
+    updatePlyrControls: function (self) {
+        self.$('.chat-tool-player').showIf(this.current_plyr_player);
+        self.$el.switchClass('chat-head-player-enabled', this.current_plyr_player);
+        if (this.current_plyr_player && this.current_plyr_player.$audio_elem) {
+            if (this.current_plyr_player.$audio_elem.voice_message){
+                let voice_message = this.current_plyr_player.$audio_elem.voice_message;
+                self.$('.chat-head-player-type').text(this.getString("chat_message_voice"))
+                self.$('.btn-play-pause-plyr .mdi-play').hideIf(voice_message.isPlaying());
+                self.$('.btn-play-pause-plyr .mdi-pause').hideIf(!voice_message.isPlaying());
+                self.$('.btn-play-pause-plyr').switchClass('active-plyr', voice_message.isPlaying());
+                // this.$('.btn-play-pause-plyr').switchClass('ground-color-500', voice_message.isPlaying());
+                self.$('.btn-previous-plyr').switchClass('before-active-plyr', voice_message.isPlaying());
+                let player_index = this.current_plyr_player.chat_item.model.plyr_players.indexOf(this.current_plyr_player);
+                self.$('.btn-next-plyr').switchClass('disabled', !(player_index >= 0 && player_index < this.current_plyr_player.chat_item.model.plyr_players.length - 1));
+                self.$('.btn-previous-plyr').switchClass('disabled', !(player_index <= this.current_plyr_player.chat_item.model.plyr_players.length && player_index > 0));
+                self.$('.mdi-player-type-icon').addClass('hidden');
+                self.$('.player-poster').addClass('hidden');
+                self.$('.voice-message-player-avatar').removeClass('hidden');
+                self.$('.voice-message-player-avatar').setAvatar(this.current_plyr_player.contact_avatar, 32);
+                self.updatePlyrTitle();
+                let duration = Math.round(voice_message.getDuration());
+                self.$('.chat-head-player-total-time').text(utils.pretty_duration(duration));
+                let timerId = setInterval(function() {
+                    let cur_time = Math.round(voice_message.getCurrentTime());
+                    if (voice_message.isPlaying())
+                        self.$('.chat-head-player-current-time').text(utils.pretty_duration(cur_time));
+                    else
+                        clearInterval(timerId);
+                }, 100);
+                (this.plyr_player_popup) && this.plyr_player_popup.$el.addClass('hidden2');
+                (this.plyr_player_popup) && this.plyr_player_popup.$el.closest('#modals').siblings('#' + this.plyr_player_popup.$el.data('overlayId')).addClass('hidden2');
+            }
+        }
+        else if (this.current_plyr_player) {
+            self.$('.chat-head-player-current-time').text(utils.pretty_duration(isNaN(this.current_plyr_player.currentTime) ? 0 : parseInt(this.current_plyr_player.currentTime)));
+            self.$('.chat-head-player-total-time').text(utils.pretty_duration(parseInt(this.current_plyr_player.duration)));
+            self.updatePlyrTitle();
+            let poster = this.current_plyr_player.poster;
+            if (poster){
+                self.$('.mdi-player-type-icon').addClass('hidden');
+                self.$('.player-poster').removeClass('hidden');
+                self.$('.player-poster').attr("src", poster);
+            } else {
+                self.$('.mdi-player-type-icon').removeClass('hidden');
+                self.$('.player-poster').addClass('hidden');
+            }
+            self.$('.voice-message-player-avatar').addClass('hidden');
+            if (this.current_plyr_player.provider != 'html5')
+                self.$('.chat-head-player-type').text(this.current_plyr_player.provider)
+            else
+                self.$('.chat-head-player-type').text(this.getString("chat_message_video"))
+            self.$('.btn-play-pause-plyr .mdi-play').hideIf(this.current_plyr_player.playing);
+            self.$('.btn-play-pause-plyr .mdi-pause').hideIf(!this.current_plyr_player.playing);
+            self.$('.btn-play-pause-plyr').switchClass('active-plyr', this.current_plyr_player.playing);
+            // self.$('.btn-play-pause-plyr').switchClass('ground-color-500', this.current_plyr_player.playing);
+            self.$('.btn-previous-plyr').switchClass('before-active-plyr', this.current_plyr_player.playing);
+            let player_index = this.current_plyr_player.chat_item.model.plyr_players.indexOf(this.current_plyr_player.player_item);
+            self.$('.btn-next-plyr').switchClass('disabled', !(player_index >= 0 && player_index < this.current_plyr_player.chat_item.model.plyr_players.length - 1));
+            self.$('.btn-previous-plyr').switchClass('disabled', !(player_index <= this.current_plyr_player.chat_item.model.plyr_players.length && player_index > 0));
+            (this.plyr_player_popup) && this.plyr_player_popup.$el.removeClass('hidden2');
+            (this.plyr_player_popup) && this.plyr_player_popup.$el.closest('#modals').siblings('#' + this.plyr_player_popup.$el.data('overlayId')).removeClass('hidden2');
+        }
+    },
+
+    updatePlyrTitle: function (self) {
+        if (!this.current_plyr_player)
+            return
+        let $title_elem = self.$('.chat-head-player-title .chat-head-player-title-text'),
+            title;
+        if (this.current_plyr_player && this.current_plyr_player.$audio_elem)
+            title = this.current_plyr_player.author;
+        else if (this.current_plyr_player)
+            title = this.current_plyr_player.config.title ?
+                this.current_plyr_player.config.title :
+                this.current_plyr_player.provider === 'html5' ?
+                    this.current_plyr_player.source.substring(this.current_plyr_player.source.lastIndexOf('/')+1)
+                    : this.getString("chat_message_video");
+        $title_elem.text(title);
+        if (self.$('.chat-head-player-title')[0] && utils.isOverflownWidth(self.$('.chat-head-player-title')[0])){
+            $title_elem.addClass('active-animation-player-title');
+            $title_elem.text(title + ' ⚫︎︎ ⚫︎︎ ⚫︎︎ ' + title);
+            let text = $title_elem[0],
+                containerWidth = self.$('.chat-head-player-title')[0].offsetWidth,
+                textWidth = text.offsetWidth;
+            text.style.animationDuration = `${textWidth / containerWidth * 10}s`;
+        } else
+            $title_elem.removeClass('active-animation-player-title');
+
+    },
+
+    updatePlyrTime: function (self) {
+        if (this.current_plyr_player){
+            if (this.current_plyr_player && this.current_plyr_player.$audio_elem) {
+            }
+            else if (!isNaN(this.current_plyr_player.currentTime))
+                self.$('.chat-head-player-current-time').text(utils.pretty_duration(isNaN(this.current_plyr_player.currentTime) ? 0 : parseInt(this.current_plyr_player.currentTime)));
+        }
+    },
+
     updateFaviconConnected: function () {
         let is_disconnected = false;
         this.accounts.each((account) => {

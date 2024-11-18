@@ -102,6 +102,7 @@ let badges_names = [
         'cancel',
         'edit',
         'edit-outline',
+        'arrow-collapse',
         'check-circle',
         'blocked-add',
         'information',

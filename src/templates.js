@@ -364,6 +364,7 @@
     addSvgTemplate('svg.security');
     addSvgTemplate('svg.edit');
     addSvgTemplate('svg.edit-outline');
+    addSvgTemplate('svg.arrow-collapse');
     addSvgTemplate('svg.check-circle');
     addSvgTemplate('svg.blocked-add');
     addSvgTemplate('svg.information-outline');

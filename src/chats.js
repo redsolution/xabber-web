@@ -10630,7 +10630,7 @@ xabber.InvitationPanelView = xabber.SearchView.extend({
           "click .btn-next-plyr": "nextPlyr",
           "click .btn-previous-plyr": "previousPlyr",
           "click .btn-stop-plyr": "stopPlyr",
-          "click .btn-popup-plyr": "popupPlyr",
+          "click .chat-tool-player-containter": "popupPlyr",
           "click .btn-jingle-message": "openJingleMessage",
           "click .btn-search-messages": "renderSearchPanel"
       },
@@ -10743,184 +10743,35 @@ xabber.InvitationPanelView = xabber.SearchView.extend({
       },
 
       playPausePlyr: function () {
-          if (!xabber.current_plyr_player)
-              return;
-          if (xabber.current_plyr_player.$audio_elem){
-              if (!xabber.current_plyr_player.$audio_elem.voice_message){
-                  let f_url = $(xabber.current_plyr_player.$audio_elem).find('.file-link-download').attr('href');
-                  $(xabber.current_plyr_player.$audio_elem).find('.mdi-play').removeClass('no-uploaded')
-                  xabber.current_plyr_player.$audio_elem.voice_message = this.content.renderVoiceMessage($(xabber.current_plyr_player.$audio_elem).find('.file-container')[0], f_url);
-              } else {
-                  xabber.current_plyr_player.$audio_elem.voice_message.playPause()
-              }
-          } else
-              xabber.current_plyr_player.togglePlay();
-          xabber.trigger('plyr_player_updated');
+          xabber.playPausePlyr();
       },
 
       stopPlyr: function () {
-          if (!xabber.current_plyr_player && xabber.plyr_player_popup)
-              return;
-          xabber.plyr_players.forEach((item) => {
-              if (item.$audio_elem){
-                  if (item.$audio_elem.voice_message)
-                      item.$audio_elem.voice_message.stopTime();
-              }
-          });
-          if (xabber.plyr_player_popup)
-              xabber.plyr_player_popup.closePopup();
-          else {
-              xabber.current_plyr_player = null;
-              xabber.trigger('plyr_player_updated');
-          }
+          xabber.stopPlyr();
       },
 
-      popupPlyr: function () {
-          if (xabber.plyr_player_popup)
-              xabber.plyr_player_popup.minimizePopup();
+      popupPlyr: function (ev) {
+          xabber.popupPlyr(ev);
       },
 
       nextPlyr: function () {
-          let player_index = xabber.current_plyr_player.chat_item.model.plyr_players.indexOf(xabber.current_plyr_player);
-          if (player_index === -1 && xabber.current_plyr_player.player_item)
-              player_index = xabber.current_plyr_player.chat_item.model.plyr_players.indexOf(xabber.current_plyr_player.player_item);
-          if (!xabber.current_plyr_player || !(player_index >= 0 && player_index < xabber.current_plyr_player.chat_item.model.plyr_players.length - 1))
-              return;
-          if (xabber.current_plyr_player.chat_item.model.plyr_players[player_index + 1].$audio_elem){
-              let next_item = xabber.current_plyr_player.chat_item.model.plyr_players[player_index + 1];
-              if (!next_item.$audio_elem.voice_message){
-                  let f_url = $(next_item.$audio_elem).find('.file-link-download').attr('href');
-                  $(next_item.$audio_elem).find('.mdi-play').removeClass('no-uploaded');
-                  next_item.$audio_elem.voice_message = xabber.current_plyr_player.chat_item.content.renderVoiceMessage($(next_item.$audio_elem).find('.file-container')[0], f_url, xabber.current_plyr_player.chat_item.model);
-              } else {
-                  next_item.$audio_elem.voice_message.play()
-              }
-          } else{
-              if (!xabber.plyr_player_popup){
-                  xabber.plyr_player_popup = new xabber.PlyrPlayerPopupView({});
-                  xabber.plyr_player_popup.show({player: xabber.current_plyr_player.chat_item.model.plyr_players[player_index + 1]});
-              } else
-                  xabber.plyr_player_popup.showNewVideo({player: xabber.current_plyr_player.chat_item.model.plyr_players[player_index + 1]});
-          }
+          xabber.nextPlyr();
       },
 
       previousPlyr: function () {
-          let player_index = xabber.current_plyr_player.chat_item.model.plyr_players.indexOf(xabber.current_plyr_player);
-          if (player_index === -1 && xabber.current_plyr_player.player_item)
-              player_index = xabber.current_plyr_player.chat_item.model.plyr_players.indexOf(xabber.current_plyr_player.player_item);
-          if (!xabber.current_plyr_player || !(player_index <= xabber.current_plyr_player.chat_item.model.plyr_players.length && player_index > 0))
-              return;
-          if (xabber.current_plyr_player.chat_item.model.plyr_players[player_index - 1].$audio_elem){
-              let prev_item = xabber.current_plyr_player.chat_item.model.plyr_players[player_index - 1];
-              if (!prev_item.$audio_elem.voice_message){
-                  let f_url = $(prev_item.$audio_elem).find('.file-link-download').attr('href');
-                  $(prev_item.$audio_elem).find('.mdi-play').removeClass('no-uploaded');
-                  prev_item.$audio_elem.voice_message = xabber.current_plyr_player.chat_item.content.renderVoiceMessage($(prev_item.$audio_elem).find('.file-container')[0], f_url, xabber.current_plyr_player.chat_item.model);
-              } else {
-                  prev_item.$audio_elem.voice_message.play()
-              }
-          } else{
-              if (!xabber.plyr_player_popup){
-                  xabber.plyr_player_popup = new xabber.PlyrPlayerPopupView({});
-                  xabber.plyr_player_popup.show({player: xabber.current_plyr_player.chat_item.model.plyr_players[player_index - 1]});
-              } else
-                  xabber.plyr_player_popup.showNewVideo({player: xabber.current_plyr_player.chat_item.model.plyr_players[player_index - 1]});
-          }
+          xabber.previousPlyr();
       },
 
       updatePlyrControls: function () {
-          this.$('.chat-tool-player').showIf(xabber.current_plyr_player);
-          this.$el.switchClass('chat-head-player-enabled', xabber.current_plyr_player);
-          if (xabber.current_plyr_player && xabber.current_plyr_player.$audio_elem) {
-              if (xabber.current_plyr_player.$audio_elem.voice_message){
-                  let voice_message = xabber.current_plyr_player.$audio_elem.voice_message;
-                  this.$('.chat-head-player-type').text(xabber.getString("chat_message_voice"))
-                  this.$('.btn-play-pause-plyr .mdi-play').hideIf(voice_message.isPlaying());
-                  this.$('.btn-play-pause-plyr .mdi-pause').hideIf(!voice_message.isPlaying());
-                  this.$('.btn-play-pause-plyr').switchClass('active-plyr', voice_message.isPlaying());
-                  // this.$('.btn-play-pause-plyr').switchClass('ground-color-500', voice_message.isPlaying());
-                  this.$('.btn-previous-plyr').switchClass('before-active-plyr', voice_message.isPlaying());
-                  let player_index = xabber.current_plyr_player.chat_item.model.plyr_players.indexOf(xabber.current_plyr_player);
-                  this.$('.btn-next-plyr').switchClass('disabled', !(player_index >= 0 && player_index < xabber.current_plyr_player.chat_item.model.plyr_players.length - 1));
-                  this.$('.btn-previous-plyr').switchClass('disabled', !(player_index <= xabber.current_plyr_player.chat_item.model.plyr_players.length && player_index > 0));
-                  this.$('.mdi-player-type-icon').addClass('hidden');
-                  this.$('.player-poster').addClass('hidden');
-                  this.$('.voice-message-player-avatar').removeClass('hidden');
-                  this.$('.voice-message-player-avatar').setAvatar(xabber.current_plyr_player.contact_avatar, 32);
-                  this.updatePlyrTitle();
-                  let duration = Math.round(voice_message.getDuration());
-                  this.$('.chat-head-player-total-time').text(utils.pretty_duration(duration));
-                  let timerId = setInterval(function() {
-                      let cur_time = Math.round(voice_message.getCurrentTime());
-                      if (voice_message.isPlaying())
-                          this.$('.chat-head-player-current-time').text(utils.pretty_duration(cur_time));
-                      else
-                          clearInterval(timerId);
-                  }, 100);
-                  (xabber.plyr_player_popup) && xabber.plyr_player_popup.$el.addClass('hidden2');
-                  (xabber.plyr_player_popup) && xabber.plyr_player_popup.$el.closest('#modals').siblings('#' + xabber.plyr_player_popup.$el.data('overlayId')).addClass('hidden2');
-              }
-          }
-          else if (xabber.current_plyr_player) {
-              this.$('.chat-head-player-current-time').text(utils.pretty_duration(isNaN(xabber.current_plyr_player.currentTime) ? 0 : parseInt(xabber.current_plyr_player.currentTime)));
-              this.$('.chat-head-player-total-time').text(utils.pretty_duration(parseInt(xabber.current_plyr_player.duration)));
-              this.updatePlyrTitle();
-              let poster = xabber.current_plyr_player.poster;
-              if (poster){
-                  this.$('.mdi-player-type-icon').addClass('hidden');
-                  this.$('.player-poster').removeClass('hidden');
-                  this.$('.player-poster').attr("src", poster);
-              } else {
-                  this.$('.mdi-player-type-icon').removeClass('hidden');
-                  this.$('.player-poster').addClass('hidden');
-              }
-              this.$('.voice-message-player-avatar').addClass('hidden');
-              if (xabber.current_plyr_player.provider != 'html5')
-                  this.$('.chat-head-player-type').text(xabber.current_plyr_player.provider)
-              else
-                  this.$('.chat-head-player-type').text(xabber.getString("chat_message_video"))
-              this.$('.btn-play-pause-plyr .mdi-play').hideIf(xabber.current_plyr_player.playing);
-              this.$('.btn-play-pause-plyr .mdi-pause').hideIf(!xabber.current_plyr_player.playing);
-              this.$('.btn-play-pause-plyr').switchClass('active-plyr', xabber.current_plyr_player.playing);
-              // this.$('.btn-play-pause-plyr').switchClass('ground-color-500', xabber.current_plyr_player.playing);
-              this.$('.btn-previous-plyr').switchClass('before-active-plyr', xabber.current_plyr_player.playing);
-              let player_index = xabber.current_plyr_player.chat_item.model.plyr_players.indexOf(xabber.current_plyr_player.player_item);
-              this.$('.btn-next-plyr').switchClass('disabled', !(player_index >= 0 && player_index < xabber.current_plyr_player.chat_item.model.plyr_players.length - 1));
-              this.$('.btn-previous-plyr').switchClass('disabled', !(player_index <= xabber.current_plyr_player.chat_item.model.plyr_players.length && player_index > 0));
-              (xabber.plyr_player_popup) && xabber.plyr_player_popup.$el.removeClass('hidden2');
-              (xabber.plyr_player_popup) && xabber.plyr_player_popup.$el.closest('#modals').siblings('#' + xabber.plyr_player_popup.$el.data('overlayId')).removeClass('hidden2');
-          }
-      },
-
-      updatePlyrTime: function () {
-          if (xabber.current_plyr_player){
-              if (xabber.current_plyr_player && xabber.current_plyr_player.$audio_elem) {
-              }
-              else if (!isNaN(xabber.current_plyr_player.currentTime))
-                  this.$('.chat-head-player-current-time').text(utils.pretty_duration(isNaN(xabber.current_plyr_player.currentTime) ? 0 : parseInt(xabber.current_plyr_player.currentTime)));
-          }
+          xabber.updatePlyrControls(this);
       },
 
       updatePlyrTitle: function () {
-          if (!xabber.current_plyr_player)
-              return
-          let $title_elem = this.$('.chat-head-player-title .chat-head-player-title-text'),
-              title;
-          if (xabber.current_plyr_player && xabber.current_plyr_player.$audio_elem)
-              title = xabber.current_plyr_player.author;
-          else if (xabber.current_plyr_player)
-              title = xabber.current_plyr_player.config.title ?
-                  xabber.current_plyr_player.config.title :
-                  xabber.current_plyr_player.provider === 'html5' ?
-                      xabber.current_plyr_player.source.substring(xabber.current_plyr_player.source.lastIndexOf('/')+1)
-                      : xabber.getString("chat_message_video");
-          $title_elem.text(title);
-          if (this.$('.chat-head-player-title')[0] && utils.isOverflownWidth(this.$('.chat-head-player-title')[0])){
-              $title_elem.addClass('active-animation-player-title');
-              $title_elem.text(title + ' ⚫︎︎ ⚫︎︎ ⚫︎︎ ' + title);
-          } else
-              $title_elem.removeClass('active-animation-player-title');
+          xabber.updatePlyrTitle(this);
+      },
 
+      updatePlyrTime: function () {
+          xabber.updatePlyrTime(this);
       },
 
       updateJingleButton: function () {
@@ -10983,7 +10834,7 @@ xabber.InvitationPanelView = xabber.SearchView.extend({
         "click .btn-next-plyr": "nextPlyr",
         "click .btn-previous-plyr": "previousPlyr",
         "click .btn-stop-plyr": "stopPlyr",
-        "click .btn-popup-plyr": "popupPlyr",
+        "click .chat-tool-player-containter": "popupPlyr",
         "click .btn-set-ephemeral-timer": "setEphemeralTimer",
     },
 
@@ -11374,186 +11225,37 @@ xabber.InvitationPanelView = xabber.SearchView.extend({
         set_status_view.open(this.contact);
     },
 
-    playPausePlyr: function () {
-        if (!xabber.current_plyr_player)
-            return;
-        if (xabber.current_plyr_player.$audio_elem){
-            if (!xabber.current_plyr_player.$audio_elem.voice_message){
-                let f_url = $(xabber.current_plyr_player.$audio_elem).find('.file-link-download').attr('href');
-                $(xabber.current_plyr_player.$audio_elem).find('.mdi-play').removeClass('no-uploaded')
-                xabber.current_plyr_player.$audio_elem.voice_message = this.content.renderVoiceMessage($(xabber.current_plyr_player.$audio_elem).find('.file-container')[0], f_url);
-            } else {
-                xabber.current_plyr_player.$audio_elem.voice_message.playPause()
-            }
-        } else
-            xabber.current_plyr_player.togglePlay();
-        xabber.trigger('plyr_player_updated');
-    },
+      playPausePlyr: function () {
+          xabber.playPausePlyr();
+      },
 
-    stopPlyr: function () {
-        if (!xabber.current_plyr_player && xabber.plyr_player_popup)
-            return;
-        xabber.plyr_players.forEach((item) => {
-            if (item.$audio_elem){
-                if (item.$audio_elem.voice_message)
-                    item.$audio_elem.voice_message.stopTime();
-            }
-        });
-        if (xabber.plyr_player_popup)
-            xabber.plyr_player_popup.closePopup();
-        else {
-            xabber.current_plyr_player = null;
-            xabber.trigger('plyr_player_updated');
-        }
-    },
+      stopPlyr: function () {
+          xabber.stopPlyr();
+      },
 
-    popupPlyr: function () {
-        if (xabber.plyr_player_popup)
-            xabber.plyr_player_popup.minimizePopup();
-    },
+      popupPlyr: function (ev) {
+          xabber.popupPlyr(ev);
+      },
 
-    nextPlyr: function () {
-        let player_index = xabber.current_plyr_player.chat_item.model.plyr_players.indexOf(xabber.current_plyr_player);
-        if (player_index === -1 && xabber.current_plyr_player.player_item)
-            player_index = xabber.current_plyr_player.chat_item.model.plyr_players.indexOf(xabber.current_plyr_player.player_item);
-        if (!xabber.current_plyr_player || !(player_index >= 0 && player_index < xabber.current_plyr_player.chat_item.model.plyr_players.length - 1))
-            return;
-        if (xabber.current_plyr_player.chat_item.model.plyr_players[player_index + 1].$audio_elem){
-            let next_item = xabber.current_plyr_player.chat_item.model.plyr_players[player_index + 1];
-            if (!next_item.$audio_elem.voice_message){
-                let f_url = $(next_item.$audio_elem).find('.file-link-download').attr('href');
-                $(next_item.$audio_elem).find('.mdi-play').removeClass('no-uploaded');
-                next_item.$audio_elem.voice_message = xabber.current_plyr_player.chat_item.content.renderVoiceMessage($(next_item.$audio_elem).find('.file-container')[0], f_url, xabber.current_plyr_player.chat_item.model);
-            } else {
-                next_item.$audio_elem.voice_message.play()
-            }
-        } else{
-            if (!xabber.plyr_player_popup){
-                xabber.plyr_player_popup = new xabber.PlyrPlayerPopupView({});
-                xabber.plyr_player_popup.show({player: xabber.current_plyr_player.chat_item.model.plyr_players[player_index + 1]});
-            } else
-                xabber.plyr_player_popup.showNewVideo({player: xabber.current_plyr_player.chat_item.model.plyr_players[player_index + 1]});
-        }
-    },
+      nextPlyr: function () {
+          xabber.nextPlyr();
+      },
 
-    previousPlyr: function () {
-        let player_index = xabber.current_plyr_player.chat_item.model.plyr_players.indexOf(xabber.current_plyr_player);
-        if (player_index === -1 && xabber.current_plyr_player.player_item)
-            player_index = xabber.current_plyr_player.chat_item.model.plyr_players.indexOf(xabber.current_plyr_player.player_item);
-        if (!xabber.current_plyr_player || !(player_index <= xabber.current_plyr_player.chat_item.model.plyr_players.length && player_index > 0))
-            return;
-        if (xabber.current_plyr_player.chat_item.model.plyr_players[player_index - 1].$audio_elem){
-            let prev_item = xabber.current_plyr_player.chat_item.model.plyr_players[player_index - 1];
-            if (!prev_item.$audio_elem.voice_message){
-                let f_url = $(prev_item.$audio_elem).find('.file-link-download').attr('href');
-                $(prev_item.$audio_elem).find('.mdi-play').removeClass('no-uploaded');
-                prev_item.$audio_elem.voice_message = xabber.current_plyr_player.chat_item.content.renderVoiceMessage($(prev_item.$audio_elem).find('.file-container')[0], f_url, xabber.current_plyr_player.chat_item.model);
-            } else {
-                prev_item.$audio_elem.voice_message.play()
-            }
-        } else{
-            if (!xabber.plyr_player_popup){
-                xabber.plyr_player_popup = new xabber.PlyrPlayerPopupView({});
-                xabber.plyr_player_popup.show({player: xabber.current_plyr_player.chat_item.model.plyr_players[player_index - 1]});
-            } else
-                xabber.plyr_player_popup.showNewVideo({player: xabber.current_plyr_player.chat_item.model.plyr_players[player_index - 1]});
-        }
-    },
+      previousPlyr: function () {
+          xabber.previousPlyr();
+      },
 
-    updatePlyrControls: function () {
-        this.$('.chat-tool-player').showIf(xabber.current_plyr_player);
-        this.$el.switchClass('chat-head-player-enabled', xabber.current_plyr_player);
-        if (xabber.current_plyr_player && xabber.current_plyr_player.$audio_elem) {
-            if (xabber.current_plyr_player.$audio_elem.voice_message){
-                let voice_message = xabber.current_plyr_player.$audio_elem.voice_message;
-                this.$('.chat-head-player-type').text(xabber.getString("chat_message_voice"))
-                this.$('.btn-play-pause-plyr .mdi-play').hideIf(voice_message.isPlaying());
-                this.$('.btn-play-pause-plyr .mdi-pause').hideIf(!voice_message.isPlaying());
-                this.$('.btn-play-pause-plyr').switchClass('active-plyr', voice_message.isPlaying());
-                // this.$('.btn-play-pause-plyr').switchClass('ground-color-500', voice_message.isPlaying());
-                this.$('.btn-previous-plyr').switchClass('before-active-plyr', voice_message.isPlaying());
-                let player_index = xabber.current_plyr_player.chat_item.model.plyr_players.indexOf(xabber.current_plyr_player);
-                this.$('.btn-next-plyr').switchClass('disabled', !(player_index >= 0 && player_index < xabber.current_plyr_player.chat_item.model.plyr_players.length - 1));
-                this.$('.btn-previous-plyr').switchClass('disabled', !(player_index <= xabber.current_plyr_player.chat_item.model.plyr_players.length && player_index > 0));
-                this.$('.mdi-player-type-icon').addClass('hidden');
-                this.$('.player-poster').addClass('hidden');
-                this.$('.voice-message-player-avatar').removeClass('hidden');
-                this.$('.voice-message-player-avatar').setAvatar(xabber.current_plyr_player.contact_avatar, 32);
-                this.updatePlyrTitle();
-                let duration = Math.round(voice_message.getDuration());
-                this.$('.chat-head-player-total-time').text(utils.pretty_duration(duration));
-                let timerId = setInterval(function() {
-                    let cur_time = Math.round(voice_message.getCurrentTime());
-                    if (voice_message.isPlaying())
-                        this.$('.chat-head-player-current-time').text(utils.pretty_duration(cur_time));
-                    else
-                        clearInterval(timerId);
-                }, 100);
-                (xabber.plyr_player_popup) && xabber.plyr_player_popup.$el.addClass('hidden2');
-                (xabber.plyr_player_popup) && xabber.plyr_player_popup.$el.closest('#modals').siblings('#' + xabber.plyr_player_popup.$el.data('overlayId')).addClass('hidden2');
-            }
-        }
-        else if (xabber.current_plyr_player) {
-            this.$('.chat-head-player-current-time').text(utils.pretty_duration(isNaN(xabber.current_plyr_player.currentTime) ? 0 : parseInt(xabber.current_plyr_player.currentTime)));
-            this.$('.chat-head-player-total-time').text(utils.pretty_duration(parseInt(xabber.current_plyr_player.duration)));
-            this.updatePlyrTitle();
-            let poster = xabber.current_plyr_player.poster;
-            if (poster){
-                this.$('.mdi-player-type-icon').addClass('hidden');
-                this.$('.player-poster').removeClass('hidden');
-                this.$('.player-poster').attr("src", poster);
-            } else {
-                this.$('.mdi-player-type-icon').removeClass('hidden');
-                this.$('.player-poster').addClass('hidden');
-            }
-            this.$('.voice-message-player-avatar').addClass('hidden');
-            if (xabber.current_plyr_player.provider != 'html5')
-                this.$('.chat-head-player-type').text(xabber.current_plyr_player.provider)
-            else
-                this.$('.chat-head-player-type').text(xabber.getString("chat_message_video"))
-            this.$('.btn-play-pause-plyr .mdi-play').hideIf(xabber.current_plyr_player.playing);
-            this.$('.btn-play-pause-plyr .mdi-pause').hideIf(!xabber.current_plyr_player.playing);
-            this.$('.btn-play-pause-plyr').switchClass('active-plyr', xabber.current_plyr_player.playing);
-            // this.$('.btn-play-pause-plyr').switchClass('ground-color-500', xabber.current_plyr_player.playing);
-            this.$('.btn-previous-plyr').switchClass('before-active-plyr', xabber.current_plyr_player.playing);
-            let player_index = xabber.current_plyr_player.chat_item.model.plyr_players.indexOf(xabber.current_plyr_player.player_item);
-            this.$('.btn-next-plyr').switchClass('disabled', !(player_index >= 0 && player_index < xabber.current_plyr_player.chat_item.model.plyr_players.length - 1));
-            this.$('.btn-previous-plyr').switchClass('disabled', !(player_index <= xabber.current_plyr_player.chat_item.model.plyr_players.length && player_index > 0));
-            (xabber.plyr_player_popup) && xabber.plyr_player_popup.$el.removeClass('hidden2');
-            (xabber.plyr_player_popup) && xabber.plyr_player_popup.$el.closest('#modals').siblings('#' + xabber.plyr_player_popup.$el.data('overlayId')).removeClass('hidden2');
-        }
-    },
+      updatePlyrControls: function () {
+          xabber.updatePlyrControls(this);
+      },
 
-    updatePlyrTime: function () {
-        if (xabber.current_plyr_player){
-            if (xabber.current_plyr_player && xabber.current_plyr_player.$audio_elem) {
-            }
-            else if (!isNaN(xabber.current_plyr_player.currentTime))
-                this.$('.chat-head-player-current-time').text(utils.pretty_duration(isNaN(xabber.current_plyr_player.currentTime) ? 0 : parseInt(xabber.current_plyr_player.currentTime)));
-        }
-    },
+      updatePlyrTitle: function () {
+          xabber.updatePlyrTitle(this);
+      },
 
-    updatePlyrTitle: function () {
-        if (!xabber.current_plyr_player)
-            return
-        let $title_elem = this.$('.chat-head-player-title .chat-head-player-title-text'),
-            title;
-        if (xabber.current_plyr_player && xabber.current_plyr_player.$audio_elem)
-            title = xabber.current_plyr_player.author;
-        else if (xabber.current_plyr_player)
-            title = xabber.current_plyr_player.config.title ?
-                xabber.current_plyr_player.config.title :
-                xabber.current_plyr_player.provider === 'html5' ?
-                    xabber.current_plyr_player.source.substring(xabber.current_plyr_player.source.lastIndexOf('/')+1)
-                    : xabber.getString("chat_message_video");
-        $title_elem.text(title);
-        if (this.$('.chat-head-player-title')[0] && utils.isOverflownWidth(this.$('.chat-head-player-title')[0])){
-            $title_elem.addClass('active-animation-player-title');
-            $title_elem.text(title + ' ⚫︎︎ ⚫︎︎ ⚫︎︎ ' + title);
-        } else
-            $title_elem.removeClass('active-animation-player-title');
-
-    },
+      updatePlyrTime: function () {
+          xabber.updatePlyrTime(this);
+      },
 
     setEphemeralTimer: function (ev) {
         this.model.setEphemeralTimer(ev);

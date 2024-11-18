@@ -45,6 +45,11 @@ xabber.NotificationsView = xabber.BasicView.extend({
         "click .notification-subscriptions-button": "filterContent",
         "click .notifications-calendar-day": "showDay",
         "click .btn-read-all": "readAll",
+        "click .btn-play-pause-plyr": "playPausePlyr",
+        "click .btn-next-plyr": "nextPlyr",
+        "click .btn-previous-plyr": "previousPlyr",
+        "click .btn-stop-plyr": "stopPlyr",
+        "click .chat-tool-player-containter": "popupPlyr",
 
     },
 
@@ -52,6 +57,9 @@ xabber.NotificationsView = xabber.BasicView.extend({
         xabber.accounts.on("list_changed connected_list_changed notification_chat_created account_color_updated add destroy", this.updateAccountsFilter, this);
         xabber.accounts.on("change:enabled", this.updateAccountsFilter, this);
         xabber.accounts.on("change:connected", this.updateAccountsFilter, this);
+        xabber.on('plyr_player_updated', this.updatePlyrControls, this);
+        xabber.on('plyr_player_time_updated', this.updatePlyrTime, this);
+        xabber.on('update_layout', this.updatePlyrTitle, this);
         return this;
     },
 
@@ -63,6 +71,40 @@ xabber.NotificationsView = xabber.BasicView.extend({
         this.showReadAllBtn();
         this.renderCalendar();
         this.updateScrollBar();
+        this.updatePlyrControls();
+        this.updatePlyrTime();
+    },
+
+    playPausePlyr: function () {
+        xabber.playPausePlyr();
+    },
+
+    stopPlyr: function () {
+        xabber.stopPlyr();
+    },
+
+    popupPlyr: function (ev) {
+        xabber.popupPlyr(ev);
+    },
+
+    nextPlyr: function () {
+        xabber.nextPlyr();
+    },
+
+    previousPlyr: function () {
+        xabber.previousPlyr();
+    },
+
+    updatePlyrControls: function () {
+        xabber.updatePlyrControls(this);
+    },
+
+    updatePlyrTitle: function () {
+        xabber.updatePlyrTitle(this);
+    },
+
+    updatePlyrTime: function () {
+        xabber.updatePlyrTime(this);
     },
 
     clearFilter: function () {

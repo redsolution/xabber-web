@@ -46,6 +46,11 @@ xabber.CallsView = xabber.BasicView.extend({
         "click .chat-message .btn-send-jingle": "sendJingleMessage",
         "click .call-contact-item .btn-send-jingle": "sendJingleMessageContact",
         "click .btn-end-call": "endCall",
+        "click .btn-play-pause-plyr": "playPausePlyr",
+        "click .btn-next-plyr": "nextPlyr",
+        "click .btn-previous-plyr": "previousPlyr",
+        "click .btn-stop-plyr": "stopPlyr",
+        "click .chat-tool-player-containter": "popupPlyr",
 
     },
 
@@ -54,6 +59,9 @@ xabber.CallsView = xabber.BasicView.extend({
         xabber.accounts.on("change:enabled", this.updateAccountsFilter, this);
         xabber.accounts.on("change:connected", this.updateAccountsFilter, this);
         xabber.on("update_jingle_button", this.updateActiveCall, this);
+        xabber.on('plyr_player_updated', this.updatePlyrControls, this);
+        xabber.on('plyr_player_time_updated', this.updatePlyrTime, this);
+        xabber.on('update_layout', this.updatePlyrTitle, this);
 
         this.rendered_messages = [];
         this.calls_accounts = [];
@@ -80,6 +88,40 @@ xabber.CallsView = xabber.BasicView.extend({
         this.updateActiveCall();
         this.updateCallContacts();
         this.updateScrollBar2();
+        this.updatePlyrControls();
+        this.updatePlyrTime();
+    },
+
+    playPausePlyr: function () {
+        xabber.playPausePlyr();
+    },
+
+    stopPlyr: function () {
+        xabber.stopPlyr();
+    },
+
+    popupPlyr: function (ev) {
+        xabber.popupPlyr(ev);
+    },
+
+    nextPlyr: function () {
+        xabber.nextPlyr();
+    },
+
+    previousPlyr: function () {
+        xabber.previousPlyr();
+    },
+
+    updatePlyrControls: function () {
+        xabber.updatePlyrControls(this);
+    },
+
+    updatePlyrTitle: function () {
+        xabber.updatePlyrTitle(this);
+    },
+
+    updatePlyrTime: function () {
+        xabber.updatePlyrTime(this);
     },
 
     updateActiveCall: function () {

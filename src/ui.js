@@ -169,11 +169,25 @@ xabber.once("start", function () {
         this.left_panel.$el.switchClass('hidden', (this.body.screen.get('notifications')  || (this.body.screen.get('previous_screen') && this.body.screen.get('previous_screen').notifications))
             || (this.body.screen.get('calls') || (this.body.screen.get('previous_screen') && this.body.screen.get('previous_screen').calls))
             || (this.body.screen.get('name') === 'contacts' || (this.body.screen.get('previous_screen') && this.body.screen.get('previous_screen').name === 'contacts')));
-        this.chat_head.$el.switchClass('chat-head-ultra-narrow', right_panel_width <= 650);
-        this.chat_head.$el.switchClass('chat-head-narrow', right_panel_width < 750);
-        this.chat_head.$el.switchClass('chat-head-normal', (right_panel_width < 850 && right_panel_width >= 750));
-        this.chat_head.$el.switchClass('chat-head-normal-wide', (right_panel_width < 1000 && right_panel_width >= 850));
-        this.chat_head.$el.switchClass('chat-head-wide', right_panel_width > 1000);
+        if (left_panel_width === 0){
+            let fake_left_panel_width = right_panel_width * 0.26;
+            if (fake_left_panel_width <= 288)
+                fake_left_panel_width = 288;
+            if (fake_left_panel_width >= 384)
+                fake_left_panel_width = 384;
+            let true_right_panel_width = right_panel_width - fake_left_panel_width;
+            this.right_panel.$el.switchClass('chat-head-ultra-narrow', true_right_panel_width <= 650);
+            this.right_panel.$el.switchClass('chat-head-narrow', true_right_panel_width < 650);
+            this.right_panel.$el.switchClass('chat-head-normal', (true_right_panel_width < 850 && true_right_panel_width >= 650));
+            this.right_panel.$el.switchClass('chat-head-normal-wide', (true_right_panel_width < 1000 && true_right_panel_width >= 850));
+            this.right_panel.$el.switchClass('chat-head-wide', true_right_panel_width > 1000);
+        } else {
+            this.right_panel.$el.switchClass('chat-head-ultra-narrow', right_panel_width <= 650);
+            this.right_panel.$el.switchClass('chat-head-narrow', right_panel_width < 650);
+            this.right_panel.$el.switchClass('chat-head-normal', (right_panel_width < 850 && right_panel_width >= 650));
+            this.right_panel.$el.switchClass('chat-head-normal-wide', (right_panel_width < 1000 && right_panel_width >= 850));
+            this.right_panel.$el.switchClass('chat-head-wide', right_panel_width > 1000);
+        }
         this.contacts_view.$el.switchClass('narrow-panel', right_panel_width < 1000);
         this.main_panel.setCustomCss({
             width: panel_width,

@@ -9795,6 +9795,12 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
         "keyup .search-input": "keyUpSearch",
         "click .btn-edit": "editContactsGroups",
         "click .contact-jid": "onClickJid",
+        "click .btn-play-pause-plyr": "playPausePlyr",
+        "click .btn-next-plyr": "nextPlyr",
+        "click .btn-previous-plyr": "previousPlyr",
+        "click .btn-stop-plyr": "stopPlyr",
+        "click .chat-tool-player-containter": "popupPlyr",
+        "click .btn-add-contact": "showAddContactView",
     },
 
     _initialize: function () {
@@ -9814,6 +9820,9 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
         this.model.on("list_changed connected_list_changed account_color_updated add destroy", this.updateAccountsFilter, this);
         this.model.on("contacts_updated", this.onContactsUpdated, this);
         xabber.accounts.on('account_color_updated', this.onContactsUpdated, this);
+        xabber.on('plyr_player_updated', this.updatePlyrControls, this);
+        xabber.on('plyr_player_time_updated', this.updatePlyrTime, this);
+        xabber.on('update_layout', this.updatePlyrTitle, this);
         this.updateAccountsFilter();
         if (!_.isUndefined(this.ps_selector)) {
             this.ps_container2 = this.$('.contacts-panel-left-side');
@@ -9843,6 +9852,44 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
             hover: false,
             belowOrigin: true,
         });
+        this.updatePlyrControls();
+        this.updatePlyrTime();
+    },
+
+    showAddContactView: function () {
+        xabber.trigger('add_contact', {right: null});
+    },
+
+    playPausePlyr: function () {
+        xabber.playPausePlyr();
+    },
+
+    stopPlyr: function () {
+        xabber.stopPlyr();
+    },
+
+    popupPlyr: function (ev) {
+        xabber.popupPlyr(ev);
+    },
+
+    nextPlyr: function () {
+        xabber.nextPlyr();
+    },
+
+    previousPlyr: function () {
+        xabber.previousPlyr();
+    },
+
+    updatePlyrControls: function () {
+        xabber.updatePlyrControls(this);
+    },
+
+    updatePlyrTitle: function () {
+        xabber.updatePlyrTitle(this);
+    },
+
+    updatePlyrTime: function () {
+        xabber.updatePlyrTime(this);
     },
 
     updateScrollBar2: function () {
