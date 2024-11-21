@@ -944,6 +944,7 @@ xabber.Body = xabber.NodeView.extend({
     setScreen: function (name, attrs, options) {
         xabber.error(name);
         options = options || {};
+        attrs = attrs || {};
         $(window).unbind("keydown.contact_panel");
         xabber.notifications_placeholder && xabber.main_panel.$el.addClass('notifications-request');
         $(constants.CONTAINER_ELEMENT).switchClass('xabber-login', name === 'login');
@@ -4833,7 +4834,9 @@ xabber.once("start", function () {
         'right_contact', this.NodeView, {classlist: 'panel-wrap right-contact-panel-wrap'});
     this.wide_panel = this.main_panel.addChild(
         'wide', this.NodeView, {classlist: 'panel-wrap wide-panel-wrap'});
-    this.placeholders_wrap = this.main_panel.addChild('placeholders', this.NodeView, {classlist: 'wide-placeholders-wrap'});
+
+    this.placeholders_wrap = new this.ClientNotificationsContainer();
+
     this.settings_modal_view = this.main_overlay_panel.addChild(
         'settings_modal', this.SettingsModalView, {model: this._settings});
 }, xabber);

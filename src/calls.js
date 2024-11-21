@@ -62,6 +62,7 @@ xabber.CallsView = xabber.BasicView.extend({
         xabber.on('plyr_player_updated', this.updatePlyrControls, this);
         xabber.on('plyr_player_time_updated', this.updatePlyrTime, this);
         xabber.on('update_layout', this.updatePlyrTitle, this);
+        xabber.on('update_client_notifications', this.updateClientNotifications, this);
 
         this.rendered_messages = [];
         this.calls_accounts = [];
@@ -69,7 +70,7 @@ xabber.CallsView = xabber.BasicView.extend({
         this.calls_messages = new xabber.Messages(null, {});
         this.calls_messages.on("add", this.addMessage, this);
 
-        this.ps_container2 = this.$('.calls-content-filters');
+        this.ps_container2 = this.$('.left-column-filters-container');
         if (this.ps_container2.length) {
             this.ps_container2.perfectScrollbar(
                 _.extend(this.ps_settings || {}, xabber.ps_settings)
@@ -90,6 +91,16 @@ xabber.CallsView = xabber.BasicView.extend({
         this.updateScrollBar2();
         this.updatePlyrControls();
         this.updatePlyrTime();
+        this.updateClientNotifications();
+    },
+
+    updateClientNotifications: function () {
+        this.$('.client-notifications-wrap').find('.client-notifications-container').detach();
+
+        if (xabber.placeholders_wrap && this.isVisible()){
+            this.$('.client-notifications-wrap').append(xabber.placeholders_wrap.$el);
+        }
+        this.$('.client-notifications-wrap').switchClass('hidden', !xabber.placeholders_wrap.$el.children().length)
     },
 
     playPausePlyr: function () {

@@ -9825,9 +9825,10 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
         xabber.on('plyr_player_updated', this.updatePlyrControls, this);
         xabber.on('plyr_player_time_updated', this.updatePlyrTime, this);
         xabber.on('update_layout', this.updatePlyrTitle, this);
+        xabber.on('update_client_notifications', this.updateClientNotifications, this);
         this.updateAccountsFilter();
         if (!_.isUndefined(this.ps_selector)) {
-            this.ps_container2 = this.$('.contacts-panel-left-side');
+            this.ps_container2 = this.$('.left-column-filters-container');
             if (this.ps_container2.length) {
                 this.ps_container2.perfectScrollbar(
                     _.extend(this.ps_settings || {}, xabber.ps_settings)
@@ -9862,6 +9863,16 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
         });
         this.updatePlyrControls();
         this.updatePlyrTime();
+        this.updateClientNotifications();
+    },
+
+    updateClientNotifications: function (options) {
+        this.$('.client-notifications-wrap').find('.client-notifications-container').detach();
+
+        if (xabber.placeholders_wrap && this.isVisible()){
+            this.$('.client-notifications-wrap').append(xabber.placeholders_wrap.$el);
+        }
+        this.$('.client-notifications-wrap').switchClass('hidden', !xabber.placeholders_wrap.$el.children().length)
     },
 
     showAddContactView: function () {

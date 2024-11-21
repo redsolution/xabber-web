@@ -2818,23 +2818,23 @@ xabber.SignalProtocolStore = Backbone.Model.extend({
 });
 
 xabber.OMEMOEnablePlaceholder = xabber.BasicView.extend({
-    className: 'omemo-enable-placeholder',
+    className: 'omemo-enable-placeholder desktop-notification-item',
 
     events: {
-        'click .btn-enable': 'enableOmemo',
+        'click': 'enableOmemo',
         'click .btn-escape': 'closeOmemoPlaceholder'
     },
 
     _initialize: function (options) {
         this.account = options.account;
         this.updateColorScheme();
-        this.$el.html(templates.omemo_enable({jid: this.account.get('jid')}));
+        this.$el.html(templates.client_notification_item({text: xabber.getString("desktop_notifications__enable_encryption"), jid: this.account.get('jid')}));
         xabber.placeholders_wrap.$el.append(this.$el);
-        xabber.main_panel.$el.css('padding-bottom', xabber.placeholders_wrap.$el.height());
         xabber.on("update_screen", this.onUpdatedScreen, this);
         this.account.session.on("change:connected", this.updateConnected, this);
         this.account.settings.on("change:color", this.updateColorScheme, this);
         this.account.settings.on("change:omemo", this.onOmemoChange, this);
+        xabber.trigger('update_client_notifications');
     },
 
     updateColorScheme: function () {
@@ -2847,7 +2847,7 @@ xabber.OMEMOEnablePlaceholder = xabber.BasicView.extend({
             return;
         this.$el.detach();
         xabber.placeholders_wrap.$el.append(this.$el);
-        xabber.main_panel.$el.css('padding-bottom', xabber.placeholders_wrap.$el.height());
+        xabber.trigger('update_client_notifications');
     },
 
     updateConnected: function () {
@@ -2855,7 +2855,9 @@ xabber.OMEMOEnablePlaceholder = xabber.BasicView.extend({
             this.close();
     },
 
-    enableOmemo: function () {
+    enableOmemo: function (ev) {
+        if ($(ev.target).closest('.btn-escape').length)
+            return;
         this.account.settings.save('omemo', true);
         this.close();
         this.account.omemo = new xabber.Omemo({id: 'omemo'}, {
@@ -2881,7 +2883,8 @@ xabber.OMEMOEnablePlaceholder = xabber.BasicView.extend({
     close: function () {
         this.trigger('remove') && this.remove();
         this.account.omemo_enable_placeholder = undefined;
-        xabber.main_panel.$el.css('padding-bottom', xabber.placeholders_wrap.$el.height());
+        xabber.placeholders_wrap.$(this.$el).remove();
+        xabber.trigger('update_client_notifications');
     }
 });
 

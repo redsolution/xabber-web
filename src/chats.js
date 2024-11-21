@@ -9518,6 +9518,7 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
         xabber.on("update_screen", this.onUpdatedScreen, this);
         xabber.on("update_layout", this.onWindowResized, this);
         xabber.on('clear_chats_search', this.clearSearch, this);
+        xabber.on('update_client_notifications', this.updateClientNotifications, this);
         this.$('input').on('input', this.updateSearch.bind(this));
     },
 
@@ -9531,6 +9532,16 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
                 this.showAllChats();
             }
         }
+        this.updateClientNotifications();
+    },
+
+    updateClientNotifications: function (options) {
+        this.$('.client-notifications-wrap').find('.client-notifications-container').detach();
+
+        if (xabber.placeholders_wrap && this.isVisible()){
+            this.$('.client-notifications-wrap').append(xabber.placeholders_wrap.$el);
+        }
+        this.$('.client-notifications-wrap').switchClass('hidden', !xabber.placeholders_wrap.$el.children().length)
     },
 
     readAllMessages: function () {
@@ -14271,19 +14282,20 @@ xabber.ChatBodyPlaceholderContainer = xabber.Container.extend({
 });
 
 xabber.NotificationsPlaceholder = xabber.BasicView.extend({
-    className: 'notifications-placeholder',
+    className: 'notifications-placeholder desktop-notification-item',
     events: {
-        "click .btn-request-notifications": "requestNotifications",
-        "click .mdi-close": "close"
+        "click": "requestNotifications",
+        "click .btn-escape": "closeDesktopPlaceholder",
     },
 
     _initialize: function (options) {
-        this.$el.html(`${xabber.getString("desktop_notifications__alert_enable__text", [constants.CLIENT_NAME])} <span class="btn-request-notifications">${xabber.getString("desktop_notifications__alert_enable__link_text")}</span><button class="btn-request-notifications btn-flat btn-dark btn-main">${xabber.getString("chat_allow")}</button>`);
-        this.$el.append($('<i/>').addClass('mdi mdi-22px mdi-close'));
+        this.$el.html(env.templates.base.client_notification_item({text: xabber.getString("desktop_notifications__enable_desktop_notifications")}));
         xabber.on("update_screen", this.onUpdatedScreen, this);
     },
 
-    requestNotifications: function () {
+    requestNotifications: function (ev) {
+        if ($(ev.target).closest('.btn-escape').length)
+            return;
         window.Notification.requestPermission((permission) => {
             xabber._cache.save({'notifications': (permission === 'granted'), 'ignore_notifications_warning': true});
             this.close();
@@ -14295,14 +14307,19 @@ xabber.NotificationsPlaceholder = xabber.BasicView.extend({
             return;
         this.$el.detach();
         xabber.placeholders_wrap.$el.append(this.$el);
-        xabber.main_panel.$el.css('padding-bottom', xabber.placeholders_wrap.$el.height());
+        xabber.trigger('update_client_notifications');
+    },
+
+    closeDesktopPlaceholder: function () {
+        this.close();
     },
 
     close: function () {
         xabber._cache.save('ignore_notifications_warning', true);
         this.remove();
+        xabber.placeholders_wrap.$(this.$el).detach();
         xabber.notifications_placeholder = undefined;
-        xabber.main_panel.$el.css('padding-bottom', xabber.placeholders_wrap.$el.height());
+        xabber.trigger('update_client_notifications');
     }
 });
 

@@ -81,6 +81,7 @@
     addTemplate('base.setting_language_radio_input');
     addTemplate('base.about');
     addTemplate('base.omemo_enable');
+    addTemplate('base.client_notification_item');
     addTemplate('base.backgrounds_gallery');
     addTemplate('base.color_picker');
     addTemplate('base.color_scheme');
@@ -330,6 +331,8 @@
     addSvgTemplate('svg.contacts');
     addSvgTemplate('svg.check');
     addSvgTemplate('svg.call-outline');
+    addSvgTemplate('svg.unread');
+    addSvgTemplate('svg.unread-outline');
     addSvgTemplate('svg.call');
     addSvgTemplate('svg.call-missed');
     addSvgTemplate('svg.call-hangup');

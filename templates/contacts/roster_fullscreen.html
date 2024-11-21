@@ -1,31 +1,36 @@
 <div class="contacts-panel-wrap">
     <div class="contacts-panel-left-side no-select">
         <div class="contacts-filter-main-header">{[print(xabber.getString("contacts"))]}</div>
-        <div class="contacts-account-filter">
-            <div class="contacts-filter-header">{[print(xabber.getString("notifications_window__account_filter_header"))]}</div>
-            <div class="contacts-account-filter-content">
+        <div class="left-column-filters-container">
+            <div class="client-notifications-wrap">
+
             </div>
-        </div>
-        <div class="contacts-type-filter">
-            <div class="contacts-filter-header">{[print(xabber.getString("notifications_window__filters_header"))]}</div>
-            <div class="contacts-type-filter-content">
-                <div class="filter-item-wrap selected-filter" data-filter="all">
-                    <svg class="filter-icon mdi fill-color-grey-500 mdi-svg-template" data-svgname="account"></svg>
-                    <div class="name one-line">{[print(xabber.getString("contacts"))]}<span></span></div>
+            <div class="contacts-account-filter">
+                <div class="contacts-filter-header">{[print(xabber.getString("notifications_window__account_filter_header"))]}</div>
+                <div class="contacts-account-filter-content">
                 </div>
-                <div class="filter-item-wrap" data-filter="groupchat">
-                    <svg class="filter-icon mdi fill-color-grey-500 mdi-svg-template" data-svgname="contacts"></svg>
-                    <div class="name one-line">{[print(xabber.getString("contacts_window__type_filter_groupchat"))]}<span></span></div>
-                </div>
-                <!--<div class="filter-item-wrap" data-filter="online">-->
+            </div>
+            <div class="contacts-type-filter">
+                <div class="contacts-filter-header">{[print(xabber.getString("notifications_window__filters_header"))]}</div>
+                <div class="contacts-type-filter-content">
+                    <div class="filter-item-wrap selected-filter" data-filter="all">
+                        <svg class="filter-icon mdi fill-color-grey-500 mdi-svg-template" data-svgname="account"></svg>
+                        <div class="name one-line">{[print(xabber.getString("contacts"))]}<span></span></div>
+                    </div>
+                    <div class="filter-item-wrap" data-filter="groupchat">
+                        <svg class="filter-icon mdi fill-color-grey-500 mdi-svg-template" data-svgname="contacts"></svg>
+                        <div class="name one-line">{[print(xabber.getString("contacts_window__type_filter_groupchat"))]}<span></span></div>
+                    </div>
+                    <!--<div class="filter-item-wrap" data-filter="online">-->
                     <!--<svg class="filter-icon mdi fill-color-grey-500 mdi-svg-template" data-svgname="alert-circle"></svg>-->
                     <!--<div class="name one-line">{[print(xabber.getString("contacts_window__type_filter_online"))]}</div>-->
-                <!--</div>-->
+                    <!--</div>-->
+                </div>
             </div>
-        </div>
-        <div class="contacts-type-filter contacts-group-filter">
-            <div class="contacts-filter-header">{[print(xabber.getString("contact_circle"))]}</div>
-            <div class="contacts-group-filter-content">
+            <div class="contacts-type-filter contacts-group-filter">
+                <div class="contacts-filter-header">{[print(xabber.getString("contact_circle"))]}</div>
+                <div class="contacts-group-filter-content">
+                </div>
             </div>
         </div>
     </div>

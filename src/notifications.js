@@ -29,6 +29,12 @@ let env = xabber.env,
     pretty_datetime = (timestamp) => { return utils.pretty_datetime(timestamp, (xabber.settings.language == 'ru-RU' || xabber.settings.language == 'default' && xabber.get("default_language") == 'ru-RU') && 'D MMMM YYYY HH:mm:ss')};
 
 
+xabber.ClientNotificationsContainer = xabber.BasicView.extend({
+    className: 'client-notifications-container',
+    events: {
+    },
+});
+
 xabber.NotificationsBodyContainer = xabber.Container.extend({
     className: 'notifications-body-container',
 });
@@ -36,7 +42,7 @@ xabber.NotificationsBodyContainer = xabber.Container.extend({
 xabber.NotificationsView = xabber.BasicView.extend({
     className: 'notifications-content-wrap',
     template: templates.notifications_view,
-    ps_selector: '.notifications-content-filters',
+    ps_selector: '.left-column-filters-container',
     avatar_size: constants.AVATAR_SIZES.SYNCHRONIZE_ACCOUNT_ITEM,
 
     events: {
@@ -60,6 +66,7 @@ xabber.NotificationsView = xabber.BasicView.extend({
         xabber.on('plyr_player_updated', this.updatePlyrControls, this);
         xabber.on('plyr_player_time_updated', this.updatePlyrTime, this);
         xabber.on('update_layout', this.updatePlyrTitle, this);
+        xabber.on('update_client_notifications', this.updateClientNotifications, this);
         return this;
     },
 
@@ -73,6 +80,17 @@ xabber.NotificationsView = xabber.BasicView.extend({
         this.updateScrollBar();
         this.updatePlyrControls();
         this.updatePlyrTime();
+        this.updateClientNotifications();
+        console.log('render');
+    },
+
+    updateClientNotifications: function (options) {
+        this.$('.client-notifications-wrap').find('.client-notifications-container').detach();
+
+        if (xabber.placeholders_wrap && this.isVisible()){
+            this.$('.client-notifications-wrap').append(xabber.placeholders_wrap.$el);
+        }
+        this.$('.client-notifications-wrap').switchClass('hidden', !xabber.placeholders_wrap.$el.children().length)
     },
 
     playPausePlyr: function () {

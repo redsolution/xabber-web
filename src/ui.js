@@ -232,7 +232,7 @@ xabber.once("start", function () {
         toolbar: null,
         main: {
             wide: { about: null },
-            placeholders: null
+            // placeholders: null
         },
         roster: null
     });
@@ -275,7 +275,7 @@ xabber.once("start", function () {
         toolbar: null,
         main: {
             wide: { discovering_main: null},
-            placeholders: null
+            // placeholders: null
         },
         roster: null
     });
@@ -287,7 +287,7 @@ xabber.once("start", function () {
             left: { mentions: null },
             right: { mentions_placeholder: null },
             right_contact: {},
-            placeholders: null
+            // placeholders: null
         },
         roster: null
     });
@@ -299,7 +299,7 @@ xabber.once("start", function () {
             left: { chats: null },
             right: { chat_placeholder: null },
             right_contact: {},
-            placeholders: null
+            // placeholders: null
         },
         roster: null
     });

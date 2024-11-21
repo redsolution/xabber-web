@@ -3092,3 +3092,136 @@
 .hover-text-color-grey-500:hover{
   color: #9E9E9E !important;
 }
+
+[data-main-color=red] .fill-main-color-500 path,
+[data-main-color=red] .fill-main-color-500 use,
+[data-main-color=red] .fill-main-color-500 polygon,
+[data-main-color=red] .hover-fill-main-color-500:hover {
+   fill: #F44336 !important;
+}
+
+[data-main-color=pink] .fill-main-color-500 path,
+[data-main-color=pink] .fill-main-color-500 use,
+[data-main-color=pink] .fill-main-color-500 polygon,
+[data-main-color=pink] .hover-fill-main-color-500:hover {
+  fill: #E91E63 !important;
+}
+
+[data-main-color=purple] .fill-main-color-500 path,
+[data-main-color=purple] .fill-main-color-500 use,
+[data-main-color=purple] .fill-main-color-500 polygon,
+[data-main-color=purple] .hover-fill-main-color-500:hover {
+  fill: #9C27B0 !important;
+}
+
+[data-main-color=deep-purple] .fill-main-color-500 path,
+[data-main-color=deep-purple] .fill-main-color-500 use,
+[data-main-color=deep-purple] .fill-main-color-500 polygon,
+[data-main-color=deep-purple] .hover-fill-main-color-500:hover {
+  fill: #673AB7 !important;
+}
+
+[data-main-color=indigo] .fill-main-color-500 path,
+[data-main-color=indigo] .fill-main-color-500 use,
+[data-main-color=indigo] .fill-main-color-500 polygon,
+[data-main-color=indigo] .hover-fill-main-color-500:hover {
+  fill: #3F51B5 !important;
+}
+
+[data-main-color=blue] .fill-main-color-500 path,
+[data-main-color=blue] .fill-main-color-500 use,
+[data-main-color=blue] .fill-main-color-500 polygon,
+[data-main-color=blue] .hover-fill-main-color-500:hover {
+  fill: #2196F3 !important;
+}
+
+[data-main-color=light-blue] .fill-main-color-500 path,
+[data-main-color=light-blue] .fill-main-color-500 use,
+[data-main-color=light-blue] .fill-main-color-500 polygon,
+[data-main-color=light-blue] .hover-fill-main-color-500:hover {
+  fill: #03A9F4 !important;
+}
+
+[data-main-color=cyan] .fill-main-color-500 path,
+[data-main-color=cyan] .fill-main-color-500 use,
+[data-main-color=cyan] .fill-main-color-500 polygon,
+[data-main-color=cyan] .hover-fill-main-color-500:hover {
+  fill: #00BCD4 !important;
+}
+
+[data-main-color=teal] .fill-main-color-500 path,
+[data-main-color=teal] .fill-main-color-500 use,
+[data-main-color=teal] .fill-main-color-500 polygon,
+[data-main-color=teal] .hover-fill-main-color-500:hover {
+  fill: #009688 !important;
+}
+
+[data-main-color=green] .fill-main-color-500 path,
+[data-main-color=green] .fill-main-color-500 use,
+[data-main-color=green] .fill-main-color-500 polygon,
+[data-main-color=green] .hover-fill-main-color-500:hover {
+  fill: #4CAF50 !important;
+}
+
+[data-main-color=light-green] .fill-main-color-500 path,
+[data-main-color=light-green] .fill-main-color-500 use,
+[data-main-color=light-green] .fill-main-color-500 polygon,
+[data-main-color=light-green] .hover-fill-main-color-500:hover {
+  fill: #8BC34A !important;
+}
+
+[data-main-color=lime] .fill-main-color-500 path,
+[data-main-color=lime] .fill-main-color-500 use,
+[data-main-color=lime] .fill-main-color-500 polygon,
+[data-main-color=lime] .hover-fill-main-color-500:hover {
+  fill: #CDDC39 !important;
+}
+
+[data-main-color=yellow] .fill-main-color-500 path,
+[data-main-color=yellow] .fill-main-color-500 use,
+[data-main-color=yellow] .fill-main-color-500 polygon,
+[data-main-color=yellow] .hover-fill-main-color-500:hover {
+  fill: #FFEB3B !important;
+}
+
+[data-main-color=amber] .fill-main-color-500 path,
+[data-main-color=amber] .fill-main-color-500 use,
+[data-main-color=amber] .fill-main-color-500 polygon,
+[data-main-color=amber] .hover-fill-main-color-500:hover {
+  fill: #FFC107 !important;
+}
+
+[data-main-color=orange] .fill-main-color-500 path,
+[data-main-color=orange] .fill-main-color-500 use,
+[data-main-color=orange] .fill-main-color-500 polygon,
+[data-main-color=orange] .hover-fill-main-color-500:hover {
+  fill: #FF9800 !important;
+}
+
+[data-main-color=deep-orange] .fill-main-color-500 path,
+[data-main-color=deep-orange] .fill-main-color-500 use,
+[data-main-color=deep-orange] .fill-main-color-500 polygon,
+[data-main-color=deep-orange] .hover-fill-main-color-500:hover {
+  fill: #FF5722 !important;
+}
+
+[data-main-color=brown] .fill-main-color-500 path,
+[data-main-color=brown] .fill-main-color-500 use,
+[data-main-color=brown] .fill-main-color-500 polygon,
+[data-main-color=brown] .hover-fill-main-color-500:hover {
+  fill: #795548 !important;
+}
+
+[data-main-color=grey] .fill-main-color-500 path,
+[data-main-color=grey] .fill-main-color-500 use,
+[data-main-color=grey] .fill-main-color-500 polygon,
+[data-main-color=grey] .hover-fill-main-color-500:hover {
+  fill: #9E9E9E !important;
+}
+
+[data-main-color=blue-grey] .fill-main-color-500 path,
+[data-main-color=blue-grey] .fill-main-color-500 use,
+[data-main-color=blue-grey] .fill-main-color-500 polygon,
+[data-main-color=blue-grey] .hover-fill-main-color-500:hover {
+  fill: #607D8B !important;
+}

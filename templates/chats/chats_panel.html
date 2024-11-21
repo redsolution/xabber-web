@@ -1,8 +1,11 @@
 <div class="recent-chats-panel noselect">
     <div class="recent-chats-main-header">{[print(xabber.getString("toolbar__menu_item__chats"))]}</div>
-    <i class="btn-unread mdi mdi-24px mdi-nature"></i>
-    <i class="btn-unread unread-active-btn mdi mdi-24px mdi-nature-people"></i>
+    <svg class="btn-unread mdi mdi-24px mdi-svg-template" data-svgname="unread-outline"></svg>
+    <svg class="btn-unread unread-active-btn mdi mdi-24px mdi-svg-template fill-main-color-500" data-svgname="unread"></svg>
     <div class="chat-list-wrap left-panel-list-wrap">
+        <div class="client-notifications-wrap">
+
+        </div>
         <div class="chats-search-form search-form panel-head">
             <i class="search-icon mdi mdi-24px mdi-magnify"></i>
             <input type="text" class="search-input simple-input-field" tabindex="1" placeholder='{[print(xabber.getString("search"))]}'>
