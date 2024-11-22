@@ -1028,30 +1028,22 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
                     this.$('.notification-subscriptions-button').addClass('hidden');
                 }
             } else {
+                let is_filtered;
                 if (this.filter_type === 'security'){
                     this.filtered_messages = this.notification_messages.filter((msg) => msg.get('security_notification') && !msg.get('ignored') && !msg.get('notification_info') && !msg.get('notification_mention'));
-                    if (this.filtered_messages.length) {
-                        this.rendered_messages = this.filtered_messages.slice(Math.max(this.filtered_messages.length - 20, 0));
-                        this.renderMessage(this.rendered_messages[this.rendered_messages.length - 1], this.rendered_messages);
-                        this.updateCalendarCellsActivity(this.filtered_messages);
-                        this.handleOnScrollRendering('bottom');
-                    }
+                    is_filtered = true;
                 } else if (this.filter_type === 'information'){
                     this.filtered_messages = this.notification_messages.filter((msg) => msg.get('notification_info') && !msg.get('ignored'));
-                    if (this.filtered_messages.length) {
-                        this.rendered_messages = this.filtered_messages.slice(Math.max(this.filtered_messages.length - 20, 0));
-                        this.renderMessage(this.rendered_messages[this.rendered_messages.length - 1], this.rendered_messages);
-                        this.updateCalendarCellsActivity(this.filtered_messages);
-                        this.handleOnScrollRendering('bottom');
-                    }
+                    is_filtered = true;
                 } else if (this.filter_type === 'mentions'){
                     this.filtered_messages = this.notification_messages.filter((msg) => msg.get('notification_mention') && !msg.get('ignored'));
-                    if (this.filtered_messages.length) {
-                        this.rendered_messages = this.filtered_messages.slice(Math.max(this.filtered_messages.length - 20, 0));
-                        this.renderMessage(this.rendered_messages[this.rendered_messages.length - 1], this.rendered_messages);
-                        this.updateCalendarCellsActivity(this.filtered_messages);
-                        this.handleOnScrollRendering('bottom');
-                    }
+                    is_filtered = true;
+                }
+                if (this.filtered_messages.length && is_filtered) {
+                    this.rendered_messages = this.filtered_messages.slice(Math.max(this.filtered_messages.length - 20, 0));
+                    this.renderMessage(this.rendered_messages[this.rendered_messages.length - 1], this.rendered_messages);
+                    this.updateCalendarCellsActivity(this.filtered_messages);
+                    this.handleOnScrollRendering('bottom');
                 }
             }
 
@@ -1129,11 +1121,28 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
         this.$('.chat-day-indicator').remove();
         this.load_history_dfd = null;
         this.rendered_messages = this.notification_messages.filter(msg => !msg.get('ignored')).slice(Math.max(this.notification_messages.filter(msg => !msg.get('ignored')).length - 20, 0));
+        this.checkRenderedMessages();
         this.rendered_messages.length && this.renderMessage(this.rendered_messages[this.rendered_messages.length - 1], this.rendered_messages);
         this.updateCalendarCellsActivity(this.notification_messages.filter(msg => !msg.get('ignored')));
     },
 
-    updateCalendarCellsActivity: function (messages) { //34
+    checkRenderedMessages: function (filter) {
+        _.each(this.notifications_chats, (chat) => {
+            chat = chat.chat;
+            let messages = chat.messages.filter((msg) => !msg.get('ignored'));
+
+            if (!messages.length)
+                return;
+            let chat_last_message = messages[messages.length - 1];
+            if (this.rendered_messages.indexOf(chat_last_message) === -1){
+                this.rendered_messages.push(chat_last_message);
+            }
+        });
+
+        this.rendered_messages.sort((a, b) => a.get('timestamp') - b.get('timestamp'));
+    },
+
+    updateCalendarCellsActivity: function (messages) {
         if (!messages || !messages.length)
             return;
         messages = messages.filter(item => item.get('timestamp') >= Number(moment(Date.now()).subtract(1, 'months').startOf('month')));
@@ -1227,14 +1236,19 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
                 filtered_chats_messages.push(chat_filtered_messages)
             });
 
-            _.each(filtered_chats_messages, (list) => {
-                if (!list.length)
-                    return;
-                let first_msg = list[0];
-                if (!msg || (msg.get('timestamp') < first_msg.get('timestamp'))) {
-                    msg = first_msg;
-                }
-            });
+            if (this.filtered_accounts.length || this.filter_type !== 'all') {
+                msg = this.rendered_messages[0];
+            } else {
+                _.each(filtered_chats_messages, (list) => {
+                    if (!list.length)
+                        return;
+                    let first_msg = list[0];
+                    if (!msg || (msg.get('timestamp') < first_msg.get('timestamp'))) {
+                        msg = first_msg;
+                    }
+                });
+
+            }
             if (!msg)
                 return true;
 
