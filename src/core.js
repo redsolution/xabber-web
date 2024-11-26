@@ -139,25 +139,25 @@ let Xabber = Backbone.Model.extend({
     },
 
     error: function (msg) {
-        if (constants.LOG_LEVEL >= constants.LOG_LEVEL_ERROR) {
+        if (constants.LOG_LEVEL <= constants.LOG_LEVEL_ERROR) {
             console.error(msg);
         }
     },
 
     warn: function (msg) {
-        if (constants.LOG_LEVEL >= constants.LOG_LEVEL_WARN) {
+        if (constants.LOG_LEVEL <= constants.LOG_LEVEL_WARN) {
             console.warn(msg);
         }
     },
 
     info: function (msg) {
-        if (constants.LOG_LEVEL >= constants.LOG_LEVEL_INFO) {
+        if (constants.LOG_LEVEL <= constants.LOG_LEVEL_INFO) {
             console.log(msg);
         }
     },
 
     debug: function (msg) {
-        if (constants.LOG_LEVEL >= constants.LOG_LEVEL_DEBUG) {
+        if (constants.LOG_LEVEL <= constants.LOG_LEVEL_DEBUG) {
             console.log(msg);
         }
     },
@@ -377,6 +377,7 @@ let Xabber = Backbone.Model.extend({
 
             let log_level = constants['LOG_LEVEL_'+constants.LOG_LEVEL];
             constants.LOG_LEVEL = log_level || constants.LOG_LEVEL_ERROR;
+            Strophe.setLogLevel(constants.LOG_LEVEL);
             constants.MATERIAL_COLORS.includes(config.MAIN_COLOR) && (constants.MAIN_COLOR = config.MAIN_COLOR);
             (this._settings.get("main_color") == 'default') && this._settings.set("main_color", constants.MAIN_COLOR);
             this.trigger("update_main_color");
@@ -402,7 +403,7 @@ let Xabber = Backbone.Model.extend({
                 this._settings.set("idling_time", constants.IDLING_DEFAULT_TIMEOUT);
 
             window.xabber = this;
-            _.extend(window, env);
+            _.defaults(window, env);
             if (config.SYNCHRONIZATION_RSM_MAX)
                 constants.SYNCHRONIZATION_RSM_MAX = config.SYNCHRONIZATION_RSM_MAX;
             if (config.ASSETS_URL_PREFIX) {

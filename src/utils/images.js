@@ -2,7 +2,7 @@ import deps from "xabber-dependencies"
 
 var _ = deps._,
     $ = deps.$,
-    hasher = deps.SHA1.b64_sha1;
+    hasher = deps.stropheSHA1.b64_sha1;
 
 var _image_cache = {};
 

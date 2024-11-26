@@ -1,1 +1,0 @@
-{"version":3,"file":"xabber.6552.js","mappings":"AAAAA,KAAKC,UAAY,KACbC,aAAY,KACRF,KAAKG,YAAY,CAAC,EAAE,GACrB,IAAK","sources":["webpack://xabber.web/./src/worker.js"],"sourcesContent":["self.onmessage = () => {\n    setInterval(() => {\n        self.postMessage({});\n    }, 1000);\n};"],"names":["self","onmessage","setInterval","postMessage"],"sourceRoot":""}

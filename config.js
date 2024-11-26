@@ -13,7 +13,7 @@ require.config({
         "moment":                   "node_modules/moment/min/moment-with-locales.min",
         "moment-locales":           "node_modules/moment/min/locales.min",
         "perfectScrollbarJQuery":   "node_modules/perfect-scrollbar/dist/js/perfect-scrollbar.jquery",
-        "strophe":                  "node_modules/strophe.js/strophe",
+        "strophe":                  "node_modules/strophe.js/dist/strophe.esm",
         "strophe.disco":            "node_modules/strophejs-plugins/disco/strophe.disco",
         "strophe.ping":             "node_modules/strophejs-plugins/ping/strophe.ping",
         "strophe.rsm":              "node_modules/strophejs-plugins/rsm/strophe.rsm",
@@ -33,6 +33,7 @@ require.config({
         "strophe.pubsub":           "src/lib/strophe.pubsub",
         "sha1_hasher":              "src/lib/sha1.min",
         "omemo":                    "src/lib/omemo",
+        "strophe.sha1":             "src/lib/strophe-sha1",
         "qrcode":                   "src/lib/VanillaQR.min",
         "i18next-post":             "src/lib/i18nextSprintfPostProcessor.min",
 

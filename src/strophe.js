@@ -8,17 +8,6 @@ let env = xabber.env,
     Strophe = env.Strophe,
     constants = env.constants;
 
-Strophe.log = function (log_level, msg) {
-    let do_log = (constants.LOG_LEVEL === constants.LOG_LEVEL_DEBUG) ||
-        (constants.LOG_LEVEL >= constants.LOG_LEVEL_WARN &&
-            log_level >= Strophe.LogLevel.WARN) ||
-        (constants.LOG_LEVEL >= constants.LOG_LEVEL_ERROR &&
-            log_level >= Strophe.LogLevel.ERROR);
-    if (do_log) {
-        console.info('Strophe log: ');
-        console.info(msg);
-    }
-};
 
 Strophe.addConnectionPlugin('register', {
     _connection: null,
@@ -190,7 +179,6 @@ Strophe.addConnectionPlugin('register', {
         this.fields = {};
         conn.registerSASLMechanisms([Strophe.SASLAnonymous,
             Strophe.SASLExternal,
-            Strophe.SASLMD5,
             Strophe.SASLPlain,
             Strophe.SASLSHA1]);
 
@@ -575,7 +563,6 @@ Strophe.ConnectionManager.prototype = {
         if (this.auth_type === 'password') {
             this.connection.registerSASLMechanisms([Strophe.SASLAnonymous,
                 Strophe.SASLExternal,
-                Strophe.SASLMD5,
                 Strophe.SASLPlain,
                 Strophe.SASLSHA1]);
         } else if (this.auth_type === 'x-token') {
@@ -623,35 +610,27 @@ _.extend(Strophe.Connection.prototype, {
 
     _attemptSASLAuth: function (mechanisms) {
         mechanisms = this.sortMechanismsByPriority(mechanisms || []);
-        var i = 0, mechanism_found = false;
-        for (i = 0; i < mechanisms.length; ++i) {
-            if (!mechanisms[i].prototype.test(this)) {
+        let mechanism_found = false;
+        for (let i = 0; i < mechanisms.length; ++i) {
+            if (!mechanisms[i].test(this)) {
                 continue;
             }
-            this._sasl_success_handler = this._addSysHandler(
-                this._sasl_success_cb.bind(this), null,
-                "success", null, null);
-            this._sasl_failure_handler = this._addSysHandler(
-                this._sasl_failure_cb.bind(this), null,
-                "failure", null, null);
-            this._sasl_challenge_handler = this._addSysHandler(
-                this._sasl_challenge_cb.bind(this), null,
-                "challenge", null, null);
-
-            this._sasl_mechanism = new mechanisms[i]();
+            this._sasl_success_handler = this._addSysHandler(this._sasl_success_cb.bind(this), null, 'success', null, null);
+            this._sasl_failure_handler = this._addSysHandler(this._sasl_failure_cb.bind(this), null, 'failure', null, null);
+            this._sasl_challenge_handler = this._addSysHandler(this._sasl_challenge_cb.bind(this), null, 'challenge', null, null);
+            this._sasl_mechanism = mechanisms[i];
             this._sasl_mechanism.onStart(this);
-
-            var request_auth_exchange = $build("auth", {
-                xmlns: Strophe.NS.SASL,
-                mechanism: this._sasl_mechanism.name
+            const request_auth_exchange = $build('auth', {
+                'xmlns': Strophe.NS.SASL,
+                'mechanism': this._sasl_mechanism.mechname
             });
             if (this._sasl_mechanism.isClientFirst) {
-                var response = this._sasl_mechanism.onChallenge(this, null);
+                const response = this._sasl_mechanism.clientChallenge(this);
                 request_auth_exchange.t(btoa(response));
             }
             this.send(request_auth_exchange.tree());
             mechanism_found = true;
-            if (this.account && this.counter && this.account.get('x_token') && this._sasl_mechanism.name === "HOTP") {
+            if (this.account && this.counter && this.account.get('x_token') && this._sasl_mechanism.mechname === "HOTP") {
                 this.counter++;
                 this.account.save({
                     hotp_counter: this.counter,
@@ -662,16 +641,14 @@ _.extend(Strophe.Connection.prototype, {
         return mechanism_found;
     },
 
-    _sasl_challenge_cb: function(elem) {
+    _sasl_challenge_cb: async function(elem) {
         var challenge = atob(Strophe.getText(elem));
-        if (this._sasl_mechanism.name === 'DEVICES-OCRA'){
+        if (this._sasl_mechanism.mechname === 'DEVICES-OCRA'){
             this._sasl_mechanism.onChallenge(this, challenge).then((response)=> {
                 var stanza = $build('response', {
                     'xmlns': Strophe.NS.SASL
                 });
-                if (response !== "") {
-                    stanza.t(btoa(response));
-                }
+                if (response) stanza.t(btoa(response));
                 this.send(stanza.tree());
                 if (this.account && this.counter && this.account.get('x_token')) {
                     this.counter++;
@@ -685,19 +662,17 @@ _.extend(Strophe.Connection.prototype, {
             });
 
         } else {
-            var response = this._sasl_mechanism.onChallenge(this, challenge);
+            var response = await this._sasl_mechanism.onChallenge(this, challenge);
             var stanza = $build('response', {
                 'xmlns': Strophe.NS.SASL
             });
-            if (response !== "") {
-                stanza.t(btoa(response));
-            }
+            if (response) stanza.t(btoa(response));
             this.send(stanza.tree());
             return true;
         }
     },
 
-    _sasl_auth1_cb: function (elem) {
+    _onStreamFeaturesAfterSASL: function (elem) {
         this.features = elem;
         let i, child;
         for (i = 0; i < elem.childNodes.length; i++) {
@@ -737,8 +712,10 @@ _.extend(Strophe.Connection.prototype, {
         if (!this.do_bind) {
             this._changeConnectStatus(Strophe.Status.AUTHFAIL, null);
             return false;
-        } else {
-            if (this.x_token_auth && (!this.x_token || (parseInt(this.x_token.expire)*1000 < env.moment.now()))) {
+        } else if (!this.options.explicitResourceBinding) {
+            if (this.x_token_auth &&
+                (!this.x_token || (this.x_token && this.x_token.expire && (parseInt(this.x_token.expire)*1000 < env.moment.now())))
+            ) {
                 this.getXToken((success) => {
                     let token = $(success).find('secret').text(),
                         expires_at = $(success).find('expire').text(),
@@ -761,12 +738,20 @@ _.extend(Strophe.Connection.prototype, {
             else {
                 this._send_auth_bind();
             }
+        } else {
+            this._changeConnectStatus(Strophe.Status.BINDREQUIRED, null);
         }
         return false;
     },
 
     _send_auth_bind() {
-        this._addSysHandler(this._sasl_bind_cb.bind(this), null, null,
+
+        if (!this.do_bind) {
+            Strophe.log.info(`Connection.prototype.bind called but "do_bind" is false`);
+            return;
+        }
+
+        this._addSysHandler(this._onResourceBindResultIQ.bind(this), null, null,
             null, "_bind_auth_2");
 
         let resource = Strophe.getResourceFromJid(this.jid);
@@ -848,67 +833,64 @@ _.extend(Strophe.Connection.prototype, {
     _connect_cb: function (req, _callback, raw) {
         Strophe.info("_connect_cb was called");
         this.connected = true;
-
-        var bodyWrap;
+        let bodyWrap;
         try {
-            bodyWrap = this._proto._reqToData(req);
+            bodyWrap = /** @type {Element} */
+                '_reqToData' in this._proto ? this._proto._reqToData( /** @type {Request} */req) : req;
         } catch (e) {
-            if (e !== "badformat") { throw e; }
-            this._changeConnectStatus(
-                Strophe.Status.CONNFAIL,
-                Strophe.ErrorCondition.BAD_FORMAT
-            );
-            this._doDisconnect(Strophe.ErrorCondition.BAD_FORMAT);
+            if (e.name !== ErrorCondition.BAD_FORMAT) {
+                throw e;
+            }
+            this._changeConnectStatus(Status.CONNFAIL, ErrorCondition.BAD_FORMAT);
+            this._doDisconnect(ErrorCondition.BAD_FORMAT);
         }
-        if (!bodyWrap) { return; }
-
-        if (this.xmlInput !== Strophe.Connection.prototype.xmlInput) {
+        if (!bodyWrap) {
+            return;
+        }
+        if (this.xmlInput !== Connection.prototype.xmlInput) {
             if (bodyWrap.nodeName === this._proto.strip && bodyWrap.childNodes.length) {
                 this.xmlInput(bodyWrap.childNodes[0]);
             } else {
                 this.xmlInput(bodyWrap);
             }
         }
-        if (this.rawInput !== Strophe.Connection.prototype.rawInput) {
+        if (this.rawInput !== Connection.prototype.rawInput) {
             if (raw) {
                 this.rawInput(raw);
             } else {
-                this.rawInput(Strophe.serialize(bodyWrap));
+                this.rawInput(Builder.serialize(bodyWrap));
             }
         }
-
-        var conncheck = this._proto._connect_cb(bodyWrap);
-        if (conncheck === Strophe.Status.CONNFAIL) {
+        const conncheck = this._proto._connect_cb(bodyWrap);
+        if (conncheck === Status.CONNFAIL) {
             return;
         }
 
         // Check for the stream:features tag
-        var hasFeatures;
+        let hasFeatures;
         if (bodyWrap.getElementsByTagNameNS) {
-            hasFeatures = bodyWrap.getElementsByTagNameNS(Strophe.NS.STREAM, "features").length > 0;
+            hasFeatures = bodyWrap.getElementsByTagNameNS(NS.STREAM, 'features').length > 0;
         } else {
-            hasFeatures = bodyWrap.getElementsByTagName("stream:features").length > 0 ||
-                bodyWrap.getElementsByTagName("features").length > 0;
+            hasFeatures = bodyWrap.getElementsByTagName('stream:features').length > 0 || bodyWrap.getElementsByTagName('features').length > 0;
         }
         if (!hasFeatures) {
             this._proto._no_auth_received(_callback);
             return;
         }
-
-        var matched = [], i, mech, server_mechanisms = [];
-        var mechanisms = bodyWrap.getElementsByTagName("mechanism");
+        let server_mechanisms = [],
+            mechanisms = bodyWrap.getElementsByTagName("mechanism");
         if (mechanisms.length > 0) {
-            for (i = 0; i < mechanisms.length; i++) {
-                mech = Strophe.getText(mechanisms[i]);
+            for (let i = 0; i < mechanisms.length; i++) {
+                let mech = Strophe.getText(mechanisms[i]);
                 server_mechanisms.push(mech);
-                if (this.mechanisms[mech]) matched.push(this.mechanisms[mech]);
             }
         }
 
         this.server_mechanisms = server_mechanisms; // to check if server supports OCRA
 
+        const matched = Array.from(bodyWrap.getElementsByTagName('mechanism')).map(m => this.mechanisms[m.textContent]).filter(m => m);
         if (matched.length === 0) {
-            if (bodyWrap.getElementsByTagName("auth").length === 0) {
+            if (bodyWrap.getElementsByTagName('auth').length === 0) {
                 // There are no matching SASL mechanisms and also no legacy
                 // auth available.
                 this._proto._no_auth_received(_callback);
@@ -923,80 +905,80 @@ _.extend(Strophe.Connection.prototype, {
 
 _.extend(Strophe.Websocket.prototype, {
 
-    _onIdle: function () {
-        var data = this._conn._data;
-        if (data.length > 0 && !this._conn.paused) {
-            for (var i = 0; i < data.length; i++) {
-                if (data[i] !== null) {
-                    var stanza, rawStanza;
-                    if (data[i] === "restart") {
-                        stanza = this._buildStream().tree();
-                    } else {
-                        stanza = data[i];
-                    }
-                    rawStanza = Strophe.serialize(stanza);
-                    this._conn.xmlOutput(stanza);
-                    this._conn.rawOutput(rawStanza);
-                    if (this.socket && this.socket.readyState === 1){
-                        this.socket.send(rawStanza);
-                    } else {
-                        console.log('data went to pending');
-                        console.log(this._conn._data.slice(i));
-                        this._conn.account._pending_stanzas.push(this._conn._data.slice(i))
-                        this._conn._data = [];
-                        return;
-                    }
-                }
-            }
-            this._conn._data = [];
-        }
-    },
+    // _onIdle: function () {
+    //     var data = this._conn._data;
+    //     if (data.length > 0 && !this._conn.paused) {
+    //         for (var i = 0; i < data.length; i++) {
+    //             if (data[i] !== null) {
+    //                 var stanza, rawStanza;
+    //                 if (data[i] === "restart") {
+    //                     stanza = this._buildStream().tree();
+    //                 } else {
+    //                     stanza = data[i];
+    //                 }
+    //                 rawStanza = Strophe.serialize(stanza);
+    //                 this._conn.xmlOutput(stanza);
+    //                 this._conn.rawOutput(rawStanza);
+    //                 if (this.socket && this.socket.readyState === 1){
+    //                     this.socket.send(rawStanza);
+    //                 } else {
+    //                     console.log('data went to pending');
+    //                     console.log(this._conn._data.slice(i));
+    //                     this._conn.account._pending_stanzas.push(this._conn._data.slice(i))
+    //                     this._conn._data = [];
+    //                     return;
+    //                 }
+    //             }
+    //         }
+    //         this._conn._data = [];
+    //     }
+    // },
 
-    _onOpen: function() {
-        Strophe.info("Websocket open");
-        var start = this._buildStream();
-        this._conn.xmlOutput(start.tree());
-
-        var startString = Strophe.serialize(start);
-        this._conn.rawOutput(startString);
-        this.socket.send(startString);
-        this._conn.openCheckTimeout = setTimeout(() => { // check of that open was sent but was not received from server
-            if (this._conn.open_received) {
-                return;
-            } else {
-                console.log('disconnected on open not being received')
-                this._conn.disconnect();
-                return;
-            }
-        }, 5000)
-    },
-
-    _handleStreamStart: function(message) {
-        var error = false;
-
-        // Check for errors in the <open /> tag
-        var ns = message.getAttribute("xmlns");
-        if (typeof ns !== "string") {
-            error = "Missing xmlns in <open />";
-        } else if (ns !== Strophe.NS.FRAMING) {
-            error = "Wrong xmlns in <open />: " + ns;
-        }
-
-        var ver = message.getAttribute("version");
-        if (typeof ver !== "string") {
-            error = "Missing version in <open />";
-        } else if (ver !== "1.0") {
-            error = "Wrong version in <open />: " + ver;
-        }
-
-        if (error) {
-            this._conn._changeConnectStatus(Strophe.Status.CONNFAIL, error);
-            this._conn._doDisconnect();
-            return false;
-        }
-        clearTimeout(this._conn.openCheckTimeout);
-        return true;
-    },
+    // _onOpen: function() {
+    //     Strophe.info("Websocket open");
+    //     var start = this._buildStream();
+    //     this._conn.xmlOutput(start.tree());
+    //
+    //     var startString = Strophe.serialize(start);
+    //     this._conn.rawOutput(startString);
+    //     this.socket.send(startString);
+    //     this._conn.openCheckTimeout = setTimeout(() => { // check of that open was sent but was not received from server
+    //         if (this._conn.open_received) {
+    //             return;
+    //         } else {
+    //             console.log('disconnected on open not being received')
+    //             this._conn.disconnect();
+    //             return;
+    //         }
+    //     }, 5000)
+    // },
+    //
+    // _handleStreamStart: function(message) {
+    //     var error = false;
+    //
+    //     // Check for errors in the <open /> tag
+    //     var ns = message.getAttribute("xmlns");
+    //     if (typeof ns !== "string") {
+    //         error = "Missing xmlns in <open />";
+    //     } else if (ns !== Strophe.NS.FRAMING) {
+    //         error = "Wrong xmlns in <open />: " + ns;
+    //     }
+    //
+    //     var ver = message.getAttribute("version");
+    //     if (typeof ver !== "string") {
+    //         error = "Missing version in <open />";
+    //     } else if (ver !== "1.0") {
+    //         error = "Wrong version in <open />: " + ver;
+    //     }
+    //
+    //     if (error) {
+    //         this._conn._changeConnectStatus(Strophe.Status.CONNFAIL, error);
+    //         this._conn._doDisconnect();
+    //         return false;
+    //     }
+    //     clearTimeout(this._conn.openCheckTimeout);
+    //     return true;
+    // },
 });
 
 Strophe.xmlunescape = function (text) {

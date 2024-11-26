@@ -65,7 +65,7 @@
     "requirejs": "~2.3.3",
     "requirejs-text": "~2.0.15",
     "slug": ">0.0.0",
-    "strophe.js": "~1.2.13",
+    "strophe.js": "~3.0.1",
     "strophejs-plugins": "0.0.7",
     "style-loader": "^3.3.1",
     "transliteration": "^2.3.5",
@@ -76,6 +76,7 @@
     "webpack": "^5.75.0",
     "webpack-cli": "^5.0.1",
     "webpack-dev-server": "^4.11.1",
+    "ws": "^8.18.0",
     "xml-loader": "^1.2.1"
   }
 }

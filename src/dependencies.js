@@ -10,11 +10,12 @@ import sha256 from "sha256";
 import magnificPopup from "magnific-popup";
 import i18next from "i18next";
 import i18next_sprintf from "i18next-post";
-import Strophe from "strophe";
+import { $build, $iq, $msg, $pres, Builder, Request, Stanza, Strophe, stx, toStanza } from "strophe";
 import plyr from "Plyr";
 import Quill from "Quill";
 import libsignal from "libsignal-protocol";
 import sha1 from "sha1_hasher";
+import stropheSHA1 from "strophe.sha1";
 import Recorder from 'opus-recorder';
 import encoderPath from 'opus-recorder/dist/encoderWorker.min.js';
 import VanillaQR from "VanillaQR";
@@ -50,6 +51,7 @@ export default _.extend({
     libsignal: libsignal,
     slug: slug,
     sha1: sha1,
+    stropheSHA1: stropheSHA1,
     idleJs: idleJs,
     opusRecorder: Recorder,
     opusRecorderEncoderPath: encoderPath,
@@ -65,5 +67,7 @@ export default _.extend({
     magnificPopup: magnificPopup,
     backgroundImagesXml: backgroundImagesXml,
     backgroundPatternsXml: backgroundPatternsXml,
-    Strophe: Strophe
-}, Strophe);
+    Strophe: _.extend(Strophe, {
+        $build, $iq, $msg, $pres, Builder, Request, Stanza, stx, toStanza
+    }),
+}, Strophe, stropheSHA1);

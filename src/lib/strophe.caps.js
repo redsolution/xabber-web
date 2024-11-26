@@ -2,10 +2,11 @@
 
 // added AMD support, removed forcing identity
 (function (root, factory) {
-    define(["strophe", "strophe.disco"], function (Strophe) {
-        factory(Strophe.Strophe, Strophe.SHA1, Strophe.$build, Strophe.$iq, Strophe.$msg, Strophe.$pres);
+    define(["strophe", "strophe.disco", "strophe.sha1"], function (Strophe, disco, SHA1) {
+        factory(Strophe.Strophe, SHA1, Strophe.$build, Strophe.$iq, Strophe.$msg, Strophe.$pres);
     });
 }(this, function (Strophe, SHA1, $build, $iq, $msg, $pres) {
+    SHA1 = SHA1.default ? SHA1.default : SHA1;
     var b64_sha1 = SHA1.b64_sha1;
 
       Strophe.addConnectionPlugin('caps', (function() {
