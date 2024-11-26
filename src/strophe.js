@@ -905,34 +905,30 @@ _.extend(Strophe.Connection.prototype, {
 
 _.extend(Strophe.Websocket.prototype, {
 
-    // _onIdle: function () {
-    //     var data = this._conn._data;
-    //     if (data.length > 0 && !this._conn.paused) {
-    //         for (var i = 0; i < data.length; i++) {
-    //             if (data[i] !== null) {
-    //                 var stanza, rawStanza;
-    //                 if (data[i] === "restart") {
-    //                     stanza = this._buildStream().tree();
-    //                 } else {
-    //                     stanza = data[i];
-    //                 }
-    //                 rawStanza = Strophe.serialize(stanza);
-    //                 this._conn.xmlOutput(stanza);
-    //                 this._conn.rawOutput(rawStanza);
-    //                 if (this.socket && this.socket.readyState === 1){
-    //                     this.socket.send(rawStanza);
-    //                 } else {
-    //                     console.log('data went to pending');
-    //                     console.log(this._conn._data.slice(i));
-    //                     this._conn.account._pending_stanzas.push(this._conn._data.slice(i))
-    //                     this._conn._data = [];
-    //                     return;
-    //                 }
-    //             }
-    //         }
-    //         this._conn._data = [];
-    //     }
-    // },
+    _onIdle: function () {
+        const data = this._conn._data;
+        if (data.length > 0 && !this._conn.paused) {
+            for (let i = 0; i < data.length; i++) {
+                if (data[i] !== null) {
+                    const stanza = data[i] === 'restart' ? this._buildStream().tree() : data[i];
+                    if (stanza === 'restart') throw new Error('Wrong type for stanza'); // Shut up tsc
+                    const rawStanza = Builder.serialize(stanza);
+                    this._conn.xmlOutput(stanza);
+                    this._conn.rawOutput(rawStanza);
+                    if (this.socket && this.socket.readyState === 1){
+                        this.socket.send(rawStanza);
+                    } else {
+                        console.log('data went to pending');
+                        console.log(this._conn._data.slice(i));
+                        this._conn.account._pending_stanzas.push(this._conn._data.slice(i))
+                        this._conn._data = [];
+                        return;
+                    }
+                }
+            }
+            this._conn._data = [];
+        }
+    },
 
     // _onOpen: function() {
     //     Strophe.info("Websocket open");

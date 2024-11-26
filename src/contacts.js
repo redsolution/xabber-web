@@ -239,6 +239,8 @@ xabber.Contact = Backbone.Model.extend({
     },
 
     getVCard: function (callback) {
+        if (this.account.domain && this.get('notifications'))
+            return;
         let jid = this.get('jid'),
             is_callback = _.isFunction(callback);
         this.account.getConnectionForIQ().vcard.get(jid,
@@ -9133,8 +9135,7 @@ xabber.Roster = xabber.ContactsBase.extend({
                 if (res.length){
                     let parser = new DOMParser();
                     _.each(res, (msg_item) => {
-                        let xml = parser.parseFromString(msg_item.xml, "text/xml")
-                        msg_item.is_unread && console.error(msg_item.is_unread)
+                        let xml = parser.parseFromString(msg_item.xml, "text/xml");
                         this.account.chats.receiveChatMessage(xml.firstChild,
                             _.extend({
                                 is_archived: true,

@@ -8694,6 +8694,8 @@ xabber.AccountChats = xabber.ChatsBase.extend({
                     } else if (photo_url) {
                         contact.cached_image = photo_url;
                         contact.set({photo_hash: photo_id, image: photo_url, avatar_priority: constants.AVATAR_PRIORITIES.PUBSUB_AVATAR});
+                        contact.updateCachedInfo();
+                        return;
                     }
                     contact.getAvatar(photo_id, Strophe.NS.PUBSUB_AVATAR_DATA, (data_avatar) => {
                         try {
@@ -11137,10 +11139,12 @@ xabber.InvitationPanelView = xabber.SearchView.extend({
 
     updateNotifications: function () {
         if (this.model.isMuted()) {
+            this.$('.btn-notifications .one-line').text(xabber.getString("unmute_chat"));
             this.$('.btn-notifications').addClass('muted');
             this.$('.btn-notifications').addClass('active');
         }
         else {
+            this.$('.btn-notifications .one-line').text(xabber.getString("mute_chat"));
             this.$('.btn-notifications').removeClass('muted');
             this.$('.btn-notifications').removeClass('active');
         }
@@ -14698,7 +14702,7 @@ xabber.Account.addConnPlugin(function () {
 }, true, true);
 
 xabber.Account.addFastConnPlugin(function () {
-    this.getVCard();
+    // this.getVCard();
     if (!(this.auth_view && this.auth_view.data.get('authentication')))
         this.trigger('ready_to_get_roster');
 }, true, true);

@@ -91,7 +91,7 @@ xabber.Account = Backbone.Model.extend({
             this.password_view = new xabber.ChangePasswordView({model: this});
             this.updateColorScheme();
             this.settings.on("change:color", this.updateColorScheme, this);
-            this.on("change:photo_hash", this.getVCard, this);
+            // this.on("change:photo_hash", this.getVCard, this);
             _.each(this._init_plugins, (plugin) => {
                 plugin.call(this);
             });
@@ -1720,7 +1720,7 @@ xabber.Account = Backbone.Model.extend({
                 status = $presence.find('show').text() || 'online',
                 status_message = $presence.find('status').text();
             _.isNaN(priority) && (priority = 0);
-            let $vcard_update = $presence.find(`x[xmlns="${Strophe.NS.VCAD_UPDATE}"]`);
+            let $vcard_update = $presence.find(`x[xmlns="${Strophe.NS.VCARD_UPDATE}"]`);
             if ($vcard_update.length && this.get('avatar_priority') && this.get('avatar_priority') <= constants.AVATAR_PRIORITIES.VCARD_AVATAR)
                 this.save('photo_hash', $vcard_update.find('photo').text());
             if (resource) {

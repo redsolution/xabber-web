@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.4","version_description":"increased Strophe version, updated custom extended function for it, changed logging level hierarchy, fixed overwriting of global constructors by Strophe object attributes "}'
+'{"version_number":"2.4.1","version_description":"fixed vcard request and avatar setting from pubsub metadata, fixed sending messages when socket is already closed, fixed presence vcard update check, fixed mute button text"}'
 )});
