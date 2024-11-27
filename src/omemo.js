@@ -294,8 +294,11 @@ xabber.Fingerprints = xabber.BasicView.extend({
     renderDevices: function () {
         if (this.data.get('visible')){
             this.model.getDevicesNode().then(() => {
-                let devices_count = _.keys(this.model.devices).length;
-                this.updateFingerprints(this.model.devices);
+                let contact = this.account.contacts.get(this.jid);
+                this.account.omemo.checkContactFingerprints(contact).then(() => {
+                    let devices_count = _.keys(this.model.devices).length;
+                    this.updateFingerprints(this.model.devices);
+                });
             });
         }
     },
@@ -554,6 +557,11 @@ xabber.Fingerprints = xabber.BasicView.extend({
             this.$('.btn-revoke-trust').switchClass('hidden', !this.$('.row.btn-fingerprint-details[data-trust="trust"]').length)
             this.renderActiveTrustSession();
         });
+        if (!devices_count){
+            this.account.trigger('trusting_updated');
+            this.close();
+            return;
+        }
         let rows = [];
         for (let device_id in devices) {
             if (device_id == this.omemo.get('device_id')) {

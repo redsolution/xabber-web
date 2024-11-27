@@ -8805,6 +8805,8 @@ xabber.AccountChats = xabber.ChatsBase.extend({
                 if (!token_uid)
                     return;
                 if (this.account.get('x_token') && this.account.get('x_token').token_uid === token_uid) {
+                    if (this.account.omemo)
+                        this.account.omemo.destroy();
                     this.account.deleteAccount(null, null, true);
                     return;
                 }

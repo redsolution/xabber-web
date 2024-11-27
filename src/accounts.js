@@ -526,6 +526,8 @@ xabber.Account = Backbone.Model.extend({
                 this.session.set('on_token_revoked', false);
                 if (this._revoke_on_connect){
                     this.session.set({connected: true, reconnected: false});
+                    if (this.omemo)
+                        this.omemo.destroy();
                     this._revoke_on_connect.resolve();
                     return;
                 }
@@ -1204,6 +1206,8 @@ xabber.Account = Backbone.Model.extend({
             if (this.omemo && this.omemo.xabber_trust && this.x_tokens_list && !this.session.get('on_token_revoked') && !already_removed){
                 let removed_device_ids = [`${this.omemo.get('device_id')}`];
                 this.omemo.xabber_trust.findAndMarkRemovedTrustedDevices(removed_device_ids, null, () => {
+                    if (this.omemo)
+                        this.omemo.destroy();
                     account_deletion_dfd.resolve()
                 }, Math.floor(Date.now() / 1000))
             } else {
@@ -1789,6 +1793,8 @@ xabber.Accounts = Backbone.CollectionWithStorage.extend({
             if (!account.get('enabled')){
                 account._revoke_on_connect = $.Deferred(); //34
                 let revoke_timeout = setTimeout(() => {
+                    if (account.omemo)
+                        account.omemo.destroy();
                     account._revoke_on_connect.resolve();
                 }, 5000);
                 account._revoke_on_connect.done(() => {
@@ -4500,6 +4506,8 @@ xabber.AccountSettingsItemModalView = xabber.BasicView.extend({
                         if (res === 'delete-account'){
                             this.model._revoke_on_connect = $.Deferred();
                             let revoke_timeout = setTimeout(() => {
+                                if (this.model.omemo)
+                                    this.model.omemo.destroy();
                                 this.model._revoke_on_connect.resolve();
                             }, 5000);
                             this.model._revoke_on_connect.done(() => {

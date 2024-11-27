@@ -176,7 +176,7 @@ xabber.ServerFeatures = Backbone.Collection.extend({
             this.connection.disco.addItem(jid, name, node, () => {});
             this.connection.disco.info(
                 jid,
-                null,
+                node,
                 this.onInfo.bind(this));
         });
     },
