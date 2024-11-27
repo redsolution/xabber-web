@@ -2188,11 +2188,16 @@ xabber.Omemo = Backbone.ModelWithStorage.extend({
             let is_trusted = true,
                 peer = this.getPeer(contact.get('jid')),
                 dfd = new $.Deferred(), counter = 0, unverified_counter = 0;
+            console.log(contact.get('jid'));
+            console.log(peer);
             dfd.done((t) => {
+                console.log(t);
+                console.log(unverified_counter);
                 let trust = t === null ? 'error' : (t === undefined ? 'none' : t);
                 contact.trigger('update_trusted', trust, peer);
                 resolve({trust: trust, unverified_counter: unverified_counter});
             });
+            console.log(Object.keys(peer.devices).length);
             if (Object.keys(peer.devices).length) {
                 counter = Object.keys(peer.devices).length;
                 for (let device_id in peer.devices) {
@@ -2208,9 +2213,11 @@ xabber.Omemo = Backbone.ModelWithStorage.extend({
                             unverified_counter++;
                         }
                         counter--;
+                        console.log(counter);
                         !counter && dfd.resolve(is_trusted);
                     } else if (device.get('ik')) {
                         device.set('fingerprint', device.generateFingerprint());
+                        console.log(device);
                         let trusted = this.isTrusted(contact.get('jid'), device.id, device.get('fingerprint'));
                         if (trusted === undefined && is_trusted !== null){
                             is_trusted = undefined;
@@ -2221,10 +2228,12 @@ xabber.Omemo = Backbone.ModelWithStorage.extend({
                             unverified_counter++;
                         }
                         counter--;
+                        console.log(counter);
                         !counter && dfd.resolve(is_trusted);
                     } else {
                         if (device.get('ik') === null) {
                             counter--;
+                            console.log(counter);
                             if (!counter) {
                                 if (Object.keys(peer.devices).length === 1){
                                     is_trusted = 'nil';
@@ -2261,14 +2270,21 @@ xabber.Omemo = Backbone.ModelWithStorage.extend({
                     }
                 }
             } else {
+                console.log(peer);
                 peer.getDevicesNode().then(() => {
+                    console.log(peer.devices);
                     counter = Object.keys(peer.devices).length;
+                    console.log(counter);
                     !counter && dfd.resolve('nil');
                     for (let device_id in peer.devices) {
                         let device = peer.devices[device_id];
+                        console.log(device);
                         device.getBundle().then(({pk, spk, ik}) => {
+                            console.log({pk, spk, ik});
                             device.set('ik', utils.fromBase64toArrayBuffer(ik));
                             device.set('fingerprint', device.generateFingerprint());
+                            console.log(device.get('ik'));
+                            console.log(device.get('fingerprint'));
                             let trusted = this.isTrusted(contact.get('jid'), device.id, device.get('fingerprint'));
                             if (trusted === undefined && is_trusted !== null){
                                 is_trusted = undefined;
@@ -2285,9 +2301,12 @@ xabber.Omemo = Backbone.ModelWithStorage.extend({
                                 }
                             }
                             counter--;
+                            console.log(counter);
                             !counter && dfd.resolve(is_trusted);
-                        }).catch(() => {
+                        }).catch((e) => {
+                            console.error(e);
                             counter--;
+                            console.error(counter);
                             if (!counter) {
                                 if (Object.keys(peer.devices).length === 1){
                                     is_trusted = 'nil';
