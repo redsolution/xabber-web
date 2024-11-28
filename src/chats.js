@@ -1423,13 +1423,13 @@ xabber.EphemeralTimerSelector = xabber.BasicView.extend({
             if (rsm.complete)
                 this.set('last_sync_unread_id', this.get('last_read_msg'));
             if (query.is_first && !query.sync_update) {
-                let read_count = Number(rsm.count) + 1;
+                let read_count = Number(rsm.count) + 1; // todo: переделать с count на подсчёт кол-ва сообщений
                 read_count = this.get('const_unread') - read_count;
                 (read_count < 0) && (read_count = 0);
                 this.set('unread', 0);
                 this.set('const_unread', read_count);
             }
-            if (!rsm.complete && (rsm.count > messages.length)){
+            if (!rsm.complete && (rsm.count > messages.length)){// todo: убрать rsm.count
                 query.after = rsm.last;
                 query.is_first = false;
                 this.requestHistoryBetweenAnchors(query);
@@ -3302,9 +3302,9 @@ xabber.ChatItemView = xabber.BasicView.extend({
                       else
                           this.messagesRequest(query, timestamp, rsm, loaded_messages, (messages, rsm) => {});
                   }
-                  else if (loaded_messages.length == rsm.count) {
-                      if (rsm.count != 0) {
-                          let message_count = rsm.count;
+                  else if (loaded_messages.length == rsm.count) { // todo: переделать на complete
+                      if (rsm.count != 0) {// todo: убрать rsm.count
+                          let message_count = rsm.count;// todo: убрать rsm.count
                           this.emptyChat()
                           // list.sort((a, b) => (a.color > b.color) ? 1 : -1)
                           $(loaded_messages).each((idx, message) => {
@@ -4543,14 +4543,14 @@ xabber.ChatContentView = xabber.BasicView.extend({
             clearTimeout(this._load_history_timeout);
             this._loading_history = false;
             this.hideHistoryFeedback();
-            if (options.missed_history && !rsm.complete && (rsm.count > messages.length))
+            if (options.missed_history && !rsm.complete && (rsm.count > messages.length))// todo: убрать rsm.count
                 this.getMessageArchive({after: rsm.last}, {missed_history: true, notificications_month: options.notificications_month || null});
             if (options.missed_history) {
             }
             if (options.missed_history && options.notificications_month && rsm.complete) {
                 account.settings.update_settings({last_month_notifications_loaded: true});
             }
-            if (options.notifications_last_msg && !rsm.complete && (rsm.count > messages.length)) {
+            if (options.notifications_last_msg && !rsm.complete && (rsm.count > messages.length)) { // todo: убрать rsm.count
                 this.getMessageArchive({
                         fast: true,
                         max: xabber.settings.mam_messages_limit,
@@ -4562,8 +4562,6 @@ xabber.ChatContentView = xabber.BasicView.extend({
                     {
                         notifications_last_msg: options.notifications_last_msg
                     });
-            } else if (this.model.get('notifications') && !this.model.get('history_loaded') && !_.isUndefined(options.notifications_last_msg) && rsm.complete && (rsm.count == 0)) {
-            } else if (!this.model.get('history_loaded') && options.notifications_last_msg && rsm.complete){
             }
             if (options.unread_history){
                 if (messages.length)
@@ -10701,6 +10699,7 @@ xabber.InvitationPanelView = xabber.SearchView.extend({
           this.updatePlyrControls();
           this.updatePlyrTime();
           this.updateJingleButton();
+          this.updatePlyrPlayerPosition();
           return this;
       },
 
@@ -10823,6 +10822,15 @@ xabber.InvitationPanelView = xabber.SearchView.extend({
                   this.$('.btn-jingle-message').removeClass('active-call');
           } else
               this.$('.btn-jingle-message').addClass('hidden');
+      },
+
+      updatePlyrPlayerPosition: function () {
+          let visible_buttons_count = 0;
+          _.each(this.$('.chat-tools-wrap').children('div:not(.chat-tool-player)'),(item) => {
+              if(item.checkVisibility()) visible_buttons_count++;
+          })
+          this.$el.switchClass('plyr-player-large-margin', visible_buttons_count === 1);
+          this.$el.switchClass('plyr-player-margin', visible_buttons_count === 2);
       },
 
       openJingleMessage: function () {
@@ -10957,6 +10965,7 @@ xabber.InvitationPanelView = xabber.SearchView.extend({
         this.updateLeftIndicator(xabber.accounts);
         if (this.model.get('encrypted'))
             this.renderActiveTrustSession();
+        this.updatePlyrPlayerPosition();
         return this;
     },
 
@@ -11112,6 +11121,16 @@ xabber.InvitationPanelView = xabber.SearchView.extend({
         this.$('.btn-jingle-message').hideIf((this.contact.get('blocked') || is_group_chat) && xabber.current_voip_call);
         this.$('.btn-jingle-message').hideIf(!xabber.settings.jingle_calls);
         this.$el.switchClass('notifications', is_notifications);
+        this.updatePlyrPlayerPosition();
+    },
+
+      updatePlyrPlayerPosition: function () {
+        let visible_buttons_count = 0;
+        _.each(this.$('.chat-tools-wrap').children('div:not(.chat-tool-player)'),(item) => {
+            if(item.checkVisibility()) visible_buttons_count++;
+        })
+        this.$el.switchClass('plyr-player-large-margin', visible_buttons_count === 1);
+        this.$el.switchClass('plyr-player-margin', visible_buttons_count === 2);
     },
 
     renderSearchPanel: function () {
@@ -14541,7 +14560,7 @@ xabber.ExportChatHistoryView = xabber.BasicView.extend({
             this.all_messages_count = rsm.count
             if (loading_id !== this.loading_id || this.history_export_stoped)
                 return;
-            if (rsm.count == 0){
+            if (rsm.count == 0){// todo: переделать на подсчёт сообщений
                 this.is_loading = false;
                 this.$('.export-history-msg-count').text(xabber.getString("no_messages"))
             }
@@ -14555,7 +14574,7 @@ xabber.ExportChatHistoryView = xabber.BasicView.extend({
                 this.loaded_messages++;
             });
 
-            this.$('.export-history-progress-bar').css('background', `radial-gradient(closest-side,#fff 94%,#00000000 95% 100%),conic-gradient(#BDBDBD ${(this.loaded_messages/rsm.count * 100)}%,#F5F5F5 0)`)
+            this.$('.export-history-progress-bar').css('background', `radial-gradient(closest-side,#fff 94%,#00000000 95% 100%),conic-gradient(#BDBDBD ${(this.loaded_messages/rsm.count * 100)}%,#F5F5F5 0)`) // todo: bez count
             this.$('.export-history-msg-count').text(xabber.getString("export_history_msg_count", [this.loaded_messages, this.all_messages_count]))
 
             if (!this.history_export_loaded && !this.history_export_stoped) {

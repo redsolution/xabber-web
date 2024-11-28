@@ -980,10 +980,9 @@ xabber.Body = xabber.NodeView.extend({
                 new_attrs.previous_screen = undefined;
             }
         }
-        if (this.screen.get('right') === 'contacts' && (!attrs || !attrs.right))
-            attrs.right = null;
         (!attrs || !attrs.notifications) && (new_attrs.notifications = false);
         (!attrs || !attrs.calls) && (new_attrs.calls = false);
+        (!attrs || !attrs.contacts) && (new_attrs.contacts = false);
         this.screen.set(_.extend(new_attrs, attrs), options);
     },
 
@@ -1227,15 +1226,15 @@ xabber.ToolbarView = xabber.BasicView.extend({
     },
 
     showContacts: function () {
-        xabber.chats_view.active_chat = null;
-        xabber.body.setScreen('contacts', {right: 'contacts', right_contact: null, chat_item: null, contact: null});
+        if (!xabber.accounts.enabled.length || !xabber.accounts.connected.length)
+            return;
+        xabber.body.setScreen('contacts', {right: 'contacts', contacts: xabber.contacts_view});
         xabber.trigger('update_placeholder');
     },
 
     showCalls: function () {
         if (!xabber.accounts.enabled.length || !xabber.accounts.connected.length)
             return;
-        xabber.chats_view.active_chat = null;
         xabber.body.setScreen('calls', {right: 'calls', calls: xabber.calls_view});
         xabber.trigger('update_placeholder');
     },

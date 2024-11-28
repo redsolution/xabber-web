@@ -9773,6 +9773,10 @@ xabber.EditContactsGroupsModalView = xabber.BasicView.extend({
     },
 });
 
+xabber.ContactsBodyContainer = xabber.Container.extend({
+    className: 'contacts-body-container',
+});
+
 xabber.RosterFullScreenView = xabber.BasicView.extend({
     className: 'roster-left-container container',
     template: templates.roster_fullscreen,
@@ -11131,8 +11135,11 @@ xabber.once("start", function () {
     this._roster_settings = new this.RosterSettings({id: 'roster-settings'},
         {storage_name: this.getStorageName(), fetch: 'after'});
     this.settings.roster = this._roster_settings.attributes;
-    this.contacts_view = this.right_panel.addChild('contacts', this.RosterFullScreenView,
-        {model: this.accounts});
+
+    !this.contacts_view && (this.contacts_view = new xabber.RosterFullScreenView({model: this.accounts}));
+
+    this.contacts_body = this.right_panel.addChild('contacts_body',
+        this.ContactsBodyContainer);
     this.contacts_left_view = this.left_panel.addChild('contacts-left', this.RosterLeftView,
         {model: this.accounts});
     this.contact_container = this.right_panel.addChild('details', this.Container);

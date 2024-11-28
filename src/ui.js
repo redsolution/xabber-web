@@ -127,7 +127,7 @@ xabber.once("start", function () {
 
         if ((this.body.screen.get('notifications') || (this.body.screen.get('previous_screen') && this.body.screen.get('previous_screen').notifications))
             || (this.body.screen.get('calls') || (this.body.screen.get('previous_screen') && this.body.screen.get('previous_screen').calls))
-        || (this.body.screen.get('name') === 'contacts' || (this.body.screen.get('previous_screen') && this.body.screen.get('previous_screen').name === 'contacts'))) {
+        || (this.body.screen.get('name') === 'contacts' || (this.body.screen.get('previous_screen') && this.body.screen.get('previous_screen').name === 'contacts' && this.body.screen.get('previous_screen').contacts))) {
             left_panel_width = 0;
             right_panel_width = panel_width;
         }
@@ -168,9 +168,9 @@ xabber.once("start", function () {
         }
         this.left_panel.$el.switchClass('hidden', (this.body.screen.get('notifications')  || (this.body.screen.get('previous_screen') && this.body.screen.get('previous_screen').notifications))
             || (this.body.screen.get('calls') || (this.body.screen.get('previous_screen') && this.body.screen.get('previous_screen').calls))
-            || (this.body.screen.get('name') === 'contacts' || (this.body.screen.get('previous_screen') && this.body.screen.get('previous_screen').name === 'contacts')));
+            || (this.body.screen.get('name') === 'contacts' || (this.body.screen.get('previous_screen') && this.body.screen.get('previous_screen').name === 'contacts' && this.body.screen.get('previous_screen').contacts)));
         if (left_panel_width === 0){
-            let fake_left_panel_width = right_panel_width * 0.26;
+            let fake_left_panel_width = right_panel_width * 0.264;
             if (fake_left_panel_width <= 288)
                 fake_left_panel_width = 288;
             if (fake_left_panel_width >= 384)
@@ -253,7 +253,7 @@ xabber.once("start", function () {
         path_chat_bottom = new this.ViewPath('chat_item.content.bottom'),
         path_group_invitation = new this.ViewPath('contact.invitation'),
         path_enable_view = new this.ViewPath('omemo_item.account.omemo_enable_view'),
-        path_contacts = new this.ViewPath('contacts'),
+        path_contacts_body = new this.ViewPath('contacts'),
         path_calls_body = new this.ViewPath('calls'),
         path_contact_details_right = new this.ViewPath('contact.details_view_right'),
         path_contact_details_right_encrypted = new this.ViewPath('contact.details_view_right_encrypted'),
@@ -264,7 +264,7 @@ xabber.once("start", function () {
         blur_overlay: null,
         toolbar: null,
         main: {
-            right: { contacts: null },
+            right: { contacts_body: null },
             right_contact: {},
         },
         roster: null
@@ -344,9 +344,9 @@ xabber.once("start", function () {
                 notifications_body: path_notifications_body,
             };
         }
-        if (options.right === 'contacts') {
+        if (options.contacts && options.right === 'contacts') {
             return {
-                contacts: path_contacts,
+                contacts_body: path_contacts_body,
             };
         }
         if (options.calls && options.right === 'calls') {
