@@ -6650,8 +6650,9 @@ input[type=text].simple-input-field:hover {
     height: 72px;
     min-height: 72px;
     padding: 22px 0 16px;
-    position: relative;
+    position: absolute;
     display: flex;
+    z-index: 0;
 }
 .calls-content-filters .search-form,
 .notifications-content-filters .search-form,
@@ -6699,22 +6700,33 @@ input[type=text].simple-input-field:hover {
 .contacts-panel-wrap .panel-head .chat-tool.chat-tool-plyr-controls:not(.chat-player-duration){
     color: #9e9e9e;
 }
-.contacts-panel-wrap .contacts-active-filters-wrap{
-    display: flex;
-    padding: 0 8px;
+.contacts-panel-wrap .chat-tools-wrap{
     position: relative;
-    flex-wrap: wrap;
-    align-items: center;
-    margin: 4px 0;
+    top: -11px;
+    flex-shrink: unset;
+    height: 72px;
+    float: right;
+    width: fit-content;
+    margin: 0;
+    margin-right: 158px;
+}
+.contacts-panel-wrap .chat-tools-wrap .chat-tool-player{
+    position: relative;
+    right: 0;
+}
+.contacts-panel-wrap .contacts-active-filters-wrap{
+    margin: 4px 0 0 4px;
+    padding: 8px 0 0 8px;
+    position: relative;
+    resize: both;
 }
 .contacts-panel-wrap .contacts-active-filters-wrap .roster-additional-filter-item,
 .contacts-panel-wrap .contacts-active-filters-wrap .roster-filter-item{
-    align-items: center;
     background: #eeeeee;
     border-radius: 20px;
-    display: flex;
+    display: inline-block;
     font-size: 14px;
-    line-height: 16px;
+    line-height: 24px;
     margin-right: 8px;
     max-width: 300px;
     padding: 0 8px;
@@ -6722,10 +6734,10 @@ input[type=text].simple-input-field:hover {
     cursor: pointer;
     height: 24px;
     margin: 8px 8px 8px 0;
+    position: relative;
 }
 .contacts-panel-wrap .contacts-active-filters-wrap .roster-additional-filter-item{
     min-width: 100px;
-    justify-content: space-between;
 }
 .contacts-panel-wrap .contacts-active-filters-wrap .roster-additional-filter-item:hover,
 .contacts-panel-wrap .contacts-active-filters-wrap .roster-filter-item:hover{
@@ -6733,8 +6745,7 @@ input[type=text].simple-input-field:hover {
 
 }
 .contacts-panel-wrap .contacts-active-filters-wrap .roster-additional-filter-item .roster-filter-item-text,
-.contacts-panel-wrap .contacts-active-filters-wrap .roster-filter-item .roster-filter-item-text{
-    margin: 8px;
+.contacts-panel-wrap .contacts-active-filters-wrap .roster-filter-item .roster-filter-item-text{    margin: 0 16px 0 8px;
 }
 .contacts-panel-wrap .contacts-active-filters-wrap .roster-additional-filter-item .roster-filter-item-text{
     margin-right: 2px;
@@ -6743,9 +6754,14 @@ input[type=text].simple-input-field:hover {
 .contacts-panel-wrap .contacts-active-filters-wrap .roster-filter-item .remove-filter{
     margin-bottom: 1px;
     opacity: 0.5;
+    position: absolute;
+    top: 6px;
+    right: 8px;
 }
 .contacts-panel-wrap .contacts-active-filters-wrap .roster-additional-filter-item .mdi-triangle{
     rotate: 180deg;
+    top: 8px;
+    right: 10px;
 }
 .contacts-panel-wrap .contacts-active-filters-wrap .dropdown-content{
     top: 32px !important;
@@ -21408,12 +21424,12 @@ input[type=range].voice-message-volume:focus {
 .left-panel-wrap .left-panel-list-wrap .chats-title,
 .left-panel-wrap .left-panel-list-wrap .messages-title,
 .left-panel-wrap .left-panel-list-wrap .contacts-title{
-    font-size: 18px;
-    font-weight: 500;
     height: 48px;
     line-height: 32px;
     padding: 12px 8px;
-    color: rgba(0, 0, 0, .87);
+    font-size: 16px;
+    FONT-WEIGHT: 500;
+    color: rgba(0, 0, 0, .54);
 }
 .forward-panel-modal .forward-panel-list-title{
     padding: 12px 24px;
@@ -22588,10 +22604,12 @@ ul.restrictions-list-content>li {
 .calls-content-filters .calls-filter-header,
 .notifications-content-filters .notifications-filter-header{
     height: 48px;
-    font-size: 18px;
     font-weight: 500;
     line-height: 32px;
     padding: 12px 8px;
+    font-size: 16px;
+    FONT-WEIGHT: 500;
+    color: rgba(0, 0, 0, .54);
 }
 .contacts-panel-wrap .contacts-panel-left-side .filter-item-wrap span{
     color: #757575;

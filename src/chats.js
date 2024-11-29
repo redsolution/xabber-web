@@ -2596,7 +2596,9 @@ xabber.ChatItemView = xabber.BasicView.extend({
     },
 
     updateLastMessage: function (msg) {
-        if (this.model.get('saved') && xabber.toolbar_view.$('.toolbar-item.saved-chats.active').length){
+        if (this.model.get('saved')){
+            this.$('.last-msg').html(this.account.get('jid'));
+            this.$(`.msg-delivering-state`).addClass('hidden');
             return;
         }
         msg || (msg = this.model.last_message);

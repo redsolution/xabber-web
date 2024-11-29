@@ -9774,7 +9774,7 @@ xabber.EditContactsGroupsModalView = xabber.BasicView.extend({
 });
 
 xabber.ContactsBodyContainer = xabber.Container.extend({
-    className: 'contacts-body-container',
+    className: 'contacts-body-container container   ',
 });
 
 xabber.RosterFullScreenView = xabber.BasicView.extend({
