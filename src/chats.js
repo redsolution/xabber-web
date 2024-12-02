@@ -1422,14 +1422,17 @@ xabber.EphemeralTimerSelector = xabber.BasicView.extend({
         this.item_view.content.MAMRequest(query, (success, messages, rsm) => {
             if (rsm.complete)
                 this.set('last_sync_unread_id', this.get('last_read_msg'));
-            if (query.is_first && !query.sync_update) {
-                let read_count = Number(rsm.count) + 1; // todo: переделать с count на подсчёт кол-ва сообщений
+            if (!query.sync_update) {
+                let read_count = messages.length;
+                if (query.is_first){
+                    read_count = read_count + 1;
+                }
                 read_count = this.get('const_unread') - read_count;
                 (read_count < 0) && (read_count = 0);
                 this.set('unread', 0);
                 this.set('const_unread', read_count);
             }
-            if (!rsm.complete && (rsm.count > messages.length)){// todo: убрать rsm.count
+            if (!rsm.complete){
                 query.after = rsm.last;
                 query.is_first = false;
                 this.requestHistoryBetweenAnchors(query);
@@ -3247,6 +3250,7 @@ xabber.ChatItemView = xabber.BasicView.extend({
           if (this.$search_form.find('input').val()){
               this.parent.$('.panel-background-clickable').removeClass('fading-search-background');
           }
+          this.message_count = 0;
           if (ev.keyCode === constants.KEY_ENTER) {
               this.emptyChat();
               let query = this.$search_form.find('input').val();
@@ -3304,26 +3308,25 @@ xabber.ChatItemView = xabber.BasicView.extend({
                       else
                           this.messagesRequest(query, timestamp, rsm, loaded_messages, (messages, rsm) => {});
                   }
-                  else if (loaded_messages.length == rsm.count) { // todo: переделать на complete
-                      if (rsm.count != 0) {// todo: убрать rsm.count
-                          let message_count = rsm.count;// todo: убрать rsm.count
+                  else if (rsm.complete) {
+                      if (loaded_messages.length != 0) {
                           this.emptyChat()
-                          // list.sort((a, b) => (a.color > b.color) ? 1 : -1)
                           $(loaded_messages).each((idx, message) => {
                               let $message = $(message),
                                   $jingle_msg_propose = $message.find(`propose[xmlns="${Strophe.NS.JINGLE_MSG}"]`);
-                              if ($jingle_msg_propose.length)
-                                  message_count--;
+                              if (!$jingle_msg_propose.length){
+                                  this.message_count++;
+                              }
                               this.account.chats.receiveChatMessage($message, {
                                   searched_message: true,
                                   searched_in_contact_messages: true,
                                   query: query
                               });
                           });
-                          this.$('.messages-count').hideIf(!message_count);
-                          this.$('.close-search-icon').hideIf(!message_count);
-                          this.$('.search-results').hideIf(message_count);
-                          this.$('.messages-count').text(xabber.getQuantityString("searched_messages_count", message_count));
+                          this.$('.messages-count').hideIf(!this.message_count);
+                          this.$('.close-search-icon').hideIf(!this.message_count);
+                          this.$('.search-results').hideIf(this.message_count);
+                          this.$('.messages-count').text(xabber.getQuantityString("searched_messages_count", this.message_count));
                       }
                       else {
                           this.emptyChat();
@@ -4471,7 +4474,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
                 let _delete_handler_timeout = setTimeout(() => {
                     console.log('handler deleted');
                     func_conn.deleteHandler(handler);
-                }, 14000);
+                }, 19000);
                 let callb = function (res) {
                         func_conn.deleteHandler(handler);
                         clearTimeout(_delete_handler_timeout);
@@ -4524,7 +4527,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
                     send_counter++;
                     sendMAMRequest(conn);
                 }
-            }, 15000);
+            }, 20000);
         });
     },
 
@@ -4545,14 +4548,14 @@ xabber.ChatContentView = xabber.BasicView.extend({
             clearTimeout(this._load_history_timeout);
             this._loading_history = false;
             this.hideHistoryFeedback();
-            if (options.missed_history && !rsm.complete && (rsm.count > messages.length))// todo: убрать rsm.count
+            if (options.missed_history && !rsm.complete)
                 this.getMessageArchive({after: rsm.last}, {missed_history: true, notificications_month: options.notificications_month || null});
             if (options.missed_history) {
             }
             if (options.missed_history && options.notificications_month && rsm.complete) {
                 account.settings.update_settings({last_month_notifications_loaded: true});
             }
-            if (options.notifications_last_msg && !rsm.complete && (rsm.count > messages.length)) { // todo: убрать rsm.count
+            if (options.notifications_last_msg && !rsm.complete) {
                 this.getMessageArchive({
                         fast: true,
                         max: xabber.settings.mam_messages_limit,
@@ -5722,8 +5725,6 @@ xabber.ChatContentView = xabber.BasicView.extend({
         if (attrs.searched_message){
             let myRegexp = new RegExp('(.{0,12})(' + attrs.query + ')(.{0,12})','gmius'),
                 matching_markup = myRegexp.exec(Strophe.xmlescape(attrs.original_message || attrs.message) || markup_body);
-            console.log(markup_body);
-            console.log(matching_markup);
             if (matching_markup) {
                 if (matching_markup[1].length == 12)
                     matching_markup[1] = '...' + matching_markup[1].substring(1);
@@ -14559,13 +14560,8 @@ xabber.ExportChatHistoryView = xabber.BasicView.extend({
         !this.history_last_id && delete(query.after);
         let account = this.model.account, counter = 0;
         this.content.MAMRequest(query, (success, messages, rsm) => {
-            this.all_messages_count = rsm.count
             if (loading_id !== this.loading_id || this.history_export_stoped)
                 return;
-            if (rsm.count == 0){// todo: переделать на подсчёт сообщений
-                this.is_loading = false;
-                this.$('.export-history-msg-count').text(xabber.getString("no_messages"))
-            }
             rsm.first && (this.history_last_id = rsm.last);
 
             if ((messages.length < query.max) && success) {
@@ -14575,9 +14571,13 @@ xabber.ExportChatHistoryView = xabber.BasicView.extend({
                 this.handleMessage(message)
                 this.loaded_messages++;
             });
+            if (this.loaded_messages == 0){
+                this.is_loading = false;
+                this.$('.export-history-msg-count').text(xabber.getString("no_messages"))
+            }
 
-            this.$('.export-history-progress-bar').css('background', `radial-gradient(closest-side,#fff 94%,#00000000 95% 100%),conic-gradient(#BDBDBD ${(this.loaded_messages/rsm.count * 100)}%,#F5F5F5 0)`) // todo: bez count
-            this.$('.export-history-msg-count').text(xabber.getString("export_history_msg_count", [this.loaded_messages, this.all_messages_count]))
+            this.$('.export-history-progress-bar').css('background', `radial-gradient(closest-side,#fff 94%,#00000000 95% 100%),conic-gradient(#BDBDBD 0%,#F5F5F5 0)`)
+            this.$('.export-history-msg-count').text(xabber.getString("export_history_msg_count", [this.loaded_messages, this.loaded_messages]))
 
             if (!this.history_export_loaded && !this.history_export_stoped) {
                 this.getMessageArchive(loading_id);

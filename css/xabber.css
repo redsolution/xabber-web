@@ -6578,6 +6578,10 @@ input[type=text].simple-input-field:hover {
 .roster-left-container.container{
     max-width: unset;
 }
+.contacts-body-container{
+    height: 100%;
+    width: 100%;
+}
 .roster-left-container.narrow-panel .contacts-panel-wrap .contact-list-wrap .roster-contact-item-wrap .contact-groups-wrap {
     display:none;
 }

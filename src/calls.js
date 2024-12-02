@@ -703,7 +703,7 @@ xabber.CallsView = xabber.BasicView.extend({
             clearTimeout(this._load_history_timeout);
             this._loading_history = false;
 
-            if (options.missed_history && !rsm.complete && (rsm.count > messages.length)) {
+            if (options.missed_history && !rsm.complete) {
                 this.getMessageArchive({after: rsm.last}, {missed_history: true});
             }
             if (options.previous_history && (messages.length < query.max) && success) {
@@ -805,7 +805,7 @@ xabber.CallsView = xabber.BasicView.extend({
                 let _delete_handler_timeout = setTimeout(() => {
                     console.log('handler deleted');
                     func_conn.deleteHandler(handler);
-                }, 14000);
+                }, 19000);
                 let callb = function (res) {
                         func_conn.deleteHandler(handler);
                         clearTimeout(_delete_handler_timeout);
@@ -858,7 +858,7 @@ xabber.CallsView = xabber.BasicView.extend({
                     send_counter++;
                     sendMAMRequest(conn);
                 }
-            }, 15000);
+            }, 20000);
         });
     },
 
