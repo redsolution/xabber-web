@@ -676,7 +676,7 @@ xabber.SearchView = xabber.BasicView.extend({
               account.searched_msgs_loaded = false;
               options.account = account;
               this.MAMRequest(query, options, (messages) => {
-                  this.$('.messages-list-wrap .messages-list').html('');
+                  this.$('.messages-list-wrap .messages-list .preloader-wrapper').remove();
                   if (!this.query_text)
                       return;
                   _.each(messages, (message) => {
@@ -717,37 +717,71 @@ xabber.SearchView = xabber.BasicView.extend({
                   .c('value').t(Strophe.NS.MAM).up().up()
                   .c('field', {'var': 'withtext'})
                   .c('value').t(query).up().up().up().cnode(new Strophe.RSM(options).toXML()),
-              conn;
+              _interval, handler;
 
-          let res = account.fast_connection && !account.fast_connection.disconnecting && account.fast_connection.authenticated && account.fast_connection.connected && account.get('status') !== 'offline';
-          if (res) {
-              conn = account.fast_connection;
-          } else{
-              conn = account.connection;
-          }
-
-          let handler = conn.addHandler((message) => {
+          let sendMAMRequest = function(func_conn) {
+              handler = func_conn.addHandler(function (message) {
                   let $msg = $(message);
-                  if ($msg.find('result').attr('queryid') === queryid && options.query_id === this.queryid) {
+                  if ($msg.find('result').attr('queryid') === queryid) {
                       messages.push(message);
                   }
                   return true;
-              }, env.Strophe.NS.MAM);
-          account.sendIQFast(iq,
-              function (res) {
-                  account.connection.deleteHandler(handler);
-                  let $fin = $(res).find(`fin[xmlns="${Strophe.NS.MAM}"]`);
-                  if ($fin.length && $fin.attr('queryid') === queryid) {
-                      let rsm_complete = ($fin.attr('complete') === 'true') ? true : false;
-                      rsm_complete && (account.searched_msgs_loaded = true);
-                  }
-                  callback && callback(messages);
-              },
-              function () {
-                  account.connection.deleteHandler(handler);
-                  errback && errback();
+              }, Strophe.NS.MAM);
+              let _delete_handler_timeout = setTimeout(() => {
+                  func_conn.deleteHandler(handler);
+              }, 19000);
+              let callb = function (res) {
+                      func_conn.deleteHandler(handler);
+                      clearTimeout(_delete_handler_timeout);
+                      clearInterval(_interval);
+                      handler = null;
+                      let $fin = $(res).find(`fin[xmlns="${Strophe.NS.MAM}"]`);
+                      if ($fin.length && $fin.attr('queryid') === queryid) {
+                          let rsm_complete = ($fin.attr('complete') === 'true') ? true : false;
+                          rsm_complete && (account.searched_msgs_loaded = true);
+                      }
+                      callback && callback(messages);
+                  },
+                  errb = function (err) {
+                      func_conn.deleteHandler(handler);
+                      clearTimeout(_delete_handler_timeout);
+                      clearInterval(_interval);
+                      handler = null;
+                      xabber.error("MAM search error");
+                      xabber.error(err);
+                      errback && errback(err);
+                  };
+              console.error('trying to send for search');
+
+              if (is_fast)
+                  account.sendFast(iq, callb, errb);
+              else
+                  account.sendIQ(iq, callb, errb);
+
+          };
+          let is_fast = options.fast && account.fast_connection && !account.fast_connection.disconnecting
+              && account.fast_connection.authenticated && account.fast_connection.connected && account.get('status') !== 'offline',
+              conn = is_fast ? account.fast_connection : account.connection;
+
+          if (conn.connected){
+              sendMAMRequest(conn);
+          }
+          let send_counter = 0;
+          _interval = setInterval(() => {
+              is_fast = options.fast && account.fast_connection && !account.fast_connection.disconnecting
+                  && account.fast_connection.authenticated && account.fast_connection.connected && account.get('status') !== 'offline';
+              conn = is_fast ? account.fast_connection : account.connection;
+              conn && console.log(conn.connected);
+              if (!conn || send_counter >= 1){
+                  clearInterval(_interval);
+                  errback && errback('No connection or too many attempts');
+                  return;
               }
-          );
+              if (conn.connected && send_counter < 1){
+                  send_counter++;
+                  sendMAMRequest(conn);
+              }
+          }, 20000);
       },
 
       clearSearch: function (ev) {
@@ -1132,7 +1166,7 @@ xabber.ToolbarView = xabber.BasicView.extend({
         this.$('.all-chats').click();
     },
 
-    showAllChats: function (ev, no_unread) {
+    showAllChats: function (ev, no_unread, force_unread) {
         let $el;
         if (ev && ev.target)
             $el = $(ev.target).closest('.toolbar-item:not(.toolbar-logo)');
@@ -1143,6 +1177,12 @@ xabber.ToolbarView = xabber.BasicView.extend({
             .filter('.all-chats').addClass('active').switchClass('unread', is_active);
         let options = {}
         no_unread && (options.no_unread = no_unread);
+
+        if (xabber.chats_view && Boolean(xabber.chats_view.$('.search-input').val()) && !force_unread) {
+            options.no_unread = true;
+            no_unread = true;
+            this.$('.toolbar-item:not(.account-item):not(.toolbar-logo)').removeClass(' unread');
+        }
         xabber.body.setScreen('all-chats', options);
         xabber.trigger('show_all_chats', no_unread);
         xabber.trigger('clear_chats_search');

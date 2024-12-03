@@ -9585,7 +9585,7 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
     },
 
     clickUnread: function () {
-        xabber.toolbar_view.clickAllChats();
+        xabber.toolbar_view.showAllChats(null, null, true);
     },
 
     clickScrollToTop: function (ev) {
@@ -13497,7 +13497,7 @@ xabber.ChatBottomView = xabber.BasicView.extend({
     },
 
     submit: function (ev, forced) {
-        if (this.$('.send-message').hasClass('disabled') || this.$('.attach-voice-message').hasClass('disabled') ){
+        if (this.$('.send-message').hasClass('disabled') || this.$('.attach-voice-message').hasClass('disabled')){
             return;
         }
         let $rich_textarea = this.$('.input-message .rich-textarea'),

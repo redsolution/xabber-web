@@ -6604,7 +6604,7 @@ input[type=text].simple-input-field:hover {
     min-width: 288px;
     overflow: hidden;
     position: relative;
-    width: 26%;
+    width: 26.4%;
 }
 .contacts-panel-wrap .contacts-panel-left-side .contacts-filter-main-header{
     font-size: 24px;
@@ -6780,7 +6780,7 @@ input[type=text].simple-input-field:hover {
     height: 100%;
     overflow: hidden;
     position: relative;
-    width: 100%;
+    width: 73.6%;
     max-width: 1024px;
 }
 .contacts-panel-wrap .roster-sorting-wrap{
@@ -22358,7 +22358,7 @@ ul.restrictions-list-content>li {
     height: 100%;
     overflow: hidden;
     position: relative;
-    width: 100%;
+    width: 73.6%;
     max-width: 1024px;
 }
 .calls-header-container{
@@ -22529,7 +22529,7 @@ ul.restrictions-list-content>li {
 
 }
 .notifications-right-wrap{
-    width: 100%;
+    width: 73.6%;
     height: 100%;
     position: relative;
     overflow: hidden;
@@ -22549,7 +22549,7 @@ ul.restrictions-list-content>li {
     min-width: 288px;
     overflow: hidden;
     position: relative;
-    width: 26%;
+    width: 26.4%;
 }
 .notifications-content-wrap.subscription-content .notifications-utility{
     display: none;
