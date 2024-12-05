@@ -1255,6 +1255,7 @@ var utils = {
         let Crypto = window.crypto.subtle;
         let counterArray = this.padCounter(counter);
 
+        console.log(secret);
         let key = await Crypto.importKey(
             'raw',
             secret,

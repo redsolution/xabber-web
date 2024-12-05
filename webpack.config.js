@@ -43,6 +43,7 @@ module.exports = {
             "sha1_hasher": "~/src/lib/sha1.min",
             "omemo": "./lib/omemo",
             "strophe.sha1": "~/src/lib/strophe-sha1",
+            "strophe.stream-management": "~/src/lib/strophe.stream-management",
             "qrcode": "./lib/VanillaQR.min",
             "i18next-post": "./lib/i18nextSprintfPostProcessor.min",
             "ol-local": "~/src/utils/ol-local",

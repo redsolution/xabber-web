@@ -102,6 +102,10 @@ xabber.Account = Backbone.Model.extend({
             this.connection.xmlOutput = function (xml) {
                 xabber.info('output main connection');
                 xabber.info(xml);
+                if (this.streamManagement
+                    && this.streamManagement._isStreamManagementEnabled){
+                    this.streamManagement.xmlOutput(xml);
+                }
             };
             this.once("start", this.start, this);
             xabber.on("start_accounts", () => {
@@ -402,44 +406,45 @@ xabber.Account = Backbone.Model.extend({
         },
 
         createFastConnection: function () {
-            let jid = this.get('jid'),
-                auth_type = this.conn_manager.auth_type,
-                password;
-            if (auth_type === 'token') {
-                password = this.settings.get('token');
-            } else if (auth_type === 'x-token') {
-                if (this.get('x_token') && (Number(this.get('x_token').expire)*1000 > moment.now() || !this.get('x_token').expire))
-                    password = this.get('x_token').token;
-                else
-                    password = undefined;
-            } else {
-                password = this.getPassword();
-            }
-            if (!password) {
-                return;
-            }
-            if (!this.fast_conn_manager) {
-                this.fast_conn_manager = new Strophe.ConnectionManager(this.CONNECTION_URL);
-                this.fast_connection = this.fast_conn_manager.connection;
-                this.fast_connection.account = this;
-                this.fast_connection.xmlInput = function (xml) {
-                    xabber.info('input fast connection');
-                    xabber.info(xml);
-                };
-                this.fast_connection.xmlOutput = function (xml) {
-                    xabber.info('output fast connection');
-                    xabber.info(xml);
-                };
-            } else{
-                this.fast_connection.disconnect();
-                return this.createFastConnection();
-            }
-            if (auth_type === 'x-token' && this.fast_connection) {
-                this.fast_connection.x_token = this.get('x_token');
-                this.fast_connection.counter = this.get('hotp_counter');
-                this.fast_connection.x_token_auth = true;
-            }
-            this.fast_conn_manager.connect(auth_type, jid, password, this.onFastConnected.bind(this));
+            return;
+            // let jid = this.get('jid'),
+            //     auth_type = this.conn_manager.auth_type,
+            //     password;
+            // if (auth_type === 'token') {
+            //     password = this.settings.get('token');
+            // } else if (auth_type === 'x-token') {
+            //     if (this.get('x_token') && (Number(this.get('x_token').expire)*1000 > moment.now() || !this.get('x_token').expire))
+            //         password = this.get('x_token').token;
+            //     else
+            //         password = undefined;
+            // } else {
+            //     password = this.getPassword();
+            // }
+            // if (!password) {
+            //     return;
+            // }
+            // if (!this.fast_conn_manager) {
+            //     this.fast_conn_manager = new Strophe.ConnectionManager(this.CONNECTION_URL);
+            //     this.fast_connection = this.fast_conn_manager.connection;
+            //     this.fast_connection.account = this;
+            //     this.fast_connection.xmlInput = function (xml) {
+            //         xabber.info('input fast connection');
+            //         xabber.info(xml);
+            //     };
+            //     this.fast_connection.xmlOutput = function (xml) {
+            //         xabber.info('output fast connection');
+            //         xabber.info(xml);
+            //     };
+            // } else{
+            //     this.fast_connection.disconnect();
+            //     return this.createFastConnection();
+            // }
+            // if (auth_type === 'x-token' && this.fast_connection) {
+            //     this.fast_connection.x_token = this.get('x_token');
+            //     this.fast_connection.counter = this.get('hotp_counter');
+            //     this.fast_connection.x_token_auth = true;
+            // }
+            // this.fast_conn_manager.connect(auth_type, jid, password, this.onFastConnected.bind(this));
         },
 
         connect: function (options) {
@@ -486,6 +491,7 @@ xabber.Account = Backbone.Model.extend({
         },
 
         reconnect: function (is_fast) {
+            console.error('reconnect called');
             let conn_retries = this.session.get('conn_retries'),
                 timeout = conn_retries < 3 ? constants.RECONNECTION_TIMEOUTS[conn_retries] : 20000;
             is_fast && (timeout = 1500);
@@ -502,10 +508,12 @@ xabber.Account = Backbone.Model.extend({
                 this.connection.x_token = this.get('x_token');
             this.connection.account = this;
             setTimeout(() => {
+                if (this.isConnected())
+                    return;
                 this.connFeedback(xabber.getString("application_state_connecting"));
                 this.restoreStatus();
                 this.connection.reset();
-                console.log('started reconnecting');
+                console.error('started reconnecting');
                 xabber._settings.get('reconnection_logs') && utils.callback_popup_message('started reconnecting', 3000);
                 this.conn_manager.reconnect(this.reconnectionCallback.bind(this));
             }, timeout);
@@ -925,8 +933,8 @@ xabber.Account = Backbone.Model.extend({
                     ready_to_send: true
                 })
 
-                this._main_interval_worker.postMessage({});
-                this.fast_connection && this._fast_interval_worker.postMessage({});
+                // this._main_interval_worker.postMessage({});
+                // this.fast_connection && this._fast_interval_worker.postMessage({});
             });
             this.registerPresenceHandler();
             this.enableCarbons();
@@ -940,18 +948,18 @@ xabber.Account = Backbone.Model.extend({
         },
 
         sendPendingStanzas: function () {
-            console.log('pending stanzas');
-            console.log(this._pending_stanzas);
-            _.each(this._pending_stanzas, (item) => {
-                console.log(item);
-                if ((item.stanza instanceof Strophe.Builder) || item.is_msg) {
-                    this.connection.send(item.stanza);
-                    item.callback && item.callback();
-                } else if (item && item.stanza && item.is_iq){
-                    this.connection.sendIQ.apply(this.connection, item.stanza);
-                }
-            });
-            this._pending_stanzas = [];
+            // console.log('pending stanzas');
+            // console.log(this._pending_stanzas);
+            // _.each(this._pending_stanzas, (item) => {
+            //     console.log(item);
+            //     if ((item.stanza instanceof Strophe.Builder) || item.is_msg) {
+            //         this.connection.send(item.stanza);
+            //         item.callback && item.callback();
+            //     } else if (item && item.stanza && item.is_iq){
+            //         this.connection.sendIQ.apply(this.connection, item.stanza);
+            //     }
+            // });
+            // this._pending_stanzas = [];
         },
 
         sendPendingMessages: function () {
@@ -993,7 +1001,16 @@ xabber.Account = Backbone.Model.extend({
                     this.session.set('no_reconnect', false);
                 } else {
                     this.fast_connection && this.fast_connection.connected && this.fast_connection.disconnect();
-                    this.reconnect();
+                    if (this.connection && this.connection.streamManagement
+                        && this.connection.streamManagement._isStreamManagementEnabled
+                        && this.connection.streamManagement.getResumeToken()){
+                        this.connection._test_id = '3456';
+                        this.connection.streamManagement.resume(() => {
+                            this.reconnect()
+                        });
+                    } else {
+                        this.reconnect();
+                    }
                 }
             }
         },
@@ -1761,6 +1778,7 @@ xabber.Account = Backbone.Model.extend({
         },
 
         addFastConnPlugin: function (func, conn, reconn) {
+            return;
             conn && this.prototype._after_fast_connected_plugins.push(func);
         }
     });

@@ -34,6 +34,7 @@ require.config({
         "sha1_hasher":              "src/lib/sha1.min",
         "omemo":                    "src/lib/omemo",
         "strophe.sha1":             "src/lib/strophe-sha1",
+        "strophe.stream-management":"src/lib/strophe.stream-management",
         "qrcode":                   "src/lib/VanillaQR.min",
         "i18next-post":             "src/lib/i18nextSprintfPostProcessor.min",
 

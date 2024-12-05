@@ -11077,6 +11077,11 @@ xabber.Account.addInitPlugin(function () {
     this.on("ready_to_get_roster", function () {
         let dfd = new $.Deferred();
         dfd.done(() => {
+            if (this.connection && this.connection.streamManagement){
+                if (!(this.connection.streamManagement._isStreamManagementEnabled && this.connection.streamManagement.getResumeToken())){
+                    this.connection.streamManagement.enable(true);
+                }
+            }
             this.resources.reset();
             this.contacts.each(function (contact) {
                 contact.resources.reset();

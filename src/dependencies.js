@@ -31,6 +31,7 @@ import "~/css/quill.snow.css";
 import "~/css/xabber.css";
 import "~/node_modules/magnific-popup/dist/magnific-popup.css";
 import "~/node_modules/perfect-scrollbar/dist/css/perfect-scrollbar.css";
+import "strophe.stream-management";
 import "strophe.disco";
 import "strophe.ping";
 import "strophe.rsm";

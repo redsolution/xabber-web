@@ -4471,14 +4471,14 @@ xabber.ChatContentView = xabber.BasicView.extend({
                     }
                     return true;
                 }, Strophe.NS.MAM);
-                let _delete_handler_timeout = setTimeout(() => {
-                    console.log('handler deleted');
-                    func_conn.deleteHandler(handler);
-                }, 19000);
+                // let _delete_handler_timeout = setTimeout(() => {
+                //     console.log('handler deleted');
+                //     func_conn.deleteHandler(handler);
+                // }, 19000);
                 let callb = function (res) {
                         func_conn.deleteHandler(handler);
-                        clearTimeout(_delete_handler_timeout);
-                        clearInterval(_interval);
+                        // clearTimeout(_delete_handler_timeout);
+                        // clearInterval(_interval);
                         handler = null;
                         account.chats.onCompletedMAMRequest(deferred);
                         let $fin = $(res).find(`fin[xmlns="${Strophe.NS.MAM}"]`);
@@ -4490,8 +4490,8 @@ xabber.ChatContentView = xabber.BasicView.extend({
                     },
                     errb = function (err) {
                         func_conn.deleteHandler(handler);
-                        clearTimeout(_delete_handler_timeout);
-                        clearInterval(_interval);
+                        // clearTimeout(_delete_handler_timeout);
+                        // clearInterval(_interval);
                         handler = null;
                         xabber.error("MAM error");
                         xabber.error(err);
@@ -4499,35 +4499,36 @@ xabber.ChatContentView = xabber.BasicView.extend({
                         errback && errback(err);
                     };
                 console.error('trying to send')
-                if (is_fast)
-                    account.sendFast(iq, callb, errb);
-                else
+                // if (is_fast)
+                //     account.sendFast(iq, callb, errb);
+                // else
                     account.sendIQ(iq, callb, errb);
 
             };
-            let is_fast = options.fast && account.fast_connection && !account.fast_connection.disconnecting
-                && account.fast_connection.authenticated && account.fast_connection.connected && account.get('status') !== 'offline',
-                conn = is_fast ? account.fast_connection : account.connection;
+            // let is_fast = options.fast && account.fast_connection && !account.fast_connection.disconnecting
+            //     && account.fast_connection.authenticated && account.fast_connection.connected && account.get('status') !== 'offline',
+            //     conn = is_fast ? account.fast_connection : account.connection;
 
-            if (conn.connected){
-                sendMAMRequest(conn);
-            }
-            let send_counter = 0;
-            _interval = setInterval(() => {
-                is_fast = options.fast && account.fast_connection && !account.fast_connection.disconnecting
-                    && account.fast_connection.authenticated && account.fast_connection.connected && account.get('status') !== 'offline';
-                conn = is_fast ? account.fast_connection : account.connection;
-                conn && console.log(conn.connected);
-                if (!conn || send_counter >= 1){
-                    clearInterval(_interval);
-                    errback && errback('No connection or too many attempts');
-                    return;
-                }
-                if (conn.connected && send_counter < 1){
-                    send_counter++;
-                    sendMAMRequest(conn);
-                }
-            }, 20000);
+            // if (conn.connected){
+            //     sendMAMRequest(conn);
+            sendMAMRequest(account.connection);
+            // }
+            // let send_counter = 0;
+            // _interval = setInterval(() => {
+            //     is_fast = options.fast && account.fast_connection && !account.fast_connection.disconnecting
+            //         && account.fast_connection.authenticated && account.fast_connection.connected && account.get('status') !== 'offline';
+            //     conn = is_fast ? account.fast_connection : account.connection;
+            //     conn && console.log(conn.connected);
+            //     if (!conn || send_counter >= 1){
+            //         clearInterval(_interval);
+            //         errback && errback('No connection or too many attempts');
+            //         return;
+            //     }
+            //     if (conn.connected && send_counter < 1){
+            //         send_counter++;
+            //         sendMAMRequest(conn);
+            //     }
+            // }, 20000);
         });
     },
 
@@ -6751,17 +6752,17 @@ xabber.ChatContentView = xabber.BasicView.extend({
             });
             let _interval = setInterval(() => {
                 if (_pending_time >= 8 && message.get('state') === constants.MSG_PENDING && !was_reconnecting){
-                    console.log('ping on message pending');
-                    this.account.connection.ping.ping(this.account.get('jid'), () => {},  () => {
-                        let downtime = (moment.now() - this.account.last_stanza_timestamp) / 1000;
-                        if (downtime >= 2){
-                            console.log('message initiated reconnection');
-                            console.log(message);
-                            this.account.connection.disconnect();
-                        } else {
-                            console.log('ping was sent and got no result after 2 seconds, but didnt reconnect because last stanza time was: ' + downtime + ' sec')
-                        }
-                    }, 2000);
+                    // console.log('ping on message pending');
+                    // this.account.connection.ping.ping(this.account.get('jid'), () => {},  () => {
+                    //     let downtime = (moment.now() - this.account.last_stanza_timestamp) / 1000;
+                    //     if (downtime >= 2){
+                    //         console.log('message initiated reconnection');
+                    //         console.log(message);
+                    //         this.account.connection.disconnect();
+                    //     } else {
+                    //         console.log('ping was sent and got no result after 2 seconds, but didnt reconnect because last stanza time was: ' + downtime + ' sec')
+                    //     }
+                    // }, 2000);
                 }
                 if (was_reconnecting && has_reconnected && (_pending_time > 10)){
                     message.set('state', constants.MSG_ERROR);
@@ -14722,12 +14723,12 @@ xabber.Account.addConnPlugin(function () {
     if (_.isUndefined(this.settings.get('omemo')) && !this.omemo_enable_placeholder) {
         this.omemo_enable_placeholder = new xabber.OMEMOEnablePlaceholder({account: this});
     }
+    if (!(this.auth_view && this.auth_view.data.get('authentication')))
+        this.trigger('ready_to_get_roster');
 }, true, true);
 
 xabber.Account.addFastConnPlugin(function () {
     // this.getVCard();
-    if (!(this.auth_view && this.auth_view.data.get('authentication')))
-        this.trigger('ready_to_get_roster');
 }, true, true);
 
 xabber.once("start", function () {

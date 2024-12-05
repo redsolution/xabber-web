@@ -595,6 +595,10 @@ Strophe.ConnectionManager.prototype = {
             if (this.connection.account && this.connection.account.get('hotp_counter'))
                 this.connection.counter = this.connection.account.get('hotp_counter');
             this.connection.cl_challenge = generateChallenge();
+            console.error(this.connection);
+            console.error(this.connection.pass);
+            console.error(this.connection.counter);
+            console.error(utils.fromBase64toArrayBuffer(this.connection.pass));
             utils.generateHOTP(utils.fromBase64toArrayBuffer(this.connection.pass), this.connection.counter).then((pass) => {
                 this.connection.hotp_pass = pass;
             }).then(() => {
@@ -747,7 +751,7 @@ _.extend(Strophe.Connection.prototype, {
     _send_auth_bind() {
 
         if (!this.do_bind) {
-            Strophe.log.info(`Connection.prototype.bind called but "do_bind" is false`);
+            Strophe.info(`Connection.prototype.bind called but "do_bind" is false`);
             return;
         }
 
@@ -929,6 +933,34 @@ _.extend(Strophe.Websocket.prototype, {
             this._conn._data = [];
         }
     },
+
+    // _onClose: function (e) {
+    //     if (this._conn.connected && !this._conn.disconnecting) {
+    //         Strophe.error('Websocket closed unexpectedly');
+    //         Strophe.error(e);
+    //         Strophe.error(e.code);
+    //         this._conn._doDisconnect();
+    //     } else if (e && e.code === 1006 && !this._conn.connected && this.socket) {
+    //         // in case the onError callback was not called (Safari 10 does not
+    //         // call onerror when the initial connection fails) we need to
+    //         // dispatch a CONNFAIL status update to be consistent with the
+    //         // behavior on other browsers.
+    //         Strophe.error('Websocket closed unexcectedly');
+    //         Strophe.error(e);
+    //         Strophe.error(e.code);
+    //         this._conn._changeConnectStatus(Status.CONNFAIL, 'The WebSocket connection could not be established or was disconnected.');
+    //         this._conn._doDisconnect();
+    //     } else {
+    //         Strophe.debug('Websocket closed');
+    //     }
+    // },
+    //
+    // _onError: function (error) {
+    //     Strophe.error('Websocket error ' + JSON.stringify(error));
+    //     Strophe.error(error);
+    //     this._conn._changeConnectStatus(Status.CONNFAIL, 'The WebSocket connection could not be established or was disconnected.');
+    //     this._disconnect();
+    // },
 
     // _onOpen: function() {
     //     Strophe.info("Websocket open");

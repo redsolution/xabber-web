@@ -802,14 +802,14 @@ xabber.CallsView = xabber.BasicView.extend({
                     }
                     return true;
                 }, Strophe.NS.MAM);
-                let _delete_handler_timeout = setTimeout(() => {
-                    console.log('handler deleted');
-                    func_conn.deleteHandler(handler);
-                }, 19000);
+                // let _delete_handler_timeout = setTimeout(() => {
+                //     console.log('handler deleted');
+                //     func_conn.deleteHandler(handler);
+                // }, 19000);
                 let callb = function (res) {
                         func_conn.deleteHandler(handler);
-                        clearTimeout(_delete_handler_timeout);
-                        clearInterval(_interval);
+                        // clearTimeout(_delete_handler_timeout);
+                        // clearInterval(_interval);
                         handler = null;
                         account.chats.onCompletedMAMRequest(deferred);
                         let $fin = $(res).find(`fin[xmlns="${Strophe.NS.MAM}"]`);
@@ -821,8 +821,8 @@ xabber.CallsView = xabber.BasicView.extend({
                     },
                     errb = function (err) {
                         func_conn.deleteHandler(handler);
-                        clearTimeout(_delete_handler_timeout);
-                        clearInterval(_interval);
+                        // clearTimeout(_delete_handler_timeout);
+                        // clearInterval(_interval);
                         handler = null;
                         xabber.error("MAM error");
                         xabber.error(err);
@@ -830,35 +830,36 @@ xabber.CallsView = xabber.BasicView.extend({
                         errback && errback(err);
                     };
                 console.error('trying to send for calls');
-                if (is_fast)
-                    account.sendFast(iq, callb, errb);
-                else
+                // if (is_fast)
+                //     account.sendFast(iq, callb, errb);
+                // else
                     account.sendIQ(iq, callb, errb);
 
             };
-            let is_fast = options.fast && account.fast_connection && !account.fast_connection.disconnecting
-                && account.fast_connection.authenticated && account.fast_connection.connected && account.get('status') !== 'offline',
-                conn = is_fast ? account.fast_connection : account.connection;
-
-            if (conn.connected){
-                sendMAMRequest(conn);
-            }
-            let send_counter = 0;
-            _interval = setInterval(() => {
-                is_fast = options.fast && account.fast_connection && !account.fast_connection.disconnecting
-                    && account.fast_connection.authenticated && account.fast_connection.connected && account.get('status') !== 'offline';
-                conn = is_fast ? account.fast_connection : account.connection;
-                conn && console.log(conn.connected);
-                if (!conn || send_counter >= 1){
-                    clearInterval(_interval);
-                    errback && errback('No connection or too many attempts');
-                    return;
-                }
-                if (conn.connected && send_counter < 1){
-                    send_counter++;
-                    sendMAMRequest(conn);
-                }
-            }, 20000);
+            // let is_fast = options.fast && account.fast_connection && !account.fast_connection.disconnecting
+            //     && account.fast_connection.authenticated && account.fast_connection.connected && account.get('status') !== 'offline',
+            //     conn = is_fast ? account.fast_connection : account.connection;
+            //
+            // if (conn.connected){
+            //     sendMAMRequest(conn);
+                sendMAMRequest(account.connection);
+            // }
+            // let send_counter = 0;
+            // _interval = setInterval(() => {
+            //     is_fast = options.fast && account.fast_connection && !account.fast_connection.disconnecting
+            //         && account.fast_connection.authenticated && account.fast_connection.connected && account.get('status') !== 'offline';
+            //     conn = is_fast ? account.fast_connection : account.connection;
+            //     conn && console.log(conn.connected);
+            //     if (!conn || send_counter >= 1){
+            //         clearInterval(_interval);
+            //         errback && errback('No connection or too many attempts');
+            //         return;
+            //     }
+            //     if (conn.connected && send_counter < 1){
+            //         send_counter++;
+            //         sendMAMRequest(conn);
+            //     }
+            // }, 20000);
         });
     },
 
