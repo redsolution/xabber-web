@@ -473,6 +473,14 @@ button.btn-float-left {
     background-position: center center;
     background-repeat: no-repeat no-repeat;
 }
+.circle-avatar:before {
+    background: #000;
+    display: block;
+    content: "";
+    height: 100%;
+    width: 100%;
+    opacity: .08;
+}
 
 #xabber-container:not(.non-circle-avatars) .circle-avatar-wrap{
     background: none !important;
@@ -4228,7 +4236,6 @@ input[type=text].simple-input-field:hover {
     width: 32px;
     height: 32px;
     border: 0;
-    background-color: transparent !important;
 }
 
 .non-circle-avatars .account-item .circle-avatar {
@@ -9085,6 +9092,7 @@ input[type=text].simple-input-field:hover {
     display: none;
     -webkit-mask-repeat: round;
     mask-repeat: round;
+    pointer-events: none;
 }
 .chat-list-wrap.left-panel-list-wrap .chat-item .account-indicator {
     display: block;

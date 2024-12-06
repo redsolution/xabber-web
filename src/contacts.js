@@ -3841,10 +3841,18 @@ xabber.BlockedView = xabber.BasicView.extend({
                     iq = $iq({type: 'set', to: this.contact.get('full_jid') || this.contact.get('jid')})
                         .c('block', {xmlns: `${Strophe.NS.GROUP_CHAT}#block`})
                         .c(tag).t(result);
+                if (!Strophe.getDomainFromJid(tag) || Strophe.getDomainFromJid(tag).includes('@')){
+                    utils.dialogs.error(xabber.getString("groupchat_incorrect_jid_or_domain"));
+                    return;
+                }
                 this.account.sendIQFast(iq, () => {
                     this.updateBlockedParticipants()
                 }, function (err) {
-                    utils.dialogs.error(xabber.getString("groupchat_you_have_no_permissions_to_do_it"));
+                    if ($(err).find('bad-request').length){
+                        utils.dialogs.error(xabber.getString("groupchat_incorrect_jid_or_domain"));
+                    } else {
+                        utils.dialogs.error(xabber.getString("groupchat_you_have_no_permissions_to_do_it"));
+                    }
                 });
             }
         });

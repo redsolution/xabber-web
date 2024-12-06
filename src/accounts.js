@@ -161,19 +161,19 @@ xabber.Account = Backbone.Model.extend({
         },
 
         getConnectionForIQ: function () {
-            let res = this.fast_connection && !this.fast_connection.disconnecting && this.fast_connection.authenticated && this.fast_connection.connected && this.get('status') !== 'offline';
-            if (res) {
-                return this.fast_connection;
-            } else
+            // let res = this.fast_connection && !this.fast_connection.disconnecting && this.fast_connection.authenticated && this.fast_connection.connected && this.get('status') !== 'offline';
+            // if (res) {
+            //     return this.fast_connection;
+            // } else
                 return this.connection;
         },
 
         sendIQFast: function () {
-            let res = this.fast_connection && !this.fast_connection.disconnecting && this.fast_connection.authenticated && this.fast_connection.connected && this.get('status') !== 'offline';
-            if (res) {
-                this.fast_connection.sendIQ.apply(this.fast_connection, arguments);
-                return res;
-            } else
+            // let res = this.fast_connection && !this.fast_connection.disconnecting && this.fast_connection.authenticated && this.fast_connection.connected && this.get('status') !== 'offline';
+            // if (res) {
+            //     this.fast_connection.sendIQ.apply(this.fast_connection, arguments);
+            //     return res;
+            // } else
                 return this.sendIQ.apply(this, arguments);
         },
 
@@ -933,7 +933,7 @@ xabber.Account = Backbone.Model.extend({
                     ready_to_send: true
                 })
 
-                // this._main_interval_worker.postMessage({});
+                this._main_interval_worker.postMessage({});
                 // this.fast_connection && this._fast_interval_worker.postMessage({});
             });
             this.registerPresenceHandler();
