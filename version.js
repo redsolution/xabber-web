@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.4.9","version_description":"fixed reconnection on connection loss, returned pings and changed their disconnect to work with stream management, added handling for bad requet in blocking view in groups, added simple jid and domain checker for blocking field in groups, returned stuck on open sending fix for reconnection, added tint and white background for avatars"}'
+'{"version_number":"2.4.10","version_description":"added status text to add contact modal"}'
 )});

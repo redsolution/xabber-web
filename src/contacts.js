@@ -461,10 +461,12 @@ xabber.Contact = Backbone.Model.extend({
         return xabber.pretty_last_seen(seconds);
     },
 
-    pres: function (type) {
+    pres: function (type, subscribe_text) {
         let pres = $pres({to: this.get('jid'), type: type});
-        if (type === 'subscribe')
-            pres.c('nick', {xmlns: Strophe.NS.NICK}).t(this.account.getOwnNickname());
+        if (type === 'subscribe') {
+            pres.c('nick', {xmlns: Strophe.NS.NICK}).t(this.account.getOwnNickname()).up();
+            subscribe_text && pres.c('status').t(subscribe_text).up();
+        }
         this.account.sendPres(pres);
         return this;
     },
@@ -10583,6 +10585,7 @@ xabber.AddContactView = xabber.BasicView.extend({
         "focusout .name-field #new_contact_username": "focusoutInputField",
         "focusout .new-group-name #new-group-name": "addNewGroup",
         "click .btn-add": "stepForward",
+        "click .btn-subscribe-text": "showSubcribeTextField",
         "click .btn-cancel": "close"
     },
 
@@ -10601,6 +10604,7 @@ xabber.AddContactView = xabber.BasicView.extend({
             jid = options.jid || '';
         this.$('input[name="username"]').val(jid).attr('readonly', !!jid)
             .removeClass('invalid');
+        this.$('.subcribe-text-row').addClass('hidden');
         this.$('.single-acc').showIf(accounts.length === 1);
         this.$('.multiple-acc').hideIf(accounts.length === 1);
         this.$('.dropdown-content#select-account-for-add-contact').empty();
@@ -10633,6 +10637,11 @@ xabber.AddContactView = xabber.BasicView.extend({
         this.$('.account-dropdown-wrap .dropdown-button .account-item-wrap')
             .replaceWith(this.renderAccountItem(account));
         this.renderGroupsForAccount(account);
+    },
+
+    showSubcribeTextField: function (ev) {
+        this.$('.subcribe-text-row').switchClass('hidden');
+        this.$('textarea[name=subcribe_text]').val('')
     },
 
     stepForward: function () {
@@ -10772,6 +10781,7 @@ xabber.AddContactView = xabber.BasicView.extend({
         let jid = this.$('input[name=username]').removeClass('invalid').val().trim(),
             name = this.$('input[name=contact_name]').removeClass('invalid').val(),
             groups = this.group_data.get('selected'),
+            subscribe_text = this.$('textarea[name=subcribe_text]').val(),
             contact, error_text,
             regexp = /^(([^<>()[\]\\.,;:\s%@\"]+(\.[^<>()[\]\\.,;:\s%@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
         if (jid)
@@ -10799,7 +10809,7 @@ xabber.AddContactView = xabber.BasicView.extend({
             contact.set('known', true);
             contact.set('removed', false);
             setTimeout(() => {
-                contact.pres('subscribe');
+                contact.pres('subscribe', subscribe_text);
             }, 500);
             contact.trigger('presence', contact, 'subscribe_from');
             contact.trigger("open_chat", contact, {right_force_close: true, force_opened_state: true});

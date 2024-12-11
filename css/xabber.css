@@ -7396,6 +7396,10 @@ input[type=text].simple-input-field:hover {
 }
 /* ----------------- ADD CONTACT VIEW ------------------------ */
 
+.add-contact-modal {
+    width: 550px !important;
+}
+
 .add-contact-modal.main-modal .modal-content {
 }
 .add-contact-modal .row {
@@ -7682,6 +7686,21 @@ input[type=text].simple-input-field:hover {
 .add-contact-modal .input-field input#new_contact_username::placeholder {
     text-transform: none;
 }
+
+.add-contact-modal .input-field textarea#subcribe_text {
+    padding: 8px !important;
+    height: 100px;
+    resize: none;
+}
+
+.add-contact-modal .input-field textarea#subcribe_text::placeholder {
+    text-transform: none;
+    color: #9e9e9e;
+}
+
+.add-contact-modal .btn-subscribe-text {
+    position: absolute;
+}
 .add-contact-modal .preloader-wrapper{
     position: absolute;
     right: 64px;
@@ -7911,9 +7930,22 @@ input[type=text].simple-input-field:hover {
     float: left;
 }
 
-.add-user-group-chat .roster-contact .circle-avatar {
+.add-user-group-chat .roster-contact .account-indicator-background-exclude {
     top: 8px;
     left: 28px;
+    display: block;
+    position: absolute;
+    height: 32px;
+    width: 32px;
+}
+
+.add-user-group-chat .roster-contact .account-indicator,
+.add-user-group-chat .roster-contact .circle-avatar {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 32px;
+    height: 32px;
 }
 
 .group-chat-participant .participant-info {
