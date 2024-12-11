@@ -291,6 +291,7 @@ xabber.Contact = Backbone.Model.extend({
                 roster_name: !_.isUndefined(this.get('roster_name')) ? this.get('roster_name') : cached_info.roster_name,
                 subscription_request_out: this.get('subscription_request_out'),
                 subscription_request_in: this.get('subscription_request_in'),
+                subscription_request_in_text: this.get('subscription_request_in_text'),
                 name: this.get('name'),
                 vcard_updated: this.get('vcard_updated')
             }, full_jid = this.get('full_jid');
@@ -656,6 +657,10 @@ xabber.Contact = Backbone.Model.extend({
             this.set({status: prev_group_info.status, status_updated: moment.now(), status_message: (prev_group_info.members_num + ' members' + xabber.getString("contact_groupchat_status_online", [prev_group_info.online_members_num || 0]))});
         }
         if (type === 'subscribe') {
+            let $status = $presence.find('status');
+            if ($status.length){
+                this.set('subscription_request_in_text', $status.text());
+            }
             this.set('subscription_request_in', true);
             if (this.get('subscription_preapproved')) {
                 this.pres('subscribed');
@@ -10605,6 +10610,7 @@ xabber.AddContactView = xabber.BasicView.extend({
         this.$('input[name="username"]').val(jid).attr('readonly', !!jid)
             .removeClass('invalid');
         this.$('.subcribe-text-row').addClass('hidden');
+        this.$('textarea[name=subcribe_text]').val('')
         this.$('.single-acc').showIf(accounts.length === 1);
         this.$('.multiple-acc').hideIf(accounts.length === 1);
         this.$('.dropdown-content#select-account-for-add-contact').empty();

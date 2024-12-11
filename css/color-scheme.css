@@ -3225,3 +3225,155 @@
 [data-main-color=blue-grey] .hover-fill-main-color-500:hover {
   fill: #607D8B !important;
 }
+/* border colors */
+.border-color-red-100 {
+  border-color: #FFCDD2 !important;
+}
+
+.border-color-pink-100 {
+  border-color: #F8BBD0 !important;
+}
+
+.border-color-purple-100 {
+  border-color: #E1BEE7 !important;
+}
+
+.border-color-deep-purple-100 {
+  border-color: #D1C4E9 !important;
+}
+
+.border-color-indigo-100 {
+  border-color: #C5CAE9 !important;
+}
+
+.border-color-blue-100 {
+  border-color: #BBDEFB !important;
+}
+
+.border-color-light-blue-100 {
+  border-color: #B3E5FC !important;
+}
+
+.border-color-cyan-100 {
+  border-color: #B2EBF2 !important;
+}
+
+.border-color-teal-100 {
+  border-color: #B2DFDB !important;
+}
+
+.border-color-green-100 {
+  border-color: #C8E6C9 !important;
+}
+
+.border-color-light-green-100 {
+  border-color: #DCEDC8 !important;
+}
+
+.border-color-lime-100 {
+  border-color: #F0F4C3 !important;
+}
+
+.border-color-yellow-100 {
+  border-color: #FFF9C4 !important;
+}
+
+.border-color-amber-100 {
+  border-color: #FFECB3 !important;
+}
+
+.border-color-orange-100 {
+  border-color: #FFE0B2 !important;
+}
+
+.border-color-deep-orange-100 {
+  border-color: #FFCCBC !important;
+}
+
+.border-color-brown-100 {
+  border-color: #D7CCC8 !important;
+}
+
+.border-color-grey-100 {
+  border-color: #F5F5F5 !important;
+}
+
+.border-color-blue-grey-100 {
+  border-color: #CFD8DC !important;
+}
+/* outline colors */
+.outline-color-red-100 {
+  outline-color: #FFCDD2 !important;
+}
+
+.outline-color-pink-100 {
+  outline-color: #F8BBD0 !important;
+}
+
+.outline-color-purple-100 {
+  outline-color: #E1BEE7 !important;
+}
+
+.outline-color-deep-purple-100 {
+  outline-color: #D1C4E9 !important;
+}
+
+.outline-color-indigo-100 {
+  outline-color: #C5CAE9 !important;
+}
+
+.outline-color-blue-100 {
+  outline-color: #BBDEFB !important;
+}
+
+.outline-color-light-blue-100 {
+  outline-color: #B3E5FC !important;
+}
+
+.outline-color-cyan-100 {
+  outline-color: #B2EBF2 !important;
+}
+
+.outline-color-teal-100 {
+  outline-color: #B2DFDB !important;
+}
+
+.outline-color-green-100 {
+  outline-color: #C8E6C9 !important;
+}
+
+.outline-color-light-green-100 {
+  outline-color: #DCEDC8 !important;
+}
+
+.outline-color-lime-100 {
+  outline-color: #F0F4C3 !important;
+}
+
+.outline-color-yellow-100 {
+  outline-color: #FFF9C4 !important;
+}
+
+.outline-color-amber-100 {
+  outline-color: #FFECB3 !important;
+}
+
+.outline-color-orange-100 {
+  outline-color: #FFE0B2 !important;
+}
+
+.outline-color-deep-orange-100 {
+  outline-color: #FFCCBC !important;
+}
+
+.outline-color-brown-100 {
+  outline-color: #D7CCC8 !important;
+}
+
+.outline-color-grey-100 {
+  outline-color: #F5F5F5 !important;
+}
+
+.outline-color-blue-grey-100 {
+  outline-color: #CFD8DC !important;
+}

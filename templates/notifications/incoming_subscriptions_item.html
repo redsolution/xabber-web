@@ -6,10 +6,11 @@
     <div class="subcription-main-wrap">
         <div class="subscription-item-name">{{name}}</div>
         <div class="subscription-item-jid">{{jid}}</div>
+        {[if (text) {]}<div class="subscription-item-text">“{{text}}“</div>{[}]}
         <div class="subscription-item-buttons-wrap">
-            <div class="btn-flat btn-add btn-main-filled ground-color-500">{[print(xabber.getString("add"))]}</div>
-            <div class="btn-flat btn-decline btn-main text-color-500">{[print(xabber.getString("decline"))]}</div>
-            <div class="btn-flat btn-block btn-main text-color-red-500">{[print(xabber.getString("block"))]}</div>
+            <div class="subscription-button btn-add text-color-500">{[print(xabber.getString("contact_add"))]}</div>
+            <div class="subscription-button btn-decline">{[print(xabber.getString("decline"))]}</div>
+            <div class="subscription-button btn-block text-color-red-500">{[print(xabber.getString("block"))]}</div>
         </div>
     </div>
 </div>
