@@ -7,8 +7,8 @@
         <div class="subscription-item-name">{{name}}</div>
         <div class="subscription-item-jid">{{jid}}</div>
         {[if (text) {]}
-        <div class="subscription-item-text">“{{text}}“</div>
-        <div class="subscription-show-text-btn">{[print(xabber.getString("chat_events_show_text_always"))]}</div>
+        <div class="subscription-item-text">{{text}}</div>
+        <div class="subscription-item-text-backup hidden">{{text}}</div>
         {[}]}
         <div class="subscription-item-buttons-wrap">
             <div class="subscription-button btn-add text-color-500">{[print(xabber.getString("contact_add"))]}</div>

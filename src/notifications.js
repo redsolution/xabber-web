@@ -763,8 +763,7 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
         this.$('.notification-subscriptions-content-wrap').html('');
         let accounts = xabber.accounts.enabled;
         let counter = 0,
-            color,
-            first_el;
+            color;
         this.$('.subscription-switch-container').remove();
         _.each(accounts, (account) => {
             let contacts = account.contacts.filter(item => item.get('subscription_request_in'));
@@ -784,7 +783,6 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
                     $template.attr('data-counter', counter);
                     let $switch_element = $(`<div class="subscription-switch-container" data-counter="${counter}" data-color="${contact.account.settings.get('color')}"><div class="subscription-switch-item ground-color-200 outline-color-200"></div></div>`);
                     $switch_element.insertBefore(this.$('.notification-subscriptions-button'));
-                    !first_el && (first_el = $template.find('.subscription-item-text')[0]);
                     counter++;
                 });
         });
@@ -804,16 +802,12 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
         this.$('.notification-subscriptions-wrap').switchClass('hidden', this.$('.notification-subscription-item:not(.hidden)').length === 0);
         this.$('.notification-subscription-item').slice(1).addClass('hidden');
         this.$('.subscription-switch-item').first().addClass('selected-switch');
-        this.$('.extended-text').removeClass('extended-text');
-        this.$('.overflown-text').removeClass('overflown-text');
-        if (first_el && (first_el.clientWidth < first_el.scrollWidth || first_el.clientHeight < first_el.scrollHeight)){
-            $(first_el).closest('.notification-subscription-item').addClass('overflown-text');
-        }
 
         if (color) {
             this.$('.notification-subscriptions-wrap').attr('class', 'notification-subscriptions-wrap');
             this.$('.notification-subscriptions-wrap').addClass(`outline-color-${color}-100`);
         }
+        this.prepareShowMoreText();
         xabber.toolbar_view.recountAllMessageCounter()
     },
 
@@ -821,26 +815,41 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
         let $item = $(ev.target).closest('.subscription-switch-container'),
             counter = $item.attr('data-counter'),
             color = $item.attr('data-color');
-        this.$('.extended-text').removeClass('extended-text');
-        this.$('.overflown-text').removeClass('overflown-text');
         this.$('.subscription-switch-item').removeClass('selected-switch');
         $item.find('.subscription-switch-item').addClass('selected-switch');
         this.$('.notification-subscription-item').addClass('hidden');
         this.$(`.notification-subscription-item[data-counter="${counter}"]`).removeClass('hidden');
-        let $el = this.$(`.notification-subscription-item[data-counter="${counter}"]`).find('.subscription-item-text');
-        if ($el[0] && ($el[0].clientWidth < $el[0].scrollWidth || $el[0].clientHeight < $el[0].scrollHeight)){
-            this.$(`.notification-subscription-item[data-counter="${counter}"]`).addClass('overflown-text');
-        }
         if (color) {
             this.$('.notification-subscriptions-wrap').attr('class', 'notification-subscriptions-wrap');
             this.$('.notification-subscriptions-wrap').addClass(`outline-color-${color}-100`);
         }
+        this.prepareShowMoreText();
+    },
 
+    prepareShowMoreText: function () {
+        let $item = this.$('.notification-subscription-item:not(.hidden)'),
+            text = $item.find('.subscription-item-text-backup').text(),
+            showChar = 100;
+
+        if (text.length > showChar){
+
+            let c = text.substr(0, showChar);
+            let h = text.substr(showChar-1, text.length - showChar);
+
+            let html = c + '<span class="moreellipses">... </span><span><span class="subscription-more-text hidden">' + h + '</span>  <span href="" class="subscription-show-text-btn">' + xabber.getString("show_more") + '</span></span>';
+
+            $item.find('.subscription-item-text').html(`"${html}"`);
+
+        } else {
+            $item.find('.subscription-item-text').html(`"${text}"`);
+        }
     },
 
     showText: function (ev) {
         let $item = $(ev.target).closest('.notification-subscription-item');
-        $item.addClass('extended-text');
+        $item.find('.subscription-show-text-btn').detach();
+        $item.find('.moreellipses').detach();
+        $item.find('.subscription-more-text').removeClass('hidden');
     },
 
     updateAllTrustSessions: function () {

@@ -7687,13 +7687,13 @@ input[type=text].simple-input-field:hover {
     text-transform: none;
 }
 
-.add-contact-modal .input-field textarea#subcribe_text {
+.add-contact-modal .input-field textarea#subscribe_text {
     padding: 8px !important;
     height: 100px;
     resize: none;
 }
 
-.add-contact-modal .input-field textarea#subcribe_text::placeholder {
+.add-contact-modal .input-field textarea#subscribe_text::placeholder {
     text-transform: none;
     color: #9e9e9e;
 }
@@ -22822,39 +22822,15 @@ ul.restrictions-list-content>li {
     right: 11px !important;
 }
 .notifications-content-wrap .notification-subscriptions-wrap .notification-subscription-item .subscription-item-text{
-    line-height: 20px;
-    margin-bottom: 28px;
     font-size: 14px;
     font-style: italic;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    display: -webkit-box;
-    overflow: hidden;
-}
-.notifications-content-wrap .notification-subscriptions-wrap .notification-subscription-item.extended-text .subscription-item-text{
-    overflow: visible;
-    display: block;
-}
-.notifications-content-wrap .notification-subscriptions-wrap .notification-subscription-item.extended-text .subscription-show-text-btn,
-.notifications-content-wrap .notification-subscriptions-wrap .notification-subscription-item:not(.overflown-text) .subscription-show-text-btn{
-    display: none !important;
+    line-height: 20px;
+    margin-bottom: 28px;
 }
 .notifications-content-wrap .notification-subscriptions-wrap .notification-subscription-item .subscription-show-text-btn{
     color: #9e9e9e;
     cursor: pointer;
-    font-size: 14px;
-    line-height: 20px;
-    margin-right: 16px;
-    text-decoration-line: underline;
-    text-decoration-style: dotted;
-    text-underline-offset: 2px;
-    position: absolute;
-    bottom: 0px;
-    right: 48px;
-    display: none;
-}
-.notifications-content-wrap .notification-subscriptions-wrap:hover .notification-subscription-item .subscription-show-text-btn{
-    display: block;
+    font-style: normal;
 }
 .notifications-content-wrap .notification-subscriptions-wrap .notification-subscription-item .subscription-item-buttons-wrap{
     display: flex;

@@ -10610,7 +10610,7 @@ xabber.AddContactView = xabber.BasicView.extend({
         this.$('input[name="username"]').val(jid).attr('readonly', !!jid)
             .removeClass('invalid');
         this.$('.subcribe-text-row').addClass('hidden');
-        this.$('textarea[name=subcribe_text]').val('')
+        this.$('textarea[name=subscribe_text]').val('')
         this.$('.single-acc').showIf(accounts.length === 1);
         this.$('.multiple-acc').hideIf(accounts.length === 1);
         this.$('.dropdown-content#select-account-for-add-contact').empty();
@@ -10647,7 +10647,7 @@ xabber.AddContactView = xabber.BasicView.extend({
 
     showSubcribeTextField: function (ev) {
         this.$('.subcribe-text-row').switchClass('hidden');
-        this.$('textarea[name=subcribe_text]').val('')
+        this.$('textarea[name=subscribe_text]').val('')
     },
 
     stepForward: function () {
@@ -10787,9 +10787,11 @@ xabber.AddContactView = xabber.BasicView.extend({
         let jid = this.$('input[name=username]').removeClass('invalid').val().trim(),
             name = this.$('input[name=contact_name]').removeClass('invalid').val(),
             groups = this.group_data.get('selected'),
-            subscribe_text = this.$('textarea[name=subcribe_text]').val(),
+            subscribe_text = this.$('textarea[name=subscribe_text]').val(),
             contact, error_text,
             regexp = /^(([^<>()[\]\\.,;:\s%@\"]+(\.[^<>()[\]\\.,;:\s%@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+        if (subscribe_text.length > 300)
+            error_text = xabber.getString("dialog_add_contact__error__too_long_text");
         if (jid)
             jid = jid.toLowerCase()
         jid = Strophe.getBareJidFromJid(jid);
