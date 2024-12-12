@@ -410,7 +410,8 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
         "click .btn-decline": "declineSubscription",
         "click .btn-add": "addContact",
         "click .btn-block": "blockContact",
-        "click .subscription-switch-item": "switchSubscription"
+        "click .subscription-switch-item": "switchSubscription",
+        "click .subscription-show-text-btn": "showText",
     },
 
     _initialize: function (options) {
@@ -762,7 +763,8 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
         this.$('.notification-subscriptions-content-wrap').html('');
         let accounts = xabber.accounts.enabled;
         let counter = 0,
-            color;
+            color,
+            first_el;
         this.$('.subscription-switch-container').remove();
         _.each(accounts, (account) => {
             let contacts = account.contacts.filter(item => item.get('subscription_request_in'));
@@ -782,7 +784,7 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
                     $template.attr('data-counter', counter);
                     let $switch_element = $(`<div class="subscription-switch-container" data-counter="${counter}" data-color="${contact.account.settings.get('color')}"><div class="subscription-switch-item ground-color-200 outline-color-200"></div></div>`);
                     $switch_element.insertBefore(this.$('.notification-subscriptions-button'));
-
+                    !first_el && (first_el = $template.find('.subscription-item-text')[0]);
                     counter++;
                 });
         });
@@ -794,16 +796,19 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
 
         } else if (counter > 1 && this.filter_type !== 'subscription'){
             this.$('.notification-subscriptions-button').addClass('hidden');
-            this.$('.notification-subscription-item').slice(1).addClass('hidden');
             this.$('.notification-subscriptions-button-wrap').removeClass('hidden');
         } else {
             this.$('.notification-subscriptions-button').addClass('hidden');
             this.$('.notification-subscriptions-button-wrap').addClass('hidden');
-            this.$('.notification-subscription-item').addClass('hidden');
         }
         this.$('.notification-subscriptions-wrap').switchClass('hidden', this.$('.notification-subscription-item:not(.hidden)').length === 0);
         this.$('.notification-subscription-item').slice(1).addClass('hidden');
         this.$('.subscription-switch-item').first().addClass('selected-switch');
+        this.$('.extended-text').removeClass('extended-text');
+        this.$('.overflown-text').removeClass('overflown-text');
+        if (first_el && (first_el.clientWidth < first_el.scrollWidth || first_el.clientHeight < first_el.scrollHeight)){
+            $(first_el).closest('.notification-subscription-item').addClass('overflown-text');
+        }
 
         if (color) {
             this.$('.notification-subscriptions-wrap').attr('class', 'notification-subscriptions-wrap');
@@ -816,15 +821,26 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
         let $item = $(ev.target).closest('.subscription-switch-container'),
             counter = $item.attr('data-counter'),
             color = $item.attr('data-color');
+        this.$('.extended-text').removeClass('extended-text');
+        this.$('.overflown-text').removeClass('overflown-text');
         this.$('.subscription-switch-item').removeClass('selected-switch');
         $item.find('.subscription-switch-item').addClass('selected-switch');
         this.$('.notification-subscription-item').addClass('hidden');
         this.$(`.notification-subscription-item[data-counter="${counter}"]`).removeClass('hidden');
+        let $el = this.$(`.notification-subscription-item[data-counter="${counter}"]`).find('.subscription-item-text');
+        if ($el[0] && ($el[0].clientWidth < $el[0].scrollWidth || $el[0].clientHeight < $el[0].scrollHeight)){
+            this.$(`.notification-subscription-item[data-counter="${counter}"]`).addClass('overflown-text');
+        }
         if (color) {
             this.$('.notification-subscriptions-wrap').attr('class', 'notification-subscriptions-wrap');
             this.$('.notification-subscriptions-wrap').addClass(`outline-color-${color}-100`);
         }
 
+    },
+
+    showText: function (ev) {
+        let $item = $(ev.target).closest('.notification-subscription-item');
+        $item.addClass('extended-text');
     },
 
     updateAllTrustSessions: function () {
@@ -1109,21 +1125,6 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
                 this.updateCalendarCellsActivity(this.filtered_messages);
                 this.handleOnScrollRendering('bottom');
             }
-
-            this.$('.notification-subscription-item').addClass('hidden');
-            _.each(this.filtered_accounts, (jid) => {
-                this.$(`.notification-subscription-item[data-account-jid="${jid}"]`).removeClass('hidden');
-                if (this.filter_type !== 'subscription'){
-                    if (this.$(`.notification-subscription-item[data-account-jid="${jid}"]:not(.hidden)`).length > 2){
-                        this.$(`.notification-subscription-item[data-account-jid="${jid}"]:not(.hidden)`).slice(2).addClass('hidden');
-                        this.$('.notification-subscriptions-button').removeClass('hidden');
-                    } else {
-                        this.$('.notification-subscriptions-button').addClass('hidden');
-                    }
-                }
-            });
-
-            this.$('.notification-subscriptions-wrap').switchClass('hidden', this.$('.notification-subscription-item:not(.hidden)').length === 0);
 
         }
     },

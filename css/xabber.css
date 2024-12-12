@@ -22826,6 +22826,35 @@ ul.restrictions-list-content>li {
     margin-bottom: 28px;
     font-size: 14px;
     font-style: italic;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    display: -webkit-box;
+    overflow: hidden;
+}
+.notifications-content-wrap .notification-subscriptions-wrap .notification-subscription-item.extended-text .subscription-item-text{
+    overflow: visible;
+    display: block;
+}
+.notifications-content-wrap .notification-subscriptions-wrap .notification-subscription-item.extended-text .subscription-show-text-btn,
+.notifications-content-wrap .notification-subscriptions-wrap .notification-subscription-item:not(.overflown-text) .subscription-show-text-btn{
+    display: none !important;
+}
+.notifications-content-wrap .notification-subscriptions-wrap .notification-subscription-item .subscription-show-text-btn{
+    color: #9e9e9e;
+    cursor: pointer;
+    font-size: 14px;
+    line-height: 20px;
+    margin-right: 16px;
+    text-decoration-line: underline;
+    text-decoration-style: dotted;
+    text-underline-offset: 2px;
+    position: absolute;
+    bottom: 0px;
+    right: 48px;
+    display: none;
+}
+.notifications-content-wrap .notification-subscriptions-wrap:hover .notification-subscription-item .subscription-show-text-btn{
+    display: block;
 }
 .notifications-content-wrap .notification-subscriptions-wrap .notification-subscription-item .subscription-item-buttons-wrap{
     display: flex;
