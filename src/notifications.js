@@ -47,6 +47,8 @@ xabber.NotificationsView = xabber.BasicView.extend({
 
     events: {
         "click .notifications-account-filter-content .filter-item-wrap": "selectAccounts",
+        "click .btn-accounts-filter": "selectAccountFromDropdown",
+        "click .tab-filter-item": "removeFilter",
         "click .notifications-type-filter-content .filter-item-wrap": "filterContent",
         "click .notification-subscriptions-button": "filterContent",
         "click .notifications-calendar-day": "showDay",
@@ -81,6 +83,13 @@ xabber.NotificationsView = xabber.BasicView.extend({
         this.updatePlyrControls();
         this.updatePlyrTime();
         this.updateClientNotifications();
+        this.$('.dropdown-button').dropdown({
+            inDuration: 100,
+            outDuration: 100,
+            hover: false,
+            belowOrigin: true,
+        });
+        this.updateFilterItems();
     },
 
     updateClientNotifications: function (options) {
@@ -90,6 +99,48 @@ xabber.NotificationsView = xabber.BasicView.extend({
             this.$('.client-notifications-wrap').append(xabber.placeholders_wrap.$el);
         }
         this.$('.client-notifications-wrap').switchClass('hidden', !xabber.placeholders_wrap.$el.children().length)
+    },
+
+    removeFilter: function (ev) {
+        let $item = $(ev.target).closest('.tab-filter-item'),
+            filter_type = $item.attr('data-type');
+        if (!this.current_content){
+            this.$('.tab-filter-item').remove();
+            return;
+        }
+
+        if (filter_type === 'filter_type'){
+            this.current_content.filter_type = 'all';
+            this.$('.notifications-type-filter-content .filter-item-wrap').removeClass('selected-filter');
+            this.$('.notifications-type-filter-content .filter-item-wrap[data-filter="all"]').addClass('selected-filter');
+            this.current_content.updateAllIncomingSubscriptions();
+            this.current_content.$el.removeClass('subscription-content');
+            this.$('.notifications-utility').removeClass('subscription-content');
+            this.$el.removeClass('subscription-content');
+            this.current_content.$el.removeClass('security-content');
+            this.current_content.$el.removeClass('subscription-content-hidden');
+        }
+        $item.remove();
+        this.current_content.FilterMessagesInChat(true);
+
+    },
+
+    updateFilterItems: function () {
+        this.$('.tab-filter-item').remove();
+        if (this.current_content){
+            if (this.current_content.filter_type !== 'all'){
+                this.$('.tab-active-filters-wrap').append($(env.templates.contacts.tab_filter_item_main_color({
+                    value: this.current_content.filter_type,
+                    type: 'filter_type',
+                    text: xabber.getString(`notifications_window__type_filter_${this.current_content.filter_type}`)
+                })));
+            }
+            if (this.current_content.filtered_accounts.length){
+                this.$('.tab-additional-filter-item .tab-filter-item-text').text(this.current_content.filtered_accounts[0]);
+            } else {
+                this.$('.tab-additional-filter-item .tab-filter-item-text').text(xabber.getString("notifications_window__type_filter_all_accounts"));
+            }
+        }
     },
 
     playPausePlyr: function () {
@@ -131,10 +182,12 @@ xabber.NotificationsView = xabber.BasicView.extend({
                 this.current_content.filter_type = 'all';
                 this.$('.notifications-type-filter-content .filter-item-wrap').removeClass('selected-filter');
                 this.$('.notifications-type-filter-content .filter-item-wrap[data-filter="all"]').addClass('selected-filter');
+                this.current_content.updateAllIncomingSubscriptions();
                 this.current_content.$el.removeClass('security-content');
                 this.current_content.$el.removeClass('subscription-content');
+                this.$('.notifications-utility').removeClass('subscription-content');
                 this.$el.removeClass('subscription-content');
-                this.$('.notifications-utility .notifications-header').text(xabber.getString("notifications_window__type_filter_all"));
+                this.current_content.$el.removeClass('subscription-content-hidden');
                 clear = true;
             }
             this.current_content.filterByAccounts([], clear);
@@ -246,12 +299,10 @@ xabber.NotificationsView = xabber.BasicView.extend({
         let filter_type = $item.attr('data-filter'),
             clear_account;
         if ($item.hasClass('selected-filter')){
-            this.$('.filter-item-wrap').removeClass('selected-filter');
-            clear_account = true
+            filter_type = 'all';
         }
         this.$('.notifications-type-filter-content .filter-item-wrap').removeClass('selected-filter');
         this.$('.notifications-type-filter-content .filter-item-wrap[data-filter="all"]').addClass('selected-filter');
-        this.current_content.updateAllIncomingSubscriptions();
         this.current_content.$el.removeClass('subscription-content');
         this.$('.notifications-utility').removeClass('subscription-content');
         this.$el.removeClass('subscription-content');
@@ -274,15 +325,13 @@ xabber.NotificationsView = xabber.BasicView.extend({
             this.$(`.notifications-type-filter-content .filter-item-wrap[data-filter="${filter_type}"]`).addClass('selected-filter');
         }
 
-        if (!clear_account){
-            this.$('.notifications-account-filter-content .filter-item-wrap').removeClass('selected-filter');
-        }
         if (filter_type === 'subscription') {
             this.$('.notifications-utility .notifications-header').text(xabber.getString("notifications_window__type_filter_subscriptions"));
         } else {
             this.$('.notifications-utility .notifications-header').text(this.$('.notifications-type-filter-content .filter-item-wrap.selected-filter .name').text());
         }
         this.current_content.filterByProperty(filter_type, clear_account);
+        this.updateFilterItems();
     },
 
     showDay: function (ev) {
@@ -291,37 +340,23 @@ xabber.NotificationsView = xabber.BasicView.extend({
 
     updateAccountsFilter: function () {
         let accounts = xabber.accounts.enabled;
-        // console.log(accounts.length);
         accounts = accounts.filter(item => item.server_features.get(Strophe.NS.XABBER_NOTIFY));
-        // console.log(accounts.length);
+        this.$('.tab-additional-filter-item').switchClass('hidden', accounts.length === 1 || !accounts.length);
         this.$('.notifications-account-filter').switchClass('hidden', accounts.length === 1 || !accounts.length);
         if (accounts.length){
-            //     jid = options.jid || '';
-            // this.$('input[name="username"]').val(jid).attr('readonly', !!jid)
-            //     .removeClass('invalid');
-            // this.$('.single-acc').showIf(accounts.length === 1);
-            // this.$('.multiple-acc').hideIf(accounts.length === 1);
             try{
                 this.$('.notifications-account-filter-content').empty();
+                this.$('.additional-filter-variant').remove();
                 _.each(accounts, (account) => {
                     this.$('.notifications-account-filter-content').append(this.renderAccountItem(account));
+                    this.$('.accounts-dropdown').append($(`<div class="property-variant btn-accounts-filter additional-filter-variant" data-jid="${account.get('jid')}"><span class="one-line">${account.get('jid')}</span></div>`));
                 });
-
-                // this.$('.account-dropdown-wrap').dropdown({
-                //     inDuration: 100,
-                //     outDuration: 100,
-                //     constrainWidth: false,
-                //     hover: false,
-                //     alignment: 'left'
-                // });
                 this.updateCurrentNotifications();
             } catch (e) {
                 console.error(e)
             }
         } else {
             // if no accounts
-            // console.log(xabber.accounts.enabled.length);
-            // console.log(xabber.body.screen.get('name') === 'notifications');
             if (!xabber.accounts.enabled.length){
                 if (xabber.body.screen.get('name') === 'notifications'){
                     xabber.toolbar_view.showAllChats(null, true);
@@ -358,6 +393,27 @@ xabber.NotificationsView = xabber.BasicView.extend({
         let accounts  = this.$('.notifications-account-filter-content .filter-item-wrap.selected-filter').map(function(){return $(this).attr("data-jid");}).get();
         if (this.current_content){
             this.current_content.filterByAccounts(accounts);
+            this.updateFilterItems();
+        }
+    },
+
+    selectAccountFromDropdown: function (ev) {
+
+        let $item = $(ev.target).closest('.btn-accounts-filter');
+        if (!$item.attr('data-jid')) {
+            $item.remove();
+            return;
+        }
+        this.$('.notifications-account-filter-content .filter-item-wrap').removeClass('selected-filter');
+        this.$(`.notifications-account-filter-content .filter-item-wrap[data-jid="${$item.attr('data-jid')}"]`).addClass('selected-filter');
+
+        if (this.current_content) {
+            if ($item.attr('data-jid') === 'all'){
+                this.current_content.filterByAccounts([]);
+            } else {
+                this.current_content.filterByAccounts([$item.attr('data-jid')]);
+            }
+            this.updateFilterItems();
         }
     },
 
@@ -710,12 +766,9 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
         this.FilterMessagesInChat(cleared);
     },
 
-    filterByProperty: function (filter_type, clear_account) {
-        if (clear_account)
-            this.filterByAccounts([]);
+    filterByProperty: function (filter_type) {
         if (this.filter_type === filter_type)
             return;
-        this.filtered_accounts = [];
         this.filter_type = filter_type;
         this.FilterMessagesInChat(true);
     },
@@ -763,6 +816,9 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
         this.$('.notification-subscriptions-content-wrap').html('');
         let accounts = xabber.accounts.enabled;
         let counter = 0;
+        if (this.filtered_accounts.length){
+            accounts = accounts.filter(item => this.filtered_accounts.includes(item.get('jid')));
+        }
         this.$('.subscription-switch-container').remove();
         _.each(accounts, (account) => {
             let contacts = account.contacts.filter(item => item.get('subscription_request_in'));
@@ -779,7 +835,7 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
                     $template.find('.circle-avatar').setAvatar(image, 64);
                     $template.attr('data-color', contact.account.settings.get('color'));
                     $template.attr('data-counter', counter);
-                    $template.addClass(`outline-color-${contact.account.settings.get('color')}-100`);
+                    $template.addClass(`outline-color-${contact.account.settings.get('color')}-300`);
                     this.prepareShowMoreText($template);
                     counter++;
                 });
@@ -795,7 +851,7 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
             this.$('.notification-subscriptions-button-wrap').addClass('hidden');
         }
         this.$('.notification-subscriptions-wrap').switchClass('hidden', this.$('.notification-subscription-item:not(.hidden)').length === 0);
-        this.$('.notification-subscription-item').slice(2).addClass('hidden');
+        this.$('.notification-subscription-item').slice(3).addClass('hidden');
         xabber.toolbar_view.recountAllMessageCounter()
     },
 
@@ -1057,6 +1113,7 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
     },
 
     FilterMessagesInChat: function (is_cleared) {
+        this.updateAllIncomingSubscriptions();
         if (!this.filtered_accounts.length && is_cleared){
             this.filtered_messages = [];
             this.$(`.chat-message`).remove();
@@ -1066,7 +1123,6 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
             this.$('.notification-subscription-item').removeClass('hidden');
             if (this.filter_type === 'all'){
                 this.onShowNotificationsTab();
-                this.updateAllIncomingSubscriptions();
             } else {
                 let is_filtered;
                 if (this.filter_type === 'security'){

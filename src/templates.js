@@ -130,7 +130,8 @@
     addTemplate('contacts.roster_fullscreen');
     addTemplate('contacts.edit_groups_modal');
     addTemplate('contacts.roster_contact_item');
-    addTemplate('contacts.roster_filter_item');
+    addTemplate('contacts.tab_filter_item');
+    addTemplate('contacts.tab_filter_item_main_color');
     addTemplate('contacts.roster_sorting');
     addTemplate('contacts.group_filter_item');
     addTemplate('contacts.account_roster_right');

@@ -17,10 +17,6 @@
         <div class="notifications-type-filter">
             <div class="notifications-filter-header">{[print(xabber.getString("notifications_window__filters_header"))]}</div>
             <div class="notifications-type-filter-content">
-                <div class="filter-item-wrap selected-filter" data-filter="all">
-                    <svg class="filter-icon mdi fill-color-grey-500 mdi-svg-template" data-svgname="bell"></svg>
-                    <div class="name one-line">{[print(xabber.getString("notifications_window__type_filter_all"))]}</div>
-                </div>
                 <div class="filter-item-wrap" data-filter="security">
                     <svg class="filter-icon mdi fill-color-grey-500 mdi-svg-template" data-svgname="security"></svg>
                     <div class="name one-line">{[print(xabber.getString("notifications_window__type_filter_security"))]}</div>
@@ -43,7 +39,12 @@
 </div>
 <div class="notifications-right-wrap">
     <div class="notifications-utility">
-        <div class="notifications-header"></div>
+        <div class="btn-read-all">
+            <svg class="mdi mdi-24px mdi-svg-template" data-svgname="check-all"></svg>
+        </div>
+
+    </div>
+    <div class="tab-active-filters-wrap">
         <div class="chat-tools-wrap">
             <div class="chat-tool chat-tool-player">
                 <div class="chat-tool-player-containter">
@@ -76,10 +77,16 @@
                 </div>
             </div>
         </div>
-        <div class="btn-read-all">
-            <svg class="mdi mdi-24px mdi-svg-template" data-svgname="check-all"></svg>
+        <div class="tab-additional-filter-item dropdown-button ground-main-color-50" data-type="accounts" data-value="all" data-activates="{{view.cid}}-accounts-filters">
+            <div class="tab-filter-item-text one-line">{[print(xabber.getString("notifications_window__type_filter_all_accounts"))]}</div>
+            <i class="mdi mdi-8px mdi-triangle"></i>
         </div>
+        <ul id="{{view.cid}}-accounts-filters" class="dropdown-content accounts-dropdown bootstrap-dropdown noselect">
+            <div class="property-variant btn-accounts-filter" data-jid="all">
+                <span class="one-line">{[print(xabber.getString("notifications_window__type_filter_all_accounts"))]}</span>
+            </div>
 
+        </ul>
     </div>
     <div class="notifications-content">
 

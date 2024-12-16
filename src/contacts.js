@@ -9808,7 +9808,7 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
         "click .contact-expanded-groups-wrap .group:not(.group-expand)": "filterByGroup",
         "click .contact-domain": "filterByDomain",
         "click .roster-sorting-item": "chooseSorting",
-        "click .roster-filter-item": "removeFilter",
+        "click .tab-filter-item": "removeFilter",
         "click .close-search-icon": "clearSearch",
         "click .contact-groups-wrap .group.group-expand": "expandGroups",
         "mouseout .contact-expanded-groups-wrap": "closeGroups",
@@ -10057,7 +10057,7 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
         this.current_filter_domain = null;
         this.sorting_type = 'name';
         this.clearSearch();
-        this.$(`.contacts-active-filters-wrap .roster-filter-item`).remove();
+        this.$(`.tab-active-filters-wrap .tab-filter-item`).remove();
 
         this.updateSubFilter();
         this.contacts = [];
@@ -10091,7 +10091,7 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
         this.sorting_type = 'name';
         this.current_type_subfilter = 'contacts';
         this.clearSearch();
-        this.$(`.contacts-active-filters-wrap .roster-filter-item`).remove();
+        this.$(`.tab-active-filters-wrap .tab-filter-item`).remove();
         this.updateSubFilter();
         this.updateGroupsFilter();
         this.contacts = [];
@@ -10140,7 +10140,7 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
 
         if (!this.current_filter_groups_list.includes(filter_name)){
             this.current_filter_groups_list.push(filter_name);
-            this.$('.contacts-active-filters-wrap').append($(templates.roster_filter_item({
+            this.$('.tab-active-filters-wrap').append($(templates.tab_filter_item({
                 value: filter_name,
                 type: 'circle',
                 text: filter_name
@@ -10150,7 +10150,7 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
             this.current_filter_groups_list = this.current_filter_groups_list.filter(i => i !== filter_name);
 
             this.$(`.filter-item-wrap[data-groupname="${filter_name}"]`).removeClass('selected-filter');
-            this.$(`.roster-filter-item[data-type="circle"][data-value="${filter_name}"]`).remove();
+            this.$(`.tab-filter-item[data-type="circle"][data-value="${filter_name}"]`).remove();
         }
 
         this.contacts = [];
@@ -10165,11 +10165,11 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
         if (!filter_domain)
             return;
 
-        this.$(`.contacts-active-filters-wrap .roster-filter-item[data-type="domain"]`).remove();
+        this.$(`.tab-active-filters-wrap .tab-filter-item[data-type="domain"]`).remove();
         this.current_filter_domain = filter_domain;
-        this.$('.contacts-active-filters-wrap').append($(templates.roster_filter_item({
+        this.$('.tab-active-filters-wrap').append($(templates.tab_filter_item({
             value: filter_domain,
-            type: 'domain',
+            type: 'filter_type',
             text: filter_domain
         })));
 
@@ -10200,7 +10200,7 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
     },
 
     removeFilter: function (ev) {
-        let $item = $(ev.target).closest('.roster-filter-item'),
+        let $item = $(ev.target).closest('.tab-filter-item'),
             filter_type = $item.attr('data-type'),
             filter_value = $item.attr('data-value');
 
@@ -10259,9 +10259,9 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
         } else if (groups_filters.includes(this.current_type_subfilter)){
             sub_filter_parent_type = 'groups';
         }
-        this.$(`.roster-additional-filter-item`).addClass('hidden');
-        this.$(`.roster-additional-filter-item[data-type="${sub_filter_parent_type}"]`).removeClass('hidden');
-        this.$(`.roster-additional-filter-item[data-type="${sub_filter_parent_type}"] .roster-filter-item-text`).text(item_text);
+        this.$(`.tab-additional-filter-item`).addClass('hidden');
+        this.$(`.tab-additional-filter-item[data-type="${sub_filter_parent_type}"]`).removeClass('hidden');
+        this.$(`.tab-additional-filter-item[data-type="${sub_filter_parent_type}"] .tab-filter-item-text`).text(item_text);
     },
 
     updateAccountColor: function (account) {
