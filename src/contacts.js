@@ -9863,6 +9863,8 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
             this.current_filter = {};
             this.$('.contacts-type-filter-content .filter-item-wrap').removeClass('selected-filter');
             this.$('.contacts-type-filter-content .filter-item-wrap[data-filter="all"]').addClass('selected-filter');
+            this.current_type_subfilter = 'contacts';
+            this.updateSubFilter();
             this.updateAccountsFilter();
             this.processUpdateContacts(true, true);
         } else {
@@ -10016,6 +10018,9 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
 
         }
         this.$('.contacts-group-filter').switchClass('hidden', !this.$('.contacts-group-filter-content .filter-item-wrap').length);
+        _.each(this.current_filter_groups_list, (item) => {
+            this.$(`.filter-item-wrap[data-groupname="${item}"]`).addClass('selected-filter');
+        });
         this.updateScrollBar2();
         this.updateAccountColor(account);
     },
@@ -10047,6 +10052,7 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
             this.current_type_subfilter = 'groups';
         }
 
+        this.$(`.contacts-group-filter-content .filter-item-wrap`).removeClass('selected-filter');
         this.current_filter_groups_list = [];
         this.current_filter_domain = null;
         this.sorting_type = 'name';
@@ -10079,6 +10085,7 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
         this.$('.contacts-account-filter-content .filter-item-wrap').removeClass('selected-filter');
         this.$(`.contacts-account-filter-content .filter-item-wrap[data-jid="${filter_type}"]`).addClass('selected-filter');
 
+        this.$(`.contacts-group-filter-content .filter-item-wrap`).removeClass('selected-filter');
         this.current_filter_groups_list = [];
         this.current_filter_domain = null;
         this.sorting_type = 'name';
@@ -10138,9 +10145,11 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
                 type: 'circle',
                 text: filter_name
             })));
+            this.$(`.filter-item-wrap[data-groupname="${filter_name}"]`).addClass('selected-filter');
         } else {
             this.current_filter_groups_list = this.current_filter_groups_list.filter(i => i !== filter_name);
 
+            this.$(`.filter-item-wrap[data-groupname="${filter_name}"]`).removeClass('selected-filter');
             this.$(`.roster-filter-item[data-type="circle"][data-value="${filter_name}"]`).remove();
         }
 
@@ -10200,6 +10209,7 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
         }
         if (filter_type === 'circle'){
             this.current_filter_groups_list = this.current_filter_groups_list.filter(i => i !== filter_value);
+            this.$(`.contacts-group-filter-content .filter-item-wrap[data-groupname="${filter_value}"]`).removeClass('selected-filter');
         }
         $item.remove()
 
