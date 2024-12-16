@@ -762,8 +762,7 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
     updateAllIncomingSubscriptions: function () {
         this.$('.notification-subscriptions-content-wrap').html('');
         let accounts = xabber.accounts.enabled;
-        let counter = 0,
-            color;
+        let counter = 0;
         this.$('.subscription-switch-container').remove();
         _.each(accounts, (account) => {
             let contacts = account.contacts.filter(item => item.get('subscription_request_in'));
@@ -779,19 +778,15 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
                     let image = contact.cached_image;
                     $template.find('.circle-avatar').setAvatar(image, 64);
                     $template.attr('data-color', contact.account.settings.get('color'));
-                    !color && (color = contact.account.settings.get('color'));
                     $template.attr('data-counter', counter);
-                    let $switch_element = $(`<div class="subscription-switch-container" data-counter="${counter}" data-color="${contact.account.settings.get('color')}"><div class="subscription-switch-item ground-color-200 outline-color-200"></div></div>`);
-                    $switch_element.insertBefore(this.$('.notification-subscriptions-button'));
+                    $template.addClass(`outline-color-${contact.account.settings.get('color')}-100`);
+                    this.prepareShowMoreText($template);
                     counter++;
                 });
         });
-        if (counter > 9 && this.filter_type !== 'subscription') {
+        if (counter > 3 && this.filter_type !== 'subscription') {
             this.$('.notification-subscriptions-button').removeClass('hidden');
-            this.$('.subscription-switch-container').slice(9).addClass('hidden');
             this.$('.notification-subscriptions-button-wrap').removeClass('hidden');
-            this.$('.notification-subscriptions-button-wrap').removeClass('hidden');
-
         } else if (counter > 1 && this.filter_type !== 'subscription'){
             this.$('.notification-subscriptions-button').addClass('hidden');
             this.$('.notification-subscriptions-button-wrap').removeClass('hidden');
@@ -800,35 +795,15 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
             this.$('.notification-subscriptions-button-wrap').addClass('hidden');
         }
         this.$('.notification-subscriptions-wrap').switchClass('hidden', this.$('.notification-subscription-item:not(.hidden)').length === 0);
-        this.$('.notification-subscription-item').slice(1).addClass('hidden');
-        this.$('.subscription-switch-item').first().addClass('selected-switch');
-
-        if (color) {
-            this.$('.notification-subscriptions-wrap').attr('class', 'notification-subscriptions-wrap');
-            this.$('.notification-subscriptions-wrap').addClass(`outline-color-${color}-100`);
-        }
-        this.prepareShowMoreText();
+        this.$('.notification-subscription-item').slice(2).addClass('hidden');
         xabber.toolbar_view.recountAllMessageCounter()
     },
 
     switchSubscription: function (ev) {
-        let $item = $(ev.target).closest('.subscription-switch-container'),
-            counter = $item.attr('data-counter'),
-            color = $item.attr('data-color');
-        this.$('.subscription-switch-item').removeClass('selected-switch');
-        $item.find('.subscription-switch-item').addClass('selected-switch');
-        this.$('.notification-subscription-item').addClass('hidden');
-        this.$(`.notification-subscription-item[data-counter="${counter}"]`).removeClass('hidden');
-        if (color) {
-            this.$('.notification-subscriptions-wrap').attr('class', 'notification-subscriptions-wrap');
-            this.$('.notification-subscriptions-wrap').addClass(`outline-color-${color}-100`);
-        }
-        this.prepareShowMoreText();
     },
 
-    prepareShowMoreText: function () {
-        let $item = this.$('.notification-subscription-item:not(.hidden)'),
-            text = $item.find('.subscription-item-text-backup').text(),
+    prepareShowMoreText: function ($item) {
+        let text = $item.find('.subscription-item-text-backup').text(),
             showChar = 100;
 
         if (text.length > showChar){
