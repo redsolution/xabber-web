@@ -836,12 +836,12 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
             let c = text.substr(0, showChar);
             let h = text.substr(showChar-1, text.length - showChar);
 
-            let html = c + '<span class="moreellipses">... </span><span><span class="subscription-more-text hidden">' + h + '</span>  <span href="" class="subscription-show-text-btn">' + xabber.getString("show_more") + '</span></span>';
+            let html = c + '<span class="moreellipses">... </span><span><span class="subscription-more-text hidden">' + h + '</span>  <span href="" class="subscription-show-text-btn">' + xabber.getString("more") + '</span></span>';
 
-            $item.find('.subscription-item-text').html(`"${html}"`);
+            $item.find('.subscription-item-text').html(`${html}`);
 
         } else {
-            $item.find('.subscription-item-text').html(`"${text}"`);
+            $item.find('.subscription-item-text').html(`${text}`);
         }
     },
 

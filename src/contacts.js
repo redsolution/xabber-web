@@ -11103,16 +11103,22 @@ xabber.Account.addInitPlugin(function () {
     this.on("ready_to_get_roster", function () {
         let dfd = new $.Deferred();
         dfd.done(() => {
+            let resumed;
             if (this.connection && this.connection.streamManagement){
                 if (!(this.connection.streamManagement._isStreamManagementEnabled && this.connection.streamManagement.getResumeToken())){
+                    resumed = false;
                     this.connection.streamManagement.enable(true);
+                } else if (this.connection.streamManagement._isStreamManagementEnabled && this.connection.streamManagement.getResumeToken()) {
+                    resumed = true;
                 }
             }
-            this.resources.reset();
-            this.contacts.each(function (contact) {
-                contact.resources.reset();
-                contact.resetStatus();
-            });
+            if (!resumed){
+                this.resources.reset();
+                this.contacts.each(function (contact) {
+                    contact.resources.reset();
+                    contact.resetStatus();
+                });
+            }
             this.cached_roster.getAllFromRoster((roster_items) => {
                 $(roster_items).each((idx, roster_item) => {
                     if (roster_item.jid === 'roster_version'){

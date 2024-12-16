@@ -277,19 +277,36 @@
             } else if (status === Strophe.Status.BINDREQUIRED && this.getResumeToken())  {
                 this._c.jid = this._storedJid;
 
-                // Restore Strophe handlers
-                for (const h of (this._resumeState.handlers || [])
-                    .concat(this._resumeState.addHandlers || [])) {
-                    this._c._addSysHandler(h.handler, h.ns, h.name, h.type, h.id);
+                // // Restore Strophe handlers
+                // for (const h of (this._resumeState.handlers || [])
+                //     .concat(this._resumeState.addHandlers || [])) {
+                //     console.warn(h);
+                //     this._c._addSysHandler(h.handler, h.ns, h.name, h.type, h.id);
+                // }
+                // for (const h of (this._resumeState.timedHandlers || [])
+                //     .concat(this._resumeState.addTimeds)) {
+                //     this._c.addTimedHandler(h.period, h.handler);
+                // }
+                // for (const h of (this._resumeState.removeTimeds || [])
+                //     .concat(this._resumeState.removeHandlers || [])) {
+                //     this._c.deleteTimedHandler(h);
+                // }
+
+                if (this._requestHandler) {
+                    this._c.deleteHandler(this._requestHandler);
                 }
-                for (const h of (this._resumeState.timedHandlers || [])
-                    .concat(this._resumeState.addTimeds)) {
-                    this._c.addTimedHandler(h.period, h.handler);
+
+                if (this._incomingHandler) {
+                    this._c.deleteHandler(this._incomingHandler);
                 }
-                for (const h of (this._resumeState.removeTimeds || [])
-                    .concat(this._resumeState.removeHandlers || [])) {
-                    this._c.deleteTimedHandler(h);
-                }
+
+                this._requestHandler = this._c.addHandler(this._handleServerRequestHandler.bind(this), this._NS, 'r');
+                this._ackHandler = this._c.addHandler(this._handleServerAck.bind(this), this._NS, 'a');
+                this._incomingHandler = this._c.addHandler(this._incomingStanzaHandler.bind(this));
+
+                this._enabledHandler = this._c._addSysHandler(this._handleEnabled.bind(this), this._NS, 'enabled');
+                this._resumeFailedHandler = this._c._addSysHandler(this._handleResumeFailed.bind(this), this._NS, 'failed');
+                this._resumedHandler =  this._c._addSysHandler(this._handleResumed.bind(this), this._NS,'resumed');
 
                 // FIXME check conditions if there's session ID and if enabled
                 this._c.send($build('resume', {

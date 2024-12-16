@@ -9209,6 +9209,7 @@ input[type=text].simple-input-field:hover {
     height: 11.9px;
     border: 1.125px solid #FFF;
     border-radius: 50%;
+    pointer-events: none;
 }
 
 .chat-list-wrap.left-panel-list-wrap .chat-item .status{
@@ -9254,6 +9255,7 @@ input[type=text].simple-input-field:hover {
 .chat-head-wrap .chat-icon {
     top: 40px;
     left: 52px;
+    pointer-events: none;
 }
 .message-item .chat-icon svg,
 .chat-item .chat-icon svg,
