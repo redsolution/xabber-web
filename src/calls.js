@@ -39,7 +39,7 @@ xabber.CallsView = xabber.BasicView.extend({
     avatar_size: constants.AVATAR_SIZES.CHAT_ITEM,
 
     events: {
-        "click .calls-account-filter-content .filter-item-wrap": "filterAccount",
+        "click .btn-accounts-filter": "filterAccount",
         "click .calls-type-filter-content .filter-item-wrap": "filterType",
         "click .chat-message": "openChat",
         "click .call-contact-item": "openChatContact",
@@ -51,6 +51,7 @@ xabber.CallsView = xabber.BasicView.extend({
         "click .btn-previous-plyr": "previousPlyr",
         "click .btn-stop-plyr": "stopPlyr",
         "click .chat-tool-player-containter": "popupPlyr",
+        "click .tab-filter-item": "removeFilter",
 
     },
 
@@ -92,6 +93,12 @@ xabber.CallsView = xabber.BasicView.extend({
         this.updatePlyrControls();
         this.updatePlyrTime();
         this.updateClientNotifications();
+        this.$('.dropdown-button').dropdown({
+            inDuration: 100,
+            outDuration: 100,
+            hover: false,
+            belowOrigin: true,
+        });
     },
 
     updateClientNotifications: function () {
@@ -215,6 +222,35 @@ xabber.CallsView = xabber.BasicView.extend({
         }
     },
 
+    updateFilterItems: function () {
+        this.$('.tab-filter-item').remove();
+        if (this.filter_type){
+            this.$('.tab-active-filters-wrap').append($(env.templates.contacts.tab_filter_item_main_color({
+                value: this.filter_type,
+                type: 'filter_type',
+                text: xabber.getString(`calls_window__type_filter_${this.filter_type}`)
+            })));
+        }
+        if (this.current_account){
+            this.$('.tab-account-filter-item .tab-filter-item-text').text(this.current_account.get('jid'));
+        }
+    },
+
+    removeFilter: function (ev) {
+        let $item = $(ev.target).closest('.tab-filter-item'),
+            filter_type = $item.attr('data-type');
+
+        if (filter_type === 'filter_type'){
+            this.filter_type = null;
+            this.$('.calls-type-filter-content .filter-item-wrap').removeClass('selected-filter');
+        }
+        $item.remove();
+
+        this.renderCalls();
+        this.updateFilterItems()
+
+    },
+
     openChatContact: function (ev) {
         if ($(ev.target).closest('.btn-send-jingle').length)
             return;
@@ -263,15 +299,11 @@ xabber.CallsView = xabber.BasicView.extend({
     },
 
     clearFilter: function () {
-        this.$('.calls-account-filter-content .filter-item-wrap').removeClass('selected-filter');
     },
 
     updateCurrentCalls: function () {
         if (this.calls_accounts.length){
             this.current_account = this.calls_accounts[0];
-            this.$('.calls-account-filter-content .filter-item-wrap').removeClass('selected-filter');
-            this.$(`.calls-account-filter-content .filter-item-wrap[data-jid="${this.current_account.get('jid')}"]`).addClass('selected-filter');
-
             this.filter_type = null;
             this.$('.calls-type-filter-content .filter-item-wrap').removeClass('selected-filter');
             this.$(`.calls-type-filter-content .filter-item-wrap[data-filter="all"]`).addClass('selected-filter');
@@ -281,6 +313,7 @@ xabber.CallsView = xabber.BasicView.extend({
                 // remove куртилку
 
                 this.renderCalls();
+                this.updateFilterItems()
             });
 
             // добавить крутилку
@@ -327,7 +360,7 @@ xabber.CallsView = xabber.BasicView.extend({
     },
 
     filterAccount: function (ev) {
-        let $item = $(ev.target).closest('.filter-item-wrap'),
+        let $item = $(ev.target).closest('.btn-accounts-filter'),
             filter_type = $item.attr('data-jid');
 
         this.current_account = this.calls_accounts.find(item => item.get('jid') === filter_type);
@@ -335,20 +368,19 @@ xabber.CallsView = xabber.BasicView.extend({
         if (!this.current_account)
             this.current_account = this.calls_accounts[0];
 
-        this.filter_type = null;
-        this.$('.calls-type-filter-content .filter-item-wrap').removeClass('selected-filter');
-        this.$(`.calls-type-filter-content .filter-item-wrap[data-filter="all"]`).addClass('selected-filter');
-
-        this.$('.calls-account-filter-content .filter-item-wrap').removeClass('selected-filter');
-        this.$(`.calls-account-filter-content .filter-item-wrap[data-jid="${filter_type}"]`).addClass('selected-filter');
 
         this.renderCalls();
         this.updateCallContacts();
+        this.updateFilterItems()
     },
 
     filterType: function (ev) {
         let $item = $(ev.target).closest('.filter-item-wrap'),
             filter_type = $item.attr('data-filter');
+
+        if ($item.hasClass('selected-filter')){
+            filter_type = 'all';
+        }
 
         if (filter_type === 'all'){
             this.filter_type = null
@@ -360,6 +392,7 @@ xabber.CallsView = xabber.BasicView.extend({
         this.$(`.calls-type-filter-content .filter-item-wrap[data-filter="${filter_type}"]`).addClass('selected-filter');
 
         this.renderCalls();
+        this.updateFilterItems()
     },
 
     renderCalls: function () {
@@ -625,15 +658,18 @@ xabber.CallsView = xabber.BasicView.extend({
 
     updateAccountsFilter: function (item, collection, options, force_render) {
         let accounts = xabber.accounts.enabled;
-        this.$('.calls-account-filter').switchClass('hidden', accounts.length === 1 || !accounts.length);
+        this.$('.tab-account-filter-item').switchClass('hidden', accounts.length === 1 || !accounts.length);
         if (accounts.length){
             try{
-                this.$('.calls-account-filter-content').empty();
+                this.$('.additional-filter-variant').remove();
                 _.each(accounts, (account) => {
-                    this.$('.calls-account-filter-content').append(this.renderAccountItem(account));
+                    this.$('.accounts-dropdown').append($(`<div class="property-variant btn-accounts-filter additional-filter-variant" data-jid="${account.get('jid')}"><span class="one-line">${account.get('jid')}</span></div>`));
                 });
                 this.calls_accounts = accounts;
-                !this.current_account && (this.current_account = this.calls_accounts[0]);
+                if (!this.current_account) {
+                    this.current_account = this.calls_accounts[0];
+                    this.$('.tab-account-filter-item .tab-filter-item-text').text(this.current_account.get('jid'));
+                }
                 (this.isVisible() || force_render) && this.updateCurrentCalls();
                 (this.isVisible() || force_render) && this.updateCallContacts();
             } catch (e) {

@@ -46,8 +46,7 @@ xabber.NotificationsView = xabber.BasicView.extend({
     avatar_size: constants.AVATAR_SIZES.SYNCHRONIZE_ACCOUNT_ITEM,
 
     events: {
-        "click .notifications-account-filter-content .filter-item-wrap": "selectAccounts",
-        "click .btn-accounts-filter": "selectAccountFromDropdown",
+        "click .btn-accounts-filter": "selectAccounts",
         "click .tab-filter-item": "removeFilter",
         "click .notifications-type-filter-content .filter-item-wrap": "filterContent",
         "click .notification-subscriptions-button": "filterContent",
@@ -342,13 +341,10 @@ xabber.NotificationsView = xabber.BasicView.extend({
         let accounts = xabber.accounts.enabled;
         accounts = accounts.filter(item => item.server_features.get(Strophe.NS.XABBER_NOTIFY));
         this.$('.tab-additional-filter-item').switchClass('hidden', accounts.length === 1 || !accounts.length);
-        this.$('.notifications-account-filter').switchClass('hidden', accounts.length === 1 || !accounts.length);
         if (accounts.length){
             try{
-                this.$('.notifications-account-filter-content').empty();
                 this.$('.additional-filter-variant').remove();
                 _.each(accounts, (account) => {
-                    this.$('.notifications-account-filter-content').append(this.renderAccountItem(account));
                     this.$('.accounts-dropdown').append($(`<div class="property-variant btn-accounts-filter additional-filter-variant" data-jid="${account.get('jid')}"><span class="one-line">${account.get('jid')}</span></div>`));
                 });
                 this.updateCurrentNotifications();
@@ -379,33 +375,11 @@ xabber.NotificationsView = xabber.BasicView.extend({
 
     selectAccounts: function (ev) {
 
-        let $item = $(ev.target).closest('.filter-item-wrap');
-        if (!$item.attr('data-jid')) {
-            $item.remove();
-            return;
-        }
-        if(!$item.hasClass('selected-filter')){
-            this.$('.notifications-account-filter-content .filter-item-wrap').removeClass('selected-filter');
-        }
-        $item.switchClass('selected-filter');
-
-
-        let accounts  = this.$('.notifications-account-filter-content .filter-item-wrap.selected-filter').map(function(){return $(this).attr("data-jid");}).get();
-        if (this.current_content){
-            this.current_content.filterByAccounts(accounts);
-            this.updateFilterItems();
-        }
-    },
-
-    selectAccountFromDropdown: function (ev) {
-
         let $item = $(ev.target).closest('.btn-accounts-filter');
         if (!$item.attr('data-jid')) {
             $item.remove();
             return;
         }
-        this.$('.notifications-account-filter-content .filter-item-wrap').removeClass('selected-filter');
-        this.$(`.notifications-account-filter-content .filter-item-wrap[data-jid="${$item.attr('data-jid')}"]`).addClass('selected-filter');
 
         if (this.current_content) {
             if ($item.attr('data-jid') === 'all'){

@@ -9,18 +9,13 @@
             <input type="text" class="search-input simple-input-field" tabindex="1" placeholder='{[print(xabber.getString("search"))]}'>
             <i class="close-search-icon mdi mdi-16px mdi-close-circle"></i>
         </div>
-        <div class="calls-account-filter">
-            <div class="calls-filter-header">{[print(xabber.getString("notifications_window__account_filter_header"))]}</div>
-            <div class="calls-account-filter-content">
-            </div>
-        </div>
         <div class="calls-type-filter">
             <div class="calls-filter-header">{[print(xabber.getString("notifications_window__filters_header"))]}</div>
             <div class="calls-type-filter-content">
-                <div class="filter-item-wrap selected-filter" data-filter="all">
-                    <svg class="filter-icon mdi fill-color-grey-500 mdi-svg-template" data-svgname="call"></svg>
-                    <div class="name one-line">{[print(xabber.getString("calls_window__type_filter_all"))]}</div>
-                </div>
+                <!--<div class="filter-item-wrap selected-filter" data-filter="all">-->
+                    <!--<svg class="filter-icon mdi fill-color-grey-500 mdi-svg-template" data-svgname="call"></svg>-->
+                    <!--<div class="name one-line">{[print(xabber.getString("calls_window__type_filter_all"))]}</div>-->
+                <!--</div>-->
                 <div class="filter-item-wrap" data-filter="missed">
                     <svg class="filter-icon mdi fill-color-grey-500 mdi-svg-template" data-svgname="call-missed"></svg>
                     <div class="name one-line">{[print(xabber.getString("calls_window__type_filter_missed"))]}</div>
@@ -48,7 +43,11 @@
 </div>
 <div class="calls-right-wrap">
     <div class="calls-header-container">
-        <div class="call-header-text">{[print(xabber.getString("calls_window__header"))]}</div>
+        <div class="btn-check-all">
+            <svg class="mdi mdi-24px mdi-svg-template" data-svgname="check-all"></svg>
+        </div>
+    </div>
+    <div class="tab-active-filters-wrap">
         <div class="chat-tools-wrap">
             <div class="chat-tool chat-tool-player">
                 <div class="chat-tool-player-containter">
@@ -81,9 +80,12 @@
                 </div>
             </div>
         </div>
-        <div class="btn-check-all">
-            <svg class="mdi mdi-24px mdi-svg-template" data-svgname="check-all"></svg>
+        <div class="tab-additional-filter-item tab-account-filter-item dropdown-button ground-main-color-50 hidden" data-type="accounts" data-value="all" data-activates="{{view.cid}}-accounts-filters">
+            <div class="tab-filter-item-text one-line"></div>
+            <i class="mdi mdi-8px mdi-triangle"></i>
         </div>
+        <ul id="{{view.cid}}-accounts-filters" class="dropdown-content accounts-dropdown bootstrap-dropdown noselect">
+        </ul>
     </div>
     <div class="calls-right-container">
         <div class="active-call-container">

@@ -6658,7 +6658,8 @@ input[type=text].simple-input-field:hover {
     padding: 22px 0 16px;
     position: absolute;
     display: flex;
-    z-index: 0;
+    z-index: 1;
+    pointer-events: none;
 }
 .calls-content-filters .search-form,
 .notifications-content-filters .search-form,
@@ -6695,6 +6696,7 @@ input[type=text].simple-input-field:hover {
     right: 44px;
     top: 20px;
     cursor: pointer;
+    pointer-events: auto;
 }
 .contacts-panel-wrap .panel-head .btn-add-contact{
     right: 94px;
@@ -6706,6 +6708,7 @@ input[type=text].simple-input-field:hover {
     color: #9e9e9e;
 }
 .contacts-panel-wrap .chat-tools-wrap,
+.calls-right-wrap .chat-tools-wrap,
 .notifications-right-wrap .chat-tools-wrap{
     position: relative;
     top: -11px;
@@ -6716,12 +6719,14 @@ input[type=text].simple-input-field:hover {
     margin: 0;
     margin-right: 158px;
 }
+.notifications-right-wrap .chat-tools-wrap .chat-tool-player,
+.calls-right-wrap .chat-tools-wrap .chat-tool-player,
 .contacts-panel-wrap .chat-tools-wrap .chat-tool-player{
     position: relative;
     right: 0;
 }
 .tab-active-filters-wrap{
-    margin: 4px 0 0 4px;
+    margin: 3px 0 0 4px;
     padding: 8px 0 0 8px;
     position: relative;
     resize: both;
@@ -6741,9 +6746,6 @@ input[type=text].simple-input-field:hover {
     height: 24px;
     margin: 8px 8px 8px 0;
     position: relative;
-}
-.tab-active-filters-wrap .tab-additional-filter-item:not(.regular-additional-filter){
-    min-width: 100px;
 }
 .tab-active-filters-wrap .tab-additional-filter-item:hover,
 .tab-active-filters-wrap .tab-filter-item:hover{
@@ -9986,7 +9988,7 @@ input[type=text].simple-input-field:hover {
 }
 
 .chat-head-info-buttons-container .chat-tools-wrap .chat-tool-player .chat-tool:not(.chat-player-duration){
-    margin-top: 5px;
+    margin-top: 4px;
 }
 
 .chat-head-info-buttons-container .chat-tools-wrap .chat-tool-player .chat-tool.active-plyr:not(.chat-player-duration){
@@ -17221,6 +17223,7 @@ input[type=range].voice-message-volume:focus {
     border: 1px solid rgba(0,0,0,.15);
     border-radius: 0.25rem;
     overflow: visible;
+    pointer-events: auto;
 }
 .settings-panel-head .dropdown-content#storage-delete-files{
     top: -3px!important;
@@ -22401,13 +22404,21 @@ ul.restrictions-list-content>li {
     position: relative;
     width: 73.6%;
     max-width: 1024px;
+    display: flex;
+    flex-direction: column;
 }
 .calls-header-container{
     font-size: 20px;
-    height: 72px;
-    padding: 20px 6px 28px 32px;
     width: 100%;
-    position: relative;
+    border: none;
+    box-shadow: none;
+    display: flex;
+    height: 72px;
+    min-height: 72px;
+    padding: 22px 0 16px;
+    position: absolute;
+    z-index: 1;
+    pointer-events: none;
 }
 .calls-header-container .btn-check-all{
     position: absolute;
@@ -22416,6 +22427,7 @@ ul.restrictions-list-content>li {
     right: 44px;
     width: 24px;
     height: 24px;
+    pointer-events: auto;
 }
 .calls-header-container .btn-check-all svg path{
     fill: #BDBDBD;
@@ -22606,6 +22618,8 @@ ul.restrictions-list-content>li {
     padding: 20px 6px 28px 32px;
     width: 100%;
     position: absolute;
+    z-index: 1;
+    pointer-events: none;
 }
 .notifications-content-wrap .notifications-utility .btn-read-all{
     position: absolute;
@@ -22614,6 +22628,7 @@ ul.restrictions-list-content>li {
     right: 44px;
     width: 24px;
     height: 24px;
+    pointer-events: auto;
 }
 .notifications-content-wrap .notifications-utility .btn-read-all svg path{
     fill: #BDBDBD;
