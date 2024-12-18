@@ -1017,7 +1017,7 @@ xabber.Body = xabber.NodeView.extend({
         }
         (!attrs || !attrs.notifications) && (new_attrs.notifications = false);
         (!attrs || !attrs.calls) && (new_attrs.calls = false);
-        (!attrs || !attrs.contacts) && (new_attrs.contacts = false);
+        (name !== 'contacts' && (!attrs || !attrs.contacts)) && (new_attrs.contacts = false);
         this.screen.set(_.extend(new_attrs, attrs), options);
     },
 
@@ -1128,13 +1128,15 @@ xabber.ToolbarView = xabber.BasicView.extend({
     },
 
     onUpdatedScreen: function (name) {
+        xabber.chats_view.$('.btn-unread').removeClass('hidden2');
         if (this.$('.toolbar-item:not(.toolbar-logo).saved-chats').hasClass('active')) {
             xabber.chats_view.$('.recent-chats-main-header').text(xabber.getString("toolbar__menu_item__saved_chats"));
         } else if (this.$('.toolbar-item:not(.toolbar-logo):not(.account-item).all-chats.unread').hasClass('active'))  {
             xabber.chats_view.$('.recent-chats-main-header').text(xabber.getString("unread_chats"));
 
         } else if (this.$('.toolbar-item:not(.toolbar-logo).archive-chats').hasClass('active'))  {
-            xabber.chats_view.$('.recent-chats-main-header').text(xabber.getString("toolbar__menu_item__archive_chats"));
+            xabber.chats_view.$('.recent-chats-main-header').text(xabber.getString("chats_view__header_archive"));
+            xabber.chats_view.$('.btn-unread').addClass('hidden2');
         } else {
             xabber.chats_view.$('.recent-chats-main-header').text(xabber.getString("toolbar__menu_item__chats"));
         }

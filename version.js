@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.4.17","version_description":"active filtration block in calls, fixed player position in tabs, added account filtration to contacts, removed left account filtration block in tabs, "}'
+'{"version_number":"2.4.18","version_description":"changed archive header text, hidden unread button from archive tab, changed subscription show limit, added unread notifications counter, added chat open on subscription jid click, fixed contacts group dropdown, fixed contact details opening in contacts tab, fixed chat active state in chats view after opening contact details in contacts tab"}'
 )});

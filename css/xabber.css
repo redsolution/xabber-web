@@ -22371,6 +22371,7 @@ ul.restrictions-list-content>li {
 .calls-content-filters .call-contact-item .call-contact-frequency{
     color: rgba(0, 0, 0, 0.54);
     float: right;
+    line-height: 24px;
 }
 .calls-content-filters .call-contact-item .btn-send-jingle{
     border-radius: 50%;
@@ -22653,6 +22654,9 @@ ul.restrictions-list-content>li {
     position: relative;
     margin-bottom: 8px;
 }
+.filter-item-wrap.subscription-item-wrap{
+    margin-top: 16px;
+}
 .contacts-panel-wrap .contacts-panel-left-side .filter-item-wrap .filter-icon,
 .calls-content-filters .filter-item-wrap .filter-icon,
 .notifications-content-wrap .filter-item-wrap .filter-icon{
@@ -22678,6 +22682,7 @@ ul.restrictions-list-content>li {
     FONT-WEIGHT: 500;
     color: rgba(0, 0, 0, .54);
 }
+.notifications-content-filters .filter-item-wrap span,
 .contacts-panel-wrap .contacts-panel-left-side .filter-item-wrap span{
     color: #757575;
     font-size: 16px;
@@ -22909,10 +22914,13 @@ ul.restrictions-list-content>li {
 }
 .notifications-content-wrap .notification-subscriptions-wrap .notification-subscription-item .subcription-main-wrap .subscription-item-jid{
     font-size: 14px;
-    color: rgba(60, 60, 67, 0.6);
     margin-bottom: 8px;
     line-height: 20px;
     color: #757575;
+    cursor: pointer;
+}
+.notifications-content-wrap .notification-subscriptions-wrap .notification-subscription-item .subcription-main-wrap .subscription-item-jid:hover{
+    opacity: 0.7;
 }
 .notifications-content-wrap .notification-subscriptions-wrap .notification-subscription-item .subscription-item-buttons-wrap{
     /*height: 28px;*/

@@ -9882,6 +9882,7 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
             outDuration: 100,
             hover: false,
             belowOrigin: true,
+            alignment: 'right'
         });
         this.updatePlyrControls();
         this.updatePlyrTime();
@@ -10276,6 +10277,9 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
             this.saved_scroll = scrolled_top;
             contact.showDetailsRight('contacts')
             this.saved_scroll = scrolled_top;
+            if (xabber.chats_view.active_chat && xabber.chats_view.active_chat.model) {
+                xabber.chats_view.active_chat.model.set('active', false);
+            }
             this.scrollTo(scrolled_top);
         } else {
             $item.remove();
