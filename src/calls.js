@@ -232,7 +232,10 @@ xabber.CallsView = xabber.BasicView.extend({
             })));
         }
         if (this.current_account){
+            this.$('.tab-active-filters-wrap').attr('data-color', this.current_account.settings.get('color'));
             this.$('.tab-account-filter-item .tab-filter-item-text').text(this.current_account.get('jid'));
+        } else {
+            this.$('.tab-active-filters-wrap').attr('data-color', '');
         }
     },
 

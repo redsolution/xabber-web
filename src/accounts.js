@@ -2063,6 +2063,18 @@ xabber.ToolbarAccountsBlockView = xabber.BasicView.extend({
         } else {
             account.last_msg_timestamp = 0;
             this.removeChild(jid);
+            if (xabber.toolbar_view.data.get('account_filtering') === account.get('jid')) {
+                xabber.toolbar_view.data.set('account_filtering', null);
+                xabber.toolbar_view.$('.toolbar-item.account-item').removeClass('active');
+                if (xabber.body.screen.get('previous_screen')){
+                    let previous_chat = xabber.body.screen.get('previous_screen');
+                    previous_chat.force_open_all_chats = true;
+                    xabber.body.screen.set('previous_screen', previous_chat);
+                }
+                if (xabber.body.screen && (xabber.body.screen.get('name') === 'all-chats')){
+                    xabber.toolbar_view.showAllChats(null, true);
+                }
+            }
         }
         this.$el.find('.single-item').removeClass('single-item');
         if (this.model.enabled.length === 1)
@@ -2077,6 +2089,18 @@ xabber.ToolbarAccountsBlockView = xabber.BasicView.extend({
         if (this.model.enabled.length === 1)
             this.$el.find('.toolbar-item.account-item').addClass('single-item');
         this.$el.find('.toolbar-item.settings-modal').switchClass('hidden', this.model.enabled.length != 0);
+        if (xabber.toolbar_view.data.get('account_filtering') === account.get('jid')) {
+            xabber.toolbar_view.data.set('account_filtering', null);
+            xabber.toolbar_view.$('.toolbar-item.account-item').removeClass('active');
+            if (xabber.body.screen.get('previous_screen')){
+                let previous_chat = xabber.body.screen.get('previous_screen');
+                previous_chat.force_open_all_chats = true;
+                xabber.body.screen.set('previous_screen', previous_chat);
+            }
+            if (xabber.body.screen && (xabber.body.screen.get('name') === 'all-chats')){
+                xabber.toolbar_view.showAllChats(null, true);
+            }
+        }
     }
 });
 

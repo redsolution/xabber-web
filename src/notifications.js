@@ -135,8 +135,13 @@ xabber.NotificationsView = xabber.BasicView.extend({
                 })));
             }
             if (this.current_content.filtered_accounts.length){
+                let account = xabber.accounts.find(item => item.get('jid') === this.current_content.filtered_accounts[0]);
+                this.$('.tab-active-filters-wrap').attr('data-color', account.settings.get('color'));
+                this.$('.notifications-calendars-wrap').attr('data-color', account.settings.get('color'));
                 this.$('.tab-additional-filter-item .tab-filter-item-text').text(this.current_content.filtered_accounts[0]);
             } else {
+                this.$('.tab-active-filters-wrap').attr('data-color', '');
+                this.$('.notifications-calendars-wrap').attr('data-color', '');
                 this.$('.tab-additional-filter-item .tab-filter-item-text').text(xabber.getString("notifications_window__type_filter_all_accounts"));
             }
         }
@@ -854,7 +859,7 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
             this.$('.notification-subscriptions-button-wrap').addClass('hidden');
         }
         this.$('.notification-subscriptions-wrap').switchClass('hidden', this.$('.notification-subscription-item:not(.hidden)').length === 0);
-        this.$('.notification-subscription-item').slice(1).addClass('hidden');
+        this.$('.notification-subscription-item').slice(3).addClass('hidden');
         xabber.toolbar_view.recountAllMessageCounter();
         this.recountFilteredCount();
     },
@@ -869,7 +874,7 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
         if (text.length > showChar){
 
             let c = text.substr(0, showChar);
-            let h = text.substr(showChar-1, text.length - showChar);
+            let h = text.substr(showChar, text.length - showChar);
 
             let html = c + '<span class="moreellipses">... </span><span><span class="subscription-more-text hidden">' + h + '</span>  <span href="" class="subscription-show-text-btn">' + xabber.getString("more") + '</span></span>';
 
@@ -900,6 +905,7 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
         if (!contact)
             return;
 
+        xabber.toolbar_view.showAllChats();
         account.chats.openChat(contact);
     },
 
