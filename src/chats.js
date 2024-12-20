@@ -10059,7 +10059,12 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
             all_chats = chats.filter(chat => (chat.get('saved') || chat.get('timestamp') && (!chat.get('archived') && !chat.get('notifications'))) && (chat.get('pinned') === '0' || !chat.get('pinned')));
             all_chats_pinned = chats.filter(chat => (chat.get('saved') || chat.get('timestamp') && (!chat.get('archived') && !chat.get('notifications'))) && chat.get('pinned') !== '0' && chat.get('pinned'));
             xabber.toolbar_view.$('.toolbar-item:not(.toolbar-logo).unread').removeClass('unread');
+            xabber.chats_view.$('.recent-chats-main-header').text(xabber.getString("toolbar__menu_item__chats"));
             this.onUpdatedScreen();
+        }
+        if (!all_chats.length && !all_chats_pinned.length) {
+            xabber.toolbar_view.$('.toolbar-item:not(.toolbar-logo).unread').removeClass('unread');
+            xabber.chats_view.$('.recent-chats-main-header').text(xabber.getString("toolbar__menu_item__chats"));
         }
         if (xabber.toolbar_view.data.get('account_filtering')){
             all_chats = all_chats.filter(chat => (chat.account.get('jid') === xabber.toolbar_view.data.get('account_filtering')))

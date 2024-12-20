@@ -2063,7 +2063,7 @@ xabber.ToolbarAccountsBlockView = xabber.BasicView.extend({
         } else {
             account.last_msg_timestamp = 0;
             this.removeChild(jid);
-            if (xabber.toolbar_view.data.get('account_filtering') === account.get('jid')) {
+            if (xabber.toolbar_view.data.get('account_filtering') === account.get('jid') || !xabber.accounts.enabled.length) {
                 xabber.toolbar_view.data.set('account_filtering', null);
                 xabber.toolbar_view.$('.toolbar-item.account-item').removeClass('active');
                 if (xabber.body.screen.get('previous_screen')){
@@ -2089,7 +2089,7 @@ xabber.ToolbarAccountsBlockView = xabber.BasicView.extend({
         if (this.model.enabled.length === 1)
             this.$el.find('.toolbar-item.account-item').addClass('single-item');
         this.$el.find('.toolbar-item.settings-modal').switchClass('hidden', this.model.enabled.length != 0);
-        if (xabber.toolbar_view.data.get('account_filtering') === account.get('jid')) {
+        if (xabber.toolbar_view.data.get('account_filtering') === account.get('jid') || !xabber.accounts.enabled.length) {
             xabber.toolbar_view.data.set('account_filtering', null);
             xabber.toolbar_view.$('.toolbar-item.account-item').removeClass('active');
             if (xabber.body.screen.get('previous_screen')){

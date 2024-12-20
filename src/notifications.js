@@ -542,7 +542,7 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
             subscription_counter = subscription_counter + contacts.length;
         });
 
-        security_counter = unread_msgs.filter(msg => msg.get('security_notification')).length;
+        security_counter = unread_msgs.filter(msg => msg.get('security_notification') && !msg.get('notification_info') && !msg.get('notification_mention')).length;
         information_counter = unread_msgs.filter(msg => msg.get('notification_info')).length;
         mention_counter = unread_msgs.filter(msg => msg.get('notification_mention')).length;
 

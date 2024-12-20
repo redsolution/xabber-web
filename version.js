@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.4.19","version_description":"fixed account filtering behaviour when switching tabs, added filter account button hiding in tabs where it is not used, fixed account filtering after account was disabled, added account coloring for active filtration block in calls and notifications, added calendar account coloring dependent on current account filtration, changed subscription button desing and shown amount of subscription items, fixed subscription text slicing, fixed chat opening on subscription jid click, fixed chats list after closing settings after disabling account with which account filtering was currently enabled"}'
+'{"version_number":"2.4.20","version_description":"fixed account filtration after closing settings, fixed unread header showing in different incorrect situtations, fixed security notifications counter, "}'
 )});
