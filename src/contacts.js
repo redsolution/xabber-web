@@ -8912,37 +8912,38 @@ xabber.Roster = xabber.ContactsBase.extend({
             account_conversation_type: $(item).attr('jid') +  '/' + $(item).attr('type'),
             conversation: item.outerHTML,
         });
-        if (!chat.item_view.content && (chat.get('sync_type') === Strophe.NS.XABBER_NOTIFY || is_invite || encrypted && this.account.omemo)) {
+        if (!chat.item_view.content && (is_invite || encrypted && this.account.omemo)) {
             chat.item_view.content = new xabber.ChatContentView({chat_item: chat.item_view});
-            if (chat.get('sync_type') === Strophe.NS.XABBER_NOTIFY && this.account.server_features.get(Strophe.NS.XABBER_NOTIFY) && jid === this.account.server_features.get(Strophe.NS.XABBER_NOTIFY).get('from')){
-                chat.set('notifications', true);
-                contact.set('notifications', true);
-                contact.set('subscription', 'both');
-                chat.set('last_read_msg', last_read_msg);
-                if (!request_with_stamp) {
-                    chat.item_view.content.loadNotificationsHistoryToPreviousLastMsg();
-                }
-                xabber.accounts.trigger('notification_chat_created');
-                this.account.cached_notifications.getAllFromCachedNotifications((res) => {
-                    if (res.length){
-                        let parser = new DOMParser();
-                        _.each(res, (msg_item) => {
-                            let xml = parser.parseFromString(msg_item.xml, "text/xml")
-                            msg_item.is_unread && console.error(msg_item.is_unread)
-                            this.account.chats.receiveChatMessage(xml.firstChild,
-                                _.extend({
-                                    is_archived: true,
-                                    is_cached: true,
-                                    is_cached_unread: msg_item.is_unread,
-                                }, {})
-                            )
-                        });
-                        if (xabber.notifications_view.current_content && xabber.notifications_view.current_content.isVisible() && is_first_sync){
-                            xabber.notifications_view.current_content.onShowNotificationsTab();
-                        }
-                    }
-                });
+        }
+        if (!chat.get('notifications') && chat.get('sync_type') === Strophe.NS.XABBER_NOTIFY && this.account.server_features.get(Strophe.NS.XABBER_NOTIFY) && jid === this.account.server_features.get(Strophe.NS.XABBER_NOTIFY).get('from')){
+            !chat.item_view.content && (chat.item_view.content = new xabber.ChatContentView({chat_item: chat.item_view}));
+            chat.set('notifications', true);
+            contact.set('notifications', true);
+            contact.set('subscription', 'both');
+            chat.set('last_read_msg', last_read_msg);
+            if (!request_with_stamp) {
+                chat.item_view.content.loadNotificationsHistoryToPreviousLastMsg();
             }
+            xabber.accounts.trigger('notification_chat_created');
+            this.account.cached_notifications.getAllFromCachedNotifications((res) => {
+                if (res.length){
+                    let parser = new DOMParser();
+                    _.each(res, (msg_item) => {
+                        let xml = parser.parseFromString(msg_item.xml, "text/xml")
+                        msg_item.is_unread && console.error(msg_item.is_unread)
+                        this.account.chats.receiveChatMessage(xml.firstChild,
+                            _.extend({
+                                is_archived: true,
+                                is_cached: true,
+                                is_cached_unread: msg_item.is_unread,
+                            }, {})
+                        )
+                    });
+                    if (xabber.notifications_view.current_content && xabber.notifications_view.current_content.isVisible() && is_first_sync){
+                        xabber.notifications_view.current_content.onShowNotificationsTab();
+                    }
+                }
+            });
         }
         if ($item.attr('pinned') || $item.attr('pinned') === '0'){
             chat.set('pinned', $item.attr('pinned'));

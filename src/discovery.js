@@ -206,6 +206,25 @@ xabber.ServerFeatures = Backbone.Collection.extend({
                 }
             }
         });
+        if (this.get(Strophe.NS.XABBER_NOTIFY) && this.get(Strophe.NS.XABBER_NOTIFY).get('from')){
+            let jid = this.get(Strophe.NS.XABBER_NOTIFY).get('from');
+            if (this.account.contacts.get(jid)){
+                let chat = this.account.chats.getChat(this.account.contacts.get(jid))
+                if (!chat.get('notifications')){
+                    this.account.cached_sync_conversations.getFromCachedConversations(`${jid}/${Strophe.NS.XABBER_NOTIFY}` ,(item) => {
+                        if (!item || !item.conversation)
+                            return;
+                        this.account.roster.syncConversation(null, null, item.conversation, true);
+                    });
+                    account.cached_sync_conversations.getFromCachedConversations(`notifications.xmppdev01.xabber.com/${Strophe.NS.XABBER_NOTIFY}` ,(item) => {
+                        if (!item || !item.conversation)
+                            return;
+                        account.roster.syncConversation(null, null, item.conversation, true);
+                    });
+                }
+            }
+
+        }
         if (this.account.auth_view && !(constants.TRUSTED_DOMAINS.indexOf(this.account.connection.domain) > -1)){
             this.account.auth_view.first_features_received = true
             if (this.account.auth_view.stepped_auth_complete)
