@@ -484,7 +484,8 @@ xabber.Account = Backbone.Model.extend({
                 ready_to_send: false,
                 conn_retries: 0,
                 conn_feedback: xabber.getString("application_state_connecting"),
-                auth_failed: false
+                auth_failed: false,
+                connection_timeout: undefined,
             });
             this.restoreStatus();
             this.conn_manager.connect(auth_type, jid, password, this.connectionCallback.bind(this));
@@ -528,6 +529,8 @@ xabber.Account = Backbone.Model.extend({
             this.session.set({conn_status: status, conn_condition: condition});
             if ((status === Strophe.Status.ERROR) && (condition === 'conflict') && !this.session.get('delete')) {
                 this.onConnectionConflict();
+            } else if (status === Strophe.Status.ERROR && (condition === 'connection-timeout')) {
+                this.session.set('connection_timeout', true);
             } else if (status === Strophe.Status.ERROR && (condition === 'policy-violation')) {
                 this.onAuthFailed(condition);
             } else if (status === Strophe.Status.CONNECTED) {
@@ -584,6 +587,9 @@ xabber.Account = Backbone.Model.extend({
                     connected: false,
                     ready_to_send: false,
                 });
+                if (this.session.get('connection_timeout')){
+                    this.connect();
+                }
             }
         },
 

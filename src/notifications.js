@@ -319,6 +319,7 @@ xabber.NotificationsView = xabber.BasicView.extend({
                 this.$('.notifications-utility').addClass('subscription-content');
                 this.$('.notification-subscription-item').removeClass('hidden');
                 this.$('.notification-subscriptions-button').addClass('hidden');
+                this.current_content.updateCalendarCellsActivity([]);
             } else if (filter_type === 'security') {
                 this.current_content.$el.addClass('security-content');
                 this.current_content.$el.addClass('subscription-content-hidden');
@@ -1252,10 +1253,10 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
     },
 
     updateCalendarCellsActivity: function (messages) {
+        xabber.notifications_view.$('.notifications-calendar-day').attr('data-activity-value', 0);
         if (!messages || !messages.length)
             return;
         messages = messages.filter(item => item.get('timestamp') >= Number(moment(Date.now()).subtract(1, 'months').startOf('month')));
-        xabber.notifications_view.$('.notifications-calendar-day').attr('data-activity-value', 0);
 
         _.each(messages, (msg) => {
             let $cell = this.findCalendarCellByDate(msg.get('timestamp'));
@@ -1395,6 +1396,7 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
                             }
                         }
                     } else if (force_render) {
+                        this._scroll_rendering = false;
                         return true;
                     } else if (!force_render) {
                             if (!this.load_history_dfd){
@@ -1404,6 +1406,7 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
 
                 }
             } else if (force_render) {
+                this._scroll_rendering = false;
                 return true;
             }
 

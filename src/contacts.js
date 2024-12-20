@@ -10165,7 +10165,7 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
         this.current_filter_domain = filter_domain;
         this.$('.tab-active-filters-wrap').append($(templates.tab_filter_item({
             value: filter_domain,
-            type: 'filter_type',
+            type: 'domain',
             text: filter_domain
         })));
 

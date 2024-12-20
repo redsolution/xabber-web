@@ -194,6 +194,7 @@ xabber.CallsView = xabber.BasicView.extend({
 
     updateCallContacts: function () {
         this.$('.calls-contacts-container').html('');
+        this.$('.calls-contacts-wrap').addClass('hidden');
         let calls_messages =  this.calls_messages.filter(msg => msg.get('call_chat').account.get('jid') === this.current_account.get('jid'));
         if (!calls_messages.length)
             return;
@@ -218,6 +219,7 @@ xabber.CallsView = xabber.BasicView.extend({
                 let $template = $(templates.call_contact_item({jid: item.contact.get('jid'), name: item.contact.get('name'), count: item.count}));
                 $template.find('.circle-avatar').setAvatar(item.contact.cached_image || utils.images.getDefaultAvatar(item.contact), 32);
                 this.$('.calls-contacts-container').append($template);
+                this.$('.calls-contacts-wrap').removeClass('hidden');
             });
         }
     },
