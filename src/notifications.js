@@ -48,6 +48,7 @@ xabber.NotificationsView = xabber.BasicView.extend({
     events: {
         "click .btn-accounts-filter": "selectAccounts",
         "click .tab-filter-item": "removeFilter",
+        "click .notifications-filter-main-header": "clickClearFilter",
         "click .notifications-type-filter-content .filter-item-wrap": "filterContent",
         "click .notification-subscriptions-button": "filterContent",
         "click .notifications-calendar-day": "showDay",
@@ -88,6 +89,14 @@ xabber.NotificationsView = xabber.BasicView.extend({
             hover: false,
             belowOrigin: true,
         });
+        this.updateFilterItems();
+    },
+
+
+
+    clickClearFilter: function (options) {
+        this.clearFilter();
+        this.updateAccountsFilter();
         this.updateFilterItems();
     },
 
@@ -445,6 +454,7 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
         "click .back-to-unread:not(.back-to-bottom)": "scrollToUnreadWithButton",
         "click .btn-decline": "declineSubscription",
         "click .btn-add": "addContact",
+        "click .btn-join-group": "joinGroup",
         "click .btn-block": "blockContact",
         "click .subscription-switch-item": "switchSubscription",
         "click .subscription-show-text-btn": "showText",
@@ -602,6 +612,23 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
             });
         else
             this.sendAndAskSubscription(contact);
+    },
+
+    joinGroup: function (ev) {
+        let $item = $(ev.target).closest('.notification-subscription-item');
+        if (!$item.attr('data-jid') || !$item.attr('data-account-jid'))
+            return;
+        let account = xabber.accounts.enabled.find(acc => acc.get('jid') === $item.attr('data-account-jid'));
+        if (!account)
+            return;
+        let contact = account.contacts.get($item.attr('data-jid'));
+        if (!contact)
+            return;
+
+        if (contact.invitation){
+            xabber.toolbar_view.showAllChats();
+            contact.invitation.join();
+        }
     },
 
     sendAndAskSubscription: function (contact) {
@@ -831,7 +858,7 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
         }
         this.$('.subscription-switch-container').remove();
         _.each(accounts, (account) => {
-            let contacts = account.contacts.filter(item => item.get('subscription_request_in'));
+            let contacts = account.contacts.filter(item => item.get('invitation') || (item.get('subscription_request_in') && item.get('subscription') !== 'both'));
                 _.each(contacts, (contact) => {
                     let $template = $(templates.incoming_subscriptions_item({
                         name: contact.get('name'),
@@ -839,13 +866,54 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
                         account: account.get('jid'),
                         text: contact.get('subscription_request_in_text'),
                         counter: counter,
+                        group_chat: contact.get('group_chat'),
+                        group_chat_members_text: contact.get('group_chat') ? '23 members, including Amy Adams, Baster Beagle, Clint Collins, Dudley Dillington.' : '',
                     }));
                     this.$('.notification-subscriptions-content-wrap').append($template);
-                    let image = contact.cached_image;
-                    $template.find('.circle-avatar').setAvatar(image, 64);
+                    if (contact.invitation && contact.invitation.message){
+                        $template.find('.subscription-invitation-item-user-text').text(contact.invitation.message.get('message'));
+                    }
+                    if (contact.get('group_chat')){
+                        if (contact.invitation && contact.invitation.message && contact.invitation.message.get('inviter_jid')){ //34
+                            let inviter_contact = account.contacts.get(contact.invitation.message.get('inviter_jid'));
+                            if (!inviter_contact){
+                                inviter_contact = account.contacts.mergeContact({jid: contact.invitation.message.get('inviter_jid')})
+                            }
+                            let inviter_image = inviter_contact.cached_image;
+                            $template.find('.circle-avatar.subscribe-avatar').setAvatar(inviter_image, 64);
+
+                            let group_image = contact.cached_image;
+                            $template.find('.circle-avatar.group-avatar').setAvatar(group_image, 64);
+
+                            $template.find('.subscription-invitation-item-group-wrap').removeClass('hidden');
+                            let group_name = xabber.getString("groupchat_public_group");
+                            if (contact.get('incognito_chat'))
+                                group_name = xabber.getString("groupchat_incognito_group");
+                            if (contact.get('private_chat'))
+                                group_name = xabber.getString("groupchat_private_chat");
+
+                            if (inviter_contact.get('name') === inviter_contact.get('jid')){
+                                $template.find('.subscription-invitation-item-main-text')
+                                    .html(`<span class="inviter-name">${inviter_contact.get('name')}</span> ${xabber.getString("notifications_window__subscriptions_group_chat_invitation_main_text")} <span class="invitation-link text-color-700">${group_name}</span>:`)
+                            } else {
+                                $template.find('.subscription-invitation-item-main-text')
+                                    .html(`<span class="inviter-name">${inviter_contact.get('name')}</span> (<span class="inviter-jid">${inviter_contact.get('jid')}</span>) ${xabber.getString("notifications_window__subscriptions_group_chat_invitation_main_text")} <span class="invitation-link text-color-700">${group_name}</span>:`)
+                            }
+                            let image = contact.cached_image;
+                            let icon_name = 'group-public';
+                            if (contact.get('incognito_chat'))
+                                icon_name = 'group-incognito';
+                            if (contact.get('private_chat'))
+                                icon_name = 'group-private';
+                            $template.find('.notification-icon.group-invite-icon').html(env.templates.svg[icon_name]());
+                        }
+                    } else {
+                        let image = contact.cached_image;
+                        $template.find('.circle-avatar.subscribe-avatar').setAvatar(image, 64);
+                    }
                     $template.attr('data-color', contact.account.settings.get('color'));
                     $template.attr('data-counter', counter);
-                    $template.find('.notification-icon').html(env.templates.svg['group-invite']());
+                    $template.find('.notification-icon.subscribe-icon').html(env.templates.svg['group-invite']());
                     if (!color_set){
                         this.$('.notification-subscriptions-wrap').prop('class', 'notification-subscriptions-wrap');
                         this.$('.notification-subscriptions-wrap').addClass(`outline-color-${contact.account.settings.get('color')}-300`);
@@ -866,7 +934,7 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
             this.$('.notification-subscriptions-button-wrap').addClass('hidden');
         }
         this.$('.notification-subscriptions-wrap').switchClass('hidden', this.$('.notification-subscription-item:not(.hidden)').length === 0);
-        this.$('.notification-subscription-item').slice(2).addClass('hidden');
+        this.filter_type !== 'subscription' && this.$('.notification-subscription-item').slice(2).addClass('hidden');
         xabber.toolbar_view.recountAllMessageCounter();
         this.recountFilteredCount();
     },
@@ -900,6 +968,8 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
     },
 
     openSubscriptionChat: function (ev) {
+        if ($(ev.target).closest('.subscription-invitation-item-group-wrap').length)
+            return;
         let $item = $(ev.target).closest('.notification-subscription-item'),
             account_jid = $item.attr('data-account-jid'),
             jid = $item.attr('data-jid');

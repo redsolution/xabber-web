@@ -46,6 +46,7 @@ xabber.CallsView = xabber.BasicView.extend({
         "click .chat-message .btn-send-jingle": "sendJingleMessage",
         "click .call-contact-item .btn-send-jingle": "sendJingleMessageContact",
         "click .btn-end-call": "endCall",
+        "click .calls-filter-main-header": "updateAccountsFilter",
         "click .btn-play-pause-plyr": "playPausePlyr",
         "click .btn-next-plyr": "nextPlyr",
         "click .btn-previous-plyr": "previousPlyr",
@@ -308,7 +309,9 @@ xabber.CallsView = xabber.BasicView.extend({
 
     updateCurrentCalls: function () {
         if (this.calls_accounts.length){
-            this.current_account = this.calls_accounts[0];
+            if (!this.current_account || (this.current_account && !this.current_account.get('enabled'))) {
+                this.current_account = this.calls_accounts[0];
+            }
             this.filter_type = null;
             this.$('.calls-type-filter-content .filter-item-wrap').removeClass('selected-filter');
             this.$(`.calls-type-filter-content .filter-item-wrap[data-filter="all"]`).addClass('selected-filter');
@@ -370,7 +373,7 @@ xabber.CallsView = xabber.BasicView.extend({
 
         this.current_account = this.calls_accounts.find(item => item.get('jid') === filter_type);
 
-        if (!this.current_account)
+        if (!this.current_account || (this.current_account && !this.current_account.get('enabled')))
             this.current_account = this.calls_accounts[0];
 
 
@@ -671,7 +674,7 @@ xabber.CallsView = xabber.BasicView.extend({
                     this.$('.accounts-dropdown').append($(`<div class="property-variant btn-accounts-filter additional-filter-variant" data-jid="${account.get('jid')}"><span class="one-line">${account.get('jid')}</span></div>`));
                 });
                 this.calls_accounts = accounts;
-                if (!this.current_account) {
+                if (!this.current_account || (this.current_account && !this.current_account.get('enabled'))) {
                     this.current_account = this.calls_accounts[0];
                     this.$('.tab-account-filter-item .tab-filter-item-text').text(this.current_account.get('jid'));
                 }

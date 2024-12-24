@@ -6621,6 +6621,7 @@ input[type=text].simple-input-field:hover {
     line-height: 32px;
     height: 64px;
     padding: 16px 24px;
+    cursor: pointer;
 }
 .contacts-panel-wrap .contacts-panel-left-side .contacts-type-filter{
 }
@@ -22313,6 +22314,7 @@ ul.restrictions-list-content>li {
     line-height: 32px;
     height: 64px;
     padding: 16px 24px;
+    cursor: pointer;
 }
 .left-column-filters-container{
     height: calc(100% - 64px);
@@ -22646,6 +22648,7 @@ ul.restrictions-list-content>li {
     line-height: 32px;
     height: 64px;
     padding: 16px 24px;
+    cursor: pointer;
 }
 .notifications-content-filters .notifications-type-filter{
     margin-bottom: 28px;
@@ -22959,6 +22962,80 @@ ul.restrictions-list-content>li {
     height: 20px;
     top: 14px;
     right: 24px;
+}
+.notifications-content-wrap .notification-subscriptions-wrap .notification-subscription-item .subscription-item-members-text,
+.notifications-content-wrap .notification-subscriptions-wrap .notification-subscription-item .subscription-invitation-item-main-text{
+    font-size: 14px;
+    line-height: 20px;
+}
+.notifications-content-wrap .notification-subscriptions-wrap .notification-subscription-item .subscription-invitation-item-main-text .inviter-name{
+    font-weight: 500;
+}
+.notifications-content-wrap .notification-subscriptions-wrap .notification-subscription-item .subscription-invitation-item-main-text .inviter-jid{
+    color: #757575;
+}
+.notifications-content-wrap .notification-subscriptions-wrap .notification-subscription-item .subscription-invitation-item-main-text .invitation-link{
+    text-decoration: underline;
+    text-transform: lowercase;
+}
+.notifications-content-wrap .notification-subscriptions-wrap .notification-subscription-item .subscription-invitation-item-group-wrap .subscription-item-jid{
+    cursor: auto !important;
+}
+.notifications-content-wrap .notification-subscriptions-wrap .notification-subscription-item .subscription-invitation-item-group-wrap .subscription-item-jid:hover{
+    opacity: 1 !important;
+}
+.notifications-content-wrap .notification-subscriptions-wrap .notification-subscription-item .invitation-avatar-wrap{
+    height: 100%;
+    left: 0;
+    position: absolute;
+    top: 0;
+    width: 86px;
+}
+.notifications-content-wrap .notification-subscriptions-wrap .notification-subscription-item .invitation-avatar-wrap .circle-avatar{
+    width: 48px;
+    height: 48px;
+    position: absolute;
+    top: 4px;
+    left: 18px;
+}
+.notifications-content-wrap .notification-subscriptions-wrap .notification-subscription-item .invitation-avatar-wrap .notification-icon.group-invite-icon{
+    background: #2196f3;
+    border-radius: 50%;
+    top: 40px;
+    color: #fff;
+    font-size: 16px;
+    height: 16px;
+    line-height: 16px;
+    outline: 2px solid #fff;
+    position: absolute;
+    right: 22px;
+    text-align: center;
+    width: 16px;
+}
+.notifications-content-wrap .notification-subscriptions-wrap .notification-subscription-item .invitation-avatar-wrap .notification-icon.group-invite-icon path,
+.notifications-content-wrap .notification-subscriptions-wrap .notification-subscription-item .invitation-avatar-wrap .notification-icon.group-invite-icon polygon{
+    fill: #fff;
+
+}
+.notifications-content-wrap .notification-subscriptions-wrap .notification-subscription-item .subscription-invitation-item-group-wrap{
+    padding-left: 88px;
+    border-left: 2px solid;
+    position: relative;
+    padding-bottom: 4px;
+}
+.notifications-content-wrap .notification-subscriptions-wrap .notification-subscription-item .subscription-invitation-item-user-text{
+    font-style: italic;
+    margin-bottom: 28px;
+}
+.notifications-content-wrap .notification-subscriptions-wrap .notification-subscription-item .subscription-item-members-avatars{
+    height: 24px;
+    margin-top: 6px;
+    display: flex;
+}
+.notifications-content-wrap .notification-subscriptions-wrap .notification-subscription-item .subscription-item-members-avatars .circle-avatar{
+    width: 24px;
+    height: 24px;
+    margin-right: 8px;
 }
 .notifications-content-wrap .chat-message .left-side{
     width: 84px;

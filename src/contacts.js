@@ -9810,6 +9810,7 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
         "click .contact-domain": "filterByDomain",
         "click .roster-sorting-item": "chooseSorting",
         "click .tab-filter-item": "removeFilter",
+        "click .contacts-filter-main-header": "clickClearFilter",
         "click .close-search-icon": "clearSearch",
         "click .contact-groups-wrap .group.group-expand": "expandGroups",
         "mouseout .contact-expanded-groups-wrap": "closeGroups",
@@ -9861,13 +9862,7 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
     render: function (options) {
         console.error(this.saved_scroll);
         if (_.isUndefined(this.saved_scroll) || _.isNull(this.saved_scroll) ){
-            this.current_filter = {};
-            this.$('.contacts-type-filter-content .filter-item-wrap').removeClass('selected-filter');
-            this.$('.contacts-type-filter-content .filter-item-wrap[data-filter="all"]').addClass('selected-filter');
-            this.current_type_subfilter = 'contacts';
-            this.updateSubFilter();
-            this.updateAccountsFilter();
-            this.processUpdateContacts(true, true);
+            this.clickClearFilter();
         } else {
             this.scrollTo(this.saved_scroll);
             this.saved_scroll = null
@@ -9888,6 +9883,21 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
         this.updatePlyrControls();
         this.updatePlyrTime();
         this.updateClientNotifications();
+    },
+
+    clickClearFilter: function () {
+        this.clearSearch();
+        this.current_filter = {};
+        this.current_filter_groups_list = [];
+        this.current_filter_domain = null;
+        this.sorting_type = 'name';
+        this.$(`.tab-active-filters-wrap .tab-filter-item`).remove();
+        this.$('.contacts-type-filter-content .filter-item-wrap').removeClass('selected-filter');
+        this.$('.contacts-type-filter-content .filter-item-wrap[data-filter="all"]').addClass('selected-filter');
+        this.current_type_subfilter = 'contacts';
+        this.updateSubFilter();
+        this.updateAccountsFilter();
+        this.processUpdateContacts(true, true);
     },
 
     updateClientNotifications: function (options) {
@@ -10315,6 +10325,7 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
         _.each(this.model.enabled, (account) => {
             if (account.get('jid') !== this.current_filter_account)
                 return;
+            let contacts = account.contacts.filter(item => !(item.get('invitation') || (item.get('subscription_request_in') && item.get('subscription') !== 'both')))
             _.each(account.contacts.models, (contact) => {
                 if (this.contacts.some(item => (item.account.get('jid') === contact.account.get('jid') && item.get('jid') === contact.get('jid')))
                     || contact.get('group_chat') || contact.get('notifications') || contact.get('server') || !Strophe.getNodeFromJid(contact.get('jid')))
@@ -10390,7 +10401,7 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
             if (account.get('jid') !== this.current_filter_account)
                 return;
             _.each(account.contacts.models, (contact) => {
-                if (contact.get('notifications') || contact.get('server') || !Strophe.getNodeFromJid(contact.get('jid')))
+                if (contact.get('notifications') || contact.get('server') || !Strophe.getNodeFromJid(contact.get('jid')) || contact.get('invitation') || contact.get('subscription_request_in'))
                     return;
                 if (this.current_filter_groups_list.length){
                     if (!contact.get('groups') || !contact.get('groups').length || !checker(contact.get('groups'), this.current_filter_groups_list))
@@ -10492,7 +10503,8 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
         let current_account = xabber.accounts.enabled.find(item => item.get('jid') === this.current_filter_account);
         if (current_account){
             let account_contacts = current_account.contacts.models;
-            account_contacts = account_contacts.filter(contact => !contact.get('notifications') && !contact.get('server') && Strophe.getNodeFromJid(contact.get('jid')));
+            account_contacts = account_contacts.filter(contact => !contact.get('notifications') && !contact.get('server')
+                && Strophe.getNodeFromJid(contact.get('jid')) && !(contact.get('invitation') || (contact.get('subscription_request_in') && contact.get('subscription') !== 'both')));
             this.$('.filter-item-wrap[data-filter="all"] span').text(account_contacts.filter(contact => !contact.get('group_chat')).length)
             this.$('.filter-item-wrap[data-filter="groupchat"] span').text(account_contacts.filter(contact => contact.get('group_chat')).length)
         }

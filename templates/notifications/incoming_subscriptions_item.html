@@ -1,17 +1,46 @@
 <div class="notification-subscription-item" data-account-jid="{{account}}" data-jid="{{jid}}">
     <div class="avatar-wrap">
-        <div class="circle-avatar"></div>
-        <div class="notification-icon ground-color-500"></div>
+        <div class="circle-avatar subscribe-avatar"></div>
+        {[if (!group_chat) {]}
+            <div class="notification-icon subscribe-icon ground-color-500"></div>
+        {[}]}
     </div>
     <div class="subcription-main-wrap">
-        <div class="subscription-item-name">{{name}}</div>
-        <div class="subscription-item-jid">{{jid}}</div>
-        {[if (text) {]}
-        <div class="subscription-item-text">{{text}}</div>
-        <div class="subscription-item-text-backup hidden">{{text}}</div>
+        {[if (group_chat) {]}
+        <div class="subscription-invitation-item-main-text"></div>
+        <div class="subscription-invitation-item-group-wrap border-color-700 hidden">
+            <div class="invitation-avatar-wrap">
+                <div class="circle-avatar group-avatar"></div>
+                <div class="notification-icon group-invite-icon ground-color-500"></div>
+            </div>
+            <div class="subscription-item-name">{{name}}</div>
+            <div class="subscription-item-jid">{{jid}}</div>
+            <div class="subscription-item-members-text">{{group_chat_members_text}}</div>
+            <div class="subscription-item-members-avatars">
+                <div class="circle-avatar group-avatar"></div>
+                <div class="circle-avatar group-avatar"></div>
+                <div class="circle-avatar group-avatar"></div>
+                <div class="circle-avatar group-avatar"></div>
+                <div class="circle-avatar group-avatar"></div>
+            </div>
+        </div>
+        <div class="subscription-invitation-item-user-text"></div>
+
+        {[} else {]}
+            <div class="subscription-item-name">{{name}}</div>
+            <div class="subscription-item-jid">{{jid}}</div>
+            {[if (text) {]}
+            <div class="subscription-item-text">{{text}}</div>
+            <div class="subscription-item-text-backup hidden">{{text}}</div>
+            {[}]}
+            <div class="subscription-button btn-add text-color-500">{[print(xabber.getString("contact_add"))]}</div>
         {[}]}
         <div class="subscription-item-buttons-wrap">
+            {[if (group_chat) {]}
+            <div class="subscription-button btn-join-group text-color-500">{[print(xabber.getString("join_group"))]}</div>
+            {[} else {]}
             <div class="subscription-button btn-add text-color-500">{[print(xabber.getString("contact_add"))]}</div>
+            {[}]}
             <div class="subscription-button btn-decline">{[print(xabber.getString("decline"))]}</div>
             <div class="subscription-button btn-block">{[print(xabber.getString("block"))]}</div>
         </div>
