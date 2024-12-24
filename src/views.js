@@ -720,7 +720,7 @@ xabber.SearchView = xabber.BasicView.extend({
               _interval, handler;
 
           let sendMAMRequest = (func_conn) => {
-              handler = this.account.connection._addSysHandler((message) => {
+              handler = account.connection._addSysHandler((message) => {
                   let $msg = $(message);
                   if ($msg.find('result').attr('queryid') === queryid) {
                       messages.push(message);
@@ -731,7 +731,7 @@ xabber.SearchView = xabber.BasicView.extend({
               //     func_conn.deleteHandler(handler);
               // }, 19000);
               let callb = (res) => {
-                      this.account.connection.deleteHandler(handler);
+                      account.connection.deleteHandler(handler);
                       // clearTimeout(_delete_handler_timeout);
                       // clearInterval(_interval);
                       handler = null;
@@ -743,7 +743,7 @@ xabber.SearchView = xabber.BasicView.extend({
                       callback && callback(messages);
                   },
                   errb = (err) => {
-                      this.account.connection.deleteHandler(handler);
+                      account.connection.deleteHandler(handler);
                       // clearTimeout(_delete_handler_timeout);
                       // clearInterval(_interval);
                       handler = null;

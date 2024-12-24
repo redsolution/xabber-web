@@ -859,7 +859,7 @@ xabber.Contact = Backbone.Model.extend({
         let deferred = new $.Deferred();
         account.chats.onStartedMAMRequest(deferred);
         deferred.done(() => {
-            let handler = conn.addHandler((message) => {
+            let handler = this.account.connection.addHandler((message) => {
                 if ((contact && is_groupchat == contact.get('group_chat'))) {
                     let $msg = $(message);
                     if ($msg.find('result').attr('queryid') === queryid) {

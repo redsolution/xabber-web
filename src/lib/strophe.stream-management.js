@@ -282,7 +282,6 @@
                 for (const h of (this._resumeState.handlers || [])
                     .concat(this._resumeState.addHandlers || []).concat(this._resumeState.addHandlersAfterDisconnect || [])) {
                     if (!h.user || h.id){
-                        console.error(h.id);
                         this._c._addSysHandler(h.handler, h.ns, h.name, h.type, h.id, h.from, h.options);
                     }
                 }

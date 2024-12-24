@@ -836,7 +836,7 @@ xabber.CallsView = xabber.BasicView.extend({
 
         deferred.done(() => {
             let sendMAMRequest = (func_conn) => {
-                handler = this.account.connection._addSysHandler((message) => {
+                handler = account.connection._addSysHandler((message) => {
                     let $msg = $(message);
                     if ($msg.find('result').attr('queryid') === queryid) {
                         messages.push(message);
@@ -848,7 +848,7 @@ xabber.CallsView = xabber.BasicView.extend({
                 //     func_conn.deleteHandler(handler);
                 // }, 19000);
                 let callb = (res) => {
-                        this.account.connection.deleteHandler(handler);
+                        account.connection.deleteHandler(handler);
                         // clearTimeout(_delete_handler_timeout);
                         // clearInterval(_interval);
                         handler = null;
@@ -861,7 +861,7 @@ xabber.CallsView = xabber.BasicView.extend({
                         }
                     },
                     errb = (err) => {
-                        this.account.connection.deleteHandler(handler);
+                        account.connection.deleteHandler(handler);
                         // clearTimeout(_delete_handler_timeout);
                         // clearInterval(_interval);
                         handler = null;
