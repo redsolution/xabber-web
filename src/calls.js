@@ -834,21 +834,21 @@ xabber.CallsView = xabber.BasicView.extend({
         let deferred = new $.Deferred();
         account.chats.onStartedMAMRequest(deferred);
 
-        deferred.done(function () {
-            let sendMAMRequest = function(func_conn) {
-                handler = func_conn.addHandler(function (message) {
+        deferred.done(() => {
+            let sendMAMRequest = (func_conn) => {
+                handler = this.account.connection._addSysHandler((message) => {
                     let $msg = $(message);
                     if ($msg.find('result').attr('queryid') === queryid) {
                         messages.push(message);
                     }
                     return true;
-                }, Strophe.NS.MAM);
+                }, Strophe.NS.MAM, null, null, null, null, {query_id: queryid} );
                 // let _delete_handler_timeout = setTimeout(() => {
                 //     console.log('handler deleted');
                 //     func_conn.deleteHandler(handler);
                 // }, 19000);
-                let callb = function (res) {
-                        func_conn.deleteHandler(handler);
+                let callb = (res) => {
+                        this.account.connection.deleteHandler(handler);
                         // clearTimeout(_delete_handler_timeout);
                         // clearInterval(_interval);
                         handler = null;
@@ -860,8 +860,8 @@ xabber.CallsView = xabber.BasicView.extend({
                             callback && callback(success, messages, rsm);
                         }
                     },
-                    errb = function (err) {
-                        func_conn.deleteHandler(handler);
+                    errb = (err) => {
+                        this.account.connection.deleteHandler(handler);
                         // clearTimeout(_delete_handler_timeout);
                         // clearInterval(_interval);
                         handler = null;

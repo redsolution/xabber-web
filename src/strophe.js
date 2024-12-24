@@ -612,6 +612,74 @@ Strophe.ConnectionManager.prototype = {
 
 _.extend(Strophe.Connection.prototype, {
 
+    addHandler: function(handler, ns, name, type, id, from, options) {
+        const hand = new Strophe.Handler(handler, ns, name, type, id, from, options);
+        this.addHandlers.push(hand);
+
+        let res = (this.authenticated && !this.disconnecting && this.account && this.account.session.get('connected') && this.account.get('status') !== 'offline');
+
+        if (!res) {
+            if (this.streamManagement && this.streamManagement._isStreamManagementEnabled && this.streamManagement.getResumeToken()) {
+                if (this.streamManagement._resumeState){
+                    let index = this.streamManagement._resumeState.addHandlersAfterDisconnect.indexOf(hand);
+                    if (index === -1) {
+                        this.streamManagement._resumeState.addHandlersAfterDisconnect.push(hand);
+                    }
+                }
+            }
+        }
+        return hand;
+    },
+
+    _addSysHandler: function(handler, ns, name, type, id, from, options ) {
+        const hand = new Strophe.Handler(handler, ns, name, type, id, from, options);
+        hand.user = false;
+
+        this.addHandlers.push(hand);
+
+        let res = (this.authenticated && !this.disconnecting && this.account && this.account.session.get('connected') && this.account.get('status') !== 'offline');
+
+        if (!res) {
+            if (this.streamManagement && this.streamManagement._isStreamManagementEnabled && this.streamManagement.getResumeToken()) {
+                if (this.streamManagement._resumeState){
+                    let index = this.streamManagement._resumeState.addHandlersAfterDisconnect.indexOf(hand);
+                    if (index === -1) {
+                        this.streamManagement._resumeState.addHandlersAfterDisconnect.push(hand);
+                    }
+                }
+            }
+        }
+        return hand;
+    },
+
+    deleteHandler: function(handRef) {
+        // this must be done in the Idle loop so that we don't change
+        // the handlers during iteration
+        let handler_index = this.handlers.indexOf(handRef);
+        if (handler_index === -1){
+            let query_msg_handler = this.handlers.find(item => (item && item.options && handRef && handRef.options)
+                && item.options.query_id === handRef.options.query_id);
+            query_msg_handler && (handRef = query_msg_handler);
+        }
+
+        this.removeHandlers.push(handRef);
+
+        // If a handler is being deleted while it is being added,
+        // prevent it from getting added
+
+        let add_index = this.addHandlers.indexOf(handRef);
+        if (add_index >= 0) {
+            this.addHandlers.splice(add_index, 1);
+        }
+        // remove temp handlers that otherwise are reinstatted after resume
+        if (this.streamManagement && this.streamManagement._resumeState && this.streamManagement._resumeState.addHandlersAfterDisconnect){
+            let after_disconnect_index = this.streamManagement._resumeState.addHandlersAfterDisconnect.indexOf(handRef);
+            if (after_disconnect_index >= 0) {
+                this.streamManagement._resumeState.addHandlersAfterDisconnect.splice(after_disconnect_index, 1);
+            }
+        }
+    },
+
     _attemptSASLAuth: function (mechanisms) {
         mechanisms = this.sortMechanismsByPriority(mechanisms || []);
         let mechanism_found = false;
@@ -643,6 +711,67 @@ _.extend(Strophe.Connection.prototype, {
             break;
         }
         return mechanism_found;
+    },
+
+    _sasl_success_cb: function(elem) {
+        if (this._sasl_data['server-signature']) {
+            let serverSignature;
+            const success = atob(Strophe.getText(elem));
+            const attribMatch = /([a-z]+)=([^,]+)(,|$)/;
+            const matches = success.match(attribMatch);
+            if (matches[1] === 'v') {
+                serverSignature = matches[2];
+            }
+            if (serverSignature !== this._sasl_data['server-signature']) {
+                // remove old handlers
+                this.deleteHandler(this._sasl_failure_handler);
+                this._sasl_failure_handler = null;
+                if (this._sasl_challenge_handler) {
+                    this.deleteHandler(this._sasl_challenge_handler);
+                    this._sasl_challenge_handler = null;
+                }
+                this._sasl_data = {};
+                return this._sasl_failure_cb(null);
+            }
+        }
+        Strophe.info('SASL authentication succeeded.');
+        if (this._sasl_data.keys) {
+            this.scram_keys = this._sasl_data.keys;
+        }
+        if (this._sasl_mechanism) {
+            this._sasl_mechanism.onSuccess();
+        }
+        // remove old handlers
+        this.deleteHandler(this._sasl_failure_handler);
+        this._sasl_failure_handler = null;
+        this.deleteHandler(this._sasl_success_handler);
+        this._sasl_success_handler = null;
+        if (this._sasl_challenge_handler) {
+            this.deleteHandler(this._sasl_challenge_handler);
+            this._sasl_challenge_handler = null;
+        }
+        /** @type {Handler[]} */
+        const streamfeature_handlers = [];
+
+        /**
+         * @param {Handler[]} handlers
+         * @param {Element} elem
+         */
+        const wrapper = (handlers, elem) => {
+            while (handlers.length) {
+                this.deleteHandler(handlers.pop());
+            }
+            this._onStreamFeaturesAfterSASL(elem);
+            return false;
+        };
+        streamfeature_handlers.push(this._addSysHandler( /** @param {Element} elem */
+        elem => wrapper(streamfeature_handlers, elem), null, 'stream:features', null, null));
+        streamfeature_handlers.push(this._addSysHandler( /** @param {Element} elem */
+        elem => wrapper(streamfeature_handlers, elem), NS.STREAM, 'features', null, null));
+
+        // we must send an xmpp:restart now
+        this._sendRestart();
+        return false;
     },
 
     _sasl_challenge_cb: async function(elem) {
@@ -902,6 +1031,7 @@ _.extend(Strophe.Connection.prototype, {
             }
         }
         if (this.do_authentication !== false) {
+            this.resume();
             this.authenticate(matched);
         }
     },

@@ -3045,7 +3045,7 @@ xabber.ChatItemView = xabber.BasicView.extend({
               if ($msg.find('result').attr('queryid') === queryid)
                   messages.push(message);
               return true;
-          }, Strophe.NS.MAM);
+          }, Strophe.NS.MAM, null, null, null, null, {query_id: queryid} );
           this.chat_content.MAMRequest(options, (success, messages, rsm) => {
                   this.account.connection.deleteHandler(handler);
                   rsm && (this.first_msg_id = rsm.first) && (this.last_msg_id = rsm.last);
@@ -3142,7 +3142,7 @@ xabber.ChatItemView = xabber.BasicView.extend({
               if ($msg.find('result').attr('queryid') === queryid)
                   messages.push(message);
               return true;
-          }, Strophe.NS.MAM);
+          }, Strophe.NS.MAM, null, null, null, null, {query_id: queryid} );
           this.chat_content.MAMRequest(options, (success, messages, rsm) => {
                   this.account.connection.deleteHandler(handler);
                   rsm && (this.first_msg_id = rsm.first);
@@ -3292,7 +3292,7 @@ xabber.ChatItemView = xabber.BasicView.extend({
               if ($msg.find('result').attr('queryid') === queryid)
                   messages.push(message);
               return true;
-          }, Strophe.NS.MAM);
+          }, Strophe.NS.MAM, null, null, null, null, {query_id: queryid} );
           this.chat_content.MAMRequest(options, (success, messages, rsm) => {
                   this.account.connection.deleteHandler(handler);
                   rsm && (this.first_msg_id = rsm.first);
@@ -3459,7 +3459,7 @@ xabber.ChatItemView = xabber.BasicView.extend({
                   messages.push(message);
               }
               return true;
-          }, Strophe.NS.MAM);
+          }, Strophe.NS.MAM, null, null, null, null, {query_id: queryid} );
           this.chat_content.MAMRequest(options,
               (success, messages, rsm) => {
                   this.account.connection.deleteHandler(handler);
@@ -4456,9 +4456,9 @@ xabber.ChatContentView = xabber.BasicView.extend({
         if (options.flip_page){
             iq.up().c('flip-page').up();
         }
-        deferred.done(function () {
-            let sendMAMRequest = function(func_conn) {
-                handler = func_conn.addHandler(function (message) {
+        deferred.done(() => {
+            let sendMAMRequest = (func_conn) => {
+                handler = this.account.connection._addSysHandler((message) => {
                     if ((contact && is_groupchat == contact.get('group_chat')) || is_saved) {
                         let $msg = $(message);
                         if ($msg.find('result').attr('queryid') === queryid) {
@@ -4470,13 +4470,13 @@ xabber.ChatContentView = xabber.BasicView.extend({
                         success = false;
                     }
                     return true;
-                }, Strophe.NS.MAM);
+                }, Strophe.NS.MAM, null, null, null, null, {query_id: queryid} );
                 // let _delete_handler_timeout = setTimeout(() => {
                 //     console.log('handler deleted');
                 //     func_conn.deleteHandler(handler);
                 // }, 19000);
-                let callb = function (res) {
-                        func_conn.deleteHandler(handler);
+                let callb = (res) => {
+                        this.account.connection.deleteHandler(handler);
                         // clearTimeout(_delete_handler_timeout);
                         // clearInterval(_interval);
                         handler = null;
@@ -4488,8 +4488,8 @@ xabber.ChatContentView = xabber.BasicView.extend({
                             callback && callback(success, messages, rsm);
                         }
                     },
-                    errb = function (err) {
-                        func_conn.deleteHandler(handler);
+                    errb = (err) => {
+                        this.account.connection.deleteHandler(handler);
                         // clearTimeout(_delete_handler_timeout);
                         // clearInterval(_interval);
                         handler = null;

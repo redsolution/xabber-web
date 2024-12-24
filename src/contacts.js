@@ -806,11 +806,11 @@ xabber.Contact = Backbone.Model.extend({
             if ($msg.find('result').attr('queryid') === queryid)
                 callback && callback($msg);
             return true;
-        }, Strophe.NS.MAM);
+        }, Strophe.NS.MAM, null, null, null, null, {query_id: queryid} );
         this.account.sendIQFast(iq, () => {
-                conn.deleteHandler(handler);
+                this.account.connection.deleteHandler(handler);
             }, () => {
-                conn.deleteHandler(handler);
+                this.account.connection.deleteHandler(handler);
             }
         );
     },
@@ -858,8 +858,8 @@ xabber.Contact = Backbone.Model.extend({
         iq.up().cnode(new Strophe.RSM(options).toXML());
         let deferred = new $.Deferred();
         account.chats.onStartedMAMRequest(deferred);
-        deferred.done(function () {
-            let handler = conn.addHandler(function (message) {
+        deferred.done(() => {
+            let handler = conn.addHandler((message) => {
                 if ((contact && is_groupchat == contact.get('group_chat'))) {
                     let $msg = $(message);
                     if ($msg.find('result').attr('queryid') === queryid) {
@@ -871,9 +871,9 @@ xabber.Contact = Backbone.Model.extend({
                     success = false;
                 }
                 return true;
-            }, Strophe.NS.MAM);
-            let callb = function (res) {
-                    conn.deleteHandler(handler);
+            }, Strophe.NS.MAM, null, null, null, null, {query_id: queryid} );
+            let callb = (res) => {
+                    this.account.connection.deleteHandler(handler);
                     account.chats.onCompletedMAMRequest(deferred);
                     let $fin = $(res).find(`fin[xmlns="${Strophe.NS.MAM}"]`);
                     if ($fin.length && $fin.attr('queryid') === queryid) {
@@ -882,8 +882,8 @@ xabber.Contact = Backbone.Model.extend({
                         callback && callback(success, messages, rsm);
                     }
                 },
-                errb = function (err) {
-                    conn.deleteHandler(handler);
+                errb = (err) => {
+                    this.account.connection.deleteHandler(handler);
                     xabber.error("MAM error");
                     xabber.error(err);
                     account.chats.onCompletedMAMRequest(deferred);

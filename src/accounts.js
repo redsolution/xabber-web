@@ -289,8 +289,8 @@ xabber.Account = Backbone.Model.extend({
         },
 
         sendIQ: function () {
-            let res = this.connection.authenticated && !this.connection.disconnecting && this.session.get('connected') && this.get('status') !== 'offline';
-            if (res) {
+            let res = (this.connection.authenticated && !this.connection.disconnecting && this.session.get('connected') && this.get('status') !== 'offline');
+            if (res || (this.connection && this.connection.streamManagement._isStreamManagementEnabled && this.connection.streamManagement.getResumeToken())) {
                 let elem = arguments[0];
                 if (typeof(elem.tree) === "function" && elem.tree().getAttribute('type') == 'get') {
                     let lang = xabber.settings.language;
@@ -299,9 +299,6 @@ xabber.Account = Backbone.Model.extend({
                 }
                 this.connection.sendIQ.apply(this.connection, arguments);
             } else {
-                if (!(arguments[0] && $(arguments[0].nodeTree).find('query[xmlns="' + Strophe.NS.MAM + '"]').length)) {
-                    this._pending_stanzas.push({stanza: arguments, is_iq: true});
-                }
             }
             return res;
         },

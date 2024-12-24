@@ -719,19 +719,19 @@ xabber.SearchView = xabber.BasicView.extend({
                   .c('value').t(query).up().up().up().cnode(new Strophe.RSM(options).toXML()),
               _interval, handler;
 
-          let sendMAMRequest = function(func_conn) {
-              handler = func_conn.addHandler(function (message) {
+          let sendMAMRequest = (func_conn) => {
+              handler = this.account.connection._addSysHandler((message) => {
                   let $msg = $(message);
                   if ($msg.find('result').attr('queryid') === queryid) {
                       messages.push(message);
                   }
                   return true;
-              }, Strophe.NS.MAM);
+              }, Strophe.NS.MAM, null, null, null, null, {query_id: queryid} );
               // let _delete_handler_timeout = setTimeout(() => {
               //     func_conn.deleteHandler(handler);
               // }, 19000);
-              let callb = function (res) {
-                      func_conn.deleteHandler(handler);
+              let callb = (res) => {
+                      this.account.connection.deleteHandler(handler);
                       // clearTimeout(_delete_handler_timeout);
                       // clearInterval(_interval);
                       handler = null;
@@ -742,8 +742,8 @@ xabber.SearchView = xabber.BasicView.extend({
                       }
                       callback && callback(messages);
                   },
-                  errb = function (err) {
-                      func_conn.deleteHandler(handler);
+                  errb = (err) => {
+                      this.account.connection.deleteHandler(handler);
                       // clearTimeout(_delete_handler_timeout);
                       // clearInterval(_interval);
                       handler = null;

@@ -207,7 +207,8 @@
                     removeTimeds: this._c.removeTimeds,
                     removeHandlers: this._c.removeHandlers,
                     addTimeds: this._c.addTimeds,
-                    addHandlers: this._c.addHandlers
+                    addHandlers: this._c.addHandlers,
+                    addHandlersAfterDisconnect: []
                 };
                 this._storedJid = this._c.jid;
 
@@ -265,9 +266,9 @@
                     this._c.deleteHandler(this._incomingHandler);
                 }
 
-                this._requestHandler = this._c.addHandler(this._handleServerRequestHandler.bind(this), this._NS, 'r');
-                this._ackHandler = this._c.addHandler(this._handleServerAck.bind(this), this._NS, 'a');
-                this._incomingHandler = this._c.addHandler(this._incomingStanzaHandler.bind(this));
+                this._requestHandler = this._c._addSysHandler(this._handleServerRequestHandler.bind(this), this._NS, 'r');
+                this._ackHandler = this._c._addSysHandler(this._handleServerAck.bind(this), this._NS, 'a');
+                this._incomingHandler = this._c._addSysHandler(this._incomingStanzaHandler.bind(this));
 
                 // FIXME handler instances stored, but never used
                 this._enabledHandler = this._c._addSysHandler(this._handleEnabled.bind(this), this._NS, 'enabled');
@@ -277,36 +278,22 @@
             } else if (status === Strophe.Status.BINDREQUIRED && this.getResumeToken())  {
                 this._c.jid = this._storedJid;
 
-                // // Restore Strophe handlers
-                // for (const h of (this._resumeState.handlers || [])
-                //     .concat(this._resumeState.addHandlers || [])) {
-                //     console.warn(h);
-                //     this._c._addSysHandler(h.handler, h.ns, h.name, h.type, h.id);
-                // }
-                // for (const h of (this._resumeState.timedHandlers || [])
-                //     .concat(this._resumeState.addTimeds)) {
-                //     this._c.addTimedHandler(h.period, h.handler);
-                // }
-                // for (const h of (this._resumeState.removeTimeds || [])
-                //     .concat(this._resumeState.removeHandlers || [])) {
-                //     this._c.deleteTimedHandler(h);
-                // }
-
-                if (this._requestHandler) {
-                    this._c.deleteHandler(this._requestHandler);
+                // Restore Strophe handlers
+                for (const h of (this._resumeState.handlers || [])
+                    .concat(this._resumeState.addHandlers || []).concat(this._resumeState.addHandlersAfterDisconnect || [])) {
+                    if (!h.user || h.id){
+                        console.error(h.id);
+                        this._c._addSysHandler(h.handler, h.ns, h.name, h.type, h.id, h.from, h.options);
+                    }
                 }
-
-                if (this._incomingHandler) {
-                    this._c.deleteHandler(this._incomingHandler);
+                for (const h of (this._resumeState.timedHandlers || [])
+                    .concat(this._resumeState.addTimeds)) {
+                    this._c.addTimedHandler(h.period, h.handler);
                 }
-
-                this._requestHandler = this._c.addHandler(this._handleServerRequestHandler.bind(this), this._NS, 'r');
-                this._ackHandler = this._c.addHandler(this._handleServerAck.bind(this), this._NS, 'a');
-                this._incomingHandler = this._c.addHandler(this._incomingStanzaHandler.bind(this));
-
-                this._enabledHandler = this._c._addSysHandler(this._handleEnabled.bind(this), this._NS, 'enabled');
-                this._resumeFailedHandler = this._c._addSysHandler(this._handleResumeFailed.bind(this), this._NS, 'failed');
-                this._resumedHandler =  this._c._addSysHandler(this._handleResumed.bind(this), this._NS,'resumed');
+                for (const h of (this._resumeState.removeTimeds || [])
+                    .concat(this._resumeState.removeHandlers || [])) {
+                    this._c.deleteTimedHandler(h);
+                }
 
                 // FIXME check conditions if there's session ID and if enabled
                 this._c.send($build('resume', {
@@ -315,6 +302,8 @@
                     previd: this._resumeToken
                 }));
                 this._c.flush();
+
+                this._resumeState.addHandlersAfterDisconnect = [];
             } else if (status === Strophe.Status.ERROR) {
                 this.logging && Strophe.debug('SM cleared resume token on error');
                 this._resumeToken = undefined;
