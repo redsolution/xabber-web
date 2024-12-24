@@ -824,7 +824,8 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
     updateAllIncomingSubscriptions: function () {
         this.$('.notification-subscriptions-content-wrap').html('');
         let accounts = xabber.accounts.enabled;
-        let counter = 0;
+        let counter = 0,
+            color_set = false;
         if (this.filtered_accounts.length){
             accounts = accounts.filter(item => this.filtered_accounts.includes(item.get('jid')));
         }
@@ -844,7 +845,12 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
                     $template.find('.circle-avatar').setAvatar(image, 64);
                     $template.attr('data-color', contact.account.settings.get('color'));
                     $template.attr('data-counter', counter);
-                    $template.addClass(`outline-color-${contact.account.settings.get('color')}-300`);
+                    $template.find('.notification-icon').html(env.templates.svg['group-invite']());
+                    if (!color_set){
+                        this.$('.notification-subscriptions-wrap').prop('class', 'notification-subscriptions-wrap');
+                        this.$('.notification-subscriptions-wrap').addClass(`outline-color-${contact.account.settings.get('color')}-300`);
+                        color_set = true;
+                    }
                     this.prepareShowMoreText($template);
                     counter++;
                 });
@@ -860,7 +866,7 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
             this.$('.notification-subscriptions-button-wrap').addClass('hidden');
         }
         this.$('.notification-subscriptions-wrap').switchClass('hidden', this.$('.notification-subscription-item:not(.hidden)').length === 0);
-        this.$('.notification-subscription-item').slice(3).addClass('hidden');
+        this.$('.notification-subscription-item').slice(2).addClass('hidden');
         xabber.toolbar_view.recountAllMessageCounter();
         this.recountFilteredCount();
     },

@@ -22611,6 +22611,9 @@ ul.restrictions-list-content>li {
 .notifications-content-wrap.subscription-content .notification-subscriptions-wrap{
     outline: none;
 }
+.notifications-content-wrap.subscription-content .notification-subscriptions-header{
+    display: none;
+}
 .notifications-content-wrap.subscription-content .notification-subscriptions-wrap .notification-subscription-item{
     margin-bottom: 16px;
 }
@@ -22808,42 +22811,44 @@ ul.restrictions-list-content>li {
     margin: 0 auto 32px;
     max-width: 768px;
     position: relative;
+    outline: 1px solid;
+    border-radius: 8px;
+    padding: 0 0 8px;
 }
 .notifications-content-wrap .notification-subscriptions-wrap .notification-subscriptions-header{
-    box-shadow: 0 1px 1px -1px rgba(0, 0, 0, .25);
     font-size: 16px;
     font-weight: 500;
-    line-height: 22px;
-    margin: 0 auto 16px;
-    max-width: 672px;
-    padding: 0 8px 2px;
+    line-height: 24px;
+    padding: 12px 24px;
+    height: 48px;
 }
 .notifications-content-wrap .notification-subscriptions-wrap .notification-subscription-item{
     display: flex;
     min-height: 100px;
     position: relative;
-    outline: 1px solid;
     padding: 16px 0;
-    border-radius: 8px;
-    margin-bottom: 16px;
 }
 .notifications-content-wrap .notification-subscriptions-wrap .notification-subscription-item .avatar-wrap{
     height: calc(100% - 32px);
     left: 0;
     position: absolute;
     top: 16px;
-    width: 64px;
+    width: 84px;
 }
 .notifications-content-wrap .notification-subscriptions-wrap .notification-subscription-item .avatar-wrap .circle-avatar{
     height: 32px;
-    left: 18px;
+    left: 32px;
     position: absolute;
     top: 4px;
     width: 32px;
 }
 .notifications-content-wrap .notification-subscriptions-wrap .notification-subscription-item .avatar-wrap .notification-icon{
     top: 25px;
-    right: 11px !important;
+    right: 16px !important;
+    outline: 2px solid #fff !important;
+}
+.notifications-content-wrap .notification-subscriptions-wrap .notification-subscription-item .avatar-wrap .notification-icon svg path{
+    fill: #fff;
 }
 .notifications-content-wrap .notification-subscriptions-wrap .notification-subscription-item .subscription-item-text{
     font-size: 14px;
@@ -22887,12 +22892,12 @@ ul.restrictions-list-content>li {
     position: absolute;
     right: 8px;
     bottom: 16px;
-    outline: 1px solid #fff;
+    outline: 2px solid #fff;
 }
 .notifications-content-wrap .chat-message .left-side .notification-icon{
     font-size: 10px;
-    top: 25px;
-    right: 11px;
+    right: 16px;
+    top: 30px;
     font-size: 14px;
 }
 .notifications-content-wrap .chat-message .left-side .notification-icon svg{
@@ -22909,7 +22914,7 @@ ul.restrictions-list-content>li {
 
 }
 .notifications-content-wrap .notification-subscriptions-wrap .notification-subscription-item .subcription-main-wrap{
-    padding: 0 96px 0 70px;
+    padding: 0 24px 0 84px;
 }
 .notifications-content-wrap .notification-subscriptions-wrap .notification-subscription-item .subcription-main-wrap .subscription-item-name{
     font-size: 15px;
@@ -22950,8 +22955,19 @@ ul.restrictions-list-content>li {
     margin-left: 70px;
 }
 .notifications-content-wrap .notification-subscriptions-wrap .notification-subscriptions-button-wrap{
-    display: flex;
+    position: absolute;
     height: 20px;
+    top: 14px;
+    right: 24px;
+}
+.notifications-content-wrap .chat-message .left-side{
+    width: 84px;
+}
+.notifications-content-wrap .chat-message .left-side .circle-avatar{
+    left: 32px;
+}
+.notifications-content-wrap .chat-message .msg-wrap{
+    padding: 0 96px 0 84px;
 }
 .notifications-content-wrap .chat-msg-content{
     font-size: 14px;
