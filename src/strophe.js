@@ -658,7 +658,7 @@ _.extend(Strophe.Connection.prototype, {
         let handler_index = this.handlers.indexOf(handRef);
         if (handler_index === -1){
             let query_msg_handler = this.handlers.find(item => (item && item.options && handRef && handRef.options)
-                && item.options.query_id === handRef.options.query_id);
+                && (item.options.query_id && handRef.options.query_id && item.options.query_id === handRef.options.query_id));
             query_msg_handler && (handRef = query_msg_handler);
         }
 
