@@ -6658,17 +6658,17 @@ xabber.GroupchatInvitationView = xabber.BasicView.extend({
 
     blockContact: function (no_change) {
         let contact = this.model;
-        utils.dialogs.ask(xabber.getString("contact_block"), xabber.getString("block_contact_confirm", [contact.get('name'), this.account.get('jid')]), null, { ok_button_text: xabber.getString("contact_bar_block")}).done(function (result) {
+        utils.dialogs.ask(xabber.getString("contact_block"), xabber.getString("block_contact_confirm", [contact.get('name'), this.account.get('jid')]), null, { ok_button_text: xabber.getString("contact_bar_block")}).done((result) => {
             if (result) {
                 contact.trigger('remove_invite', contact);
                 contact.block();
                 xabber.trigger("clear_search");
+                this.blockInvitation();
+                !no_change && this.closeChat();
+                contact.trigger('remove_invite', contact);
+                this.reject(no_change);
             }
         });
-        this.blockInvitation();
-        !no_change && this.closeChat();
-        contact.trigger('remove_invite', contact);
-        xabber.trigger('invitations_updated');
     }
 });
 
@@ -8975,7 +8975,12 @@ xabber.Roster = xabber.ContactsBase.extend({
         else if ($item.attr('status') === 'active' && !saved)
             chat.set('archived', false);
         if ($item.attr('status') === 'deleted' || chat.get('sync_type') === Strophe.NS.XABBER_NOTIFY && this.account.server_features.get(Strophe.NS.XABBER_NOTIFY) && jid !== this.account.server_features.get(Strophe.NS.XABBER_NOTIFY).get('from')) {
-            chat.get('display') && xabber.body.setScreen(xabber.body.screen.get('name'), {right_contact: '', right: undefined});
+            if (chat.get('display') &&
+                (xabber.body.screen.get('name') === 'all-chats'
+                    || xabber.body.screen.get('name') === 'settings-modal'
+                    || xabber.body.screen.get('name') === 'account_settings_modal')){
+                xabber.body.setScreen(xabber.body.screen.get('name'), {right_contact: '', right: undefined});
+            }
             chat.set('opened', false);
             chat.set('const_unread', 0);
             this.account.cached_sync_conversations.removeFromCachedConversations($(item).attr('jid') +  '/' + $(item).attr('type'));

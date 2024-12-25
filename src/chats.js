@@ -5173,7 +5173,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
             if (!(this.contact.invitation && this.contact.invitation.message.get('timestamp') > message.get('timestamp')))
                 this.contact.invitation = new xabber.GroupchatInvitationView({model: this.contact, message: message});
             this.model.contact.set('invitation', true);
-            this.model.get('active') && this.model.contact.trigger('open_chat', this.model.contact);
+            this.model.get('active') && this.model.set('active', false);
             message.set('is_unread', false);
         }
 

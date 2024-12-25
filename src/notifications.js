@@ -280,6 +280,14 @@ xabber.NotificationsView = xabber.BasicView.extend({
         });
 
         this.$('.notifications-calendar-activity').append($calendarContainer);
+
+        if (this.current_content){
+            if (this.current_content.filtered_messages && this.current_content.filtered_messages.length) {
+                this.current_content.updateCalendarCellsActivity(this.current_content.filtered_messages);
+            } else {
+                this.current_content.updateCalendarCellsActivity(this.current_content.notification_messages.filter(msg => !msg.get('ignored')));
+            }
+        }
     },
 
 
