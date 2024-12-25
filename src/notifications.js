@@ -125,6 +125,9 @@ xabber.NotificationsView = xabber.BasicView.extend({
             this.current_content.$el.removeClass('subscription-content');
             this.$('.notifications-utility').removeClass('subscription-content');
             this.$el.removeClass('subscription-content');
+            this.current_content.$el.removeClass('invitation-content');
+            this.$('.notifications-utility').removeClass('invitation-content');
+            this.$el.removeClass('invitation-content');
             this.current_content.$el.removeClass('security-content');
             this.current_content.$el.removeClass('subscription-content-hidden');
         }
@@ -200,6 +203,9 @@ xabber.NotificationsView = xabber.BasicView.extend({
                 this.current_content.$el.removeClass('subscription-content');
                 this.$('.notifications-utility').removeClass('subscription-content');
                 this.$el.removeClass('subscription-content');
+                this.current_content.$el.removeClass('invitation-content');
+                this.$('.notifications-utility').removeClass('invitation-content');
+                this.$el.removeClass('invitation-content');
                 this.current_content.$el.removeClass('subscription-content-hidden');
                 clear = true;
             }
@@ -319,10 +325,20 @@ xabber.NotificationsView = xabber.BasicView.extend({
         this.current_content.$el.removeClass('subscription-content');
         this.$('.notifications-utility').removeClass('subscription-content');
         this.$el.removeClass('subscription-content');
+        this.current_content.$el.removeClass('invitation-content');
+        this.$('.notifications-utility').removeClass('invitation-content');
+        this.$el.removeClass('invitation-content');
         this.current_content.$el.removeClass('security-content');
         this.current_content.$el.removeClass('subscription-content-hidden');
         if (filter_type !== 'all') {
-            if (filter_type === 'subscription') {
+            if (filter_type === 'invitations') {
+                this.current_content.$el.addClass('invitation-content');
+                this.$el.addClass('invitation-content');
+                this.$('.notifications-utility').addClass('invitation-content');
+                this.$('.notification-subscription-item').removeClass('hidden');
+                this.$('.notification-subscriptions-button').addClass('hidden');
+                this.current_content.updateCalendarCellsActivity([]);
+            } else if (filter_type === 'subscription') {
                 this.current_content.$el.addClass('subscription-content');
                 this.$el.addClass('subscription-content');
                 this.$('.notifications-utility').addClass('subscription-content');
@@ -337,12 +353,6 @@ xabber.NotificationsView = xabber.BasicView.extend({
             }
             this.$('.notifications-type-filter-content .filter-item-wrap').removeClass('selected-filter');
             this.$(`.notifications-type-filter-content .filter-item-wrap[data-filter="${filter_type}"]`).addClass('selected-filter');
-        }
-
-        if (filter_type === 'subscription') {
-            this.$('.notifications-utility .notifications-header').text(xabber.getString("notifications_window__type_filter_subscriptions"));
-        } else {
-            this.$('.notifications-utility .notifications-header').text(this.$('.notifications-type-filter-content .filter-item-wrap.selected-filter .name').text());
         }
         this.current_content.filterByProperty(filter_type, clear_account);
         this.updateFilterItems();
@@ -484,6 +494,7 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
         this.notification_messages.on("change:timestamp", this.onChangedMessageTimestamp, this);
         xabber.accounts.on('account_color_updated', this.updateColorScheme, this);
         xabber.on('new_incoming_subscription', this.updateAllIncomingSubscriptions, this);
+        xabber.on('invitations_updated', this.updateAllIncomingSubscriptions, this);
 
         return this;
     },
@@ -540,6 +551,7 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
 
         let accounts = xabber.accounts.enabled,
             subscription_counter = 0,
+            invitations_counter = 0,
             security_counter, information_counter, mention_counter,
             unread_msgs = this.notification_messages.filter(msg => msg.get('is_unread') &&!msg.get('ignored'));
 
@@ -549,8 +561,10 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
         }
 
         _.each(accounts, (account) => {
-            let contacts = account.contacts.filter(item => item.get('subscription_request_in'));
-            subscription_counter = subscription_counter + contacts.length;
+            let subs_contacts = account.contacts.filter(item => item.get('subscription_request_in'));
+            subscription_counter = subscription_counter + subs_contacts.length;
+            let inv_contacts = account.contacts.filter(item => item.get('invitation'));
+            invitations_counter = invitations_counter + inv_contacts.length;
         });
 
         security_counter = unread_msgs.filter(msg => msg.get('security_notification') && !msg.get('notification_info') && !msg.get('notification_mention')).length;
@@ -561,6 +575,7 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
         xabber.notifications_view.$('.filter-item-wrap[data-filter="information"] span').text(information_counter || '');
         xabber.notifications_view.$('.filter-item-wrap[data-filter="mentions"] span').text(mention_counter || '');
         xabber.notifications_view.$('.filter-item-wrap[data-filter="subscription"] span').text(subscription_counter || '');
+        xabber.notifications_view.$('.filter-item-wrap[data-filter="invitations"] span').text(invitations_counter || '');
     },
 
     defineMouseWheelEvent: function () {
@@ -609,9 +624,12 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
         if (contact.get('subscription') === undefined)
             contact.pushInRoster(null, () => {
                 this.sendAndAskSubscription(contact);
+                xabber.trigger('new_incoming_subscription');
             });
-        else
+        else {
             this.sendAndAskSubscription(contact);
+            xabber.trigger('new_incoming_subscription');
+        }
     },
 
     joinGroup: function (ev) {
@@ -647,8 +665,14 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
         if (!contact)
             return;
 
-        contact.declineSubscribe();
-        contact.set('subscription_request_in', false);
+
+        if (contact.invitation){
+            contact.invitation.reject(true);
+        } else {
+            contact.declineSubscribe();
+            contact.set('subscription_request_in', false);
+            xabber.trigger('new_incoming_subscription');
+        }
     },
 
     blockContact: function (ev) {
@@ -662,11 +686,16 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
         if (!contact)
             return;
 
-        contact.declineSubscribe();
-        contact.set('subscription_request_in', false);
-        setTimeout(()=> {
-            contact.blockRequest();
-        }, 1000);
+        if (contact.invitation){
+            contact.invitation.blockContact(true);
+        } else {
+            contact.declineSubscribe();
+            contact.set('subscription_request_in', false);
+            setTimeout(()=> {
+                contact.blockRequest();
+            }, 1000);
+            xabber.trigger('new_incoming_subscription');
+        }
     },
 
     onShow: function (attrs) {
@@ -844,15 +873,19 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
     },
 
     addIncomingSubscriptionContainer: function () {
+        this.$('.chat-content').prepend($(templates.incoming_invitations_container()));
         this.$('.chat-content').prepend($(templates.incoming_subscriptions_container()));
         this.updateAllIncomingSubscriptions();
     },
 
     updateAllIncomingSubscriptions: function () {
         this.$('.notification-subscriptions-content-wrap').html('');
+        this.$('.notification-invitations-content-wrap').html('');
         let accounts = xabber.accounts.enabled;
-        let counter = 0,
-            color_set = false;
+        let subs_counter = 0,
+            inv_counter = 0,
+            subs_color_set = false,
+            inv_color_set = false;
         if (this.filtered_accounts.length){
             accounts = accounts.filter(item => this.filtered_accounts.includes(item.get('jid')));
         }
@@ -865,11 +898,15 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
                         jid: contact.get('jid'),
                         account: account.get('jid'),
                         text: contact.get('subscription_request_in_text'),
-                        counter: counter,
+                        counter: contact.get('invitation') ? inv_counter : subs_counter,
                         group_chat: contact.get('group_chat'),
                         group_chat_members_text: contact.get('group_chat') ? '23 members, including Amy Adams, Baster Beagle, Clint Collins, Dudley Dillington.' : '',
                     }));
-                    this.$('.notification-subscriptions-content-wrap').append($template);
+                    if (contact.get('invitation')){
+                        this.$('.notification-invitations-content-wrap').append($template);
+                    } else {
+                        this.$('.notification-subscriptions-content-wrap').append($template);
+                    }
                     if (contact.invitation && contact.invitation.message){
                         $template.find('.subscription-invitation-item-user-text').text(contact.invitation.message.get('message'));
                     }
@@ -912,29 +949,44 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
                         $template.find('.circle-avatar.subscribe-avatar').setAvatar(image, 64);
                     }
                     $template.attr('data-color', contact.account.settings.get('color'));
-                    $template.attr('data-counter', counter);
+                    if (contact.get('invitation')){
+                        $template.attr('data-counter', inv_counter);
+                        inv_counter++;
+                    } else {
+                        $template.attr('data-counter', subs_counter);
+                        subs_counter++;
+                    }
                     $template.find('.notification-icon.subscribe-icon').html(env.templates.svg['group-invite']());
-                    if (!color_set){
-                        this.$('.notification-subscriptions-wrap').prop('class', 'notification-subscriptions-wrap');
-                        this.$('.notification-subscriptions-wrap').addClass(`outline-color-${contact.account.settings.get('color')}-300`);
-                        color_set = true;
+                    if (!subs_color_set && !contact.get('invitation')){
+                        this.$('.notification-subscriptions-wrap.notifications-subscriptions').prop('class', 'notification-subscriptions-wrap notifications-subscriptions');
+                        this.$('.notification-subscriptions-wrap.notifications-subscriptions').addClass(`outline-color-${contact.account.settings.get('color')}-300`);
+                        subs_color_set = true;
+                    }
+                    if (!inv_color_set && contact.get('invitation')){
+                        this.$('.notification-subscriptions-wrap.notifications-invitations').prop('class', 'notification-subscriptions-wrap notifications-invitations');
+                        this.$('.notification-subscriptions-wrap.notifications-invitations').addClass(`outline-color-${contact.account.settings.get('color')}-300`);
+                        inv_color_set = true;
                     }
                     this.prepareShowMoreText($template);
-                    counter++;
                 });
         });
-        if (counter > 1 && this.filter_type !== 'subscription') {
-            this.$('.notification-subscriptions-button').removeClass('hidden');
+        if (subs_counter > 1 && this.filter_type !== 'subscription') {
             this.$('.notification-subscriptions-button-wrap').removeClass('hidden');
-        // } else if (counter > 1 && this.filter_type !== 'subscription'){
-            // this.$('.notification-subscriptions-button').addClass('hidden');
-            // this.$('.notification-subscriptions-button-wrap').removeClass('hidden');
         } else {
-            this.$('.notification-subscriptions-button').addClass('hidden');
             this.$('.notification-subscriptions-button-wrap').addClass('hidden');
         }
-        this.$('.notification-subscriptions-wrap').switchClass('hidden', this.$('.notification-subscription-item:not(.hidden)').length === 0);
-        this.filter_type !== 'subscription' && this.$('.notification-subscription-item').slice(2).addClass('hidden');
+        if (inv_counter > 1 && this.filter_type !== 'invitations') {
+            this.$('.notification-subscriptions-button-wrap').removeClass('hidden');
+            this.$('.invitation-item-wrap').removeClass('hidden');
+        } else {
+            this.$('.notification-subscriptions-button-wrap').addClass('hidden');
+        }
+        xabber.notifications_view.$('.subscription-item-wrap').switchClass('hidden', subs_counter === 0);
+        xabber.notifications_view.$('.invitation-item-wrap').switchClass('hidden', inv_counter === 0);
+        this.$('.notification-subscriptions-wrap.notifications-subscriptions').switchClass('hidden', this.$('.notifications-subscriptions .notification-subscription-item:not(.hidden)').length === 0);
+        this.$('.notification-subscriptions-wrap.notifications-invitations').switchClass('hidden', this.$('.notifications-invitations .notification-subscription-item:not(.hidden)').length === 0);
+        this.filter_type !== 'subscription' && this.$('.notifications-subscriptions .notification-subscription-item').slice(2).addClass('hidden');
+        this.filter_type !== 'invitations' && this.$('.notifications-invitations .notification-subscription-item').slice(2).addClass('hidden');
         xabber.toolbar_view.recountAllMessageCounter();
         this.recountFilteredCount();
     },

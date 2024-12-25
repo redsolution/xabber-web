@@ -1,4 +1,4 @@
-<div class="notification-subscription-item" data-account-jid="{{account}}" data-jid="{{jid}}">
+<div class="notification-subscription-item {[if (group_chat) {]}invitation-notifications-item{[} else {]}incoming-subscription-notifications-item{[}]}" data-account-jid="{{account}}" data-jid="{{jid}}">
     <div class="avatar-wrap">
         <div class="circle-avatar subscribe-avatar"></div>
         {[if (!group_chat) {]}

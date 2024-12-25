@@ -22607,20 +22607,31 @@ ul.restrictions-list-content>li {
     position: relative;
     width: 26.4%;
 }
+.notifications-content-wrap.invitation-content .notifications-utility .btn-read-all,
 .notifications-content-wrap.subscription-content .notifications-utility .btn-read-all{
     display: none;
 }
+.notifications-content-wrap.invitation-content .notification-subscriptions-wrap,
 .notifications-content-wrap.subscription-content .notification-subscriptions-wrap{
     outline: none;
 }
+.notifications-content-wrap.invitation-content .notification-subscriptions-header,
 .notifications-content-wrap.subscription-content .notification-subscriptions-header{
     display: none;
 }
+.notifications-content-wrap.invitation-content .notification-subscriptions-wrap .notification-subscription-item,
 .notifications-content-wrap.subscription-content .notification-subscriptions-wrap .notification-subscription-item{
     margin-bottom: 16px;
 }
+.notifications-content-wrap.invitation-content .notification-subscriptions-button-wrap,
 .notifications-content-wrap.subscription-content .notification-subscriptions-button-wrap{
     display: none !important;
+}
+.notifications-content-wrap.invitation-content .notification-subscriptions-wrap .notification-subscription-item.incoming-subscription-notifications-item,
+.notifications-content-wrap.subscription-content .notification-subscriptions-wrap .notification-subscription-item.invitation-notifications-item,
+.notifications-content-wrap.invitation-content .notification-subscriptions-wrap.notifications-subscriptions,
+.notifications-content-wrap.subscription-content .notification-subscriptions-wrap.notifications-invitations{
+    display: none;
 }
 .notifications-content-wrap .notifications-utility{
     font-size: 20px;
@@ -22664,7 +22675,8 @@ ul.restrictions-list-content>li {
     position: relative;
     margin-bottom: 8px;
 }
-.filter-item-wrap.subscription-item-wrap{
+.filter-item-wrap.subscription-item-wrap,
+.filter-item-wrap.invitation-item-wrap{
     margin-top: 16px;
 }
 .contacts-panel-wrap .contacts-panel-left-side .filter-item-wrap .filter-icon,
@@ -22800,6 +22812,8 @@ ul.restrictions-list-content>li {
 .chat-content-wrap.subscription-content-hidden .notification-subscriptions-wrap{
     display: none;
 }
+.chat-content-wrap.invitation-content .chat-day-indicator,
+.chat-content-wrap.invitation-content .chat-message,
 .chat-content-wrap.subscription-content .chat-day-indicator,
 .chat-content-wrap.subscription-content .chat-message{
     display: none;

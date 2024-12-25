@@ -6640,11 +6640,12 @@ xabber.GroupchatInvitationView = xabber.BasicView.extend({
         this.openChat();
         contact.trigger('remove_invite', contact);
         let chat = this.account.chats.getChat(this.model);
+        xabber.trigger('invitations_updated');
     },
 
-    reject: function () {
+    reject: function (no_change) {
         let contact = this.model;
-        this.closeChat();
+        !no_change && this.closeChat();
         let iq = $iq({to: contact.get('full_jid') || contact.get('jid'), type: 'set'})
             .c('decline', {xmlns: `${Strophe.NS.GROUP_CHAT}#invite`});
         this.account.sendFast(iq, () => {}, () => {
@@ -6652,9 +6653,10 @@ xabber.GroupchatInvitationView = xabber.BasicView.extend({
             this.blockInvitation();
         });
         contact.trigger('remove_invite', contact);
+        xabber.trigger('invitations_updated');
     },
 
-    blockContact: function () {
+    blockContact: function (no_change) {
         let contact = this.model;
         utils.dialogs.ask(xabber.getString("contact_block"), xabber.getString("block_contact_confirm", [contact.get('name'), this.account.get('jid')]), null, { ok_button_text: xabber.getString("contact_bar_block")}).done(function (result) {
             if (result) {
@@ -6664,8 +6666,9 @@ xabber.GroupchatInvitationView = xabber.BasicView.extend({
             }
         });
         this.blockInvitation();
-        this.closeChat();
+        !no_change && this.closeChat();
         contact.trigger('remove_invite', contact);
+        xabber.trigger('invitations_updated');
     }
 });
 

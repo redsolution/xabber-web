@@ -857,7 +857,11 @@ xabber.EphemeralTimerSelector = xabber.BasicView.extend({
           this.onChangedMediaType();
           this.conn.ontrack = (ev) => {
               this.remote_stream = ev.streams[0];
-              this.modal_view.$el.find('.webrtc-remote-audio')[0].srcObject = ev.streams[0];
+              if (this.modal_view.$el.find('.webrtc-remote-audio').length){
+                  this.modal_view.$el.find('.webrtc-remote-audio')[0].srcObject = ev.streams[0];
+              } else if (this.modal_view.$el.find('.webrtc-remote-video').length){
+                  this.modal_view.$el.find('.webrtc-remote-video')[0].srcObject = ev.streams[0];
+              }
           };
           this._waiting_timeout = setTimeout(() => {
               (!this.get('state') && this.get('status') === 'calling' && this.get('call_initiator') === this.account.get('jid')) && this.reject();
@@ -2326,6 +2330,7 @@ xabber.ChatItemView = xabber.BasicView.extend({
             this.contact.on("change:status", this.updateStatus, this);
             this.contact.on("change:private_chat", this.updateIcon, this);
             this.contact.on("change:invitation", this.updateIcon, this);
+            this.contact.on("change:invitation", this.triggerUpdateInvitation, this);
             this.contact.on("change:incognito_chat", this.updateIcon, this);
             this.contact.on("change:image", this.updateAvatar, this);
             this.contact.on("change:blocked", this.onBlocked, this);
@@ -2793,6 +2798,11 @@ xabber.ChatItemView = xabber.BasicView.extend({
         delete this.contact.attributes.invitation;
         this.updateIcon();
         this.content.head && this.content.head.updateIcon();
+        xabber.trigger('invitations_updated');
+    },
+
+    triggerUpdateInvitation: function () {
+        xabber.trigger('invitations_updated');
     },
 
     onClosed: function () {
