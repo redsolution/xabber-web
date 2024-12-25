@@ -141,7 +141,7 @@ xabber.Account = Backbone.Model.extend({
 
         sendMsg: function (stanza, callback) {
             let res = this.connection.authenticated && !this.connection.disconnecting && this.session.get('connected') && this.session.get('ready_to_send') && this.get('status') !== 'offline';
-            if (res) {
+            if (res || (this.connection && this.connection.streamManagement._isStreamManagementEnabled && this.connection.streamManagement.getResumeToken())) {
                 this.connection.send(stanza);
             }
             callback && callback();
@@ -358,7 +358,7 @@ xabber.Account = Backbone.Model.extend({
         },
 
         sendPres: function (stanza) {
-            if (this.connection.authenticated && this.session.get('connected')) {
+            if (this.connection.authenticated && this.session.get('connected') || (this.connection && this.connection.streamManagement._isStreamManagementEnabled && this.connection.streamManagement.getResumeToken())) {
                 this.connection.send(stanza);
             } else {
                 this._pending_stanzas.push({stanza: stanza});

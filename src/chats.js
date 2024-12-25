@@ -7730,7 +7730,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
             }
         } else {
             let $prev_msg = this.$('.chat-message').eq(index - 1),
-                is_same_sender = ($message.data('from') === $prev_msg.data('from')),
+                is_same_sender = ($message.attr('data-from') === $prev_msg.attr('data-from')),
                 is_same_date = moment($message.data('time')).startOf('day')
                     .isSame(moment($prev_msg.data('time')).startOf('day'));
             if (($old_prev_msg.data('from') !== $message.data('from')) && ($next_msg.data('from') === $message.data('from')) && (($next_msg.children('.right-side').find('.msg-delivering-state').attr('data-state') === 'delivered') || ($next_msg.children('.right-side').find('.msg-delivering-state').attr('data-state') === 'displayed')))
@@ -7744,7 +7744,20 @@ xabber.ChatContentView = xabber.BasicView.extend({
                 console.error('here !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!11')
                 $message.insertAfter($prev_msg);
             }
-            if (message.get('data_form') || message.get('forwarded_message') || !is_same_date || !is_same_sender || $prev_msg.hasClass('system') || $prev_msg.hasClass('saved-main'))
+            let $actual_prev_not_pending;
+            if ($message.find('.msg-delivering-state').attr('data-state') !== 'pending'){
+                $actual_prev_not_pending = _.find($message.prevAll(), (prev_msg) => {
+                    if (!($(prev_msg).data('from') === $message.data('from')
+                        && $(prev_msg).find('.msg-delivering-state').length
+                        && ($(prev_msg).find('.msg-delivering-state').attr('data-state') === 'pending'))) {
+                        return prev_msg;
+                    }
+                });
+                $actual_prev_not_pending && ($actual_prev_not_pending = $($actual_prev_not_pending))
+            }
+            if ($actual_prev_not_pending && $actual_prev_not_pending.length && $actual_prev_not_pending.attr('data-from') !== $message.attr('data-from'))
+                this.showMessageAuthor($message);
+            else if (message.get('data_form') || message.get('forwarded_message') || !is_same_date || !is_same_sender || $prev_msg.hasClass('system') || $prev_msg.hasClass('saved-main'))
                 this.showMessageAuthor($message);
             else
                 this.hideMessageAuthor($message);
