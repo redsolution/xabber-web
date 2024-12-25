@@ -216,11 +216,6 @@ xabber.ServerFeatures = Backbone.Collection.extend({
                             return;
                         this.account.roster.syncConversation(null, null, item.conversation, true);
                     });
-                    account.cached_sync_conversations.getFromCachedConversations(`notifications.xmppdev01.xabber.com/${Strophe.NS.XABBER_NOTIFY}` ,(item) => {
-                        if (!item || !item.conversation)
-                            return;
-                        account.roster.syncConversation(null, null, item.conversation, true);
-                    });
                 }
             }
 
