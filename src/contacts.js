@@ -6550,6 +6550,7 @@ xabber.GroupchatInvitationView = xabber.BasicView.extend({
         this.$('.msg-text').text(options.message && options.message.get('message') ? options.message.get('message') : xabber.getString("groupchat__public_group__text_invitation", [this.account.get('jid')]));
         this.message = options.message;
         this.model.on("change", this.update, this);
+        this.getInviteAvatar();
     },
 
     render: function () {
@@ -6563,6 +6564,64 @@ xabber.GroupchatInvitationView = xabber.BasicView.extend({
         this.data.set('visible', false);
         this.model.set('visible', false);
         this.onHide.apply(this, arguments);
+    },
+
+    getInviteAvatar: function (node) {
+        let contact = this.model;
+
+        if (!contact.get('avatar_priority')) {
+            let iq = $iq({to: this.model.get('jid'), type:'get'})
+                .c('pubsub', { xmlns:Strophe.NS.PUBSUB })
+                .c('items', {node: node || Strophe.NS.PUBSUB_AVATAR_METADATA});
+            return this.account.sendIQFast(iq, (res) => {
+                let $res = $(res),
+                    $metadata = $res.find(`metadata[xmlns="${Strophe.NS.PUBSUB_AVATAR_METADATA}"]`)
+                if ($metadata.length) {
+                    let photo_id = $metadata.find('info').attr('id'),
+                        photo_url = $metadata.find('info').attr('url');
+                    if (!photo_id) {
+                        let image = Images.getDefaultAvatar(contact.get('name'));
+                        contact.cached_image = Images.getCachedImage(image);
+                        contact.set('avatar_priority', constants.AVATAR_PRIORITIES.PUBSUB_AVATAR);
+                        contact.set('photo_hash', null);
+                        contact.set('image', image);
+                        contact.updateCachedInfo();
+                        return;
+                    }
+                    if ((photo_id !== "") && (contact.get('photo_hash') === photo_id)) {
+                        return;
+                    } else if (photo_url) {
+                        contact.cached_image = photo_url;
+                        contact.set({
+                            photo_hash: photo_id,
+                            image: photo_url,
+                            avatar_priority: constants.AVATAR_PRIORITIES.PUBSUB_AVATAR
+                        });
+                        contact.updateCachedInfo();
+                        return;
+                    }
+                    contact.getAvatar(photo_id, Strophe.NS.PUBSUB_AVATAR_DATA, (data_avatar) => {
+                        try {
+                            contact.cached_image = Images.getCachedImage(data_avatar);
+                            contact.set('avatar_priority', constants.AVATAR_PRIORITIES.PUBSUB_AVATAR);
+                            contact.set('photo_hash', photo_id);
+                            contact.set('image', data_avatar);
+                            contact.updateCachedInfo();
+                        } catch (e) {
+                            console.error(e);
+                        }
+                    });
+                } else {
+                    let image = Images.getDefaultAvatar(contact.get('name'));
+                    contact.cached_image = Images.getCachedImage(image);
+                    contact.set('avatar_priority', constants.AVATAR_PRIORITIES.PUBSUB_AVATAR);
+                    contact.set('photo_hash', null);
+                    contact.set('image', image);
+                    contact.updateCachedInfo();
+                    return;
+                }
+            });
+        }
     },
 
     update: function () {

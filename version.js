@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.4.31","version_description":"added msgs and presence resending after resume, fixed msg author not being shown after multiple pending msgs resending"}'
+'{"version_number":"2.4.32","version_description":"added get avatar func on group invitation, fixed show all btn and subscription blocks visibility, removed incoming subscription system message and hidden chats with subscription and invitation if they have no messages, returned avatar icon for invitations in notifications, changed counter visuals for subscirptions and invitations in notifications tab"}'
 )});

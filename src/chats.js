@@ -2124,11 +2124,11 @@ xabber.EphemeralTimerSelector = xabber.BasicView.extend({
         let jid = this.get('jid');
         if (!this.contact.get('group_chat') && !this.contact.get('in_roster')) {
             if (type === 'subscribe') {
-                this.messages.createSystemMessage({ //change to chat timestamp update
-                    from_jid: jid,
-                    auth_request: true,
-                    message: xabber.getString("action_subscription_received")
-                });
+                // this.messages.createSystemMessage({ //change to chat timestamp update
+                //     from_jid: jid,
+                //     auth_request: true,
+                //     message: xabber.getString("action_subscription_received")
+                // });
             }
         }
     },
@@ -2434,8 +2434,18 @@ xabber.ChatItemView = xabber.BasicView.extend({
     },
 
     updateIncomingSubscription: function () {
-        this.$('.msg-incoming-subscription').showIf(this.contact.get('invitation') || (this.contact.get('subscription_request_in') && this.contact.get('subscription') != 'both'));
+        let is_fitting = this.contact.get('invitation') || (this.contact.get('subscription_request_in') && this.contact.get('subscription') != 'both');
+        this.$('.msg-incoming-subscription').showIf(is_fitting);
         this.updateTextClipping();
+        if (is_fitting) {
+            if (!this.model.last_message || this.contact.get('invitation')){
+                this.$el.addClass('hidden2');
+            } else {
+                this.$el.removeClass('hidden2');
+            }
+        } else {
+            this.$el.removeClass('hidden2');
+        }
         xabber.trigger('new_incoming_subscription');
     },
 
@@ -2611,6 +2621,7 @@ xabber.ChatItemView = xabber.BasicView.extend({
             this.$(`.msg-delivering-state`).addClass('hidden');
             return;
         }
+        this.updateIncomingSubscription();
         msg || (msg = this.model.last_message);
         if (!this.model.get('active') && this.model.item_view && this.model.item_view.content && this.model.item_view.content.bottom && this.model.item_view.content.bottom.$('.input-message .rich-textarea').getTextFromRichTextarea().trim()){
             let draft_message = this.model.item_view.content.bottom.$('.input-message .rich-textarea').getTextFromRichTextarea();

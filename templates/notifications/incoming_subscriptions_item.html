@@ -1,9 +1,7 @@
 <div class="notification-subscription-item {[if (group_chat) {]}invitation-notifications-item{[} else {]}incoming-subscription-notifications-item{[}]}" data-account-jid="{{account}}" data-jid="{{jid}}">
     <div class="avatar-wrap">
         <div class="circle-avatar subscribe-avatar"></div>
-        {[if (!group_chat) {]}
-            <div class="notification-icon subscribe-icon ground-color-500"></div>
-        {[}]}
+        <div class="notification-icon subscribe-icon ground-color-500"></div>
     </div>
     <div class="subcription-main-wrap">
         {[if (group_chat) {]}

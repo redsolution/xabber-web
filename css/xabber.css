@@ -22675,9 +22675,20 @@ ul.restrictions-list-content>li {
     position: relative;
     margin-bottom: 8px;
 }
-.filter-item-wrap.subscription-item-wrap,
-.filter-item-wrap.invitation-item-wrap{
-    margin-top: 16px;
+.filter-item-wrap.subscription-item-wrap{
+    margin-top: 24px;
+}
+.notifications-content-filters .filter-item-wrap.subscription-item-wrap span,
+.notifications-content-filters .filter-item-wrap.invitation-item-wrap span{
+    background-color: #388e3c;
+    border-radius: 8px;
+    color: #fff !important;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 16px;
+    padding: 0 4px;
+    text-align: center;
+    margin-top: 4px;
 }
 .contacts-panel-wrap .contacts-panel-left-side .filter-item-wrap .filter-icon,
 .calls-content-filters .filter-item-wrap .filter-icon,

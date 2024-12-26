@@ -344,14 +344,12 @@ xabber.NotificationsView = xabber.BasicView.extend({
                 this.$el.addClass('invitation-content');
                 this.$('.notifications-utility').addClass('invitation-content');
                 this.$('.notification-subscription-item').removeClass('hidden');
-                this.$('.notification-subscriptions-button').addClass('hidden');
                 this.current_content.updateCalendarCellsActivity([]);
             } else if (filter_type === 'subscription') {
                 this.current_content.$el.addClass('subscription-content');
                 this.$el.addClass('subscription-content');
                 this.$('.notifications-utility').addClass('subscription-content');
                 this.$('.notification-subscription-item').removeClass('hidden');
-                this.$('.notification-subscriptions-button').addClass('hidden');
                 this.current_content.updateCalendarCellsActivity([]);
             } else if (filter_type === 'security') {
                 this.current_content.$el.addClass('security-content');
@@ -978,21 +976,20 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
                     this.prepareShowMoreText($template);
                 });
         });
-        if (subs_counter > 1 && this.filter_type !== 'subscription') {
-            this.$('.notification-subscriptions-button-wrap').removeClass('hidden');
+        if (subs_counter > 0) {
+            this.$('.notifications-subscriptions .notification-subscriptions-button-wrap').removeClass('hidden');
         } else {
-            this.$('.notification-subscriptions-button-wrap').addClass('hidden');
+            this.$('.notifications-subscriptions .notification-subscriptions-button-wrap').addClass('hidden');
         }
-        if (inv_counter > 1 && this.filter_type !== 'invitations') {
-            this.$('.notification-subscriptions-button-wrap').removeClass('hidden');
-            this.$('.invitation-item-wrap').removeClass('hidden');
+        if (inv_counter > 0) {
+            this.$('.notifications-invitations .notification-subscriptions-button-wrap').removeClass('hidden');
         } else {
-            this.$('.notification-subscriptions-button-wrap').addClass('hidden');
+            this.$('.notifications-invitations .notification-subscriptions-button-wrap').addClass('hidden');
         }
         xabber.notifications_view.$('.subscription-item-wrap').switchClass('hidden', subs_counter === 0);
         xabber.notifications_view.$('.invitation-item-wrap').switchClass('hidden', inv_counter === 0);
-        this.$('.notification-subscriptions-wrap.notifications-subscriptions').switchClass('hidden', this.$('.notifications-subscriptions .notification-subscription-item:not(.hidden)').length === 0);
-        this.$('.notification-subscriptions-wrap.notifications-invitations').switchClass('hidden', this.$('.notifications-invitations .notification-subscription-item:not(.hidden)').length === 0);
+        this.$('.notification-subscriptions-wrap.notifications-subscriptions').switchClass('hidden', subs_counter === 0);
+        this.$('.notification-subscriptions-wrap.notifications-invitations').switchClass('hidden', inv_counter === 0);
         this.filter_type !== 'subscription' && this.$('.notifications-subscriptions .notification-subscription-item').slice(2).addClass('hidden');
         this.filter_type !== 'invitations' && this.$('.notifications-invitations .notification-subscription-item').slice(2).addClass('hidden');
         xabber.toolbar_view.recountAllMessageCounter();
@@ -1307,8 +1304,6 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
                     this.handleOnScrollRendering('bottom');
                 }
             }
-
-            this.$('.notification-subscriptions-wrap').switchClass('hidden', this.$('.notification-subscription-item:not(.hidden)').length === 0);
         } else if (this.filtered_accounts.length) {
             this.filtered_messages = this.notification_messages.filter((msg) => msg.collection && msg.collection.account && this.filtered_accounts.includes(msg.collection.account.get('jid')) && !msg.get('ignored'));
             if (this.filter_type !== 'all'){
