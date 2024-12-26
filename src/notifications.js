@@ -906,15 +906,38 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
                         text: contact.get('subscription_request_in_text'),
                         counter: contact.get('invitation') ? inv_counter : subs_counter,
                         group_chat: contact.get('group_chat'),
-                        group_chat_members_text: contact.get('group_chat') ? '23 members, including Amy Adams, Baster Beagle, Clint Collins, Dudley Dillington.' : '',
                     }));
                     if (contact.get('invitation')){
                         this.$('.notification-invitations-content-wrap').append($template);
                     } else {
                         this.$('.notification-subscriptions-content-wrap').append($template);
                     }
-                    if (contact.invitation && contact.invitation.message){
-                        $template.find('.subscription-invitation-item-user-text').text(contact.invitation.message.get('message'));
+                    if (contact.invitation){
+                        contact.invitation.message && $template.find('.subscription-invitation-item-user-text').text(contact.invitation.message.get('message'));
+                        if (contact.invitation.members_count) {
+                            $template.find('.subscription-item-members-text').html(`<span class="invitation-notifications-item-members-count">${xabber.getString("groupchats_some_members", [Number(contact.invitation.members_count)])}</span>`)
+                            let names_count = 0,
+                                avatars_count = 0,
+                                including_added;
+
+                            if (contact.invitation.participants.length){
+                                $template.find('.subscription-item-members-text').append(`<span>, ${xabber.getString("including")}</span>`);
+                                _.each(contact.invitation.participants, (member) => {
+                                    if (names_count < 5){
+                                        $template.find('.subscription-item-members-text')
+                                            .append(` <span class="invitation-notifications-item-member-name">${member.name}</span>${(names_count === 4 || (names_count + 1) === contact.invitation.participants.length) ? '.' : ',' }`);
+                                        names_count++;
+                                    }
+                                    if (avatars_count < 11 && member.avatar_url){
+                                        let $avatar = $(`<div class="circle-avatar member-avatar"></div>`);
+                                        $avatar.setAvatar(member.avatar_url, 64);
+                                        $template.find('.subscription-item-members-avatars').append($avatar);
+                                        avatars_count++;
+                                    }
+                                });
+                            }
+                        }
+
                     }
                     if (contact.get('group_chat')){
                         if (contact.invitation && contact.invitation.message && contact.invitation.message.get('inviter_jid')){ //34

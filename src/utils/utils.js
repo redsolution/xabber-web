@@ -1299,7 +1299,7 @@ var utils = {
         return Snum;
     },
 
-    generateHOTP: async function(secret, counter) {
+    generateHOTP: async function(secret, counter) { //todo: проверить если сломался, то получится ли по окра
         let key = await this.generateHOTPKey(secret, counter);
         let uKey = new Uint8Array(key);
 

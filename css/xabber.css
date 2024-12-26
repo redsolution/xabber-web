@@ -22993,6 +22993,9 @@ ul.restrictions-list-content>li {
     font-size: 14px;
     line-height: 20px;
 }
+.notifications-content-wrap .notification-subscriptions-wrap .notification-subscription-item .invitation-notifications-item-member-name{
+    font-weight: 500;
+}
 .notifications-content-wrap .notification-subscriptions-wrap .notification-subscription-item .subscription-invitation-item-main-text .inviter-name{
     font-weight: 500;
 }

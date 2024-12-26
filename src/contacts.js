@@ -6551,6 +6551,7 @@ xabber.GroupchatInvitationView = xabber.BasicView.extend({
         this.message = options.message;
         this.model.on("change", this.update, this);
         this.getInviteAvatar();
+        this.getGroupMembers();
     },
 
     render: function () {
@@ -6622,6 +6623,52 @@ xabber.GroupchatInvitationView = xabber.BasicView.extend({
                 }
             });
         }
+    },
+
+    getGroupMembers: function (node) {
+
+        let iq = $iq({to: this.model.get('full_jid'), type: 'get'});
+        iq.c('query', {xmlns: `${Strophe.NS.GROUP_CHAT}#members`, version: 0});
+
+        this.account.sendFast(iq, (response) => {
+            let $response = $(response);
+
+            let participants = [],
+                members_count = 0;
+
+            $response.find(`query user`).each((idx, item) => {
+                let $item = $(item),
+                    subscription = $item.find('subscription').text(),
+                    id = $item.attr('id');
+
+                if (subscription !== 'none') {
+                    let jid = $item.find('jid').text();
+                    if (jid){
+                        let contact_in_group = {
+                            jid: jid,
+                            contact: this.account.contacts.get(jid),
+                            name: $item.find('nickname').text(),
+                        };
+                        let $metadata = $item.find(`metadata[xmlns="${Strophe.NS.PUBSUB_AVATAR_METADATA}"]`)
+                        if ($metadata.length) {
+                            let photo_id = $metadata.find('info').attr('id'),
+                                photo_url = $metadata.find('info').attr('url');
+                            contact_in_group.avatar_url = photo_url
+                        }
+                        if (jid && this.account.contacts.get(jid) && this.account.contacts.get(jid).get('in_roster')) {
+                            contact_in_group.in_roster = true;
+                        }
+                        participants.push(contact_in_group)
+                        members_count++;
+                    }
+                }
+            });
+            participants = participants.sort((a,b) => !a.in_roster ? 1 : -1);
+            this.members_count = members_count;
+            this.participants = participants;
+            xabber.trigger('invitations_updated');
+        }, (error) => {
+        });
     },
 
     update: function () {
