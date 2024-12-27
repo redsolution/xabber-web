@@ -1093,6 +1093,7 @@ xabber.ToolbarView = xabber.BasicView.extend({
         this.data.on("change:all_msg_counter", this.onChangedAllMessageCounter, this);
         this.data.on("change:group_msg_counter", this.onChangedGroupMessageCounter, this);
         this.data.on("change:mentions_counter", this.onChangedMentionsCounter, this);
+        this.data.on("change:mentions_subscriptions", this.onChangedMentionsSubscriptions, this);
         this.data.on("change:msg_counter", this.onChangedMessageCounter, this);
         this.data.set({msg_counter: 0});
         this.data.set({group_msg_counter: 0});
@@ -1355,7 +1356,7 @@ xabber.ToolbarView = xabber.BasicView.extend({
     },
 
     setAllMessageCounter: function () {
-        let count_msg = 0, count_all_msg = 0, count_group_msg = 0, mentions = 0;
+        let count_msg = 0, count_all_msg = 0, count_group_msg = 0, mentions = 0, incoming_subs_count = 0;
         let all_unread_list = []
         xabber.accounts.each((account) => {
             account.chats.each((chat) => {
@@ -1378,6 +1379,7 @@ xabber.ToolbarView = xabber.BasicView.extend({
             incoming_subscriptions && all_unread_list.push({is_subs:true, inc_subs: account.contacts.filter(item => (item.get('invitation') && !item.get('removed')) || (item.get('subscription_request_in') && item.get('subscription') != 'both'))});
 
             incoming_subscriptions && (mentions += incoming_subscriptions);
+            incoming_subscriptions && (incoming_subs_count += incoming_subscriptions);
 
             // count_all_msg += incoming_subscriptions;
             if (account.omemo && account.omemo.xabber_trust){
@@ -1391,7 +1393,7 @@ xabber.ToolbarView = xabber.BasicView.extend({
             // console.error('TOOLBARS UNREAD');
             // console.error(all_unread_list);
         }
-        return { msgs: count_msg, all_msgs: count_all_msg, group_msgs: count_group_msg, mentions: mentions };
+        return { msgs: count_msg, all_msgs: count_all_msg, group_msgs: count_group_msg, mentions: mentions , mentions_subscriptions: incoming_subs_count };
     },
 
     recountAllMessageCounter: function () {
@@ -1400,6 +1402,7 @@ xabber.ToolbarView = xabber.BasicView.extend({
         this.data.set('msg_counter', unread_messages.msgs);
         this.data.set('group_msg_counter', unread_messages.group_msgs);
         this.data.set('mentions_counter', unread_messages.mentions);
+        this.data.set('mentions_subscriptions', unread_messages.mentions_subscriptions);
         xabber.recountAllMessageCounter();
     },
 
@@ -1418,6 +1421,22 @@ xabber.ToolbarView = xabber.BasicView.extend({
         if (c >= 100)
             c = '99+';
         this.$('.mentions-indicator').switchClass('unread', c).text(c);
+    },
+
+    onChangedMentionsSubscriptions: function () {
+        let incoming = this.data.get('mentions_subscriptions');
+        if (incoming) {
+            this.$('.mentions-indicator').addClass('indicatior-subscription');
+            // if (!this.mentions_subscriptions_interval){
+            //     this.mentions_subscriptions_interval = setInterval(() => {
+            //         this.$('.mentions-indicator').switchClass('indicatior-subscription');
+            //     }, 750);
+            // }
+        } else {
+            // clearInterval(this.mentions_subscriptions_interval)
+            // this.mentions_subscriptions_interval = null;
+            this.$('.mentions-indicator').removeClass('indicatior-subscription');
+        }
     },
 
     onChangedAllMessageCounter: function () {

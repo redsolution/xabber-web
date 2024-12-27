@@ -4115,6 +4115,24 @@ input[type=text].simple-input-field:hover {
 .toolbar .all-msg-indicator.unread {
     display: inline-block;
 }
+.toolbar .mentions-indicator.indicatior-subscription{
+    outline: 2px solid transparent;
+    outline-offset: -1px;
+    animation: blink-animation 2s steps(100, start) infinite;
+    -webkit-animation: blink-animation 2s steps(100, start) infinite;
+}
+@keyframes blink-animation {
+    50% {
+        background: #4CAF50;
+        outline: 2px solid #4CAF53;
+    }
+}
+@-webkit-keyframes blink-animation {
+    50% {
+        background: #4CAF50;
+        outline: 2px solid #4CAF53;
+    }
+}
 
 .toolbar .show-chats.active .msg-indicator,
 .toolbar .show-chats.active .group-msg-indicator,
