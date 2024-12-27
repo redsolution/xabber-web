@@ -896,7 +896,7 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
         } else if ($(ev.target).closest('.inviter-name:not(.private-chat-inviter)').length) {
             $item = $(ev.target).closest('.inviter-name:not(.private-chat-inviter)');
         }
-        if (!$item.length)
+        if (!$item || !$item.length)
             return;
         let $invite_item = $item.closest('.notification-subscription-item'),
             account_jid = $invite_item .attr('data-account-jid'),

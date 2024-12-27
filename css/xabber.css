@@ -23066,6 +23066,9 @@ ul.restrictions-list-content>li {
     margin-top: 6px;
     display: flex;
 }
+.notifications-content-wrap .notification-subscriptions-wrap .notification-subscription-item .subscription-item-members-avatars:empty{
+    display: none;
+}
 .notifications-content-wrap .notification-subscriptions-wrap .notification-subscription-item .subscription-item-members-avatars .circle-avatar{
     width: 24px;
     height: 24px;

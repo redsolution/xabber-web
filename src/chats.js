@@ -10561,8 +10561,10 @@ xabber.InvitationPanelView = xabber.SearchView.extend({
         let iq = $iq({type: 'set', to: (this.contact.get('full_jid') || this.contact.get('jid'))})
                 .c('invite', {xmlns: `${Strophe.NS.GROUP_CHAT}#invite`})
                 .c('jid').t(contact_jid).up()
-                .c('send').t('false').up()
-                .c('reason').t(reason_text);
+                .c('send').t('false').up();
+        if (reason_text) {
+            iq.c('reason').t(reason_text);
+        }
         this.account.sendIQFast(iq, () => {
             this.sendInviteMessage(contact_jid);
             this.close();
@@ -10594,11 +10596,13 @@ xabber.InvitationPanelView = xabber.SearchView.extend({
                 to: jid_to,
                 type: 'chat',
                 id: uuid()
-            }).c('invite', {xmlns: `${Strophe.NS.GROUP_CHAT}#invite`, jid: this.contact.get('jid')})
-                .c('reason').t(reason_text).up().up()
-                .c('x', {xmlns: Strophe.NS.GROUP_CHAT})
-                .c('privacy').t(this.contact.get('group_info').privacy).up().up()
-                .c('body').t(body).up();
+            }).c('invite', {xmlns: `${Strophe.NS.GROUP_CHAT}#invite`, jid: this.contact.get('jid')}).up();
+        if (reason_text) {
+            stanza.c('reason').t(reason_text).up();
+        }
+        stanza.c('x', {xmlns: Strophe.NS.GROUP_CHAT})
+            .c('privacy').t(this.contact.get('group_info').privacy).up().up()
+            .c('body').t(body).up();
         this.account.sendMsg(stanza);
     },
 

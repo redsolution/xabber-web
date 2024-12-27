@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.4.34","version_description":"added group member avatar to non contacts details of group member from invitation, fixed avatar hashing for group member avatar, removed default invitation reason text, added force request avatar function to contact, fixed saved scroll state when opening chat through contact details, added group members sorting with inviter being first"}'
+'{"version_number":"2.4.35","version_description":"fixed visible empty avatars in invitation, fixed reason element in invitation sending, fixed opening contact details for private group in invitation"}'
 )});
