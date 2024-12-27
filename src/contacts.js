@@ -1085,6 +1085,12 @@ xabber.Contact = Backbone.Model.extend({
             this.set('search_hidden', true)
             let attrs = {right_contact: '', contact: this};
             (screen === 'contacts') && (attrs.chat_item = null);
+            if (screen === 'notifications') {
+                attrs.chat_item = null;
+                attrs.right = 'notifications';
+                attrs.notifications = xabber.notifications_view;
+
+            };
             xabber.body.setScreen(screen, attrs);
         }
         else {
@@ -1095,6 +1101,11 @@ xabber.Contact = Backbone.Model.extend({
                     right_contact_modal: true,
                 };
                 (screen === 'contacts') && (attrs.chat_item = null);
+                if (screen === 'notifications') {
+                    attrs.chat_item = null;
+                    attrs.right = 'notifications';
+                    attrs.notifications = xabber.notifications_view;
+                };
                 xabber.body.setScreen(screen, attrs);
             } else {
                 let attrs = {
@@ -1103,6 +1114,11 @@ xabber.Contact = Backbone.Model.extend({
                     right_contact_modal: true,
                 };
                 (screen === 'contacts') && (attrs.chat_item = null);
+                if (screen === 'notifications') {
+                    attrs.chat_item = null;
+                    attrs.right = 'notifications';
+                    attrs.notifications = xabber.notifications_view;
+                };
                 xabber.body.setScreen(screen, attrs);
             }
             if (this.details_view_right && this.details_view_right.contact_searched_messages_view){
@@ -1714,7 +1730,7 @@ xabber.ContactDetailsViewRight = xabber.BasicView.extend({
     },
 
     startEncryptedChat: function (ev, no_close) {
-        let is_contacts = xabber.body.screen.get('name') === 'contacts';
+        let is_contacts = xabber.body.screen.get('name') === 'contacts' || xabber.body.screen.get('name') === 'notifications';
         this.account.chats.openChat(this.model, {encrypted: true});
         let chat = this.account.chats.get(this.model.hash_id + ':encrypted');
         chat.set('timestamp', moment.now());
@@ -1723,13 +1739,13 @@ xabber.ContactDetailsViewRight = xabber.BasicView.extend({
     },
 
     openEncryptedChat: function (ev, no_close) {
-        let is_contacts = xabber.body.screen.get('name') === 'contacts';
+        let is_contacts = xabber.body.screen.get('name') === 'contacts' || xabber.body.screen.get('name') === 'notifications';
         this.account.chats.openChat(this.model, {encrypted: true});
         is_contacts && !no_close && this.closeDetails();
     },
 
     openRegularChat: function (ev, no_close) {
-        let is_contacts = xabber.body.screen.get('name') === 'contacts';
+        let is_contacts = xabber.body.screen.get('name') === 'contacts' || xabber.body.screen.get('name') === 'notifications';
         this.account.chats.openChat(this.model);
         is_contacts && !no_close && this.closeDetails();
     },
@@ -2682,7 +2698,7 @@ xabber.GroupChatDetailsViewRight = xabber.BasicView.extend({
     },
 
     openChat: function (ev) {
-        let is_contacts = xabber.body.screen.get('name') === 'contacts';
+        let is_contacts = xabber.body.screen.get('name') === 'contacts' || xabber.body.screen.get('name') === 'notifications';
         this.openRegularChat();
         is_contacts && this.closeDetails();
     },
@@ -10439,7 +10455,7 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
         _.each(this.model.enabled, (account) => {
             if (account.get('jid') !== this.current_filter_account)
                 return;
-            let contacts = account.contacts.filter(item => !(item.get('invitation') || (item.get('subscription_request_in') && item.get('subscription') !== 'both')))
+            let contacts = account.contacts.filter(item => !(item.get('invitation') || (item.get('subscription_request_in') && item.get('subscription') !== 'both')) && item.get('in_roster'))
             _.each(account.contacts.models, (contact) => {
                 if (this.contacts.some(item => (item.account.get('jid') === contact.account.get('jid') && item.get('jid') === contact.get('jid')))
                     || contact.get('group_chat') || contact.get('notifications') || contact.get('server') || !Strophe.getNodeFromJid(contact.get('jid')))
@@ -10515,7 +10531,7 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
             if (account.get('jid') !== this.current_filter_account)
                 return;
             _.each(account.contacts.models, (contact) => {
-                if (contact.get('notifications') || contact.get('server') || !Strophe.getNodeFromJid(contact.get('jid')) || contact.get('invitation') || contact.get('subscription_request_in'))
+                if (contact.get('notifications') || contact.get('server') || !Strophe.getNodeFromJid(contact.get('jid')) || contact.get('invitation') || (contact.get('subscription_request_in') && contact.get('subscription') !== 'both') || !contact.get('in_roster'))
                     return;
                 if (this.current_filter_groups_list.length){
                     if (!contact.get('groups') || !contact.get('groups').length || !checker(contact.get('groups'), this.current_filter_groups_list))
@@ -10617,7 +10633,7 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
         let current_account = xabber.accounts.enabled.find(item => item.get('jid') === this.current_filter_account);
         if (current_account){
             let account_contacts = current_account.contacts.models;
-            account_contacts = account_contacts.filter(contact => !contact.get('notifications') && !contact.get('server')
+            account_contacts = account_contacts.filter(contact => !contact.get('notifications') && !contact.get('server') && contact.get('in_roster')
                 && Strophe.getNodeFromJid(contact.get('jid')) && !(contact.get('invitation') || (contact.get('subscription_request_in') && contact.get('subscription') !== 'both')));
             this.$('.filter-item-wrap[data-filter="all"] span').text(account_contacts.filter(contact => !contact.get('group_chat')).length)
             this.$('.filter-item-wrap[data-filter="groupchat"] span').text(account_contacts.filter(contact => contact.get('group_chat')).length)

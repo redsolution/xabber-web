@@ -74,6 +74,11 @@ xabber.NotificationsView = xabber.BasicView.extend({
 
     render: function (options) {
         // console.log(options);
+        if (this.current_content && !(_.isUndefined(this.current_content.saved_scroll) || _.isNull(this.current_content.saved_scroll))){
+            this.current_content.scrollTo(this.current_content.saved_scroll);
+            this.current_content.saved_scroll = null;
+            return;
+        }
         this.clearFilter();
         this.updateAccountsFilter();
         this.$('.notifications-utility .notifications-header').text(xabber.getString("notifications_window__type_filter_all"));
@@ -475,6 +480,9 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
         "click .subscription-switch-item": "switchSubscription",
         "click .subscription-show-text-btn": "showText",
         "click .subscription-item-jid": "openSubscriptionChat",
+        "click .invitation-notifications-item-member-name": "onClickName",
+        "click .circle-avatar.member-avatar": "onClickName",
+        "click .inviter-name": "onClickName",
     },
 
     _initialize: function (options) {
@@ -878,6 +886,40 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
     addTrustSessionsContainer: function () {
     },
 
+    onClickName: function (ev) {
+        let $item;
+        if ($(ev.target).closest('.invitation-notifications-item-member-name').length){
+            $item = $(ev.target).closest('.invitation-notifications-item-member-name');
+        } else if ($(ev.target).closest('.circle-avatar.member-avatar').length) {
+            $item = $(ev.target).closest('.circle-avatar.member-avatar');
+        } else if ($(ev.target).closest('.inviter-name:not(.private-chat-inviter)').length) {
+            $item = $(ev.target).closest('.inviter-name:not(.private-chat-inviter)');
+        }
+        if (!$item.length)
+            return;
+
+        let account_jid = $item.closest('.notification-subscription-item').attr('data-account-jid'),
+            contact_jid = $item.attr('data-jid');
+
+
+        let account = xabber.accounts.find(item => item.get('jid') === account_jid);
+        if (!account)
+            return;
+
+        let contact = account.contacts.mergeContact(contact_jid);
+        if (!contact)
+            return;
+
+
+        let scrolled_top = this.getScrollTop();
+        this.saved_scroll = scrolled_top;
+        contact.showDetailsRight('notifications');
+        this.saved_scroll = scrolled_top;
+        if (xabber.chats_view.active_chat && xabber.chats_view.active_chat.model) {
+            xabber.chats_view.active_chat.model.set('active', false);
+        }
+    },
+
     addIncomingSubscriptionContainer: function () {
         this.$('.chat-content').prepend($(templates.incoming_invitations_container()));
         this.$('.chat-content').prepend($(templates.incoming_subscriptions_container()));
@@ -925,11 +967,11 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
                                 _.each(contact.invitation.participants, (member) => {
                                     if (names_count < 5){
                                         $template.find('.subscription-item-members-text')
-                                            .append(` <span class="invitation-notifications-item-member-name">${member.name}</span>${(names_count === 4 || (names_count + 1) === contact.invitation.participants.length) ? '.' : ',' }`);
+                                            .append(` <span class="invitation-notifications-item-member-name${!member.in_roster ? ' not-contact-member' : ''}" data-jid="${member.jid}">${member.name}</span>${(names_count === 4 || (names_count + 1) === contact.invitation.participants.length) ? '.' : ',' }`);
                                         names_count++;
                                     }
                                     if (avatars_count < 11 && member.avatar_url){
-                                        let $avatar = $(`<div class="circle-avatar member-avatar"></div>`);
+                                        let $avatar = $(`<div class="circle-avatar member-avatar${!member.in_roster ? ' not-contact-member' : ''}" data-jid="${member.jid}"></div>`);
                                         $avatar.setAvatar(member.avatar_url, 64);
                                         $template.find('.subscription-item-members-avatars').append($avatar);
                                         avatars_count++;
@@ -960,10 +1002,10 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
 
                             if (inviter_contact.get('name') === inviter_contact.get('jid')){
                                 $template.find('.subscription-invitation-item-main-text')
-                                    .html(`<span class="inviter-name">${inviter_contact.get('name')}</span> ${xabber.getString("notifications_window__subscriptions_group_chat_invitation_main_text")} <span class="invitation-link text-color-700">${group_name}</span>:`)
+                                    .html(`<span class="inviter-name${contact.get('private_chat') ? ' private-chat-inviter' : ''}" data-jid="${inviter_contact.get('jid')}">${inviter_contact.get('name')}</span> ${xabber.getString("notifications_window__subscriptions_group_chat_invitation_main_text")} <span class="invitation-link text-color-700">${group_name}</span>:`)
                             } else {
                                 $template.find('.subscription-invitation-item-main-text')
-                                    .html(`<span class="inviter-name">${inviter_contact.get('name')}</span> (<span class="inviter-jid">${inviter_contact.get('jid')}</span>) ${xabber.getString("notifications_window__subscriptions_group_chat_invitation_main_text")} <span class="invitation-link text-color-700">${group_name}</span>:`)
+                                    .html(`<span class="inviter-name${contact.get('private_chat') ? ' private-chat-inviter' : ''}" data-jid="${inviter_contact.get('jid')}">${inviter_contact.get('name')}</span> (<span class="inviter-jid">${inviter_contact.get('jid')}</span>) ${xabber.getString("notifications_window__subscriptions_group_chat_invitation_main_text")} <span class="invitation-link text-color-700">${group_name}</span>:`)
                             }
                             let image = contact.cached_image;
                             let icon_name = 'group-public';

@@ -1379,7 +1379,7 @@ xabber.ToolbarView = xabber.BasicView.extend({
 
             incoming_subscriptions && (mentions += incoming_subscriptions);
 
-            count_all_msg += incoming_subscriptions;
+            // count_all_msg += incoming_subscriptions;
             if (account.omemo && account.omemo.xabber_trust){
                 let trust = account.omemo.xabber_trust,
                     active_trust_sessions = trust.get('active_trust_sessions');

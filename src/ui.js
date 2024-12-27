@@ -310,7 +310,7 @@ xabber.once("start", function () {
         main: {
             // left: { chats: null },
             right: { notifications_body: null  },
-            // right_contact: {},
+            right_contact: {},
             // placeholders: null
         },
         // roster: null

@@ -22993,6 +22993,12 @@ ul.restrictions-list-content>li {
     font-size: 14px;
     line-height: 20px;
 }
+.notifications-content-wrap .notification-subscriptions-wrap .notification-subscription-item .inviter-name:not(.private-chat-inviter):hover,
+.notifications-content-wrap .notification-subscriptions-wrap .notification-subscription-item .circle-avatar.member-avatar:hover,
+.notifications-content-wrap .notification-subscriptions-wrap .notification-subscription-item .invitation-notifications-item-member-name:hover{
+    cursor: pointer;
+    opacity: 0.7;
+}
 .notifications-content-wrap .notification-subscriptions-wrap .notification-subscription-item .invitation-notifications-item-member-name{
     font-weight: 500;
 }
