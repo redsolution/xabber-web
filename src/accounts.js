@@ -1100,11 +1100,16 @@ xabber.Account = Backbone.Model.extend({
         getAvatarHash: function (avatar) {
             let from_avatar = avatar || this.get('vcard').photo.image;
             if (from_avatar) {
-                let decoded_raw = atob(from_avatar),
-                    bin = Uint8Array.from(Array.prototype.map.call(decoded_raw,function(x) {
-                        return x.charCodeAt(0);
-                    }));
-                return sha1(bin);
+                try {
+                    let decoded_raw = atob(from_avatar),
+                        bin = Uint8Array.from(Array.prototype.map.call(decoded_raw,function(x) {
+                            return x.charCodeAt(0);
+                        }));
+                    return sha1(bin);
+                } catch (e) {
+                    console.error(e)
+                    return "";
+                }
             }
             else
                 return "";

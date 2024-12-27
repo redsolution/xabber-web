@@ -111,6 +111,68 @@ xabber.Contact = Backbone.Model.extend({
         return status_text;
     },
 
+    forceUpdatePubSubAvatar: function (dfd) {
+        let iq = $iq({to: this.get('jid'), type: 'get'})
+            .c('pubsub', {xmlns: Strophe.NS.PUBSUB})
+            .c('items', {node: Strophe.NS.PUBSUB_AVATAR_METADATA});
+        return this.account.sendIQFast(iq, (res) => {
+            let $res = $(res),
+                $metadata = $res.find(`metadata[xmlns="${Strophe.NS.PUBSUB_AVATAR_METADATA}"]`)
+            if ($metadata.length) {
+                let photo_id = $metadata.find('info').attr('id'),
+                    photo_url = $metadata.find('info').attr('url');
+                if (!photo_id) {
+                    let image = Images.getDefaultAvatar(this.get('name'));
+                    this.cached_image = Images.getCachedImage(image);
+                    this.set('avatar_priority', constants.AVATAR_PRIORITIES.PUBSUB_AVATAR);
+                    this.set('photo_hash', null);
+                    this.set('image', image);
+                    this.updateCachedInfo();
+                    dfd.resolve();
+                    return;
+                }
+                if ((photo_id !== "") && (this.get('photo_hash') === photo_id)) {
+                    return;
+                } else if (photo_url) {
+                    this.cached_image = photo_url;
+                    this.set({
+                        photo_hash: photo_id,
+                        image: photo_url,
+                        avatar_priority: constants.AVATAR_PRIORITIES.PUBSUB_AVATAR
+                    });
+                    this.updateCachedInfo();
+                    dfd.resolve();
+                    return;
+                }
+                this.getAvatar(photo_id, Strophe.NS.PUBSUB_AVATAR_DATA, (data_avatar) => {
+                    try {
+                        this.cached_image = Images.getCachedImage(data_avatar);
+                        this.set('avatar_priority', constants.AVATAR_PRIORITIES.PUBSUB_AVATAR);
+                        this.set('photo_hash', photo_id);
+                        this.set('image', data_avatar);
+                        this.updateCachedInfo();
+                        dfd.resolve();
+                    } catch (e) {
+                        console.error(e);
+                        dfd.resolve();
+                    }
+                });
+            } else {
+                let image = Images.getDefaultAvatar(this.get('name'));
+                this.cached_image = Images.getCachedImage(image);
+                this.set('avatar_priority', constants.AVATAR_PRIORITIES.PUBSUB_AVATAR);
+                this.set('photo_hash', null);
+                this.set('image', image);
+                this.updateCachedInfo();
+                dfd.resolve();
+                return;
+            }
+        }, (err) => {
+            console.error(err);
+            dfd.resolve();
+        });
+    },
+
     getSubscriptionStatuses: function () {
         let subscription = this.get('subscription'),
             subscription_preapproved = this.get('subscription_preapproved'),
@@ -267,6 +329,8 @@ xabber.Contact = Backbone.Model.extend({
                         attrs.avatar_priority = constants.AVATAR_PRIORITIES.VCARD_AVATAR;
                         attrs.image = vcard.photo.image;
                     }
+                    else if (this.get('forced_group_avatar') && this.get('image'))
+                        attrs.image = this.get('image');
                     else
                         attrs.image = Images.getDefaultAvatar(attrs.name);
                     this.cached_image = Images.getCachedImage(attrs.image);
@@ -1695,6 +1759,7 @@ xabber.ContactDetailsViewRight = xabber.BasicView.extend({
         this.updateNotifications();
         this.updateButtons();
         this.hideQRCode();
+        this.updateAvatar();
         this.updateList('image');
         if (options && options.right_contact_modal)
             this.makeModal();
@@ -1729,6 +1794,17 @@ xabber.ContactDetailsViewRight = xabber.BasicView.extend({
         }
     },
 
+    clearTabsScrolling: function (is_contacts) {
+        if (is_contacts) {
+            if (!(_.isUndefined(xabber.contacts_view.saved_scroll) || _.isNull(xabber.contacts_view.saved_scroll)))
+                xabber.contacts_view.saved_scroll = null;
+            if (xabber.notifications_view.current_content
+                && !(_.isUndefined(xabber.notifications_view.current_content.saved_scroll) || _.isNull(xabber.notifications_view.current_content.saved_scroll)))
+                xabber.notifications_view.current_content.saved_scroll = null;
+        }
+
+    },
+
     startEncryptedChat: function (ev, no_close) {
         let is_contacts = xabber.body.screen.get('name') === 'contacts' || xabber.body.screen.get('name') === 'notifications';
         this.account.chats.openChat(this.model, {encrypted: true});
@@ -1736,18 +1812,21 @@ xabber.ContactDetailsViewRight = xabber.BasicView.extend({
         chat.set('timestamp', moment.now());
         chat.item_view.updateLastMessage();
         is_contacts && !no_close && this.closeDetails();
+        this.clearTabsScrolling(is_contacts);
     },
 
     openEncryptedChat: function (ev, no_close) {
         let is_contacts = xabber.body.screen.get('name') === 'contacts' || xabber.body.screen.get('name') === 'notifications';
         this.account.chats.openChat(this.model, {encrypted: true});
         is_contacts && !no_close && this.closeDetails();
+        this.clearTabsScrolling(is_contacts);
     },
 
     openRegularChat: function (ev, no_close) {
         let is_contacts = xabber.body.screen.get('name') === 'contacts' || xabber.body.screen.get('name') === 'notifications';
         this.account.chats.openChat(this.model);
         is_contacts && !no_close && this.closeDetails();
+        this.clearTabsScrolling(is_contacts);
     },
 
     keydownHandler: function (ev) {
@@ -2266,6 +2345,7 @@ xabber.GroupChatDetailsViewRight = xabber.BasicView.extend({
         this.updateChilds();
         this.updateNotifications();
         this.updateList('participants');
+        this.updateAvatar();
         this.hideQRCode();
         if (options && options.right_contact_modal)
             this.makeModal();
@@ -2701,6 +2781,18 @@ xabber.GroupChatDetailsViewRight = xabber.BasicView.extend({
         let is_contacts = xabber.body.screen.get('name') === 'contacts' || xabber.body.screen.get('name') === 'notifications';
         this.openRegularChat();
         is_contacts && this.closeDetails();
+        this.clearTabsScrolling(is_contacts);
+    },
+
+    clearTabsScrolling: function (is_contacts) {
+        if (is_contacts) {
+            if (!(_.isUndefined(xabber.contacts_view.saved_scroll) || _.isNull(xabber.contacts_view.saved_scroll)))
+                xabber.contacts_view.saved_scroll = null;
+            if (xabber.notifications_view.current_content
+                && !(_.isUndefined(xabber.notifications_view.current_content.saved_scroll) || _.isNull(xabber.notifications_view.current_content.saved_scroll)))
+                xabber.notifications_view.current_content.saved_scroll = null;
+        }
+
     },
 
     closeDetails: function (ev) {
@@ -6675,11 +6767,14 @@ xabber.GroupchatInvitationView = xabber.BasicView.extend({
                             contact_in_group.in_roster = true;
                         }
                         participants.push(contact_in_group)
-                        members_count++;
                     }
+                    members_count++;
                 }
             });
             participants = participants.sort((a,b) => !a.in_roster ? 1 : -1);
+            if (this.message.get('inviter_jid')) {
+                participants = participants.sort((a, b) => a.jid !== this.message.get('inviter_jid') ? 1 : -1);
+            }
             this.members_count = members_count;
             this.participants = participants;
             xabber.trigger('invitations_updated');

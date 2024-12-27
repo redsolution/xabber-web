@@ -10,6 +10,7 @@ let env = xabber.env,
     Strophe = env.Strophe,
     _ = env._,
     moment = env.moment,
+    Images = utils.images,
     uuid = env.uuid,
     pretty_date = (timestamp) => {
         let date = new Date(timestamp),
@@ -897,27 +898,47 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
         }
         if (!$item.length)
             return;
-
-        let account_jid = $item.closest('.notification-subscription-item').attr('data-account-jid'),
-            contact_jid = $item.attr('data-jid');
+        let $invite_item = $item.closest('.notification-subscription-item'),
+            account_jid = $invite_item .attr('data-account-jid'),
+            contact_jid = $item.attr('data-jid'),
+            update_avatar;
 
 
         let account = xabber.accounts.find(item => item.get('jid') === account_jid);
         if (!account)
             return;
 
-        let contact = account.contacts.mergeContact(contact_jid);
+        let contact = account.contacts.get(contact_jid);
         if (!contact)
-            return;
+            contact = account.contacts.mergeContact(contact_jid);
 
+        let dfd = new $.Deferred();
 
-        let scrolled_top = this.getScrollTop();
-        this.saved_scroll = scrolled_top;
-        contact.showDetailsRight('notifications');
-        this.saved_scroll = scrolled_top;
-        if (xabber.chats_view.active_chat && xabber.chats_view.active_chat.model) {
-            xabber.chats_view.active_chat.model.set('active', false);
+        dfd.done(() => {
+            let scrolled_top = this.getScrollTop();
+            this.saved_scroll = scrolled_top;
+            contact.showDetailsRight('notifications');
+            if (update_avatar && contact.details_view_right){
+                contact.details_view_right.updateAvatar();
+            }
+            this.saved_scroll = scrolled_top;
+            if (xabber.chats_view.active_chat && xabber.chats_view.active_chat.model) {
+                xabber.chats_view.active_chat.model.set('active', false);
+            }
+        });
+
+        if (!contact.get('avatar_priority')) {
+            let photo_url = $invite_item.find(`.circle-avatar.member-avatar[data-jid="${contact_jid}"]`).attr('data-avatar-url');
+            if (photo_url) {
+                contact.set({
+                    image: photo_url,
+                    forced_group_avatar: true,
+                });
+                contact.cached_image = photo_url;
+                update_avatar = true;
+            }
         }
+        dfd.resolve();
     },
 
     addIncomingSubscriptionContainer: function () {
@@ -967,11 +988,11 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
                                 _.each(contact.invitation.participants, (member) => {
                                     if (names_count < 5){
                                         $template.find('.subscription-item-members-text')
-                                            .append(` <span class="invitation-notifications-item-member-name${!member.in_roster ? ' not-contact-member' : ''}" data-jid="${member.jid}">${member.name}</span>${(names_count === 4 || (names_count + 1) === contact.invitation.participants.length) ? '.' : ',' }`);
+                                            .append(` <span class="invitation-notifications-item-member-name${!member.in_roster ? ' not-contact-member' : ''}" data-jid="${member.jid}" data-avatar-url="${member.avatar_url}">${member.name}</span>${(names_count === 4 || (names_count + 1) === contact.invitation.participants.length) ? '.' : ',' }`);
                                         names_count++;
                                     }
                                     if (avatars_count < 11 && member.avatar_url){
-                                        let $avatar = $(`<div class="circle-avatar member-avatar${!member.in_roster ? ' not-contact-member' : ''}" data-jid="${member.jid}"></div>`);
+                                        let $avatar = $(`<div class="circle-avatar member-avatar${!member.in_roster ? ' not-contact-member' : ''}" data-jid="${member.jid}" data-avatar-url="${member.avatar_url}"></div>`);
                                         $avatar.setAvatar(member.avatar_url, 64);
                                         $template.find('.subscription-item-members-avatars').append($avatar);
                                         avatars_count++;

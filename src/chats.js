@@ -10554,9 +10554,9 @@ xabber.InvitationPanelView = xabber.SearchView.extend({
     },
 
     sendInvite: function (contact_jid, callback, errback) {
-        let reason_text = (this.contact.get('group_info').privacy === 'incognito') ? xabber.getString("groupchat__incognito_group__text_invitation") : xabber.getString("groupchat__public_group__text_invitation", [contact_jid]);
+        let reason_text = '';
         if (this.$(`textarea[name="invitation_text"]`).val()){
-            reason_text = reason_text + '\n\n' + this.$(`textarea[name="invitation_text"]`).val();
+            reason_text = this.$(`textarea[name="invitation_text"]`).val();
         }
         let iq = $iq({type: 'set', to: (this.contact.get('full_jid') || this.contact.get('jid'))})
                 .c('invite', {xmlns: `${Strophe.NS.GROUP_CHAT}#invite`})
@@ -10585,9 +10585,9 @@ xabber.InvitationPanelView = xabber.SearchView.extend({
     },
 
     sendInviteMessage: function(jid_to) {
-        let reason_text = (this.contact.get('group_info').privacy === 'incognito') ? xabber.getString("groupchat__incognito_group__text_invitation") : xabber.getString("groupchat__public_group__text_invitation", [jid_to]);
+        let reason_text = '';
         if (this.$(`textarea[name="invitation_text"]`).val()){
-            reason_text = reason_text + '\n\n' + this.$(`textarea[name="invitation_text"]`).val();
+            reason_text = this.$(`textarea[name="invitation_text"]`).val();
         }
         let body = xabber.getString("groupchat_legacy_invitation_body", [this.contact.get('jid')]),
             stanza = $msg({
