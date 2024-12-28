@@ -6695,6 +6695,7 @@ input[type=text].simple-input-field:hover {
     padding: 24px 20px;
     top: 0;
     z-index: 1;
+    width: 100%;
 }
 
 .calls-content-filters .search-form .search-icon,
