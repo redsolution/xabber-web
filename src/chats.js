@@ -6489,6 +6489,10 @@ xabber.ChatContentView = xabber.BasicView.extend({
             });
             notification.onclick = () => {
                 window.focus();
+                if (message.get('invite')){
+                    xabber.toolbar_view.showNotifications();
+                    return;
+                }
                 this.model.trigger('open');
             };
         }
@@ -9388,7 +9392,8 @@ xabber.AddGroupChatView = xabber.SearchView.extend({
     selectAccount: function (ev) {
         let $item = $(ev.target).closest('.account-item-wrap'),
             account = xabber.accounts.get($item.data('jid'));
-        this.bindAccount(account);
+        if (account)
+            this.bindAccount(account);
     },
 
     setCustomDomain: function ($property_value) {
@@ -9536,6 +9541,7 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
         "keydown .search-input": "keyUpOnSearch",
         "focusout .search-input": "clearSearchSelection",
         "click .close-search-icon": "clearSearch",
+        "click .btn-show-search": "showSearch",
         "click .list-item": "onClickItem",
         "click .btn-search-messages": "updateSearchWithMessages",
         "click .btn-unread": "clickUnread",
@@ -9574,7 +9580,25 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
                 this.showAllChats();
             }
         }
+        this.hideSearch();
         this.updateClientNotifications();
+    },
+
+    clearSearch: function (ev) {
+        ev && ev.preventDefault();
+        this.$('.search-input').val('');
+        this.updateSearch();
+        this.onEmptyQuery();
+        this.hideSearch();
+    },
+
+    showSearch: function (ev) {
+        this.$('.chats-search-form').removeClass('hidden');
+        this.$('.search-input').focus();
+    },
+
+    hideSearch: function (ev) {
+        this.$('.chats-search-form').addClass('hidden');
     },
 
     updateClientNotifications: function (options) {

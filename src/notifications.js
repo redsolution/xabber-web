@@ -59,6 +59,8 @@ xabber.NotificationsView = xabber.BasicView.extend({
         "click .btn-previous-plyr": "previousPlyr",
         "click .btn-stop-plyr": "stopPlyr",
         "click .chat-tool-player-containter": "popupPlyr",
+        "click .btn-show-search": "showSearch",
+        "click .close-search-icon": "hideSearch",
 
     },
 
@@ -89,6 +91,7 @@ xabber.NotificationsView = xabber.BasicView.extend({
         this.updatePlyrControls();
         this.updatePlyrTime();
         this.updateClientNotifications();
+        this.hideSearch();
         this.$('.dropdown-button').dropdown({
             inDuration: 100,
             outDuration: 100,
@@ -98,7 +101,15 @@ xabber.NotificationsView = xabber.BasicView.extend({
         this.updateFilterItems();
     },
 
+    showSearch: function (ev) {
+        this.$('.search-form').removeClass('hidden');
+        this.$('.search-input').focus();
+    },
 
+    hideSearch: function (ev) {
+        this.$('.search-form').addClass('hidden');
+        this.$('.search-input').val('');
+    },
 
     clickClearFilter: function (options) {
         this.clearFilter();

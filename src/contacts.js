@@ -10037,6 +10037,7 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
         "click .tab-filter-item": "removeFilter",
         "click .contacts-filter-main-header": "clickClearFilter",
         "click .close-search-icon": "clearSearch",
+        "click .btn-show-search": "showSearch",
         "click .contact-groups-wrap .group.group-expand": "expandGroups",
         "mouseout .contact-expanded-groups-wrap": "closeGroups",
         "keyup .search-input": "keyUpSearch",
@@ -10453,7 +10454,17 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
         this.$('.search-form').removeClass('active');
         this.current_filter_query = null;
         this.contacts = [];
+        this.hideSearch();
         this.processUpdateContacts(true, true);
+    },
+
+    showSearch: function (ev) {
+        this.$('.search-form').removeClass('hidden');
+        this.$('.search-input').focus();
+    },
+
+    hideSearch: function (ev) {
+        this.$('.search-form').addClass('hidden');
     },
 
     updateOneRosterView: function (account) {
@@ -10961,7 +10972,8 @@ xabber.AddContactView = xabber.BasicView.extend({
     selectAccount: function (ev) {
         let $item = $(ev.target).closest('.account-item-wrap'),
             account = xabber.accounts.get($item.data('jid'));
-        this.bindAccount(account);
+        if (account)
+            this.bindAccount(account);
     },
 
     editGroup: function (ev) {
