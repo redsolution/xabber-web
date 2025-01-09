@@ -6725,13 +6725,13 @@ input[type=text].simple-input-field:hover {
 .contacts-panel-wrap .panel-head .btn-dropdown-groups,
 .contacts-panel-wrap .panel-head .btn-add-contact{
     position: absolute;
-    right: 44px;
+    right: 14px;
     top: 20px;
     cursor: pointer;
     pointer-events: auto;
 }
 .contacts-panel-wrap .panel-head .btn-add-contact{
-    right: 94px;
+    right: 62px;
 }
 .contacts-panel-wrap .panel-head i{
     color: #9e9e9e;
@@ -22481,7 +22481,7 @@ ul.restrictions-list-content>li {
     position: absolute;
     cursor: pointer;
     top: 20px;
-    right: 44px;
+    right: 14px;
     width: 24px;
     height: 24px;
     pointer-events: auto;
@@ -22696,7 +22696,7 @@ ul.restrictions-list-content>li {
     position: absolute;
     cursor: pointer;
     top: 20px;
-    right: 44px;
+    right: 14px;
     width: 24px;
     height: 24px;
     pointer-events: auto;

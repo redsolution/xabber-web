@@ -1,4 +1,3 @@
-//todo: change pathings
 let fs = require('fs'),
     xmldom = require('xmldom'),
     json = {},

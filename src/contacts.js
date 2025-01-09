@@ -7562,7 +7562,8 @@ xabber.ContactEditGroupsView = xabber.BasicView.extend({
             name = $input.val();
         if (ev.keyCode === constants.KEY_ENTER && name) {
             if (name == constants.GENERAL_GROUP_ID || name == constants.NON_ROSTER_GROUP_ID){
-                $input.val('') //todo: show error that this name in not acceptable
+                $input.val('')
+                utils.dialogs.error(xabber.getString("error_circle_name_not_available"));
                 return;
             }
             this.addNewGroup();
@@ -7588,11 +7589,13 @@ xabber.ContactEditGroupsView = xabber.BasicView.extend({
         if (this.$('.new-group-name input').val()){
             let name = this.$('.new-group-name input').val();
             if (name == constants.GENERAL_GROUP_ID || name == constants.NON_ROSTER_GROUP_ID){
-                $input.val('') //todo: show error that this name in not acceptable
+                $input.val('')
+                utils.dialogs.error(xabber.getString("error_circle_name_not_available"));
                 return;
             }
             if (name.includes('>') || name.includes('<') || name.includes('/')){
-                $input.val('') //todo: show error that this name in not acceptable
+                $input.val('')
+                utils.dialogs.error(xabber.getString("error_circle_name_not_available"));
                 return;
             }
             this.addNewGroup();
@@ -8465,7 +8468,10 @@ xabber.Group = Backbone.Model.extend({
     },
 
     isSpecial: function () {
-        return _.isNumber(this.get('id'));
+        if (this.get('id') == constants.GENERAL_GROUP_ID || this.get('id') == constants.NON_ROSTER_GROUP_ID)
+            return true;
+        else
+            return false;
     },
 
     updateCounter: function () {

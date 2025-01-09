@@ -1299,14 +1299,19 @@ var utils = {
         return Snum;
     },
 
-    generateHOTP: async function(secret, counter) { //todo: проверить если сломался, то получится ли по окра
-        let key = await this.generateHOTPKey(secret, counter);
-        let uKey = new Uint8Array(key);
+    generateHOTP: async function(secret, counter) {
+        try {
+            let key = await this.generateHOTPKey(secret, counter);
+            let uKey = new Uint8Array(key);
 
-        let Snum = this.truncate(uKey);
-        let padded = ('000000' + (Snum % (10 ** 8))).slice(-8);
+            let Snum = this.truncate(uKey);
+            let padded = ('000000' + (Snum % (10 ** 8))).slice(-8);
 
-        return padded;
+            return padded;
+        } catch (e) {
+            console.error(e);
+            return '';
+        }
     },
 
     hmacSha256: async function(key, message) {

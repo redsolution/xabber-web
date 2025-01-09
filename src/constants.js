@@ -143,8 +143,8 @@ var constants = {
     RSM_ATTRIBUTES: ['max', 'first', 'last', 'after', 'before', 'index', 'count'],
     MAM_ATTRIBUTES: ['with', 'start', 'end'],
 
-    GENERAL_GROUP_ID: 1,
-    NON_ROSTER_GROUP_ID: 2,
+    GENERAL_GROUP_ID: 'com.xabber.system.roster.group',
+    NON_ROSTER_GROUP_ID: 'com.xabber.system.roster.noInRoster',
 
     MATERIAL_COLORS: [
         "red", "green", "blue", "deep-purple", "orange", "lime",
