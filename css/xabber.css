@@ -6704,6 +6704,7 @@ input[type=text].simple-input-field:hover {
     left: 24px !important;
     top: 20px !important;
     color: rgba(0, 0, 0, .87);
+    /*display: none;*/
 }
 .calls-content-filters .search-form .search-input,
 .notifications-content-filters .search-form .search-input,
@@ -8659,9 +8660,10 @@ input[type=text].simple-input-field:hover {
 .chats-search-form {
      height: 64px;
 }
-.chats-search-form.search-form .search-icon {
+.recent-chats-panel .chats-search-form.search-form .search-icon {
     left: 24px;
     color: rgba(0, 0, 0, .87);
+    /*display: none;*/
 }
 .search-wide.search-form .close-search-icon,
 .contacts-search-form.search-form .close-search-icon,
@@ -20519,7 +20521,7 @@ input[type=range].voice-message-volume:focus {
     position: absolute;
     color: #9e9e9e;
     top: 20px;
-    right: 24px;
+    right: 16px;
     cursor: pointer;
     z-index: 0;
 }
@@ -20527,7 +20529,7 @@ input[type=range].voice-message-volume:focus {
 .btn-show-search{
 }
 .recent-chats-panel .btn-unread{
-    right: 56px;
+    right: 64px;
 }
 
 .btn-show-search svg,

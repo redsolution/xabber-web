@@ -9267,7 +9267,9 @@ xabber.Roster = xabber.ContactsBase.extend({
         (unread_msgs_count == 0) && (options.sync_timestamp = chat_timestamp);
         message.length && (msg = this.account.chats.receiveChatMessage(message, options));
         if (msg) {
-            if (!msg.get('is_unread') && $unread_messages.attr('count') > 0 && !msg.isSenderMe() && !(msg.get('type') === 'system') && ($unread_messages.attr('after') < msg.get('stanza_id') || $unread_messages.attr('after') < msg.get('contact_stanza_id'))) {//TODO: change to timestamp checking
+            if (!msg.get('is_unread') && $unread_messages.attr('count') > 0 && !msg.isSenderMe()
+                && !(msg.get('type') === 'system')
+            ) {
                 msg.set('is_unread', true);
                 if (chat.get('notifications')){
                     msg.get('xml') && this.account.cached_notifications.putInCachedNotifications({

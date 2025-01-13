@@ -4690,7 +4690,6 @@ xabber.ChatContentView = xabber.BasicView.extend({
             }
             if (options.unread_history_before){
                 if (this.model.get('encrypted')){
-                    //TODO: make async func to start opening chat after all messages been handled in enc chat
                     setTimeout(() => {
                         this.model._wait_load_unread_history.resolve();
                     }, 1000);
@@ -14625,13 +14624,21 @@ xabber.ExportChatHistoryView = xabber.BasicView.extend({
         let query = {
             fast: true,
             max: this.load_limit || 50,
-            after: this.history_last_id
+            after: this.history_last_id,
+            var:  [
+                {var: 'rsm-counter', value: '1'},
+            ]
         };
         !this.history_last_id && delete(query.after);
         let account = this.model.account, counter = 0;
         this.content.MAMRequest(query, (success, messages, rsm) => {
+            this.all_messages_count = rsm.count
             if (loading_id !== this.loading_id || this.history_export_stoped)
                 return;
+            if (rsm.count == 0){
+                this.is_loading = false;
+                this.$('.export-history-msg-count').text(xabber.getString("no_messages"))
+            }
             rsm.first && (this.history_last_id = rsm.last);
 
             if ((messages.length < query.max) && success) {
@@ -14646,8 +14653,8 @@ xabber.ExportChatHistoryView = xabber.BasicView.extend({
                 this.$('.export-history-msg-count').text(xabber.getString("no_messages"))
             }
 
-            this.$('.export-history-progress-bar').css('background', `radial-gradient(closest-side,#fff 94%,#00000000 95% 100%),conic-gradient(#BDBDBD 0%,#F5F5F5 0)`)
-            this.$('.export-history-msg-count').text(xabber.getString("export_history_msg_count", [this.loaded_messages, this.loaded_messages]))
+            this.$('.export-history-progress-bar').css('background', `radial-gradient(closest-side,#fff 94%,#00000000 95% 100%),conic-gradient(#BDBDBD ${(this.loaded_messages/rsm.count * 100)}%,#F5F5F5 0)`)
+            this.$('.export-history-msg-count').text(xabber.getString("export_history_msg_count", [this.loaded_messages, this.all_messages_count]))
 
             if (!this.history_export_loaded && !this.history_export_stoped) {
                 this.getMessageArchive(loading_id);

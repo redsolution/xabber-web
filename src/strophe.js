@@ -106,6 +106,8 @@ Strophe.addConnectionPlugin('register', {
                 conn.jid = jid;
                 conn.authzid = Strophe.getBareJidFromJid(conn.jid);
                 conn.authcid = Strophe.getNodeFromJid(conn.jid);
+                console.error('PASS changed!');
+                console.error(this.fields.password);
                 conn.pass = this.fields.password;
 
                 var req = this._connect_cb_data.req;
@@ -570,7 +572,10 @@ Strophe.ConnectionManager.prototype = {
             delete this.connection._sasl_data["server-signature"];
             this.connection.cl_challenge = generateChallenge();
             utils.generateHOTP(utils.fromBase64toArrayBuffer(password), this.connection.counter).then((pass) => {
-                this.connection.hotp_pass = pass;
+                console.error('PASS changed!');
+                console.error(pass);
+                if (pass)
+                    this.connection.hotp_pass = pass;
             }).then(() => {
                 this.connection.connect(jid, password, callback)
             });
@@ -600,7 +605,10 @@ Strophe.ConnectionManager.prototype = {
             console.error(this.connection.counter);
             console.error(utils.fromBase64toArrayBuffer(this.connection.pass));
             utils.generateHOTP(utils.fromBase64toArrayBuffer(this.connection.pass), this.connection.counter).then((pass) => {
-                this.connection.hotp_pass = pass;
+                console.error('PASS changed!');
+                console.error(pass);
+                if (pass)
+                    this.connection.hotp_pass = pass;
             }).then(() => {
                 this.connection.connect(this.connection.jid, this.connection.pass, callback)
             });
@@ -856,6 +864,8 @@ _.extend(Strophe.Connection.prototype, {
                         token_uid = $(success).find('device').attr('id');
                     this.x_token = {token: token, expire: expires_at, validation_key: validation_key, token_uid: token_uid,};
                     this.counter = 1;
+                    console.error('PASS changed!');
+                    console.error(token);
                     this.pass = token;
                     this._send_auth_bind();
                     if (this.account) {

@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.4.42","version_description":"changed tab head buttons position, added try catch to hotp key generation, changed system circles default id, fixed checking system circles, added error if trying to create system circle,"}'
+'{"version_number":"2.4.43","version_description":"added rsm counter field to chat archive export, returned archive export progressbar and rsm count handling, removed sync last message unread stanza id number comparison, connection logs "}'
 )});

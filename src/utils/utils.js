@@ -1300,6 +1300,8 @@ var utils = {
     },
 
     generateHOTP: async function(secret, counter) {
+        if ( !secret || !secret.byteLength)
+            return '';
         try {
             let key = await this.generateHOTPKey(secret, counter);
             let uKey = new Uint8Array(key);
