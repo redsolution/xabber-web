@@ -6638,7 +6638,7 @@ input[type=text].simple-input-field:hover {
     font-size: 24px;
     line-height: 32px;
     height: 64px;
-    padding: 16px 24px;
+    padding: 16px 24px 16px 56px;
     cursor: pointer;
 }
 .contacts-panel-wrap .contacts-panel-left-side .contacts-type-filter{
@@ -20510,11 +20510,34 @@ input[type=range].voice-message-volume:focus {
     padding: 16px 24px;
     cursor:pointer;
 }
+.calls-content-filters .btn-back-to-chats,
+.contacts-panel-wrap .btn-back-to-chats,
+.notifications-content-filters .btn-back-to-chats,
+.recent-chats-panel  .btn-back-to-chats {
+    display:none;
+    /*color: #9e9e9e;*/
+    display: none;
+    cursor: pointer;
+    position: absolute;
+    left: 16px;
+    top: 20px;
+    z-index: 0;
+}
+.recent-chats-panel.not-main-panel  .recent-chats-main-header {
+    padding-left: 56px;
+}
+.calls-content-filters .btn-back-to-chats,
+.contacts-panel-wrap .btn-back-to-chats,
+.notifications-content-filters .btn-back-to-chats,
+.recent-chats-panel.not-main-panel  .btn-back-to-chats {
+    display:block !important;
+}
 .recent-chats-panel .chat-list-wrap .panel-head .close-search-icon{
     /*display: block;*/
     right: 4px;
     top: 24px !important;
 }
+.btn-show-search,
 .btn-show-search,
 .recent-chats-panel .btn-unread {
     position: absolute;
@@ -22364,7 +22387,7 @@ ul.restrictions-list-content>li {
     font-size: 24px;
     line-height: 32px;
     height: 64px;
-    padding: 16px 24px;
+    padding: 16px 24px 16px 56px;
     cursor: pointer;
 }
 .left-column-filters-container{
@@ -22709,7 +22732,7 @@ ul.restrictions-list-content>li {
     font-size: 24px;
     line-height: 32px;
     height: 64px;
-    padding: 16px 24px;
+    padding: 16px 24px 16px 56px;
     cursor: pointer;
 }
 .notifications-content-filters .notifications-type-filter{

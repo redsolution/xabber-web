@@ -9540,6 +9540,7 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
         "keydown .search-input": "keyUpOnSearch",
         "focusout .search-input": "clearSearchSelection",
         "click .close-search-icon": "clearSearch",
+        "click .btn-back-to-chats": "clickBackToChats",
         "click .btn-show-search": "showSearch",
         "click .list-item": "onClickItem",
         "click .btn-search-messages": "updateSearchWithMessages",
@@ -9598,6 +9599,10 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
 
     hideSearch: function (ev) {
     //     this.$('.chats-search-form').addClass('hidden');
+    },
+
+    clickBackToChats: function (ev) {
+        xabber.toolbar_view.showAllChats(null, null, true);
     },
 
     updateClientNotifications: function (options) {
@@ -10119,11 +10124,13 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
             all_chats_pinned = chats.filter(chat => (chat.get('saved') || chat.get('timestamp') && (!chat.get('archived') && !chat.get('notifications'))) && chat.get('pinned') !== '0' && chat.get('pinned'));
             xabber.toolbar_view.$('.toolbar-item:not(.toolbar-logo).unread').removeClass('unread');
             xabber.chats_view.$('.recent-chats-main-header').text(xabber.getString("toolbar__menu_item__chats"));
+            xabber.chats_view.$('.recent-chats-panel').removeClass('not-main-panel');
             this.onUpdatedScreen();
         }
         if (!all_chats.length && !all_chats_pinned.length) {
             xabber.toolbar_view.$('.toolbar-item:not(.toolbar-logo).unread').removeClass('unread');
             xabber.chats_view.$('.recent-chats-main-header').text(xabber.getString("toolbar__menu_item__chats"));
+            xabber.chats_view.$('.recent-chats-panel').removeClass('not-main-panel');
         }
         if (xabber.toolbar_view.data.get('account_filtering')){
             all_chats = all_chats.filter(chat => (chat.account.get('jid') === xabber.toolbar_view.data.get('account_filtering')))

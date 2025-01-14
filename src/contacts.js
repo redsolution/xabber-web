@@ -10046,6 +10046,7 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
         "click .contacts-filter-main-header": "clickClearFilter",
         "click .close-search-icon": "clearSearch",
         "click .btn-show-search": "showSearch",
+        "click .btn-back-to-chats": "clickBackToChats",
         "click .contact-groups-wrap .group.group-expand": "expandGroups",
         "mouseout .contact-expanded-groups-wrap": "closeGroups",
         "keyup .search-input": "keyUpSearch",
@@ -10091,6 +10092,10 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
                 );
             }
         }
+    },
+
+    clickBackToChats: function (ev) {
+        xabber.toolbar_view.showAllChats(null, null, true);
     },
 
     render: function (options) {

@@ -48,6 +48,7 @@ xabber.CallsView = xabber.BasicView.extend({
         "click .btn-end-call": "endCall",
         "click .btn-show-search": "showSearch",
         "click .close-search-icon": "hideSearch",
+        "click .btn-back-to-chats": "clickBackToChats",
         "click .calls-filter-main-header": "updateAccountsFilter",
         "click .btn-play-pause-plyr": "playPausePlyr",
         "click .btn-next-plyr": "nextPlyr",
@@ -113,6 +114,10 @@ xabber.CallsView = xabber.BasicView.extend({
     hideSearch: function (ev) {
         this.$('.search-form').addClass('hidden');
         this.$('.search-input').val('');
+    },
+
+    clickBackToChats: function (ev) {
+        xabber.toolbar_view.showAllChats(null, null, true);
     },
 
     updateClientNotifications: function () {

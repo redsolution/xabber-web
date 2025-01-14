@@ -61,6 +61,7 @@ xabber.NotificationsView = xabber.BasicView.extend({
         "click .chat-tool-player-containter": "popupPlyr",
         "click .btn-show-search": "showSearch",
         "click .close-search-icon": "hideSearch",
+        "click .btn-back-to-chats": "clickBackToChats",
 
     },
 
@@ -109,6 +110,10 @@ xabber.NotificationsView = xabber.BasicView.extend({
     hideSearch: function (ev) {
         this.$('.search-form').addClass('hidden');
         this.$('.search-input').val('');
+    },
+
+    clickBackToChats: function (ev) {
+        xabber.toolbar_view.showAllChats(null, null, true);
     },
 
     clickClearFilter: function (options) {
