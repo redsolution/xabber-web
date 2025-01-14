@@ -9579,7 +9579,7 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
                 this.showAllChats();
             }
         }
-        this.hideSearch();
+        // this.hideSearch();
         this.updateClientNotifications();
     },
 
@@ -9588,16 +9588,16 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
         this.$('.search-input').val('');
         this.updateSearch();
         this.onEmptyQuery();
-        this.hideSearch();
+        // this.hideSearch();
     },
 
     showSearch: function (ev) {
-        this.$('.chats-search-form').removeClass('hidden');
-        this.$('.search-input').focus();
+    //     this.$('.chats-search-form').removeClass('hidden');
+    //     this.$('.search-input').focus();
     },
 
     hideSearch: function (ev) {
-        this.$('.chats-search-form').addClass('hidden');
+    //     this.$('.chats-search-form').addClass('hidden');
     },
 
     updateClientNotifications: function (options) {

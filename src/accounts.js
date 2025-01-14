@@ -617,7 +617,7 @@ xabber.Account = Backbone.Model.extend({
                 });
             } else if (status === Strophe.Status.ERROR && (condition === 'policy-violation')) {
                 this.onAuthFailed(condition);
-            } else if (status === Strophe.Status.AUTHFAIL || ((status === Strophe.Status.ERROR) && (condition === 'not-authorized'))) {
+            } else if (status === Strophe.Status.AUTHFAIL) {
                 if ((this.get('auth_type') === 'x-token' || this.connection.x_token)) {
                     if ($(elem).find('account-disabled').length > 0)
                         this.onTokenRevoked();
@@ -633,6 +633,8 @@ xabber.Account = Backbone.Model.extend({
                 this.connection.flush();
                 if (this._main_interval_worker)
                     this._main_interval_worker.terminate();
+                if (this.session.get('no_reconnect') && this.session.get('auth_failed')) //34
+                    return;
                 let max_retries = xabber.settings.max_connection_retries;
                 if (max_retries === -1 || this.session.get('conn_retries') < max_retries) {
                     console.log(`started another reconnecting, conn_retries: ${this.session.get('conn_retries')},status: ${status} ,condition: ${condition} `);
@@ -769,6 +771,7 @@ xabber.Account = Backbone.Model.extend({
 
         onAuthFailed: function (text) {
             console.error(text);
+            console.error(this);
             if (!this.auth_view && !text){
                 utils.dialogs.error(xabber.getString("connection__error__text_authentication_failed", [this.get('jid')]));
                 this.password_view.show();
@@ -811,6 +814,7 @@ xabber.Account = Backbone.Model.extend({
             this.get('x_token') && this.save({old_device_token: this.get('x_token').token_uid});
             this.save({auth_type: 'password', password: null, x_token: null});
             console.error('PASS CLEARED!');
+            console.error(this);
             this.connection.pass = "";
             this.trigger('deactivate', this);
             this.deactivate()
@@ -864,6 +868,7 @@ xabber.Account = Backbone.Model.extend({
             });
             this.save({auth_type: 'password', password: null, x_token: null});
             console.error('PASS CLEARED!');
+            console.error(this);
             this.connection.pass = "";
             this.trigger('deactivate', this);
             this.connFeedback(xabber.getString("connection__error__text_token_invalidated_short"));

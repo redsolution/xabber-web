@@ -108,6 +108,7 @@ Strophe.addConnectionPlugin('register', {
                 conn.authcid = Strophe.getNodeFromJid(conn.jid);
                 console.error('PASS changed!');
                 console.error(this.fields.password);
+                console.error(conn.jid);
                 conn.pass = this.fields.password;
 
                 var req = this._connect_cb_data.req;
@@ -514,6 +515,12 @@ Strophe.SASLOCRA.prototype.test = function (connection) {
 };
 
 Strophe.SASLOCRA.prototype.onChallenge = function (connection, server_challenge) {
+    console.error(connection.authcid);
+    console.error(connection.x_token);
+    connection.x_token && console.error(connection.x_token.token);
+    connection.x_token && console.error(connection.x_token.token_uid);
+    connection.x_token && console.error(connection.x_token.validation_key);
+
     if (server_challenge){
         return new Promise((resolve, reject) => {
             server_challenge = server_challenge.split(String.fromCharCode(0))
@@ -571,8 +578,13 @@ Strophe.ConnectionManager.prototype = {
             this.connection.registerSASLMechanisms([Strophe.SASLHOTP, Strophe.SASLOCRA]);
             delete this.connection._sasl_data["server-signature"];
             this.connection.cl_challenge = generateChallenge();
+            console.error(this.connection);
+            console.error(this.connection.pass);
+            console.error(this.connection.counter);
+            this.connection.pass && console.error(utils.fromBase64toArrayBuffer(this.connection.pass));
             utils.generateHOTP(utils.fromBase64toArrayBuffer(password), this.connection.counter).then((pass) => {
                 console.error('PASS changed!');
+                console.error(jid);
                 console.error(pass);
                 if (pass)
                     this.connection.hotp_pass = pass;
@@ -603,9 +615,10 @@ Strophe.ConnectionManager.prototype = {
             console.error(this.connection);
             console.error(this.connection.pass);
             console.error(this.connection.counter);
-            console.error(utils.fromBase64toArrayBuffer(this.connection.pass));
+            this.connection.pass && console.error(utils.fromBase64toArrayBuffer(this.connection.pass));
             utils.generateHOTP(utils.fromBase64toArrayBuffer(this.connection.pass), this.connection.counter).then((pass) => {
                 console.error('PASS changed!');
+                console.error(this.connection.jid);
                 console.error(pass);
                 if (pass)
                     this.connection.hotp_pass = pass;
@@ -865,6 +878,7 @@ _.extend(Strophe.Connection.prototype, {
                     this.x_token = {token: token, expire: expires_at, validation_key: validation_key, token_uid: token_uid,};
                     this.counter = 1;
                     console.error('PASS changed!');
+                    console.error(success);
                     console.error(token);
                     this.pass = token;
                     this._send_auth_bind();
