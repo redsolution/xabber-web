@@ -351,6 +351,8 @@
     addSvgTemplate('svg.bell');
     addSvgTemplate('svg.bell-sleep');
     addSvgTemplate('svg.bell-mention');
+    addSvgTemplate('svg.mention');
+    addSvgTemplate('svg.vcard-outline');
     addSvgTemplate('svg.bell-off');
     addSvgTemplate('svg.check-all');
     addSvgTemplate('svg.cancel');
