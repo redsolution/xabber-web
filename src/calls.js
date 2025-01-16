@@ -56,6 +56,10 @@ xabber.CallsView = xabber.BasicView.extend({
         "click .btn-stop-plyr": "stopPlyr",
         "click .chat-tool-player-containter": "popupPlyr",
         "click .tab-filter-item": "removeFilter",
+        "keyup .search-input": "keyUpSearch",
+        "click .search-form": "focusSearch",
+        "click .btn-show-search": "focusSearch",
+        "click .close-search-icon": "clearSearch",
 
     },
 
@@ -107,13 +111,26 @@ xabber.CallsView = xabber.BasicView.extend({
     },
 
     showSearch: function (ev) {
-        this.$('.search-form').removeClass('hidden');
-        this.$('.search-input').focus();
     },
 
     hideSearch: function (ev) {
-        this.$('.search-form').addClass('hidden');
-        this.$('.search-input').val('');
+    },
+
+    focusSearch: function (ev) {
+        this.$('.search-input').focus();
+    },
+
+    keyUpSearch: function (ev) {
+        let $item = $(ev.target).closest('.search-input'),
+            value = $item.text();
+        $item.closest('.search-form').switchClass('active', value);
+        if (!value)
+            $item.empty();
+    },
+
+    clearSearch: function () {
+        this.$('.search-input').empty();
+        this.$('.search-form').removeClass('active');
     },
 
     clickBackToChats: function (ev) {
@@ -246,11 +263,11 @@ xabber.CallsView = xabber.BasicView.extend({
     updateFilterItems: function () {
         this.$('.tab-filter-item').remove();
         if (this.filter_type){
-            this.$('.tab-active-filters-wrap').append($(env.templates.contacts.tab_filter_item_main_color({
+            $(env.templates.contacts.tab_filter_item_main_color({
                 value: this.filter_type,
                 type: 'filter_type',
                 text: xabber.getString(`calls_window__type_filter_${this.filter_type}`)
-            })));
+            })).insertBefore(this.$('.search-form'));
         }
         if (this.current_account){
             this.$('.tab-active-filters-wrap').attr('data-color', this.current_account.settings.get('color'));
@@ -331,6 +348,8 @@ xabber.CallsView = xabber.BasicView.extend({
                 this.current_account = this.calls_accounts[0];
             }
             this.filter_type = null;
+            this.$('.tab-filter-item').remove();
+            this.clearSearch();
             this.$('.calls-type-filter-content .filter-item-wrap').removeClass('selected-filter');
             this.$(`.calls-type-filter-content .filter-item-wrap[data-filter="all"]`).addClass('selected-filter');
 

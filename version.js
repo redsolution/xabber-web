@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.4.45","version_description":"back to chats button in tabs, fixed unread button in saved chats tab, "}'
+'{"version_number":"2.4.46","version_description":"changed search in tabs with filtration, changed translations, fixed clear search icon"}'
 )});

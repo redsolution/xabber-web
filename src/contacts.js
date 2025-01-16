@@ -10050,6 +10050,8 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
         "click .contact-groups-wrap .group.group-expand": "expandGroups",
         "mouseout .contact-expanded-groups-wrap": "closeGroups",
         "keyup .search-input": "keyUpSearch",
+        "click .search-form": "focusSearch",
+        "click .btn-show-search": "focusSearch",
         "click .btn-edit": "editContactsGroups",
         "click .contact-jid": "onClickJid",
         "click .btn-play-pause-plyr": "playPausePlyr",
@@ -10122,6 +10124,7 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
         this.updatePlyrControls();
         this.updatePlyrTime();
         this.updateClientNotifications();
+        this.updateSearchPlaceholder();
     },
 
     clickClearFilter: function () {
@@ -10343,14 +10346,24 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
         this.processUpdateContacts(true, true);
     },
 
+    focusSearch: function (ev) {
+        this.$('.search-input').focus();
+    },
+
     keyUpSearch: function (ev) {
         let $item = $(ev.target).closest('.search-input'),
-            value = $item.val();
+            value = $item.text();
         if (value && ev.keyCode == constants.KEY_ENTER) {
             ev.preventDefault();
         }
         $item.closest('.search-form').switchClass('active', value);
+        if (!value)
+            $item.empty();
         this.filterSearch(value || null);
+    },
+
+    updateSearchPlaceholder: function (placeholder) {
+        this.$('.search-input').attr('data-placeholder', xabber.getString("search"));
     },
 
     filterSearch: function (query) {
@@ -10385,11 +10398,11 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
 
         if (!this.current_filter_groups_list.includes(filter_name)){
             this.current_filter_groups_list.push(filter_name);
-            this.$('.tab-active-filters-wrap').append($(templates.tab_filter_item({
+            $(templates.tab_filter_item({
                 value: filter_name,
                 type: 'circle',
                 text: filter_name
-            })));
+            })).insertBefore(this.$('.search-form'));
             this.$(`.filter-item-wrap[data-groupname="${filter_name}"]`).addClass('selected-filter');
         } else {
             this.current_filter_groups_list = this.current_filter_groups_list.filter(i => i !== filter_name);
@@ -10412,11 +10425,11 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
 
         this.$(`.tab-active-filters-wrap .tab-filter-item[data-type="domain"]`).remove();
         this.current_filter_domain = filter_domain;
-        this.$('.tab-active-filters-wrap').append($(templates.tab_filter_item({
+        $(templates.tab_filter_item({
             value: filter_domain,
             type: 'domain',
             text: filter_domain
-        })));
+        })).insertBefore(this.$('.search-form'));
 
         this.contacts = [];
         this.processUpdateContacts(true, true);
@@ -10464,6 +10477,7 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
 
     clearSearch: function () {
         this.$('.search-input').val('');
+        this.$('.search-input').empty();
         this.$('.search-form').removeClass('active');
         this.current_filter_query = null;
         this.contacts = [];
@@ -10472,12 +10486,9 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
     },
 
     showSearch: function (ev) {
-        this.$('.search-form').removeClass('hidden');
-        this.$('.search-input').focus();
     },
 
     hideSearch: function (ev) {
-        this.$('.search-form').addClass('hidden');
     },
 
     updateOneRosterView: function (account) {

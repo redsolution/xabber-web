@@ -62,6 +62,10 @@ xabber.NotificationsView = xabber.BasicView.extend({
         "click .btn-show-search": "showSearch",
         "click .close-search-icon": "hideSearch",
         "click .btn-back-to-chats": "clickBackToChats",
+        "keyup .search-input": "keyUpSearch",
+        "click .search-form": "focusSearch",
+        "click .btn-show-search": "focusSearch",
+        "click .close-search-icon": "clearSearch",
 
     },
 
@@ -84,6 +88,7 @@ xabber.NotificationsView = xabber.BasicView.extend({
             return;
         }
         this.clearFilter();
+        this.clearSearch();
         this.updateAccountsFilter();
         this.$('.notifications-utility .notifications-header').text(xabber.getString("notifications_window__type_filter_all"));
         this.showReadAllBtn();
@@ -103,13 +108,26 @@ xabber.NotificationsView = xabber.BasicView.extend({
     },
 
     showSearch: function (ev) {
-        this.$('.search-form').removeClass('hidden');
-        this.$('.search-input').focus();
     },
 
     hideSearch: function (ev) {
-        this.$('.search-form').addClass('hidden');
-        this.$('.search-input').val('');
+    },
+
+    focusSearch: function (ev) {
+        this.$('.search-input').focus();
+    },
+
+    keyUpSearch: function (ev) {
+        let $item = $(ev.target).closest('.search-input'),
+            value = $item.text();
+        $item.closest('.search-form').switchClass('active', value);
+        if (!value)
+            $item.empty();
+    },
+
+    clearSearch: function () {
+        this.$('.search-input').empty();
+        this.$('.search-form').removeClass('active');
     },
 
     clickBackToChats: function (ev) {
@@ -162,11 +180,11 @@ xabber.NotificationsView = xabber.BasicView.extend({
         this.$('.tab-filter-item').remove();
         if (this.current_content){
             if (this.current_content.filter_type !== 'all'){
-                this.$('.tab-active-filters-wrap').append($(env.templates.contacts.tab_filter_item_main_color({
+                $(env.templates.contacts.tab_filter_item_main_color({
                     value: this.current_content.filter_type,
                     type: 'filter_type',
                     text: xabber.getString(`notifications_window__type_filter_${this.current_content.filter_type}`)
-                })));
+                })).insertBefore(this.$('.search-form'));
             }
             if (this.current_content.filtered_accounts.length){
                 let account = xabber.accounts.find(item => item.get('jid') === this.current_content.filtered_accounts[0]);

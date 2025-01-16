@@ -2,12 +2,6 @@
     <div class="contacts-panel-left-side no-select">
         <i class="btn-back-to-chats mdi mdi-24px mdi-arrow-left"></i>
         <div class="contacts-filter-main-header">{[print(xabber.getString("contacts"))]}</div>
-        <div class="contacts-search-form search-form hidden">
-            <i class="search-icon mdi mdi-24px mdi-magnify"></i>
-            <input type="text" class="search-input simple-input-field" tabindex="1" placeholder='{[print(xabber.getString("search"))]}'>
-            <i class="close-search-icon mdi mdi-16px mdi-close-circle"></i>
-        </div>
-        <svg class="btn-show-search mdi mdi-24px mdi-svg-template" data-svgname="search"></svg>
         <div class="left-column-filters-container">
             <div class="client-notifications-wrap">
 
@@ -39,6 +33,7 @@
     <div class="contacts-panel-right-side">
         <div class="contacts-panel">
             <div class="panel-head">
+                <svg class="btn-show-search mdi mdi-24px mdi-svg-template" data-svgname="search"></svg>
                 <i class="btn-add-contact mdi mdi-24px mdi-account-plus"></i>
                 <i class="btn-dropdown-groups mdi mdi-24px mdi-dots-vertical" data-activates="{{view.cid}}-more"></i>
                 <ul id="{{view.cid}}-more" class="bootstrap-dropdown dropdown-content noselect">
@@ -116,6 +111,10 @@
                         <span class="one-line">{[print(xabber.getString("groupchat_privacy_type_incognito"))]}</span>
                     </div>
                 </ul>
+                <div class="contacts-search-form search-form">
+                    <div type="text" class="search-input simple-input-field" role="textbox" contenteditable data-placeholder='{[print(xabber.getString("search"))]}'></div>
+                    <i class="close-search-icon mdi mdi-16px mdi-close-circle"></i>
+                </div>
             </div>
             <div class="roster-sorting-wrap no-select">
                 <div class="roster-sorting-item sort-name" data-sort="name">
