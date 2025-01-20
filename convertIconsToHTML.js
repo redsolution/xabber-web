@@ -129,6 +129,7 @@ let badges_names = [
         'vcard',
         'membership',
         'membership-outline',
+        'shield-outline',
         'invite',
         'invite-outline',
         'chevron-right-variant',

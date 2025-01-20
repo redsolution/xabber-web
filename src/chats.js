@@ -9550,6 +9550,7 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
 
     _initialize: function () {
         this.active_chat = null;
+        this.update_debounce = _.debounce(this.updateChatPositionDebounced, 100, false);
         this.model.on("add", this.onChatAdded, this);
         this.model.on("destroy", this.onChatRemoved, this);
         this.model.on("change:active", this.onChangedActiveStatus, this);
@@ -9761,37 +9762,25 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
     },
 
     replaceChatItem: function (item, chats, pinned_chats) {
-        let view = this.child(item.id);
-        if (item.get('encrypted') && item.account && !item.account.omemo)
-            view.$el.addClass('hidden');
-        else if (item.get('encrypted') && item.account && item.account.omemo)
-            view.$el.removeClass('hidden');
-        if (view && item.get('pinned') && item.get('pinned') !== '0' && pinned_chats ){
+
+        this.$('.chat-item').detach();
+        chats.forEach((chat) => {
+            this.$('.chat-list').append(chat.item_view.$el);
+        });
+        if (pinned_chats) {
             pinned_chats = pinned_chats.sort((a, b) => (a.get('pinned') > b.get('pinned')) ? 1 : -1)
-            let index = pinned_chats.indexOf(item);
-            if (index === 0) {
-                this.$('.pinned-chat-list').prepend(view.$el);
-            } else {
-                let $chat_item = this.$('.pinned-chat-list .chat-item').eq(index - 1);
-                while (!$chat_item.length && index > 0) {
-                    index--;
-                    $chat_item = this.$('.pinned-chat-list .chat-item').eq(index - 1);
+            pinned_chats.forEach((chat) => {
+                let index = pinned_chats.indexOf(chat);
+                if (index === 0) {
+                    this.$('.pinned-chat-list').prepend(chat.item_view.$el);
+                } else {
+                    this.$('.pinned-chat-list .chat-item').eq(index - 1).after(chat.item_view.$el);
                 }
-                $chat_item.after(view.$el);
-            }
-        }
-        else if (view) {
-            view.$el.detach();
-            let index = chats.indexOf(item);
-            if (index === 0) {
-                this.$('.chat-list').prepend(view.$el);
-            } else {
-                this.$('.chat-list .chat-item').eq(index - 1).after(view.$el);
-            }
+            });
         }
     },
 
-    updateChatPosition: function (item, unread) {
+    updateChatPositionDebounced: function (item, unread) {
         let view = this.child(item.id),
             active_toolbar = xabber.toolbar_view.$('.active');
         if (!view)
@@ -9824,6 +9813,10 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
             this.model.filter(chat => !chat.get('saved') && (chat.get('archived') && !chat.get('notifications'))));
         active_toolbar.hasClass('saved-chats') && (xabber.accounts.enabled.length !== 1) && (view.model.get('saved') && this.replaceChatItem(item, this.model.filter(chat => chat.get('saved'))));
         active_toolbar.hasClass('mentions') && (!view.model.get('saved') && this.replaceChatItem(item, this.model.filter(chat => ((chat.get('notifications'))))));
+    },
+
+    updateChatPosition: function (item, unread) {
+        this.update_debounce(item, unread);
     },
 
     onEnterPressed: function (selection) {

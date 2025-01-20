@@ -338,10 +338,12 @@ xabber.NotificationsView = xabber.BasicView.extend({
     },
 
     showReadAllBtn: function () {
-        this.$('.btn-read-all').switchClass('hidden', !this.$('.unread-message-background').length);
+        this.$('.btn-read-all').switchClass('btn-disabled', !this.$('.unread-message-background').length);
     },
 
-    readAll: function () {
+    readAll: function (ev) {
+        if ($(ev.target).closest('.btn-disabled').length)
+            return;
         if (!this.current_content)
             return;
         _.each(this.$('.unread-message-background'),(item) => {

@@ -10073,8 +10073,9 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
         this.current_filter_groups_list = [];
         this._current_expanded_groups_item = {};
         this.sorting_type = 'name';
-        this.processing_debounce = _.debounce(this.processAccounts, 1000, false);
-        this.update_debounce = _.debounce(this.processUpdateContacts, 1000, false);
+        this.processing_debounce = _.debounce(this.processAccounts, 300, false);
+        this.update_debounce = _.debounce(this.processUpdateContacts, 300, false);
+        this.circle_debounce = _.debounce(this.updateGroupsFilterDebounced, 300, false);
         this.model.on("activate", this.updateOneRosterView, this);
         this.model.on("deactivate destroy", this.removeRosterView, this);
         this.model.on("list_changed", this.updateLeftIndicator, this);
@@ -10129,6 +10130,7 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
 
     clickClearFilter: function () {
         this.clearSearch();
+        this.current_filter_account = 'all';
         this.current_filter = {};
         this.current_filter_groups_list = [];
         this.current_filter_domain = null;
@@ -10137,8 +10139,8 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
         this.$('.contacts-type-filter-content .filter-item-wrap').removeClass('selected-filter');
         this.$('.contacts-type-filter-content .filter-item-wrap[data-filter="all"]').addClass('selected-filter');
         this.current_type_subfilter = 'contacts';
-        this.updateSubFilter();
         this.updateAccountsFilter();
+        this.updateSubFilter();
         this.processUpdateContacts(true, true);
     },
 
@@ -10223,14 +10225,20 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
                 _.each(accounts, (account) => {
                     this.$('.accounts-dropdown').append($(`<div class="property-variant btn-accounts-filter additional-filter-variant" data-jid="${account.get('jid')}"><span class="one-line">${account.get('jid')}</span></div>`));
                 });
-                if (selected_jid && accounts.find(item => item.get('jid') === this.current_filter_account)){
+                if (selected_jid && selected_jid === 'all'){
+                    this.current_filter_account = 'all';
+                    this.account = null;
+                    this.updateGroupsFilter();
+                    this.processUpdateContacts(null, true);
+
+                } else if (selected_jid && accounts.find(item => item.get('jid') === this.current_filter_account)){
                     this.current_filter_account = selected_jid;
                     this.account = accounts.find(item => item.get('jid') === this.current_filter_account);
                     this.updateGroupsFilter();
                     this.processUpdateContacts(null, true);
                 } else {
-                    this.account = accounts[0];
-                    this.current_filter_account = this.account.get('jid');
+                    this.current_filter_account = 'all';
+                    this.account = null;
                     this.updateGroupsFilter();
                     this.processUpdateContacts(true, true);
                 }
@@ -10252,21 +10260,41 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
         }
     },
 
-    updateGroupsFilter: function () {
+    updateGroupsFilterDebounced: function () {
         let accounts = xabber.accounts.enabled,
             selected_group,
             account = accounts.find(item => item.get('jid') === this.current_filter_account);
 
         if (account){
-                this.$('.contacts-group-filter-content').empty();
-                _.each(account.groups.models, (group) => {
-                    if (group.get('id') == constants.GENERAL_GROUP_ID && group.get('name') === xabber.settings.roster.general_group_name)
-                        return;
-                    if (group.get('id') == constants.NON_ROSTER_GROUP_ID && group.get('name') === xabber.settings.roster.non_roster_group_name)
-                        return;
-                    this.$('.contacts-group-filter-content').append(this.renderGroupFilterItem(group));
-                });
+            this.$('.contacts-group-filter-content').empty();
+            _.each(account.groups.models, (group) => {
+                if (group.get('id') == constants.GENERAL_GROUP_ID && group.get('name') === xabber.settings.roster.general_group_name)
+                    return;
+                if (group.get('id') == constants.NON_ROSTER_GROUP_ID && group.get('name') === xabber.settings.roster.non_roster_group_name)
+                    return;
+                this.$('.contacts-group-filter-content').append(this.renderGroupFilterItem(group));
+            });
         } else {
+            if(this.current_filter_account === 'all' && accounts.length){
+                this.$('.contacts-group-filter-content').empty();
+                _.each(accounts, (account) => {
+                    _.each(account.groups.models, (group) => {
+                        if (group.get('id') == constants.GENERAL_GROUP_ID && group.get('name') === xabber.settings.roster.general_group_name)
+                            return;
+                        if (group.get('id') == constants.NON_ROSTER_GROUP_ID && group.get('name') === xabber.settings.roster.non_roster_group_name)
+                            return;
+                        if (this.$(`.filter-item-wrap[data-groupname="${group.get('id')}"]`).length){
+                            let $group = this.$(`.filter-item-wrap[data-groupname="${group.get('id')}"]`);
+                            if ($group.find('span').text() && Number($group.find('span').text())){
+                                let initial_count = Number($group.find('span').text())
+                                $group.find('span').text(initial_count + group.get('counter').all);
+                            }
+                        } else {
+                            this.$('.contacts-group-filter-content').append(this.renderGroupFilterItem(group));
+                        }
+                    });
+                })
+            }
 
         }
         this.$('.contacts-group-filter').switchClass('hidden', !this.$('.contacts-group-filter-content .filter-item-wrap').length);
@@ -10275,6 +10303,10 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
         });
         this.updateScrollBar2();
         this.updateAccountColor(account);
+    },
+
+    updateGroupsFilter: function () {
+        this.circle_debounce();
     },
 
     renderAccountItem: function (account) {
@@ -10332,7 +10364,11 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
             filter_type = $item.attr('data-jid');
 
         this.current_filter_account = filter_type;
-        this.account = xabber.accounts.enabled.find(item => item.get('jid') === this.current_filter_account);
+        if (this.current_filter_account === 'all'){
+            this.account = null;
+        } else {
+            this.account = xabber.accounts.enabled.find(item => item.get('jid') === this.current_filter_account);
+        }
 
         this.$(`.contacts-group-filter-content .filter-item-wrap`).removeClass('selected-filter');
         this.current_filter_groups_list = [];
@@ -10377,12 +10413,22 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
 
     editContactsGroups: function (ev) {
         let $item = $(ev.target).closest('.roster-contact-item-wrap'),
-            contact_jid = $item.attr('data-jid');
+            contact_jid = $item.attr('data-jid'),
+            account_jid = $item.attr('data-account-jid');
 
-        let contact = this.account.contacts.models.find(item => item.get('jid') === contact_jid);
+        let account;
+        if (this.account){
+            account = this.account;
+        } else {
+            account = xabber.accounts.enabled.find(item => item.get('jid') === account_jid);
+        }
+        if (!account)
+            return;
+
+        let contact = this.contacts.find(item => item.get('jid') === contact_jid && item.account.get('jid') === account_jid);
 
         let edit_contacts_groups = new xabber.EditContactsGroupsModalView();
-        edit_contacts_groups.open({contact: contact, account: this.account});
+        edit_contacts_groups.open({contact: contact, account: account});
     },
 
     filterByGroup: function (ev) {
@@ -10398,7 +10444,7 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
 
         if (!this.current_filter_groups_list.includes(filter_name)){
             this.current_filter_groups_list.push(filter_name);
-            $(templates.tab_filter_item({
+            $(templates.tab_filter_item_main_color({
                 value: filter_name,
                 type: 'circle',
                 text: filter_name
@@ -10425,7 +10471,7 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
 
         this.$(`.tab-active-filters-wrap .tab-filter-item[data-type="domain"]`).remove();
         this.current_filter_domain = filter_domain;
-        $(templates.tab_filter_item({
+        $(templates.tab_filter_item_main_color({
             value: filter_domain,
             type: 'domain',
             text: filter_domain
@@ -10492,18 +10538,26 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
     },
 
     updateOneRosterView: function (account) {
-        this.accounts.push(account);
-        if (account.get('jid') !== this.current_filter_account)
+        if (
+            (account.get('jid') !== this.current_filter_account && this.current_filter_account !== 'all')
+            || (this.account === null && !this.model.enabled.length)
+            || this.model.enabled.some(acc => acc.get('jid') === account.get('jid'))
+        )
             return;
         if (this.current_filter.type || this.current_filter_groups_list.length || this.current_filter_domain || this.current_filter_query || this.current_type_subfilter) {
             return this.getFilteredContacts();
         }
-        _.each(account.contacts.models, (contact)=>{
-            if (this.contacts.some(item => (item.account.get('jid') === contact.account.get('jid') && item.get('jid') === contact.get('jid')))
-                || contact.get('group_chat') || contact.get('notifications') || contact.get('server') || !Strophe.getNodeFromJid(contact.get('jid')))
+        _.each(this.model.enabled, (account) => {
+            if (account.get('jid') !== this.current_filter_account && this.current_filter_account !== 'all')
                 return;
-           this.contacts.push(contact);
-        });
+            let contacts_list = account.contacts.models;
+            _.each(account.contacts.models, (contact) => {
+                if (this.contacts.some(item => (item.account.get('jid') === contact.account.get('jid') && item.get('jid') === contact.get('jid')))
+                    || contact.get('group_chat') || contact.get('notifications') || contact.get('server') || !Strophe.getNodeFromJid(contact.get('jid')))
+                    return;
+                this.contacts.push(contact);
+            });
+        })
         this.updateAccountColor(account);
         this.processing_debounce();
     },
@@ -10526,7 +10580,12 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
             sub_filter_parent_type = 'groups';
         }
         if (this.account){
+
+            this.$('.tab-active-filters-wrap').attr('data-color', this.account.settings.get('color'));
             this.$('.tab-account-filter-item .tab-filter-item-text').text(this.account.get('jid'));
+        } else if (this.current_filter_account === 'all') {
+            this.$('.tab-active-filters-wrap').attr('data-color', '');
+            this.$('.tab-account-filter-item .tab-filter-item-text').text(xabber.getString("notifications_window__type_filter_all_accounts"));
         }
         this.$(`.tab-additional-filter-item:not(.tab-account-filter-item)`).addClass('hidden');
         this.$(`.tab-additional-filter-item[data-type="${sub_filter_parent_type}"]`).removeClass('hidden');
@@ -10583,7 +10642,7 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
         }
         this.contacts = [];
         _.each(this.model.enabled, (account) => {
-            if (account.get('jid') !== this.current_filter_account)
+            if (account.get('jid') !== this.current_filter_account && this.current_filter_account !== 'all')
                 return;
             let contacts = account.contacts.filter(item => !(item.get('invitation') || (item.get('subscription_request_in') && item.get('subscription') !== 'both')) && item.get('in_roster'))
             _.each(account.contacts.models, (contact) => {
@@ -10609,8 +10668,7 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
     },
 
     removeRosterView: function (account) {
-        let contacts = this.contacts.filter(item => item.account.get('jid') !== account.get('jid')),
-            accounts = this.accounts.filter(item => item.get('jid') !== account.get('jid'));
+        let contacts = this.contacts.filter(item => item.account.get('jid') !== account.get('jid'));
         this.contacts = contacts;
         this.processing_debounce(true);
     },
@@ -10658,7 +10716,7 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
         let checker = (arr, target) => target.every(v => arr.includes(v));
 
         _.each(this.model.enabled, (account) => {
-            if (account.get('jid') !== this.current_filter_account)
+            if (account.get('jid') !== this.current_filter_account && this.current_filter_account !== 'all')
                 return;
             _.each(account.contacts.models, (contact) => {
                 if (contact.get('notifications') || contact.get('server') || !Strophe.getNodeFromJid(contact.get('jid')) || contact.get('invitation') || (contact.get('subscription_request_in') && contact.get('subscription') !== 'both') || !contact.get('in_roster'))
@@ -10723,6 +10781,7 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
                 jid_content: `${Strophe.getNodeFromJid(contact.get('jid'))}@<span class="contact-domain" data-domain="${Strophe.getDomainFromJid(contact.get('jid'))}">${Strophe.getDomainFromJid(contact.get('jid'))}</span>`,
                 name: contact.get('jid') === contact.get('name') ? Strophe.getNodeFromJid(contact.get('jid')) : contact.get('name'),
                 account_jid: contact.account.get('jid'),
+                account_color: contact.account.settings.get('color'),
             }));
             let image = contact.cached_image;
             $template.find('.circle-avatar').setAvatar(image, 32);
@@ -10760,13 +10819,32 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
             $template.find('.circle-avatar').setAvatar(image, 32);
             this.$('.contact-list').append($template);
         });
-        let current_account = xabber.accounts.enabled.find(item => item.get('jid') === this.current_filter_account);
-        if (current_account){
-            let account_contacts = current_account.contacts.models;
-            account_contacts = account_contacts.filter(contact => !contact.get('notifications') && !contact.get('server') && contact.get('in_roster')
-                && Strophe.getNodeFromJid(contact.get('jid')) && !(contact.get('invitation') || (contact.get('subscription_request_in') && contact.get('subscription') !== 'both')));
-            this.$('.filter-item-wrap[data-filter="all"] span').text(account_contacts.filter(contact => !contact.get('group_chat')).length)
-            this.$('.filter-item-wrap[data-filter="groupchat"] span').text(account_contacts.filter(contact => contact.get('group_chat')).length)
+        if (this.current_filter_account === 'all'){
+            let all_accounts_contacts_counter = 0,
+                all_accounts_groups_counter = 0;
+
+            _.each(this.model.enabled, (account) => {
+                let account_contacts = account.contacts.models;
+
+                account_contacts = account_contacts.filter(contact => !contact.get('notifications') && !contact.get('server') && contact.get('in_roster')
+                    && Strophe.getNodeFromJid(contact.get('jid')) && !(contact.get('invitation') || (contact.get('subscription_request_in') && contact.get('subscription') !== 'both')));
+
+                all_accounts_contacts_counter = all_accounts_contacts_counter + account_contacts.filter(contact => !contact.get('group_chat')).length;
+                all_accounts_groups_counter = all_accounts_groups_counter + account_contacts.filter(contact => contact.get('group_chat')).length;
+            })
+
+            this.$('.filter-item-wrap[data-filter="all"] span').text(all_accounts_contacts_counter)
+            this.$('.filter-item-wrap[data-filter="groupchat"] span').text(all_accounts_groups_counter)
+
+        } else {
+            let current_account = xabber.accounts.enabled.find(item => item.get('jid') === this.current_filter_account);
+            if (current_account){
+                let account_contacts = current_account.contacts.models;
+                account_contacts = account_contacts.filter(contact => !contact.get('notifications') && !contact.get('server') && contact.get('in_roster')
+                    && Strophe.getNodeFromJid(contact.get('jid')) && !(contact.get('invitation') || (contact.get('subscription_request_in') && contact.get('subscription') !== 'both')));
+                this.$('.filter-item-wrap[data-filter="all"] span').text(account_contacts.filter(contact => !contact.get('group_chat')).length)
+                this.$('.filter-item-wrap[data-filter="groupchat"] span').text(account_contacts.filter(contact => contact.get('group_chat')).length)
+            }
         }
         this.$('.contact-list').switchClass('groupchat-list', this.current_filter.type && this.current_filter.type === 'groupchat');
         if (this._current_expanded_groups_item.account_jid && this._current_expanded_groups_item.contact_jid) {

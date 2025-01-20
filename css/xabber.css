@@ -6883,11 +6883,27 @@ input[type=text].simple-input-field:hover {
 .contacts-panel-wrap .contact-list-wrap .roster-contact-item-wrap:hover{
     background: #FAFAFA;
 }
-.contacts-panel-wrap .contact-list-wrap .roster-contact-item-wrap .circle-avatar{
+.contacts-panel-wrap .contact-list-wrap .roster-contact-item-wrap .account-indicator-background-exclude{
     cursor: pointer;
     height: 40px;
     margin-left: 16px;
     margin-top: 8px;
+    width: 40px;
+    position: relative;
+}
+.contacts-panel-wrap .contact-list-wrap .roster-contact-item-wrap .account-indicator{
+    display: block;
+    position: absolute;
+    width: 40px;
+    height: 40px;
+    -webkit-mask-repeat: round;
+    mask-repeat: round;
+}
+.contacts-panel-wrap .contact-list-wrap .roster-contact-item-wrap .circle-avatar{
+    cursor: pointer;
+    height: 40px;
+    /*margin-left: 16px;*/
+    /*margin-top: 8px;*/
     width: 40px;
 }
 .contacts-panel-wrap .contact-list-wrap .roster-contact-item-wrap .contact-name{
@@ -22549,7 +22565,7 @@ ul.restrictions-list-content>li {
     height: 24px;
     pointer-events: auto;
 }
-.calls-header-container .btn-check-all{
+.calls-header-container .btn-show-search{
     right: 62px
 }
 .calls-header-container .btn-check-all svg path{
@@ -22768,7 +22784,12 @@ ul.restrictions-list-content>li {
     height: 24px;
     pointer-events: auto;
 }
-.notifications-content-wrap .notifications-utility .btn-read-all{
+.notifications-content-wrap .notifications-utility .btn-read-all.btn-disabled{
+    pointer-events: none;
+    opacity: 0.5;
+    cursor: auto;
+}
+.notifications-content-wrap .notifications-utility .btn-show-search{
     right: 62px;
 }
 .notifications-content-wrap .notifications-utility .btn-read-all svg path{
@@ -23193,6 +23214,9 @@ ul.restrictions-list-content>li {
     width: 24px;
     height: 24px;
     margin-right: 8px;
+}
+.notifications-content-wrap .chat-message{
+    min-height: 56px;
 }
 .notifications-content-wrap .chat-message .left-side{
     width: 84px;

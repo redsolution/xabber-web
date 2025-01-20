@@ -281,6 +281,7 @@
     addSvgTemplate('svg.vcard');
     addSvgTemplate('svg.membership');
     addSvgTemplate('svg.membership-outline');
+    addSvgTemplate('svg.shield-outline');
     addSvgTemplate('svg.invite');
     addSvgTemplate('svg.invite-outline');
     addSvgTemplate('svg.chevron-right-variant');
