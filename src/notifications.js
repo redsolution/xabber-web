@@ -544,7 +544,6 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
         this.notification_messages.on("change:is_unread", this.onChangedReadState, this);
         this.notification_messages.on("change:timestamp", this.onChangedMessageTimestamp, this);
         xabber.accounts.on('account_color_updated', this.updateColorScheme, this);
-        xabber.on('new_incoming_subscription', this.updateAllIncomingSubscriptions, this);
         xabber.on('invitations_updated', this.updateAllIncomingSubscriptions, this);
 
         return this;
@@ -979,7 +978,7 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
 
     addIncomingSubscriptionContainer: function () {
         this.$('.chat-content').prepend($(templates.incoming_invitations_container()));
-        this.$('.chat-content').prepend($(templates.incoming_subscriptions_container()));
+        // this.$('.chat-content').prepend($(templates.incoming_subscriptions_container()));
         this.updateAllIncomingSubscriptions();
     },
 
@@ -996,7 +995,7 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
         }
         this.$('.subscription-switch-container').remove();
         _.each(accounts, (account) => {
-            let contacts = account.contacts.filter(item => item.get('invitation') || (item.get('subscription_request_in') && item.get('subscription') !== 'both'));
+            let contacts = account.contacts.filter(item => item.get('invitation'));
                 _.each(contacts, (contact) => {
                     let $template = $(templates.incoming_subscriptions_item({
                         name: contact.get('name'),

@@ -1093,12 +1093,14 @@ xabber.ToolbarView = xabber.BasicView.extend({
         this.data.on("change:all_msg_counter", this.onChangedAllMessageCounter, this);
         this.data.on("change:group_msg_counter", this.onChangedGroupMessageCounter, this);
         this.data.on("change:mentions_counter", this.onChangedMentionsCounter, this);
+        this.data.on("change:contacts_counter", this.onChangedContactsCounter, this);
         this.data.on("change:mentions_subscriptions", this.onChangedMentionsSubscriptions, this);
         this.data.on("change:msg_counter", this.onChangedMessageCounter, this);
         this.data.set({msg_counter: 0});
         this.data.set({group_msg_counter: 0});
         this.data.set({all_msg_counter: 0});
         this.data.set({mentions_counter: 0});
+        this.data.set({contacts_counter: 0});
     },
 
     render: function () {
@@ -1360,17 +1362,14 @@ xabber.ToolbarView = xabber.BasicView.extend({
     },
 
     setAllMessageCounter: function () {
-        let count_msg = 0, count_all_msg = 0, count_group_msg = 0, mentions = 0, incoming_subs_count = 0;
-        let all_unread_list = []
+        let count_msg = 0, count_all_msg = 0, count_group_msg = 0, mentions = 0, contacts = 0, incoming_subs_count = 0;
         xabber.accounts.each((account) => {
             account.chats.each((chat) => {
                 if (chat.contact && !chat.isMuted()) {
                     if (chat.get('notifications')){
                         mentions += chat.get('unread') + chat.get('const_unread');
-                        (chat.get('unread') || chat.get('const_unread')) && all_unread_list.push({notifications:true, chat: chat, unread: chat.get('unread'), const_unread: chat.get('const_unread')});
                     } else {
                         count_all_msg += chat.get('unread') + chat.get('const_unread');
-                        (chat.get('unread') || chat.get('const_unread')) && all_unread_list.push({normal_chat:true, chat: chat, unread: chat.get('unread'), const_unread: chat.get('const_unread')});
                         if (chat.contact.get('group_chat'))
                             count_group_msg += chat.get('unread') + chat.get('const_unread');
                         else
@@ -1378,14 +1377,14 @@ xabber.ToolbarView = xabber.BasicView.extend({
                     }
                 }
             });
-            let incoming_subscriptions = account.contacts.filter(item => (item.get('invitation') && !item.get('removed')) || (item.get('subscription_request_in') && item.get('subscription') != 'both')).length;
+            let incoming_subscriptions = account.contacts.filter(item => ((item.get('subscription_request_in') && item.get('subscription') != 'both'))).length;
+            let incoming_invitations = account.contacts.filter(item => (item.get('invitation') && !item.get('removed'))).length;
 
-            incoming_subscriptions && all_unread_list.push({is_subs:true, inc_subs: account.contacts.filter(item => (item.get('invitation') && !item.get('removed')) || (item.get('subscription_request_in') && item.get('subscription') != 'both'))});
 
-            incoming_subscriptions && (mentions += incoming_subscriptions);
-            incoming_subscriptions && (incoming_subs_count += incoming_subscriptions);
+            incoming_invitations && (mentions += incoming_invitations);
+            incoming_invitations && (incoming_subs_count += incoming_invitations);
+            incoming_subscriptions && (contacts += incoming_subscriptions);
 
-            // count_all_msg += incoming_subscriptions;
             if (account.omemo && account.omemo.xabber_trust){
                 let trust = account.omemo.xabber_trust,
                     active_trust_sessions = trust.get('active_trust_sessions');
@@ -1393,11 +1392,7 @@ xabber.ToolbarView = xabber.BasicView.extend({
                     mentions += Object.keys(active_trust_sessions).length;
             }
         });
-        if (all_unread_list.length){
-            // console.error('TOOLBARS UNREAD');
-            // console.error(all_unread_list);
-        }
-        return { msgs: count_msg, all_msgs: count_all_msg, group_msgs: count_group_msg, mentions: mentions , mentions_subscriptions: incoming_subs_count };
+        return { msgs: count_msg, all_msgs: count_all_msg, group_msgs: count_group_msg, mentions: mentions, contacts: contacts , mentions_subscriptions: incoming_subs_count };
     },
 
     recountAllMessageCounter: function () {
@@ -1406,6 +1401,7 @@ xabber.ToolbarView = xabber.BasicView.extend({
         this.data.set('msg_counter', unread_messages.msgs);
         this.data.set('group_msg_counter', unread_messages.group_msgs);
         this.data.set('mentions_counter', unread_messages.mentions);
+        this.data.set('contacts_counter', unread_messages.contacts);
         this.data.set('mentions_subscriptions', unread_messages.mentions_subscriptions);
         xabber.recountAllMessageCounter();
     },
@@ -1427,18 +1423,18 @@ xabber.ToolbarView = xabber.BasicView.extend({
         this.$('.mentions-indicator').switchClass('unread', c).text(c);
     },
 
+    onChangedContactsCounter: function () {
+        let c = this.data.get('contacts_counter');
+        if (c >= 100)
+            c = '99+';
+        this.$('.contacts-indicator').switchClass('unread', c).text(c);
+    },
+
     onChangedMentionsSubscriptions: function () {
         let incoming = this.data.get('mentions_subscriptions');
         if (incoming) {
             this.$('.mentions-indicator').addClass('indicatior-subscription');
-            // if (!this.mentions_subscriptions_interval){
-            //     this.mentions_subscriptions_interval = setInterval(() => {
-            //         this.$('.mentions-indicator').switchClass('indicatior-subscription');
-            //     }, 750);
-            // }
         } else {
-            // clearInterval(this.mentions_subscriptions_interval)
-            // this.mentions_subscriptions_interval = null;
             this.$('.mentions-indicator').removeClass('indicatior-subscription');
         }
     },

@@ -149,6 +149,7 @@ let badges_names = [
         'close',
         'link',
         'security',
+        'security-outline',
         'picture-in-picture-minimize',
         'picture-in-picture-bottom-right',
         'picture-in-picture-top-right',

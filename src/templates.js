@@ -370,6 +370,7 @@
     addSvgTemplate('svg.alert');
     addSvgTemplate('svg.alert-circle');
     addSvgTemplate('svg.security');
+    addSvgTemplate('svg.security-outline');
     addSvgTemplate('svg.edit');
     addSvgTemplate('svg.edit-outline');
     addSvgTemplate('svg.arrow-collapse');

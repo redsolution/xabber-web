@@ -4073,6 +4073,7 @@ input[type=text].simple-input-field:hover {
 }
 
 .toolbar .mentions-indicator,
+.toolbar .contacts-indicator,
 .toolbar .msg-indicator,
 .toolbar .group-msg-indicator,
 .toolbar .archive-msg-indicator,
@@ -4094,6 +4095,7 @@ input[type=text].simple-input-field:hover {
     transform: translateX(-50%);
 }
 .toolbar .mentions-indicator,
+.toolbar .contacts-indicator,
 .toolbar .all-msg-indicator {
     top: 6px !important;
     right: 8px !important;
@@ -4110,6 +4112,7 @@ input[type=text].simple-input-field:hover {
 }
 
 .toolbar .mentions-indicator.unread,
+.toolbar .contacts-indicator.unread,
 .toolbar .msg-indicator.unread,
 .toolbar .group-msg-indicator.unread,
 .toolbar .archive-msg-indicator.unread,
@@ -6810,6 +6813,12 @@ input[type=text].simple-input-field:hover {
 }
 .tab-active-filters-wrap .dropdown-content{
     top: 32px !important;
+}
+.contacts-panel-wrap .contacts-content-wrap{
+    position: relative;
+    border: none;
+    top: 0;
+    height: inherit;
 }
 .contacts-panel-wrap .contact-list-wrap{
     position: relative;
@@ -22744,18 +22753,22 @@ ul.restrictions-list-content>li {
     display: none;
 }
 .notifications-content-wrap.invitation-content .notification-subscriptions-wrap,
+.roster-left-container.subscription-content .notification-subscriptions-wrap,
 .notifications-content-wrap.subscription-content .notification-subscriptions-wrap{
     outline: none;
 }
 .notifications-content-wrap.invitation-content .notification-subscriptions-header,
+.roster-left-container.subscription-content .notification-subscriptions-header,
 .notifications-content-wrap.subscription-content .notification-subscriptions-header{
     display: none;
 }
 .notifications-content-wrap.invitation-content .notification-subscriptions-wrap .notification-subscription-item,
+.roster-left-container.subscription-content .notification-subscriptions-wrap .notification-subscription-item,
 .notifications-content-wrap.subscription-content .notification-subscriptions-wrap .notification-subscription-item{
     margin-bottom: 16px;
 }
 .notifications-content-wrap.invitation-content .notification-subscriptions-button-wrap,
+.roster-left-container.subscription-content .notification-subscriptions-button-wrap,
 .notifications-content-wrap.subscription-content .notification-subscriptions-button-wrap{
     display: none !important;
 }
@@ -22961,6 +22974,8 @@ ul.restrictions-list-content>li {
 /*.chat-content-wrap.security-content .chat-message:not(.security-content-msg){*/
     /*display: none;*/
 /*}*/
+.roster-left-container.subscription-content .roster-sorting-wrap,
+.roster-left-container.subscription-content .contact-list-wrap,
 .chat-content-wrap.subscription-content-hidden .notification-subscriptions-wrap{
     display: none;
 }
@@ -22976,7 +22991,7 @@ ul.restrictions-list-content>li {
 .notifications-content .chat-content{
     padding: 15px 10px 0 4px;
 }
-.notifications-content-wrap .notification-subscriptions-wrap{
+.panel-wrap .notification-subscriptions-wrap{
     margin: 0 auto 32px;
     max-width: 768px;
     position: relative;
@@ -22984,58 +22999,62 @@ ul.restrictions-list-content>li {
     border-radius: 8px;
     padding: 0 0 8px;
 }
-.notifications-content-wrap .notification-subscriptions-wrap .notification-subscriptions-header{
+    .contacts-panel .notification-subscriptions-wrap{
+        right: 3px;
+        margin-top: 15px;
+}
+.panel-wrap .notification-subscriptions-wrap .notification-subscriptions-header{
     font-size: 16px;
     font-weight: 500;
     line-height: 24px;
     padding: 12px 24px;
     height: 48px;
 }
-.notifications-content-wrap .notification-subscriptions-wrap .notification-subscription-item{
+.panel-wrap .notification-subscriptions-wrap .notification-subscription-item{
     display: flex;
     min-height: 100px;
     position: relative;
     padding: 16px 0;
 }
-.notifications-content-wrap .notification-subscriptions-wrap .notification-subscription-item .avatar-wrap{
+.panel-wrap .notification-subscriptions-wrap .notification-subscription-item .avatar-wrap{
     height: calc(100% - 32px);
     left: 0;
     position: absolute;
     top: 16px;
     width: 84px;
 }
-.notifications-content-wrap .notification-subscriptions-wrap .notification-subscription-item .avatar-wrap .circle-avatar{
+.panel-wrap .notification-subscriptions-wrap .notification-subscription-item .avatar-wrap .circle-avatar{
     height: 32px;
     left: 32px;
     position: absolute;
     top: 4px;
     width: 32px;
 }
-.notifications-content-wrap .notification-subscriptions-wrap .notification-subscription-item .avatar-wrap .notification-icon{
+.panel-wrap .notification-subscriptions-wrap .notification-subscription-item .avatar-wrap .notification-icon{
     top: 25px;
     right: 16px !important;
     outline: 2px solid #fff !important;
 }
-.notifications-content-wrap .notification-subscriptions-wrap .notification-subscription-item .avatar-wrap .notification-icon svg path{
+.panel-wrap .notification-subscriptions-wrap .notification-subscription-item .avatar-wrap .notification-icon svg path{
     fill: #fff;
 }
-.notifications-content-wrap .notification-subscriptions-wrap .notification-subscription-item .subscription-item-text{
+.panel-wrap .notification-subscriptions-wrap .notification-subscription-item .subscription-item-text{
     font-size: 14px;
     font-style: italic;
     line-height: 20px;
     margin-bottom: 28px;
 }
-.notifications-content-wrap .notification-subscriptions-wrap .notification-subscription-item .subscription-show-text-btn{
+.panel-wrap .notification-subscriptions-wrap .notification-subscription-item .subscription-show-text-btn{
     color: #9e9e9e;
     cursor: pointer;
     font-style: normal;
 }
-.notifications-content-wrap .notification-subscriptions-wrap .notification-subscription-item .subscription-item-buttons-wrap{
+.panel-wrap .notification-subscriptions-wrap .notification-subscription-item .subscription-item-buttons-wrap{
     display: flex;
     position: absolute;
     bottom: 16px;
 }
-.notifications-content-wrap .notification-subscriptions-wrap .notification-subscription-item .subscription-button{
+.panel-wrap .notification-subscriptions-wrap .notification-subscription-item .subscription-button{
     font-size: 14px;
     line-height: 20px;
     margin-right: 16px;
@@ -23045,11 +23064,11 @@ ul.restrictions-list-content>li {
     cursor: pointer;
     color: #9E9E9E;
 }
-.notifications-content-wrap .notification-subscriptions-wrap .notification-subscription-item .subscription-button.btn-block{
+.panel-wrap .notification-subscriptions-wrap .notification-subscription-item .subscription-button.btn-block{
     text-transform: capitalize;
 }
 .notifications-content-wrap .chat-message .left-side .notification-icon,
-.notifications-content-wrap .notification-subscriptions-wrap .notification-subscription-item .avatar-wrap .notification-icon{
+.panel-wrap .notification-subscriptions-wrap .notification-subscription-item .avatar-wrap .notification-icon{
     background: #2196F3;
     width: 16px;
     height: 16px;
@@ -23082,38 +23101,38 @@ ul.restrictions-list-content>li {
     fill: #fff;
 
 }
-.notifications-content-wrap .notification-subscriptions-wrap .notification-subscription-item .subcription-main-wrap{
+.panel-wrap .notification-subscriptions-wrap .notification-subscription-item .subcription-main-wrap{
     padding: 0 24px 0 84px;
 }
-.notifications-content-wrap .notification-subscriptions-wrap .notification-subscription-item .subcription-main-wrap .subscription-item-name{
+.panel-wrap .notification-subscriptions-wrap .notification-subscription-item .subcription-main-wrap .subscription-item-name{
     font-size: 15px;
     line-height: 20px;
     font-weight: 500;
 }
-.notifications-content-wrap .notification-subscriptions-wrap .notification-subscription-item .subcription-main-wrap .subscription-item-jid{
+.panel-wrap .notification-subscriptions-wrap .notification-subscription-item .subcription-main-wrap .subscription-item-jid{
     font-size: 14px;
     margin-bottom: 8px;
     line-height: 20px;
     color: #757575;
     cursor: pointer;
 }
-.notifications-content-wrap .notification-subscriptions-wrap .notification-subscription-item .subcription-main-wrap .subscription-item-jid:hover{
+.panel-wrap .notification-subscriptions-wrap .notification-subscription-item .subcription-main-wrap .subscription-item-jid:hover{
     opacity: 0.7;
 }
-.notifications-content-wrap .notification-subscriptions-wrap .notification-subscription-item .subscription-item-buttons-wrap{
+.panel-wrap .notification-subscriptions-wrap .notification-subscription-item .subscription-item-buttons-wrap{
     /*height: 28px;*/
 }
-.notifications-content-wrap .notification-subscriptions-wrap .notification-subscription-item .subscription-item-buttons-wrap .btn-flat{
+.panel-wrap .notification-subscriptions-wrap .notification-subscription-item .subscription-item-buttons-wrap .btn-flat{
     /*height: 28px;*/
     margin-right: 4px;
     min-width: 72px;
     text-align: center;
     color: #FFF;
 }
-.notifications-content-wrap .notification-subscriptions-wrap .notification-subscription-item .subscription-item-buttons-wrap .btn-block{
+.panel-wrap .notification-subscriptions-wrap .notification-subscription-item .subscription-item-buttons-wrap .btn-block{
     display: inline-block;
 }
-.notifications-content-wrap .notification-subscriptions-wrap .notification-subscriptions-button{
+.panel-wrap .notification-subscriptions-wrap .notification-subscriptions-button{
     cursor: pointer;
     font-size: 14px;
     line-height: 22px;
@@ -23123,57 +23142,57 @@ ul.restrictions-list-content>li {
     color: #9e9e9e;
     margin-left: 70px;
 }
-.notifications-content-wrap .notification-subscriptions-wrap .notification-subscriptions-button-wrap{
+.panel-wrap .notification-subscriptions-wrap .notification-subscriptions-button-wrap{
     position: absolute;
     height: 20px;
     top: 14px;
     right: 24px;
 }
-.notifications-content-wrap .notification-subscriptions-wrap .notification-subscription-item .subscription-item-members-text,
-.notifications-content-wrap .notification-subscriptions-wrap .notification-subscription-item .subscription-invitation-item-main-text{
+.panel-wrap .notification-subscriptions-wrap .notification-subscription-item .subscription-item-members-text,
+.panel-wrap .notification-subscriptions-wrap .notification-subscription-item .subscription-invitation-item-main-text{
     font-size: 14px;
     line-height: 20px;
 }
-.notifications-content-wrap .notification-subscriptions-wrap .notification-subscription-item .inviter-name:not(.private-chat-inviter):hover,
-.notifications-content-wrap .notification-subscriptions-wrap .notification-subscription-item .circle-avatar.member-avatar:hover,
-.notifications-content-wrap .notification-subscriptions-wrap .notification-subscription-item .invitation-notifications-item-member-name:hover{
+.panel-wrap .notification-subscriptions-wrap .notification-subscription-item .inviter-name:not(.private-chat-inviter):hover,
+.panel-wrap .notification-subscriptions-wrap .notification-subscription-item .circle-avatar.member-avatar:hover,
+.panel-wrap .notification-subscriptions-wrap .notification-subscription-item .invitation-notifications-item-member-name:hover{
     cursor: pointer;
     opacity: 0.7;
 }
-.notifications-content-wrap .notification-subscriptions-wrap .notification-subscription-item .invitation-notifications-item-member-name{
+.panel-wrap .notification-subscriptions-wrap .notification-subscription-item .invitation-notifications-item-member-name{
     font-weight: 500;
 }
-.notifications-content-wrap .notification-subscriptions-wrap .notification-subscription-item .subscription-invitation-item-main-text .inviter-name{
+.panel-wrap .notification-subscriptions-wrap .notification-subscription-item .subscription-invitation-item-main-text .inviter-name{
     font-weight: 500;
 }
-.notifications-content-wrap .notification-subscriptions-wrap .notification-subscription-item .subscription-invitation-item-main-text .inviter-jid{
+.panel-wrap .notification-subscriptions-wrap .notification-subscription-item .subscription-invitation-item-main-text .inviter-jid{
     color: #757575;
 }
-.notifications-content-wrap .notification-subscriptions-wrap .notification-subscription-item .subscription-invitation-item-main-text .invitation-link{
+.panel-wrap .notification-subscriptions-wrap .notification-subscription-item .subscription-invitation-item-main-text .invitation-link{
     text-decoration: underline;
     text-transform: lowercase;
 }
-.notifications-content-wrap .notification-subscriptions-wrap .notification-subscription-item .subscription-invitation-item-group-wrap .subscription-item-jid{
+.panel-wrap .notification-subscriptions-wrap .notification-subscription-item .subscription-invitation-item-group-wrap .subscription-item-jid{
     cursor: auto !important;
 }
-.notifications-content-wrap .notification-subscriptions-wrap .notification-subscription-item .subscription-invitation-item-group-wrap .subscription-item-jid:hover{
+.panel-wrap .notification-subscriptions-wrap .notification-subscription-item .subscription-invitation-item-group-wrap .subscription-item-jid:hover{
     opacity: 1 !important;
 }
-.notifications-content-wrap .notification-subscriptions-wrap .notification-subscription-item .invitation-avatar-wrap{
+.panel-wrap .notification-subscriptions-wrap .notification-subscription-item .invitation-avatar-wrap{
     height: 100%;
     left: 0;
     position: absolute;
     top: 0;
     width: 86px;
 }
-.notifications-content-wrap .notification-subscriptions-wrap .notification-subscription-item .invitation-avatar-wrap .circle-avatar{
+.panel-wrap .notification-subscriptions-wrap .notification-subscription-item .invitation-avatar-wrap .circle-avatar{
     width: 48px;
     height: 48px;
     position: absolute;
     top: 4px;
     left: 18px;
 }
-.notifications-content-wrap .notification-subscriptions-wrap .notification-subscription-item .invitation-avatar-wrap .notification-icon.group-invite-icon{
+.panel-wrap .notification-subscriptions-wrap .notification-subscription-item .invitation-avatar-wrap .notification-icon.group-invite-icon{
     background: #2196f3;
     border-radius: 50%;
     top: 40px;
@@ -23187,30 +23206,30 @@ ul.restrictions-list-content>li {
     text-align: center;
     width: 16px;
 }
-.notifications-content-wrap .notification-subscriptions-wrap .notification-subscription-item .invitation-avatar-wrap .notification-icon.group-invite-icon path,
-.notifications-content-wrap .notification-subscriptions-wrap .notification-subscription-item .invitation-avatar-wrap .notification-icon.group-invite-icon polygon{
+.panel-wrap .notification-subscriptions-wrap .notification-subscription-item .invitation-avatar-wrap .notification-icon.group-invite-icon path,
+.panel-wrap .notification-subscriptions-wrap .notification-subscription-item .invitation-avatar-wrap .notification-icon.group-invite-icon polygon{
     fill: #fff;
 
 }
-.notifications-content-wrap .notification-subscriptions-wrap .notification-subscription-item .subscription-invitation-item-group-wrap{
+.panel-wrap .notification-subscriptions-wrap .notification-subscription-item .subscription-invitation-item-group-wrap{
     padding-left: 88px;
     border-left: 2px solid;
     position: relative;
     padding-bottom: 4px;
 }
-.notifications-content-wrap .notification-subscriptions-wrap .notification-subscription-item .subscription-invitation-item-user-text{
+.panel-wrap .notification-subscriptions-wrap .notification-subscription-item .subscription-invitation-item-user-text{
     font-style: italic;
     margin-bottom: 28px;
 }
-.notifications-content-wrap .notification-subscriptions-wrap .notification-subscription-item .subscription-item-members-avatars{
+.panel-wrap .notification-subscriptions-wrap .notification-subscription-item .subscription-item-members-avatars{
     height: 24px;
     margin-top: 6px;
     display: flex;
 }
-.notifications-content-wrap .notification-subscriptions-wrap .notification-subscription-item .subscription-item-members-avatars:empty{
+.panel-wrap .notification-subscriptions-wrap .notification-subscription-item .subscription-item-members-avatars:empty{
     display: none;
 }
-.notifications-content-wrap .notification-subscriptions-wrap .notification-subscription-item .subscription-item-members-avatars .circle-avatar{
+.panel-wrap .notification-subscriptions-wrap .notification-subscription-item .subscription-item-members-avatars .circle-avatar{
     width: 24px;
     height: 24px;
     margin-right: 8px;
