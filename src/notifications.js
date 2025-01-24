@@ -191,6 +191,12 @@ xabber.NotificationsView = xabber.BasicView.extend({
                 this.$('.tab-active-filters-wrap').attr('data-color', account.settings.get('color'));
                 this.$('.notifications-calendars-wrap').attr('data-color', account.settings.get('color'));
                 this.$('.tab-additional-filter-item .tab-filter-item-text').text(this.current_content.filtered_accounts[0]);
+            } else if (xabber.accounts.enabled.length === 1) {
+                let account = xabber.accounts.enabled[0];
+                this.current_content.filtered_accounts = [account.get('jid')];
+                this.$('.tab-active-filters-wrap').attr('data-color', account.settings.get('color'));
+                this.$('.notifications-calendars-wrap').attr('data-color', account.settings.get('color'));
+                this.$('.tab-additional-filter-item .tab-filter-item-text').text(this.current_content.filtered_accounts[0]);
             } else {
                 this.$('.tab-active-filters-wrap').attr('data-color', '');
                 this.$('.notifications-calendars-wrap').attr('data-color', '');
@@ -877,6 +883,9 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
 
     filterByAccounts: function (accounts, cleared) {
         this.filtered_accounts.length && !accounts.length && (cleared = true);
+        if ((!accounts || !accounts.length) && xabber.accounts.enabled.length === 1) {
+            accounts = [xabber.accounts.enabled[0].get('jid')];
+        }
         this.filtered_accounts = accounts;
         this.FilterMessagesInChat(cleared);
     },

@@ -339,7 +339,6 @@ xabber.once("start", function () {
             };
         }
         if (options.notifications && options.right === 'notifications') {
-            console.error(path_notifications_body);
             return {
                 notifications_body: path_notifications_body,
             };
@@ -350,7 +349,6 @@ xabber.once("start", function () {
             };
         }
         if (options.calls && options.right === 'calls') {
-            console.error(path_calls_body);
             return {
                 calls_body: path_calls_body,
             };

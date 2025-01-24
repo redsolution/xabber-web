@@ -10108,7 +10108,6 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
     },
 
     render: function (options) {
-        console.error(this.saved_scroll);
         if (_.isUndefined(this.saved_scroll) || _.isNull(this.saved_scroll) ){
             this.clickClearFilter();
         } else {
@@ -10137,7 +10136,11 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
 
     clickClearFilter: function () {
         this.clearSearch();
-        this.current_filter_account = 'all';
+        if (xabber.accounts.enabled.length === 1) {
+        this.current_filter_account = xabber.accounts.enabled[0].get('jid');
+        } else {
+            this.current_filter_account = 'all';
+        }
         this.current_filter = {};
         this.current_filter_groups_list = [];
         this.current_filter_domain = null;
@@ -10483,6 +10486,12 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
                     this.account = accounts.find(item => item.get('jid') === this.current_filter_account);
                     this.updateGroupsFilter();
                     this.processUpdateContacts(null, true);
+                    this.processUpdateContacts(null, true);
+                } else if (accounts.length === 1) {
+                    this.account = accounts[0];
+                    this.current_filter_account = this.account.get('jid');
+                    this.updateGroupsFilter();
+                    this.processUpdateContacts(true, true);
                 } else {
                     this.current_filter_account = 'all';
                     this.account = null;

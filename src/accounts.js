@@ -813,8 +813,6 @@ xabber.Account = Backbone.Model.extend({
             });
             this.get('x_token') && this.save({old_device_token: this.get('x_token').token_uid});
             this.save({auth_type: 'password', password: null, x_token: null});
-            console.error('PASS CLEARED!');
-            console.error(this);
             this.connection.pass = "";
             this.trigger('deactivate', this);
             this.deactivate()
@@ -867,8 +865,6 @@ xabber.Account = Backbone.Model.extend({
                 no_reconnect: true
             });
             this.save({auth_type: 'password', password: null, x_token: null});
-            console.error('PASS CLEARED!');
-            console.error(this);
             this.connection.pass = "";
             this.trigger('deactivate', this);
             this.connFeedback(xabber.getString("connection__error__text_token_invalidated_short"));

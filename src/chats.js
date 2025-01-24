@@ -9783,11 +9783,10 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
     updateChatPositionDebounced: function (item, unread) {
         let view = this.child(item.id),
             active_toolbar = xabber.toolbar_view.$('.active');
-        if (!view)
+        if (item && active_toolbar.hasClass('unread') && (item.get('notifications') || !(item.get('unread') || item.get('const_unread')))) {
             return;
-        if (active_toolbar.hasClass('unread') && (item.get('notifications') || !(item.get('unread') || item.get('const_unread'))))
-            return;
-        if (active_toolbar.hasClass('account-item') && view.account.get('jid') !== active_toolbar.attr('data-jid')){
+        }
+        if (view && active_toolbar.hasClass('account-item') && view.account.get('jid') !== active_toolbar.attr('data-jid')){
             return;
         }
         if (active_toolbar.hasClass('unread') && unread){
@@ -9796,23 +9795,22 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
                 this.model.filter(chat => ((chat.get('unread') || chat.get('const_unread')) && (!chat.get('archived') && !chat.get('notifications'))) && chat.get('pinned') !== '0' && chat.get('pinned')))
             return;
         }
-        active_toolbar.hasClass('group-chats') && (!view.model.get('saved') && view.contact.get('group_chat')) && this.replaceChatItem(item, this.model.filter(chat => (!chat.get('saved') && chat.contact.get('group_chat') && (!chat.get('archived') && !chat.get('notifications'))) && (chat.get('pinned') === '0' || !chat.get('pinned'))), this.model.filter(chat => (!chat.get('saved') && chat.contact.get('group_chat') && (!chat.get('archived') && !chat.get('notifications'))) && chat.get('pinned') !== '0' && chat.get('pinned')));
-        active_toolbar.hasClass('chats') && (!view.model.get('saved') && !view.contact.get('group_chat')) && this.replaceChatItem(item, this.model.filter(chat => (!chat.get('saved') && !chat.contact.get('group_chat') && (!chat.get('archived') && !chat.get('notifications'))) && (chat.get('pinned') === '0' || !chat.get('pinned'))), this.model.filter(chat => (!chat.get('saved') && !chat.contact.get('group_chat') && (!chat.get('archived') && !chat.get('notifications'))) && chat.get('pinned') !== '0' && chat.get('pinned')));
+        active_toolbar.hasClass('group-chats') && this.replaceChatItem(item, this.model.filter(chat => (!chat.get('saved') && chat.contact.get('group_chat') && (!chat.get('archived') && !chat.get('notifications'))) && (chat.get('pinned') === '0' || !chat.get('pinned'))), this.model.filter(chat => (!chat.get('saved') && chat.contact.get('group_chat') && (!chat.get('archived') && !chat.get('notifications'))) && chat.get('pinned') !== '0' && chat.get('pinned')));
+        active_toolbar.hasClass('chats') && this.replaceChatItem(item, this.model.filter(chat => (!chat.get('saved') && !chat.contact.get('group_chat') && (!chat.get('archived') && !chat.get('notifications'))) && (chat.get('pinned') === '0' || !chat.get('pinned'))), this.model.filter(chat => (!chat.get('saved') && !chat.contact.get('group_chat') && (!chat.get('archived') && !chat.get('notifications'))) && chat.get('pinned') !== '0' && chat.get('pinned')));
 
         (
             active_toolbar.hasClass('all-chats') || active_toolbar.hasClass('settings-modal')
             || (xabber.accounts.enabled.length === 1 && active_toolbar.hasClass('saved-chats'))
         )
-        && (!view.model.get('saved') && !view.model.get('archived') && !view.model.get('notifications'))
         && this.replaceChatItem(item,
             this.model.filter(chat => (!chat.get('saved') && !chat.get('archived') && !chat.get('notifications')) && (chat.get('pinned') === '0' || !chat.get('pinned'))),
             this.model.filter(chat => (!chat.get('saved') && !chat.get('archived') && !chat.get('notifications')) && chat.get('pinned') !== '0' && chat.get('pinned')));
 
-        active_toolbar.hasClass('archive-chats') && (!view.model.get('saved') || view.model.get('archived'))
+        active_toolbar.hasClass('archive-chats')
         && this.replaceChatItem(item,
             this.model.filter(chat => !chat.get('saved') && (chat.get('archived') && !chat.get('notifications'))));
-        active_toolbar.hasClass('saved-chats') && (xabber.accounts.enabled.length !== 1) && (view.model.get('saved') && this.replaceChatItem(item, this.model.filter(chat => chat.get('saved'))));
-        active_toolbar.hasClass('mentions') && (!view.model.get('saved') && this.replaceChatItem(item, this.model.filter(chat => ((chat.get('notifications'))))));
+        active_toolbar.hasClass('saved-chats') && (xabber.accounts.enabled.length !== 1) && this.replaceChatItem(item, this.model.filter(chat => chat.get('saved')));
+        active_toolbar.hasClass('mentions') && this.replaceChatItem(item, this.model.filter(chat => ((chat.get('notifications')))));
     },
 
     updateChatPosition: function (item, unread) {

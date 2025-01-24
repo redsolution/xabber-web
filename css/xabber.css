@@ -6819,6 +6819,7 @@ input[type=text].simple-input-field:hover {
     border: none;
     top: 0;
     height: inherit;
+    padding: 15px 10px 0 4px;
 }
 .contacts-panel-wrap .contact-list-wrap{
     position: relative;
@@ -22999,9 +23000,8 @@ ul.restrictions-list-content>li {
     border-radius: 8px;
     padding: 0 0 8px;
 }
-    .contacts-panel .notification-subscriptions-wrap{
-        right: 3px;
-        margin-top: 15px;
+.contacts-panel .notification-subscriptions-wrap{
+    margin-top: 15px;
 }
 .panel-wrap .notification-subscriptions-wrap .notification-subscriptions-header{
     font-size: 16px;

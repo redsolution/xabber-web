@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.4.49","version_description":"moved incoming contacts requests to contacts tab, changed security icon"}'
+'{"version_number":"2.4.50","version_description":"fixed one account notifications and contacts tab coloring, fixed chats rendering on debounce, fixed subscription block position in contacts tab, removed some console logs"}'
 )});
