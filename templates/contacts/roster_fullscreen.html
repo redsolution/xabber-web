@@ -9,7 +9,7 @@
             <div class="contacts-type-filter">
                 <div class="contacts-filter-header">{[print(xabber.getString("notifications_window__filters_header"))]}</div>
                 <div class="contacts-type-filter-content">
-                    <div class="filter-item-wrap selected-filter" data-filter="all">
+                    <div class="filter-item-wrap" data-filter="contacts">
                         <svg class="filter-icon mdi fill-color-grey-500 mdi-svg-template" data-svgname="account"></svg>
                         <div class="name one-line">{[print(xabber.getString("contacts"))]}<span></span></div>
                     </div>
@@ -38,9 +38,11 @@
         <div class="contacts-panel">
             <div class="panel-head">
                 <svg class="btn-show-search mdi mdi-24px mdi-svg-template" data-svgname="search"></svg>
-                <i class="btn-add-contact mdi mdi-24px mdi-account-plus"></i>
                 <i class="btn-dropdown-groups mdi mdi-24px mdi-dots-vertical" data-activates="{{view.cid}}-more"></i>
                 <ul id="{{view.cid}}-more" class="bootstrap-dropdown dropdown-content noselect">
+                    <div class="btn-add-contact property-variant">
+                        {[print(xabber.getString("add_contact"))]}
+                    </div>
                     <div class="btn-create-group property-variant">
                         {[print(xabber.getString("create_group"))]}
                     </div>
@@ -147,16 +149,27 @@
                         <i class="mdi mdi-24px mdi-arrow-down-slim"></i>
                     </div>
                 </div>
-                <div class="contact-list-wrap left-panel-list-wrap">
+                <div class="contact-list-wrap hidden left-panel-list-wrap">
                     <div class="contact-list item-list">
                     </div>
-                    <!--<div class="searched-lists-wrap">-->
-                        <!--<div class="contacts-list-wrap hidden">-->
-                            <!--<div class="account-indicator"></div>-->
-                            <!--<div class="contacts-title">{[print(xabber.getString("category_title_contacts"))]}</div>-->
-                            <!--<div class="contacts-list roster-left-container"></div>-->
-                        <!--</div>-->
-                    <!--</div>-->
+                </div>
+                <div class="contacts-home-wrap left-panel-list-wrap">
+                    <div class="contacts-home-items-wrap">
+                        <div class="contacts-list-header contacts-home-header">{[print(xabber.getString("contacts"))]}<span></span></div>
+                        <div class="contact-item-list contacts-preview-list">
+                        </div>
+                        <div class="btn-add-contact contacts-home-items-button text-main-color-500">
+                            <i class="mdi mdi-24px mdi-account-plus"></i>{[print(xabber.getString("add_contact"))]}
+                        </div>
+                    </div>
+                    <div class="contacts-home-items-wrap">
+                        <div class="contacts-list-header groupchats-home-header">{[print(xabber.getString("contacts_window__type_filter_groupchat"))]}<span></span></div>
+                        <div class="contact-item-list groupchats-preview-list">
+                        </div>
+                        <div class="btn-create-group contacts-home-items-button text-main-color-500">
+                            <i class="mdi mdi-24px mdi-account-multiple-plus"></i>{[print(xabber.getString("create_group"))]}
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

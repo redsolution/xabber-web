@@ -6722,19 +6722,15 @@ input[type=text].simple-input-field:hover {
 .contacts-panel-wrap .contacts-search-form .close-search-icon{
 }
 .contacts-panel-wrap .panel-head .btn-show-search,
-.contacts-panel-wrap .panel-head .btn-dropdown-groups,
-.contacts-panel-wrap .panel-head .btn-add-contact{
+.contacts-panel-wrap .panel-head .btn-dropdown-groups{
     position: absolute;
     right: 14px;
     top: 20px;
     cursor: pointer;
     pointer-events: auto;
 }
-.contacts-panel-wrap .panel-head .btn-add-contact{
-    right: 62px;
-}
 .contacts-panel-wrap .panel-head .btn-show-search{
-    right: 110px;
+    right: 62px;
 }
 .contacts-panel-wrap .panel-head i{
     color: #9e9e9e;
@@ -7021,6 +7017,97 @@ input[type=text].simple-input-field:hover {
 }
 .contacts-panel-wrap .contact-list-wrap .roster-contact-item-wrap .contact-expanded-groups-wrap.hidden:hover{
     display: flex !important;
+}
+.contacts-panel-wrap .contacts-home-wrap{
+    display: flex;
+}
+.contacts-panel-wrap .contacts-home-wrap .contacts-home-items-wrap{
+    width: 50%;
+    border: 1px solid #EEEEEE;
+    border-radius: 8px;
+    padding: 16px 24px 40px;
+    min-height: 536px;
+    position: relative;
+}
+.contacts-panel-wrap .contacts-home-wrap .contacts-home-items-wrap:first-child{
+    margin-right: 24px;
+}
+.contacts-panel-wrap .contacts-home-wrap .contacts-list-header{
+    color: #212121;
+    font-weight: 500;
+    font-size: 16px;
+    line-height: 24px;
+}
+.contacts-panel-wrap .contacts-home-wrap .contacts-list-header span{
+    float: right;
+    font-weight: 300;
+    font-size: 24px;
+}
+.contacts-panel-wrap .contacts-home-wrap .contact-item-list{
+    margin-top: 16px;
+}
+.contacts-panel-wrap .contacts-home-wrap .contact-jid,
+.contacts-panel-wrap .contacts-home-wrap .contact-groups-wrap,
+.contacts-panel-wrap .contacts-home-wrap .btn-edit,
+.contacts-panel-wrap .contacts-home-wrap .contact-expanded-groups-wrap{
+    display: none;
+}
+.contacts-panel-wrap .contacts-home-wrap .roster-contact-item-wrap{
+    height: 40px;
+    padding: 12px 12px 12px 56px;
+    position: relative;
+    margin-bottom: 12px;
+}
+.contacts-panel-wrap .contacts-home-wrap .account-indicator-background-exclude{
+    width: 40px;
+    height: 40px;
+    position: absolute;
+    left: 0;
+    top: 0;
+    cursor: pointer;
+}
+.contacts-panel-wrap .contacts-home-wrap .account-indicator-background-exclude .account-indicator{
+    display: block;
+    width: 40px;
+    height: 40px;
+}
+.contacts-panel-wrap .contacts-home-wrap .account-indicator-background-exclude .circle-avatar{
+    width: 40px;
+    height: 40px;
+}
+.contacts-panel-wrap .contacts-home-wrap .status{
+    height: 16px;
+    width: 16px;
+    border-radius: 50%;
+    position: absolute;
+    left: 26px;
+    top: 26px;
+    border: 1.125px solid #fff;
+    pointer-events: none;
+}
+.contacts-panel-wrap .contacts-home-wrap .status svg{
+    position: absolute;
+}
+.contacts-panel-wrap .contacts-home-wrap .contact-name{
+    font-size: 14px;
+    font-weight: 500;
+    color: #212121;
+    cursor: pointer;
+}
+.contacts-panel-wrap .contacts-home-wrap .btn-add-contact,
+.contacts-panel-wrap .contacts-home-wrap .btn-create-group{
+    bottom: 18px;
+    left: 50%;
+    position: absolute;
+    transform: translate(-50%);
+    height: 24px;
+    display: flex;
+    align-items: flex-end;
+    cursor: pointer;
+}
+.contacts-panel-wrap .contacts-home-wrap .btn-add-contact i,
+.contacts-panel-wrap .contacts-home-wrap .btn-create-group i{
+    margin-right: 12px;
 }
 /* edit contacts groups modal //34*/
 .edit-groups-modal {
@@ -22834,16 +22921,16 @@ ul.restrictions-list-content>li {
     margin-top: 24px;
 }
 .notifications-content-filters .filter-item-wrap.subscription-item-wrap span,
+.contacts-panel-wrap .contacts-panel-left-side .filter-item-wrap.subscription-item-wrap span,
 .notifications-content-filters .filter-item-wrap.invitation-item-wrap span{
     background-color: #388e3c;
-    border-radius: 8px;
+    border-radius: 50%;
     color: #fff !important;
-    font-size: 12px;
+    font-size: 16px;
     font-weight: 700;
-    line-height: 16px;
-    padding: 0 4px;
+    line-height: 20px;
+    padding: 0 5px;
     text-align: center;
-    margin-top: 4px;
 }
 .contacts-panel-wrap .contacts-panel-left-side .filter-item-wrap .filter-icon,
 .calls-content-filters .filter-item-wrap .filter-icon,
@@ -22993,15 +23080,13 @@ ul.restrictions-list-content>li {
     padding: 15px 10px 0 4px;
 }
 .panel-wrap .notification-subscriptions-wrap{
-    margin: 0 auto 32px;
-    max-width: 768px;
+    margin: 0 16px 32px;
     position: relative;
     outline: 1px solid;
     border-radius: 8px;
     padding: 0 0 8px;
 }
 .contacts-panel .notification-subscriptions-wrap{
-    margin-top: 15px;
 }
 .panel-wrap .notification-subscriptions-wrap .notification-subscriptions-header{
     font-size: 16px;

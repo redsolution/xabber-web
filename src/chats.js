@@ -9790,9 +9790,11 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
             return;
         }
         if (active_toolbar.hasClass('unread') && unread){
-            this.replaceChatItem(item,
-                this.model.filter(chat => ((chat.get('unread') || chat.get('const_unread')) && (!chat.get('archived') && !chat.get('notifications'))) && (chat.get('pinned') === '0' || !chat.get('pinned'))),
-                this.model.filter(chat => ((chat.get('unread') || chat.get('const_unread')) && (!chat.get('archived') && !chat.get('notifications'))) && chat.get('pinned') !== '0' && chat.get('pinned')))
+            if (item.get('pinned') !== '0' && item.get('pinned')){
+                this.$('.pinned-chat-list').prepend(item.item_view.$el);
+            } else {
+                this.$('.chat-list').prepend(item.item_view.$el);
+            }
             return;
         }
         active_toolbar.hasClass('group-chats') && this.replaceChatItem(item, this.model.filter(chat => (!chat.get('saved') && chat.contact.get('group_chat') && (!chat.get('archived') && !chat.get('notifications'))) && (chat.get('pinned') === '0' || !chat.get('pinned'))), this.model.filter(chat => (!chat.get('saved') && chat.contact.get('group_chat') && (!chat.get('archived') && !chat.get('notifications'))) && chat.get('pinned') !== '0' && chat.get('pinned')));
@@ -10118,8 +10120,8 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
             xabber.toolbar_view.$('.toolbar-item.account-item').removeClass('active');
         }
         if (is_unread) {
-            all_chats = chats.filter(chat => chat.contact && chat.get('timestamp') && (!chat.get('archived') && !chat.get('notifications')) && ((chat.get('unread') || chat.get('const_unread')) || ((chat.contact.get('invitation') && !chat.contact.get('removed')) ||  (chat.contact.get('subscription_request_in') && chat.contact.get('subscription') != 'both'))) && (chat.get('pinned') === '0' || !chat.get('pinned')) );
-            all_chats_pinned = chats.filter(chat => chat.contact && chat.get('timestamp') && (!chat.get('archived') && !chat.get('notifications')) && ((chat.get('unread') || chat.get('const_unread')) || ((chat.contact.get('invitation') && !chat.contact.get('removed')) || (chat.contact.get('subscription_request_in') && chat.contact.get('subscription') != 'both'))) && chat.get('pinned') !== '0' && chat.get('pinned'));
+            all_chats = chats.filter(chat => chat.contact && chat.get('timestamp') && (!chat.get('archived') && !chat.get('notifications')) && ((chat.get('unread') || chat.get('const_unread'))) && (chat.get('pinned') === '0' || !chat.get('pinned')) );
+            all_chats_pinned = chats.filter(chat => chat.contact && chat.get('timestamp') && (!chat.get('archived') && !chat.get('notifications')) && ((chat.get('unread') || chat.get('const_unread'))) && chat.get('pinned') !== '0' && chat.get('pinned'));
         }
         if (!all_chats.length && !all_chats_pinned.length) {
             all_chats = chats.filter(chat => (!chat.get('saved') && chat.get('timestamp') && (!chat.get('archived') && !chat.get('notifications'))) && (chat.get('pinned') === '0' || !chat.get('pinned')));
