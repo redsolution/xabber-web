@@ -22924,7 +22924,7 @@ ul.restrictions-list-content>li {
 .contacts-panel-wrap .contacts-panel-left-side .filter-item-wrap.subscription-item-wrap span,
 .notifications-content-filters .filter-item-wrap.invitation-item-wrap span{
     background-color: #388e3c;
-    border-radius: 8px;
+    border-radius: 10px;
     color: #fff !important;
     font-size: 16px;
     font-weight: 400;
