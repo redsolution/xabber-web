@@ -2626,7 +2626,7 @@ xabber.ChatItemView = xabber.BasicView.extend({
         if (!this.model.get('active') && this.model.item_view && this.model.item_view.content && this.model.item_view.content.bottom && this.model.item_view.content.bottom.$('.input-message .rich-textarea').getTextFromRichTextarea().trim()){
             let draft_message = this.model.item_view.content.bottom.$('.input-message .rich-textarea').getTextFromRichTextarea();
             this.$('.last-msg').html(draft_message).prepend($(`<span class="text-color-700">${xabber.getString("draft")}: </span>`));
-            this.$el.emojify('.last-msg', {emoji_size: 16}).hyperlinkify({decode_uri: true});
+            this.$el.emojify('.last-msg', {emoji_size: 16}).hyperlinkify({selector: '.last-msg', decode_uri: true});
             msg && this.model.set({timestamp: msg.get('timestamp')});
             return;
         }
@@ -2766,7 +2766,7 @@ xabber.ChatItemView = xabber.BasicView.extend({
         if (msg.get('not_encrypted')) {
             this.$('.last-msg').html(this.$('.last-msg').html().italics());
         }
-        this.$el.emojify('.last-msg', {emoji_size: 16}).hyperlinkify({decode_uri: true});
+        this.$el.emojify('.last-msg', {emoji_size: 16}).hyperlinkify({selector: '.last-msg', decode_uri: true});
         this.$('.last-msg-date').text(utils.pretty_short_datetime_recent_chat(msg_time))
         this.$('.msg-delivering-state').showIf(msg.get('type') !== 'system' && msg.isSenderMe() && (msg.get('state') !== constants.MSG_ARCHIVED) && !msg.get('notification_msg'))
             .attr('data-state', msg.getState());
@@ -8802,8 +8802,10 @@ xabber.AccountChats = xabber.ChatsBase.extend({
         let $message = $(message),
             msg_from = Strophe.getBareJidFromJid($message.attr('from')),
             $stanza_received = $message.find(`received[xmlns="${Strophe.NS.DELIVERY}"]`),
-            $echo_msg = $message.children(`x[xmlns="${Strophe.NS.DELIVERY}"]`).children('message');
+            $echo_msg = $message.children(`x[xmlns="${Strophe.NS.DELIVERY}"]`).children('message'),
+            special_logic = false;
         if ($stanza_received.length) {
+            special_logic = true;
             let stanza_id = $stanza_received.children('stanza-id').attr('id'),
                 origin_msg_id = $stanza_received.children('origin-id').first().attr('id');
             if (origin_msg_id) {
@@ -8830,6 +8832,7 @@ xabber.AccountChats = xabber.ChatsBase.extend({
         }
 
         if ($echo_msg.length) {
+            special_logic = true;
             let origin_msg_id = $echo_msg.children('origin-id').first().attr('id'),
                 pending_message = this.account._pending_messages.find(msg => msg.unique_id == origin_msg_id);
             if (pending_message) {
@@ -8840,6 +8843,7 @@ xabber.AccountChats = xabber.ChatsBase.extend({
 
         let $token_revoke = $message.children(`revoke[xmlns="${Strophe.NS.AUTH_DEVICES}"]`);
         if ($token_revoke.length && msg_from === this.account.domain) {
+            special_logic = true;
             $token_revoke.children('device').each((idx, token) => {
                 let $token = $(token),
                     token_uid = $token.attr('id');
@@ -8862,6 +8866,7 @@ xabber.AccountChats = xabber.ChatsBase.extend({
         }
 
         if ($message.find(`event[xmlns="${Strophe.NS.PUBSUB}#event"]`).length) {
+            special_logic = true;
             this.receivePubsubMessage($message);
             return;
         }
@@ -8876,6 +8881,7 @@ xabber.AccountChats = xabber.ChatsBase.extend({
         }
 
         if ($message.children(`x[xmlns="${Strophe.NS.GROUP_CHAT}#system-message"]`).length) {
+            special_logic = true;
             if (!contact)
                 return;
             let participant_version = $message.children(`x[xmlns="${Strophe.NS.GROUP_CHAT}#system-message"]`).attr('version');
@@ -8884,12 +8890,14 @@ xabber.AccountChats = xabber.ChatsBase.extend({
         }
 
         if ($message.children(`attention[xmlns="${Strophe.NS.ATTENTION}"]`).length && xabber.settings.call_attention) {
+            special_logic = true;
             if (!chat)
                 return;
             return chat.messages.createSystemMessage({from_jid: msg_from, message: xabber.getString("action_attention_requested"), attention: true});
         }
 
         if ($message.find(`replace[xmlns="${Strophe.NS.REWRITE}#notify"]`).length) {
+            special_logic = true;
             !contact && (contact = this.account.contacts.get($message.find('replace').attr('conversation'))) && (chat = this.account.chats.getChat(contact));
             if (this.account.server_features.get(Strophe.NS.XABBER_FAVORITES) && $message.find('replace').attr('conversation') === this.account.server_features.get(Strophe.NS.XABBER_FAVORITES).get('from'))
                 chat = this.getSavedChat();
@@ -8918,6 +8926,7 @@ xabber.AccountChats = xabber.ChatsBase.extend({
         }
 
         if ($message.find(`invalidate[xmlns="${Strophe.NS.REWRITE}#notify"]`).length) {
+            special_logic = true;
             !contact && (contact = this.account.contacts.get($message.find('invalidate').attr('conversation'))) && (chat = this.account.chats.getChat(contact));
             if (this.account.server_features.get(Strophe.NS.XABBER_FAVORITES) && $message.find('invalidate').attr('conversation') === this.account.server_features.get(Strophe.NS.XABBER_FAVORITES).get('from'))
                 chat = this.getSavedChat();
@@ -8950,6 +8959,7 @@ xabber.AccountChats = xabber.ChatsBase.extend({
             }
         }
         if ($message.find('retract-message').length) {
+            special_logic = true;
             let is_encrypted = $message.find('retract-message').attr('type') == Strophe.NS.OMEMO;
             !contact && (contact = this.account.contacts.get($message.find('retract-message').attr('conversation'))) && (chat = this.account.chats.getChat(contact,  is_encrypted && 'encrypted'));
             if (this.account.server_features.get(Strophe.NS.XABBER_FAVORITES) && $message.find('retract-message').attr('conversation') === this.account.server_features.get(Strophe.NS.XABBER_FAVORITES).get('from'))
@@ -8973,6 +8983,7 @@ xabber.AccountChats = xabber.ChatsBase.extend({
             }
         }
         if ($message.find('retract-user').length) {
+            special_logic = true;
             let $retracted_user_msgs = $message.find('retract-user'),
                 retracted_user_id = $retracted_user_msgs.attr('id'),
                 msg_item = chat.messages.filter(msg => msg.get('user_info') && (msg.get('user_info').id == retracted_user_id));
@@ -8986,6 +8997,7 @@ xabber.AccountChats = xabber.ChatsBase.extend({
             chat.item_view.updateLastMessage(chat.last_message);
         }
         if ($message.find('retract-all').length) {
+            special_logic = true;
             !contact && (contact = this.account.contacts.get($message.find('retract-all').attr('conversation'))) && (chat = this.getChat(contact, $message.find('retract-all').attr('type') == Strophe.NS.OMEMO && 'encrypted'));
             if (!chat)
                 return;
@@ -9013,7 +9025,11 @@ xabber.AccountChats = xabber.ChatsBase.extend({
             });
             chat.item_view.updateLastMessage();
         }
-        return;
+        if (special_logic){
+            return this.receiveChatMessage(message);
+        } else {
+            return;
+        }
     },
 
     receiveStanzaId: function ($message, options) {
@@ -10272,7 +10288,7 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
               if (msg_from)
                   this.$('.last-msg').prepend($('<span class=text-color-700>' + msg_from + ': ' + '</span>'));
           }
-          this.$el.emojify('.last-msg', {emoji_size: 16}).hyperlinkify({decode_uri: true});
+          this.$el.emojify('.last-msg', {emoji_size: 16}).hyperlinkify({selector: '.last-msg', decode_uri: true});
           this.$('.last-msg-date').text(utils.pretty_short_datetime_recent_chat(msg_time))
               .attr('title', pretty_datetime(msg_time));
           this.$('.msg-delivering-state').showIf(msg.isSenderMe() && (msg.get('state') !== constants.MSG_ARCHIVED) && !msg.get('notification_msg'))

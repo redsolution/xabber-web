@@ -22924,13 +22924,14 @@ ul.restrictions-list-content>li {
 .contacts-panel-wrap .contacts-panel-left-side .filter-item-wrap.subscription-item-wrap span,
 .notifications-content-filters .filter-item-wrap.invitation-item-wrap span{
     background-color: #388e3c;
-    border-radius: 50%;
+    border-radius: 8px;
     color: #fff !important;
     font-size: 16px;
-    font-weight: 700;
+    font-weight: 400;
     line-height: 20px;
     padding: 0 5px;
     text-align: center;
+    margin-top: 2px;
 }
 .contacts-panel-wrap .contacts-panel-left-side .filter-item-wrap .filter-icon,
 .calls-content-filters .filter-item-wrap .filter-icon,
@@ -22959,6 +22960,7 @@ ul.restrictions-list-content>li {
 }
 .notifications-content-filters .filter-item-wrap span,
 .contacts-panel-wrap .contacts-panel-left-side .filter-item-wrap span{
+    padding: 0 5px;
     color: #757575;
     font-size: 16px;
     line-height: 24px;

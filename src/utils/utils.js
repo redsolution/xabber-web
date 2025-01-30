@@ -112,31 +112,37 @@ $.fn.isBottomVisibleInContainer = function(container) {
     );
 };
 
-var getHyperLink = function (url) {
+var getHyperLink = function (url, is_url) {
     var prot = (url.indexOf('http://') === 0 ||  url.indexOf('https://') === 0) ? '' : 'http://',
         escaped_url = "";
-    try {
-        escaped_url = url.replace(/[!'()]/g, escape).replace(/\*/g, "%2A");
+    if (is_url){
+        return "<a target='_blank' class='msg-hyperlink msg-hyperlink-identity' href='mailto:"+ url + "'>" + url + "</a>";
+    } else {
+        try {
+            escaped_url = url.replace(/[!'()]/g, escape).replace(/\*/g, "%2A");
+        }
+        catch (e) {
+            escaped_url = url;
+        }
+        try {
+            url = decodeURI(url);
+        }
+        catch (e) {
+            return url;
+        }
+        return "<a target='_blank' class='msg-hyperlink' href='"+prot+escaped_url + "'>"+url+"</a>";
     }
-    catch (e) {
-        escaped_url = url;
-    }
-    try {
-        url = decodeURI(url);
-    }
-    catch (e) {
-        return url;
-    }
-    return "<a target='_blank' class='msg-hyperlink' href='"+prot+escaped_url + "'>"+url+"</a>";
 };
 
-$.fn.hyperlinkify = function (options) {
+$.fn.hyperlinkify = function (options, id) {
+    id = id || uuid();
     options || (options = {});
     var $query = options.selector ? this.find(options.selector) : this;
     $query.each(function (i, obj) {
         var $obj = $(obj),
             html_concat = "",
-            url_regexp = /((((ftp|http|https):\/\/)|(www\.))(\w+:{0,1}\w*@)?([^\s"<>{}|\\^~\[\]`]+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?)|((\b)(([\w#:.@\-]+))?(\.net|\.edu|\.cloud|\.top|\.vip|\.cash|\.im|\.online|\.chat|\.com|\.org|\.ru|\.travel|\.info|\.tv|\.biz|\.mobi|\.tel|\.ar|\.al|\.asia|\.np|\.ng|\.io|\.bb|\.br|\.ca|\.tr|\.co|\.ec|\.fr|\.ht|\.in|\.eg|\.ie|\.et|\.jo|\.mr|\.id|\.iq|\.nl|\.ps|\.ph|\.sl|\.si|\.se|\.af|\.ag|\.be|\.bd|\.bg|\.cl|\.cd|\.my|\.mz|\.mx|\.cz|\.eu|\.dz|\.de|\.hk|\.it|\.la|\.no|\.pl|\.ro|\.sg|\.ke|\.kr|\.ch|\.ug|\.us|\.ve|\.vn|\.at|\.bo|\.cm|\.cn|\.cg|\.dk|\.fi|\.gr|\.gh|\.is|\.ir|\.jp|\.lv|\.ma|\.me|\.pk|\.pe|\.pt|\.sa|\.sk|\.es|\.tz|\.tw|\.ua|\.uz|\.ye)((\/[\w#!:;.?+=&%@!\-\/]+)|(\b)|\/))/gim;
+            email_regexp = /([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+)/gi,
+            url_regexp = /((((ftp|http|https):\/\/)|(www\.))(\w+:{0,1}\w*@)?([^\s^)^("<>{}|\\^~\[\]`]+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?)|((\b)(([\w#.@\-]+))?(\.net|\.edu|\.cloud|\.top|\.vip|\.cash|\.im|\.online|\.chat|\.com|\.org|\.ru|\.travel|\.info|\.tv|\.biz|\.mobi|\.tel|\.ar|\.al|\.asia|\.np|\.ng|\.io|\.bb|\.br|\.ca|\.tr|\.co|\.ec|\.fr|\.ht|\.in|\.eg|\.ie|\.et|\.jo|\.mr|\.id|\.iq|\.nl|\.ps|\.ph|\.sl|\.si|\.se|\.af|\.ag|\.be|\.bd|\.bg|\.cl|\.cd|\.my|\.mz|\.mx|\.cz|\.eu|\.dz|\.de|\.hk|\.it|\.la|\.no|\.pl|\.ro|\.sg|\.ke|\.kr|\.ch|\.ug|\.us|\.ve|\.vn|\.at|\.bo|\.cm|\.cn|\.cg|\.dk|\.fi|\.gr|\.gh|\.is|\.ir|\.jp|\.lv|\.ma|\.me|\.pk|\.pe|\.pt|\.sa|\.sk|\.es|\.tz|\.tw|\.ua|\.uz|\.ye)((\/[\w#!:;.?+=&%@!\-\/]+)|(\b)|\/))/gim;
         $obj[0].childNodes.forEach(function (node) {
             let $node = $(node),
                 x = node.outerHTML;
@@ -149,13 +155,30 @@ $.fn.hyperlinkify = function (options) {
                     x = _.escape($node.text());
                 let list = x && x.match(url_regexp);
                 list = Array.from(new Set(list));
-                if (!list || list.length === 0) {
+                let email_list = x && x.match(email_regexp);
+                email_list = Array.from(new Set(email_list));
+                if (email_list.length){
+                    email_list = email_list.filter(email =>
+                        !list.some(url =>
+                            url.includes(email)
+                            && (!url.match(email_regexp) || url.match(email_regexp).includes(email))
+                            && url !== email
+                        )
+                    )
+                }
+                if (!options.decode_uri){
+                    list = list.filter( function( el ) {
+                        return email_list.indexOf( el ) < 0;
+                    });
+                }
+
+                if ((!list || list.length === 0) && (!email_list || email_list.length === 0)) {
                     html_concat += x;
                     return;
                 }
                 if (list.length === 1 && list[0] === x) {
                     html_concat += options.decode_uri ? decodeURI(x) : getHyperLink(x);
-                } else {
+                } else if (list.length) {
                     for (i = 0; i < list.length; i++) {
                             if (options.decode_uri) {
                                 try {
@@ -165,9 +188,17 @@ $.fn.hyperlinkify = function (options) {
                                 }
                             }
                             else
-                                x = x.replaceAll(new RegExp(`(\\s|^)(${list[i].replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`,"g"), '$1' + getHyperLink(list[i]));
+                                x = x.replaceAll(new RegExp(`(\\s|^)(${list[i].replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})(\\s|$)`,"g"), '$1' + getHyperLink(list[i]) + '$3');
                     }
                     html_concat += x;
+                }
+                if (email_list.length === 1 && email_list[0] === x && !options.decode_uri) {
+                    html_concat += getHyperLink(x, true);
+                } else if (email_list.length && !options.decode_uri) {
+                    for (i = 0; i < email_list.length; i++) {
+                        !html_concat && (html_concat += x);
+                        html_concat = html_concat.replaceAll(new RegExp(`(\\s|^)(${email_list[i].replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})(\\s|$)`,"g"), '$1' + getHyperLink(email_list[i], true) + '$3');
+                    }
                 }
             }
         }.bind(this));

@@ -4545,7 +4545,9 @@ xabber.AccountSettingsItemModalView = xabber.BasicView.extend({
     updateSyncState: function () {
     },
 
-    showSettings: function () {
+    showSettings: function (ev) {
+        if (ev && $(ev.target).hasClass('drag-handle'))
+            return;
         if (this.model.get('enabled'))
             this.model.showSettingsModal();
         else {
