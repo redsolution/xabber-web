@@ -13153,9 +13153,11 @@ xabber.ChatBottomView = xabber.BasicView.extend({
                 )
             )
         }
-        list = list.filter( function( el ) {
-            return email_list.indexOf( el ) < 0;
-        });
+        if (list && list.length){
+            list = list.filter( function( el ) {
+                return email_list.indexOf( el ) < 0;
+            });
+        }
         list = _.difference(list, this.link_reference_exempted);
         list = _.difference(list, this.currently_loaded_link_references);
         if (list && list.length){
