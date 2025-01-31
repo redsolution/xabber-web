@@ -10307,6 +10307,11 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
         }
     },
 
+    sendAndAskSubscription: function (contact) {
+        contact.askRequest();
+        contact.acceptRequest();
+    },
+
     updateClientNotifications: function (options) {
         this.$('.client-notifications-wrap').find('.client-notifications-container').detach();
 

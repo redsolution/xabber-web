@@ -1362,6 +1362,12 @@ xabber.EphemeralTimerSelector = xabber.BasicView.extend({
         } else {
             this.set({'group_chat': false, 'name': attrs.name});
         }
+        if (this.account.server_features.get(Strophe.NS.XABBER_NOTIFY)
+            && this.account.server_features.get(Strophe.NS.XABBER_NOTIFY).get('from')
+            && this.account.server_features.get(Strophe.NS.XABBER_NOTIFY).get('from') === this.get('jid')) {
+            this.set('notifications' , true);
+
+        }
         this.messages = new xabber.Messages(null, {account: this.account, chat: this});
         this.messages_unread = new xabber.Messages(null, {account: this.account});
         this.item_view = new xabber.ChatItemView({model: this});
@@ -13143,8 +13149,7 @@ xabber.ChatBottomView = xabber.BasicView.extend({
             email_regexp = /([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+)/gi,
             list = text && text.match(url_regexp),
             email_list = text && text.match(email_regexp)
-
-        if (email_list && email_list.length){
+        if (list && list.length && email_list && email_list.length){
             email_list = email_list.filter(email =>
                 !list.some(url =>
                     url.includes(email)
@@ -13152,8 +13157,6 @@ xabber.ChatBottomView = xabber.BasicView.extend({
                     && url !== email
                 )
             )
-        }
-        if (list && list.length){
             list = list.filter( function( el ) {
                 return email_list.indexOf( el ) < 0;
             });

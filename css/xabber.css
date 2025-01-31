@@ -8700,6 +8700,10 @@ input[type=text].simple-input-field:hover {
     text-align: center;
 }
 
+.back-to-unread .back-to-unread-counter:empty{
+    display: none;
+}
+
 /* -------------- DATA FORM IN MESSAGE ------------------ */
 
 .chat-message .chat-msg-content .data-form {
