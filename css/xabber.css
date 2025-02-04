@@ -6930,6 +6930,9 @@ input[type=text].simple-input-field:hover {
     opacity: 0.8;
     cursor:pointer;
 }
+.contacts-panel-wrap .contact-list-wrap .roster-contact-item-wrap .contact-group-details{
+    display: none;
+}
 .contacts-panel-wrap .contact-list-wrap .roster-contact-item-wrap .contact-jid .contact-domain:hover{
     color: #757575;
     cursor: pointer;
@@ -7026,7 +7029,7 @@ input[type=text].simple-input-field:hover {
     border: 1px solid #EEEEEE;
     border-radius: 8px;
     padding: 16px 24px 40px;
-    min-height: 536px;
+    min-height: 150px;
     position: relative;
 }
 .contacts-panel-wrap .contacts-home-wrap .contacts-home-items-wrap:first-child{
@@ -7038,6 +7041,10 @@ input[type=text].simple-input-field:hover {
     font-size: 16px;
     line-height: 24px;
 }
+.contacts-panel-wrap .contacts-home-wrap .contacts-list-header:hover{
+    opacity: 0.7;
+    cursor: pointer;
+}
 .contacts-panel-wrap .contacts-home-wrap .contacts-list-header span{
     float: right;
     font-weight: 300;
@@ -7046,7 +7053,17 @@ input[type=text].simple-input-field:hover {
 .contacts-panel-wrap .contacts-home-wrap .contact-item-list{
     margin-top: 16px;
 }
-.contacts-panel-wrap .contacts-home-wrap .contact-jid,
+.contacts-panel-wrap .contacts-home-wrap .groupchats-preview-list .contact-jid{
+    display: none;
+}
+    .contacts-panel-wrap .contacts-home-wrap .contact-group-details,
+    .contacts-panel-wrap .contacts-home-wrap .contact-jid{
+    color: #757575;
+    cursor: pointer;
+    font-size: 14px;
+    line-height: 20px;
+    margin-bottom: 8px;
+}
 .contacts-panel-wrap .contacts-home-wrap .contact-groups-wrap,
 .contacts-panel-wrap .contacts-home-wrap .btn-edit,
 .contacts-panel-wrap .contacts-home-wrap .contact-expanded-groups-wrap{
@@ -7054,7 +7071,7 @@ input[type=text].simple-input-field:hover {
 }
 .contacts-panel-wrap .contacts-home-wrap .roster-contact-item-wrap{
     height: 40px;
-    padding: 12px 12px 12px 56px;
+    padding: 0 12px 0 56px;
     position: relative;
     margin-bottom: 12px;
 }
@@ -7093,6 +7110,7 @@ input[type=text].simple-input-field:hover {
     font-weight: 500;
     color: #212121;
     cursor: pointer;
+    line-height: 20px;
 }
 .contacts-panel-wrap .contacts-home-wrap .btn-add-contact,
 .contacts-panel-wrap .contacts-home-wrap .btn-create-group{
@@ -23092,6 +23110,10 @@ ul.restrictions-list-content>li {
     border-radius: 8px;
     padding: 0 0 8px;
 }
+.panel-wrap .notifications-content .notification-subscriptions-wrap{
+    margin: 0 auto 32px;
+    max-width: 768px;
+}
 .contacts-panel .notification-subscriptions-wrap{
 }
 .panel-wrap .notification-subscriptions-wrap .notification-subscriptions-header{
@@ -23120,6 +23142,12 @@ ul.restrictions-list-content>li {
     position: absolute;
     top: 4px;
     width: 32px;
+}
+.panel-wrap .contacts-content-wrap .notification-subscriptions-wrap .notification-subscription-item .avatar-wrap .circle-avatar{
+    width: 40px;
+    height: 40px;
+    left: 26px;
+    top: 0;
 }
 .panel-wrap .notification-subscriptions-wrap .notification-subscription-item .avatar-wrap .notification-icon{
     top: 25px;

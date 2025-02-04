@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.4.55","version_description":"fixed ogp link list filtering, fixed encrypted notifications chat in chats view, fixed adding contacts in contacts tab, hidden empty back to unread counter"}'
+'{"version_number":"2.4.55","version_description":"contacts home page design, changed icons, added details to contact items in contacts home page, fixed unread chats updating, fixed saved chats rendering on new message, fixed saved chats tab opening, fixed contact details closing on esc button press, added contacts filter enabling on pressing circle filter on home page"}'
 )});

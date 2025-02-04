@@ -332,6 +332,7 @@
     addSvgTemplate('svg.description-outline');
     addSvgTemplate('svg.contact-add');
     addSvgTemplate('svg.contacts');
+    addSvgTemplate('svg.contacts-outline');
     addSvgTemplate('svg.check');
     addSvgTemplate('svg.call-outline');
     addSvgTemplate('svg.unread');
@@ -405,6 +406,7 @@
     addSvgTemplate('svg.chat');
     addSvgTemplate('svg.star-face');
     addSvgTemplate('svg.alarm-bell');
+    addSvgTemplate('svg.label-outline');
     addSvgTemplate('svg.id');
     addSvgTemplate('svg.expires');
     addSvgTemplate('svg.database');

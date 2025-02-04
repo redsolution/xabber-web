@@ -1501,7 +1501,7 @@ xabber.EphemeralTimerSelector = xabber.BasicView.extend({
       },
 
     recountUnread: function () {
-        this.set('unread', this.messages_unread.length);
+        this.set('unread', this.messages_unread.length, {previous_unread: this.get('unread')});
         if (this.contact && this.get('archived') && this.isMuted()) {
         }
         else {
@@ -4180,7 +4180,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
             read_count = this.model.get('const_unread') - read_count;
             (read_count < 0) && (read_count = 0);
             this.model.set('unread', 0);
-            this.model.set('const_unread', read_count);
+            this.model.set('const_unread', read_count, {previous_unread: this.model.get('const_unread')});
         } else {
             let unread_messages = _.clone(this.model.messages_unread.models);
             _.each(unread_messages, (msg) => {
@@ -8587,7 +8587,7 @@ xabber.AccountChats = xabber.ChatsBase.extend({
         if (!this.account.server_features.get(Strophe.NS.XABBER_FAVORITES))
             return;
         let jid = this.account.server_features.get(Strophe.NS.XABBER_FAVORITES).get('from'),
-            attrs = {jid: jid, type: 'saved', name: xabber.getString("saved_messages__header"), id: `${jid}:saved`},
+            attrs = {jid: jid, type: 'saved', name: xabber.getString("saved_messages__header"), id: `${this.account.get('jid')}:${jid}:saved`},
             chat = this.get(attrs.id);
         if (!chat) {
             chat = xabber.chats.create(attrs, {account: this.account});
@@ -9761,13 +9761,20 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
         }
     },
 
-    onChangedReadStatus: function (item) {
+    onChangedReadStatus: function (item, unread_count, options) {
+        options = options || {};
+
         let view = this.child(item.id),
             active_toolbar = xabber.toolbar_view.$('.active');
-        this.updateChatPosition(item, true);
+        if (active_toolbar.hasClass('unread')){
+            if (unread_count === 0 || options.previous_unread !== 0){
+                return;
+            }
+            this.updateChatPositionDebounced(item, true);
+        } else {
+            this.updateChatPosition(item, true);
+        }
         if (!view)
-            return;
-        if (!active_toolbar.hasClass('unread') || (active_toolbar.hasClass('unread') && (item.get('unread') || item.get('const_unread'))))
             return;
     },
 
@@ -9802,7 +9809,7 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
         }
     },
 
-    updateChatPositionDebounced: function (item, unread) {
+    updateChatPositionDebounced: function (item, unread, still_unread) {
         let view = this.child(item.id),
             active_toolbar = xabber.toolbar_view.$('.active');
         if (item && active_toolbar.hasClass('unread') && (item.get('notifications') || !(item.get('unread') || item.get('const_unread')))) {
@@ -9833,7 +9840,20 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
         active_toolbar.hasClass('archive-chats')
         && this.replaceChatItem(item,
             this.model.filter(chat => !chat.get('saved') && (chat.get('archived') && !chat.get('notifications'))));
-        active_toolbar.hasClass('saved-chats') && (xabber.accounts.enabled.length !== 1) && this.replaceChatItem(item, this.model.filter(chat => chat.get('saved')));
+        if (active_toolbar.hasClass('saved-chats') && (xabber.accounts.enabled.length !== 1)) {
+
+            let saved_chats = []
+            xabber.accounts.connected.forEach((acc) => {
+                if (acc.server_features.get(Strophe.NS.XABBER_FAVORITES)) {
+                    let saved_chat = acc.chats.getSavedChat();
+                    saved_chats.push(saved_chat);
+                }
+            });
+            if (xabber.toolbar_view.data.get('account_filtering'))
+                saved_chats = saved_chats.filter(chat => (chat.account.get('jid') === xabber.toolbar_view.data.get('account_filtering')));
+
+            this.replaceChatItem(item, saved_chats);
+        }
         active_toolbar.hasClass('mentions') && this.replaceChatItem(item, this.model.filter(chat => ((chat.get('notifications')))));
     },
 
@@ -9921,6 +9941,10 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
                     chat_item: view,
                     blocked: view.model.get('blocked')
                 },{right_contact_save: options.right_contact_save, right_force_close: options.right_force_close} );
+                if (view.model.get('saved')){
+                    xabber.toolbar_view.$('.active').removeClass('active unread');
+                    xabber.toolbar_view.$('.saved-chats').addClass('active');
+                }
                 if (view.model.last_message && !view.content.isMessageAdded(view.model.last_message)){
                     view.content.addMessage(view.model.last_message);
                 }
@@ -10345,7 +10369,7 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
             all_chats_pinned = all_chats_pinned.sort((a, b) => (a.get('pinned') > b.get('pinned')) ? 1 : -1)
             all_chats_pinned.forEach((chat) => {
                 if (chat.account.get('jid') === this.account.get('jid')) {
-                    if (this.account.server_features.get(Strophe.NS.XABBER_FAVORITES) && chat.id == `${this.account.server_features.get(Strophe.NS.XABBER_FAVORITES).get('from')}:saved`) {
+                    if (this.account.server_features.get(Strophe.NS.XABBER_FAVORITES) && chat.id == `${this.account.get('jid')}:${this.account.server_features.get(Strophe.NS.XABBER_FAVORITES).get('from')}:saved`) {
                         let $cloned_item = chat.item_view.$el.clone().removeClass('hidden');
                         $cloned_item.find('.last-msg').text(xabber.getString("saved_messages__hint_forward_here"));
                         this.saved_chat = true;
@@ -10357,7 +10381,7 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
         }
         all_chats.forEach((chat) => {
             if (chat.account.get('jid') === this.account.get('jid')) {
-                if (this.account.server_features.get(Strophe.NS.XABBER_FAVORITES) && chat.id == `${this.account.server_features.get(Strophe.NS.XABBER_FAVORITES).get('from')}:saved`) {
+                if (this.account.server_features.get(Strophe.NS.XABBER_FAVORITES) && chat.id == `${this.account.get('jid')}:${this.account.server_features.get(Strophe.NS.XABBER_FAVORITES).get('from')}:saved`) {
                     let $cloned_item = chat.item_view.$el.clone().removeClass('hidden');
                     $cloned_item.find('.last-msg').text(xabber.getString("saved_messages__hint_forward_here"));
                     this.saved_chat = true;

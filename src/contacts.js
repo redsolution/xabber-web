@@ -1831,7 +1831,7 @@ xabber.ContactDetailsViewRight = xabber.BasicView.extend({
 
     keydownHandler: function (ev) {
         if (!xabber.body.$el.siblings('.mfp-ready').length && !$.magnificPopup.instance.isOpen && ev.keyCode === constants.KEY_ESCAPE && !xabber.body.$el.siblings('#modals').children('.open').length) {
-            this.model.showDetailsRight('all-chats');
+            this.closeDetails();
             $(window).unbind("keydown.contact_panel");
         }
     },
@@ -2401,7 +2401,7 @@ xabber.GroupChatDetailsViewRight = xabber.BasicView.extend({
 
     keydownHandler: function (ev) {
         if (!xabber.body.$el.siblings('.mfp-ready').length && !$.magnificPopup.instance.isOpen && ev.keyCode === constants.KEY_ESCAPE && !xabber.body.$el.siblings('#modals').children('.open').length) {
-            this.model.showDetailsRight('all-chats');
+            this.closeDetails();
             $(window).unbind("keydown.contact_panel");
         }
     },
@@ -10034,7 +10034,10 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
     events: {
         "click .roster-contact-item-wrap .circle-avatar": "onClickItem",
         "click .roster-contact-item-wrap .contact-name": "onClickItem",
+        "click .contact-item-list .roster-contact-item-wrap .contact-jid": "onClickItem",
+        "click .contact-item-list .roster-contact-item-wrap .contact-group-details": "onClickItem",
         "click .contacts-type-filter-content .filter-item-wrap": "filterContent",
+        "click .contacts-home-items-wrap .filter-item-wrap": "filterContent",
         "click .notification-subscriptions-button": "filterContent",
         "click .btn-subfilter": "filterSubContent",
         "click .btn-accounts-filter": "filterAccount",
@@ -10373,7 +10376,7 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
     },
 
     onClickJid: function (ev) {
-        if ($(ev.target).closest('.contact-domain').length)
+        if ($(ev.target).closest('.contact-domain').length || $(ev.target).closest('.contact-item-list').length)
             return;
         let $target_info = $(ev.target).closest('.roster-contact-item-wrap'),
             $target_value = $target_info.attr('data-jid');
@@ -10656,8 +10659,7 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
 
     filterByGroup: function (ev) {
         if (!this.current_filter.type) {
-            this.clickClearFilter();
-            return;
+            this.$('.filter-item-wrap[data-filter="contacts"]').click();
         }
         let $item = $(ev.target).closest('.filter-item-wrap').length ? $(ev.target).closest('.filter-item-wrap') : $(ev.target).closest('.group'),
             filter_name = $item.attr('data-groupname');
@@ -10689,6 +10691,8 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
     },
 
     filterByDomain: function (ev) {
+        if ($(ev.target).closest('.contact-item-list').length)
+            return;
         let $item = $(ev.target).closest('.contact-domain'),
             filter_domain = $item.attr('data-domain');
 
@@ -11015,12 +11019,27 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
         let preview_contacts_counter = 0,
             preview_groupchats_counter = 0;
         _.each(this.contacts, (contact) => {
+            let group_details_text = ''
+            if (contact.get('group_chat')){
+
+                group_details_text = xabber.getString("groupchat_public_group");
+                if (contact.get('incognito_chat'))
+                    group_details_text = xabber.getString("groupchat_incognito_group");
+                if (contact.get('private_chat'))
+                    group_details_text = xabber.getString("groupchat_private_chat");
+
+                if (contact.get('group_info') && contact.get('group_info').members_num){
+                    group_details_text += ', ' + xabber.getQuantityString("contact_groupchat_status_member", contact.get('group_info').members_num);
+                }
+
+            }
             let $template = $(templates.roster_contact_item({
                 status: contact.get('status'),
                 jid: contact.get('jid'),
                 jid_content: `${Strophe.getNodeFromJid(contact.get('jid'))}@<span class="contact-domain" data-domain="${Strophe.getDomainFromJid(contact.get('jid'))}">${Strophe.getDomainFromJid(contact.get('jid'))}</span>`,
                 name: contact.get('jid') === contact.get('name') ? Strophe.getNodeFromJid(contact.get('jid')) : contact.get('name'),
                 account_jid: contact.account.get('jid'),
+                group_details_text: group_details_text,
                 account_color: contact.account.settings.get('color'),
             }));
             let image = contact.cached_image;
