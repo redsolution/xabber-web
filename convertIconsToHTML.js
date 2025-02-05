@@ -116,6 +116,7 @@ let badges_names = [
         'qrcode',
         'code',
         'group-public-add',
+        'group-public-outline',
         'heart-circle',
         'bank-circle',
         'fullname',

@@ -268,6 +268,7 @@
     addSvgTemplate('svg.qrcode');
     addSvgTemplate('svg.code');
     addSvgTemplate('svg.group-public-add');
+    addSvgTemplate('svg.group-public-outline');
     addSvgTemplate('svg.heart-circle');
     addSvgTemplate('svg.bank-circle');
     addSvgTemplate('svg.id-outline');

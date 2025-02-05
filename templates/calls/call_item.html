@@ -20,6 +20,8 @@
         <svg class="call-icon mdi fill-color-green-700 mdi-svg-template" data-svgname="call-received"></svg>
         {[} else if (jingle_call_status === 'declined') {]}
         <svg class="call-icon mdi fill-color-grey-500 mdi-svg-template" data-svgname="call-noanswer"></svg>
+        {[} else {]}
+        <svg class="call-icon mdi fill-color-red-700 mdi-svg-template" data-svgname="call-missed"></svg>
         {[}]}
         <div class="chat-msg-content chat-text-content">{[if (time){]}{{time}}, {[}]}{{message}}{[if (jingle_duration){]}, {{jingle_duration}} {[}]}</div>
     </div>

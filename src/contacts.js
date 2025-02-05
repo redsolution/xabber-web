@@ -10070,6 +10070,8 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
         "click .btn-add": "addContact",
         "click .btn-block": "blockContact",
         "click .btn-decline": "declineSubscription",
+        "click .btn-chat": "openChat",
+        "click .btn-voice-call": "voiceCall",
     },
 
     _initialize: function () {
@@ -10095,6 +10097,8 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
         xabber.on('update_layout', this.updatePlyrTitle, this);
         xabber.on('update_client_notifications', this.updateClientNotifications, this);
         xabber.on('new_incoming_subscription', this.updateAllIncomingSubscriptions, this);
+        xabber.on("change:video", this.updateJingleButtons, this);
+        xabber.on("change:audio", this.updateJingleButtons, this);
         this.updateAccountsFilter();
         if (!_.isUndefined(this.ps_selector)) {
             this.ps_container2 = this.$('.left-column-filters-container');
@@ -10130,6 +10134,7 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
             belowOrigin: true,
             alignment: 'right'
         });
+        this.updateJingleButtons();
         this.updatePlyrControls();
         this.updatePlyrTime();
         this.updateClientNotifications();
@@ -10155,6 +10160,51 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
         this.updateAccountsFilter();
         this.updateSubFilter();
         this.processUpdateContacts(true, true);
+    },
+
+    openChat: function (ev) {
+        let $item = $(ev.target).closest('.roster-contact-item-wrap'),
+            account_jid = $item.attr('data-account-jid'),
+            jid = $item.attr('data-jid');
+
+        let account = xabber.accounts.find(item => item.get('jid') === account_jid);
+        if (!account)
+            return;
+
+        let contact = account.contacts.get(jid);
+        if (!contact)
+            return;
+        account.chats.openChat(contact);
+    },
+
+    updateJingleButtons: function () {
+        this.$('.btn-voice-call').switchClass('non-active', !xabber.get('audio'));
+    },
+
+    voiceCall: function (ev) {
+        if (xabber.get('audio')){
+            if (xabber.current_voip_call) {
+                utils.callback_popup_message(xabber.getString("jingle__error__call_in_progress"), 1000);
+                return;
+            }
+            let $item = $(ev.target).closest('.roster-contact-item-wrap'),
+                account_jid = $item.attr('data-account-jid'),
+                jid = $item.attr('data-jid');
+
+            let account = xabber.accounts.find(item => item.get('jid') === account_jid);
+            if (!account)
+                return;
+
+            let contact = account.contacts.get(jid);
+            if (!contact)
+                return;
+
+            let chat = account.chats.getChat(contact);
+            if (!chat.item_view.content)
+                chat.item_view.content = new xabber.ChatContentView({chat_item: chat.item_view});
+            chat.item_view.content.initJingleMessage();
+
+        }
     },
 
     openSubscriptionChat: function (ev) {
@@ -10893,8 +10943,8 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
         _.each(this.model.enabled, (account) => {
             if (account.get('jid') !== this.current_filter_account && this.current_filter_account !== 'all')
                 return;
-            let contacts = account.contacts.filter(item => !(item.get('invitation') || (item.get('subscription_request_in') && item.get('subscription') !== 'both')) && item.get('in_roster'))
-            _.each(account.contacts.models, (contact) => {
+            let contacts = account.contacts.filter(item => !(item.get('invitation') || (item.get('subscription_request_in') && item.get('subscription') !== 'both')) && item.get('in_roster'));
+            _.each(contacts, (contact) => {
                 if (this.contacts.some(item => (item.account.get('jid') === contact.account.get('jid') && item.get('jid') === contact.get('jid')))
                     || contact.get('notifications') || contact.get('server') || !Strophe.getNodeFromJid(contact.get('jid')))
                     return;

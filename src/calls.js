@@ -386,6 +386,11 @@ xabber.CallsView = xabber.BasicView.extend({
                                 }
                             });
                             this.loadMissedHistory(account, load_dfd);
+                        } else {
+                            count++;
+                            if (count === length){
+                                dfd.resolve();
+                            }
                         }
                     });
                 } else {
