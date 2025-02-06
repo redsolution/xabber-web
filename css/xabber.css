@@ -7026,6 +7026,13 @@ input[type=text].simple-input-field:hover {
 .contacts-panel-wrap .contacts-home-wrap{
     display: flex;
 }
+.narrow-panel .contacts-panel-wrap .contacts-home-wrap{
+    flex-direction: column;
+}
+.narrow-panel .contacts-panel-wrap .contacts-home-wrap .contacts-home-items-wrap{
+    margin: 0 0 16px;
+    width: 100%;
+}
 .contacts-panel-wrap .contacts-home-wrap .contacts-home-items-wrap{
     width: calc(50% - 12px);
     border: 1px solid #EEEEEE;
