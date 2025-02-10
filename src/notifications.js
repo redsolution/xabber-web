@@ -609,7 +609,7 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
             subscription_counter = 0,
             invitations_counter = 0,
             security_counter, information_counter, mention_counter,
-            unread_msgs = this.notification_messages.filter(msg => msg.get('is_unread') &&!msg.get('ignored'));
+            unread_msgs = this.notification_messages.filter(msg => msg.get('is_unread') && !msg.get('ignored'));
 
         if (this.filtered_accounts.length){
             accounts = accounts.filter(item => this.filtered_accounts.includes(item.get('jid')));
@@ -879,6 +879,7 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
             }
         }
         xabber.notifications_view.showReadAllBtn();
+        this.recountFilteredCount();
     },
 
     filterByAccounts: function (accounts, cleared) {

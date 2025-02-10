@@ -5085,6 +5085,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
         }
 
         let $message = this.addMessage(message);
+        console.warn($message);
 
         if (message.get('type') === 'file_upload') {
             if (this.account.get('gallery_token') && this.account.get('gallery_url'))
@@ -5319,13 +5320,21 @@ xabber.ChatContentView = xabber.BasicView.extend({
     addMessage: function (message) {
         let $message = this.buildMessageHtml(message),
             index = this.model.messages.indexOf(message);
+        console.log(this.model.messages);
         if (index === 0) {
+            console.warn($message);
+            console.log(message);
             $message.prependTo(this.$('.chat-content'));
         } else if (this.model.messages.models.length && this.model.messages.models[index - 1]) {
             let $prev_message = this.$(`.chat-message[data-uniqueid="${this.model.messages.models[index - 1].get('unique_id')}"]`);
             if (!$prev_message.length) {
                 $prev_message = this.addMessage(this.model.messages.models[index - 1]);
             }
+            console.warn('prev msg');
+            console.warn($prev_message);
+            console.warn('added msg');
+            console.warn($message);
+            console.warn(message);
             $message.insertAfter($prev_message);
         }
         let $next_message = $message.nextAll('.chat-message').first();
@@ -6760,8 +6769,14 @@ xabber.ChatContentView = xabber.BasicView.extend({
                         (message.get('state') === constants.MSG_PENDING) && message.set('state', constants.MSG_SENT);
                     });
                     setTimeout(() => {
-                        if ((this.account.last_stanza_timestamp < msg_sending_timestamp) && (message.get('state') === constants.MSG_PENDING))
+                        if ((this.account.last_stanza_timestamp < msg_sending_timestamp) && (message.get('state') === constants.MSG_PENDING)) {
+                            console.error(constants.MSG_ERROR);
+                            console.error(this.account.last_stanza_timestamp);
+                            console.error(msg_sending_timestamp);
+                            console.error(message.get('state'));
+                            console.error(message);
                             message.set('state', constants.MSG_ERROR);
+                        }
                     }, 5000);
                 }
             }, 1000);
@@ -6796,11 +6811,21 @@ xabber.ChatContentView = xabber.BasicView.extend({
                     //     }
                     // }, 2000);
                 }
-                if (was_reconnecting && has_reconnected && (_pending_time > 10)){
+                if (was_reconnecting && has_reconnected && (_pending_time > 10) && (message.get('state') === constants.MSG_PENDING)){
+                    console.error(constants.MSG_ERROR);
+                    console.error(message.get('state'));
+                    console.error(message);
                     message.set('state', constants.MSG_ERROR);
                     clearInterval(_interval);
                 }
                 if (((this.account.last_stanza_timestamp < msg_sending_timestamp) && (_pending_time > 40) && (message.get('state') === constants.MSG_PENDING) || (_pending_time > 40)) && !was_reconnecting) {
+                    console.error(constants.MSG_ERROR);
+                    console.error(this.account.last_stanza_timestamp);
+                    console.error(msg_sending_timestamp);
+                    console.error(_pending_time);
+                    console.error(was_reconnecting);
+                    console.error(message.get('state'));
+                    console.error(message);
                     message.set('state', constants.MSG_ERROR);
                     clearInterval(_interval);
                 }
@@ -7084,6 +7109,13 @@ xabber.ChatContentView = xabber.BasicView.extend({
             );
             let msg_sending_timestamp = moment.now(), _pending_time = 10, _interval = setInterval(() => {
                 if ((this.account.last_stanza_timestamp < msg_sending_timestamp) && (_pending_time > 20) && (message.get('state') === constants.MSG_PENDING) || (_pending_time > 20)) {
+                    console.error(constants.MSG_ERROR);
+                    console.error(this.account.last_stanza_timestamp);
+                    console.error(msg_sending_timestamp);
+                    console.error(_pending_time);
+                    console.error(was_reconnecting);
+                    console.error(message.get('state'));
+                    console.error(message);
                     message.set('state', constants.MSG_ERROR);
                     clearInterval(_interval);
                 }
@@ -7150,6 +7182,13 @@ xabber.ChatContentView = xabber.BasicView.extend({
             }
             let msg_sending_timestamp = moment.now(), _pending_time = 10, _interval = setInterval(() => {
                 if ((this.account.last_stanza_timestamp < msg_sending_timestamp) && (_pending_time > 20) && (message.get('state') === constants.MSG_PENDING) || (_pending_time > 20)) {
+                    console.error(constants.MSG_ERROR);
+                    console.error(this.account.last_stanza_timestamp);
+                    console.error(msg_sending_timestamp);
+                    console.error(_pending_time);
+                    console.error(was_reconnecting);
+                    console.error(message.get('state'));
+                    console.error(message);
                     message.set('state', constants.MSG_ERROR);
                     clearInterval(_interval);
                 }
@@ -7667,6 +7706,9 @@ xabber.ChatContentView = xabber.BasicView.extend({
         $message.find('.dropdown-content.retry-send-message').removeClass('hidden');
         $message.find('.msg-delivering-state').removeClass('no-click');
         $message.find('.circle-wrap .mdi-close').unbind( "click" );
+        console.error(constants.MSG_ERROR);
+        console.error(message.get('state'));
+        console.error(message);
         message.set('state', constants.MSG_ERROR);
         if (type == 'http' || error_type == 'wait'){
             $message.find('.repeat-upload').one("click",() => {
@@ -9288,6 +9330,11 @@ xabber.AccountChats = xabber.ChatsBase.extend({
                     msg.set('state', constants.MSG_BLOCKED);
                 }
                 if (code === '406') {
+                    console.error(constants.MSG_ERROR);
+                    console.error(code);
+                    console.error(message);
+                    console.error(msg.get('state'));
+                    console.error(msg);
                     msg.set('state', constants.MSG_ERROR);
                 }
             }

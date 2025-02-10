@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.4.56","version_description":"changed contacts tab icons, added interaction buttons in contacts tab home page, fixed empty calls tab, fixed empty call item icon, fixed contacts filtering in home page"}'
+'{"version_number":"2.4.58","version_description":"add message logs, file upload msg error logs, fixed setting read state on archive loaded notifications, added dynamic circle counter depending on current active type filtration, fixed unread notifications counter update in filtration counters, search block visuals in forward message modal"}'
 )});

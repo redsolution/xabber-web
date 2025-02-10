@@ -7102,7 +7102,7 @@ input[type=text].simple-input-field:hover {
     display: none;
 }
 .contacts-panel-wrap .contacts-home-wrap .btn-voice-call{
-    right: 40px;
+    right: 48px;
 }
 .contacts-panel-wrap .contacts-home-wrap .btn-voice-call.non-active,
 .contacts-panel-wrap .contacts-home-wrap .btn-voice-call.non-active path{
@@ -7117,7 +7117,7 @@ input[type=text].simple-input-field:hover {
     margin-bottom: 12px;
 }
 .contacts-panel-wrap .contacts-home-wrap .contacts-preview-list .roster-contact-item-wrap{
-    padding: 0 80px 0 56px;
+    padding: 0 88px 0 56px;
 }
 .contacts-panel-wrap .contacts-home-wrap .account-indicator-background-exclude{
     width: 40px;
@@ -21835,7 +21835,10 @@ input[type=range].voice-message-volume:focus {
     height: unset;
 }
 
-.forward-panel-modal .chats-search-form .search-icon,
+.forward-panel-modal .chats-search-form .search-icon{
+    top: 0;
+    left: 50px;
+}
 .add-user-group-chat .chats-search-form .search-icon {
     top: 0;
     left: 36px;
@@ -21846,7 +21849,9 @@ input[type=range].voice-message-volume:focus {
     top: 1px!important;
 }
 
-.forward-panel-modal .chats-search-form > input,
+.forward-panel-modal .chats-search-form > input{
+    padding: 0 90px !important;
+}
 .add-user-group-chat .chats-search-form > input {
     padding: 0 74px!important;
 }

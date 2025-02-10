@@ -9326,8 +9326,8 @@ xabber.Roster = xabber.ContactsBase.extend({
                     chat.sendMarker(last_readen_unread_msg.get('msgid'), 'displayed', last_readen_unread_msg.get('stanza_id'), last_readen_unread_msg.get('contact_stanza_id'), last_readen_unread_msg.get('encrypted') && last_readen_unread_msg.get('ephemeral_timer'), true)
                 }
             }
-            if (chat.get('notifications') && chat.messages_unread.length && last_read_msg_item){
-                let unread_messages = _.clone(chat.messages_unread.models);
+            if (chat.get('notifications') && chat.messages.length && chat.messages.filter(item => item.get('is_unread')).length && last_read_msg_item){
+                let unread_messages = _.clone(chat.messages.filter(item => item.get('is_unread')));
                 _.each(unread_messages, (msg_item) => {
                     if (msg_item.get('timestamp') <= last_read_msg_item.get('timestamp'))
                         msg_item.set('is_unread', false);
@@ -10496,29 +10496,52 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
         if (account){
             this.$('.contacts-group-filter-content').empty();
             _.each(account.groups.models, (group) => {
+                let custom_count_value;
                 if (group.get('id') == constants.GENERAL_GROUP_ID && group.get('name') === xabber.settings.roster.general_group_name)
                     return;
                 if (group.get('id') == constants.NON_ROSTER_GROUP_ID && group.get('name') === xabber.settings.roster.non_roster_group_name)
                     return;
-                this.$('.contacts-group-filter-content').append(this.renderGroupFilterItem(group));
+                if (this.current_filter.type === 'groupchat' && group.contacts.some(item => item.get('group_chat'))){
+                    custom_count_value = group.contacts.filter(item => item.get('group_chat')).length;
+                }
+                if (this.current_filter.type === 'contacts' && group.contacts.some(item => !item.get('group_chat'))){
+                    custom_count_value = group.contacts.filter(item => !item.get('group_chat')).length;
+                }
+                if (this.current_filter.type && this.current_filter.type !== 'subscription' && !custom_count_value){
+                    custom_count_value = 0
+                }
+                this.$('.contacts-group-filter-content').append(this.renderGroupFilterItem(group, custom_count_value));
             });
         } else {
             if(this.current_filter_account === 'all' && accounts.length){
                 this.$('.contacts-group-filter-content').empty();
                 _.each(accounts, (account) => {
                     _.each(account.groups.models, (group) => {
+                        let custom_count_value;
                         if (group.get('id') == constants.GENERAL_GROUP_ID && group.get('name') === xabber.settings.roster.general_group_name)
                             return;
                         if (group.get('id') == constants.NON_ROSTER_GROUP_ID && group.get('name') === xabber.settings.roster.non_roster_group_name)
                             return;
+                        if (this.current_filter.type === 'groupchat' && group.contacts.some(item => item.get('group_chat'))){
+                            custom_count_value = group.contacts.filter(item => item.get('group_chat')).length;
+                        }
+                        if (this.current_filter.type === 'contacts' && group.contacts.some(item => !item.get('group_chat'))){
+                            custom_count_value = group.contacts.filter(item => !item.get('group_chat')).length;
+                        }
+                        if (this.current_filter.type && this.current_filter.type !== 'subscription' && !custom_count_value){
+                            custom_count_value = 0
+                        }
                         if (this.$(`.filter-item-wrap[data-groupname="${group.get('id')}"]`).length){
                             let $group = this.$(`.filter-item-wrap[data-groupname="${group.get('id')}"]`);
                             if ($group.find('span').text() && Number($group.find('span').text())){
-                                let initial_count = Number($group.find('span').text())
-                                $group.find('span').text(initial_count + group.get('counter').all);
+                                let initial_count = Number($group.find('span').text());
+                                if (!_.isUndefined(custom_count_value))
+                                    $group.find('span').text(initial_count + custom_count_value);
+                                else
+                                    $group.find('span').text(initial_count + group.get('counter').all);
                             }
                         } else {
-                            this.$('.contacts-group-filter-content').append(this.renderGroupFilterItem(group));
+                            this.$('.contacts-group-filter-content').append(this.renderGroupFilterItem(group, custom_count_value));
                         }
                     });
                 })
@@ -10542,8 +10565,12 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
         return $item;
     },
 
-    renderGroupFilterItem: function (group) {
-        let $item = $(templates.group_filter_item({id: group.get('id'), name: group.get('name'), counter: group.get('counter').all}));
+    renderGroupFilterItem: function (group, custom_count_value) {
+        let counter = group.get('counter').all;
+        if (!_.isUndefined(custom_count_value)){
+            counter = custom_count_value;
+        }
+        let $item = $(templates.group_filter_item({id: group.get('id'), name: group.get('name'), counter: counter }));
         return $item;
     },
 
@@ -10596,6 +10623,7 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
         this.sorting_type = 'name';
         this.clearSearch();
 
+        this.updateGroupsFilterDebounced();
         this.updateSubFilter();
         this.contacts = [];
         this.processUpdateContacts(true, true);
