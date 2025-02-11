@@ -23388,6 +23388,7 @@ ul.restrictions-list-content>li {
 .panel-wrap .notification-subscriptions-wrap .notification-subscription-item .subscription-invitation-item-user-text{
     font-style: italic;
     margin-bottom: 28px;
+    white-space: pre-wrap;
 }
 .panel-wrap .notification-subscriptions-wrap .notification-subscription-item .subscription-item-members-avatars{
     height: 24px;

@@ -344,7 +344,11 @@ xabber.NotificationsView = xabber.BasicView.extend({
     },
 
     showReadAllBtn: function () {
-        this.$('.btn-read-all').switchClass('btn-disabled', !this.$('.unread-message-background').length);
+        if (this.current_content && this.current_content.notification_messages.filter(msg => msg.get('is_unread') && !msg.get('ignored')).length){
+            this.$('.btn-read-all').removeClass('btn-disabled');
+        } else {
+            this.$('.btn-read-all').addClass('btn-disabled');
+        }
     },
 
     readAll: function (ev) {
@@ -352,10 +356,7 @@ xabber.NotificationsView = xabber.BasicView.extend({
             return;
         if (!this.current_content)
             return;
-        _.each(this.$('.unread-message-background'),(item) => {
-            this.current_content.onClickNotification({target: item});
-
-        })
+        this.current_content.readAllNotifications();
     },
 
     cancelTrustSession: function (ev) {
@@ -570,6 +571,22 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
         _.each(xabber.accounts.models, (account) => {
             this.$(`div[data-account-jid="${account.get('jid')}"`).attr('data-color', account.settings.get('color'));
         });
+    },
+
+    readAllNotifications: function () {
+        let unread_notifications = this.notification_messages.filter(msg => msg.get('is_unread') && !msg.get('ignored'));
+
+        _.each(unread_notifications, (msg) => {
+            if (msg.get('is_unread'))
+                msg.set('is_unread', false);
+        });
+        xabber.notifications_view.showReadAllBtn();
+        _.each(this.notifications_chats, (item) => {
+            if (item && item.chat)
+                item.chat.set('const_unread', 0);
+        });
+        xabber.toolbar_view.recountAllMessageCounter();
+        this.recountFilteredCount();
     },
 
     onClickNotification: function (ev) {
