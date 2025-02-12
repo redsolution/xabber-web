@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.4.59","version_description":"changed notifications read all button, fixed invitation reason text formatting, removed text from filters header"}'
+'{"version_number":"2.4.60","version_description":"fixed toolbar filter account button appearing in scrollable toolbar, fixed active tab switching on switching active saved messages chat, hidden pin chat button in saved messages chat head, added active filtration context to read all notifications button, hidden filter account button in saved chats tab, changed saved chats tab design, "}'
 )});

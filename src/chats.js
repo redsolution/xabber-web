@@ -9991,6 +9991,7 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
                 if (view.model.get('saved')){
                     xabber.toolbar_view.$('.active').removeClass('active unread');
                     xabber.toolbar_view.$('.saved-chats').addClass('active');
+                    xabber.toolbar_view.onUpdatedScreen('all-chats');
                 }
                 if (view.model.last_message && !view.content.isMessageAdded(view.model.last_message)){
                     view.content.addMessage(view.model.last_message);
@@ -10833,7 +10834,7 @@ xabber.InvitationPanelView = xabber.SearchView.extend({
       events: {
           "click .contact-name": "showSettings",
           "click .circle-avatar": "showSettings",
-          "click .btn-chat-pin": "pinSavedChat",
+          // "click .btn-chat-pin": "pinSavedChat",
           "click .btn-delete-chat": "deleteChat",
           "click .btn-set-status": "setStatus",
           "click .btn-play-pause-plyr": "playPausePlyr",

@@ -1136,9 +1136,12 @@ xabber.ToolbarView = xabber.BasicView.extend({
         if (name === 'all-chats'){
             this.$el.removeClass('account-filter-hidden');
         }
+        xabber.chats_view.$('.recent-chats-panel').removeClass('saved-chats-panel');
         if (this.$('.toolbar-item:not(.toolbar-logo).saved-chats').hasClass('active')) {
+            this.$el.addClass('account-filter-hidden');
             xabber.chats_view.$('.recent-chats-main-header').text(xabber.getString("toolbar__menu_item__saved_chats"));
             xabber.chats_view.$('.recent-chats-panel').addClass('not-main-panel');
+            xabber.chats_view.$('.recent-chats-panel').addClass('saved-chats-panel');
             xabber.chats_view.$('.btn-unread').addClass('hidden2');
         } else if (this.$('.toolbar-item:not(.toolbar-logo):not(.account-item).all-chats.unread').hasClass('active'))  {
             xabber.chats_view.$('.recent-chats-main-header').text(xabber.getString("unread_chats"));

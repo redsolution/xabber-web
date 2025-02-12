@@ -576,10 +576,39 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
     readAllNotifications: function () {
         let unread_notifications = this.notification_messages.filter(msg => msg.get('is_unread') && !msg.get('ignored'));
 
+        if (this.filtered_accounts && this.filtered_accounts.length){
+            unread_notifications = unread_notifications.filter((msg) => msg.collection && msg.collection.account && this.filtered_accounts.includes(msg.collection.account.get('jid')));
+        }
+        if (this.filter_type !== 'all'){
+            if (this.filter_type === 'security'){
+                unread_notifications = unread_notifications.filter((msg) => msg.get('security_notification') && !msg.get('notification_info') && !msg.get('notification_mention'));
+            } else if (this.filter_type === 'information'){
+                unread_notifications = unread_notifications.filter((msg) => msg.get('notification_info'));
+            } else if (this.filter_type === 'mentions'){
+                unread_notifications = unread_notifications.filter((msg) => msg.get('notification_mention'));
+            }
+        }
+
         _.each(unread_notifications, (msg) => {
-            if (msg.get('is_unread'))
-                msg.set('is_unread', false);
+            let chat;
+            if (msg.collection && msg.collection.chat) {
+                chat = msg.collection.chat;
+            }
+            if (chat && chat.item_view && !chat.item_view.content)
+                chat.item_view.content = new xabber.ChatContentView({chat_item: chat.item_view});
+
+            if (!chat || !chat.item_view || !chat.item_view.content)
+                return;
+
+            msg.set('is_unread', false);
+
+            if (chat.get('const_unread') !== 0 && Number(chat.get('const_unread')) !== NaN) {
+                let const_unread = chat.get('const_unread');
+                const_unread = --const_unread;
+                chat.set('const_unread', const_unread);
+            }
         });
+
         xabber.notifications_view.showReadAllBtn();
         _.each(this.notifications_chats, (item) => {
             if (item && item.chat)
