@@ -34,6 +34,7 @@ let badges_names = [
         'pinned',
         'pinned-circle-small',
         'saved-messages',
+        'account-box-outline',
         'translate',
         'trash',
         'circles',

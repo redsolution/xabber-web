@@ -2346,8 +2346,8 @@ xabber.ChatItemView = xabber.BasicView.extend({
             this.contact.on("update_trusted", this.updateEncryptedColor, this);
         }
         this.$el.switchClass('saved-chat', this.model.get('saved'));
-        this.$el.find('.circle-avatar').switchClass('ground-color-700', this.model.get('saved'));
-        this.model.get('saved') && this.$el.find('.circle-avatar').html(env.templates.svg['saved-messages']());
+        this.$el.find('.circle-avatar').switchClass('fill-color-500', this.model.get('saved'));
+        this.model.get('saved') && this.$el.find('.circle-avatar').html(env.templates.svg['membership']());
         this.account.settings.on("change:color", this.updateColorScheme, this);
     },
 
@@ -2623,7 +2623,7 @@ xabber.ChatItemView = xabber.BasicView.extend({
 
     updateLastMessage: function (msg) {
         if (this.model.get('saved')){
-            this.$('.last-msg').html(this.account.get('jid'));
+            this.$('.last-msg').html(this.account.get('name'));
             this.$(`.msg-delivering-state`).addClass('hidden');
             return;
         }
@@ -10169,7 +10169,7 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
             saved_chats = saved_chats.filter(chat => (chat.account.get('jid') === xabber.toolbar_view.data.get('account_filtering')));
         saved_chats.forEach((chat) => {
             this.$('.chat-list').append(chat.item_view.$el);
-            chat.item_view.$(`.last-msg`).text(chat.account.get('jid'));
+            chat.item_view.$(`.last-msg`).text(chat.account.get('name'));
             chat.item_view.$(`.msg-delivering-state`).addClass('hidden');
         });
         if (!saved_chats.length)

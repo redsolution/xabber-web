@@ -1528,7 +1528,7 @@ body {
     left: 0;
 }
 .saved-chats-panel .chat-list-wrap.left-panel-list-wrap .chat-item .account-indicator-background-exclude .circle-avatar svg path{
-    fill: #9e9e9e !important;
+    /*fill: #9e9e9e !important;*/
 }
 .chat-list-wrap .panel-head {
     height: 40px;
@@ -9024,6 +9024,10 @@ input[type=text].simple-input-field:hover {
 }
 
 /* ------------- CLIENT NOTIFICATIONS BLOCK ------------- */
+.saved-chats-panel .chat-list-wrap.left-panel-list-wrap .client-notifications-wrap,
+.left-column-filters-container .client-notifications-wrap{
+    display: none;
+}
 .client-notifications-wrap{
     position: relative;
     width: 100%;
@@ -10003,7 +10007,7 @@ input[type=text].simple-input-field:hover {
     position: absolute;
 }
 
-.chat-item.saved-chat .circle-avatar svg path,
+/*.chat-item.saved-chat .circle-avatar svg path,*/
 .saved-chat.chat-head-wrap .circle-avatar svg path {
     fill: #FFF !important;
 }

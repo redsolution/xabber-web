@@ -401,6 +401,7 @@
     addSvgTemplate('svg.xabber-offline');
     addSvgTemplate('svg.xabber-online');
     addSvgTemplate('svg.saved-messages');
+    addSvgTemplate('svg.account-box-outline');
     addSvgTemplate('svg.account-cancel');
     addSvgTemplate('svg.web-cancel');
     addSvgTemplate('svg.palette');
