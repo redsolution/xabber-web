@@ -9988,7 +9988,7 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
                     chat_item: view,
                     blocked: view.model.get('blocked')
                 },{right_contact_save: options.right_contact_save, right_force_close: options.right_force_close} );
-                if (view.model.get('saved')){
+                if (view.model.get('saved') && xabber.accounts.enabled.length > 1){
                     xabber.toolbar_view.$('.active').removeClass('active unread');
                     xabber.toolbar_view.$('.saved-chats').addClass('active');
                     xabber.toolbar_view.onUpdatedScreen('all-chats');

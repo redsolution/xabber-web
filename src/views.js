@@ -1137,7 +1137,7 @@ xabber.ToolbarView = xabber.BasicView.extend({
             this.$el.removeClass('account-filter-hidden');
         }
         xabber.chats_view.$('.recent-chats-panel').removeClass('saved-chats-panel');
-        if (this.$('.toolbar-item:not(.toolbar-logo).saved-chats').hasClass('active')) {
+        if (this.$('.toolbar-item:not(.toolbar-logo).saved-chats').hasClass('active') && xabber.accounts.enabled.length > 1) {
             this.$el.addClass('account-filter-hidden');
             xabber.chats_view.$('.recent-chats-main-header').text(xabber.getString("toolbar__menu_item__saved_chats"));
             xabber.chats_view.$('.recent-chats-panel').addClass('not-main-panel');
@@ -1194,6 +1194,9 @@ xabber.ToolbarView = xabber.BasicView.extend({
             return;
         }
         let is_active = $el.hasClass('active') && !$el.hasClass('unread');
+        if (this.$('.toolbar-item:not(.toolbar-logo).saved-chats').hasClass('active') && xabber.accounts.enabled.length <= 1 && !ev) {
+            is_active = true;
+        }
         !no_unread && this.$('.toolbar-item:not(.account-item):not(.toolbar-logo)').removeClass('active unread')
             .filter('.all-chats').addClass('active').switchClass('unread', is_active);
         let options = {}
