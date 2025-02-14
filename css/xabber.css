@@ -1467,14 +1467,14 @@ body {
 .saved-chats-panel .chat-list-wrap.left-panel-list-wrap .chat-item .status,
 .saved-chats-panel .chat-list-wrap.left-panel-list-wrap .chat-item .chat-icon,
 .saved-chats-panel .chat-list-wrap.left-panel-list-wrap .chat-item .chat-states,
-.saved-chats-panel .chat-list-wrap.left-panel-list-wrap .chat-item .chat-title-wrap,
+
 .saved-chats-panel .chat-list-wrap.left-panel-list-wrap .chat-item .account-indicator-background-exclude .account-indicator,
 .saved-chats-panel .chat-list-wrap.left-panel-list-wrap .panel-head {
     display: none !important;
 }
-.saved-chats-panel .chat-list-wrap.left-panel-list-wrap .chat-list {
-    margin-top: 55px;
-}
+/*.saved-chats-panel .chat-list-wrap.left-panel-list-wrap .chat-list {*/
+    /*margin-top: 48px;*/
+/*}*/
 .saved-chats-panel .chat-list-wrap.left-panel-list-wrap .chat-item {
     border-radius: 8px;
     cursor: pointer;
@@ -1482,9 +1482,9 @@ body {
     line-height: 24px;
     margin: 0;
     margin-bottom: 8px;
-    padding: 8px 16px 8px 80px;
+    padding: 10px 16px 10px 80px;
     position: relative;
-    height: 40px;
+    height: 64px;
 }
 .saved-chats-panel .chat-list-wrap.left-panel-list-wrap .chat-item:hover {
     background: none;
@@ -1493,20 +1493,29 @@ body {
 .saved-chats-panel .chat-list-wrap.left-panel-list-wrap .chat-item.active {
     background: #eee !important;
 }
+.saved-chats-panel .chat-list-wrap.left-panel-list-wrap .chat-item .chat-title{
+    color: #212121;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 20px;
+}
 .saved-chats-panel .chat-list-wrap.left-panel-list-wrap .chat-item .last-msg {
-    font-size: 16px;
-    line-height: 24px;
-    color: rgba(0, 0, 0, .87);
     font-weight: 400;
+    height: unset;
     margin: 0;
     width: unset;
-    height: unset;
+    color: #757575;
+    cursor: pointer;
+    font-size: 13px;
+    line-height: 20px;
+    margin-bottom: 8px;
 }
 .saved-chats-panel .chat-list-wrap.left-panel-list-wrap .chat-item .account-indicator-background-exclude{
     height: 24px;
     left: 28px;
     position: absolute;
-    top: 8px;
+    top: 20px;
     width: 24px;
     mask-image: none !important;
     -webkit-mask-image: none !important;
@@ -7107,7 +7116,7 @@ input[type=text].simple-input-field:hover {
     width: calc(50% - 12px);
     border: 1px solid #EEEEEE;
     border-radius: 8px;
-    padding: 16px 24px 40px;
+    padding: 16px 24px 48px;
     min-height: 150px;
     position: relative;
 }
@@ -7184,7 +7193,7 @@ input[type=text].simple-input-field:hover {
     height: 40px;
     padding: 0 40px 0 56px;
     position: relative;
-    margin-bottom: 12px;
+    margin-bottom: 16px;
 }
 .contacts-panel-wrap .contacts-home-wrap .contacts-preview-list .roster-contact-item-wrap{
     padding: 0 88px 0 56px;
@@ -9025,6 +9034,7 @@ input[type=text].simple-input-field:hover {
 
 /* ------------- CLIENT NOTIFICATIONS BLOCK ------------- */
 .saved-chats-panel .chat-list-wrap.left-panel-list-wrap .client-notifications-wrap,
+.archived-chats-panel .chat-list-wrap.left-panel-list-wrap .client-notifications-wrap,
 .left-column-filters-container .client-notifications-wrap{
     display: none;
 }
@@ -23063,20 +23073,22 @@ ul.restrictions-list-content>li {
     margin-bottom: 8px;
 }
 .filter-item-wrap.subscription-item-wrap{
-    margin-top: 24px;
+    margin-top: 16px;
 }
 .notifications-content-filters .filter-item-wrap.subscription-item-wrap span,
 .contacts-panel-wrap .contacts-panel-left-side .filter-item-wrap.subscription-item-wrap span,
 .notifications-content-filters .filter-item-wrap.invitation-item-wrap span{
     background-color: #388e3c;
-    border-radius: 10px;
+    border-radius: 11px;
     color: #fff !important;
-    font-size: 16px;
+    font-size: 14px;
     font-weight: 400;
-    line-height: 20px;
-    padding: 0 5px;
+    line-height: 22px;
+    min-width: 22px;
+    margin-top: 0px;
+    padding: 0px 5px;
     text-align: center;
-    margin-top: 2px;
+    letter-spacing: .03rem;
 }
 .contacts-panel-wrap .contacts-panel-left-side .filter-item-wrap .filter-icon,
 .calls-content-filters .filter-item-wrap .filter-icon,
@@ -23102,6 +23114,12 @@ ul.restrictions-list-content>li {
     font-size: 16px;
     FONT-WEIGHT: 500;
     color: rgba(0, 0, 0, .54);
+}
+.saved-chats-panel .chat-list-wrap.left-panel-list-wrap .chat-list,
+.calls-type-filter .calls-type-filter-content,
+.contacts-type-filter .contacts-type-filter-content,
+.notifications-type-filter .notifications-type-filter-content{
+    margin-top: 16px;
 }
 .notifications-content-filters .filter-item-wrap span,
 .contacts-panel-wrap .contacts-panel-left-side .filter-item-wrap span{

@@ -2352,8 +2352,12 @@ xabber.ChatItemView = xabber.BasicView.extend({
     },
 
     render: function () {
-        if (this.model.get('saved') && (this.$('.chat-title').text() !== xabber.getString("saved_messages__header"))) {
-            this.$('.chat-title').text(xabber.getString("saved_messages__header"));
+        if (this.model.get('saved') && (this.$('.chat-title').text() !== this.account.get('name'))) {
+            if (this.account.get('name') === this.account.get('jid')){
+                this.$('.chat-title').text(Strophe.getNodeFromJid(this.account.get('jid')));
+            } else {
+                this.$('.chat-title').text(this.account.get('name'));
+            }
         }
     },
 
@@ -2403,7 +2407,11 @@ xabber.ChatItemView = xabber.BasicView.extend({
 
     updateName: function () {
         if (this.model.get('saved')) {
-            this.$('.chat-title').text(xabber.getString("saved_messages__header"));
+            if (this.account.get('name') === this.account.get('jid')){
+                this.$('.chat-title').text(Strophe.getNodeFromJid(this.account.get('jid')));
+            } else {
+                this.$('.chat-title').text(this.account.get('name'));
+            }
             return;
         }
         this.$('.chat-title').text(this.contact.get('name'));
@@ -2623,7 +2631,12 @@ xabber.ChatItemView = xabber.BasicView.extend({
 
     updateLastMessage: function (msg) {
         if (this.model.get('saved')){
-            this.$('.last-msg').html(this.account.get('name'));
+            if (this.account.get('name') === this.account.get('jid')){
+                this.$('.chat-title').text(Strophe.getNodeFromJid(this.account.get('jid')));
+            } else {
+                this.$('.chat-title').text(this.account.get('name'));
+            }
+            this.$('.last-msg').text(this.account.get('jid'));
             this.$(`.msg-delivering-state`).addClass('hidden');
             return;
         }
@@ -8629,8 +8642,12 @@ xabber.AccountChats = xabber.ChatsBase.extend({
         if (!this.account.server_features.get(Strophe.NS.XABBER_FAVORITES))
             return;
         let jid = this.account.server_features.get(Strophe.NS.XABBER_FAVORITES).get('from'),
-            attrs = {jid: jid, type: 'saved', name: xabber.getString("saved_messages__header"), id: `${this.account.get('jid')}:${jid}:saved`},
-            chat = this.get(attrs.id);
+            attrs = {jid: jid, type: 'saved', name: this.account.get('name'), id: `${this.account.get('jid')}:${jid}:saved`};
+
+        if (this.account.get('name') === this.account.get('jid')){
+            attrs.name = Strophe.getNodeFromJid(this.account.get('jid'));
+        }
+        let chat = this.get(attrs.id);
         if (!chat) {
             chat = xabber.chats.create(attrs, {account: this.account});
             this.add(chat);
@@ -10169,7 +10186,12 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
             saved_chats = saved_chats.filter(chat => (chat.account.get('jid') === xabber.toolbar_view.data.get('account_filtering')));
         saved_chats.forEach((chat) => {
             this.$('.chat-list').append(chat.item_view.$el);
-            chat.item_view.$(`.last-msg`).text(chat.account.get('name'));
+            if (chat.account.get('name') === chat.account.get('jid')){
+                chat.item_view.$(`.chat-title`).text(Strophe.getNodeFromJid(chat.account.get('jid')));
+            } else {
+                chat.item_view.$(`.chat-title`).text(chat.account.get('name'));
+            }
+            chat.item_view.$(`.last-msg`).text(chat.account.get('jid'));
             chat.item_view.$(`.msg-delivering-state`).addClass('hidden');
         });
         if (!saved_chats.length)

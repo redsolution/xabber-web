@@ -10276,6 +10276,9 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
         }
         this.$('.subscription-item-wrap').switchClass('hidden', subs_counter === 0);
         this.$('.notification-subscriptions-wrap.notifications-subscriptions').switchClass('hidden', subs_counter === 0);
+        if (this.current_filter && this.current_filter.type && this.current_filter.type !== 'subscription'){
+            this.$('.notification-subscriptions-wrap.notifications-subscriptions').addClass('hidden');
+        }
         this.current_filter.type !== 'subscription' && this.$('.notifications-subscriptions .notification-subscription-item').slice(2).addClass('hidden');
         xabber.toolbar_view.recountAllMessageCounter();
         this.$('.filter-item-wrap[data-filter="subscription"] span').text(subs_counter || '');

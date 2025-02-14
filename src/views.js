@@ -1137,6 +1137,7 @@ xabber.ToolbarView = xabber.BasicView.extend({
             this.$el.removeClass('account-filter-hidden');
         }
         xabber.chats_view.$('.recent-chats-panel').removeClass('saved-chats-panel');
+        xabber.chats_view.$('.recent-chats-panel').removeClass('archived-chats-panel');
         if (this.$('.toolbar-item:not(.toolbar-logo).saved-chats').hasClass('active') && xabber.accounts.enabled.length > 1) {
             this.$el.addClass('account-filter-hidden');
             xabber.chats_view.$('.recent-chats-main-header').text(xabber.getString("toolbar__menu_item__saved_chats"));
@@ -1150,6 +1151,7 @@ xabber.ToolbarView = xabber.BasicView.extend({
             xabber.chats_view.$('.recent-chats-main-header').text(xabber.getString("chats_view__header_archive"));
             xabber.chats_view.$('.recent-chats-panel').addClass('not-main-panel');
             xabber.chats_view.$('.btn-unread').addClass('hidden2');
+            xabber.chats_view.$('.recent-chats-panel').addClass('archived-chats-panel');
         } else {
             xabber.chats_view.$('.recent-chats-main-header').text(xabber.getString("toolbar__menu_item__chats"));
             xabber.chats_view.$('.recent-chats-panel').removeClass('not-main-panel');
