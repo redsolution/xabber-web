@@ -1,5 +1,7 @@
-self.onmessage = () => {
-    setInterval(() => {
-        self.postMessage({});
-    }, 1000);
-};
+if (!self.onmessage){
+    self.onmessage = () => {
+        setInterval(() => {
+            self.postMessage({});
+        }, 1000);
+    };
+}

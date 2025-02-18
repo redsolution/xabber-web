@@ -2072,9 +2072,27 @@ xabber.ToolbarAccountsBlockView = xabber.BasicView.extend({
             } else {
                 this.$('.account-item').eq(index - 1).after(view.$el);
             }
+            if (xabber.toolbar_view.$('.toolbar-item.saved-chats.active').length
+                && !xabber.chats_view.$('.recent-chats-panel.saved-chats-panel').length
+                && this.model.enabled.length === 2){
+                xabber.toolbar_view.$('.toolbar-item:not(.account-item):not(.toolbar-logo)').removeClass('active unread')
+                    .filter('.all-chats').addClass('active')
+
+            }
         } else {
             account.last_msg_timestamp = 0;
             this.removeChild(jid);
+            if (xabber.toolbar_view.$('.toolbar-item.saved-chats.active').length && this.model.enabled.length === 1){
+                if (xabber.body.screen.get('previous_screen')){
+                    let previous_chat = xabber.body.screen.get('previous_screen');
+                    previous_chat.force_open_all_chats = true;
+                    xabber.body.screen.set('previous_screen', previous_chat);
+                    xabber.chats_view.$('.recent-chats-main-header').text(xabber.getString("toolbar__menu_item__saved_chats"));
+                    xabber.chats_view.$('.recent-chats-panel').addClass('not-main-panel');
+                    xabber.chats_view.$('.recent-chats-panel').addClass('saved-chats-panel');
+                    xabber.chats_view.$('.btn-unread').addClass('hidden2');
+                }
+            }
             if (xabber.toolbar_view.data.get('account_filtering') === account.get('jid') || !xabber.accounts.enabled.length) {
                 xabber.toolbar_view.data.set('account_filtering', null);
                 xabber.toolbar_view.$('.toolbar-item.account-item').removeClass('active');
@@ -2101,6 +2119,15 @@ xabber.ToolbarAccountsBlockView = xabber.BasicView.extend({
         if (this.model.enabled.length === 1)
             this.$el.find('.toolbar-item.account-item').addClass('single-item');
         this.$el.find('.toolbar-item.settings-modal').switchClass('hidden', this.model.enabled.length != 0);
+        if (xabber.toolbar_view.$('.toolbar-item.saved-chats.active').length && this.model.enabled.length === 1){
+            let previous_chat = xabber.body.screen.get('previous_screen');
+            previous_chat.force_open_all_chats = true;
+            xabber.body.screen.set('previous_screen', previous_chat);
+            xabber.chats_view.$('.recent-chats-main-header').text(xabber.getString("toolbar__menu_item__saved_chats"));
+            xabber.chats_view.$('.recent-chats-panel').addClass('not-main-panel');
+            xabber.chats_view.$('.recent-chats-panel').addClass('saved-chats-panel');
+            xabber.chats_view.$('.btn-unread').addClass('hidden2');
+        }
         if (xabber.toolbar_view.data.get('account_filtering') === account.get('jid') || !xabber.accounts.enabled.length) {
             xabber.toolbar_view.data.set('account_filtering', null);
             xabber.toolbar_view.$('.toolbar-item.account-item').removeClass('active');
