@@ -206,8 +206,8 @@ xabber.VCardView = xabber.BasicView.extend({
 
     _initialize: function () {
         this.$el.html(this.template());
-        this.model.on("change:vcard_updated", this.update, this);
-        this.data.on("change:refresh", this.updateRefreshButton, this);
+        this.listenTo(this.model, 'change:vcard_updated', this.update);
+        this.listenTo(this.data, 'change:refresh', this.updateRefreshButton);
     },
 
     render: function () {
@@ -515,7 +515,7 @@ xabber.VCardEditModalView = xabber.BasicView.extend({
         $input.on('mousedown', function cancelEvent(evt) {
             evt.preventDefault();
         });
-        this.data.on("change:saving", this.updateSaveButton, this);
+        this.listenTo(this.data, 'change:saving', this.updateSaveButton);
     },
 
     render: function (options) {

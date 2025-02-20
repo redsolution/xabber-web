@@ -1965,16 +1965,15 @@ xabber.AccountToolbarItemView = xabber.BasicView.extend({
         this.updateAvatar();
         this.updateColorScheme();
         this.$el.attr('data-jid', this.model.get('jid'));
-        this.model.session.on("change:auth_failed", this.updateAuthState, this);
-        this.model.session.on("change:connected", this.updateConnected, this);
-        this.model.on("change:status", this.updateStatus, this);
-        this.model.on("change:image", this.updateAvatar, this);
-        this.model.settings.on("change:color", this.updateColorScheme, this);
-        this.model.on("open_settings", this.setActive, this);
-        this.model.on("trusting_updated", this.updateEncryptionWarning, this);
-        this.model.resources.on("change", this.updateEncryptionWarning, this);
-        this.model.resources.on("add", this.updateEncryptionWarning, this);
-        this.model.resources.on("destroy", this.updateEncryptionWarning, this);
+        this.listenTo(this.model.session, 'change:auth_failed', this.updateAuthState);
+        this.listenTo(this.model.session, 'change:connected', this.updateConnected);
+        this.listenTo(this.model, 'change:status', this.updateStatus);
+        this.listenTo(this.model, 'change:image', this.updateAvatar);
+        this.listenTo(this.model, 'trusting_updated', this.updateEncryptionWarning);
+        this.listenTo(this.model.settings, 'change:color', this.updateColorScheme);
+        this.listenTo(this.model.resources, 'change', this.updateEncryptionWarning);
+        this.listenTo(this.model.resources, 'add', this.updateEncryptionWarning);
+        this.listenTo(this.model.resources, 'destroy', this.updateEncryptionWarning);
     },
 
     updateConnected: function () {
@@ -2037,9 +2036,9 @@ xabber.AccountToolbarItemView = xabber.BasicView.extend({
 xabber.ToolbarAccountsBlockView = xabber.BasicView.extend({
     _initialize: function () {
         this.updateList();
-        this.model.on("add change:enabled", this.updateOneInList, this);
-        this.model.on("update_order", this.updateList, this);
-        this.model.on("destroy", this.onAccountRemoved, this);
+        this.listenTo(this.model, 'add change:enabled', this.updateOneInList);
+        this.listenTo(this.model, 'update_order', this.updateList);
+        this.listenTo(this.model, 'destroy', this.onAccountRemoved);
     },
 
     updateList: function (account) {
@@ -2156,7 +2155,7 @@ xabber.ResourceView = xabber.BasicView.extend({
 
     _initialize: function (options) {
         this.update();
-        this.model.on("change", this.update, this);
+        this.listenTo(this.model, 'change', this.update);
     },
 
     update: function () {
@@ -2176,7 +2175,7 @@ xabber.ResourceRightView = xabber.BasicView.extend({
 
     _initialize: function (options) {
         this.update();
-        this.model.on("change", this.update, this);
+        this.listenTo(this.model, 'change', this.update);
     },
 
     update: function () {
@@ -2224,10 +2223,10 @@ xabber.Resources = Backbone.Collection.extend({
 xabber.ResourcesView = xabber.BasicView.extend({
     _initialize: function () {
         this.renderByInit();
-        this.model.on("add", this.onResourceAdded, this);
-        this.model.on("remove", this.onResourceRemoved, this);
-        this.model.on("reset", this.onReset, this);
-        this.model.on("change:priority", this.onPriorityChanged, this);
+        this.listenTo(this.model, 'add', this.onResourceAdded);
+        this.listenTo(this.model, 'remove', this.onResourceRemoved);
+        this.listenTo(this.model, 'reset', this.onReset);
+        this.listenTo(this.model, 'change:priority', this.onPriorityChanged);
     },
 
     renderByInit: function () {
@@ -2293,7 +2292,7 @@ xabber.AccountVCardModalView = xabber.VCardView.extend({
 
     __initialize: function () {
         this.updateButtons();
-        this.model.on("activate deactivate", this.updateButtons, this);
+        this.listenTo(this.model, 'activate deactivate', this.updateButtons);
     },
 
     updateButtons: function () {
@@ -2327,7 +2326,7 @@ xabber.AccountMediaGalleryView = xabber.BasicView.extend({
         this.account = this.model;
         this.$el.html(this.template());
         this.parent.ps_container.on("ps-scroll-y", this.onScroll.bind(this));
-        this.account.on("update_avatar_list", this.onUpdateAvatars.bind(this));
+        this.listenTo(this.account, 'update_avatar_list', this.onUpdateAvatars);
     },
 
     render: function () {
@@ -3184,11 +3183,11 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
         this.updateName();
         this.updateAvatar();
         this.updateBlocks();
-        this.model.on("change:name", this.updateName, this);
-        this.model.on("change:image", this.updateAvatar, this);
-        this.model.on("change:gallery_token", this.updateGallery, this);
-        this.model.on("activate deactivate", this.updateBlocks, this);
-        this.model.on("destroy", this.remove, this);
+        this.listenTo(this.model, 'change:name', this.updateName);
+        this.listenTo(this.model, 'change:image', this.updateAvatar);
+        this.listenTo(this.model, 'change:gallery_token', this.updateGallery);
+        this.listenTo(this.model, 'activate deactivate', this.updateBlocks);
+        this.listenTo(this.model, 'destroy', this.remove);
 
         this.ps_container.on("ps-scroll-y", this.onScrollY.bind(this));
 
@@ -3202,29 +3201,29 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
         this.showConnectionStatus();
         this.updateSynchronizationBlock();
 
-        this.model.resources.on("change", this.updateXTokens, this);
-        this.model.resources.on("add", this.updateXTokens, this);
-        this.model.resources.on("destroy", this.updateXTokens, this);
-        this.model.groups.on("change", this.updateGroupsLabel, this);
-        this.model.groups.on("add", this.updateGroupsLabel, this);
-        this.model.groups.on("destroy", this.updateGroupsLabel, this);
-        this.model.session.on("change:reconnecting", this.updateReconnectButton, this);
-        this.model.session.on("change:conn_feedback", this.showConnectionStatus, this);
-        this.model.settings.on("change:to_sync", this.updateSyncOption, this);
-        this.model.settings.on("change:deleted", this.updateDelSettingsButton, this);
-        this.model.settings.on("change:to_sync change:synced", this.updateSyncState, this);
-        this.model.on("change:enabled", this.updateEnabled, this);
-        this.model.on("update_omemo_devices", this.updateOmemoDevices, this);
-        this.model.on('trusting_updated', this.updateOmemoDevices, this);
-        this.model.on('trusting_updated', this.updateXTokens, this);
-        this.model.on('xabber_trust_items_updated', this.updateTrustItems, this);
-        this.model.settings.on("change:omemo", this.updateEnabledOmemo, this);
-        this.model.settings.on("change:encrypted_chatstates", this.updateEncryptedChatstates, this);
-        this.model.on("change:status_updated", this.updateStatus, this);
-        this.model.on("activate deactivate", this.updateView, this);
-        this.model.on("change:auth_type", this.updateView, this);
-        this.model.on("destroy", this.remove, this);
-        this.model.on('active_session_change', this.renderActiveTrustSession, this);
+        this.listenTo(this.model.resources, 'change', this.updateXTokens);
+        this.listenTo(this.model.resources, 'add', this.updateXTokens);
+        this.listenTo(this.model.resources, 'destroy', this.updateXTokens);
+        this.listenTo(this.model.groups, 'change', this.updateGroupsLabel);
+        this.listenTo(this.model.groups, 'add', this.updateGroupsLabel);
+        this.listenTo(this.model.groups, 'destroy', this.updateGroupsLabel);
+        this.listenTo(this.model.session, 'change:reconnecting', this.updateReconnectButton);
+        this.listenTo(this.model.session, 'change:conn_feedback', this.showConnectionStatus);
+        this.listenTo(this.model.settings, 'change:to_sync', this.updateSyncOption);
+        this.listenTo(this.model.settings, 'change:deleted', this.updateDelSettingsButton);
+        this.listenTo(this.model.settings, 'change:to_sync change:synced', this.updateSyncState);
+        this.listenTo(this.model.settings, 'change:omemo', this.updateEnabledOmemo);
+        this.listenTo(this.model.settings, 'change:encrypted_chatstates', this.updateEncryptedChatstates);
+        this.listenTo(this.model, 'change:enabled', this.updateEnabled);
+        this.listenTo(this.model, 'update_omemo_devices', this.updateOmemoDevices);
+        this.listenTo(this.model, 'trusting_updated', this.updateOmemoDevices);
+        this.listenTo(this.model, 'trusting_updated', this.updateXTokens);
+        this.listenTo(this.model, 'xabber_trust_items_updated', this.updateTrustItems);
+        this.listenTo(this.model, 'change:status_updated', this.updateStatus);
+        this.listenTo(this.model, 'activate deactivate', this.updateView);
+        this.listenTo(this.model, 'change:auth_type', this.updateView);
+        this.listenTo(this.model, 'destroy', this.remove);
+        this.listenTo(this.model, 'active_session_change', this.renderActiveTrustSession);
         if (options && !options.single_account_modal) {
             $(document).on("keyup.account_settings_modal", (ev) => {
                 if (ev.keyCode === constants.KEY_ESCAPE && this.data.get('visible') && !options.single_account_modal) {
@@ -4422,7 +4421,7 @@ xabber.StatusMessageWidget = xabber.InputWidget.extend({
     placeholder: 'Set custom status',
 
     bindModelEvents: function () {
-        this.model.on("change:status_updated", this.updateValue, this);
+        this.listenTo(this.model, 'change:status_updated', this.updateValue);
     },
 
     getValue: function () {
@@ -4452,7 +4451,7 @@ xabber.StatusMessageModalWidget = xabber.InputWidget.extend({
     },
 
     bindModelEvents: function () {
-        this.model.on("change:status_updated", this.updateValue, this);
+        this.listenTo(this.model, 'change:status_updated', this.updateValue);
     },
 
     getValue: function () {
@@ -4481,20 +4480,20 @@ xabber.AccountSettingsItemModalView = xabber.BasicView.extend({
         this.updateColorScheme();
         this.updateSyncState();
         this.showConnectionStatus();
-        this.model.on("change:enabled", this.updateEnabled, this);
-        this.model.on("change:vcard", this.updateNickname, this);
-        this.model.settings.on("change:omemo", this.updateEnabledOmemo, this);
-        this.model.on("change:image", this.updateAvatar, this);
-        this.model.settings.on("change:color", this.updateColorScheme, this);
-        this.model.session.on("change:conn_feedback", this.showConnectionStatus, this);
+        this.listenTo(this.model, 'change:enabled', this.updateEnabled);
+        this.listenTo(this.model, 'change:vcard', this.updateNickname);
+        this.listenTo(this.model, 'change:image', this.updateAvatar);
+        this.listenTo(this.model, 'trusting_updated', this.updateEncryptionWarning);
+        this.listenTo(this.model.settings, 'change:omemo', this.updateEnabledOmemo);
+        this.listenTo(this.model.settings, 'change:color', this.updateColorScheme);
+        this.listenTo(this.model.settings, 'change:to_sync', this.updateSyncState);
+        this.listenTo(this.model.session, 'change:conn_feedback', this.showConnectionStatus);
         this.$el.on('drag_to', this.onDragTo.bind(this));
         this.$('.move-account-to-this')
             .on('move_xmpp_account', this.onMoveAccount.bind(this));
-        this.model.settings.on("change:to_sync", this.updateSyncState, this);
-        this.model.on("trusting_updated", this.updateEncryptionWarning, this);
-        this.model.resources.on("change", this.updateEncryptionWarning, this);
-        this.model.resources.on("add", this.updateEncryptionWarning, this);
-        this.model.resources.on("destroy", this.updateEncryptionWarning, this);
+        this.listenTo(this.model.resources, 'change', this.updateEncryptionWarning);
+        this.listenTo(this.model.resources, 'add', this.updateEncryptionWarning);
+        this.listenTo(this.model.resources, 'destroy', this.updateEncryptionWarning);
     },
 
     updateNickname: function () {
@@ -4615,12 +4614,12 @@ xabber.SettingsAccountsModalBlockView = xabber.BasicView.extend({
     _initialize: function () {
         this.updateList();
         this.updateSyncState();
-        this.model.on("add", this.updateOneInList, this);
-        this.model.on("update_order", this.updateList, this);
-        this.model.on("destroy", this.onAccountRemoved, this);
-        this.model.on("add", this.parent.updateAccounts, this.parent);
-        this.model.on("update_order", this.parent.updateAccounts, this.parent);
-        this.model.on("destroy", this.parent.updateAccounts, this.parent);
+        this.listenTo(this.model, 'add', this.updateOneInList);
+        this.listenTo(this.model, 'update_order', this.updateList);
+        this.listenTo(this.model, 'destroy', this.onAccountRemoved);
+        this.listenTo(this.model, 'add', this.parent.updateAccounts);
+        this.listenTo(this.model, 'update_order', this.parent.updateAccounts);
+        this.listenTo(this.model, 'destroy', this.parent.updateAccounts);
         this.$('.move-account-to-bottom')
             .on('move_xmpp_account', this.onMoveAccountToBottom.bind(this));
     },
@@ -5503,8 +5502,8 @@ xabber.ChangePasswordView = xabber.BasicView.extend({
     _initialize: function () {
         this.$('input[name=jid]').val(this.model.get('jid'));
         this.$password_input = this.$('input[name=password]');
-        this.data.on("change:authentication", this.updateButtons, this);
-        xabber.on("quit", this.onQuit, this);
+        this.listenTo(this.model, 'change:authentication', this.updateButtons);
+        this.listenTo(xabber, 'quit', this.onQuit);
         return this;
     },
 
@@ -5726,7 +5725,7 @@ xabber.AuthView = xabber.BasicView.extend({
     _initialize: function () {
         this.$jid_input = this.$('input[name=jid]');
         this.$password_input = this.$('input[name=password]');
-        this.data.on("change:authentication", this.updateButtons, this);
+        this.listenTo(this.data, 'change:authentication', this.updateButtons);
         return this;
     },
 
@@ -5925,7 +5924,7 @@ xabber.XmppLoginPanel = xabber.AuthView.extend({
     __initialize: function () {
         this.$nickname_input = this.$('input[name=register_nickname]');
         this.$domain_input = this.$('input[name=register_domain]');
-        this.data.on("change:step", this.handleRegistrationStep, this);
+        this.listenTo(this.data, 'change:step', this.handleRegistrationStep);
         return this;
     },
 

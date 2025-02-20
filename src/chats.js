@@ -868,13 +868,13 @@ xabber.EphemeralTimerSelector = xabber.BasicView.extend({
           }, constants.JINGLE_WAITING_TIME * 1000);
           this.conn.onicecandidate = this.onIceCandidate.bind(this);
           this.conn.oniceconnectionstatechange = this.onChangeIceConnectionState.bind(this);
-          this.on('change:audio', this.setEnabledAudioTrack, this);
-          this.on('change:video', this.onChangedVideoValue, this);
-          this.on('change:video_live', this.setEnabledVideoTrack, this);
-          this.on('change:video_screen', this.setEnabledScreenShareVideoTrack, this);
-          this.on('change:video_in', this.onChangedRemoteVideo, this);
-          this.on('change:volume_on', this.onChangedVolume, this);
-          this.on('destroy', this.onDestroy, this);
+          this.listenTo(this, 'change:audio', this.setEnabledAudioTrack);
+          this.listenTo(this, 'change:video', this.onChangedVideoValue);
+          this.listenTo(this, 'change:video_live', this.setEnabledVideoTrack);
+          this.listenTo(this, 'change:video_screen', this.setEnabledScreenShareVideoTrack);
+          this.listenTo(this, 'change:video_in', this.onChangedRemoteVideo);
+          this.listenTo(this, 'change:volume_on', this.onChangedVolume);
+          this.listenTo(this, 'destroy', this.onDestroy);
       },
 
       registerIqHandler: function () {
@@ -2312,43 +2312,43 @@ xabber.ChatItemView = xabber.BasicView.extend({
         this.updateEncrypted();
         this.updateChatError();
         this.updateChatSession();
-        this.model.on("change:active", this.updateActiveStatus, this);
-        this.model.on("change:unread", this.updateCounter, this);
-        this.model.on("change:encrypted", this.updateEncrypted, this);
-        this.model.on("change:const_unread", this.updateCounter, this);
-        this.model.on("change:pinned", this.updatePinned, this);
-        this.model.on("change:archived", this.updateArchivedState, this);
-        this.model.on("change:active_verification_session", this.updateChatSession, this);
-        this.model.on("change:notifications", this.updateNotificationsState, this);
-        this.model.on("change:muted", this.updateMutedState, this);
-        this.model.on("open", this.open, this);
-        this.model.on("remove_opened_chat", this.onClosed, this);
-        this.model.messages.on("add", this.updateChatCard, this);
-        this.model.messages.on("destroy", this.onMessageRemoved, this);
-        this.model.messages.on("change:state", this.onChangedMessageState, this);
+        this.listenTo(this.model, 'change:active', this.updateActiveStatus);
+        this.listenTo(this.model, 'change:unread', this.updateCounter);
+        this.listenTo(this.model, 'change:encrypted', this.updateEncrypted);
+        this.listenTo(this.model, 'change:const_unread', this.updateCounter);
+        this.listenTo(this.model, 'change:pinned', this.updatePinned);
+        this.listenTo(this.model, 'change:archived', this.updateArchivedState);
+        this.listenTo(this.model, 'change:active_verification_session', this.updateChatSession);
+        this.listenTo(this.model, 'change:notifications', this.updateNotificationsState);
+        this.listenTo(this.model, 'change:this', this.updateMutedState);
+        this.listenTo(this.model, 'change:open', this.open);
+        this.listenTo(this.model, 'change:remove_opened_chat', this.onClosed);
+        this.listenTo(this.model.messages, 'add', this.updateChatCard);
+        this.listenTo(this.model.messages, 'destroy', this.onMessageRemoved);
+        this.listenTo(this.model.messages, 'change:state', this.onChangedMessageState);
         if (this.contact) {
             this.updateIncomingSubscription();
-            this.contact.on("change:name", this.updateName, this);
-            this.contact.on("change:invitation", this.updateIncomingSubscription, this);
-            this.contact.on("change:subscription", this.updateIncomingSubscription, this);
-            this.contact.on("change:subscription_request_in", this.updateIncomingSubscription, this);
-            this.contact.on("change:subscription_request_out", this.updateIncomingSubscription, this);
-            this.contact.on("change:status", this.updateStatus, this);
-            this.contact.on("change:private_chat", this.updateIcon, this);
-            this.contact.on("change:invitation", this.updateIcon, this);
-            this.contact.on("change:invitation", this.triggerUpdateInvitation, this);
-            this.contact.on("change:incognito_chat", this.updateIcon, this);
-            this.contact.on("change:image", this.updateAvatar, this);
-            this.contact.on("change:blocked", this.onBlocked, this);
-            this.contact.on("change:group_chat", this.updateGroupChats, this);
-            this.contact.on("change:in_roster", this.updateAcceptedStatus, this);
-            this.contact.on("remove_invite", this.removeInvite, this);
-            this.contact.on("update_trusted", this.updateEncryptedColor, this);
+            this.listenTo(this.contact, 'change:name', this.updateName);
+            this.listenTo(this.contact, 'change:invitation', this.updateIncomingSubscription);
+            this.listenTo(this.contact, 'change:subscription', this.updateIncomingSubscription);
+            this.listenTo(this.contact, 'change:subscription_request_in', this.updateIncomingSubscription);
+            this.listenTo(this.contact, 'change:subscription_request_out', this.updateIncomingSubscription);
+            this.listenTo(this.contact, 'change:status', this.updateStatus);
+            this.listenTo(this.contact, 'change:private_chat', this.updateIcon);
+            this.listenTo(this.contact, 'change:invitation', this.updateIcon);
+            this.listenTo(this.contact, 'change:invitation', this.triggerUpdateInvitation);
+            this.listenTo(this.contact, 'change:incognito_chat', this.updateIcon);
+            this.listenTo(this.contact, 'change:image', this.updateAvatar);
+            this.listenTo(this.contact, 'change:blocked', this.onBlocked);
+            this.listenTo(this.contact, 'change:group_chat', this.updateGroupChats);
+            this.listenTo(this.contact, 'change:in_roster', this.updateAcceptedStatus);
+            this.listenTo(this.contact, 'remove_invite', this.removeInvite);
+            this.listenTo(this.contact, 'update_trusted', this.updateEncryptedColor);
         }
         this.$el.switchClass('saved-chat', this.model.get('saved'));
         this.$el.find('.circle-avatar').switchClass('fill-color-500', this.model.get('saved'));
         this.model.get('saved') && this.$el.find('.circle-avatar').html(env.templates.svg['membership']());
-        this.account.settings.on("change:color", this.updateColorScheme, this);
+        this.listenTo(this.account.settings, 'change:color', this.updateColorScheme);
     },
 
     render: function () {
@@ -2985,10 +2985,10 @@ xabber.ChatItemView = xabber.BasicView.extend({
               this.chat_content = new xabber.ChatContentView({chat_item: this.model.item_view});
           this.$history_feedback = this.$('.load-history-feedback');
           this.account.context_messages = new xabber.Messages(null, {account: this.account});
-          this.account.context_messages.on("change:last_replace_time", this.chat_content.updateMessage, this);
-          this.account.context_messages.on("add", this.addMessage, this);
-          this.account.context_messages.on("change:is_unread", this.onChangedReadState, this);
-          xabber.on('plyr_player_updated', this.onUpdatePlyr, this);
+          this.listenTo(this.account.context_messages, 'change:last_replace_time', this.chat_content.updateMessage);
+          this.listenTo(this.account.context_messages, 'add', this.addMessage);
+          this.listenTo(this.account.context_messages, 'change:is_unread', this.onChangedReadState);
+          this.listenTo(xabber, 'plyr_player_updated', this.onUpdatePlyr);
       },
 
       render: function () {
@@ -3155,8 +3155,8 @@ xabber.ChatItemView = xabber.BasicView.extend({
       __initialize: function (options) {
           this.query_text = options.query_text;
           this.account.searched_messages = new xabber.Messages(null, {account: this.account});
-          this.account.searched_messages.on("change:last_replace_time", this.chat_content.updateMessage, this);
-          this.account.searched_messages.on("add", this.addMessage, this);
+          this.listenTo(this.account.searched_messages, 'change:last_replace_time', this.chat_content.updateMessage);
+          this.listenTo(this.account.searched_messages, 'add', this.addMessage);
           return this;
       },
 
@@ -3255,7 +3255,7 @@ xabber.ChatItemView = xabber.BasicView.extend({
           this.account.searched_messages = new xabber.Messages(null, {account: this.account});
           if (this.searched_messages)
               this.account.searched_messages.add(this.searched_messages.toJSON(), {silent : true});
-          this.account.searched_messages.on("add", this.addMessage, this);
+          this.listenTo(this.account.searched_messages, 'add', this.addMessage);
           if (this.parent.model.get('saved_search_panel')) {
               this.$el.html(this.parent.model.get('saved_search_panel'));
               this.model.set('saved_search_panel', undefined);
@@ -3454,8 +3454,8 @@ xabber.ChatItemView = xabber.BasicView.extend({
           this.member_id = this.participant.id;
           this.member_nickname = this.participant.nickname;
           this.account.participant_messages = new xabber.Messages(null, {account: this.account});
-          this.account.participant_messages.on("add", this.addMessage, this);
-          this.account.participant_messages.on("change:last_replace_time", this.chat_content.updateMessage, this);
+          this.listenTo(this.account.participant_messages, 'add', this.addMessage);
+          this.listenTo(this.account.participant_messages, 'change:last_replace_time', this.chat_content.updateMessage);
           this.ps_container.on("ps-scroll-y", this.onScrollY.bind(this));
           return this;
       },
@@ -3547,11 +3547,11 @@ xabber.ChatItemView = xabber.BasicView.extend({
       _initialize: function (options) {
           this.$el.html(this.template());
           this.contact = options.contact;
-          this.contact.on("change:subscription", this.render, this);
-          this.contact.on("change:in_roster", this.render, this);
-          this.contact.on("change:blocked", this.render, this);
-          this.contact.on("change:subscription_request_in", this.render, this);
-          this.contact.on("change:subscription_request_out", this.render, this);
+          this.listenTo(this.contact, 'change:subscription', this.render);
+          this.listenTo(this.contact, 'change:in_roster', this.render);
+          this.listenTo(this.contact, 'change:blocked', this.render);
+          this.listenTo(this.contact, 'change:subscription_request_in', this.render);
+          this.listenTo(this.contact, 'change:subscription_request_out', this.render);
       },
 
       render: function () {
@@ -3695,37 +3695,37 @@ xabber.ChatContentView = xabber.BasicView.extend({
         this.$el.on(wheel_ev, this.onMouseWheel.bind(this));
         this.ps_container.on("ps-scroll-up ps-scroll-down", this.onScroll.bind(this));
         this.ps_container.on("ps-scroll-y", this.onScrollY.bind(this));
-        this.model.on("change:active change:idle", this.onChangedActiveStatus, this);
-        xabber.on("change:idle change:focused", this.onChangedIdleStatus, this);
-        xabber.on('update_layout', this.updateActiveSessionHeight, this);
-        this.model.on("load_last_history", this.loadLastHistory, this);
-        this.model.on("get_missed_history", this.requestMissedMessages, this);
-        this.model.messages.on("add", this.onMessage, this);
-        this.model.messages.on("change:is_unread", this.onChangedReadState, this);
-        this.model.messages.on("change:timestamp", this.onChangedMessageTimestamp, this);
-        this.model.messages.on("change:trusted", this.onTrustedChanged, this);
-        this.model.messages.on("change:last_replace_time", this.updateMessage, this);
-        this.model.on("change:unread", this.updateCounter, this);
-        this.model.on("change:const_unread", this.updateCounter, this);
+        this.listenTo(this.model, 'change:active change:idle', this.onChangedActiveStatus);
+        this.listenTo(xabber, 'change:idle change:focused', this.onChangedActiveStatus);
+        this.listenTo(xabber, 'update_layout', this.onChangedIdleStatus);
+        this.listenTo(this.model, 'load_last_history', this.loadLastHistory);
+        this.listenTo(this.model, 'get_missed_history', this.requestMissedMessages);
+        this.listenTo(this.model.messages, 'add', this.onMessage);
+        this.listenTo(this.model.messages, 'change:is_unread', this.onChangedReadState);
+        this.listenTo(this.model.messages, 'change:timestamp', this.onChangedMessageTimestamp);
+        this.listenTo(this.model.messages, 'change:trusted', this.onTrustedChanged);
+        this.listenTo(this.model.messages, 'change:last_replace_time', this.updateMessage);
+        this.listenTo(this.model, 'change:unread', this.updateCounter);
+        this.listenTo(this.model, 'change:const_unread', this.updateCounter);
         if (this.contact) {
             this.subscription_buttons = new xabber.SubscriptionButtonsView({contact: this.contact, el: this.$('.subscription-buttons-wrap')[0]});
-            this.contact.on("change:blocked", this.updateBlockedState, this);
-            this.contact.on("change:subscription", this.onSubscriptionChange, this);
-            this.contact.on("change:group_chat", this.updateGroupChat, this);
-            this.contact.on("remove_from_blocklist", this.loadLastHistory, this);
-            this.contact.on("update_trusted", this.updateMsgsMissingDevices, this);
-            this.account.contacts.on("change:name", this.updateName, this);
-            this.account.contacts.on("change:image", this.updateAvatar, this);
+            this.listenTo(this.contact, 'change:blocked', this.updateBlockedState);
+            this.listenTo(this.contact, 'change:subscription', this.onSubscriptionChange);
+            this.listenTo(this.contact, 'change:group_chat', this.updateGroupChat);
+            this.listenTo(this.contact, 'remove_from_blocklist', this.loadLastHistory);
+            this.listenTo(this.contact, 'update_trusted', this.updateMsgsMissingDevices);
+            this.listenTo(this.account.contacts, 'change:name', this.updateName);
+            this.listenTo(this.account.contacts, 'change:image', this.updateAvatar);
         }
-        this.account.on("change", this.updateMyInfo, this);
-        this.account.on("device_trusted", this.updateMsgsDeviceTrusting, this);
-        this.account.settings.on("change:color", this.updateContentColorScheme, this);
-        xabber.on('plyr_player_updated', this.onUpdatePlyr, this);
+        this.listenTo(this.account, 'change', this.updateMyInfo);
+        this.listenTo(this.account, 'device_trusted', this.updateMsgsDeviceTrusting);
+        this.listenTo(this.account.settings, 'change:color', this.updateContentColorScheme);
+        this.listenTo(xabber, 'plyr_player_updated', this.onUpdatePlyr);
         this.account.dfd_presence.done(() => {
             !this.account.connection.do_synchronization && this.loadLastHistory();
         });
         if (this.model.get('encrypted'))
-            this.account.on('active_session_change', this.renderActiveTrustSession, this);
+            this.listenTo(this.account, 'active_session_change', this.renderActiveTrustSession);
         return this;
     },
 
@@ -5225,27 +5225,27 @@ xabber.ChatContentView = xabber.BasicView.extend({
                     mention_target = jid[0].slice(5);
                 else
                     mention_target = "";
-                if (this.contact.my_info)
-                    (mention_target === this.contact.my_info.get('id')) && this.account.mentions.create(null, {message: message, contact: this.contact});
-                else if (this.contact.get('group_chat')) {
+                if (this.contact.my_info){
+                    // (mention_target === this.contact.my_info.get('id')) && this.account.mentions.create(null, {message: message, contact: this.contact});
+                } else if (this.contact.get('group_chat')) {
                     if (this._pending_my_info) {
                         this._pending_my_info.done(() => {
-                            (mention_target === this.contact.my_info.get('id')) && this.account.mentions.create(null, {message: message, contact: this.contact});
+                            // (mention_target === this.contact.my_info.get('id')) && this.account.mentions.create(null, {message: message, contact: this.contact});
                             this._pending_my_info = null;
                         });
                     }
                     else {
                         this._pending_my_info = new $.Deferred();
                         this.contact.getMyInfo(() => {
-                            (mention_target === this.contact.my_info.get('id')) && this.account.mentions.create(null, {
-                                message: message,
-                                contact: this.contact
-                            });
+                            // (mention_target === this.contact.my_info.get('id')) && this.account.mentions.create(null, {
+                            //     message: message,
+                            //     contact: this.contact
+                            // });
                             this._pending_my_info.resolve();
                         });
                     }
                 }
-                (mention_target === this.account.get('jid') || mention_target === "") && this.account.mentions.create(null, {message: message, contact: this.contact});
+                // (mention_target === this.account.get('jid') || mention_target === "") && this.account.mentions.create(null, {message: message, contact: this.contact});
             });
         }
 
@@ -9637,23 +9637,22 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
     _initialize: function () {
         this.active_chat = null;
         this.update_debounce = _.debounce(this.updateChatPositionDebounced, 100, false);
-        this.model.on("add", this.onChatAdded, this);
-        this.model.on("destroy", this.onChatRemoved, this);
-        this.model.on("change:active", this.onChangedActiveStatus, this);
-        this.model.on("add_opened_chat", this.onChangedActiveStatus, this);
-        this.model.on("change:unread", this.onChangedReadStatus, this);
-        this.model.on("change:const_unread", this.onChangedReadStatus, this);
-        this.model.on("change:timestamp", this.updateChatPosition, this);
-        xabber.accounts.on("list_changed", this.updateLeftIndicator, this);
-        xabber.accounts.on("omemo_changed", this.updateAccountEncryptedChats, this);
+        this.listenTo(this.model, 'add', this.onChatAdded);
+        this.listenTo(this.model, 'destroy', this.onChatRemoved);
+        this.listenTo(this.model, 'change:active', this.onChangedActiveStatus);
+        this.listenTo(this.model, 'add_opened_chat', this.onChangedActiveStatus);
+        this.listenTo(this.model, 'change:unread', this.onChangedReadStatus);
+        this.listenTo(this.model, 'change:const_unread', this.onChangedReadStatus);
+        this.listenTo(this.model, 'change:timestamp', this.updateChatPosition);
+        this.listenTo(xabber.accounts, 'list_changed', this.updateLeftIndicator);
+        this.listenTo(xabber.accounts, 'omemo_changed', this.updateAccountEncryptedChats);
         let wheel_ev = this.defineMouseWheelEvent();
         this.$el.on(wheel_ev, this.onMouseWheel.bind(this));
         this.ps_container.on("ps-scroll-y", this.onScrollY.bind(this));
         this.$('.read-all-button').click(this.readAllMessages.bind(this));
-        xabber.on("update_screen", this.onUpdatedScreen, this);
-        xabber.on("update_layout", this.onWindowResized, this);
-        xabber.on('clear_chats_search', this.clearSearch, this);
-        xabber.on('update_client_notifications', this.updateClientNotifications, this);
+        this.listenTo(xabber, 'update_screen', this.onUpdatedScreen);
+        this.listenTo(xabber, 'clear_chats_search', this.clearSearch);
+        this.listenTo(xabber, 'update_client_notifications', this.updateClientNotifications);
         this.$('input').on('input', this.updateSearch.bind(this));
     },
 
@@ -10300,9 +10299,9 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
           this.updateGroupChats();
           this.updateIcon();
           this.updateStatus();
-          this.account.settings.on("change:color", this.updateColorScheme, this);
-          this.contact.on("change:status", this.updateStatus, this);
-          this.contact.on("change:name", this.updateName, this);
+          this.listenTo(this.account.settings, 'change:color', this.updateColorScheme);
+          this.listenTo(this.contact, 'change:status', this.updateStatus);
+          this.listenTo(this.contact, 'change:name', this.updateName);
       },
 
       updateName: function () {
@@ -10879,12 +10878,12 @@ xabber.InvitationPanelView = xabber.SearchView.extend({
           }, 1000*60*2);
           this.account = this.model.account;
           this.$el.find('.circle-avatar:not(.voice-message-player-avatar)').html(env.templates.svg['saved-messages']());
-          this.model.on("close_chat", this.closeChat, this);
-          this.model.on("hide_chat", this.hideChat, this);
-          xabber.on('plyr_player_updated', this.updatePlyrControls, this);
-          xabber.on('update_layout', this.updatePlyrTitle, this);
-          xabber.on('plyr_player_time_updated', this.updatePlyrTime, this);
-          xabber.on("update_jingle_button", this.updateJingleButton, this);
+          this.listenTo(this.model, 'close_chat', this.closeChat);
+          this.listenTo(this.model, 'hide_chat', this.hideChat);
+          this.listenTo(xabber, 'plyr_player_updated', this.updatePlyrControls);
+          this.listenTo(xabber, 'update_layout', this.updatePlyrTitle);
+          this.listenTo(xabber, 'plyr_player_time_updated', this.updatePlyrTime);
+          this.listenTo(xabber, 'update_jingle_button', this.updateJingleButton);
       },
 
       render: function () {
@@ -11095,38 +11094,38 @@ xabber.InvitationPanelView = xabber.SearchView.extend({
         this.updateArchived();
         this.updatePinned();
         this.updateIcon();
-        this.account.on("change:omemo_enabled", this.updateMenu, this);
-        this.model.on("change:encrypted", this.updateEncrypted, this);
-        this.model.on("close_chat", this.closeChat, this);
-        this.model.on("hide_chat", this.hideChat, this);
-        this.model.on("pinned", this.pinChat, this);
-        this.model.on("change:muted", this.updateNotifications, this);
-        this.model.on("change:archived", this.updateArchived, this);
-        this.model.on("change:pinned", this.updatePinned, this);
-        this.contact.on("change", this.onContactChanged, this);
-        this.contact.on("archive_chat", this.archiveChat, this);
-        this.contact.on("change:name", this.updateName, this);
-        this.contact.on("change:status", this.updateStatus, this);
-        this.contact.on("change:status_updated", this.updateStatus, this);
-        this.contact.on("change:image", this.updateAvatar, this);
-        this.contact.on("change:blocked", this.onChangedBlocked, this);
-        this.contact.on("change:group_chat", this.updateGroupChatHead, this);
-        this.contact.on("change:subscription", this.updateMenu, this);
-        this.contact.on("change:in_roster", this.updateMenu, this);
-        this.contact.on("update_trusted", this.updateEncryptedColor, this);
-        this.contact.on("update_trusted", this.renderActiveTrustSession, this);
-        this.contact.on("change:private_chat", this.updateIcon, this);
-        this.contact.on("change:invitation", this.updateIcon, this);
-        this.contact.on("change:incognito_chat", this.updateIcon, this);
-        xabber._settings.on("change:jingle_calls", this.updateGroupChatHead, this);
-        xabber.on('change:audio', this.updateGroupChatHead, this);
-        xabber.on('plyr_player_updated', this.updatePlyrControls, this);
-        xabber.on('update_layout', this.updatePlyrTitle, this);
-        xabber.on('plyr_player_time_updated', this.updatePlyrTime, this);
-        xabber.on("update_jingle_button", this.updateJingleButton, this);
-        xabber.accounts.on("list_changed", this.updateLeftIndicator, this);
+        this.listenTo(this.account, 'change:omemo_enabled', this.updateMenu);
+        this.listenTo(this.model, 'change:encrypted', this.updateEncrypted);
+        this.listenTo(this.model, 'close_chat', this.closeChat);
+        this.listenTo(this.model, 'hide_chat', this.hideChat);
+        this.listenTo(this.model, 'pinned', this.pinChat);
+        this.listenTo(this.model, 'change:muted', this.updateNotifications);
+        this.listenTo(this.model, 'change:archived', this.updateArchived);
+        this.listenTo(this.model, 'change:pinned', this.updatePinned);
+        this.listenTo(this.contact, 'change', this.onContactChanged);
+        this.listenTo(this.contact, 'archive_chat', this.archiveChat);
+        this.listenTo(this.contact, 'change:name', this.updateName);
+        this.listenTo(this.contact, 'change:status', this.updateStatus);
+        this.listenTo(this.contact, 'change:status_updated', this.updateStatus);
+        this.listenTo(this.contact, 'change:image', this.updateAvatar);
+        this.listenTo(this.contact, 'change:blocked', this.onChangedBlocked);
+        this.listenTo(this.contact, 'change:group_chat', this.updateGroupChatHead);
+        this.listenTo(this.contact, 'change:subscription', this.updateMenu);
+        this.listenTo(this.contact, 'change:in_roster', this.updateMenu);
+        this.listenTo(this.contact, 'update_trusted', this.updateEncryptedColor);
+        this.listenTo(this.contact, 'update_trusted', this.renderActiveTrustSession);
+        this.listenTo(this.contact, 'change:private_chat', this.updateIcon);
+        this.listenTo(this.contact, 'change:invitation', this.updateIcon);
+        this.listenTo(this.contact, 'change:incognito_chat', this.updateIcon);
+        this.listenTo(xabber._settings, 'change:jingle_calls', this.updateGroupChatHead);
+        this.listenTo(xabber, 'change:audio', this.updateGroupChatHead);
+        this.listenTo(xabber, 'plyr_player_updated', this.updatePlyrControls);
+        this.listenTo(xabber, 'update_layout', this.updatePlyrTitle);
+        this.listenTo(xabber, 'plyr_player_time_updated', this.updatePlyrTime);
+        this.listenTo(xabber, 'update_jingle_button', this.updateJingleButton);
+        this.listenTo(xabber.accounts, 'list_changed', this.updateLeftIndicator);
         if (this.model.get('encrypted'))
-            this.account.on('active_session_change', this.renderActiveTrustSession, this);
+            this.listenTo(this.account, 'active_session_change', this.renderActiveTrustSession);
     },
 
     render: function (options) {
@@ -12449,22 +12448,22 @@ xabber.ChatBottomView = xabber.BasicView.extend({
         this.loading_link_reference = false;
         this.$('.account-jid').text(this.account.get('jid'));
         this.updateAvatar();
-        this.quill.on("text-change", this.onChangedText, this);
-        this.account.on("change:image", this.updateAvatar, this);
-        this.account.on('trusting_updated', this.updateEncrypted, this);
+        this.listenTo(this.quill, 'text-change', this.onChangedText);
+        this.listenTo(this.account, 'change:image', this.updateAvatar);
+        this.listenTo(this.account, 'trusting_updated', this.updateEncrypted);
         if (this.contact) {
-            this.contact.on("change:blocked", this.onBlockedUpdate, this);
-            this.contact.on('update_my_info', this.updateInfoInBottom, this);
+            this.listenTo(this.contact, 'change:blocked', this.onBlockedUpdate);
+            this.listenTo(this.contact, 'update_my_info', this.updateInfoInBottom);
         }
-        this.model.on("change:chat_ephemeral_timer", this.updateEphemeralTimer, this);
-        this.model.on("reply_selected_messages", this.replyMessages, this);
-        this.model.on("forward_selected_messages", this.forwardMessages, this);
-        this.model.on("copy_selected_messages", this.copyMessages, this);
-        this.model.on("delete_selected_messages", this.deleteMessages, this);
-        this.model.on("edit_selected_message", this.showEditPanel, this);
-        this.model.on("pin_selected_message", this.pinMessage, this);
-        this.model.on("reset_selected_messages", this.resetSelectedMessages, this);
-        xabber.accounts.on("list_changed", this.updateLeftIndicator, this);
+        this.listenTo(this.model, 'change:chat_ephemeral_timer', this.updateEphemeralTimer);
+        this.listenTo(this.model, 'reply_selected_messages', this.replyMessages);
+        this.listenTo(this.model, 'forward_selected_messages', this.forwardMessages);
+        this.listenTo(this.model, 'copy_selected_messages', this.copyMessages);
+        this.listenTo(this.model, 'delete_selected_messages', this.deleteMessages);
+        this.listenTo(this.model, 'edit_selected_message', this.showEditPanel);
+        this.listenTo(this.model, 'pin_selected_message', this.pinMessage);
+        this.listenTo(this.model, 'reset_selected_messages', this.resetSelectedMessages);
+        this.listenTo(xabber.accounts, 'list_changed', this.updateLeftIndicator);
         this.content_view = (this.view.data.get('visible') ? this.view : this.model.messages_view) || this.view;
         let $rich_textarea = this.$('.input-message .rich-textarea'),
             rich_textarea = $rich_textarea[0],
@@ -14528,7 +14527,7 @@ xabber.NotificationsPlaceholder = xabber.BasicView.extend({
 
     _initialize: function (options) {
         this.$el.html(env.templates.base.client_notification_item({text: xabber.getString("desktop_notifications__enable_desktop_notifications")}));
-        xabber.on("update_screen", this.onUpdatedScreen, this);
+        this.listenTo(xabber, 'update_screen', this.onUpdatedScreen);
     },
 
     requestNotifications: function (ev) {
@@ -14570,9 +14569,9 @@ xabber.ChatPlaceholderView = xabber.BasicView.extend({
     template: templates.chat_placeholder,
 
     _initialize: function (options) {
-        xabber.on('update_placeholder',this.onPlaceholderUpdate, this);
-        xabber.on("update_screen", this.onPlaceholderUpdate, this);
-        xabber.on("update_css", this.onPlaceholderUpdate, this);
+        this.listenTo(xabber, 'update_placeholder', this.onPlaceholderUpdate);
+        this.listenTo(xabber, 'update_screen', this.onPlaceholderUpdate);
+        this.listenTo(xabber, 'update_css', this.onPlaceholderUpdate);
     },
 
     onPlaceholderUpdate: function () {

@@ -189,8 +189,8 @@ xabber.Fingerprints = xabber.BasicView.extend({
             this.account = this.model.account;
             this.omemo = this.account.omemo;
             this.jid = this.model.get('jid');
-            this.account.on('trusting_updated', this.renderDevices, this);
-            this.account.on('active_session_change', this.renderActiveTrustSession, this);
+            this.listenTo(this.account, 'trusting_updated', this.renderDevices);
+            this.listenTo(this.account, 'active_session_change', this.renderActiveTrustSession);
         }
     },
 
@@ -2857,10 +2857,10 @@ xabber.OMEMOEnablePlaceholder = xabber.BasicView.extend({
         this.updateColorScheme();
         this.$el.html(templates.client_notification_item({text: xabber.getString("desktop_notifications__enable_encryption"), jid: this.account.get('jid')}));
         xabber.placeholders_wrap.$el.append(this.$el);
-        xabber.on("update_screen", this.onUpdatedScreen, this);
-        this.account.session.on("change:connected", this.updateConnected, this);
-        this.account.settings.on("change:color", this.updateColorScheme, this);
-        this.account.settings.on("change:omemo", this.onOmemoChange, this);
+        this.listenTo(xabber, 'update_screen', this.onUpdatedScreen);
+        this.listenTo(this.account.session, 'change:connected', this.updateConnected);
+        this.listenTo(this.account.settings, 'change:color', this.updateColorScheme);
+        this.listenTo(this.account.settings, 'change:omemo', this.onOmemoChange);
         xabber.trigger('update_client_notifications');
     },
 

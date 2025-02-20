@@ -49,11 +49,11 @@ xabber.BasicView = Backbone.View.extend({
             }
         }
         this.data = new Backbone.Model({visible: false});
-        this.data.on("change:visible", this.onChangedVisibility, this);
-        xabber.on("update_css", function (options) {
+        this.listenTo(this.data, 'change:visible', this.onChangedVisibility);
+        this.listenTo(xabber, 'update_css', (options) => {
             this.updateCSS && this.updateCSS();
             (options && options.size_changed && this.windowResized) && this.windowResized();
-        }, this);
+        });
         this._initialize && this._initialize(options);
         this.__initialize && this.__initialize(options);
     },
@@ -831,12 +831,12 @@ xabber.SearchView = xabber.BasicView.extend({
         this.$input = this.$('.field-input');
         this.updateValue();
         this.data = new Backbone.Model({input_mode: false});
-        this.data.on("change:input_mode", this.onChangedInputMode, this);
+        this.listenTo(this.data, 'change:input_mode', this.onChangedInputMode);
         this.bindModelEvents();
     },
 
     bindModelEvents: function () {
-        this.model.on("change:"+this.model_field, this.updateValue, this);
+        this.listenTo(this.model, "change:"+this.model_field, this.updateValue);
     },
 
     showInput: function () {
@@ -897,15 +897,15 @@ xabber.Body = xabber.NodeView.extend({
         this.data.set('visible', true);
         this.screen = new Backbone.Model();
         this.screen_map = new Backbone.Model();
-        this.screen.on("change", this.update, this);
-        this.screen_map.on("change", this.onScreenMapChanged, this);
+        this.listenTo(this.screen, 'change', this.update);
+        this.listenTo(this.screen_map, 'change', this.onScreenMapChanged);
         $(constants.CONTAINER_ELEMENT).append(this.$el);
         this.updateBackground();
         this.updateMainColor();
         this.updateAvatarShape();
         $('#modals').insertAfter(this.$el);
-        xabber.on('update_main_color', this.updateMainColor, this);
-        xabber.on('update_avatar_shape', this.updateAvatarShape, this);
+        this.listenTo(xabber, 'update_main_color', this.updateMainColor);
+        this.listenTo(xabber, 'update_avatar_shape', this.updateAvatarShape);
     },
 
     addScreen: function (name, attrs) {
@@ -1088,14 +1088,14 @@ xabber.ToolbarView = xabber.BasicView.extend({
             }
         });
 
-        xabber.on("update_screen", this.onUpdatedScreen, this);
-        xabber.on("update_jingle_button", this.updateJingleButton, this);
-        this.data.on("change:all_msg_counter", this.onChangedAllMessageCounter, this);
-        this.data.on("change:group_msg_counter", this.onChangedGroupMessageCounter, this);
-        this.data.on("change:mentions_counter", this.onChangedMentionsCounter, this);
-        this.data.on("change:contacts_counter", this.onChangedContactsCounter, this);
-        this.data.on("change:mentions_subscriptions", this.onChangedMentionsSubscriptions, this);
-        this.data.on("change:msg_counter", this.onChangedMessageCounter, this);
+        this.listenTo(xabber, 'update_screen', this.onUpdatedScreen);
+        this.listenTo(xabber, 'update_jingle_button', this.updateJingleButton);
+        this.listenTo(this.data, 'change:all_msg_counter', this.onChangedAllMessageCounter);
+        this.listenTo(this.data, 'change:group_msg_counter', this.onChangedGroupMessageCounter);
+        this.listenTo(this.data, 'change:mentions_counter', this.onChangedMentionsCounter);
+        this.listenTo(this.data, 'change:contacts_counter', this.onChangedContactsCounter);
+        this.listenTo(this.data, 'change:mentions_subscriptions', this.onChangedMentionsSubscriptions);
+        this.listenTo(this.data, 'change:msg_counter', this.onChangedMessageCounter);
         this.data.set({msg_counter: 0});
         this.data.set({group_msg_counter: 0});
         this.data.set({all_msg_counter: 0});
@@ -1474,18 +1474,18 @@ xabber.JingleMessageView = xabber.BasicView.extend({
 
     _initialize: function (options) {
         this.model = options.model;
-        this.model.on('destroy', this.onDestroy, this);
+        this.listenTo(this.model, 'destroy', this.onDestroy);
         this.contact = this.model.contact;
         this.account = this.contact.account;
-        this.model.on('change:state', this.updateCallingStatus, this);
-        this.model.on('change:status', this.updateBackground, this);
-        this.model.on('change:volume_on', this.updateButtons, this);
-        this.model.on('change:video_live', this.updateButtons, this);
-        xabber.on('change:video', this.updateButtons, this);
-        this.model.on('change:video_screen', this.updateButtons, this);
-        this.model.on('change:video_in', this.updateCollapsedWindow, this);
-        this.model.on('change:video', this.updateCollapsedWindow, this);
-        this.model.on('change:audio', this.updateButtons, this);
+        this.listenTo(this.model, 'change:state', this.updateCallingStatus);
+        this.listenTo(this.model, 'change:status', this.updateBackground);
+        this.listenTo(this.model, 'change:volume_on', this.updateButtons);
+        this.listenTo(this.model, 'change:video_live', this.updateButtons);
+        this.listenTo(this.model, 'change:video_screen', this.updateButtons);
+        this.listenTo(this.model, 'change:video_in', this.updateCollapsedWindow);
+        this.listenTo(this.model, 'change:video', this.updateCollapsedWindow);
+        this.listenTo(this.model, 'change:audio', this.updateButtons);
+        this.listenTo(xabber, 'change:video', this.updateButtons);
     },
 
     render: function (options) {
@@ -1749,8 +1749,8 @@ xabber.PlyrPlayerPopupView = xabber.BasicView.extend({
 
     _initialize: function (options) {
         this.data.set('visibility_state', 0);
-        this.data.on('change:visibility_state', this.onVisibilityChange, this);
-        xabber.on('plyr_player_updated', this.updatePlyrControls, this);
+        this.listenTo(this.data, 'change:visibility_state', this.onVisibilityChange);
+        this.listenTo(xabber, 'plyr_player_updated', this.updatePlyrControls);
     },
 
     render: function (options) {
@@ -2106,20 +2106,20 @@ xabber.SettingsModalView = xabber.BasicView.extend({
 
     _initialize: function (options) {
         this.$('.xabber-info-wrap .version').text(xabber.get('version_number'));
-        xabber.on('update_main_color', this.updateMainColor, this);
-        this.model.on('change:language', this.updateLanguage, this);
-        this.model.on('change:emoji_font', this.updateEmojiFontLabel, this);
-        this.model.on('change:avatar_shape', this.updateAvatarLabel, this);
-        this.model.on('change:notifications_private', this.updateSoundsLabel, this);
-        this.model.on('change:notifications_group', this.updateSoundsLabel, this);
-        this.model.on('change:call_attention', this.updateSoundsLabel, this);
-        this.model.on('change:private_sound', this.updateSoundsLabel, this);
-        this.model.on('change:group_sound', this.updateSoundsLabel, this);
-        this.model.on('change:sound_on_private_message', this.updateSoundsLabel, this);
-        this.model.on('change:sound_on_group_message', this.updateSoundsLabel, this);
-        this.model.on('change:sound_on_call', this.updateSoundsLabel, this);
-        this.model.on('change:sound_on_dialtone', this.updateSoundsLabel, this);
-        this.model.on('change:sound_on_attention', this.updateSoundsLabel, this);
+        this.listenTo(xabber, 'update_main_color', this.updateMainColor);
+        this.listenTo(this.model, 'change:language', this.updateLanguage);
+        this.listenTo(this.model, 'change:emoji_font', this.updateEmojiFontLabel);
+        this.listenTo(this.model, 'change:avatar_shape', this.updateAvatarLabel);
+        this.listenTo(this.model, 'change:notifications_private', this.updateSoundsLabel);
+        this.listenTo(this.model, 'change:notifications_group', this.updateSoundsLabel);
+        this.listenTo(this.model, 'change:call_attention', this.updateSoundsLabel);
+        this.listenTo(this.model, 'change:private_sound', this.updateSoundsLabel);
+        this.listenTo(this.model, 'change:group_sound', this.updateSoundsLabel);
+        this.listenTo(this.model, 'change:sound_on_private_message', this.updateSoundsLabel);
+        this.listenTo(this.model, 'change:sound_on_group_message', this.updateSoundsLabel);
+        this.listenTo(this.model, 'change:sound_on_call', this.updateSoundsLabel);
+        this.listenTo(this.model, 'change:sound_on_dialtone', this.updateSoundsLabel);
+        this.listenTo(this.model, 'change:sound_on_attention', this.updateSoundsLabel);
         this.ps_container.on("ps-scroll-y", this.onScrollY.bind(this));
         $(document).on("keyup", (ev) => {
             if (ev.keyCode === constants.KEY_ESCAPE && this.data.get('visible')) {

@@ -1327,20 +1327,20 @@ xabber.ContactItemView = xabber.BasicView.extend({
         this.selectView();
         this.updateGroupChat();
         this.updateIcon();
-        this.model.on("change:name", this.updateName, this);
-        this.model.on("change:image", this.updateAvatar, this);
-        this.model.on("change:status_updated", this.updateStatus, this);
-        this.model.on("change:subscription", this.updateStatus, this);
-        this.model.on("change:subscription_preapproved", this.updateStatus, this);
-        this.model.on("change:subscription_request_in", this.updateStatus, this);
-        this.model.on("change:subscription_request_out", this.updateStatus, this);
-        this.model.on("change:private_chat", this.updateIcon, this);
-        this.model.on("change:incognito_chat", this.updateIcon, this);
-        this.model.on("change:bot", this.updateIcon, this);
-        this.model.on("change:blocked", this.onBlocked, this);
-        this.model.on("change:status_message", this.updateStatusMsg, this);
-        this.model.on("change:last_seen", this.lastSeenUpdated, this);
-        this.model.on("change:group_chat", this.updateGroupChat, this);
+        this.listenTo(this.model, 'change:name', this.updateName);
+        this.listenTo(this.model, 'change:image', this.updateAvatar);
+        this.listenTo(this.model, 'change:status_updated', this.updateStatus);
+        this.listenTo(this.model, 'change:subscription', this.updateStatus);
+        this.listenTo(this.model, 'change:subscription_preapproved', this.updateStatus);
+        this.listenTo(this.model, 'change:subscription_request_in', this.updateStatus);
+        this.listenTo(this.model, 'change:subscription_request_out', this.updateStatus);
+        this.listenTo(this.model, 'change:private_chat', this.updateIcon);
+        this.listenTo(this.model, 'change:incognito_chat', this.updateIcon);
+        this.listenTo(this.model, 'change:bot', this.updateIcon);
+        this.listenTo(this.model, 'change:blocked', this.onBlocked);
+        this.listenTo(this.model, 'change:status_message', this.updateStatusMsg);
+        this.listenTo(this.model, 'change:last_seen', this.lastSeenUpdated);
+        this.listenTo(this.model, 'change:group_chat', this.updateGroupChat);
     },
 
     updateName: function () {
@@ -1453,9 +1453,9 @@ xabber.ContactItemLeftView = xabber.ContactItemView.extend({
         this.updateBlockedState();
         this.updateMutedState();
         this.updateGroupChat();
-        this.model.on("change:display", this.updateDisplayStatus, this);
-        this.model.on("change:blocked", this.updateBlockedState, this);
-        this.model.on("change:group_chat", this.updateGroupChat, this);
+        this.listenTo(this.model, 'change:display', this.updateDisplayStatus);
+        this.listenTo(this.model, 'change:blocked', this.updateBlockedState);
+        this.listenTo(this.model, 'change:group_chat', this.updateGroupChat);
     },
 
     updateDisplayStatus: function () {
@@ -1547,9 +1547,9 @@ xabber.ContactResourcesRightView = xabber.ResourcesView.extend({
     className: 'modal main-modal resource-modal',
 
     _initialize: function () {
-        this.model.on("remove", this.onResourceRemoved, this);
-        this.model.on("reset", this.onReset, this);
-        this.model.on("change:priority", this.onPriorityChanged, this);
+        this.listenTo(this.model, 'remove', this.onResourceRemoved);
+        this.listenTo(this.model, 'reset', this.onReset);
+        this.listenTo(this.model, 'change:priority', this.onPriorityChanged);
     },
 
     renderByInit: function () {
@@ -1712,13 +1712,13 @@ xabber.ContactDetailsViewRight = xabber.BasicView.extend({
         this.updateAvatar();
         this.updateButtons();
         this.updateColorScheme();
-        this.account.settings.on("change:color", this.updateColorScheme, this);
         this.ps_container.on("ps-scroll-y", this.onScroll.bind(this));
-        this.model.on("change", this.update, this);
-        this.chat.on("change:muted", this.updateNotifications, this);
-        xabber.on("change:video", this.updateJingleButtons, this);
-        xabber.on("change:audio", this.updateJingleButtons, this);
-        xabber.on("update_layout", this.updateIndicator, this);
+        this.listenTo(this.account.settings, 'change:color', this.updateColorScheme);
+        this.listenTo(this.model, 'change', this.update);
+        this.listenTo(this.chat, 'change:muted', this.updateNotifications);
+        this.listenTo(xabber, 'change:video', this.updateJingleButtons);
+        this.listenTo(xabber, 'change:audio', this.updateJingleButtons);
+        this.listenTo(xabber, 'update_layout', this.updateIndicator);
     },
 
     render: function (options) {
@@ -2293,12 +2293,12 @@ xabber.GroupChatDetailsViewRight = xabber.BasicView.extend({
         this.updateAvatar();
         this.updateColorScheme();
         this.ps_container.on("ps-scroll-y", this.onScroll.bind(this));
-        this.account.settings.on("change:color", this.updateColorScheme, this);
-        this.model.on("change", this.update, this);
-        this.chat.on("change:muted", this.updateNotifications, this);
-        this.model.on("permissions_changed", this.updateButtons, this);
-        this.model.on("change:subscription", this.updateButtons, this);
-        xabber.on("update_layout", this.updateIndicator, this);
+        this.listenTo(this.account.settings, 'change:color', this.updateColorScheme);
+        this.listenTo(this.model, 'change', this.update);
+        this.listenTo(this.chat, 'change:muted', this.updateNotifications);
+        this.listenTo(this.model, 'permissions_changed', this.updateButtons);
+        this.listenTo(this.model, 'change:subscription', this.updateButtons);
+        this.listenTo(xabber, 'update_layout', this.updateIndicator);
     },
 
     render: function (options) {
@@ -2873,8 +2873,8 @@ xabber.GroupChatStatusView = xabber.BasicView.extend({
     _initialize: function () {
         this.$el.html(this.template());
         this.render();
-        this.model.on("change:status", this.render, this);
-        this.model.on("change:group_info", this.render, this);
+        this.listenTo(this.model, 'change:status', this.render);
+        this.listenTo(this.model, 'change:group_info', this.render);
     },
 
     render: function () {
@@ -2901,8 +2901,8 @@ xabber.GroupChatStatusViewRight = xabber.BasicView.extend({
     _initialize: function () {
         this.$el.html(this.template());
         this.render();
-        this.model.on("change:status", this.render, this);
-        this.model.on("change:group_info", this.render, this);
+        this.listenTo(this.model, 'change:status', this.render);
+        this.listenTo(this.model, 'change:group_info', this.render);
     },
 
     render: function () {
@@ -2939,8 +2939,8 @@ xabber.GroupChatPropertiesView = xabber.BasicView.extend({
         this.$el.html(this.template());
         this.contact = this.model;
         this.account = this.model.account;
-        this.model.on("change:group_info", this.update, this);
-        this.model.on("change:vcard_updated", this.update, this);
+        this.listenTo(this.model, 'change:group_info', this.update);
+        this.listenTo(this.model, 'change:vcard_updated', this.update);
     },
 
     render: function () {
@@ -2996,8 +2996,8 @@ xabber.GroupChatPropertiesViewRight = xabber.BasicView.extend({
         this.$el.html(this.template());
         this.contact = this.model;
         this.account = this.model.account;
-        this.model.on("change:group_info", this.update, this);
-        this.model.on("change:vcard_updated", this.update, this);
+        this.listenTo(this.model, 'change:group_info', this.update);
+        this.listenTo(this.model, 'change:vcard_updated', this.update);
         this.ps_container = this.$('.full-vcard-content');
         if (this.ps_container.length) {
             this.ps_container.perfectScrollbar(
@@ -3133,7 +3133,7 @@ xabber.GroupChatPropertiesEditView = xabber.BasicView.extend({
     _initialize: function () {
         this.account = this.model.account;
         this.contact = this.model;
-        this.model.on("change:name", this.updateName, this);
+        this.listenTo(this.model, 'change:name', this.updateName);
     },
 
     open: function (data_form) {
@@ -3247,8 +3247,8 @@ xabber.InvitationsView = xabber.BasicView.extend({
 
     _initialize: function (options) {
         this.contact = options.model;
-        this.contact.participants.on("participants_updated", this._render, this);
-        this.contact.on("invitations_send", this._render, this);
+        this.listenTo(this.contact.participants, 'participants_updated', this._render);
+        this.listenTo(this.contact, 'invitations_send', this._render);
         this.account = this.contact.account;
         this.$error = $('<p class="errors"/>');
     },
@@ -3319,8 +3319,8 @@ xabber.MediaBaseView = xabber.BasicView.extend({
         this.chat = this.account.chats.getChat(this.contact, this.encrypted && 'encrypted');
         this.temporary_items = []
         this.parent.ps_container.on("ps-scroll-up.mediagallery ps-scroll-down.mediagallery", this.onScroll.bind(this));
-        xabber.on("update_screen", this.onUpdatedScreen, this);
-        xabber.on("update_layout", this.onUpdatedScreen, this);
+        this.listenTo(xabber, 'update_screen', this.onUpdatedScreen);
+        this.listenTo(xabber, 'update_layout', this.onUpdatedScreen);
     },
 
     _render: function () {
@@ -3992,8 +3992,8 @@ xabber.ParticipantsView = xabber.BasicView.extend({
     _initialize: function () {
         this.account = this.model.account;
         this.participants = this.model.participants;
-        this.participants.on("participants_updated", this.onParticipantsUpdated, this);
-        this.model.on("change:status_updated", this.updateParticipantsList, this);
+        this.listenTo(this.participants, 'participants_updated', this.onParticipantsUpdated);
+        this.listenTo(this.model, 'change:status_updated', this.updateParticipantsList);
         this.$(this.ps_selector).perfectScrollbar(this.ps_settings);
     },
 
@@ -4195,12 +4195,12 @@ xabber.ParticipantsViewRight = xabber.BasicView.extend({
     _initialize: function () {
         this.account = this.model.account;
         this.participants = this.model.participants;
-        this.participants.on("change", this.onParticipantsChanged, this);
-        this.participants.on("participants_updated", this.onParticipantsUpdated, this);
-        this.model.on("change:status_updated", this.updateParticipantsList, this);
+        this.listenTo(this.participants, 'change', this.onParticipantsChanged);
+        this.listenTo(this.participants, 'participants_updated', this.onParticipantsUpdated);
+        this.listenTo(this.model, 'change:status_updated', this.updateParticipantsList);
         this.participant_properties_panel = this.addChild('participant_properties_panel', xabber.ParticipantPropertiesViewRight, {model: this.model, el: this.parent.$('.participant-view-wrap')[0], parent: this.parent});
-        xabber.on("update_screen", this.onUpdatedScreen, this);
-        xabber.on("update_layout", this.onUpdatedScreen, this);
+        this.listenTo(xabber, 'update_screen', this.onUpdatedScreen);
+        this.listenTo(xabber, 'update_layout', this.onUpdatedScreen);
     },
 
     _render: function () {
@@ -4468,7 +4468,7 @@ xabber.ParticipantPropertiesView = xabber.BasicView.extend({
     open: function (participant, data_form) {
         if (!participant) return;
         this.participant = participant;
-        this.participant.on("change:badge", this.onBadgeUpdated, this);
+        this.listenTo(this.participant, 'change:badge', this.onBadgeUpdated);
         this.data_form = data_form;
         this.render();
         this.$el.openModal({
@@ -4981,8 +4981,8 @@ xabber.ParticipantPropertiesViewRight = xabber.BasicView.extend({
         this.$('.participant-details-wrap').hideIf(this.model.get('participant_hidden'))
         if (!participant) return;
         this.participant = participant;
-        this.participant.on("change:badge", this.onBadgeUpdated, this);
-        this.participant.on("change:avatar_url", this.updateMemberAvatar, this);
+        this.listenTo(this.participant, 'change:badge', this.onBadgeUpdated);
+        this.listenTo(this.participant, 'change:avatar_url', this.updateMemberAvatar);
         this.data_form = data_form;
         this.render();
         this.updateSaveButton();
@@ -6657,7 +6657,7 @@ xabber.GroupchatInvitationView = xabber.BasicView.extend({
         this.account = this.model.account;
         this.$('.msg-text').text(options.message && options.message.get('message') ? options.message.get('message') : xabber.getString("groupchat__public_group__text_invitation", [this.account.get('jid')]));
         this.message = options.message;
-        this.model.on("change", this.update, this);
+        this.listenTo(this.model, 'change', this.update);
         this.getInviteAvatar();
         this.getGroupMembers();
     },
@@ -7449,7 +7449,7 @@ xabber.ContactEditGroupsView = xabber.BasicView.extend({
         this.account = this.parent.account;
         this.model = this.parent.model;
         this.model.set('groups_hidden', true)
-        this.model.on("change:in_roster update_groups", this.onUpdate, this);
+        this.listenTo(this.model, 'change:in_roster update_groups', this.onUpdate);
     },
 
     render: function (view, args) {
@@ -7637,12 +7637,12 @@ xabber.ContactEditView = xabber.BasicView.extend({
         this.account = this.parent.account;
         this.model = this.parent.model;
         this.model.set('edit_hidden', true)
-        this.model.on("change:status_updated", this.updateStatuses, this);
-        this.model.on("change:subscription", this.updateStatuses, this);
-        this.model.on("change:subscription_preapproved", this.updateStatuses, this);
-        this.model.on("change:blocked", this.updateStatuses, this);
-        this.model.on("change:subscription_request_in", this.updateStatuses, this);
-        this.model.on("change:subscription_request_out", this.updateStatuses, this);
+        this.listenTo(this.model, 'change:status_updated', this.updateStatuses);
+        this.listenTo(this.model, 'change:subscription', this.updateStatuses);
+        this.listenTo(this.model, 'change:subscription_preapproved', this.updateStatuses);
+        this.listenTo(this.model, 'change:blocked', this.updateStatuses);
+        this.listenTo(this.model, 'change:subscription_request_in', this.updateStatuses);
+        this.listenTo(this.model, 'change:subscription_request_out', this.updateStatuses);
     },
 
     render: function () {
@@ -7798,13 +7798,13 @@ xabber.GroupEditView = xabber.BasicView.extend({
         this.account = this.parent.account;
         this.model = this.parent.model;
         this.model.set('edit_hidden', true)
-        this.model.on('change:group_info', this.update, this)
-        this.model.on("change:status_updated", this.updateStatuses, this);
-        this.model.on("change:subscription", this.updateStatuses, this);
-        this.model.on("change:subscription_preapproved", this.updateStatuses, this);
-        this.model.on("change:blocked", this.updateStatuses, this);
-        this.model.on("change:subscription_request_in", this.updateStatuses, this);
-        this.model.on("change:subscription_request_out", this.updateStatuses, this);
+        this.listenTo(this.model, 'change:group_info', this.update);
+        this.listenTo(this.model, 'change:status_updated', this.updateStatuses);
+        this.listenTo(this.model, 'change:subscription', this.updateStatuses);
+        this.listenTo(this.model, 'change:subscription_preapproved', this.updateStatuses);
+        this.listenTo(this.model, 'change:blocked', this.updateStatuses);
+        this.listenTo(this.model, 'change:subscription_request_in', this.updateStatuses);
+        this.listenTo(this.model, 'change:subscription_request_out', this.updateStatuses);
     },
 
     render: function () {
@@ -8559,14 +8559,14 @@ xabber.GroupView = xabber.BasicView.extend({
         this.updateName();
         this.updateGroupIcon();
         this.updateMembersCounter();
-        this.model.contacts.on("add", this.onContactAdded, this);
-        this.model.on("remove_contact", this.onContactRemoved, this);
-        this.model.contacts.on("update_contact_item", this.updateContactItem, this);
-        this.model.on("change:name", this.updateName, this);
-        this.model.on("change:counter", this.updateMembersCounter, this);
-        this.model._settings.on("change:show_offline", this.onChangedOfflineSetting, this);
-        this.model._settings.on("change:sorting", this.onChangedSortingSetting, this);
-        this.data.on("change:expanded", this.updateExpanded, this);
+        this.listenTo(this.model, 'remove_contact', this.onContactRemoved);
+        this.listenTo(this.model, 'change:name', this.updateName);
+        this.listenTo(this.model, 'change:counter', this.updateMembersCounter);
+        this.listenTo(this.model.contacts, 'add', this.onContactAdded);
+        this.listenTo(this.model.contacts, 'update_contact_item', this.updateContactItem);
+        this.listenTo(this.model._settings, 'change:show_offline', this.onChangedOfflineSetting);
+        this.listenTo(this.model._settings, 'change:sorting', this.onChangedSortingSetting);
+        this.listenTo(this.data, 'change:expanded', this.updateExpanded);
     },
 
     updateExpanded: function () {
@@ -8710,7 +8710,7 @@ xabber.GroupSettingsView = xabber.BasicView.extend({
             this.$('.group-name input').attr('readonly', true);
             this.$('.btn-delete').addClass('hidden');
         }
-        this.model.on("destroy", this.onDestroy, this);
+        this.listenTo(this.model, 'destroy', this.onDestroy);
     },
 
     render: function () {
@@ -9575,14 +9575,14 @@ xabber.AccountRosterView = xabber.BasicView.extend({
         this.updateStatus();
         this.updateAvatar();
         this.updateColorScheme();
-        this.account.on("change:name", this.updateName, this);
-        this.account.on("change:image", this.updateAvatar, this);
-        this.account.on("change:status_updated", this.updateStatus, this);
-        this.account.settings.on("change:color", this.updateColorScheme, this);
-        this.groups.on("add", this.onGroupAdded, this);
-        this.groups.on("rename", this.onGroupRenamed, this);
-        this.groups.on("destroy", this.onGroupRemoved, this);
-        this.data.on("change:expanded", this.updateExpanded, this);
+        this.listenTo(this.account, 'change:name', this.updateName);
+        this.listenTo(this.account, 'change:image', this.updateAvatar);
+        this.listenTo(this.account, 'change:status_updated', this.updateStatus);
+        this.listenTo(this.account.settings, 'change:color', this.updateColorScheme);
+        this.listenTo(this.groups, 'add', this.onGroupAdded);
+        this.listenTo(this.groups, 'rename', this.onGroupRenamed);
+        this.listenTo(this.groups, 'destroy', this.onGroupRemoved);
+        this.listenTo(this.data, 'change:expanded', this.updateExpanded);
         this.data.set('expanded', true);
     },
 
@@ -9654,10 +9654,8 @@ xabber.AccountRosterRightView = xabber.AccountRosterView.extend({
     avatar_size: constants.AVATAR_SIZES.ROSTER_RIGHT_ACCOUNT_ITEM,
 
     __initialize: function () {
-        this.contacts.on("add_to_roster change_in_roster remove_from_roster",
-            this.updateCounter, this);
-        this.contacts.on("add_to_roster remove_from_roster",
-            this.updateGlobalCounter, this);
+        this.listenTo(this.contacts, 'add_to_roster change_in_roster remove_from_roster', this.updateCounter);
+        this.listenTo(this.contacts, 'add_to_roster remove_from_roster', this.updateGlobalCounter);
     },
 
     updateCounter: function () {
@@ -9725,8 +9723,8 @@ xabber.BlockListView = xabber.BasicView.extend({
             this.onContactAdded(this.account.blocklist.list[jid], false);
         };
         this.updateTabsLabel();
-        this.account.contacts.on("add_to_blocklist", this.onContactAdded, this);
-        this.account.contacts.on("remove_from_blocklist", this.onContactRemoved, this);
+        this.listenTo(this.account.contacts, 'add_to_blocklist', this.onContactAdded);
+        this.listenTo(this.account.contacts, 'remove_from_blocklist', this.onContactRemoved);
     },
 
     render: function (options) {
@@ -9856,10 +9854,10 @@ xabber.RosterView = xabber.SearchPanelView.extend({
 
     _initialize: function () {
         this._settings = xabber._roster_settings;
-        this.model.on("activate", this.updateOneRosterView, this);
-        this.model.on("update_order", this.updateRosterViews, this);
-        this.model.on("deactivate destroy", this.removeRosterView, this);
-        this.on("before_hide", this.saveScrollBarOffset, this);
+        this.listenTo(this.model, 'activate', this.updateOneRosterView);
+        this.listenTo(this.model, 'update_order', this.updateRosterViews);
+        this.listenTo(this.model, 'deactivate destroy', this.removeRosterView);
+        this.listenTo(this, 'before_hide', this.saveScrollBarOffset);
         this.$('input').on('input', this.updateSearch.bind(this));
     },
 
@@ -9906,7 +9904,7 @@ xabber.RosterLeftView = xabber.RosterView.extend({
     account_roster_view: xabber.AccountRosterLeftView,
 
     __initialize: function () {
-        this.model.on("list_changed", this.updateLeftIndicator, this);
+        this.listenTo(this.model, 'list_changed', this.updateLeftIndicator);
         this.ps_container.on("ps-scroll-y", this.onScrollY.bind(this));
     },
 
@@ -10086,19 +10084,19 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
         this.processing_debounce = _.debounce(this.processAccounts, 300, false);
         this.update_debounce = _.debounce(this.processUpdateContacts, 300, false);
         this.circle_debounce = _.debounce(this.updateGroupsFilterDebounced, 300, false);
-        this.model.on("activate", this.updateOneRosterView, this);
-        this.model.on("deactivate destroy", this.removeRosterView, this);
-        this.model.on("list_changed", this.updateLeftIndicator, this);
-        this.model.on("list_changed connected_list_changed account_color_updated add destroy", this.updateAccountsFilter, this);
-        this.model.on("contacts_updated", this.onContactsUpdated, this);
-        xabber.accounts.on('account_color_updated', this.onContactsUpdated, this);
-        xabber.on('plyr_player_updated', this.updatePlyrControls, this);
-        xabber.on('plyr_player_time_updated', this.updatePlyrTime, this);
-        xabber.on('update_layout', this.updatePlyrTitle, this);
-        xabber.on('update_client_notifications', this.updateClientNotifications, this);
-        xabber.on('new_incoming_subscription', this.updateAllIncomingSubscriptions, this);
-        xabber.on("change:video", this.updateJingleButtons, this);
-        xabber.on("change:audio", this.updateJingleButtons, this);
+        this.listenTo(this.model, 'activate', this.updateOneRosterView);
+        this.listenTo(this.model, 'deactivate destroy', this.removeRosterView);
+        this.listenTo(this.model, 'list_changed', this.updateLeftIndicator);
+        this.listenTo(this.model, 'list_changed connected_list_changed account_color_updated add destroy', this.updateAccountsFilter);
+        this.listenTo(this.model, 'contacts_updated', this.onContactsUpdated);
+        this.listenTo(xabber.accounts, 'account_color_updated', this.onContactsUpdated);
+        this.listenTo(xabber, 'plyr_player_updated', this.updatePlyrControls);
+        this.listenTo(xabber, 'plyr_player_time_updated', this.updatePlyrTime);
+        this.listenTo(xabber, 'update_layout', this.updatePlyrTitle);
+        this.listenTo(xabber, 'update_client_notifications', this.updateClientNotifications);
+        this.listenTo(xabber, 'new_incoming_subscription', this.updateAllIncomingSubscriptions);
+        this.listenTo(xabber, 'change:video', this.updateJingleButtons);
+        this.listenTo(xabber, 'change:audio', this.updateJingleButtons);
         this.updateAccountsFilter();
         if (!_.isUndefined(this.ps_selector)) {
             this.ps_container2 = this.$('.left-column-filters-container');
@@ -11266,7 +11264,7 @@ xabber.AccountGroupView = xabber.BasicView.extend({
         } else {
             $parent_el.children().eq(index - 1).after(this.$el);
         }
-        this.model.on("destroy", this.remove, this);
+        this.listenTo(this.model, 'destroy', this.remove);
     },
 
     showGroupSettings: function () {
@@ -11311,7 +11309,7 @@ xabber.AddContactView = xabber.BasicView.extend({
 
     _initialize: function () {
         this.group_data = new Backbone.Model;
-        this.group_data.on("change", this.updateGroups, this);
+        this.listenTo(this.group_data, 'change', this.updateGroups);
     },
 
     render: function (options) {

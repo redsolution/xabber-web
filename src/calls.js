@@ -64,20 +64,20 @@ xabber.CallsView = xabber.BasicView.extend({
     },
 
     _initialize: function () {
-        xabber.accounts.on("list_changed connected_list_changed notification_chat_created account_color_updated add destroy", this.updateAccountsFilter, this);
-        xabber.accounts.on("change:enabled", this.updateAccountsFilter, this);
-        xabber.accounts.on("change:connected", this.updateAccountsFilter, this);
-        xabber.on("update_jingle_button", this.updateActiveCall, this);
-        xabber.on('plyr_player_updated', this.updatePlyrControls, this);
-        xabber.on('plyr_player_time_updated', this.updatePlyrTime, this);
-        xabber.on('update_layout', this.updatePlyrTitle, this);
-        xabber.on('update_client_notifications', this.updateClientNotifications, this);
+        this.listenTo(xabber.accounts, 'list_changed connected_list_changed notification_chat_created account_color_updated add destroy', this.updateAccountsFilter);
+        this.listenTo(xabber.accounts, 'change:enabled', this.updateAccountsFilter);
+        this.listenTo(xabber.accounts, 'change:connected', this.updateAccountsFilter);
+        this.listenTo(xabber, 'update_jingle_button', this.updateActiveCall);
+        this.listenTo(xabber, 'plyr_player_updated', this.updatePlyrControls);
+        this.listenTo(xabber, 'plyr_player_time_updated', this.updatePlyrTime);
+        this.listenTo(xabber, 'update_layout', this.updatePlyrTitle);
+        this.listenTo(xabber, 'update_client_notifications', this.updateClientNotifications);
 
         this.rendered_messages = [];
         this.calls_accounts = [];
 
         this.calls_messages = new xabber.Messages(null, {});
-        this.calls_messages.on("add", this.addMessage, this);
+        this.listenTo(this.calls_messages, 'add', this.addMessage);
 
         this.ps_container2 = this.$('.left-column-filters-container');
         if (this.ps_container2.length) {

@@ -25,8 +25,8 @@ xabber.FeatureView = xabber.BasicView.extend({
         if (options.single_account && options.single_account.$('.capabilities').length){
             this.$el.appendTo(options.single_account.$('.capabilities'));
         }
-        this.model.on("change", this.render, this);
-        this.model.on("destroy", this.remove, this);
+        this.listenTo(this.model, 'change', this.render);
+        this.listenTo(this.model, 'destroy', this.remove);
     },
 
     render: function () {

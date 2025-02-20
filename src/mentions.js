@@ -449,12 +449,12 @@ xabber.Account.addInitPlugin(function () {
    this.unread_mentions = new xabber.Mentions(null, {account: this});
 });
 
-xabber.once("start", function () {
-    this.mentions = new this.Mentions;
-    this.mentions_view = this.left_panel.addChild('mentions',
-        this.MentionsView, {model: this.mentions});
-    this.mentions_placeholder = this.right_panel.addChild('mentions_placeholder',
-        this.MentionsPlaceholderView);
-}, xabber);
+// xabber.once("start", function () {
+//     this.mentions = new this.Mentions;
+//     this.mentions_view = this.left_panel.addChild('mentions',
+//         this.MentionsView, {model: this.mentions});
+//     this.mentions_placeholder = this.right_panel.addChild('mentions_placeholder',
+//         this.MentionsPlaceholderView);
+// }, xabber);
 
 export default xabber;

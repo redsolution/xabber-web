@@ -30,7 +30,7 @@ xabber.DiscoveringView = xabber.BasicView.extend({
     },
 
     _initialize: function () {
-        this.data.on("change:color", this.colorUpdated, this);
+        this.listenTo(this.data, 'change:color', this.colorUpdated);
         this.$('.searching-properties-field .dropdown-button').on('click', () => {
             this.toggleProperties();
         });

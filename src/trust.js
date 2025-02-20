@@ -32,7 +32,7 @@ xabber.IncomingTrustSessionView = xabber.BasicView.extend({
             ready: this.onRender.bind(this),
             complete: this.close.bind(this),
         });
-        xabber.on('verification_session_cancelled', this.onSessionCancel, this);
+        this.listenTo(xabber, 'verification_session_cancelled', this.onSessionCancel);
     },
 
     onRender: function (options) {
@@ -134,7 +134,7 @@ xabber.ActiveSessionModalView = xabber.BasicView.extend({
         this.trust = this.account.omemo.xabber_trust;
         if (!this.trust || !this.trust.get('active_trust_sessions')[this.sid])
             return;
-        this.account.on('active_session_change', this.onRender, this);
+        this.listenTo(this.account, 'active_session_change', this.onRender);
         this.$el.openModal({
             ready: this.onRender.bind(this),
             complete: this.close.bind(this),
@@ -239,7 +239,7 @@ xabber.ActiveSessionModalView = xabber.BasicView.extend({
     },
 
     startUpdatingDevices: function () {
-        this.trust.on('trust_updated', () => {
+        this.listenTo(this.trust, 'trust_updated', () => {
             this.updateDevicesItems()
         });
         setTimeout(() => {

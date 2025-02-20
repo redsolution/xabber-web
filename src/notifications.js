@@ -70,13 +70,13 @@ xabber.NotificationsView = xabber.BasicView.extend({
     },
 
     _initialize: function () {
-        xabber.accounts.on("list_changed connected_list_changed notification_chat_created account_color_updated add destroy", this.updateAccountsFilter, this);
-        xabber.accounts.on("change:enabled", this.updateAccountsFilter, this);
-        xabber.accounts.on("change:connected", this.updateAccountsFilter, this);
-        xabber.on('plyr_player_updated', this.updatePlyrControls, this);
-        xabber.on('plyr_player_time_updated', this.updatePlyrTime, this);
-        xabber.on('update_layout', this.updatePlyrTitle, this);
-        xabber.on('update_client_notifications', this.updateClientNotifications, this);
+        this.listenTo(xabber.accounts, 'list_changed connected_list_changed notification_chat_created account_color_updated add destroy', this.updateAccountsFilter);
+        this.listenTo(xabber.accounts, 'change:enabled', this.updateAccountsFilter);
+        this.listenTo(xabber.accounts, 'change:connected', this.updateAccountsFilter);
+        this.listenTo(xabber, 'plyr_player_updated', this.updatePlyrControls);
+        this.listenTo(xabber, 'plyr_player_time_updated', this.updatePlyrTime);
+        this.listenTo(xabber, 'update_layout', this.updatePlyrTitle);
+        this.listenTo(xabber, 'update_client_notifications', this.updateClientNotifications);
         return this;
     },
 
@@ -546,12 +546,12 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
         this.filter_type = 'all';
         this.notifications_chats = [];
         this.notification_messages = new xabber.Messages(null, {});
-        this.notification_messages.on("change:last_replace_time", this.updateMessage, this);
-        this.notification_messages.on("add", this.addMessage, this);
-        this.notification_messages.on("change:is_unread", this.onChangedReadState, this);
-        this.notification_messages.on("change:timestamp", this.onChangedMessageTimestamp, this);
-        xabber.accounts.on('account_color_updated', this.updateColorScheme, this);
-        xabber.on('invitations_updated', this.updateAllIncomingSubscriptions, this);
+        this.listenTo(this.notification_messages, 'change:last_replace_time', this.updateMessage);
+        this.listenTo(this.notification_messages, 'add', this.addMessage);
+        this.listenTo(this.notification_messages, 'change:is_unread', this.onChangedReadState);
+        this.listenTo(this.notification_messages, 'change:timestamp', this.onChangedMessageTimestamp);
+        this.listenTo(xabber.accounts, 'account_color_updated', this.updateColorScheme);
+        this.listenTo(xabber, 'invitations_updated', this.updateAllIncomingSubscriptions);
 
         return this;
     },
