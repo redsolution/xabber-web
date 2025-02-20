@@ -2320,7 +2320,7 @@ xabber.ChatItemView = xabber.BasicView.extend({
         this.listenTo(this.model, 'change:archived', this.updateArchivedState);
         this.listenTo(this.model, 'change:active_verification_session', this.updateChatSession);
         this.listenTo(this.model, 'change:notifications', this.updateNotificationsState);
-        this.listenTo(this.model, 'change:this', this.updateMutedState);
+        this.listenTo(this.model, 'change:muted', this.updateMutedState);
         this.listenTo(this.model, 'change:open', this.open);
         this.listenTo(this.model, 'change:remove_opened_chat', this.onClosed);
         this.listenTo(this.model.messages, 'add', this.updateChatCard);
@@ -3696,8 +3696,8 @@ xabber.ChatContentView = xabber.BasicView.extend({
         this.ps_container.on("ps-scroll-up ps-scroll-down", this.onScroll.bind(this));
         this.ps_container.on("ps-scroll-y", this.onScrollY.bind(this));
         this.listenTo(this.model, 'change:active change:idle', this.onChangedActiveStatus);
-        this.listenTo(xabber, 'change:idle change:focused', this.onChangedActiveStatus);
-        this.listenTo(xabber, 'update_layout', this.onChangedIdleStatus);
+        this.listenTo(xabber, 'change:idle change:focused', this.onChangedIdleStatus);
+        this.listenTo(xabber, 'update_layout', this.updateActiveSessionHeight);
         this.listenTo(this.model, 'load_last_history', this.loadLastHistory);
         this.listenTo(this.model, 'get_missed_history', this.requestMissedMessages);
         this.listenTo(this.model.messages, 'add', this.onMessage);

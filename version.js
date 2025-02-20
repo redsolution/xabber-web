@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.4.65","version_description":"changed listeners to listenTo in views, removed mentions"}'
+'{"version_number":"2.4.66","version_description":"fixed chat item and chat content listeners"}'
 )});
