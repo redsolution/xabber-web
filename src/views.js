@@ -1375,7 +1375,7 @@ xabber.ToolbarView = xabber.BasicView.extend({
             account.chats.each((chat) => {
                 if (chat.contact && !chat.isMuted()) {
                     if (chat.get('notifications')){
-                        mentions += chat.get('unread') + chat.get('const_unread');
+                        // mentions += chat.get('unread') + chat.get('const_unread');
                     } else {
                         count_all_msg += chat.get('unread') + chat.get('const_unread');
                         if (chat.contact.get('group_chat'))
@@ -1388,7 +1388,6 @@ xabber.ToolbarView = xabber.BasicView.extend({
             let incoming_subscriptions = account.contacts.filter(item => ((item.get('subscription_request_in') && item.get('subscription') != 'both'))).length;
             let incoming_invitations = account.contacts.filter(item => (item.get('invitation') && !item.get('removed'))).length;
 
-
             incoming_invitations && (mentions += incoming_invitations);
             incoming_invitations && (incoming_subs_count += incoming_invitations);
             incoming_subscriptions && (contacts += incoming_subscriptions);
@@ -1400,6 +1399,13 @@ xabber.ToolbarView = xabber.BasicView.extend({
                     mentions += Object.keys(active_trust_sessions).length;
             }
         });
+
+        if (xabber.notifications_view && xabber.notifications_view.current_content && xabber.notifications_view.current_content.notification_messages.length){
+            let unread_notifications = xabber.notifications_view.current_content.notification_messages.filter(msg => msg.get('is_unread') && !msg.get('ignored')).length;
+            console.log(unread_notifications);
+            console.log(mentions);
+            mentions += unread_notifications;
+        }
         return { msgs: count_msg, all_msgs: count_all_msg, group_msgs: count_group_msg, mentions: mentions, contacts: contacts , mentions_subscriptions: incoming_subs_count };
     },
 

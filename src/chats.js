@@ -2346,8 +2346,15 @@ xabber.ChatItemView = xabber.BasicView.extend({
             this.listenTo(this.contact, 'update_trusted', this.updateEncryptedColor);
         }
         this.$el.switchClass('saved-chat', this.model.get('saved'));
+        this.$el.find('.circle-avatar').switchClass('ground-color-700', this.model.get('saved'));
         this.$el.find('.circle-avatar').switchClass('fill-color-500', this.model.get('saved'));
-        this.model.get('saved') && this.$el.find('.circle-avatar').html(env.templates.svg['membership']());
+        if (this.model.get('saved')){
+            let $tab_icon = $(env.templates.svg['membership']()).addClass('saved-tab-icon'),
+                $default_icon = $(env.templates.svg['saved-messages']()).addClass('saved-normal-icon');
+            this.$el.find('.circle-avatar').append($tab_icon);
+            this.$el.find('.circle-avatar').append($default_icon);
+
+        }
         this.listenTo(this.account.settings, 'change:color', this.updateColorScheme);
     },
 
@@ -10441,6 +10448,7 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
                     if (this.account.server_features.get(Strophe.NS.XABBER_FAVORITES) && chat.id == `${this.account.get('jid')}:${this.account.server_features.get(Strophe.NS.XABBER_FAVORITES).get('from')}:saved`) {
                         let $cloned_item = chat.item_view.$el.clone().removeClass('hidden');
                         $cloned_item.find('.last-msg').text(xabber.getString("saved_messages__hint_forward_here"));
+                        $cloned_item.find('.chat-title').text(xabber.getString("saved_messages__header"));
                         this.saved_chat = true;
                         this.$('.chat-list-wrap .pinned-chat-list').prepend($cloned_item);
                     } else
@@ -10453,6 +10461,7 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
                 if (this.account.server_features.get(Strophe.NS.XABBER_FAVORITES) && chat.id == `${this.account.get('jid')}:${this.account.server_features.get(Strophe.NS.XABBER_FAVORITES).get('from')}:saved`) {
                     let $cloned_item = chat.item_view.$el.clone().removeClass('hidden');
                     $cloned_item.find('.last-msg').text(xabber.getString("saved_messages__hint_forward_here"));
+                    $cloned_item.find('.chat-title').text(xabber.getString("saved_messages__header"));
                     this.saved_chat = true;
                     this.$('.chat-list-wrap .pinned-chat-list').prepend($cloned_item);
                 } else
@@ -10463,6 +10472,7 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
             let saved_chat = this.account.chats.getSavedChat(),
                 $cloned_item = saved_chat.item_view.$el.clone();
             $cloned_item.find('.last-msg').text(xabber.getString("saved_messages__hint_forward_here"));
+            $cloned_item.find('.chat-title').text(xabber.getString("saved_messages__header"));
             this.$('.chat-list-wrap .pinned-chat-list').prepend($cloned_item);
         }
         this.$('.chat-list-wrap .pinned-chat-list').prepend($('<div/>', { class: 'forward-panel-list-title recent-chats-title hidden'}).text(xabber.getString("category_recent_chats")));
