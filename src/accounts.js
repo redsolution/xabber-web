@@ -4617,9 +4617,9 @@ xabber.SettingsAccountsModalBlockView = xabber.BasicView.extend({
         this.listenTo(this.model, 'add', this.updateOneInList);
         this.listenTo(this.model, 'update_order', this.updateList);
         this.listenTo(this.model, 'destroy', this.onAccountRemoved);
-        this.listenTo(this.model, 'add', this.parent.updateAccounts);
-        this.listenTo(this.model, 'update_order', this.parent.updateAccounts);
-        this.listenTo(this.model, 'destroy', this.parent.updateAccounts);
+        this.model.on("add", this.parent.updateAccounts, this.parent);
+        this.model.on("update_order", this.parent.updateAccounts, this.parent);
+        this.model.on("destroy", this.parent.updateAccounts, this.parent);
         this.$('.move-account-to-bottom')
             .on('move_xmpp_account', this.onMoveAccountToBottom.bind(this));
     },
