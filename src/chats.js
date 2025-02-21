@@ -5106,7 +5106,10 @@ xabber.ChatContentView = xabber.BasicView.extend({
 
         let $message = this.addMessage(message);
         console.warn($message);
-
+        setTimeout(() => {
+            console.error(this);
+            console.error(this.$('.chat-content'));
+        }, 3000)
         if (message.get('type') === 'file_upload') {
             if (this.account.get('gallery_token') && this.account.get('gallery_url'))
                 this.startGalleryUploadFile(message, $message);

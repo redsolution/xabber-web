@@ -153,6 +153,10 @@ $.fn.hyperlinkify = function (options, id) {
             else {
                 if (node.nodeName === '#text')
                     x = _.escape($node.text());
+                if (node.tagName === 'SPAN') {
+                    html_concat += x;
+                    return;
+                }
                 let list = x && x.match(url_regexp);
                 list = Array.from(new Set(list));
                 let email_list = x && x.match(email_regexp);
