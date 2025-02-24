@@ -1496,10 +1496,10 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
             this.$('.chat-day-indicator').remove();
             this.load_history_dfd = null;
             this.backToBottom();
+            this.updateCalendarCellsActivity(this.filtered_messages);
             if (this.filtered_messages.length) {
                 this.rendered_messages = this.filtered_messages.slice(Math.max(this.filtered_messages.length - 20, 0));
                 this.renderMessage(this.rendered_messages[this.rendered_messages.length - 1], this.rendered_messages);
-                this.updateCalendarCellsActivity(this.filtered_messages);
                 this.handleOnScrollRendering('bottom');
             }
 

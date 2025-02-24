@@ -23370,6 +23370,7 @@ ul.restrictions-list-content>li {
 }
 .panel-wrap .notification-subscriptions-wrap .notification-subscription-item .subcription-main-wrap{
     padding: 0 24px 0 84px;
+    max-width: 100%;
 }
 .panel-wrap .notification-subscriptions-wrap .notification-subscription-item .subcription-main-wrap .subscription-item-name{
     font-size: 15px;
