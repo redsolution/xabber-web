@@ -7,6 +7,11 @@ let env = xabber.env,
     utils = env.utils,
     uuid = env.uuid,
     $ = env.$,
+    Backbone = env.Backbone,
+    Strophe = env.Strophe,
+    sounds = env.sounds,
+    idleJs = env.idleJs,
+    client_translation_progress = env.client_translation_progress,
     _ = env._;
 
 xabber.ViewPath = function (str) {
@@ -132,10 +137,6 @@ xabber.BasicView = Backbone.View.extend({
         this.$el.css(styles);
     },
 
-    removeCustomCss: function () {
-        this.$el.removeAttr('style');
-    },
-
     saveScrollBarOffset: function () {
         if (this.ps_container && this.isVisible()) {
             let scroll_top = this.data.get('scroll_top');
@@ -238,7 +239,7 @@ xabber.NodeView = xabber.BasicView.extend({
     onShow: function (options, tree) {
         if ((xabber.body.data.get('contact_details_view') && (this.vname === 'right_contact'))){
             xabber.body.data.get('contact_details_view').scrollTo(xabber.body.data.get('contact_details_view').data.get('scroll_top'));
-            xabber.body.data.set('contact_details_view', null)
+            xabber.body.data.set('contact_details_view', null);
             return;
         }
         if (options.close_settings && this.children.main_overlay){
@@ -255,7 +256,7 @@ xabber.NodeView = xabber.BasicView.extend({
             this.$el.children().detach();
         tree = this.patchTree(tree, options) || tree;
         _.each(this.children, (view, name) => {
-            if (tree.main_overlay && (name != 'main_overlay'))
+            if (tree.main_overlay && (name !== 'main_overlay'))
                 return;
             if (_.has(tree, name)) {
                 if (name !== 'login')
@@ -400,7 +401,7 @@ xabber.SearchView = xabber.BasicView.extend({
         this.updateSearch();
     },
 
-    clearSearchSelection: function (ev) {
+    clearSearchSelection: function () {
         this.selection_id = null;
         this.$('.list-item.selected').removeClass('selected');
     },
@@ -408,8 +409,6 @@ xabber.SearchView = xabber.BasicView.extend({
     searchAll: function () {
         this.$('.list-item').removeClass('hidden');
     },
-
-    keyUpOnSearchWithQuery: function () {},
 
     close: function () {},
 
@@ -431,7 +430,7 @@ xabber.SearchView = xabber.BasicView.extend({
           "click .btn-search-messages": "updateSearchWithMessages"
       },
 
-      updateSearchWithMessages: function (ev) {
+      updateSearchWithMessages: function () {
           this.search_messages = true;
           this.updateSearch();
       },
@@ -717,9 +716,9 @@ xabber.SearchView = xabber.BasicView.extend({
                   .c('value').t(Strophe.NS.MAM).up().up()
                   .c('field', {'var': 'withtext'})
                   .c('value').t(query).up().up().up().cnode(new Strophe.RSM(options).toXML()),
-              _interval, handler;
+              handler;
 
-          let sendMAMRequest = (func_conn) => {
+          let sendMAMRequest = () => {
               handler = account.connection._addSysHandler((message) => {
                   let $msg = $(message);
                   if ($msg.find('result').attr('queryid') === queryid) {
@@ -727,62 +726,28 @@ xabber.SearchView = xabber.BasicView.extend({
                   }
                   return true;
               }, Strophe.NS.MAM, null, null, null, null, {query_id: queryid} );
-              // let _delete_handler_timeout = setTimeout(() => {
-              //     func_conn.deleteHandler(handler);
-              // }, 19000);
               let callb = (res) => {
                       account.connection.deleteHandler(handler);
-                      // clearTimeout(_delete_handler_timeout);
-                      // clearInterval(_interval);
                       handler = null;
                       let $fin = $(res).find(`fin[xmlns="${Strophe.NS.MAM}"]`);
                       if ($fin.length && $fin.attr('queryid') === queryid) {
-                          let rsm_complete = ($fin.attr('complete') === 'true') ? true : false;
+                          let rsm_complete = ($fin.attr('complete') === 'true');
                           rsm_complete && (account.searched_msgs_loaded = true);
                       }
                       callback && callback(messages);
                   },
                   errb = (err) => {
                       account.connection.deleteHandler(handler);
-                      // clearTimeout(_delete_handler_timeout);
-                      // clearInterval(_interval);
                       handler = null;
                       xabber.error("MAM search error");
                       xabber.error(err);
                       errback && errback(err);
                   };
               console.error('trying to send for search');
-
-              // if (is_fast)
-              //     account.sendFast(iq, callb, errb);
-              // else
-                  account.sendIQ(iq, callb, errb);
+              account.sendIQ(iq, callb, errb);
 
           };
-          // let is_fast = options.fast && account.fast_connection && !account.fast_connection.disconnecting
-          //     && account.fast_connection.authenticated && account.fast_connection.connected && account.get('status') !== 'offline',
-          //     conn = is_fast ? account.fast_connection : account.connection;
-          //
-          // if (conn.connected){
-          //     sendMAMRequest(conn);
-              sendMAMRequest(account.connection);
-          // }
-          // let send_counter = 0;
-          // _interval = setInterval(() => {
-          //     is_fast = options.fast && account.fast_connection && !account.fast_connection.disconnecting
-          //         && account.fast_connection.authenticated && account.fast_connection.connected && account.get('status') !== 'offline';
-          //     conn = is_fast ? account.fast_connection : account.connection;
-          //     conn && console.log(conn.connected);
-          //     if (!conn || send_counter >= 1){
-          //         clearInterval(_interval);
-          //         errback && errback('No connection or too many attempts');
-          //         return;
-          //     }
-          //     if (conn.connected && send_counter < 1){
-          //         send_counter++;
-          //         sendMAMRequest(conn);
-          //     }
-          // }, 20000);
+          sendMAMRequest();
       },
 
       clearSearch: function (ev) {
@@ -862,7 +827,7 @@ xabber.SearchView = xabber.BasicView.extend({
         }
     },
 
-    keyUp: function (ev) {
+    keyUp: function () {
         let value = this.getValue();
         this.$input.switchClass('changed', this.$input.val() !== value);
     },
@@ -920,7 +885,7 @@ xabber.Body = xabber.NodeView.extend({
 
     updateAvatarShape: function () {
         let shape = xabber.settings.avatar_shape;
-        $(constants.CONTAINER_ELEMENT).switchClass('non-circle-avatars', shape != 'circle');
+        $(constants.CONTAINER_ELEMENT).switchClass('non-circle-avatars', shape !== 'circle');
         $(constants.CONTAINER_ELEMENT).switchClass('octagon-avatars', shape === 'octagon');
         $(constants.CONTAINER_ELEMENT).switchClass('hexagon-avatars', shape === 'hexagon');
         $(constants.CONTAINER_ELEMENT).switchClass('pentagon-avatars', shape === 'pentagon');
@@ -1181,7 +1146,7 @@ xabber.ToolbarView = xabber.BasicView.extend({
         }
     },
 
-    clickAllChats: function (ev) {
+    clickAllChats: function () {
         this.$('.all-chats').click();
     },
 
@@ -1201,7 +1166,7 @@ xabber.ToolbarView = xabber.BasicView.extend({
         }
         !no_unread && this.$('.toolbar-item:not(.account-item):not(.toolbar-logo)').removeClass('active unread')
             .filter('.all-chats').addClass('active').switchClass('unread', is_active);
-        let options = {}
+        let options = {};
         no_unread && (options.no_unread = no_unread);
 
         if (xabber.chats_view && Boolean(xabber.chats_view.$('.search-input').val()) && !force_unread) {
@@ -1250,18 +1215,16 @@ xabber.ToolbarView = xabber.BasicView.extend({
         }
     },
 
-    showNotifications: function (ev, no_unread) {
+    showNotifications: function () {
         if (this.data.get('account_filtering')){
             this.data.set('account_filtering', null);
             this.$('.toolbar-item.account-item').removeClass('active');
         }
         try {
-            let chat = xabber.chats.filter(item => item.account.server_features.get(Strophe.NS.XABBER_NOTIFY) && item.get('jid') === item.account.server_features.get(Strophe.NS.XABBER_NOTIFY).get('from') && item.get('notifications'));
-
             if (!xabber.accounts.enabled.length || !xabber.accounts.connected.length)
                 return;
             this.$('.toolbar-item:not(.account-item):not(.toolbar-logo)').removeClass('active unread')
-                .filter('.mentions').addClass('active')
+                .filter('.mentions').addClass('active');
 
             xabber.body.setScreen('notifications', {right: 'notifications', notifications: xabber.notifications_view});
             xabber.notifications_view && xabber.notifications_view.onShowNotificationsTab();
@@ -1277,21 +1240,14 @@ xabber.ToolbarView = xabber.BasicView.extend({
             this.data.set('account_filtering', account.get('jid'));
         if (this.$('.toolbar-item:not(.toolbar-logo).all-chats').hasClass('active')) {
             this.showAllChats(null, true);
-            return;
-        }
-        if (this.$('.toolbar-item:not(.toolbar-logo).archive-chats').hasClass('active')) {
+        } else if (this.$('.toolbar-item:not(.toolbar-logo).archive-chats').hasClass('active')) {
             this.showArchive(null, true);
-            return;
-        }
-        if (this.$('.toolbar-item:not(.toolbar-logo).saved-chats').hasClass('active')) {
+        } else if (this.$('.toolbar-item:not(.toolbar-logo).saved-chats').hasClass('active')) {
             this.showSavedChats(null, true);
-            return;
-        }
-        if (this.$('.toolbar-item:not(.toolbar-logo).jingle-calls').hasClass('active') ||
+        } else if (this.$('.toolbar-item:not(.toolbar-logo).jingle-calls').hasClass('active') ||
             this.$('.toolbar-item:not(.toolbar-logo).mentions').hasClass('active') ||
             this.$('.toolbar-item:not(.toolbar-logo).geolocation-chats').hasClass('active')){
             this.showAllChats(null, true);
-            return;
         }
     },
 
@@ -1315,15 +1271,6 @@ xabber.ToolbarView = xabber.BasicView.extend({
         if (!xabber.accounts.enabled.length || !xabber.accounts.connected.length)
             return;
         xabber.body.setScreen('calls', {right: 'calls', calls: xabber.calls_view});
-        xabber.trigger('update_placeholder');
-    },
-
-    showMentions: function () {
-        if (this.data.get('account_filtering')){
-            this.data.set('account_filtering', null);
-            this.$('.toolbar-item.account-item').removeClass('active');
-        }
-        xabber.body.setScreen('mentions');
         xabber.trigger('update_placeholder');
     },
 
@@ -1385,7 +1332,7 @@ xabber.ToolbarView = xabber.BasicView.extend({
                     }
                 }
             });
-            let incoming_subscriptions = account.contacts.filter(item => ((item.get('subscription_request_in') && item.get('subscription') != 'both'))).length;
+            let incoming_subscriptions = account.contacts.filter(item => ((item.get('subscription_request_in') && item.get('subscription') !== 'both'))).length;
             let incoming_invitations = account.contacts.filter(item => (item.get('invitation') && !item.get('removed'))).length;
 
             incoming_invitations && (mentions += incoming_invitations);
@@ -1640,9 +1587,7 @@ xabber.JingleMessageView = xabber.BasicView.extend({
             return true;
         else if (document.webkitFullscreenElement)
             return true;
-        else if (document.mozFullScreenElement)
-            return true;
-        else return false;
+        else return !!document.mozFullScreenElement;
     },
 
     accept: function () {
@@ -1705,13 +1650,14 @@ xabber.JingleMessageView = xabber.BasicView.extend({
         this.model.set('audio', !this.model.get('audio'));
     },
 
-    onDestroy: function (status) {
-        let status_text;
-        if (this.model.get('status') == 'device_busy')
+    onDestroy: function () {
+        let status_text,
+            status = this.model.get('status');
+        if (status === 'device_busy')
             status_text = 'dialog_jingle_message__status_device_busy';
-        else if (this.model.get('status') == 'busy')
+        else if (status === 'busy')
             status_text = 'dialog_jingle_message__status_busy';
-        else if (this.model.get('status') == 'accepted_another_device') {
+        else if (status === 'accepted_another_device') {
             status_text = 'dialog_jingle_message__status_another_device_accepted';
         } else
             status_text = 'dialog_jingle_message__status_disconnected';
@@ -1753,7 +1699,7 @@ xabber.PlyrPlayerPopupView = xabber.BasicView.extend({
         "click .mdi-toggle-mute": "toggleMute",
     },
 
-    _initialize: function (options) {
+    _initialize: function () {
         this.data.set('visibility_state', 0);
         this.listenTo(this.data, 'change:visibility_state', this.onVisibilityChange);
         this.listenTo(xabber, 'plyr_player_updated', this.updatePlyrControls);
@@ -1771,23 +1717,23 @@ xabber.PlyrPlayerPopupView = xabber.BasicView.extend({
                         ],
                         youtube: {controls: 0, disablekb: 1, iv_load_policy: 3, modestbranding: 1, rel: 0, showinfo: 0}
                     });
-                    this.player.on('play',(event) => {
-                        let other_players = xabber.plyr_players.filter(other => other != this.player);
+                    this.player.on('play',() => {
+                        let other_players = xabber.plyr_players.filter(other => other !== this.player);
                         other_players.forEach(function(other) {
                             if (other.$audio_elem){
                                 if (other.$audio_elem.voice_message)
                                     other.$audio_elem.voice_message.stopTime();
                             }
-                        })
+                        });
                         xabber.trigger('plyr_player_updated');
                     });
-                    this.player.on('pause',(event) => {
+                    this.player.on('pause',() => {
                         xabber.trigger('plyr_player_updated');
                     });
-                    this.player.on('timeupdate',(event) => {
+                    this.player.on('timeupdate',() => {
                         xabber.trigger('plyr_player_time_updated');
                     });
-                    this.player.on('volumechange',(event) => {
+                    this.player.on('volumechange',() => {
                         xabber.trigger('plyr_player_updated');
                     });
                     this.player.on('statechange',(event) => {
@@ -1879,21 +1825,21 @@ xabber.PlyrPlayerPopupView = xabber.BasicView.extend({
                 sources: [
                     video_sources,
                 ],
-            }
+            };
             xabber.current_plyr_player = this.player;
-            this.player.once('ready',(event) => {
-                let $minimize_element_float = $('<svg class="mdi mdi-24px mdi-plyr-custom-controls mdi-minimize mdi-minimize-float mdi-svg-template" data-svgname="player-float"></svg>')
-                $minimize_element_float.append(env.templates.svg['player-float']())
+            this.player.once('ready',() => {
+                let $minimize_element_float = $('<svg class="mdi mdi-24px mdi-plyr-custom-controls mdi-minimize mdi-minimize-float mdi-svg-template" data-svgname="player-float"></svg>');
+                $minimize_element_float.append(env.templates.svg['player-float']());
                 $minimize_element_float.insertBefore(this.$('.plyr__controls__item[data-plyr="fullscreen"]'));
-                let $minimize_element_full = $('<svg class="mdi mdi-24px mdi-plyr-custom-controls mdi-minimize mdi-minimize-full mdi-svg-template" data-svgname="player-full"></svg>')
-                $minimize_element_full.append(env.templates.svg['player-full']())
+                let $minimize_element_full = $('<svg class="mdi mdi-24px mdi-plyr-custom-controls mdi-minimize mdi-minimize-full mdi-svg-template" data-svgname="player-full"></svg>');
+                $minimize_element_full.append(env.templates.svg['player-full']());
                 $minimize_element_full.insertBefore(this.$('.plyr__controls__item[data-plyr="fullscreen"]'));
-                let $show_message_element_full = $('<svg class="mdi mdi-24px mdi-plyr-custom-controls mdi-open-message mdi-svg-template" data-svgname="message-bookmark-outline"></svg>')
-                $show_message_element_full.append(env.templates.svg['message-bookmark-outline']())
+                let $show_message_element_full = $('<svg class="mdi mdi-24px mdi-plyr-custom-controls mdi-open-message mdi-svg-template" data-svgname="message-bookmark-outline"></svg>');
+                $show_message_element_full.append(env.templates.svg['message-bookmark-outline']());
                 $show_message_element_full.insertAfter(this.$('.plyr__controls__item[data-plyr="download"]'));
-                let $previous_element = $('<div class="btn-previous-plyr"><i class="mdi mdi-skip-previous mdi-24px"></i></div>')
+                let $previous_element = $('<div class="btn-previous-plyr"><i class="mdi mdi-skip-previous mdi-24px"></i></div>');
                 $previous_element.insertBefore(this.$('.plyr__controls__item[data-plyr="play"]'));
-                let $next_element = $('<div class="btn-next-plyr"><i class="mdi mdi-skip-next mdi-24px"></i></div>')
+                let $next_element = $('<div class="btn-next-plyr"><i class="mdi mdi-skip-next mdi-24px"></i></div>');
                 $next_element.insertAfter(this.$('.plyr__controls__item[data-plyr="play"]'));
                 this.player.play();
                 xabber.trigger('plyr_player_updated');
@@ -1953,7 +1899,7 @@ xabber.PlyrPlayerPopupView = xabber.BasicView.extend({
     onVisibilityChange: function () {
         let visibility_state = this.data.get('visibility_state'),
             $overlay = this.$el.closest('#modals').siblings('#' + this.$el.data('overlayId'));
-        $overlay.switchClass('hidden', visibility_state != 0);
+        $overlay.switchClass('hidden', visibility_state !== 0);
         this.$el.switchClass('player-overlay', visibility_state === 0);
         this.$el.switchClass('hidden', visibility_state === 2);
     },
@@ -1968,7 +1914,7 @@ xabber.PlyrPlayerPopupView = xabber.BasicView.extend({
             let next_item = xabber.current_plyr_player.chat_item.model.plyr_players[player_index + 1];
             if (!next_item.$audio_elem.voice_message){
                 let f_url = $(next_item.$audio_elem).find('.file-link-download').attr('href');
-                $(next_item.$audio_elem).find('.mdi-play').removeClass('no-uploaded')
+                $(next_item.$audio_elem).find('.mdi-play').removeClass('no-uploaded');
                 next_item.$audio_elem.voice_message = xabber.current_plyr_player.chat_item.content.renderVoiceMessage($(next_item.$audio_elem).find('.file-container')[0], f_url, xabber.current_plyr_player.chat_item.model);
             } else {
                 next_item.$audio_elem.voice_message.play()
@@ -1992,7 +1938,7 @@ xabber.PlyrPlayerPopupView = xabber.BasicView.extend({
             let prev_item = xabber.current_plyr_player.chat_item.model.plyr_players[player_index - 1];
             if (!prev_item.$audio_elem.voice_message){
                 let f_url = $(prev_item.$audio_elem).find('.file-link-download').attr('href');
-                $(prev_item.$audio_elem).find('.mdi-play').removeClass('no-uploaded')
+                $(prev_item.$audio_elem).find('.mdi-play').removeClass('no-uploaded');
                 prev_item.$audio_elem.voice_message = xabber.current_plyr_player.chat_item.content.renderVoiceMessage($(prev_item.$audio_elem).find('.file-container')[0], f_url, xabber.current_plyr_player.chat_item.model);
             } else {
                 prev_item.$audio_elem.voice_message.play()
@@ -2037,10 +1983,10 @@ xabber.PlyrPlayerPopupView = xabber.BasicView.extend({
         if (xabber.current_plyr_player.$audio_elem){
             if (!xabber.current_plyr_player.$audio_elem.voice_message){
                 let f_url = $(xabber.current_plyr_player.$audio_elem).find('.file-link-download').attr('href');
-                $(xabber.current_plyr_player.$audio_elem).find('.mdi-play').removeClass('no-uploaded')
+                $(xabber.current_plyr_player.$audio_elem).find('.mdi-play').removeClass('no-uploaded');
                 xabber.current_plyr_player.$audio_elem.voice_message = this.content.renderVoiceMessage($(xabber.current_plyr_player.$audio_elem).find('.file-container')[0], f_url);
             } else {
-                xabber.current_plyr_player.$audio_elem.voice_message.playPause()
+                xabber.current_plyr_player.$audio_elem.voice_message.playPause();
             }
         } else
             xabber.current_plyr_player.togglePlay();
@@ -2110,7 +2056,7 @@ xabber.SettingsModalView = xabber.BasicView.extend({
         "click .settings-tab.delete-all-accounts": "deleteAllAccounts"
     },
 
-    _initialize: function (options) {
+    _initialize: function () {
         this.$('.xabber-info-wrap .version').text(xabber.get('version_number'));
         this.listenTo(xabber, 'update_main_color', this.updateMainColor);
         this.listenTo(this.model, 'change:language', this.updateLanguage);
@@ -2150,18 +2096,18 @@ xabber.SettingsModalView = xabber.BasicView.extend({
         this.$('.notifications-lever input[type=checkbox]').prop({
             checked: settings.notifications && xabber._cache.get('notifications')
         });
-        this.$('.sound input[type=radio][name=group_sound]').prop('disabled', !settings.notifications_group)
+        this.$('.sound input[type=radio][name=group_sound]').prop('disabled', !settings.notifications_group);
         this.$('.private-notifications input[type=checkbox]')
             .prop({checked: settings.notifications_private});
-        this.$('.sound input[type=radio][name=private_sound]').prop('disabled', !settings.notifications_private)
+        this.$('.sound input[type=radio][name=private_sound]').prop('disabled', !settings.notifications_private);
         this.$('.sound input[type=radio][name=call_sound]').prop('disabled', !settings.jingle_calls);
         this.$('.sound input[type=radio][name=dialtone_sound]').prop('disabled', !settings.jingle_calls);
         this.$('.group-notifications input[type=checkbox]')
             .prop({checked: settings.notifications_group});
         this.$('.jingle-calls input[type=checkbox]')
             .prop({checked: settings.jingle_calls});
-        this.$('.sound input[type=radio][name=group_sound]').prop('disabled', !settings.notifications_group)
-        this.$('.sound input[type=radio][name=attention_sound]').prop('disabled', !settings.call_attention)
+        this.$('.sound input[type=radio][name=group_sound]').prop('disabled', !settings.notifications_group);
+        this.$('.sound input[type=radio][name=attention_sound]').prop('disabled', !settings.call_attention);
         this.$('.message-preview.private-preview input[type=checkbox]')
             .prop({checked: settings.message_preview_private}).prop('disabled', !(settings.notifications && xabber._cache.get('notifications') && settings.notifications_private));
         this.$('.message-preview.group-preview input[type=checkbox]')
@@ -2211,7 +2157,7 @@ xabber.SettingsModalView = xabber.BasicView.extend({
         this.$(`.device-metadata input[type=radio][name=device_metadata][value=${settings.device_metadata}]`)
                 .prop('checked', true);
         this.$(`.device-metadata-description`).text(xabber.getString(`settings__section_privacy__${settings.device_metadata}_metadata_description`));
-        (lang == xabber.get("default_language")) && (lang = 'default');
+        (lang === xabber.get("default_language")) && (lang = 'default');
         this.$(`.languages-list input[type=radio][name=language][value="${lang}"]`)
             .prop('checked', true);
         this.$(`.emoji-fonts-list input[type=radio][name=emoji_font][value="${emoji_font}"]`)
@@ -2222,7 +2168,7 @@ xabber.SettingsModalView = xabber.BasicView.extend({
         this.$(`#notifications_volume`).val(notifications_volume);
         // this.$('.volume-setting .disabled').switchClass('hidden', settings.notifications_volume_enabled);
         // this.$('#notifications_volume').prop('disabled', !settings.notifications_volume_enabled);
-        this.$('.settings-panel-head span').text(this.$('.settings-block-wrap:not(.hidden)').attr('data-header'))
+        this.$('.settings-panel-head span').text(this.$('.settings-block-wrap:not(.hidden)').attr('data-header'));
         this.updateAvatarLabel();
         this.updateSoundsLabel();
         this.updateDescription();
@@ -2319,9 +2265,9 @@ xabber.SettingsModalView = xabber.BasicView.extend({
         let color = this.model.get('appearance').color || '#E0E0E0';
         this.$('.selected-color-item').css('background-color', color);
         this.$('.selected-color-hex').text(color);
-        let material_color = xabber.ColorPicker.prototype.materialColors.find(c => c.variations.find(v => v.hex.toLowerCase() == color.toLowerCase()));
+        let material_color = xabber.ColorPicker.prototype.materialColors.find(c => c.variations.find(v => v.hex.toLowerCase() === color.toLowerCase()));
         if (material_color) {
-            let tone = material_color.variations.find(v => v.hex.toLowerCase() == color.toLowerCase());
+            let tone = material_color.variations.find(v => v.hex.toLowerCase() === color.toLowerCase());
             this.$('.selected-color-name').text(xabber.getString(`account_color_name_${material_color.color.replace(/-/g, "_")}`).replace(/-/g, " ") + ` ${tone.weight}`);
         } else {
             this.$('.selected-color-name').text(xabber.getString("settings__section_appearance__hint_custom_color"));
@@ -2343,7 +2289,7 @@ xabber.SettingsModalView = xabber.BasicView.extend({
         this.$('.left-column').addClass('hidden');
         this.$('.right-column').removeClass('hidden');
         $elem.removeClass('hidden');
-        this.$('.settings-panel-head span').text($elem.attr('data-header'))
+        this.$('.settings-panel-head span').text($elem.attr('data-header'));
         $tab.addClass('active').siblings().removeClass('active');
         if ($tab.closest('.right-column') && $tab.attr('data-subblock-parent-name')) {
             this.$('.btn-back').addClass('hidden');
@@ -2390,7 +2336,7 @@ xabber.SettingsModalView = xabber.BasicView.extend({
 
         this.$('.notification-field').html('<form action="#"></form>');
 
-        sounds.notifications.forEach((item,idx) => {
+        sounds.notifications.forEach((item) => {
             if (!item.not_selectable){
                 let element = $(templates.setting_radio_input({
                     input_name: 'private_sound',
@@ -2426,7 +2372,7 @@ xabber.SettingsModalView = xabber.BasicView.extend({
         this.$('.group-notification-field').prepend(group_element_no_sound);
 
         this.$('.dialtone-field').html('<form action="#"></form>');
-        sounds.dialtones.forEach((item,idx) => {
+        sounds.dialtones.forEach((item) => {
             if (!item.not_selectable){
                 let element = $(templates.setting_radio_input({
                     input_name: 'dialtone_sound',
@@ -2439,7 +2385,7 @@ xabber.SettingsModalView = xabber.BasicView.extend({
         });
 
         this.$('.ringtone-field').html('<form action="#"></form>');
-        sounds.ringtones.forEach((item,idx) => {
+        sounds.ringtones.forEach((item) => {
             if (!item.not_selectable){
                 let element = $(templates.setting_radio_input({
                     input_name: 'call_sound',
@@ -2452,7 +2398,7 @@ xabber.SettingsModalView = xabber.BasicView.extend({
         });
 
         this.$('.attention-field').html('<form action="#"></form>');
-        sounds.attention.forEach((item,idx) => {
+        sounds.attention.forEach((item) => {
             if (!item.not_selectable){
                 let element = $(templates.setting_radio_input({
                     input_name: 'attention_sound',
@@ -2488,7 +2434,7 @@ xabber.SettingsModalView = xabber.BasicView.extend({
 
             if (second_locale) {
                 second_prog = client_translation_progress[second_locale];
-                second_prog_text = (second_prog == 100) ? xabber.getString("settings__section_interface_language__translation_progress_fully")
+                second_prog_text = (second_prog === 100) ? xabber.getString("settings__section_interface_language__translation_progress_fully")
                     : xabber.getString("settings__section_interface_language__translation_progress", [`${second_prog}%`]);
 
                 let second_element = $(templates.setting_language_radio_input({
@@ -2506,28 +2452,30 @@ xabber.SettingsModalView = xabber.BasicView.extend({
 
 
         for (let lang in constants.languages) {
-            if (!lang || lang == xabber.get("default_language") || lang == window.navigator.language)
-                continue;
+            if (constants.languages.hasOwnProperty(lang)) {
+                if (!lang || lang === xabber.get("default_language") || lang === window.navigator.language)
+                    continue;
 
-            let locale = Object.keys(client_translation_progress)
-                .find(key => !lang.indexOf(key)) || constants.languages_another_locales[lang] && Object.keys(client_translation_progress)
-                .find(key => !constants.languages_another_locales[lang].indexOf(key)); // < - check for locales that differ in names
+                let locale = Object.keys(client_translation_progress)
+                    .find(key => !lang.indexOf(key)) || constants.languages_another_locales[lang] && Object.keys(client_translation_progress)
+                    .find(key => !constants.languages_another_locales[lang].indexOf(key)); // < - check for locales that differ in names
 
-            if (locale) {
-                let progress = client_translation_progress[locale],
-                    progress_text = (progress == 100) ? xabber.getString("settings__section_interface_language__translation_progress_fully")
-                        : xabber.getString("settings__section_interface_language__translation_progress", [`${progress}%`]);
+                if (locale) {
+                    let progress = client_translation_progress[locale],
+                        progress_text = (progress === 100) ? xabber.getString("settings__section_interface_language__translation_progress_fully")
+                            : xabber.getString("settings__section_interface_language__translation_progress", [`${progress}%`]);
 
-                let element = $(templates.setting_language_radio_input({
-                    input_name: 'language',
-                    input_id: `${this.cid}-${lang}`,
-                    label: constants.languages[lang],
-                    value: lang,
-                    progress: {
-                        text: progress_text
-                    },
-                }));
-                this.$('.languages-list').append(element);
+                    let element = $(templates.setting_language_radio_input({
+                        input_name: 'language',
+                        input_id: `${this.cid}-${lang}`,
+                        label: constants.languages[lang],
+                        value: lang,
+                        progress: {
+                            text: progress_text
+                        },
+                    }));
+                    this.$('.languages-list').append(element);
+                }
             }
         }
     },
@@ -2556,7 +2504,7 @@ xabber.SettingsModalView = xabber.BasicView.extend({
 
         emoji_fonts_list.sort((a, b) => {
             return a.order - b.order;
-        })
+        });
 
         emoji_fonts_list.forEach((item) => {
             let item_name = item.name,
@@ -2573,12 +2521,12 @@ xabber.SettingsModalView = xabber.BasicView.extend({
 
     onScrollY: function () {
         if (this.getScrollTop() === 0)
-            this.$('.settings-panel-head').removeClass('lined-head')
+            this.$('.settings-panel-head').removeClass('lined-head');
         else
-            this.$('.settings-panel-head').addClass('lined-head')
+            this.$('.settings-panel-head').addClass('lined-head');
     },
 
-    closeSettings: function (ev) {
+    closeSettings: function () {
         this.current_sound && this.current_sound.pause();
         if (xabber.body.screen && xabber.body.screen.get('previous_screen')){
 
@@ -2597,7 +2545,7 @@ xabber.SettingsModalView = xabber.BasicView.extend({
             xabber.toolbar_view.showAllChats();
     },
 
-    backToMenu: function (ev) {
+    backToMenu: function () {
         this.current_sound && this.current_sound.pause();
         this.$('.left-column').removeClass('hidden');
         this.$('.right-column').addClass('hidden');
@@ -2626,7 +2574,7 @@ xabber.SettingsModalView = xabber.BasicView.extend({
         this.updateHeight();
     },
 
-    goToWebNotifications: function (ev) {
+    goToWebNotifications: function () {
         this.$('.settings-tab[data-block-name="web-notifications"]').click();
     },
 
@@ -2652,14 +2600,14 @@ xabber.SettingsModalView = xabber.BasicView.extend({
         ev.preventDefault();
     },
 
-    setNotificationsVolumeEnabled: function (ev) {
-        ev.preventDefault();
-        let value = !this.model.get('notifications_volume_enabled');
-        this.model.save('notifications_volume_enabled', value);
-        this.$('#notifications_volume_enable').prop('checked', value);
-        this.$('.volume-setting .disabled').switchClass('hidden', value);
-        this.$('#notifications_volume').prop('disabled', !value);
-    },
+    // setNotificationsVolumeEnabled: function (ev) {
+    //     ev.preventDefault();
+    //     let value = !this.model.get('notifications_volume_enabled');
+    //     this.model.save('notifications_volume_enabled', value);
+    //     this.$('#notifications_volume_enable').prop('checked', value);
+    //     this.$('.volume-setting .disabled').switchClass('hidden', value);
+    //     this.$('#notifications_volume').prop('disabled', !value);
+    // },
 
     setNotifications: function (ev) {
         let value = this.model.get('notifications');
@@ -2669,7 +2617,7 @@ xabber.SettingsModalView = xabber.BasicView.extend({
         } else {
             value = value && xabber._cache.get('notifications');
             if (!xabber._cache.get('notifications')) {
-                window.Notification.requestPermission((permission) => {
+                window.Notification.requestPermission().then((permission) => {
                     xabber._cache.save({'notifications': (permission === 'granted'), 'ignore_notifications_warning': true});
                     xabber.notifications_placeholder && xabber.notifications_placeholder.close();
                     value = (permission === 'granted');
@@ -2698,7 +2646,7 @@ xabber.SettingsModalView = xabber.BasicView.extend({
         let value = !this.model.get('notifications_private');
         this.model.save('notifications_private', value);
         ev.preventDefault();
-        this.$('.sound input[type=radio][name=private_sound]').prop('disabled', !value)
+        this.$('.sound input[type=radio][name=private_sound]').prop('disabled', !value);
         this.$('.message-preview.private-preview input[type=checkbox]').prop('disabled', !(this.model.get('notifications') && xabber._cache.get('notifications') && this.model.get('notifications_private')));
         $(ev.target).closest('.private-notifications').find('input').prop('checked', value);
     },
@@ -2707,7 +2655,7 @@ xabber.SettingsModalView = xabber.BasicView.extend({
         let value = !this.model.get('notifications_group');
         this.model.save('notifications_group', value);
         ev.preventDefault();
-        this.$('.sound input[type=radio][name=group_sound]').prop('disabled', !value)
+        this.$('.sound input[type=radio][name=group_sound]').prop('disabled', !value);
         this.$('.message-preview.group-preview input[type=checkbox]').prop('disabled', !(this.model.get('notifications') && xabber._cache.get('notifications') && this.model.get('notifications_group')));
         $(ev.target).closest('.group-notifications').find('input').prop('checked', value);
     },
@@ -2716,8 +2664,8 @@ xabber.SettingsModalView = xabber.BasicView.extend({
         let value = !this.model.get('jingle_calls');
         this.model.save('jingle_calls', value);
         ev.preventDefault();
-        this.$('.sound input[type=radio][name=call_sound]').prop('disabled', !value)
-        this.$('.sound input[type=radio][name=dialtone_sound]').prop('disabled', !value)
+        this.$('.sound input[type=radio][name=call_sound]').prop('disabled', !value);
+        this.$('.sound input[type=radio][name=dialtone_sound]').prop('disabled', !value);
         $(ev.target).closest('.jingle-calls').find('input').prop('checked', value);
     },
 
@@ -2829,11 +2777,11 @@ xabber.SettingsModalView = xabber.BasicView.extend({
 
     setBackground: function (ev) {
         let value = ev.target.value;
-        if (value == 'default') {
+        if (value === 'default') {
             this.model.save('background', {type: 'default'});
             xabber.body.updateBackground();
             this.updateBackgroundSetting();
-        } else if (value == 'repeating-pattern' || value == 'image') {
+        } else if (value === 'repeating-pattern' || value === 'image') {
             let background_view = new xabber.SetBackgroundView();
             background_view.render({type: value, model: this.model});
         }
@@ -2841,7 +2789,7 @@ xabber.SettingsModalView = xabber.BasicView.extend({
 
     changeBackgroundImage: function () {
         let type = this.model.get('background').type;
-        if (type == 'repeating-pattern' || type == 'image') {
+        if (type === 'repeating-pattern' || type === 'image') {
             let background_view = new xabber.SetBackgroundView();
             background_view.render({type: type, model: this.model});
         }
@@ -2919,7 +2867,7 @@ xabber.SettingsModalView = xabber.BasicView.extend({
         this.updateHeight();
     },
 
-    deleteAllAccounts: function (ev) {
+    deleteAllAccounts: function () {
         utils.dialogs.ask(xabber.getString("button_quit"), xabber.getString("settings__dialog_quit_client__confirm", [constants.CLIENT_NAME]), null, { ok_button_text: xabber.getString("button_quit")}).done((res) => {
             res && xabber.trigger('quit');
         });
@@ -2931,15 +2879,15 @@ xabber.SettingsModalView = xabber.BasicView.extend({
             progress = client_translation_progress[locale],
             platform_text;
 
-        (value == 'default') && (progress = 100);
+        (value === 'default') && (progress = 100);
 
-        if (progress == 100 && ((xabber.get("default_language") === 'en' && value === 'default') || value === 'en')) {
+        if (progress === 100 && ((xabber.get("default_language") === 'en' && value === 'default') || value === 'en')) {
             platform_text = xabber.getString("settings__dialog_change_language__confirm");
-        } else if (progress == 100) {
+        } else if (progress === 100) {
             platform_text = xabber.getString("settings__interface_language__change_language_text_full_translation",
                 [constants.SHORT_CLIENT_NAME, `<a target="_blank" href='${constants.PROJECT_CROWDIN_URL}'>${xabber.getString("settings__section_interface_language__text_description__text_translations")}</a>`, constants.SHORT_CLIENT_NAME, ])
              + '\n\n' +xabber.getString("settings__dialog_change_language__confirm");
-        } else if (progress == 0) {
+        } else if (progress === 0) {
             platform_text = xabber.getString("settings__interface_language__change_language_text_no_translation",
                 [constants.SHORT_CLIENT_NAME, `<a target="_blank" href='${constants.PROJECT_CROWDIN_URL}'>${xabber.getString("settings__section_interface_language__text_description__text_translation")}</a>`]);
         } else {
@@ -2948,9 +2896,9 @@ xabber.SettingsModalView = xabber.BasicView.extend({
                 + '\n\n' +xabber.getString("settings__dialog_change_language__confirm");
         }
         let modal_classes = ['change-language-modal'], inverted_buttons;
-        if (progress == 0){
+        if (progress === 0){
             modal_classes.push('change-language-modal-no-ok');
-        } else if (progress != 0 && progress < 70){
+        } else if (progress !== 0 && progress < 70){
             inverted_buttons = true;
         }
         utils.dialogs.ask(xabber.getString("settings__dialog_change_language__header"),
@@ -3042,13 +2990,13 @@ xabber.SettingsModalView = xabber.BasicView.extend({
         }
     },
 
-    loadExternalEmojiFont: function (ev) {
+    loadExternalEmojiFont: function () {
         this.load_emoji_external_dfd && this.load_emoji_external_dfd.resolve();
     },
 
     updateEmojiFontLabel: function () {
         if (!constants.EMOJI_FONTS_LIST[this.model.get('emoji_font')] && this.model.get('emoji_font') !== 'system') {
-            this.$('.settings-tab[data-block-name="emoji_font"] .settings-block-label').text(xabber.getString("settings__menu_item__emoji_font_chosen_does_not_exist"))
+            this.$('.settings-tab[data-block-name="emoji_font"] .settings-block-label').text(xabber.getString("settings__menu_item__emoji_font_chosen_does_not_exist"));
             return;
         }
         let label = this.model.get('emoji_font') === 'system' ? 'system' : constants.EMOJI_FONTS_LIST[this.model.get('emoji_font')].name,
@@ -3102,15 +3050,15 @@ xabber.SettingsModalView = xabber.BasicView.extend({
             locale = Object.keys(client_translation_progress).find(key => !lang.indexOf(key)) || constants.languages_another_locales[lang] && Object.keys(client_translation_progress).find(key => !constants.languages_another_locales[lang].indexOf(key)),
             progress = client_translation_progress[locale];
 
-        (lang == 'default' || !lang.indexOf('en')) && (progress = 100);
+        (lang === 'default' || !lang.indexOf('en')) && (progress = 100);
 
         if (!_.isUndefined(progress)) {
             let progress_text, platform_text;
-            if (progress == 100 && ((xabber.get("default_language") === 'en' && lang === 'default') || lang === 'en')) {
+            if (progress === 100 && ((xabber.get("default_language") === 'en' && lang === 'default') || lang === 'en')) {
                 progress_text = xabber.getString("settings__interface_language__text_description_full_translation_english", [constants.SHORT_CLIENT_NAME, `<a target="_blank" class="email-link" href='mailto:${constants.EMAIL_FOR_JOIN_TRANSLATION}'>${constants.EMAIL_FOR_JOIN_TRANSLATION}</a>`, constants.SHORT_CLIENT_NAME]);
-            } else if (progress == 100) {
+            } else if (progress === 100) {
                 progress_text = xabber.getString("settings__interface_language__text_description_full_translation", [constants.SHORT_CLIENT_NAME, constants.SHORT_CLIENT_NAME]);
-            } else if (progress == 0) {
+            } else if (progress === 0) {
                 progress_text = xabber.getString("settings__section_interface_language__text_description_no_translations", [constants.SHORT_CLIENT_NAME]);
             } else {
                 progress_text = xabber.getString("settings__interface_language__text_description_unfull_translation", [constants.SHORT_CLIENT_NAME]);
@@ -3168,45 +3116,45 @@ xabber.SettingsModalView = xabber.BasicView.extend({
     },
 });
 
-xabber.mainColorPicker = xabber.BasicView.extend({
-    className: 'modal main-modal main-color-picker',
-    template: templates.color_scheme,
-    ps_selector: '.modal-content',
-    ps_settings: {theme: 'item-list'},
-
-    events: {
-        "click .color-value": "setColor"
-    },
-
-    _initialize: function (options) {
-        this.model = options.model;
-    },
-
-    render: function () {
-        this.$el.openModal({
-            ready: () => {
-                this.$('.modal-content').css('max-height', Math.min(($(window).height() - 341), 456)).perfectScrollbar({theme: 'item-list'});
-            },
-            complete: this.close.bind(this)
-        });
-    },
-
-    setColor: function (ev) {
-        let color = $(ev.target).closest('.color-value').attr('data-value');
-        this.model.save('main_color', color);
-        xabber.trigger('update_main_color');
-        this.close();
-    },
-
-    close: function () {
-        this.$el.closeModal({ complete: () => {
-                this.$el.detach();
-                this.data.set('visible', false);
-            }
-        });
-    }
-
-});
+// xabber.mainColorPicker = xabber.BasicView.extend({
+//     className: 'modal main-modal main-color-picker',
+//     template: templates.color_scheme,
+//     ps_selector: '.modal-content',
+//     ps_settings: {theme: 'item-list'},
+//
+//     events: {
+//         "click .color-value": "setColor",
+//     },
+//
+//     _initialize: function (options) {
+//         this.model = options.model;
+//     },
+//
+//     render: function () {
+//         this.$el.openModal({
+//             ready: () => {
+//                 this.$('.modal-content').css('max-height', Math.min(($(window).height() - 341), 456)).perfectScrollbar({theme: 'item-list'});
+//             },
+//             complete: this.close.bind(this)
+//         });
+//     },
+//
+//     setColor: function (ev) {
+//         let color = $(ev.target).closest('.color-value').attr('data-value');
+//         this.model.save('main_color', color);
+//         xabber.trigger('update_main_color');
+//         this.close();
+//     },
+//
+//     close: function () {
+//         this.$el.closeModal({ complete: () => {
+//                 this.$el.detach();
+//                 this.data.set('visible', false);
+//             }
+//         });
+//     }
+//
+// });
 
 xabber.ColorPicker = xabber.BasicView.extend({
     className: 'modal main-modal color-picker',
@@ -4088,9 +4036,9 @@ xabber.ColorPicker = xabber.BasicView.extend({
                 let $input = this.$('.selected-color-hex-input'),
                     $color_hex = this.$('.selected-color-hex'),
                     value = this.model.get('appearance').color || '#E0E0E0';
-                let material_color = this.materialColors.find(c => c.variations.find(v => v.hex.toLowerCase() == value.toLowerCase()));
+                let material_color = this.materialColors.find(c => c.variations.find(v => v.hex.toLowerCase() === value.toLowerCase()));
                 if (material_color) {
-                    let tone = material_color.variations.find(v => v.hex.toLowerCase() == value.toLowerCase());
+                    let tone = material_color.variations.find(v => v.hex.toLowerCase() === value.toLowerCase());
                     this.$('.selected-color-name').text(xabber.getString(`account_color_name_${material_color.color.replace(/-/g, "_")}`).replace(/-/g, " ") + ` ${tone.weight}`);
                 } else {
                     this.$('.selected-color-name').text(xabber.getString("settings__section_appearance__hint_custom_color"));
@@ -4116,16 +4064,16 @@ xabber.ColorPicker = xabber.BasicView.extend({
     },
 
     keyUpInput: function (ev) {
-        if (ev.keyCode == constants.KEY_ENTER) {
+        if (ev.keyCode === constants.KEY_ENTER) {
             ev.preventDefault();
             this.focusoutInputField();
         }
         let $input = this.$('.selected-color-hex-input'),
             value = $input[0].value.trim();
         this.$('.selected-color-item').css('background-color', value);
-        let material_color = this.materialColors.find(c => c.variations.find(v => v.hex.toLowerCase() == value.toLowerCase()));
+        let material_color = this.materialColors.find(c => c.variations.find(v => v.hex.toLowerCase() === value.toLowerCase()));
         if (material_color) {
-            let tone = material_color.variations.find(v => v.hex.toLowerCase() == value.toLowerCase());
+            let tone = material_color.variations.find(v => v.hex.toLowerCase() === value.toLowerCase());
             this.$('.selected-color-name').text(xabber.getString(`account_color_name_${material_color.color.replace(/-/g, "_")}`).replace(/-/g, " ") + ` ${tone.weight}`);
         } else {
             this.$('.selected-color-name').text(xabber.getString("settings__section_appearance__hint_custom_color"));
@@ -4136,9 +4084,9 @@ xabber.ColorPicker = xabber.BasicView.extend({
         let $input = this.$('.selected-color-hex-input'),
             $color_hex = this.$('.selected-color-hex'),
             value = $input[0].value.trim();
-        let material_color = this.materialColors.find(c => c.variations.find(v => v.hex.toLowerCase() == value.toLowerCase()));
+        let material_color = this.materialColors.find(c => c.variations.find(v => v.hex.toLowerCase() === value.toLowerCase()));
         if (material_color) {
-            let tone = material_color.variations.find(v => v.hex.toLowerCase() == value.toLowerCase());
+            let tone = material_color.variations.find(v => v.hex.toLowerCase() === value.toLowerCase());
             this.$('.selected-color-name').text(xabber.getString(`account_color_name_${material_color.color.replace(/-/g, "_")}`).replace(/-/g, " ") + ` ${tone.weight}`);
         } else {
             this.$('.selected-color-name').text(xabber.getString("settings__section_appearance__hint_custom_color"));
@@ -4207,7 +4155,7 @@ xabber.SetBackgroundView = xabber.BasicView.extend({
         this.createLibrary();
         this.$('.menu-btn').removeClass('active');
         this.$('.menu-btn[data-screen-name="library"]').addClass('active');
-        if (this.type == 'repeating-pattern')
+        if (this.type === 'repeating-pattern')
             this.$('.modal-header span').text(xabber.getString("settings__dialog_background__header_pattern"));
         else
             this.$('.modal-header span').text(xabber.getString("settings__dialog_background__header_image"));
@@ -4253,11 +4201,11 @@ xabber.SetBackgroundView = xabber.BasicView.extend({
     },
 
     getImagesFromXML: function (callback) {
-        if (this.type == 'repeating-pattern' && this.model.patterns_library || this.type == 'images' && this.model.img_library) {
+        if (this.type === 'repeating-pattern' && this.model.patterns_library || this.type === 'images' && this.model.img_library) {
             callback && callback();
             return;
         }
-        if (this.type == 'repeating-pattern') {
+        if (this.type === 'repeating-pattern') {
             this.onGetPatternsCallback(env.backgroundPatternsXml)
         } else {
             this.onGetImagesCallback(env.backgroundImagesXml);
@@ -4316,7 +4264,7 @@ xabber.SetBackgroundView = xabber.BasicView.extend({
     updateActiveButton: function () {
         let $active_screen = this.$('.screen-wrap:not(.hidden)'),
             non_active = true;
-        if ($active_screen.attr('data-screen') == 'library') {
+        if ($active_screen.attr('data-screen') === 'library') {
             $active_screen.find('div.active').length && (non_active = false);
         } else {
             $active_screen.find('img:not(.hidden)').length && (non_active = false);
@@ -4331,19 +4279,19 @@ xabber.SetBackgroundView = xabber.BasicView.extend({
     },
 
     loadMoreImages: function (count) {
-        if ((this.type == 'repeating-pattern' && !this.model.patterns_library) || (this.type == 'images' && !this.model.img_library))
+        if ((this.type === 'repeating-pattern' && !this.model.patterns_library) || (this.type === 'images' && !this.model.img_library))
             return;
         !count && (count = 20);
         let current_count = this.$(`.image-item`).length;
-        if (this.type == 'repeating-pattern' && current_count >= this.model.patterns_library.length || this.type == 'images' && current_count >= this.model.img_library.length)
+        if (this.type === 'repeating-pattern' && current_count >= this.model.patterns_library.length || this.type === 'images' && current_count >= this.model.img_library.length)
             return;
         for (let i = current_count; i < (current_count + count); i++) {
             let img = $(`<div class="image-item"/>`),
-                img_sources = this.type == 'repeating-pattern' ? this.model.patterns_library[i] : this.model.img_library[i];
+                img_sources = this.type === 'repeating-pattern' ? this.model.patterns_library[i] : this.model.img_library[i];
             if (!img_sources)
                 break;
             img.css('background-image', `url("${img_sources.thumbnail}")`);
-            img.attr('data-src', this.type == 'repeating-pattern' ? img_sources.thumbnail : img_sources.fs_img);
+            img.attr('data-src', this.type === 'repeating-pattern' ? img_sources.thumbnail : img_sources.fs_img);
             this.$('.library-wrap').append(img);
         }
     },
@@ -4385,7 +4333,7 @@ xabber.SetBackgroundView = xabber.BasicView.extend({
     },
 
     onInputChanged: function (ev) {
-        if (ev.target.value.trim() == this.$('.image-preview img')[0].src)
+        if (ev.target.value.trim() === this.$('.image-preview img')[0].src)
             return;
         if (ev.target.value.trim() && ev.keyCode !== constants.KEY_CTRL && ev.keyCode !== constants.KEY_SHIFT && ev.keyCode !== constants.KEY_ARROW_UP && ev.keyCode !== constants.KEY_ARROW_DOWN && ev.keyCode !== constants.KEY_ARROW_RIGHT && ev.keyCode !== constants.KEY_ARROW_LEFT) {
             let url = ev.target.value.trim();
@@ -4415,12 +4363,12 @@ xabber.SetBackgroundView = xabber.BasicView.extend({
             xabber.body.updateBackground();
             this.close();
         });
-        if ($active_screen.attr('data-screen') == 'library') {
+        if ($active_screen.attr('data-screen') === 'library') {
             image = $active_screen.find('div.active').attr('data-src');
             dfd.resolve(image);
         } else {
             image = $active_screen.find('img:not(.hidden)')[0].src;
-            if ($active_screen.attr('data-screen') == 'web-address') {
+            if ($active_screen.attr('data-screen') === 'web-address') {
                 let request = {
                     type: "GET",
                     url: image,
@@ -4471,7 +4419,7 @@ xabber.DragManager = Backbone.Model.extend({
     },
 
     onMouseDown: function (ev) {
-        if (ev.which != 1) {
+        if (ev.which !== 1) {
             return;
         }
         let draghandle_elem = ev && ev.target && ev.target.closest ? ev.target.closest('.drag-handle') : $(ev.target).closest('.drag-handle'),
@@ -4513,7 +4461,6 @@ xabber.DragManager = Backbone.Model.extend({
         avatar.style.top = ev.pageY - this.get('shiftY') + 'px';
         let drop_elem = this.findDropElem(ev);
         this.updateDropElem(drop_elem);
-        return;
     },
 
     onMouseUp: function (ev) {
@@ -4571,7 +4518,7 @@ xabber.DragManager = Backbone.Model.extend({
         return avatar;
     },
 
-    startDrag: function (ev) {
+    startDrag: function () {
         let avatar = this.get('avatar');
         window.document.body.appendChild(avatar);
         avatar.style.zIndex = 9999;
@@ -4645,7 +4592,7 @@ _.extend(xabber, {
             return;
         clearInterval(this._blink_interval);
         clearInterval(this._extended_blink_interval);
-        this._blink_state = 0
+        this._blink_state = 0;
         this._extended_blink_interval = setInterval(() => {
             let $icon = $("link[rel='shortcut icon']"), url,
             state = this._blink_state;
@@ -4712,15 +4659,15 @@ _.extend(xabber, {
 
             let load_check_interval = setInterval(() => {
                 console.log('status - ' + emoji_font.status);
-                if (emoji_font.status == 'loaded' || emoji_font.status == 'error'){
+                if (emoji_font.status === 'loaded' || emoji_font.status === 'error'){
                     clearInterval(load_check_interval);
-                    if (emoji_font.status == 'loaded' && !font_loaded){
+                    if (emoji_font.status === 'loaded' && !font_loaded){
                         font_loaded = true;
                         console.log('loaded - interval');
                         document.fonts.add(emoji_font);
                         $(constants.CONTAINER_ELEMENT).addClass('custom-emoji-font');
                         dfd && dfd.resolve({});
-                    } else if (emoji_font.status == 'error' && !font_loaded) {
+                    } else if (emoji_font.status === 'error' && !font_loaded) {
                         font_loaded = true;
                         console.log('error - interval');
                         utils.dialogs.error(xabber.getString("settings__menu_item__emoji_font_error_loading"));
@@ -4773,8 +4720,10 @@ _.extend(xabber, {
                     count_msg += chat.get('unread') + chat.get('const_unread');
                 }
             });
-            let incoming_subscriptions = account.contacts.filter(item => (item.get('invitation') && !item.get('removed')) || (item.get('subscription_request_in') && item.get('subscription') != 'both')).length;
-            count_msg += incoming_subscriptions;
+            count_msg += account.contacts.filter(item =>
+                (item.get('invitation') && !item.get('removed'))
+                || (item.get('subscription_request_in') && item.get('subscription') !== 'both')
+            ).length;
         });
         return count_msg;
     },
@@ -4824,7 +4773,6 @@ _.extend(xabber, {
             audio.play();
             return audio;
         }
-        return;
     },
 
     stopAudio: function (audio) {
@@ -4841,7 +4789,7 @@ _.extend(xabber, {
             self.set('focused', ev.type === 'focus');
         });
 
-        $(window).on("resize", function (ev) {
+        $(window).on("resize", function () {
             self.set({
                 width: window.innerWidth,
                 height: window.innerHeight
@@ -4863,7 +4811,7 @@ _.extend(xabber, {
         if (this.idleJs)
             this.idleJs.stop();
         let self = this,
-            idling_time = self._settings.get('idling_time') * 1000
+            idling_time = self._settings.get('idling_time') * 1000;
 
         this.idleJs = new idleJs({
             idle: idling_time, // idle time in ms
@@ -4879,7 +4827,7 @@ _.extend(xabber, {
             }  , // callback function to be executed after back form idleness
             keepTracking: true, // set it to false if you want to be notified only on the first idleness change
             startAtIdle: false // set it to true if you want to start in the idle state
-        })
+        });
         this.idleJs.start();
     },
 

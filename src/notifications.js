@@ -5,13 +5,9 @@ let env = xabber.env,
     templates = env.templates.notifications,
     utils = env.utils,
     $ = env.$,
-    $iq = env.$iq,
-    $msg = env.$msg,
     Strophe = env.Strophe,
     _ = env._,
     moment = env.moment,
-    Images = utils.images,
-    uuid = env.uuid,
     pretty_date = (timestamp) => {
         let date = new Date(timestamp),
             today = new Date(),
@@ -24,10 +20,10 @@ let env = xabber.env,
         } else if (date.toDateString() === yesterday.toDateString()) {
             return xabber.getString("yesterday");
         } else {
-            return utils.pretty_date(timestamp, (xabber.settings.language == 'ru-RU' || xabber.settings.language == 'default' && xabber.get("default_language") == 'ru-RU') && 'dddd, D MMMM YYYY')
+            return utils.pretty_date(timestamp, (xabber.settings.language === 'ru-RU' || xabber.settings.language === 'default' && xabber.get("default_language") === 'ru-RU') && 'dddd, D MMMM YYYY')
         }
     },
-    pretty_datetime = (timestamp) => { return utils.pretty_datetime(timestamp, (xabber.settings.language == 'ru-RU' || xabber.settings.language == 'default' && xabber.get("default_language") == 'ru-RU') && 'D MMMM YYYY HH:mm:ss')};
+    pretty_datetime = (timestamp) => { return utils.pretty_datetime(timestamp, (xabber.settings.language === 'ru-RU' || xabber.settings.language === 'default' && xabber.get("default_language") === 'ru-RU') && 'D MMMM YYYY HH:mm:ss')};
 
 
 xabber.ClientNotificationsContainer = xabber.BasicView.extend({
@@ -59,8 +55,8 @@ xabber.NotificationsView = xabber.BasicView.extend({
         "click .btn-previous-plyr": "previousPlyr",
         "click .btn-stop-plyr": "stopPlyr",
         "click .chat-tool-player-containter": "popupPlyr",
-        "click .btn-show-search": "showSearch",
-        "click .close-search-icon": "hideSearch",
+        // "click .btn-show-search": "showSearch",
+        // "click .close-search-icon": "hideSearch",
         "click .btn-back-to-chats": "clickBackToChats",
         "keyup .search-input": "keyUpSearch",
         "click .search-form": "focusSearch",
@@ -80,8 +76,7 @@ xabber.NotificationsView = xabber.BasicView.extend({
         return this;
     },
 
-    render: function (options) {
-        // console.log(options);
+    render: function () {
         if (this.current_content && !(_.isUndefined(this.current_content.saved_scroll) || _.isNull(this.current_content.saved_scroll))){
             this.current_content.scrollTo(this.current_content.saved_scroll);
             this.current_content.saved_scroll = null;
@@ -97,7 +92,7 @@ xabber.NotificationsView = xabber.BasicView.extend({
         this.updatePlyrControls();
         this.updatePlyrTime();
         this.updateClientNotifications();
-        this.hideSearch();
+        // this.hideSearch();
         this.$('.dropdown-button').dropdown({
             inDuration: 100,
             outDuration: 100,
@@ -107,13 +102,13 @@ xabber.NotificationsView = xabber.BasicView.extend({
         this.updateFilterItems();
     },
 
-    showSearch: function (ev) {
-    },
+    // showSearch: function (ev) {
+    // },
+    //
+    // hideSearch: function (ev) {
+    // },
 
-    hideSearch: function (ev) {
-    },
-
-    focusSearch: function (ev) {
+    focusSearch: function () {
         this.$('.search-input').focus();
     },
 
@@ -130,17 +125,17 @@ xabber.NotificationsView = xabber.BasicView.extend({
         this.$('.search-form').removeClass('active');
     },
 
-    clickBackToChats: function (ev) {
+    clickBackToChats: function () {
         xabber.toolbar_view.showAllChats(null, null, true);
     },
 
-    clickClearFilter: function (options) {
+    clickClearFilter: function () {
         this.clearFilter();
         this.updateAccountsFilter();
         this.updateFilterItems();
     },
 
-    updateClientNotifications: function (options) {
+    updateClientNotifications: function () {
         this.$('.client-notifications-wrap').find('.client-notifications-container').detach();
 
         if (xabber.placeholders_wrap && this.isVisible()){
@@ -372,8 +367,7 @@ xabber.NotificationsView = xabber.BasicView.extend({
         if (!$item.length){
             $item = $(ev.target).closest('.notification-subscriptions-button')
         }
-        let filter_type = $item.attr('data-filter'),
-            clear_account;
+        let filter_type = $item.attr('data-filter');
         if ($item.hasClass('selected-filter')){
             filter_type = 'all';
         }
@@ -409,7 +403,7 @@ xabber.NotificationsView = xabber.BasicView.extend({
             this.$('.notifications-type-filter-content .filter-item-wrap').removeClass('selected-filter');
             this.$(`.notifications-type-filter-content .filter-item-wrap[data-filter="${filter_type}"]`).addClass('selected-filter');
         }
-        this.current_content.filterByProperty(filter_type, clear_account);
+        this.current_content.filterByProperty(filter_type);
         this.updateFilterItems();
     },
 
@@ -449,8 +443,7 @@ xabber.NotificationsView = xabber.BasicView.extend({
     },
 
     renderAccountItem: function (account) {
-        let $item = $(templates.account_filter_item({jid: account.get('jid'), color: account.settings.get('color')}));
-        return $item;
+        return $(templates.account_filter_item({jid: account.get('jid'), color: account.settings.get('color')}));
     },
 
     selectAccounts: function (ev) {
@@ -529,7 +522,7 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
         "click .inviter-name": "onClickName",
     },
 
-    _initialize: function (options) {
+    _initialize: function () {
 
         this.current_day_indicator = null;
         this.$history_feedback = this.$('.load-history-feedback');
@@ -602,7 +595,7 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
 
             msg.set('is_unread', false);
 
-            if (chat.get('const_unread') !== 0 && Number(chat.get('const_unread')) !== NaN) {
+            if (chat.get('const_unread') !== 0 && !isNaN(Number(chat.get('const_unread')))) {
                 let const_unread = chat.get('const_unread');
                 const_unread = --const_unread;
                 chat.set('const_unread', const_unread);
@@ -636,7 +629,7 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
         let is_in_unread = chat.messages_unread.get(msg);
         if (msg.get('is_unread'))
             msg.set('is_unread', false);
-        if (!is_in_unread && chat.get('const_unread') !== 0 && Number(chat.get('const_unread')) !== NaN) {
+        if (!is_in_unread && chat.get('const_unread') !== 0 && !isNaN(Number(chat.get('const_unread')))) {
             let const_unread = chat.get('const_unread');
             const_unread = --const_unread;
             chat.set('const_unread', const_unread);
@@ -701,7 +694,7 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
         let dateOnlyTimestamp = date.getTime();
 
         // Ищем элемент с соответствующим таймштампом
-        let $element = xabber.notifications_view.$('.notifications-calendar-day').filter(function() {
+        return xabber.notifications_view.$('.notifications-calendar-day').filter(function() {
             // Обнуляем время в атрибуте data-timestamp ячейки
             let cellTimestamp = parseInt($(this).attr('data-timestamp'), 10),
                 cellDate = new Date(cellTimestamp);
@@ -709,7 +702,6 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
 
             return cellDate.getTime() === dateOnlyTimestamp;
         });
-        return $element;
     },
 
     addContact: function (ev) {
@@ -800,7 +792,7 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
         }
     },
 
-    onShow: function (attrs) {
+    onShow: function () {
         xabber.notifications_view.$('.notifications-content').append(this.$el);
         this.onScroll();
         setTimeout(() => {
@@ -863,7 +855,6 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
     },
 
     updateCounter: function () {
-        return;
     },
 
     onShowNotificationsTab: function () {
@@ -902,6 +893,7 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
             }
         })
     },
+
     onChangedReadState: function (message) {
         let is_unread = message.get('is_unread'),
             $msg = this.$(`.chat-message[data-uniqueid="${message.get("unique_id")}"]`);
@@ -1034,7 +1026,6 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
 
     addIncomingSubscriptionContainer: function () {
         this.$('.chat-content').prepend($(templates.incoming_invitations_container()));
-        // this.$('.chat-content').prepend($(templates.incoming_subscriptions_container()));
         this.updateAllIncomingSubscriptions();
     },
 
@@ -1044,7 +1035,6 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
         let accounts = xabber.accounts.enabled;
         let subs_counter = 0,
             inv_counter = 0,
-            subs_color_set = false,
             inv_color_set = false;
         if (this.filtered_accounts.length){
             accounts = accounts.filter(item => this.filtered_accounts.includes(item.get('jid')));
@@ -1061,18 +1051,13 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
                         counter: contact.get('invitation') ? inv_counter : subs_counter,
                         group_chat: contact.get('group_chat'),
                     }));
-                    if (contact.get('invitation')){
-                        this.$('.notification-invitations-content-wrap').append($template);
-                    } else {
-                        this.$('.notification-subscriptions-content-wrap').append($template);
-                    }
+                    this.$('.notification-invitations-content-wrap').append($template);
                     if (contact.invitation){
                         contact.invitation.message && $template.find('.subscription-invitation-item-user-text').text(contact.invitation.message.get('message'));
                         if (contact.invitation.members_count) {
-                            $template.find('.subscription-item-members-text').html(`<span class="invitation-notifications-item-members-count">${xabber.getString("groupchats_some_members", [Number(contact.invitation.members_count)])}</span>`)
+                            $template.find('.subscription-item-members-text').html(`<span class="invitation-notifications-item-members-count">${xabber.getString("groupchats_some_members", [Number(contact.invitation.members_count)])}</span>`);
                             let names_count = 0,
-                                avatars_count = 0,
-                                including_added;
+                                avatars_count = 0;
 
                             if (contact.invitation.participants.length){
                                 $template.find('.subscription-item-members-text').append(`<span>, ${xabber.getString("including")}</span>`);
@@ -1119,7 +1104,6 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
                                 $template.find('.subscription-invitation-item-main-text')
                                     .html(`<span class="inviter-name${contact.get('private_chat') ? ' private-chat-inviter' : ''}" data-jid="${inviter_contact.get('jid')}">${inviter_contact.get('name')}</span> (<span class="inviter-jid">${inviter_contact.get('jid')}</span>) ${xabber.getString("notifications_window__subscriptions_group_chat_invitation_main_text")} <span class="invitation-link text-color-700">${group_name}</span>:`)
                             }
-                            let image = contact.cached_image;
                             let icon_name = 'group-public';
                             if (contact.get('incognito_chat'))
                                 icon_name = 'group-incognito';
@@ -1127,47 +1111,24 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
                                 icon_name = 'group-private';
                             $template.find('.notification-icon.group-invite-icon').html(env.templates.svg[icon_name]());
                         }
-                    } else {
-                        let image = contact.cached_image;
-                        $template.find('.circle-avatar.subscribe-avatar').setAvatar(image, 64);
                     }
                     $template.attr('data-color', contact.account.settings.get('color'));
-                    if (contact.get('invitation')){
-                        $template.attr('data-counter', inv_counter);
-                        inv_counter++;
-                    } else {
-                        $template.attr('data-counter', subs_counter);
-                        subs_counter++;
-                    }
+                    $template.attr('data-counter', inv_counter);
+                    inv_counter++;
                     $template.find('.notification-icon.subscribe-icon').html(env.templates.svg['group-invite']());
-                    if (!subs_color_set && !contact.get('invitation')){
-                        this.$('.notification-subscriptions-wrap.notifications-subscriptions').prop('class', 'notification-subscriptions-wrap notifications-subscriptions');
-                        this.$('.notification-subscriptions-wrap.notifications-subscriptions').addClass(`outline-color-${contact.account.settings.get('color')}-300`);
-                        subs_color_set = true;
-                    }
-                    if (!inv_color_set && contact.get('invitation')){
-                        this.$('.notification-subscriptions-wrap.notifications-invitations').prop('class', 'notification-subscriptions-wrap notifications-invitations');
-                        this.$('.notification-subscriptions-wrap.notifications-invitations').addClass(`outline-color-${contact.account.settings.get('color')}-300`);
-                        inv_color_set = true;
-                    }
+                    this.$('.notification-subscriptions-wrap.notifications-invitations').prop('class', 'notification-subscriptions-wrap notifications-invitations');
+                    this.$('.notification-subscriptions-wrap.notifications-invitations').addClass(`outline-color-${contact.account.settings.get('color')}-300`);
+                    inv_color_set = true;
                     this.prepareShowMoreText($template);
                 });
         });
-        if (subs_counter > 0) {
-            this.$('.notifications-subscriptions .notification-subscriptions-button-wrap').removeClass('hidden');
-        } else {
-            this.$('.notifications-subscriptions .notification-subscriptions-button-wrap').addClass('hidden');
-        }
         if (inv_counter > 0) {
             this.$('.notifications-invitations .notification-subscriptions-button-wrap').removeClass('hidden');
         } else {
             this.$('.notifications-invitations .notification-subscriptions-button-wrap').addClass('hidden');
         }
-        xabber.notifications_view.$('.subscription-item-wrap').switchClass('hidden', subs_counter === 0);
         xabber.notifications_view.$('.invitation-item-wrap').switchClass('hidden', inv_counter === 0);
-        this.$('.notification-subscriptions-wrap.notifications-subscriptions').switchClass('hidden', subs_counter === 0);
         this.$('.notification-subscriptions-wrap.notifications-invitations').switchClass('hidden', inv_counter === 0);
-        this.filter_type !== 'subscription' && this.$('.notifications-subscriptions .notification-subscription-item').slice(2).addClass('hidden');
         this.filter_type !== 'invitations' && this.$('.notifications-invitations .notification-subscription-item').slice(2).addClass('hidden');
         xabber.toolbar_view.recountAllMessageCounter();
         this.recountFilteredCount();
@@ -1185,7 +1146,7 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
             let c = text.substr(0, showChar);
             let h = text.substr(showChar, text.length - showChar);
 
-            let html = c + '<span class="moreellipses">... </span><span><span class="subscription-more-text hidden">' + h + '</span>  <span href="" class="subscription-show-text-btn">' + xabber.getString("more") + '</span></span>';
+            let html = c + '<span class="moreellipses">... </span><span><span class="subscription-more-text hidden">' + h + '</span>  <span class="subscription-show-text-btn">' + xabber.getString("more") + '</span></span>';
 
             $item.find('.subscription-item-text').html(`${html}`);
 
@@ -1218,9 +1179,6 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
 
         xabber.toolbar_view.showAllChats();
         account.chats.openChat(contact);
-    },
-
-    updateAllTrustSessions: function () {
     },
 
     updateTrustSession: function (session_id, is_remove) {
@@ -1410,7 +1368,6 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
             $fwd_message.each((idx, fwd_msg_item) => {
                 let $fwd_msg_item = $(fwd_msg_item),
                     $prev_fwd_message = (idx > 0) ? $fwd_msg_item.prev() : [];
-                $fwd_msg_item.switchClass('hide-date', is_same_date && $prev_fwd_message.length);
                 $fwd_msg_item.removeClass('hide-time');
                 if ($prev_fwd_message.length) {
                     let is_same_fwded_sender = ($fwd_msg_item.data('from') === $prev_fwd_message.data('from'));
@@ -1544,7 +1501,7 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
         this.updateCalendarCellsActivity(this.notification_messages.filter(msg => !msg.get('ignored')));
     },
 
-    checkRenderedMessages: function (filter) {
+    checkRenderedMessages: function () {
         _.each(this.notifications_chats, (chat) => {
             chat = chat.chat;
             let messages = chat.messages.filter((msg) => !msg.get('ignored'));
@@ -1578,7 +1535,7 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
         $msg.addClass('without-username');
     },
 
-    updateNotificationDate: function (msg_elem, msg) {
+    updateNotificationDate: function (msg_elem) {
         let $msg = $(msg_elem);
         $msg.find('.msg-time').text(utils.pretty_time($msg.data('time')));
     },
@@ -1625,7 +1582,7 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
         this._long_reading_timeout = false;
     },
 
-    onMouseWheel: function (ev) {
+    onMouseWheel: function () {
         this.$('.back-to-bottom').hideIf(this.isScrolledToTop());
     },
 
@@ -1799,8 +1756,8 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
     },
 
     updateMessage: function (item) {
-        let $message, images = item.get('images'), emoji = item.get('only_emoji'), $new_message,
-            files =  item.get('files');
+        let $message,
+            $new_message;
         if (item instanceof xabber.Message) {
             this.updateMentions(item);
             $new_message = this.buildMessageHtml(item);

@@ -4152,9 +4152,19 @@ xabber.ChatContentView = xabber.BasicView.extend({
     },
 
     hideMessagesAfterSkipping: function () {
+        console.warn(this.model.get('last_sync_unread_id'))
+        console.warn(this.model.get('synced_msg'))
         if (this.model.get('last_sync_unread_id') && this.model.get('synced_msg')){
+            if (this.model.get('synced_msg').attributes && !this.model.get('synced_msg').attributes.is_unread && !this.model.get('synced_msg').attributes.is_unread_archived){
+                this.$('.chat-message.after-skip-message').removeClass('after-skip-message');
+                return;
+            }
             let synced_message = this.model.get('synced_msg'),
                 $synced_message = this.$(`.chat-message[data-uniqueid="${synced_message.get('unique_id')}"]`);
+            console.warn(synced_message)
+            console.warn(synced_message.get('is_unread'));
+            console.warn($synced_message)
+            $synced_message.length && console.warn($synced_message[0]);
             $synced_message.addClass('after-skip-message');
             $synced_message.prevAll('.chat-message.after-skip-message').removeClass('after-skip-message');
             $synced_message.nextAll('.chat-message:not(.after-skip-message)').addClass('after-skip-message');

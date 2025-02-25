@@ -1,6 +1,6 @@
 // only external libs and plugins for them
 // import Backbone from "backbone";
-import "backbone";
+import * as Backbone from "backbone";
 import _ from "underscore";
 import $ from "jquery";
 import moment from "moment";
@@ -46,6 +46,7 @@ export default _.extend({
     $: $,
     _: _,
     moment: moment,
+    Backbone: Backbone,
     WaveSurfer: WaveSurfer,
     Plyr: plyr,
     Quill: Quill,

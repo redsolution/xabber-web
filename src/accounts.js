@@ -12,7 +12,8 @@ let env = xabber.env,
     _ = env._,
     moment = env.moment,
     Images = utils.images,
-    pretty_datetime = (timestamp) => { return utils.pretty_datetime(timestamp, (xabber.settings.language == 'ru-RU' || xabber.settings.language == 'default' && xabber.get("default_language") == 'ru-RU') && 'D MMMM YYYY HH:mm:ss')},
+    Backbone = env.Backbone,
+    pretty_datetime = (timestamp) => { return utils.pretty_datetime(timestamp, (xabber.settings.language === 'ru-RU' || xabber.settings.language === 'default' && xabber.get("default_language") === 'ru-RU') && 'D MMMM YYYY HH:mm:ss')},
     pretty_datetime_date = (timestamp) => { return utils.pretty_datetime(timestamp, 'MMM DD, YYYY')};
 
 
@@ -68,10 +69,7 @@ xabber.Account = Backbone.Model.extend({
                 conn_retries: 0,
                 conn_feedback: xabber.getString("connection__error__text_disconnected")
             });
-            this._waiting_code = false;
-            this.code_requests = [];
             this.gallery_code_requests = [];
-            this.xabber_auth = {};
             this.session.on("change:connected", this.onChangedConnected, this);
             this.CONNECTION_URL = _attrs.websocket_connection_url || constants.CONNECTION_URL;
             this.conn_manager = new Strophe.ConnectionManager(this.CONNECTION_URL, {'x-token': true});
@@ -208,7 +206,7 @@ xabber.Account = Backbone.Model.extend({
                             width: thumbnail.width,
                             height: thumbnail.height,
                         }).up()
-                    })
+                    });
                     this.sendIQFast(iq_pub_metadata, () => {
                             callback && callback(avatar_hash);
                         },
@@ -253,7 +251,7 @@ xabber.Account = Backbone.Model.extend({
                         dfd.resolve(res, true)
                     } else
                         dfd.resolve(image.base64)
-                }, (res) => {
+                }, () => {
                     dfd.resolve(image.base64)
                 });
             } else
@@ -281,7 +279,7 @@ xabber.Account = Backbone.Model.extend({
                 .c('item', {id: avatar});
             this.sendIQFast(iq_request_avatar, (iq) => {
                 let pubsub_avatar = $(iq).find('data').text();
-                if (pubsub_avatar == "")
+                if (pubsub_avatar === "")
                     errback && errback(xabber.getString("pubsub__error__text_empty_node"));
                 else
                     callback && callback(pubsub_avatar);
@@ -292,9 +290,9 @@ xabber.Account = Backbone.Model.extend({
             let res = (this.connection.authenticated && !this.connection.disconnecting && this.session.get('connected') && this.get('status') !== 'offline');
             if (res || (this.connection && this.connection.streamManagement._isStreamManagementEnabled && this.connection.streamManagement.getResumeToken())) {
                 let elem = arguments[0];
-                if (typeof(elem.tree) === "function" && elem.tree().getAttribute('type') == 'get') {
+                if (typeof(elem.tree) === "function" && elem.tree().getAttribute('type') === 'get') {
                     let lang = xabber.settings.language;
-                    (lang == 'default') && (lang = xabber.get('default_language'));
+                    (lang === 'default') && (lang = xabber.get('default_language'));
                     elem.tree().setAttribute('xml:lang', lang);
                 }
                 this.connection.sendIQ.apply(this.connection, arguments);
@@ -303,8 +301,7 @@ xabber.Account = Backbone.Model.extend({
             return res;
         },
 
-        parseDataForm: function ($dataform, options) {
-            options = options || {};
+        parseDataForm: function ($dataform) {
             let type = $dataform.attr('type'),
                 title = $dataform.children('title').text(),
                 instructions = $dataform.children('instructions').text(),
@@ -403,7 +400,6 @@ xabber.Account = Backbone.Model.extend({
         },
 
         createFastConnection: function () {
-            return;
             // let jid = this.get('jid'),
             //     auth_type = this.conn_manager.auth_type,
             //     password;
@@ -444,8 +440,7 @@ xabber.Account = Backbone.Model.extend({
             // this.fast_conn_manager.connect(auth_type, jid, password, this.onFastConnected.bind(this));
         },
 
-        connect: function (options) {
-            options = options || {};
+        connect: function () {
             let jid = this.get('jid'),
                 auth_type = this.get('auth_type'),
                 password;
@@ -492,7 +487,8 @@ xabber.Account = Backbone.Model.extend({
             console.error('reconnect called');
             let conn_retries = this.session.get('conn_retries'),
                 timeout = conn_retries < 3 ? constants.RECONNECTION_TIMEOUTS[conn_retries] : 20000;
-            is_fast && (timeout = 1500);
+            if (is_fast)
+                timeout = 1500;
             this.session.set({
                 connected: false,
                 reconnected: false,
@@ -655,7 +651,7 @@ xabber.Account = Backbone.Model.extend({
                 }
                 this.connection.register.submit();
             } else if (status === Strophe.Status.REGISTERED) {
-                let nickname = this.auth_view.$nickname_input.val()
+                let nickname = this.auth_view.$nickname_input.val();
                 this.auth_view.data.set('step',6);
                 if(nickname){
                     this.set('registration_nickname', nickname)
@@ -783,7 +779,6 @@ xabber.Account = Backbone.Model.extend({
                     ready_to_send: false,
                     no_reconnect: true
                 });
-                let dialog_text = xabber.getString("XMPP_EXCEPTION") + ": " + text;
                 utils.dialogs.ask_extended(xabber.getString("error"), xabber.getString("modal_policy_violation_text"),
                     {modal_class: 'modal-policy-violation', no_dialog_options: true, quoted_text: text, cancel_button_main: true},
                     {
@@ -815,7 +810,7 @@ xabber.Account = Backbone.Model.extend({
             this.save({auth_type: 'password', password: null, x_token: null});
             this.connection.pass = "";
             this.trigger('deactivate', this);
-            this.deactivate()
+            this.deactivate();
             this.connFeedback(xabber.getString("connection__error__text_authentication_failed_short"));
         },
 
@@ -839,7 +834,7 @@ xabber.Account = Backbone.Model.extend({
                 $(tokens).find('device').each((idx, token) => {
                     let $token = $(token),
                         client = $token.find('client').text(),
-                        public_label = $token.find('public-label').text(),
+                        // public_label = $token.find('public-label').text(),
                         device = $token.find('info').text(),
                         description = $token.find('public-label').text(),
                         omemo_id = $token.find('omemo-id').text(),
@@ -893,35 +888,35 @@ xabber.Account = Backbone.Model.extend({
             });
         },
 
-        onFastConnected: function (status) {
-            if (status === Strophe.Status.CONNECTED) {
-                if (this.fast_connection.x_token) {
-                    this.save({
-                        x_token: this.fast_connection.x_token,
-                        hotp_counter: this.fast_connection.counter,
-                    });
-                    this.fast_conn_manager.auth_type = 'x-token';
-                    this.fast_connection.x_token_auth = true;
-                    if (this.connection && this.connection.pass)
-                        this.fast_connection.pass = this.connection.pass;
-                }
-                _.each(this._after_fast_connected_plugins, (plugin) => {
-                    plugin.call(this);
-                });
-            } else if (status === Strophe.Status.AUTHFAIL || status === Strophe.Status.DISCONNECTED) {
-                this.fast_connection && clearTimeout(this.fast_connection.openCheckTimeout);
-                if (this._fast_interval_worker)
-                    this._fast_interval_worker.terminate();
-                this.fast_conn_manager = undefined;
-                this.fast_connection = undefined;
-                if (this.connection && !this.connection.disconnecting
-                    && this.connection.authenticated && this.connection.connected){
-                    this.getVCard();
-                    if (!(this.auth_view && this.auth_view.data.get('authentication')))
-                        this.trigger('ready_to_get_roster');
-                }
-            }
-        },
+        // onFastConnected: function (status) {
+        //     if (status === Strophe.Status.CONNECTED) {
+        //         if (this.fast_connection.x_token) {
+        //             this.save({
+        //                 x_token: this.fast_connection.x_token,
+        //                 hotp_counter: this.fast_connection.counter,
+        //             });
+        //             this.fast_conn_manager.auth_type = 'x-token';
+        //             this.fast_connection.x_token_auth = true;
+        //             if (this.connection && this.connection.pass)
+        //                 this.fast_connection.pass = this.connection.pass;
+        //         }
+        //         _.each(this._after_fast_connected_plugins, (plugin) => {
+        //             plugin.call(this);
+        //         });
+        //     } else if (status === Strophe.Status.AUTHFAIL || status === Strophe.Status.DISCONNECTED) {
+        //         this.fast_connection && clearTimeout(this.fast_connection.openCheckTimeout);
+        //         if (this._fast_interval_worker)
+        //             this._fast_interval_worker.terminate();
+        //         this.fast_conn_manager = undefined;
+        //         this.fast_connection = undefined;
+        //         if (this.connection && !this.connection.disconnecting
+        //             && this.connection.authenticated && this.connection.connected){
+        //             this.getVCard();
+        //             if (!(this.auth_view && this.auth_view.data.get('authentication')))
+        //                 this.trigger('ready_to_get_roster');
+        //         }
+        //     }
+        // },
 
         onReconnected: function () {
             this.connFeedback(xabber.getString("account_state_connected"));
@@ -938,7 +933,7 @@ xabber.Account = Backbone.Model.extend({
                 this.sendPendingMessages();
                 this.session.set({
                     ready_to_send: true
-                })
+                });
 
                 this._main_interval_worker.postMessage({});
                 // this.fast_connection && this._fast_interval_worker.postMessage({});
@@ -974,7 +969,7 @@ xabber.Account = Backbone.Model.extend({
             console.log(this._pending_messages);
             this._pending_messages.sort((a,b) => (a.timestamp > b.timestamp) ? 1 : ((b.timestamp > a.timestamp) ? -1 : 0));
             _.each(this._pending_messages, (item) => {
-                console.log(item)
+                console.log(item);
                 let msg = this.messages.get(item.unique_id), msg_iq;
                 msg && (msg_iq = msg.get('xml'));
                 if (msg && msg.collection && msg.collection.chat && msg.collection.chat.get('group_chat'))
@@ -1007,7 +1002,7 @@ xabber.Account = Backbone.Model.extend({
                 if (this.session.get('no_reconnect')) {
                     this.session.set('no_reconnect', false);
                 } else {
-                    this.fast_connection && this.fast_connection.connected && this.fast_connection.disconnect();
+                    // this.fast_connection && this.fast_connection.connected && this.fast_connection.disconnect();
                     if (this.connection && this.connection.streamManagement
                         && this.connection.streamManagement._isStreamManagementEnabled
                         && this.connection.streamManagement.getResumeToken()){
@@ -1111,7 +1106,7 @@ xabber.Account = Backbone.Model.extend({
                         }));
                     return sha1(bin);
                 } catch (e) {
-                    console.error(e)
+                    console.error(e);
                     return "";
                 }
             }
@@ -1188,7 +1183,7 @@ xabber.Account = Backbone.Model.extend({
                 iq.c('device', {id: token_uid[token_num]}).up();
             let token;
             if (this.omemo && this.omemo.xabber_trust && this.x_tokens_list){
-                token = this.x_tokens_list.find(token => token.token_uid == token_uid[0]);
+                token = this.x_tokens_list.find(token => token.token_uid === token_uid[0]);
                 if (!token.omemo_id)
                     token = null;
             }
@@ -1196,7 +1191,7 @@ xabber.Account = Backbone.Model.extend({
                 callback && callback();
                 if (token){
                     if (this.omemo.xabber_trust.isDeviceTrusted(this.get('jid'), token.omemo_id)){
-                        let removed_device_ids = [token.omemo_id]
+                        let removed_device_ids = [token.omemo_id];
                         this.omemo.xabber_trust.findAndMarkRemovedTrustedDevices(removed_device_ids, null, null, Math.floor(Date.now() / 1000))
                     }
                 }
@@ -1209,7 +1204,7 @@ xabber.Account = Backbone.Model.extend({
                 to: this.connection.domain
             }).c('revoke-all', {xmlns:Strophe.NS.AUTH_DEVICES});
             this.sendIQFast(iq, (success) => {
-                    callback & callback(success);
+                    callback && callback(success);
                     if (this.omemo && this.omemo.xabber_trust && this.x_tokens_list) {
                         this.omemo.xabber_trust.findAndMarkAllOwnTrustedDevices(Math.floor(Date.now() / 1000));
                     }
@@ -1256,7 +1251,7 @@ xabber.Account = Backbone.Model.extend({
                 this.connFeedback(xabber.getString("settings_account__label_state_disconnecting"));
                 this.sendPresence('offline');
                 this.connection.disconnect();
-                if (this.fast_conn_manager) this.fast_connection.disconnect();
+                // if (this.fast_conn_manager) this.fast_connection.disconnect();
             } else {
                 if (this.session.get('no_reconnect') && this.session.get('auth_failed'))
                     this.connection.disconnect();
@@ -1271,7 +1266,6 @@ xabber.Account = Backbone.Model.extend({
                 this.omemo.destroy();
                 this.omemo = undefined;
             }
-            this.groups_settings
             if (this.groups_settings){
                 this.groups_settings.clearStorage();
             }
@@ -1324,13 +1318,14 @@ xabber.Account = Backbone.Model.extend({
 
         onSetIQResult: function (iq) {
             let to = $(iq).attr('to');
-            if (this.fast_connection && this.fast_connection.jid === to
-                && !this.fast_connection.disconnecting && this.fast_connection.authenticated
-                && this.fast_connection.connected && this.get('status') !== 'offline'){
-                this.sendIQFast($iq({
-                    type: 'result', id: iq.getAttribute('id'),
-                }));
-            } else if (this.connection && this.connection.jid === to && this.connection.authenticated
+            // if (this.fast_connection && this.fast_connection.jid === to
+            //     && !this.fast_connection.disconnecting && this.fast_connection.authenticated
+            //     && this.fast_connection.connected && this.get('status') !== 'offline'){
+            //     this.sendIQFast($iq({
+            //         type: 'result', id: iq.getAttribute('id'),
+            //     }));
+            // } else
+            if (this.connection && this.connection.jid === to && this.connection.authenticated
                 && !this.connection.disconnecting && this.session.get('connected') && this.get('status') !== 'offline') {
                 this.sendIQ($iq({
                     type: 'result', id: iq.getAttribute('id'),
@@ -1389,7 +1384,7 @@ xabber.Account = Backbone.Model.extend({
                 callback && callback();
             }
             else if (this.server_features.get('media-gallery')){
-                this.initGalleryAuth(this.server_features.get('media-gallery'), errback)
+                this.initGalleryAuth(this.server_features.get('media-gallery'), errback);
                 this.once('gallery_token_authenticated', callback)
             }
             else if (!this.server_features.get('media-gallery')){
@@ -1425,8 +1420,8 @@ xabber.Account = Backbone.Model.extend({
                             callback && callback(response.responseJSON);
                         }
                     });
-                }
-                reader.onerror = (e) => {
+                };
+                reader.onerror = () => {
                     console.log(reader.error);
                     callback && callback(false)
                 };
@@ -1439,7 +1434,7 @@ xabber.Account = Backbone.Model.extend({
             if (this.get('gallery_url') && !this.get('gallery_auth')) {
                 this.set('gallery_token', undefined);
                 this.set('gallery_token_expires', undefined);
-                this.set('gallery_auth', true)
+                this.set('gallery_auth', true);
                 this.gallery_iq_answered = false;
                 $.ajax({
                     type: 'POST',
@@ -1449,7 +1444,7 @@ xabber.Account = Backbone.Model.extend({
                     data: JSON.stringify({jid: this.jid, type: "iq"}),
                     success: (response) => {
                         if (response.request_id){
-                            this.set('gallery_auth_request_code', response.request_id)
+                            this.set('gallery_auth_request_code', response.request_id);
                             this.gallery_auth_errback = errback;
                             if (this.gallery_code_requests.length){
                                 let verifying_code = this.gallery_code_requests.find(verifying_mess => (verifying_mess.id === this.get('gallery_auth_request_code')));
@@ -1463,8 +1458,8 @@ xabber.Account = Backbone.Model.extend({
                         }
                     },
                     error: (response) => {
-                        this.handleCommonGalleryErrors(response, errback)
-                        this.set('gallery_auth', false)
+                        this.handleCommonGalleryErrors(response, errback);
+                        this.set('gallery_auth', false);
                         this.gallery_code_requests = [];
                         console.log(response)
                     }
@@ -1488,32 +1483,32 @@ xabber.Account = Backbone.Model.extend({
                             this.set('gallery_token', response.token);
                         if (response.expires)
                             this.set('gallery_token_expires', response.expires);
-                        this.trigger('gallery_token_authenticated')
+                        this.trigger('gallery_token_authenticated');
                         this.set('gallery_auth', false)
                     },
                     error: (response) => {
-                        this.set('gallery_auth', false)
-                        this.handleCommonGalleryErrors(response)
+                        this.set('gallery_auth', false);
+                        this.handleCommonGalleryErrors(response);
                         console.log(response)
                     }
                 });
             }
         },
 
-        prepareFiles: function (files, callback) {
-            files.forEach((file) => {
-                let reader = new FileReader();
-                reader.onloadend = () => {
-                    let b64 = reader.result.split('base64,'),
-                        binary_file = atob(b64[1]),
-                        bytes = new Uint8Array(binary_file.length);
-                    for (let i = 0; i < binary_file.length; i++)
-                        bytes[i] = binary_file.charCodeAt(i);
-                    this.testFile({size: file.size, name: file.name, hash: sha1(bytes)}, file, callback)
-                }
-                reader.readAsDataURL(file);
-            })
-        },
+        // prepareFiles: function (files, callback) {
+        //     files.forEach((file) => {
+        //         let reader = new FileReader();
+        //         reader.onloadend = () => {
+        //             let b64 = reader.result.split('base64,'),
+        //                 binary_file = atob(b64[1]),
+        //                 bytes = new Uint8Array(binary_file.length);
+        //             for (let i = 0; i < binary_file.length; i++)
+        //                 bytes[i] = binary_file.charCodeAt(i);
+        //             this.testFile({size: file.size, name: file.name, hash: sha1(bytes)}, file, callback)
+        //         };
+        //         reader.readAsDataURL(file);
+        //     })
+        // },
 
         handleCommonGalleryErrors: function (response, errback) {
             !errback && (errback = this.gallery_auth_errback);
@@ -1552,7 +1547,7 @@ xabber.Account = Backbone.Model.extend({
                             callback && callback(response)
                         },
                         error: (response) => {
-                            this.handleCommonGalleryErrors(response)
+                            this.handleCommonGalleryErrors(response);
                             console.log(response)
                         }
                     });
@@ -1569,12 +1564,12 @@ xabber.Account = Backbone.Model.extend({
                         dataType: 'json',
                         contentType: "application/json",
                         data: params,
-                        success: (response) => {
-                            this.uploadFile(file , callback)
+                        success: () => {
+                            this.uploadFile(file , callback);
                         },
                         error: (response) => {
-                            this.handleCommonGalleryErrors(response)
-                            console.log(response)
+                            this.handleCommonGalleryErrors(response);
+                            console.log(response);
                         }
                     });
 
@@ -1605,13 +1600,13 @@ xabber.Account = Backbone.Model.extend({
                         contentType: false,
                         processData: false,
                         success: (response) => {
-                            console.log(response)
-                            callback && callback(response)
+                            console.log(response);
+                            callback && callback(response);
                         },
                         error: (response) => {
-                            this.handleCommonGalleryErrors(response)
-                            console.log(response)
-                            errback && errback(response)
+                            this.handleCommonGalleryErrors(response);
+                            console.log(response);
+                            errback && errback(response);
                         }
                     });
                 }
@@ -1622,7 +1617,7 @@ xabber.Account = Backbone.Model.extend({
             this.testGalleryTokenExpire(() => {
                 if (this.get('gallery_token') && this.get('gallery_url')) {
                     if (!file)
-                        errback && errback('no file')
+                        errback && errback('no file');
                     let formData = new FormData();
                     formData.append('file', file, file.name);
                     formData.append('media_type', file.type);
@@ -1635,12 +1630,12 @@ xabber.Account = Backbone.Model.extend({
                         contentType: false,
                         processData: false,
                         success: (response) => {
-                            console.log(response)
+                            console.log(response);
                             callback && callback(response)
                         },
                         error: (response) => {
-                            this.handleCommonGalleryErrors(response)
-                            console.log(response)
+                            this.handleCommonGalleryErrors(response);
+                            console.log(response);
                             errback && errback(response)
                         }
                     });
@@ -1660,12 +1655,12 @@ xabber.Account = Backbone.Model.extend({
                         contentType: "application/json",
                         data: JSON.stringify(options),
                         success: (response) => {
-                            console.log(response)
+                            console.log(response);
                             callback && callback(response)
                         },
                         error: (response) => {
-                            this.handleCommonGalleryErrors(response)
-                            console.log(response)
+                            this.handleCommonGalleryErrors(response);
+                            console.log(response);
                             errback && errback(response)
                         }
                     });
@@ -1685,12 +1680,12 @@ xabber.Account = Backbone.Model.extend({
                         contentType: "application/json",
                         data: JSON.stringify(options),
                         success: (response) => {
-                            console.log(response)
+                            console.log(response);
                             callback && callback(response)
                         },
                         error: (response) => {
-                            this.handleCommonGalleryErrors(response)
-                            console.log(response)
+                            this.handleCommonGalleryErrors(response);
+                            console.log(response);
                             errback && errback(response)
                         }
                     });
@@ -1709,32 +1704,32 @@ xabber.Account = Backbone.Model.extend({
                         contentType: "application/json",
                         data: JSON.stringify({url: url}),
                         success: (response) => {
-                            response.site = $(response.ogp).closest('meta[property="og:site_name"]').attr('content')
-                            response.type = $(response.ogp).closest('meta[property="og:type"]').attr('content')
-                            response.url = $(response.ogp).closest('meta[property="og:url"]').attr('content')
-                            response.description = $(response.ogp).closest('meta[property="og:description"]').attr('content')
-                            response.title = $(response.ogp).closest('meta[property="og:title"]').attr('content')
-                            response.image = $(response.ogp).closest('meta[property="og:image"]').attr('content')
-                            response.image_height = $(response.ogp).closest('meta[property="og:image:height"]').attr('content')
-                            response.image_width = $(response.ogp).closest('meta[property="og:image:width"]').attr('content')
-                            response.video_url = $(response.ogp).closest('meta[property="og:video:url"]').attr('content')
-                            console.log(response)
+                            response.site = $(response.ogp).closest('meta[property="og:site_name"]').attr('content');
+                            response.type = $(response.ogp).closest('meta[property="og:type"]').attr('content');
+                            response.url = $(response.ogp).closest('meta[property="og:url"]').attr('content');
+                            response.description = $(response.ogp).closest('meta[property="og:description"]').attr('content');
+                            response.title = $(response.ogp).closest('meta[property="og:title"]').attr('content');
+                            response.image = $(response.ogp).closest('meta[property="og:image"]').attr('content');
+                            response.image_height = $(response.ogp).closest('meta[property="og:image:height"]').attr('content');
+                            response.image_width = $(response.ogp).closest('meta[property="og:image:width"]').attr('content');
+                            response.video_url = $(response.ogp).closest('meta[property="og:video:url"]').attr('content');
+                            console.log(response);
                             callback && callback(response)
                         },
                         error: (response) => {
-                            this.handleCommonGalleryErrors(response)
-                            errback && errback(response)
+                            this.handleCommonGalleryErrors(response);
+                            errback && errback(response);
                             console.log(response)
                         }
                     });
             });
         },
 
-        createMessageFromIQ: function (attrs) {
-            let contact = this.contacts.mergeContact(attrs.from_jid),
-                chat = this.chats.getChat(contact);
-            chat.messages.create(attrs);
-        },
+        // createMessageFromIQ: function (attrs) {
+        //     let contact = this.contacts.mergeContact(attrs.from_jid),
+        //         chat = this.chats.getChat(contact);
+        //     chat.messages.create(attrs);
+        // },
 
         onPresence: function (presence) {
             let $presence = $(presence),
@@ -1747,7 +1742,7 @@ xabber.Account = Backbone.Model.extend({
                     handler(presence, bare_jid);
                 });
                 return;
-            };
+            }
             let resource = Strophe.getResourceFromJid(jid),
                 priority = Number($presence.find('priority').text()),
                 status = $presence.find('show').text() || 'online',
@@ -1772,7 +1767,7 @@ xabber.Account = Backbone.Model.extend({
                         attrs.token_uid = $device.attr('id')
                     }
                     if (!resource_obj)
-                        resource_obj = this.resources.create(attrs);
+                        this.resources.create(attrs);
                     else
                         resource_obj.set(attrs);
                 }
@@ -1790,8 +1785,8 @@ xabber.Account = Backbone.Model.extend({
         },
 
         addFastConnPlugin: function (func, conn, reconn) {
-            return;
-            conn && this.prototype._after_fast_connected_plugins.push(func);
+            // return;
+            // conn && this.prototype._after_fast_connected_plugins.push(func);
         }
     });
 
@@ -1801,7 +1796,7 @@ xabber.Accounts = Backbone.CollectionWithStorage.extend({
         return acc1.settings.get('order') < acc2.settings.get('order') ? -1 : 1;
     },
 
-    _initialize: function (models, options) {
+    _initialize: function () {
         this.settings_list = xabber.account_settings_list;
         this.getEnabledList();
         this.getConnectedList();
@@ -1833,7 +1828,7 @@ xabber.Accounts = Backbone.CollectionWithStorage.extend({
                     account.deleteAccount(true);
                     account.password_view.closeModal();
                     utils.modals.clear_queue();
-                })
+                });
                 account.save('enabled', true);
                 account.activate();
             } else {
@@ -1888,7 +1883,6 @@ xabber.Accounts = Backbone.CollectionWithStorage.extend({
             } else if (account.show_settings_after_delete) {
                 xabber.body.setScreen('settings-modal', {account_block_name: null, block_name: null});
             } else if (account.dont_change_screen_after_delete) {
-                return;
             } else {
             }
         }
@@ -1981,11 +1975,11 @@ xabber.AccountToolbarItemView = xabber.BasicView.extend({
         xabber.updateFaviconConnected();
     },
 
-    updateEncryptionWarning: function (unverified_count) { //34
+    updateEncryptionWarning: function () { //34
         if (!this.model || !this.model.omemo)
             return;
         this.model.omemo.checkOwnFingerprints().then((is_trusted) => {
-            if (is_trusted == 'none' || is_trusted == 'error') {
+            if (is_trusted === 'none' || is_trusted === 'error') {
                 this.$('.encryption-warning-icon').removeClass('hidden');
             } else {
                 this.$('.encryption-warning-icon').addClass('hidden');
@@ -2022,7 +2016,7 @@ xabber.AccountToolbarItemView = xabber.BasicView.extend({
             return;
         }
         xabber.toolbar_view.$('.toolbar-item.account-item').removeClass('active');
-        if (xabber.toolbar_view.data.get('account_filtering') != this.model.get('jid'))
+        if (xabber.toolbar_view.data.get('account_filtering') !== this.model.get('jid'))
             this.$el.addClass('active');
         xabber.toolbar_view.showChatsByAccount(this.model);
     },
@@ -2041,7 +2035,7 @@ xabber.ToolbarAccountsBlockView = xabber.BasicView.extend({
         this.listenTo(this.model, 'destroy', this.onAccountRemoved);
     },
 
-    updateList: function (account) {
+    updateList: function () {
         this.$el.find('.single-item').removeClass('single-item');
         _.each(this.children, function (view) { view.detach(); });
         _.each(this.model.enabled, (account) => {
@@ -2051,7 +2045,7 @@ xabber.ToolbarAccountsBlockView = xabber.BasicView.extend({
             if (this.model.enabled.length === 1)
                 this.$el.find('.toolbar-item.account-item').addClass('single-item');
         });
-        this.$el.find('.toolbar-item.settings-modal').switchClass('hidden', this.model.enabled.length != 0);
+        this.$el.find('.toolbar-item.settings-modal').switchClass('hidden', this.model.enabled.length !== 0);
         this.parent.updateScrollBar();
     },
 
@@ -2108,7 +2102,7 @@ xabber.ToolbarAccountsBlockView = xabber.BasicView.extend({
         this.$el.find('.single-item').removeClass('single-item');
         if (this.model.enabled.length === 1)
             this.$el.find('.toolbar-item.account-item').addClass('single-item');
-        this.$el.find('.toolbar-item.settings-modal').switchClass('hidden', this.model.enabled.length != 0);
+        this.$el.find('.toolbar-item.settings-modal').switchClass('hidden', this.model.enabled.length !== 0);
         this.parent.updateScrollBar();
     },
 
@@ -2117,7 +2111,7 @@ xabber.ToolbarAccountsBlockView = xabber.BasicView.extend({
         this.parent.updateScrollBar();
         if (this.model.enabled.length === 1)
             this.$el.find('.toolbar-item.account-item').addClass('single-item');
-        this.$el.find('.toolbar-item.settings-modal').switchClass('hidden', this.model.enabled.length != 0);
+        this.$el.find('.toolbar-item.settings-modal').switchClass('hidden', this.model.enabled.length !== 0);
         if (xabber.toolbar_view.$('.toolbar-item.saved-chats.active').length && this.model.enabled.length === 1){
             let previous_chat = xabber.body.screen.get('previous_screen');
             previous_chat.force_open_all_chats = true;
@@ -2153,7 +2147,7 @@ xabber.ResourceView = xabber.BasicView.extend({
     className: 'resource-wrap',
     template: templates.resource,
 
-    _initialize: function (options) {
+    _initialize: function () {
         this.update();
         this.listenTo(this.model, 'change', this.update);
     },
@@ -2173,7 +2167,7 @@ xabber.ResourceRightView = xabber.BasicView.extend({
     className: 'resource-wrap',
     template: templates.resource_right,
 
-    _initialize: function (options) {
+    _initialize: function () {
         this.update();
         this.listenTo(this.model, 'change', this.update);
     },
@@ -2203,21 +2197,21 @@ xabber.Resources = Backbone.Collection.extend({
                 let $identity = $(iq).find('identity[category=client]');
                 if ($identity.length)
                     resource.set('client', $identity.attr('name'));
-                this.attention_supported = this.isFeatureSupported(iq, Strophe.NS.ATTENTION);
+                // this.attention_supported = this.isFeatureSupported(iq, Strophe.NS.ATTENTION);
                 callback && callback();
             });
         }
     },
 
-    isFeatureSupported: function (stanza, ns) {
-        let $stanza = $(stanza), is_supported = false;
-        $stanza.find('feature').each(function () {
-            let namespace = $(this).attr('var');
-            if (namespace === ns)
-                is_supported = true;
-        });
-        return is_supported;
-    },
+    // isFeatureSupported: function (stanza, ns) {
+    //     let $stanza = $(stanza), is_supported = false;
+    //     $stanza.find('feature').each(function () {
+    //         let namespace = $(this).attr('var');
+    //         if (namespace === ns)
+    //             is_supported = true;
+    //     });
+    //     return is_supported;
+    // },
 });
 
 xabber.ResourcesView = xabber.BasicView.extend({
@@ -2310,7 +2304,7 @@ xabber.AccountVCardModalView = xabber.VCardView.extend({
 xabber.AccountMediaGalleryView = xabber.BasicView.extend({
     template: templates.media_gallery_account,
     events: {
-        "change input.gallery-upload": "onFileInputChanged",
+        // "change input.gallery-upload": "onFileInputChanged",
         "click .gallery-file:not(.gallery-avatar) .btn-delete": "deleteFile",
         "click .gallery-file.gallery-avatar .btn-delete": "deleteAvatar",
         "click .gallery-file .checkbox-field": "selectFile",
@@ -2359,41 +2353,41 @@ xabber.AccountMediaGalleryView = xabber.BasicView.extend({
         }
     },
 
-    updateStorage: function (after_deletion, after_avatar_update) {
+    updateStorage: function () {
         this.account.getStorageStats(null,(response) => {
             let used_storage = utils.pretty_size(response.total.used) || '0';
-            this.$('.btn-delete-files-dropdown').hideIf(!(response.total && response.total.used))
-            this.$('.gallery-manage-storage').hideIf(!(response.total && response.total.used))
-            this.$('.storage-usage').html(used_storage + xabber.getString("of") + utils.pretty_size(response.quota))
-            this.$('.storage-usage-images').hideIf(!(response.images && response.images.used))
-            this.$('.storage-label-images').hideIf(!(response.images && response.images.used))
-            response.images && !_.isUndefined(response.images.used) && this.$('.storage-usage-images .storage-usage-amount').html(utils.pretty_size(response.images.used))
-            this.$('.storage-label-videos').hideIf(!(response.videos && response.videos.used))
-            this.$('.storage-usage-videos').hideIf(!(response.videos && response.videos.used))
-            response.videos && !_.isUndefined(response.videos.used) && this.$('.storage-usage-videos .storage-usage-amount').html(utils.pretty_size(response.videos.used))
-            this.$('.storage-label-voices').hideIf(!(response.voices && response.voices.used))
-            this.$('.storage-usage-voices').hideIf(!(response.voices && response.voices.used))
-            response.voices && !_.isUndefined(response.voices.used) && this.$('.storage-usage-voices .storage-usage-amount').html(utils.pretty_size(response.voices.used))
-            this.$('.storage-label-files').hideIf(!(response.files && response.files.used))
-            this.$('.storage-usage-files').hideIf(!(response.files && response.files.used))
-            response.files && !_.isUndefined(response.files.used) && this.$('.storage-usage-files .storage-usage-amount').html(utils.pretty_size(response.files.used))
-            this.$('.storage-label-avatars').hideIf(!(response.avatars && response.avatars.used))
-            response.avatars && !_.isUndefined(response.avatars.used) && this.$('.storage-usage-avatars .storage-usage-amount').html(utils.pretty_size(response.avatars.used))
+            this.$('.btn-delete-files-dropdown').hideIf(!(response.total && response.total.used));
+            this.$('.gallery-manage-storage').hideIf(!(response.total && response.total.used));
+            this.$('.storage-usage').html(used_storage + xabber.getString("of") + utils.pretty_size(response.quota));
+            this.$('.storage-usage-images').hideIf(!(response.images && response.images.used));
+            this.$('.storage-label-images').hideIf(!(response.images && response.images.used));
+            response.images && !_.isUndefined(response.images.used) && this.$('.storage-usage-images .storage-usage-amount').html(utils.pretty_size(response.images.used));
+            this.$('.storage-label-videos').hideIf(!(response.videos && response.videos.used));
+            this.$('.storage-usage-videos').hideIf(!(response.videos && response.videos.used));
+            response.videos && !_.isUndefined(response.videos.used) && this.$('.storage-usage-videos .storage-usage-amount').html(utils.pretty_size(response.videos.used));
+            this.$('.storage-label-voices').hideIf(!(response.voices && response.voices.used));
+            this.$('.storage-usage-voices').hideIf(!(response.voices && response.voices.used));
+            response.voices && !_.isUndefined(response.voices.used) && this.$('.storage-usage-voices .storage-usage-amount').html(utils.pretty_size(response.voices.used));
+            this.$('.storage-label-files').hideIf(!(response.files && response.files.used));
+            this.$('.storage-usage-files').hideIf(!(response.files && response.files.used));
+            response.files && !_.isUndefined(response.files.used) && this.$('.storage-usage-files .storage-usage-amount').html(utils.pretty_size(response.files.used));
+            this.$('.storage-label-avatars').hideIf(!(response.avatars && response.avatars.used));
+            response.avatars && !_.isUndefined(response.avatars.used) && this.$('.storage-usage-avatars .storage-usage-amount').html(utils.pretty_size(response.avatars.used));
 
             if (response.images){
-                this.$('.storage-progress-images').css('width', ((response.images.used/response.quota) * 100).toFixed(2) + '%')
+                this.$('.storage-progress-images').css('width', ((response.images.used/response.quota) * 100).toFixed(2) + '%');
             }
             if (response.videos){
-                this.$('.storage-progress-videos').css('width', ((response.videos.used/response.quota) * 100).toFixed(2) + '%')
+                this.$('.storage-progress-videos').css('width', ((response.videos.used/response.quota) * 100).toFixed(2) + '%');
             }
             if (response.voices){
-                this.$('.storage-progress-voices').css('width', ((response.voices.used/response.quota) * 100).toFixed(2) + '%')
+                this.$('.storage-progress-voices').css('width', ((response.voices.used/response.quota) * 100).toFixed(2) + '%');
             }
             if (response.files){
-                this.$('.storage-progress-files').css('width', ((response.files.used/response.quota) * 100).toFixed(2) + '%')
+                this.$('.storage-progress-files').css('width', ((response.files.used/response.quota) * 100).toFixed(2) + '%');
             }
             if (response.avatars){
-                this.$('.storage-progress-avatars').css('width', ((response.avatars.used/response.quota) * 100).toFixed(2) + '%')
+                this.$('.storage-progress-avatars').css('width', ((response.avatars.used/response.quota) * 100).toFixed(2) + '%');
             }
             if (this.parent){
                 this.parent.$('.settings-tab[data-block-name="media-gallery"] .settings-block-label')
@@ -2409,25 +2403,25 @@ xabber.AccountMediaGalleryView = xabber.BasicView.extend({
     },
 
     filterType: function (file_type, sorting) {
-        this.$('.gallery-files').html('')
+        this.$('.gallery-files').html('');
         if (file_type === 'image' || file_type === 'video' || file_type === 'avatars') {
             this.$('.gallery-files').removeClass('voice');
             this.$('.gallery-files').removeClass('file');
             this.$('.gallery-files').addClass('grid');
         } else if (file_type === 'voice') {
-            this.$('.gallery-files').addClass('voice')
+            this.$('.gallery-files').addClass('voice');
             this.$('.gallery-files').removeClass('file');
-            this.$('.gallery-files').removeClass('grid')
+            this.$('.gallery-files').removeClass('grid');
         } else {
-            this.$('.gallery-files').removeClass('voice')
+            this.$('.gallery-files').removeClass('voice');
             this.$('.gallery-files').addClass('file');
-            this.$('.gallery-files').removeClass('grid')
+            this.$('.gallery-files').removeClass('grid');
         }
-        let options = {type: file_type}
-        sorting && (options.order_by = sorting)
-        this.current_options = options
+        let options = {type: file_type};
+        sorting && (options.order_by = sorting);
+        this.current_options = options;
         if (file_type === 'avatars')
-            this.getAvatars(options)
+            this.getAvatars(options);
         else
             this.getFiles(options)
     },
@@ -2446,7 +2440,7 @@ xabber.AccountMediaGalleryView = xabber.BasicView.extend({
         this.$('.gallery-wrap').addClass('hidden');
         this.$('.media-gallery-items-wrap').removeClass('hidden');
         this.$('.media-gallery-items-wrap').attr('data-value', file_type);
-        this.$('.gallery-files').html('')
+        this.$('.gallery-files').html('');
         this.filterType(file_type);
         if (this.parent){
             this.parent.updateHeight();
@@ -2456,7 +2450,7 @@ xabber.AccountMediaGalleryView = xabber.BasicView.extend({
         }
     },
 
-    backToMain: function (ev) {
+    backToMain: function () {
         this.parent.$('.btn-back-settings').removeClass('hidden');
         this.parent.$('.btn-select-files').addClass('hidden');
         this.parent.$('.btn-sorting').addClass('hidden');
@@ -2473,7 +2467,7 @@ xabber.AccountMediaGalleryView = xabber.BasicView.extend({
         }
     },
 
-    onUpdateAvatars: function (ev) {
+    onUpdateAvatars: function () {
         this.updateStorage(false, true);
         if (this.$('.media-gallery-items-wrap').attr('data-value') === 'avatars'){
             this.current_page = 1;
@@ -2483,7 +2477,7 @@ xabber.AccountMediaGalleryView = xabber.BasicView.extend({
         }
     },
 
-    showDeleteFilesView: function (ev) {
+    showDeleteFilesView: function () {
         xabber.trigger('show_delete_files', {model: this.account, gallery_view: this});
     },
 
@@ -2493,7 +2487,7 @@ xabber.AccountMediaGalleryView = xabber.BasicView.extend({
             sort_type = $target.attr('data-value');
         this.current_page = 1;
         this.total_pages = 0;
-        this.$('.gallery-files').html('')
+        this.$('.gallery-files').html('');
         this.filterType(file_type, sort_type);
     },
 
@@ -2503,7 +2497,7 @@ xabber.AccountMediaGalleryView = xabber.BasicView.extend({
             let $file = $elem.closest('.gallery-file'),
                 f_url = $file.attr('data-file');
 
-            utils.dialogs.common('', '<video class="gallery-video-frame" controls autoplay=1 width="420" height="315" src="' + f_url +'"></video>', null, null, null, 'gallery-video-modal')
+            utils.dialogs.common('', '<video class="gallery-video-frame" controls autoplay=1 width="420" height="315" src="' + f_url +'"></video>', null, null, null, 'gallery-video-modal');
             return;
         }
         if ($elem.hasClass('no-uploaded') || $elem.hasClass('gallery-audio-file-not-uploaded')) {
@@ -2526,7 +2520,6 @@ xabber.AccountMediaGalleryView = xabber.BasicView.extend({
 
         if ($elem.hasClass('mdi-pause')) {
             this.prev_audio_message.voice_message.pause();
-            return;
         }
     },
 
@@ -2612,8 +2605,8 @@ xabber.AccountMediaGalleryView = xabber.BasicView.extend({
                     options.contexts = 'voice';
                     delete options.type;
                 }
-                this.loading_files = true
-                $(env.templates.contacts.preloader()).appendTo(this.$('.gallery-files'))
+                this.loading_files = true;
+                $(env.templates.contacts.preloader()).appendTo(this.$('.gallery-files'));
                 $.ajax({
                     type: 'GET',
                     headers: {"Authorization": 'Bearer ' + this.account.get('gallery_token')},
@@ -2626,14 +2619,14 @@ xabber.AccountMediaGalleryView = xabber.BasicView.extend({
                             response.type = options.type;
                         else if (options.contexts)
                             response.type = options.contexts;
-                        this.renderFiles(response)
+                        this.renderFiles(response);
                         this.loading_files = false
                     },
                     error: (response) => {
-                        this.account.handleCommonGalleryErrors(response)
+                        this.account.handleCommonGalleryErrors(response);
                         this.current_rendered_type = undefined;
-                        console.log(response)
-                        this.loading_files = false
+                        console.log(response);
+                        this.loading_files = false;
                         this.$('.gallery-files .preloader-wrapper').remove()
                     }
                 });
@@ -2649,9 +2642,9 @@ xabber.AccountMediaGalleryView = xabber.BasicView.extend({
                 if (this.loading_files && this.current_rendered_type === options.type && !options.page)
                     return;
                 this.current_rendered_type = options.type;
-                this.loading_files = true
+                this.loading_files = true;
                 delete options.type;
-                $(env.templates.contacts.preloader()).appendTo(this.$('.gallery-files'))
+                $(env.templates.contacts.preloader()).appendTo(this.$('.gallery-files'));
                 $.ajax({
                     type: 'GET',
                     headers: {"Authorization": 'Bearer ' + this.account.get('gallery_token')},
@@ -2661,14 +2654,14 @@ xabber.AccountMediaGalleryView = xabber.BasicView.extend({
                     data: options,
                     success: (response) => {
                         response.type = 'avatars';
-                        this.renderFiles(response)
+                        this.renderFiles(response);
                         this.loading_files = false
                     },
                     error: (response) => {
-                        this.account.handleCommonGalleryErrors(response)
-                        this.current_rendered_type = undefined
-                        console.log(response)
-                        this.loading_files = false
+                        this.account.handleCommonGalleryErrors(response);
+                        this.current_rendered_type = undefined;
+                        console.log(response);
+                        this.loading_files = false;
                         this.$('.gallery-files .preloader-wrapper').remove()
                     }
                 });
@@ -2677,7 +2670,7 @@ xabber.AccountMediaGalleryView = xabber.BasicView.extend({
     },
 
     renderFiles: function (response) {
-        if (response.type != this.$('.media-gallery-items-wrap').attr('data-value'))
+        if (response.type !== this.$('.media-gallery-items-wrap').attr('data-value'))
             return;
         this.total_pages = response.total_pages;
         this.$('.gallery-files .preloader-wrapper').remove();
@@ -2724,7 +2717,7 @@ xabber.AccountMediaGalleryView = xabber.BasicView.extend({
             hover: false,
             alignment: 'right'
         };
-        this.$('.dropdown-button').dropdown(dropdown_settings)
+        this.$('.dropdown-button').dropdown(dropdown_settings);
         if (this.parent && this.parent.updateHeight)
             this.parent.updateHeight();
     },
@@ -2732,7 +2725,7 @@ xabber.AccountMediaGalleryView = xabber.BasicView.extend({
     deleteFile: function (ev) {
         let $target = $(ev.target).closest('.gallery-file'),
             file_id = $target.attr('data-id');
-        this.account.deleteFile(file_id,(response) => {
+        this.account.deleteFile(file_id,() => {
             $target.detach();
         }, (err) => {
         })
@@ -2750,18 +2743,18 @@ xabber.AccountMediaGalleryView = xabber.BasicView.extend({
                     dataType: 'json',
                     contentType: "application/json",
                     data: JSON.stringify({id: file_id, contexts: ['avatar']}),
-                    success: (response) => {
+                    success: () => {
                         $target.detach();
                     },
                     error: (response) => {
-                        this.account.handleCommonGalleryErrors(response)
-                        console.log(response)
+                        this.account.handleCommonGalleryErrors(response);
+                        console.log(response);
                     }
                 });
         });
     },
 
-    enableFilesSelect: function (ev) {
+    enableFilesSelect: function () {
         this.$('.media-gallery-items-wrap').addClass('select-items-state');
         this.parent.$('.settings-panel-head-title').addClass('hidden');
         this.parent.$('.btn-more.media-gallery-button').addClass('hidden');
@@ -2769,7 +2762,7 @@ xabber.AccountMediaGalleryView = xabber.BasicView.extend({
         this.onSelectFile();
     },
 
-    disableFilesSelect: function (ev) {
+    disableFilesSelect: function () {
         this.$('.media-gallery-items-wrap').removeClass('select-items-state');
         this.parent.$('.settings-panel-head-title').removeClass('hidden');
         this.parent.$('.btn-more.media-gallery-button').removeClass('hidden');
@@ -2805,22 +2798,22 @@ xabber.AccountMediaGalleryView = xabber.BasicView.extend({
                     this.deleteFile({target: item});
                 }
             }
-        })
+        });
         this.disableFilesSelect();
     },
 
-    onFileInputChanged: function (ev) {
-        let target = ev.target,
-            files = [];
-        for (let i = 0; i < target.files.length; i++) {
-            files.push(target.files[i]);
-        }
-
-        if (files) {
-            this.account.prepareFiles(files, this.openStoragePanel.bind(this));
-            $(target).val('')
-        }
-    },
+    // onFileInputChanged: function (ev) {
+    //     let target = ev.target,
+    //         files = [];
+    //     for (let i = 0; i < target.files.length; i++) {
+    //         files.push(target.files[i]);
+    //     }
+    //
+    //     if (files) {
+    //         this.account.prepareFiles(files, this.openStoragePanel.bind(this));
+    //         $(target).val('')
+    //     }
+    // },
 });
 
 xabber.DeleteFilesFromGalleryView = xabber.BasicView.extend({
@@ -2848,7 +2841,7 @@ xabber.DeleteFilesFromGalleryView = xabber.BasicView.extend({
         });
     },
 
-    onRender: function (options) {
+    onRender: function () {
         this.$el.removeClass('wide-deletion');
         this.$('.media-gallery-delete-items-wrap').addClass('hidden');
         this.$('.deletion-variants').removeClass('hidden');
@@ -2868,14 +2861,13 @@ xabber.DeleteFilesFromGalleryView = xabber.BasicView.extend({
     },
 
     onClickFile: function (ev) {
-        let $elem = $(ev.target),
-            gallery;
+        let $elem = $(ev.target);
 
         if ($elem.hasClass('uploaded-video')) {
             let $file = $elem.closest('.gallery-file'),
                 f_url = $file.attr('data-file');
 
-            utils.dialogs.common('', '<video class="gallery-video-frame" controls autoplay=1 width="420" height="315" src="' + f_url +'"></video>', null, null, null, 'gallery-video-modal')
+            utils.dialogs.common('', '<video class="gallery-video-frame" controls autoplay=1 width="420" height="315" src="' + f_url +'"></video>', null, null, null, 'gallery-video-modal');
             return;
         }
         if ($elem.hasClass('no-uploaded') || $elem.hasClass('gallery-audio-file-not-uploaded')) {
@@ -2898,7 +2890,6 @@ xabber.DeleteFilesFromGalleryView = xabber.BasicView.extend({
 
         if ($elem.hasClass('mdi-pause')) {
             this.prev_audio_message.voice_message.pause();
-            return;
         }
     },
 
@@ -2923,8 +2914,8 @@ xabber.DeleteFilesFromGalleryView = xabber.BasicView.extend({
         this.delete_avatars = false;
         this.delete_percent = percent;
         this.has_files = false;
-        this.current_page_preview = 1
-        $(env.templates.contacts.preloader()).appendTo(this.$('.modal-content'))
+        this.current_page_preview = 1;
+        $(env.templates.contacts.preloader()).appendTo(this.$('.modal-content'));
         this.getFilesForDeletion();
     },
 
@@ -2950,7 +2941,7 @@ xabber.DeleteFilesFromGalleryView = xabber.BasicView.extend({
                     data: options,
                     traditional: true,
                     success: (response) => {
-                        console.log(response)
+                        console.log(response);
                         let current_page = this.current_page_preview;
                         if (current_page < response.total_pages){
                             this.current_page_preview++;
@@ -2979,7 +2970,7 @@ xabber.DeleteFilesFromGalleryView = xabber.BasicView.extend({
                         }
                     },
                     error: (response) => {
-                        console.log(response)
+                        console.log(response);
                         this.$('.preloader-wrapper').remove();
                         this.$('.media-gallery-delete-items-wrap .no-files').removeClass('hidden');
                         this.$('.delete-files-text').addClass('hidden');
@@ -3014,7 +3005,7 @@ xabber.DeleteFilesFromGalleryView = xabber.BasicView.extend({
                     if (this.delete_percent !== '100')
                         this.$('.delete-files-avatars').removeClass('hidden');
                     else {
-                        this.$('.delete-avatars-checkbox').removeClass('hidden2');// сделать чтобы рисовало no files если при 100% есть только аватары и скрывалось появлялось на нажатие чекбокса,
+                        this.$('.delete-avatars-checkbox').removeClass('hidden2');
 
                     }
                 } else if (item.media_type && item.media_type.includes('image')){
@@ -3054,21 +3045,21 @@ xabber.DeleteFilesFromGalleryView = xabber.BasicView.extend({
                 hover: false,
                 alignment: 'right'
             };
-            this.$('.dropdown-button').dropdown(dropdown_settings)
+            this.$('.dropdown-button').dropdown(dropdown_settings);
             this.$('.list-variant.tab:not(.hidden)').length && this.$('.list-variant.tab:not(.hidden)').first().click();
             this.updateScrollBar();
         }
     },
 
-    deleteFilesFiltered: function (ev) {
+    deleteFilesFiltered: function () {
         if (!this.delete_percent)
-            return
+            return;
 
         utils.dialogs.ask(xabber.getString("media_gallery_delete_files_confirm_delete_header"), xabber.getString("media_gallery_delete_files_confirm_delete_text"),
             null, { ok_button_text: xabber.getString("delete")}).done((res) => {
             if (!res)
                 return;
-            $(env.templates.contacts.preloader()).appendTo(this.$('.modal-footer'))
+            $(env.templates.contacts.preloader()).appendTo(this.$('.modal-footer'));
             this.account.testGalleryTokenExpire(() => {
                 if (this.account.get('gallery_token') && this.account.get('gallery_url')){
                     let options = {}, url;
@@ -3093,7 +3084,7 @@ xabber.DeleteFilesFromGalleryView = xabber.BasicView.extend({
                             this.close();
                         },
                         error: (response) => {
-                            this.account.handleCommonGalleryErrors(response)
+                            this.account.handleCommonGalleryErrors(response);
                             this.close();
                             console.log(response)
                         }
@@ -3270,7 +3261,7 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
                 _.extend(this.ps_settings || {}, xabber.ps_settings)
             );
         }
-        this.updateOmemoDevices;
+        this.updateOmemoDevices();
         this.$('.left-column').removeClass('hidden');
         this.$('.right-column').addClass('hidden');
         this.$('.btn-back-settings').removeClass('hidden');
@@ -3289,14 +3280,6 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
             this.renderActiveTrustSession();
         return this;
     },
-
-    // setActiveBlock: function (block_name) {
-    //     if (block_name) {
-    //         let $elem = this.$(`.settings-tab[data-block-name="${options.block_name}"]`);
-    //         if ($elem.length)
-    //             this.jumpToBlock({target: $elem[0]});
-    //     }
-    // },
 
     updateHeight: function () {
         let height;
@@ -3333,8 +3316,6 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
         stanza.c('fallback',{xmlns: Strophe.NS.XABBER_NOTIFY}).t(`device verification fallback text`).up();
         stanza.c('addresses', {xmlns: Strophe.NS.ADDRESS}).c('address',{type: 'to', jid: this.model.get('jid')}).up().up();
         this.model.sendFast(stanza, () => {
-            // console.log(stanza);
-            // console.log(stanza.tree());
             let peer = this.model.omemo.getPeer(this.model.get('jid'));
             peer.updateDevicesKeys();
 
@@ -3399,7 +3380,7 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
                 this.active_trust_session = true;
             }
         });
-        this.$('.btn-verify').switchClass('hidden', this.$('.active-trust-session-wrap').children().length)
+        this.$('.btn-verify').switchClass('hidden', this.$('.active-trust-session-wrap').children().length);
         this.updateHeight();
     },
 
@@ -3476,12 +3457,6 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
         stanza.c('addresses', {xmlns: Strophe.NS.ADDRESS}).c('address',{type: 'to', jid: to}).up().up();
 
         this.model.sendFast(stanza, () => {
-            // let $stanza = $(stanza.tree());
-            // $stanza.attr('to',this.account.get('jid'));
-            // $stanza.find('notification forwarded message').attr('to',this.account.get('jid'));
-            // $stanza.find(`addresses[xmlns="${Strophe.NS.ADDRESS}"] address[type="to"]`).attr('jid',this.account.get('jid'));
-            // this.account.sendFast(stanza, () => {
-            // });
             utils.callback_popup_message(xabber.getString("trust_verification_decrypt_failed"), 5000);
         });
         this.model.omemo.xabber_trust.clearData(sid);
@@ -3520,8 +3495,8 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
             $elem = this.$('.settings-block-wrap.' + $tab.attr('data-block-name')),
             block_name = $tab.attr('data-block-name');
         if (block_name){
-            this.$('.device-more-button.btn-more').hideIf(block_name != 'encryption');
-            if (block_name != 'media-gallery'){
+            this.$('.device-more-button.btn-more').hideIf(block_name !== 'encryption');
+            if (block_name !== 'media-gallery'){
                 this.$('.media-gallery-button.btn-more').addClass('hidden');
             }
         }
@@ -3565,7 +3540,7 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
         this.backToMenuHandler(ev);
     },
 
-    backToMenuHandler: function (ev) {
+    backToMenuHandler: function () {
         this.$('.left-column').removeClass('hidden');
         this.$('.right-column').addClass('hidden');
         this.scrollToTop();
@@ -3586,7 +3561,7 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
         let $elem = this.$('.settings-block-wrap.' + block_name),
             elem_parent = $elem.attr('data-parent-block');
         if (block_name){
-            this.$('.device-more-button.btn-more').hideIf(block_name != 'encryption');
+            this.$('.device-more-button.btn-more').hideIf(block_name !== 'encryption');
         }
         this.$('.settings-block-wrap').addClass('hidden');
         $elem.removeClass('hidden');
@@ -3658,7 +3633,7 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
         xabber.trigger('update_placeholder');
     },
 
-    closeSettings: function (ev) {
+    closeSettings: function () {
         xabber.settings_modal_view.closeSettings();
     },
 
@@ -3722,10 +3697,6 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
         xabber.trigger('unregister_account', this.model);
     },
 
-
-
-
-
     updateStatus: function () {
         let account = this.model,
             status = account.get('status');
@@ -3750,7 +3721,6 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
     },
 
     updateView: function () {
-        let connected = this.model.isConnected();
         this.$('.connection-wrap .buttons-wrap .btn-change-password').hideIf(this.model.get('auth_type') === 'x-token');
         this.$('.connection-wrap .buttons-wrap .btn-reconnect').hideIf(this.model.get('auth_type') === 'x-token');
         this.updateScrollBar();
@@ -3762,11 +3732,11 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
         this.updateDelSettingsButton();
     },
 
-    showResources: function (ev) {
-        this.$(`.token-resource-wrap`).hideIf(true)
-        let resource_id = $(ev.target).attr('data-resource-id');
-        this.$(`.token-resource-wrap[data-resource-id="${resource_id}"]`).hideIf(false)
-    },
+    // showResources: function (ev) {
+    //     this.$(`.token-resource-wrap`).hideIf(true)
+    //     let resource_id = $(ev.target).attr('data-resource-id');
+    //     this.$(`.token-resource-wrap[data-resource-id="${resource_id}"]`).hideIf(false)
+    // },
 
     hideResources: function (ev) {
         if (!($(ev.target).hasClass('last-auth') && $(ev.target).hasClass('resource') || $(ev.target).closest(".token-resource-wrap").length > 0))
@@ -3778,7 +3748,7 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
             return;
         this.model.omemo.bundle.generateIdentity().then(()=>{
             this.model.omemo.publishBundle();
-            this.$('.btn-back-subsettings-account').length && this.backToSubMenu({target: this.$('.btn-back-subsettings-account')[0]})
+            this.$('.btn-back-subsettings-account').length && this.backToSubMenu({target: this.$('.btn-back-subsettings-account')[0]});
             this.renderAllXTokens();
         });
 
@@ -3808,19 +3778,19 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
             if (resource_obj)
                 pretty_token.resource_obj = resource_obj.toJSON();
             if (this.model.get('x_token')) {
-                if (this.model.get('x_token').token_uid == token.token_uid) {
-                    pretty_token.is_omemo = this.model.omemo ? true : false
+                if (this.model.get('x_token').token_uid === token.token_uid) {
+                    pretty_token.is_omemo = !!this.model.omemo;
                     let $cur_token_html = $(templates.current_token_item_modal(pretty_token));
                     this.$('.current-session').append($cur_token_html);
                     handled_devices++;
                     if (handled_devices === devices_count){
                         if (!_.isUndefined(this.$('.device-encryption-warning').attr('data-not-trusted-count'))){
-                            this.$('.device-encryption-warning').switchClass('hidden', this.$('.device-encryption-warning').attr('data-not-trusted-count') == '0');
-                            if (this.$('.device-encryption-warning').attr('data-not-trusted-count') != '0' && was_hidden && !this.isScrolledToTop()) {
+                            this.$('.device-encryption-warning').switchClass('hidden', this.$('.device-encryption-warning').attr('data-not-trusted-count') === '0');
+                            if (this.$('.device-encryption-warning').attr('data-not-trusted-count') !== '0' && was_hidden && !this.isScrolledToTop()) {
                                 this.scrollTo(this.getScrollTop() + 116)
                             }
-                            this.$('.settings-tabs-wrap .settings-tab .device-encryption').switchClass('hidden', this.$('.device-encryption-warning').attr('data-not-trusted-count') == '0');
-                            this.$('.btn-verify-devices').switchClass('hidden', this.$('.device-encryption-warning').attr('data-not-trusted-count') == '0');
+                            this.$('.settings-tabs-wrap .settings-tab .device-encryption').switchClass('hidden', this.$('.device-encryption-warning').attr('data-not-trusted-count') === '0');
+                            this.$('.btn-verify-devices').switchClass('hidden', this.$('.device-encryption-warning').attr('data-not-trusted-count') === '0');
                         }
                     }
                     return;
@@ -3839,24 +3809,24 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
                     handled_devices++;
                     if (handled_devices === devices_count){
                         if (!_.isUndefined(this.$('.device-encryption-warning').attr('data-not-trusted-count'))){
-                            this.$('.device-encryption-warning').switchClass('hidden', this.$('.device-encryption-warning').attr('data-not-trusted-count') == '0');
-                            if (this.$('.device-encryption-warning').attr('data-not-trusted-count') != '0' && was_hidden && !this.isScrolledToTop()) {
+                            this.$('.device-encryption-warning').switchClass('hidden', this.$('.device-encryption-warning').attr('data-not-trusted-count') === '0');
+                            if (this.$('.device-encryption-warning').attr('data-not-trusted-count') !== '0' && was_hidden && !this.isScrolledToTop()) {
                                 this.scrollTo(this.getScrollTop() + 116)
                             }
-                            this.$('.settings-tabs-wrap .settings-tab .device-encryption').switchClass('hidden', this.$('.device-encryption-warning').attr('data-not-trusted-count') == '0');
-                            this.$('.btn-verify-devices').switchClass('hidden', this.$('.device-encryption-warning').attr('data-not-trusted-count') == '0');
+                            this.$('.settings-tabs-wrap .settings-tab .device-encryption').switchClass('hidden', this.$('.device-encryption-warning').attr('data-not-trusted-count') === '0');
+                            this.$('.btn-verify-devices').switchClass('hidden', this.$('.device-encryption-warning').attr('data-not-trusted-count') === '0');
                         }
                     }
                 }, () => {
                     handled_devices++;
                     if (handled_devices === devices_count){
                         if (!_.isUndefined(this.$('.device-encryption-warning').attr('data-not-trusted-count'))){
-                            this.$('.device-encryption-warning').switchClass('hidden', this.$('.device-encryption-warning').attr('data-not-trusted-count') == '0');
-                            if (this.$('.device-encryption-warning').attr('data-not-trusted-count') != '0' && was_hidden && !this.isScrolledToTop()) {
+                            this.$('.device-encryption-warning').switchClass('hidden', this.$('.device-encryption-warning').attr('data-not-trusted-count') === '0');
+                            if (this.$('.device-encryption-warning').attr('data-not-trusted-count') !== '0' && was_hidden && !this.isScrolledToTop()) {
                                 this.scrollTo(this.getScrollTop() + 116)
                             }
-                            this.$('.settings-tabs-wrap .settings-tab .device-encryption').switchClass('hidden', this.$('.device-encryption-warning').attr('data-not-trusted-count') == '0');
-                            this.$('.btn-verify-devices').switchClass('hidden', this.$('.device-encryption-warning').attr('data-not-trusted-count') == '0');
+                            this.$('.settings-tabs-wrap .settings-tab .device-encryption').switchClass('hidden', this.$('.device-encryption-warning').attr('data-not-trusted-count') === '0');
+                            this.$('.btn-verify-devices').switchClass('hidden', this.$('.device-encryption-warning').attr('data-not-trusted-count') === '0');
                         }
                     }
                 });
@@ -3868,12 +3838,12 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
                 handled_devices++;
                 if (handled_devices === devices_count){
                     if (!_.isUndefined(this.$('.device-encryption-warning').attr('data-not-trusted-count'))){
-                        this.$('.device-encryption-warning').switchClass('hidden', this.$('.device-encryption-warning').attr('data-not-trusted-count') == '0');
-                        if (this.$('.device-encryption-warning').attr('data-not-trusted-count') != '0' && was_hidden && !this.isScrolledToTop()) {
+                        this.$('.device-encryption-warning').switchClass('hidden', this.$('.device-encryption-warning').attr('data-not-trusted-count') === '0');
+                        if (this.$('.device-encryption-warning').attr('data-not-trusted-count') !== '0' && was_hidden && !this.isScrolledToTop()) {
                             this.scrollTo(this.getScrollTop() + 116)
                         }
-                        this.$('.settings-tabs-wrap .settings-tab .device-encryption').switchClass('hidden', this.$('.device-encryption-warning').attr('data-not-trusted-count') == '0');
-                        this.$('.btn-verify-devices').switchClass('hidden', this.$('.device-encryption-warning').attr('data-not-trusted-count') == '0');
+                        this.$('.settings-tabs-wrap .settings-tab .device-encryption').switchClass('hidden', this.$('.device-encryption-warning').attr('data-not-trusted-count') === '0');
+                        this.$('.btn-verify-devices').switchClass('hidden', this.$('.device-encryption-warning').attr('data-not-trusted-count') === '0');
                     }
                 }
             }
@@ -3882,7 +3852,7 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
             this.$('.all-sessions-wrap').removeClass('hidden');
             this.$('.active-sessions-label').removeClass('hidden');
             this.$('.btn-revoke-all-tokens').removeClass('hidden');
-            this.$('.btn-verify-devices').switchClass('hidden', !this.model.omemo || this.$('.device-encryption-warning').attr('data-not-trusted-count') == '0');
+            this.$('.btn-verify-devices').switchClass('hidden', !this.model.omemo || this.$('.device-encryption-warning').attr('data-not-trusted-count') === '0');
         }
         else {
             this.$('.all-sessions-wrap').addClass('hidden');
@@ -3908,7 +3878,7 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
             status_text;
         if (resource_obj){
             status_text = resource_obj.get('status_message') || resource_obj.get('status') && xabber.getString(resource_obj.get('status')) || xabber.getString("account_state_connected");
-        } else if (this.model.get('x_token').token_uid == token.token_uid){
+        } else if (this.model.get('x_token').token_uid === token.token_uid){
             status_text = this.model.get('status_message') || this.model.get('status') && xabber.getString(this.model.get('status')) || xabber.getString("account_state_connected")
         } else
             status_text = xabber.getString("offline");
@@ -3916,9 +3886,9 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
         this.$('.device-information-status .device-information-text').text(status_text);
 
         if (this.model.get('x_token')) {
-            this.$('.btn-revoke-token').hideIf(this.model.get('x_token').token_uid == token.token_uid);
+            this.$('.btn-revoke-token').hideIf(this.model.get('x_token').token_uid === token.token_uid);
             this.$('.device-information-trust')
-                .switchClass('hidden', this.model.get('x_token').token_uid == token.token_uid)
+                .switchClass('hidden', this.model.get('x_token').token_uid === token.token_uid)
         }
         if (token.omemo_id && this.model.omemo){
             let dfd = new $.Deferred(),
@@ -3928,20 +3898,20 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
                     fing = fing.match(/.{1,8}/g).join(" ");
                 this.$('.device-information-fingerprint').showIf(fing).find('.device-information-text').text(fing);
 
-                let $this_device = this.$(`.token-wrap[data-token-uid="${token_uid}"]`)
+                let $this_device = this.$(`.token-wrap[data-token-uid="${token_uid}"]`);
 
                 this.$('.device-information-trust').removeClass('hidden');
                 this.$('.device-information-trust-text').text($this_device.attr('data-trust-text'));
                 this.$('.device-information-trust').attr('data-trust', $this_device.attr('data-trust'));
                 this.$('.device-information-trust-text').attr('data-trust', $this_device.attr('data-trust'));
-                if (this.model.get('x_token') && this.model.get('x_token').token_uid == token.token_uid){
+                if (this.model.get('x_token') && this.model.get('x_token').token_uid === token.token_uid){
                     this.$('.device-information-trust-text').text(xabber.getString("settings_account__omemo_enabled"));
                     this.$('.device-information-refresh-bundle-debug').switchClass('hidden', !xabber._settings.get('debug_mode'));
                     this.$('.device-information-trust').addClass('hidden');
                     this.$('.device-information-trust').attr('data-trust', 'trust');
                     this.$('.device-information-trust-text').attr('data-trust', 'trust');
                 }
-            })
+            });
             if (device.get('fingerprint')) {
                 dfd.resolve(device.get('fingerprint'));
             } else if (device.get('ik')) {
@@ -4029,7 +3999,7 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
                     if(a.after_trust === b.after_trust)
                         return a.timestamp-b.timestamp;
                     return a.after_trust ? -1 : 1;
-                })
+                });
                 peers_trusted_devices.forEach((device_item) => {
                     if (device_item.is_me)
                         return;
@@ -4070,7 +4040,7 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
                     }
                     this.model.getAllXTokens(() => {
                         this.$('.sessions-wrap').html("");
-                        this.$('.btn-back-subsettings-account').length && this.backToSubMenu({target: this.$('.btn-back-subsettings-account')[0]})
+                        this.$('.btn-back-subsettings-account').length && this.backToSubMenu({target: this.$('.btn-back-subsettings-account')[0]});
                         if (this.model.x_tokens_list && this.model.x_tokens_list.length) {
                             this.renderAllXTokens();
                         }
@@ -4121,7 +4091,7 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
     },
 
     updateEnabledOmemo: function () {
-        let enabled = this.model.settings.get('omemo'), has_keys = false;
+        let enabled = this.model.settings.get('omemo');
         if (_.isUndefined(enabled))
             enabled = false;
         if (enabled && this.model.omemo_enable_view)
@@ -4146,7 +4116,7 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
         this.$('.btn-reconnect').switchClass('disabled', this.model.session.get('reconnecting'));
     },
 
-    setEnabled: function (ev) {
+    setEnabled: function () {
         let enabled = this.$('.enabled-state input').prop('checked');
         this.model.save('enabled', enabled);
         enabled ? this.model.activate() : this.model.deactivate();
@@ -4296,7 +4266,7 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
         });
     },
 
-    selectUnblock: function (ev) {
+    selectUnblock: function () {
         if (this.children && this.children.blocklist){
             this.children.blocklist.selectUnblock();
         }
@@ -4332,7 +4302,7 @@ xabber.AccountSettingsSingleModalView = xabber.AccountSettingsModalView.extend({
     //     wheelPropagation: true
     // },
 
-    render: function (view, options, args) {
+    render: function (view, options) {
         if (!_.isNull(view))
             return;
         this.$el.detach();
@@ -4377,7 +4347,7 @@ xabber.AccountSettingsSingleModalView = xabber.AccountSettingsModalView.extend({
                 _.extend(this.ps_settings || {}, xabber.ps_settings)
             );
         }
-        this.updateOmemoDevices;
+        this.updateOmemoDevices();
         this.$('.left-column').removeClass('hidden');
         this.$('.right-column').addClass('hidden');
         this.$('.btn-back-settings').removeClass('hidden');
@@ -4520,11 +4490,11 @@ xabber.AccountSettingsItemModalView = xabber.BasicView.extend({
         }
     },
 
-    updateEncryptionWarning: function (unverified_count) { //34
+    updateEncryptionWarning: function () { //34
         if (!this.model || !this.model.omemo)
             return;
         this.model.omemo.checkOwnFingerprints().then((is_trusted) => {
-            if (is_trusted == 'none' || is_trusted == 'error') {
+            if (is_trusted === 'none' || is_trusted === 'error') {
                 this.$('.encryption-warning-icon').removeClass('hidden');
                 this.$('.account-info-wrap').addClass('encryption-warning');
             } else {
@@ -4554,7 +4524,7 @@ xabber.AccountSettingsItemModalView = xabber.BasicView.extend({
         this.$('.enabled-state input[type=checkbox]').prop('checked', enabled);
     },
 
-    setEnabled: function (ev) {
+    setEnabled: function () {
         let enabled = this.$('.enabled-state input').prop('checked');
         this.model.save('enabled', enabled);
         enabled ? this.model.activate() : this.model.deactivate();
@@ -4596,7 +4566,7 @@ xabber.AccountSettingsItemModalView = xabber.BasicView.extend({
                                 clearTimeout(revoke_timeout);
                                 this.model._revoke_on_connect = undefined;
                                 this.model.deleteAccount(null, true);
-                            })
+                            });
                             this.model.save('enabled', true);
                             this.model.activate();
                         }
@@ -4866,7 +4836,7 @@ xabber.SetAvatarView = xabber.BasicView.extend({
     updateActiveButton: function () {
         let $active_screen = this.$('.screen-wrap:not(.hidden)'),
             non_active = true;
-        if ($active_screen.attr('data-screen') == 'library') {
+        if ($active_screen.attr('data-screen') === 'library') {
             $active_screen.find('div.active').length && (non_active = false);
         } else {
             $active_screen.find('img:not(.hidden)').length && (non_active = false);
@@ -4875,9 +4845,9 @@ xabber.SetAvatarView = xabber.BasicView.extend({
     },
 
     renderFiles: function (response) {
-        this.$('.library-wrap .preloader-wrapper').remove()
+        this.$('.library-wrap .preloader-wrapper').remove();
         if (response.items.length){
-            this.current_items = response.items
+            this.current_items = response.items;
             response.items.forEach((item, idx) => {
                 let img = $(`<div class="image-item"/>`);
                 img.css('background-image', `url("${item.thumbnail.url}")`);
@@ -4892,7 +4862,7 @@ xabber.SetAvatarView = xabber.BasicView.extend({
         this.model.testGalleryTokenExpire(() => {
             let options = {order_by: '-id', contexts: 'avatar'};
             if (this.model.get('gallery_token') && this.model.get('gallery_url')) {
-                this.$('.library-wrap').html(env.templates.contacts.preloader())
+                this.$('.library-wrap').html(env.templates.contacts.preloader());
                 $.ajax({
                     type: 'GET',
                     headers: {"Authorization": 'Bearer ' + this.model.get('gallery_token')},
@@ -4901,12 +4871,12 @@ xabber.SetAvatarView = xabber.BasicView.extend({
                     contentType: "application/json",
                     data: options,
                     success: (response) => {
-                        console.log(response)
+                        console.log(response);
                         this.renderFiles(response)
                     },
                     error: (response) => {
-                        this.model.handleCommonGalleryErrors(response)
-                        console.log(response)
+                        this.model.handleCommonGalleryErrors(response);
+                        console.log(response);
                         this.$('.library-wrap .preloader-wrapper').remove()
                     }
                 });
@@ -4940,9 +4910,8 @@ xabber.SetAvatarView = xabber.BasicView.extend({
     addFile: function (file) {
         let reader = new FileReader();
         reader.onload = (e) => {
-            let image_prev = new Image(),
-                src = e.target.result;
-            image_prev.src = src;
+            let image_prev = new Image();
+            image_prev.src = e.target.result;
             this.$('.screen-wrap[data-screen="upload"] img').detach();
             this.$('.screen-wrap[data-screen="upload"]').prepend(image_prev);
             this.current_file = file;
@@ -4952,7 +4921,7 @@ xabber.SetAvatarView = xabber.BasicView.extend({
     },
 
     onInputChanged: function (ev) {
-        if (ev.target.value.trim() == this.$('.image-preview img')[0].src)
+        if (ev.target.value.trim() === this.$('.image-preview img')[0].src)
             return;
         if (ev.target.value.trim() && ev.keyCode !== constants.KEY_CTRL && ev.keyCode !== constants.KEY_SHIFT && ev.keyCode !== constants.KEY_ARROW_UP && ev.keyCode !== constants.KEY_ARROW_DOWN && ev.keyCode !== constants.KEY_ARROW_RIGHT && ev.keyCode !== constants.KEY_ARROW_LEFT) {
             let url = ev.target.value.trim();
@@ -5007,16 +4976,16 @@ xabber.SetAvatarView = xabber.BasicView.extend({
         this.$('.modal-preloader-wrap').html(env.templates.contacts.preloader());
         this.$('.btn-add').addClass('hidden-disabled');
 
-        if ($active_screen.attr('data-screen') == 'library') {
-            image = this.current_items[$active_screen.find('div.active').attr('data-id')]
+        if ($active_screen.attr('data-screen') === 'library') {
+            image = this.current_items[$active_screen.find('div.active').attr('data-id')];
             image.uploaded = true;
             dfd.resolve(image, true);
         }
-        else if ($active_screen.attr('data-screen') == 'web-address') {
+        else if ($active_screen.attr('data-screen') === 'web-address') {
             image = $active_screen.find('img:not(.hidden)')[0].src;
             this.createFileFromURL(image).then((file) => {
                 dfd.resolve(file);
-            }, (e) => {
+            }, () => {
                 this.$('.preloader-wrapper').remove();
                 this.$('.btn-add').removeClass('hidden-disabled');
                 utils.dialogs.error(xabber.getString("group_settings__error__wrong_image"));
@@ -5064,16 +5033,16 @@ xabber.SetAvatarView = xabber.BasicView.extend({
         this.$('.modal-preloader-wrap').html(env.templates.contacts.preloader());
         this.$('.btn-add').addClass('hidden-disabled');
 
-        if ($active_screen.attr('data-screen') == 'library') {
-            image = this.current_items[$active_screen.find('div.active').attr('data-id')]
+        if ($active_screen.attr('data-screen') === 'library') {
+            image = this.current_items[$active_screen.find('div.active').attr('data-id')];
             image.uploaded = true;
             dfd.resolve(image, true);
         }
-        else if ($active_screen.attr('data-screen') == 'web-address') {
+        else if ($active_screen.attr('data-screen') === 'web-address') {
             image = $active_screen.find('img:not(.hidden)')[0].src;
             this.createFileFromURL(image).then((file) => {
                 dfd.resolve(file);
-            }, (e) => {
+            }, () => {
                 this.$('.preloader-wrapper').remove();
                 this.$('.btn-add').removeClass('hidden-disabled');
                 utils.dialogs.error(xabber.getString("group_settings__error__wrong_image"));
@@ -5088,8 +5057,7 @@ xabber.SetAvatarView = xabber.BasicView.extend({
         let metadata = {
             type: 'image/png'
         };
-        let file = new File([data], "avatar.png", metadata);
-        return file
+        return new File([data], "avatar.png", metadata)
     },
 
     close: function () {
@@ -5138,7 +5106,7 @@ xabber.WebcamProfileImageView = xabber.BasicView.extend({
 
     onHide: function () {
         if (this.video && this.video.srcObject && this.video.srcObject.getTracks()){
-            let tracks = this.video.srcObject.getTracks()
+            let tracks = this.video.srcObject.getTracks();
             tracks.forEach(function(track) {
                 track.stop();
             });
@@ -5156,7 +5124,7 @@ xabber.WebcamProfileImageView = xabber.BasicView.extend({
         this.$el.closeModal({ complete: this.hide.bind(this) });
     },
 
-    startupStream: function (ev) {
+    startupStream: function () {
         this.video = this.$('.webcam-video')[0];
         this.canvas = this.$('#canvas')[0];
         this.photo = this.$('.webcam-photo')[0];
@@ -5170,7 +5138,7 @@ xabber.WebcamProfileImageView = xabber.BasicView.extend({
                 console.log("An error occurred: " + err);
             });
 
-        this.video.addEventListener('canplay', (ev) => {
+        this.video.addEventListener('canplay', () => {
             if (!this.streaming) {
                 if (isNaN(this.height)) {
                     this.height = this.width / (4/3);
@@ -5200,24 +5168,24 @@ xabber.WebcamProfileImageView = xabber.BasicView.extend({
     },
 
 
-    clearPhoto: function (ev) {
+    clearPhoto: function () {
         let context = this.canvas.getContext('2d');
         context.fillStyle = "#AAA";
         context.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
         let data = this.canvas.toDataURL('image/png');
         this.photo.setAttribute('src', data);
-        this.$('.btn-take-photo').hideIf(false)
-        this.$('.btn-save').hideIf(true)
+        this.$('.btn-take-photo').hideIf(false);
+        this.$('.btn-save').hideIf(true);
         this.$('.output').hideIf(true)
     },
 
 
-    takePicture: function (ev) {
+    takePicture: function () {
         let context = this.canvas.getContext('2d');
-        this.$('.btn-take-photo').hideIf(true)
-        this.$('.btn-save').hideIf(false)
-        this.$('.output').hideIf(false)
+        this.$('.btn-take-photo').hideIf(true);
+        this.$('.btn-save').hideIf(false);
+        this.$('.output').hideIf(false);
         if (this.width && this.height) {
             this.canvas.width = this.width;
             this.canvas.height = this.height;
@@ -5234,7 +5202,7 @@ xabber.WebcamProfileImageView = xabber.BasicView.extend({
         }
     },
 
-    addAvatarSelecter: function (ev) {
+    addAvatarSelecter: function () {
         if (this.contact){
             this.saveNotOwnAvatar();
         } else {
@@ -5314,7 +5282,7 @@ xabber.EmojiProfileImageView = xabber.BasicView.extend({
         this.parent = options.parent;
         this.registration = options.registration;
         this.registration_view = options.registration_view;
-        this.emoji_panel_view = this.addChild('emoji_picker_panel', xabber.EmojiPickerView,{})
+        this.emoji_panel_view = this.addChild('emoji_picker_panel', xabber.EmojiPickerView,{});
         this.show();
     },
 
@@ -5349,7 +5317,7 @@ xabber.EmojiProfileImageView = xabber.BasicView.extend({
         this.$('.circle-avatar').addClass('ground-color-' + color + '-100');
     },
 
-    addAvatarSelecter: function (ev) {
+    addAvatarSelecter: function () {
         if (this.contact){
             this.saveNotOwnAvatar();
         } else {
@@ -5357,7 +5325,7 @@ xabber.EmojiProfileImageView = xabber.BasicView.extend({
         }
     },
 
-    saveAvatar: function (ev) {
+    saveAvatar: function () {
         let b64Image = Images.getDefaultAvatar(this.$('.chosen-emoji').data('value') ,this.$('.circle-avatar').css( "background-color" ), "96px EmojiFont", 176, 176),
             blob = Images.getBlobImage(b64Image),
             file = new File([blob], "avatar.png", {
@@ -5387,7 +5355,7 @@ xabber.EmojiProfileImageView = xabber.BasicView.extend({
         }
     },
 
-    saveNotOwnAvatar: function (ev) {
+    saveNotOwnAvatar: function () {
         let blob = Images.getBlobImage(Images.getDefaultAvatar(this.$('.chosen-emoji').data('value') ,this.$('.circle-avatar').css( "background-color" ), "96px EmojiFont", 176, 176)),
             file = new File([blob], "avatar.png", {
                 type: "image/png",
@@ -5427,7 +5395,7 @@ xabber.EmojiPickerView = xabber.BasicView.extend({
         this.$el.openModal({
             complete: this.close.bind(this)
         });
-        this.readEmojisJSON()
+        this.readEmojisJSON();
         this.show();
     },
 
@@ -5541,8 +5509,7 @@ xabber.ChangePasswordView = xabber.BasicView.extend({
         }
         this.data.set('authentication', true);
         this.authFeedback({});
-        let jid = this.model.get('jid'),
-            password = this.$password_input.val();
+        let password = this.$password_input.val();
         if (!password)
             return this.errorFeedback({password: xabber.getString("dialog_change_password__error__text_input_pass")});
         password = password.trim();
@@ -5592,9 +5559,9 @@ xabber.ChangePasswordView = xabber.BasicView.extend({
         this.closeModal();
     },
 
-    endAuth: function (account) {
+    endAuth: function () {
         this.model.save('is_new', undefined);
-        this.successFeedback(this.model)
+        this.successFeedback(this.model);
         this.model.auth_view = null;
     },
 
@@ -5636,7 +5603,7 @@ xabber.ChangeAccountPasswordView = xabber.BasicView.extend({
         });
     },
 
-    onRender: function (options) {
+    onRender: function () {
         this.$('.original-state').removeClass('hidden');
         this.$('.success-state').addClass('hidden');
         this.$old_password_input = this.$('input[name=old_password]');
@@ -5669,7 +5636,7 @@ xabber.ChangeAccountPasswordView = xabber.BasicView.extend({
             return this.errorFeedback({old_password: xabber.getString("dialog_change_password__error__text_input_pass")});
         if (!password)
             return this.errorFeedback({password: xabber.getString("dialog_change_password__error__text_input_pass")});
-        if (password != password_confirm)
+        if (password !== password_confirm)
             return this.errorFeedback({password_confirm: xabber.getString("settings_account__alert_passwords_do_not_match")});
         old_password = old_password.trim();
         this.authFeedback({password_confirm: xabber.getString("dialog_change_password__feedback__text_auth_with_pass"), password_not_error: true});
@@ -5694,13 +5661,13 @@ xabber.ChangeAccountPasswordView = xabber.BasicView.extend({
 
     errorFeedback: function (options) {
         if (this.account.change_password_connection)
-            this.account.change_password_connection.disconnect()
+            this.account.change_password_connection.disconnect();
         this.authFeedback(options);
     },
 
     successFeedback: function () {
         if (this.account.change_password_connection)
-            this.account.change_password_connection.disconnect()
+            this.account.change_password_connection.disconnect();
         this.$('.original-state').addClass('hidden');
         this.$('.success-state').removeClass('hidden');
     },
@@ -5871,20 +5838,20 @@ xabber.AuthView = xabber.BasicView.extend({
         this.authFeedback({password: xabber.getString("account_auth__feedback__text_authentication")});
     },
 
-    endAuth: function (account) {
+    endAuth: function () {
         this.account.save('is_new', undefined);
-        this.successFeedback(this.account)
+        this.successFeedback(this.account);
         this.account.auth_view = null;
     },
 
-    socialAuth: function (ev) {
-        let origin = window.location.href,
-            provider = $(ev.target).closest('.btn-social').data('provider');
-        if (provider == 'email')
-            xabber.body.setScreen('login', {'login_screen': 'xabber'});
-        else
-            window.location.href = constants.XABBER_ACCOUNT_URL + '/social/login/' + provider + '/?origin=' + origin + '&source=Xabber Web';
-    }
+    // socialAuth: function (ev) {
+    //     let origin = window.location.href,
+    //         provider = $(ev.target).closest('.btn-social').data('provider');
+    //     if (provider == 'email')
+    //         xabber.body.setScreen('login', {'login_screen': 'xabber'});
+    //     else
+    //         window.location.href = constants.XABBER_ACCOUNT_URL + '/social/login/' + provider + '/?origin=' + origin + '&source=Xabber Web';
+    // }
 });
 
 xabber.XmppLoginPanel = xabber.AuthView.extend({
@@ -5929,14 +5896,14 @@ xabber.XmppLoginPanel = xabber.AuthView.extend({
     },
 
     onRender: function () {
-        this.data.set('step', 1)
+        this.data.set('step', 1);
         this.account = null;
         this.stepped_auth = true;
         this.stepped_auth_complete = false;
         this.authFeedback({});
         this.registerFeedback({});
         this.$('.btn-go-back').hideIf(false);
-        this.$('.btn-skip').hideIf(true)
+        this.$('.btn-skip').hideIf(true);
         this.$nickname_input.val('');
         this.$jid_input.val('');
         this.$password_input.val('');
@@ -5962,15 +5929,15 @@ xabber.XmppLoginPanel = xabber.AuthView.extend({
         this.$('.register-form-jid .dropdown-content .set-custom-domain').hideIf(!constants.REGISTRATION_CUSTOM_DOMAIN);
         this.$('.login-form-jid .dropdown-content .set-custom-domain').hideIf(!constants.LOGIN_CUSTOM_DOMAIN);
         this.updateOptions && this.updateOptions();
-        this.$('#select-xmpp-server').hideIf(xabber.url_params.rkey)
-        this.$('.select-xmpp-server .caret').hideIf(xabber.url_params.rkey)
+        this.$('#select-xmpp-server').hideIf(xabber.url_params.rkey);
+        this.$('.select-xmpp-server .caret').hideIf(xabber.url_params.rkey);
         this.$(`.device-metadata input[type=radio][name=device_metadata][value=${xabber.settings.device_metadata}]`)
             .prop('checked', true);
         this.$(`.device-metadata-description`).text(xabber.getString(`settings__section_privacy__${xabber.settings.device_metadata}_metadata_description`));
-        if (xabber.url_params.anchor == 'signup' || xabber.url_params.rkey)
-            this.data.set('step', 2)
-        else if (xabber.url_params.anchor == 'signin')
-            this.data.set('step', 0)
+        if (xabber.url_params.anchor === 'signup' || xabber.url_params.rkey)
+            this.data.set('step', 2);
+        else if (xabber.url_params.anchor === 'signin')
+            this.data.set('step', 0);
         Materialize && Materialize.updateTextFields && Materialize.updateTextFields();
     },
 
@@ -6012,7 +5979,7 @@ xabber.XmppLoginPanel = xabber.AuthView.extend({
             return;
         }
         if (this.$jid_input.val() && this.$jid_input.val().includes('@') && constants.REGISTRATION_CUSTOM_DOMAIN){
-            this.setCustomDomainRegistration(this.$('.register-form-jid .property-field.xmpp-server-dropdown-wrap .property-value'))
+            this.setCustomDomainRegistration(this.$('.register-form-jid .property-field.xmpp-server-dropdown-wrap .property-value'));
             this.$domain_input.val(this.$jid_input.val().split('@')[1]);
             this.$jid_input.val(this.$jid_input.val().split('@')[0]);
             this.$domain_input.focus();
@@ -6034,11 +6001,10 @@ xabber.XmppLoginPanel = xabber.AuthView.extend({
             this._check_user_timeout = setTimeout(() => {
                 domain = this.$domain_input.val() || this.$('.register-form-jid .xmpp-server-dropdown-wrap .property-value').text();
                 this.$('.btn-next').prop('disabled', true);
-                this._registration_username = this.$jid_input.val()
-                this._registration_domain = domain
+                this._registration_username = this.$jid_input.val();
                 if (domain) {
-                    if (this.auth_connection && this.auth_connection.domain != domain)
-                        this.auth_connection.disconnect()
+                    if (this.auth_connection && this.auth_connection.domain !== domain)
+                        this.auth_connection.disconnect();
                     if (!this.auth_connection) {
                         this.getWebsocketURL(domain, (response) => {
                             this.CONNECTION_URL = response || constants.CONNECTION_URL;
@@ -6086,7 +6052,7 @@ xabber.XmppLoginPanel = xabber.AuthView.extend({
         }
         this.$('.login-step-wrap').hideIf(true);
         this.authFeedback({});
-        this.$('.input-field-jid .xmpp-server-dropdown-wrap').hideIf(this.$jid_input.val() && this.$jid_input.val().includes('@') && constants.LOGIN_CUSTOM_DOMAIN)
+        this.$('.input-field-jid .xmpp-server-dropdown-wrap').hideIf(this.$jid_input.val() && this.$jid_input.val().includes('@') && constants.LOGIN_CUSTOM_DOMAIN);
         if (this.$jid_input.val() && this.$jid_input.val().includes('@') && constants.LOGIN_CUSTOM_DOMAIN){
             this.$('.input-field-jid').addClass('input-field-jid-borders')
         }else {
@@ -6116,10 +6082,10 @@ xabber.XmppLoginPanel = xabber.AuthView.extend({
                 continue;
             } else if (field.tagName.toLowerCase() === 'username') {
                 if (Strophe.getText(field))
-                    this._supports_check_user = true
+                    this._supports_check_user = true;
                 continue;
             } else if (field.tagName.toLowerCase() === 'registered') {
-                username_taken = true
+                username_taken = true;
                 continue;
             } else if (field.tagName.toLowerCase() === 'x') {
                 continue;
@@ -6181,7 +6147,7 @@ xabber.XmppLoginPanel = xabber.AuthView.extend({
             clearTimeout(this._check_user_connection_timeout);
                 this._check_user_connection_timeout = setTimeout(() => {
                     if(this.auth_connection && !this.auth_connection.connected){
-                        this.auth_connection._no_response = true
+                        this.auth_connection._no_response = true;
                         this.auth_connection.disconnect()
                     }
                 }, 10000);
@@ -6197,7 +6163,7 @@ xabber.XmppLoginPanel = xabber.AuthView.extend({
     },
 
     openPreviousStep: function () {
-        let step = this.data.get('step')
+        let step = this.data.get('step');
         if(typeof step === 'number') {
             step--;
             this.data.set('step', step)
@@ -6205,7 +6171,7 @@ xabber.XmppLoginPanel = xabber.AuthView.extend({
     },
 
     openNextStep: function () {
-        let step = this.data.get('step')
+        let step = this.data.get('step');
         if(typeof step === 'number') {
             step++;
             this.data.set('step', step)
@@ -6213,12 +6179,12 @@ xabber.XmppLoginPanel = xabber.AuthView.extend({
     },
 
     handleRegistrationStep: function () {
-        let step = this.data.get('step')
+        let step = this.data.get('step');
         if (step === -1){
             this.$(`.server-feature .preloader-wrapper`).addClass('active').addClass('visible');
             this.$(`.server-feature .mdi`).hideIf(true);
-            this.$(`.server-feature`).removeClass('active-feature')
-            this.$(`.server-feature .mdi`).addClass('.mdi-alert').removeClass('mdi-checkbox-marked-circle')
+            this.$(`.server-feature`).removeClass('active-feature');
+            this.$(`.server-feature .mdi`).addClass('.mdi-alert').removeClass('mdi-checkbox-marked-circle');
             this.$('.login-form-header').text(xabber.getString("signin_server_features"));
             this.$('.login-form-server-features .register-form-step-header').text(xabber.getString("signin_checking_features_message", [this.account.domain]));
             this.$('.btn-go-back-menu').hideIf(true);
@@ -6231,14 +6197,14 @@ xabber.XmppLoginPanel = xabber.AuthView.extend({
             this.$jid_input = this.$('input[name=jid]');
             this.$password_input = this.$('input[name=password]');
             this.$domain_input = this.$('input[name=sign_in_domain]');
-            this.$domain_input.val('')
-            this.$jid_input.val('')
-            this.$password_input.val('')
+            this.$domain_input.val('');
+            this.$jid_input.val('');
+            this.$password_input.val('');
             this.keyUpLogin();
             this.$('.login-step-wrap').hideIf(true);
             this.authFeedback({});
             this.resetAuthStepper();
-            this.$('.login-panel-form.xmpp-login-form .buttons-wrap').removeClass('server-features-additional-button')
+            this.$('.login-panel-form.xmpp-login-form .buttons-wrap').removeClass('server-features-additional-button');
             this.$('.login-form-header').text(xabber.getString("title_login_xabber_account"));
             this.$('.btn-go-back-menu').hideIf(false);
             this.$('.login-panel-intro').hideIf(true);
@@ -6318,7 +6284,7 @@ xabber.XmppLoginPanel = xabber.AuthView.extend({
             this.$('.login-form-header').text(xabber.getString("xmpp_login__registration_header_avatar"));
             this.$('.login-form-url').hideIf(true);
             this.$('.btn-go-back').hideIf(true);
-            this.$('.btn-skip').hideIf(false)
+            this.$('.btn-skip').hideIf(false);
             this.$('.register-form-nickname').hideIf(true);
             this.$('.register-form-jid').hideIf(true);
             this.$('.register-form-password').hideIf(true);
@@ -6375,7 +6341,7 @@ xabber.XmppLoginPanel = xabber.AuthView.extend({
                 }
             }
         }
-        this.$('.register-form-jid .field-jid.property-variant').remove()
+        this.$('.register-form-jid .field-jid.property-variant').remove();
         if (all_servers.length)
             this.$('.register-form-jid .xmpp-server-dropdown-wrap .field-jid').text(all_servers[0]);
         else
@@ -6393,7 +6359,7 @@ xabber.XmppLoginPanel = xabber.AuthView.extend({
     updateAuthDomains: function () {
         let all_servers = constants.LOGIN_DOMAINS;
 
-        this.$('.login-form-jid .field-jid.property-variant').remove()
+        this.$('.login-form-jid .field-jid.property-variant').remove();
         if (all_servers.length)
             this.$('.login-form-jid .xmpp-server-dropdown-wrap .field-jid').text(all_servers[0]);
         else
@@ -6495,7 +6461,7 @@ xabber.XmppLoginPanel = xabber.AuthView.extend({
         });
     },
 
-    openLoginSettings: function (ev) {
+    openLoginSettings: function () {
         this.$('.settings-block-wrap.privacy').removeClass('hidden');
     },
 
@@ -6541,8 +6507,8 @@ xabber.XmppLoginPanel = xabber.AuthView.extend({
                             this.$(`.server-feature[data-xmlns="${Strophe.NS.AUTH_DEVICES}"] .mdi`).hideIf(false).removeClass('.mdi-alert').addClass('mdi-checkbox-marked-circle');
                         }
                         else
-                                this.$(`.server-feature[data-xmlns="${Strophe.NS.AUTH_DEVICES}"] .mdi`).hideIf(false).addClass('.mdi-alert').removeClass('mdi-checkbox-marked-circle')
-                        this.$(`.server-feature[data-xmlns="${Strophe.NS.AUTH_DEVICES}"] .preloader-wrapper`).removeClass('active').removeClass('visible');;
+                                this.$(`.server-feature[data-xmlns="${Strophe.NS.AUTH_DEVICES}"] .mdi`).hideIf(false).addClass('.mdi-alert').removeClass('mdi-checkbox-marked-circle');
+                        this.$(`.server-feature[data-xmlns="${Strophe.NS.AUTH_DEVICES}"] .preloader-wrapper`).removeClass('active').removeClass('visible');
                         setTimeout(() => {
                             if (this.account.server_features.get(Strophe.NS.PUBSUB)){
                                 this.$(`.server-feature[data-xmlns="${Strophe.NS.PUBSUB}"]`).addClass('active-feature');
@@ -6560,17 +6526,17 @@ xabber.XmppLoginPanel = xabber.AuthView.extend({
                                     this.$(`.server-feature[data-xmlns="${Strophe.NS.HTTP_UPLOAD}"] .mdi`).hideIf(false).addClass('.mdi-alert').removeClass('mdi-checkbox-marked-circle');
                                 this.$(`.server-feature[data-xmlns="${Strophe.NS.HTTP_UPLOAD}"] .preloader-wrapper`).removeClass('active').removeClass('visible');
                                 setTimeout(() => {
-                                    if (constants.RECOMMENDED_DOMAIN && (this.$('.server-feature.active-feature').length != 6)){
+                                    if (constants.RECOMMENDED_DOMAIN && (this.$('.server-feature.active-feature').length !== 6)){
                                         this.$('.server-features-error').text(xabber.getString('signin_not_all_features', [constants.RECOMMENDED_DOMAIN]));
                                         this.$('.login-panel-form.xmpp-login-form .buttons-wrap').addClass('server-features-additional-button');
                                         this.$('.btn-sign-up-instead').hideIf(false);
                                     }
-                                    if (this.$('.server-feature.active-feature').length != 6) {
-                                        this.$('.btn-finish-log-in').text(xabber.getString('signin_proceed_anyway'))
+                                    if (this.$('.server-feature.active-feature').length !== 6) {
+                                        this.$('.btn-finish-log-in').text(xabber.getString('signin_proceed_anyway'));
                                         this.$('.btn-finish-log-in').addClass('btn-main').removeClass('btn-main-filled')
                                     }
                                     else {
-                                        this.$('.btn-finish-log-in').text(xabber.getString('xaccount_next'))
+                                        this.$('.btn-finish-log-in').text(xabber.getString('xaccount_next'));
                                         this.$('.btn-finish-log-in').removeClass('btn-main').addClass('btn-main-filled')
                                     }
                                     this.$('.btn-finish-log-in').hideIf(false);
@@ -6583,7 +6549,7 @@ xabber.XmppLoginPanel = xabber.AuthView.extend({
         }, timeout_timer);
     },
 
-    endAuth: function (account) {
+    endAuth: function () {
         this.account.save('is_new', undefined);
         this.data.set('registration', false);
         this.data.set('authentication', false);
@@ -6603,7 +6569,7 @@ xabber.XmppLoginPanel = xabber.AuthView.extend({
     resetAuthStepper: function (){
         this.$(`.login-step .preloader-wrapper`).addClass('active').addClass('visible');
         this.$(`.login-step .mdi`).hideIf(true);
-        this.$(`.login-step`).removeClass('active-feature')
+        this.$(`.login-step`).removeClass('active-feature');
         this.$(`.login-step .mdi`).addClass('mdi-alert-circle').removeClass('mdi-checkbox-marked-circle')
     },
 
@@ -6629,7 +6595,7 @@ xabber.XmppLoginPanel = xabber.AuthView.extend({
                         if (constants.TRUSTED_DOMAINS.indexOf(this.account.connection.domain) > -1){
                             this.endAuth();
                         } else {
-                            this.stepped_auth_complete = true
+                            this.stepped_auth_complete = true;
                             if (this.first_features_received)
                                 this.successFeedback();
                         }
@@ -6724,7 +6690,7 @@ xabber.AddAccountView = xabber.XmppLoginPanel.extend({
         "click .property-variant": "changePropertyValueAuth"
     },
 
-    render: function (options) {
+    render: function () {
         this.$el.openModal({
             ready: this.onRender.bind(this),
             complete: this.close.bind(this)
@@ -6732,7 +6698,7 @@ xabber.AddAccountView = xabber.XmppLoginPanel.extend({
     },
 
     onRender: function () {
-        this.data.set('step', 0)
+        this.data.set('step', 0);
         this.account = null;
         this.stepped_auth = true;
         this.stepped_auth_complete = false;
@@ -6740,13 +6706,13 @@ xabber.AddAccountView = xabber.XmppLoginPanel.extend({
         this.$jid_input = this.$('input[name=jid]');
         this.$password_input = this.$('input[name=password]');
         this.$domain_input = this.$('input[name=sign_in_domain]');
-        this.$jid_input.val('')
-        this.$password_input.val('')
+        this.$jid_input.val('');
+        this.$password_input.val('');
         this.keyUpLogin();
         this.updateAuthDomains();
         this.$('.login-step-wrap').hideIf(true);
         this.resetAuthStepper();
-        this.$('.login-panel-form.xmpp-login-form .buttons-wrap').removeClass('server-features-additional-button')
+        this.$('.login-panel-form.xmpp-login-form .buttons-wrap').removeClass('server-features-additional-button');
         this.$('.modal-header').text(xabber.getString("account_add"));
         this.$('.login-form-jid').hideIf(false);
         this.$('.login-form-server-features').hideIf(true);
@@ -6769,12 +6735,12 @@ xabber.AddAccountView = xabber.XmppLoginPanel.extend({
     },
 
     handleRegistrationStep: function () {
-        let step = this.data.get('step')
+        let step = this.data.get('step');
         if (step === -1){
             this.$(`.server-feature .preloader-wrapper`).addClass('active').addClass('visible');
             this.$(`.server-feature .mdi`).hideIf(true);
-            this.$(`.server-feature`).removeClass('active-feature')
-            this.$(`.server-feature .mdi`).addClass('.mdi-alert').removeClass('mdi-checkbox-marked-circle')
+            this.$(`.server-feature`).removeClass('active-feature');
+            this.$(`.server-feature .mdi`).addClass('.mdi-alert').removeClass('mdi-checkbox-marked-circle');
             this.$('.modal-header').text(xabber.getString("signin_server_features"));
             this.$('.login-form-jid').hideIf(true);
             this.$('.login-form-server-features').hideIf(false);
@@ -6830,8 +6796,8 @@ xabber.AddAccountView = xabber.XmppLoginPanel.extend({
                             this.$(`.server-feature[data-xmlns="${Strophe.NS.AUTH_DEVICES}"] .mdi`).hideIf(false).removeClass('.mdi-alert').addClass('mdi-checkbox-marked-circle');
                         }
                         else
-                            this.$(`.server-feature[data-xmlns="${Strophe.NS.AUTH_DEVICES}"] .mdi`).hideIf(false).addClass('.mdi-alert').removeClass('mdi-checkbox-marked-circle')
-                        this.$(`.server-feature[data-xmlns="${Strophe.NS.AUTH_DEVICES}"] .preloader-wrapper`).removeClass('active').removeClass('visible');;
+                            this.$(`.server-feature[data-xmlns="${Strophe.NS.AUTH_DEVICES}"] .mdi`).hideIf(false).addClass('.mdi-alert').removeClass('mdi-checkbox-marked-circle');
+                        this.$(`.server-feature[data-xmlns="${Strophe.NS.AUTH_DEVICES}"] .preloader-wrapper`).removeClass('active').removeClass('visible');
                         setTimeout(() => {
                             if (this.account && this.account.server_features.get(Strophe.NS.PUBSUB)){
                                 this.$(`.server-feature[data-xmlns="${Strophe.NS.PUBSUB}"]`).addClass('active-feature');
@@ -6849,13 +6815,13 @@ xabber.AddAccountView = xabber.XmppLoginPanel.extend({
                                     this.$(`.server-feature[data-xmlns="${Strophe.NS.HTTP_UPLOAD}"] .mdi`).hideIf(false).addClass('.mdi-alert').removeClass('mdi-checkbox-marked-circle');
                                 this.$(`.server-feature[data-xmlns="${Strophe.NS.HTTP_UPLOAD}"] .preloader-wrapper`).removeClass('active').removeClass('visible');
                                 setTimeout(() => {
-                                    if (constants.RECOMMENDED_DOMAIN && (this.$('.server-feature.active-feature').length != 6)){
+                                    if (constants.RECOMMENDED_DOMAIN && (this.$('.server-feature.active-feature').length !== 6)){
                                         this.$('.server-features-error').text(xabber.getString('signin_not_all_features', [constants.RECOMMENDED_DOMAIN]));
                                     }
-                                    if (this.$('.server-feature.active-feature').length != 6)
-                                        this.$('.btn-finish-log-in').text(xabber.getString('signin_proceed_anyway'))
+                                    if (this.$('.server-feature.active-feature').length !== 6)
+                                        this.$('.btn-finish-log-in').text(xabber.getString('signin_proceed_anyway'));
                                     else
-                                        this.$('.btn-finish-log-in').text(xabber.getString('xaccount_next'))
+                                        this.$('.btn-finish-log-in').text(xabber.getString('xaccount_next'));
                                     this.$('.btn-finish-log-in').hideIf(false);
                                     this.$('.btn-cancel').hideIf(false);
                                 }, timeout_timer);
@@ -6906,19 +6872,19 @@ xabber.UnregisterAccountView = xabber.XmppLoginPanel.extend({
         });
     },
 
-    onRender: function (options) {
+    onRender: function () {
         this.authFeedback({});
         this.data.set('step', 0);
         this.$jid_input = this.$('input[name=jid]');
         this.$password_input = this.$('input[name=password]');
         this.$('input[type=checkbox]').prop('checked', false);
-        this.$jid_input.val('')
-        this.$password_input.val('')
+        this.$jid_input.val('');
+        this.$password_input.val('');
         this.keyUpLogin();
         Materialize && Materialize.updateTextFields && Materialize.updateTextFields();
     },
 
-    keyUpLogin: function (ev) {
+    keyUpLogin: function () {
         let checked_count = this.$('input[type=checkbox]:checked').length;
         if(this.$password_input.val() && checked_count === 2){
             this.$('.btn-log-in').prop('disabled', false);
@@ -6947,14 +6913,14 @@ xabber.UnregisterAccountView = xabber.XmppLoginPanel.extend({
             from: this.get('jid')
         }).c('query', {xmlns:Strophe.NS.REGISTER}).c('remove');
         this.sendIQFast(iq, (success) => {
-                callback & callback(success);
+                callback && callback(success);
             },
             function (error) {
                 errback && errback(error);
             });
     },
 
-    login: function (callback, errback) {
+    login: function () {
         this.submit()
     },
 
@@ -7076,7 +7042,6 @@ xabber.once("start", function () {
 
     $(window).bind('beforeunload',function(){
         xabber.current_voip_call && xabber.current_voip_call.reject();
-        return;
     });
 
     window.onbeforeunload = () => {
