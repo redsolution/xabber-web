@@ -1,7 +1,6 @@
 import xabber from "xabber-core";
 
 let env = xabber.env,
-    constants = env.constants,
     templates = env.templates.vcard,
     $ = env.$,
     _ = env._,
@@ -303,7 +302,7 @@ xabber.VCardView = xabber.BasicView.extend({
         $target_value.each((idx, item) => {
             let $item = $(item),
                 value_text = $item.text();
-            value_text && (copied_text != "") && (copied_text += '\n');
+            value_text && (copied_text !== "") && (copied_text += '\n');
             value_text && (copied_text += value_text);
             copied_text && utils.copyTextToClipboard(copied_text, xabber.getString("toast__copied_in_clipboard"), xabber.getString("toast__not_copied_in_clipboard"));
         });
@@ -327,7 +326,7 @@ xabber.VCardView = xabber.BasicView.extend({
 xabber.VCardRightView = xabber.VCardView.extend({
     template: templates.vcard_right,
 
-    __initialize: function (ev) {
+    __initialize: function () {
         this.ps_container = this.$('.full-vcard-content');
         if (this.ps_container.length) {
             this.ps_container.perfectScrollbar(
@@ -341,10 +340,10 @@ xabber.VCardRightView = xabber.VCardView.extend({
     render: function () {
         this.data.set('refresh', false);
         this.update();
-        this.$('.full-vcard-wrap').hideIf(this.model.get('vcard_hidden'))
+        this.$('.full-vcard-wrap').hideIf(this.model.get('vcard_hidden'));
         if (this.parent.ps_container.length) {
             if(!this.model.get('vcard_hidden'))
-                this.parent.ps_container.perfectScrollbar('destroy')
+                this.parent.ps_container.perfectScrollbar('destroy');
             else
                 this.parent.ps_container.perfectScrollbar(
                     _.extend(this.parent.ps_settings || {}, xabber.ps_settings)
@@ -462,7 +461,7 @@ xabber.VCardRightView = xabber.VCardView.extend({
         $target_value.each((idx, item) => {
             let $item = $(item),
                 value_text = $item.text();
-            value_text && (copied_text != "") && (copied_text += '\n');
+            value_text && (copied_text !== "") && (copied_text += '\n');
             value_text && (copied_text += value_text);
             copied_text && utils.copyTextToClipboard(copied_text, xabber.getString("toast__copied_in_clipboard"), xabber.getString("toast__not_copied_in_clipboard"));
         });
@@ -657,7 +656,7 @@ xabber.VCardEditModalView = xabber.BasicView.extend({
                 this.$('.btn-vcard-back').addClass('hidden');
                 this.$('.btn-vcard-save').addClass('hidden');
             },
-            function () {
+            () => {
                 utils.dialogs.error(xabber.getString("account_user_info_save_fail"));
                 this.data.set('saving', false);
             }

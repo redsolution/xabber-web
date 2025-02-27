@@ -22,10 +22,9 @@ let env = xabber.env,
         } else if (date.toDateString() === yesterday.toDateString()) {
             return xabber.getString("yesterday");
         } else {
-            return utils.pretty_date(timestamp, (xabber.settings.language == 'ru-RU' || xabber.settings.language == 'default' && xabber.get("default_language") == 'ru-RU') && 'dddd, D MMMM YYYY')
+            return utils.pretty_date(timestamp, (xabber.settings.language === 'ru-RU' || xabber.settings.language === 'default' && xabber.get("default_language") === 'ru-RU') && 'dddd, D MMMM YYYY')
         }
-    },
-    pretty_datetime = (timestamp) => { return utils.pretty_datetime(timestamp, (xabber.settings.language == 'ru-RU' || xabber.settings.language == 'default' && xabber.get("default_language") == 'ru-RU') && 'D MMMM YYYY HH:mm:ss')};
+    };
 
 
 xabber.CallsBodyContainer = xabber.Container.extend({
@@ -46,8 +45,8 @@ xabber.CallsView = xabber.BasicView.extend({
         "click .chat-message .btn-send-jingle": "sendJingleMessage",
         "click .call-contact-item .btn-send-jingle": "sendJingleMessageContact",
         "click .btn-end-call": "endCall",
-        "click .btn-show-search": "showSearch",
-        "click .close-search-icon": "hideSearch",
+        // "click .btn-show-search": "showSearch",
+        // "click .close-search-icon": "hideSearch",
         "click .btn-back-to-chats": "clickBackToChats",
         "click .calls-filter-main-header": "updateAccountsFilter",
         "click .btn-play-pause-plyr": "playPausePlyr",
@@ -90,7 +89,7 @@ xabber.CallsView = xabber.BasicView.extend({
         return this;
     },
 
-    render: function (options) {
+    render: function () {
         this.clearFilter();
         this.data.set('visible', true);
         this.updateAccountsFilter();
@@ -101,7 +100,7 @@ xabber.CallsView = xabber.BasicView.extend({
         this.updatePlyrControls();
         this.updatePlyrTime();
         this.updateClientNotifications();
-        this.hideSearch();
+        // this.hideSearch();
         this.$('.dropdown-button').dropdown({
             inDuration: 100,
             outDuration: 100,
@@ -110,13 +109,13 @@ xabber.CallsView = xabber.BasicView.extend({
         });
     },
 
-    showSearch: function (ev) {
-    },
+    // showSearch: function (ev) {
+    // },
+    //
+    // hideSearch: function (ev) {
+    // },
 
-    hideSearch: function (ev) {
-    },
-
-    focusSearch: function (ev) {
+    focusSearch: function () {
         this.$('.search-input').focus();
     },
 
@@ -133,7 +132,7 @@ xabber.CallsView = xabber.BasicView.extend({
         this.$('.search-form').removeClass('active');
     },
 
-    clickBackToChats: function (ev) {
+    clickBackToChats: function () {
         xabber.toolbar_view.showAllChats(null, null, true);
     },
 
@@ -209,7 +208,7 @@ xabber.CallsView = xabber.BasicView.extend({
                 this.$('.calls-right-wrap').removeClass('active-call');
                 clearInterval(this._duration_Interval);
             }
-            this.$('.active-call-container').attr('data-color', contact.account.settings.get('color'))
+            this.$('.active-call-container').attr('data-color', contact.account.settings.get('color'));
             if (xabber.current_voip_call.get('call_initiator') === contact.account.get('jid')){
                 this.$('.outgoing-icon').removeClass('hidden');
                 this.$('.incoming-icon').addClass('hidden');
@@ -480,7 +479,7 @@ xabber.CallsView = xabber.BasicView.extend({
         this.$('.back-to-bottom').hideIf(this.isScrolledToTop());
     },
 
-    onScroll: function (ev, is_focused) {
+    onScroll: function () {
         if (!this.isVisible())
             return;
         this.$('.back-to-bottom').hideIf(this.isScrolledToTop());
@@ -500,9 +499,7 @@ xabber.CallsView = xabber.BasicView.extend({
             return;
 
         let $msg = this.$(`.chat-message[data-uniqueid="${msg.get('unique_id')}"]`),
-            whole_msgs_list = [];
-
-        whole_msgs_list = this.filtered_messages;
+            whole_msgs_list = this.filtered_messages;
 
         if ($msg.length){
             if ($msg.isAlmostScrolledInContainer(this.$('.chat-content'), 1500)) {
@@ -601,13 +598,13 @@ xabber.CallsView = xabber.BasicView.extend({
                 no_render = true;
             }
             if (this.filter_type !== 'all'){
-                if (this.filter_type === 'outgoing' && msg.get('jingle_call_status') !== 'outgoing') {
+                if (this.filter_type === 'outgoing' && message.get('jingle_call_status') !== 'outgoing') {
                     no_render = true;
-                } else if (this.filter_type === 'missed' && msg.get('jingle_call_status') !== 'missed') {
+                } else if (this.filter_type === 'missed' && message.get('jingle_call_status') !== 'missed') {
                     no_render = true;
-                } else if (this.filter_type === 'incoming' && msg.get('jingle_call_status') !== 'incoming') {
+                } else if (this.filter_type === 'incoming' && message.get('jingle_call_status') !== 'incoming') {
                     no_render = true;
-                } else if (this.filter_type === 'declined' && msg.get('jingle_call_status') !== 'declined') {
+                } else if (this.filter_type === 'declined' && message.get('jingle_call_status') !== 'declined') {
                     no_render = true;
                 }
             }
@@ -743,8 +740,7 @@ xabber.CallsView = xabber.BasicView.extend({
     },
 
     renderAccountItem: function (account) {
-        let $item = $(env.templates.notifications.account_filter_item({jid: account.get('jid'), color: account.settings.get('color')}));
-        return $item;
+        return $(env.templates.notifications.account_filter_item({jid: account.get('jid'), color: account.settings.get('color')}));
     },
 
     loadPreviousHistory: function (account, calls_load_dfd, before) {
@@ -819,7 +815,7 @@ xabber.CallsView = xabber.BasicView.extend({
             if (options.previous_history && this.load_history_dfd) {
                 this.load_history_dfd.resolve();
             }
-        }, (err) => {
+        }, () => {
             if (options.previous_history) {
                 this._loading_history = false;
             }
@@ -861,7 +857,7 @@ xabber.CallsView = xabber.BasicView.extend({
 
     MAMRequest: function (account, options, callback, errback) {
         let messages = [], queryid = uuid(),
-            success = true, iq, _interval, handler;
+            success = true, iq, handler;
         delete options.fast;
         iq = $iq({type: 'set'});
         iq.c('query', {xmlns: Strophe.NS.MAM, queryid: queryid})
@@ -880,7 +876,7 @@ xabber.CallsView = xabber.BasicView.extend({
         account.chats.onStartedMAMRequest(deferred);
 
         deferred.done(() => {
-            let sendMAMRequest = (func_conn) => {
+            let sendMAMRequest = () => {
                 handler = account.connection._addSysHandler((message) => {
                     let $msg = $(message);
                     if ($msg.find('result').attr('queryid') === queryid) {
@@ -888,27 +884,19 @@ xabber.CallsView = xabber.BasicView.extend({
                     }
                     return true;
                 }, Strophe.NS.MAM, null, null, null, null, {query_id: queryid} );
-                // let _delete_handler_timeout = setTimeout(() => {
-                //     console.log('handler deleted');
-                //     func_conn.deleteHandler(handler);
-                // }, 19000);
                 let callb = (res) => {
                         account.connection.deleteHandler(handler);
-                        // clearTimeout(_delete_handler_timeout);
-                        // clearInterval(_interval);
                         handler = null;
                         account.chats.onCompletedMAMRequest(deferred);
                         let $fin = $(res).find(`fin[xmlns="${Strophe.NS.MAM}"]`);
                         if ($fin.length && $fin.attr('queryid') === queryid) {
                             let rsm = new Strophe.RSM({xml: $fin.find('set')[0]});
-                            rsm.complete = ($fin.attr('complete') === 'true') ? true : false;
+                            rsm.complete = ($fin.attr('complete') === 'true');
                             callback && callback(success, messages, rsm);
                         }
                     },
                     errb = (err) => {
                         account.connection.deleteHandler(handler);
-                        // clearTimeout(_delete_handler_timeout);
-                        // clearInterval(_interval);
                         handler = null;
                         xabber.error("MAM error");
                         xabber.error(err);
@@ -916,36 +904,10 @@ xabber.CallsView = xabber.BasicView.extend({
                         errback && errback(err);
                     };
                 console.error('trying to send for calls');
-                // if (is_fast)
-                //     account.sendFast(iq, callb, errb);
-                // else
-                    account.sendIQ(iq, callb, errb);
+                account.sendIQ(iq, callb, errb);
 
             };
-            // let is_fast = options.fast && account.fast_connection && !account.fast_connection.disconnecting
-            //     && account.fast_connection.authenticated && account.fast_connection.connected && account.get('status') !== 'offline',
-            //     conn = is_fast ? account.fast_connection : account.connection;
-            //
-            // if (conn.connected){
-            //     sendMAMRequest(conn);
-                sendMAMRequest(account.connection);
-            // }
-            // let send_counter = 0;
-            // _interval = setInterval(() => {
-            //     is_fast = options.fast && account.fast_connection && !account.fast_connection.disconnecting
-            //         && account.fast_connection.authenticated && account.fast_connection.connected && account.get('status') !== 'offline';
-            //     conn = is_fast ? account.fast_connection : account.connection;
-            //     conn && console.log(conn.connected);
-            //     if (!conn || send_counter >= 1){
-            //         clearInterval(_interval);
-            //         errback && errback('No connection or too many attempts');
-            //         return;
-            //     }
-            //     if (conn.connected && send_counter < 1){
-            //         send_counter++;
-            //         sendMAMRequest(conn);
-            //     }
-            // }, 20000);
+            sendMAMRequest(account.connection);
         });
     },
 

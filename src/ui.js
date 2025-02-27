@@ -6,11 +6,11 @@ let env = xabber.env,
 
 xabber.once("start", function () {
     $(window).on("keydown", (ev) => {
-        if ((ev.ctrlKey || ev.metaKey) && ev.keyCode == constants.KEY_SHIFT || ev.shiftKey && ev.keyCode == constants.KEY_CTRL) {
+        if ((ev.ctrlKey || ev.metaKey) && ev.keyCode === constants.KEY_SHIFT || ev.shiftKey && ev.keyCode === constants.KEY_CTRL) {
             this.shift_pressed = null;
             this.shiftctrl_pressed = true;
             ev.preventDefault();
-        } else if (ev.keyCode == constants.KEY_SHIFT) {
+        } else if (ev.keyCode === constants.KEY_SHIFT) {
             this.shift_pressed = true;
             ev.preventDefault();
         }
@@ -69,7 +69,6 @@ xabber.once("start", function () {
 
     this.updateContainersLayout = function () {
         let width = this.body.$el.width(),
-            height = this.body.$el.height(),
             is_wide = width >= constants.WIDTH_MEDIUM,
             is_narrow = width < constants.WIDTH_MEDIUM;
         let panel_width,

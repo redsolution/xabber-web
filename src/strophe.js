@@ -41,7 +41,7 @@ Strophe.addConnectionPlugin('register', {
         }
 
         // hooking strophe's connection.reset
-        var self = this, reset = conn.reset.bind(conn);
+        let self = this, reset = conn.reset.bind(conn);
         conn.reset = function () {
             reset();
             self.instructions = "";
@@ -50,14 +50,14 @@ Strophe.addConnectionPlugin('register', {
         };
 
         // hooking strophe's _connect_cb
-        var connect_cb = conn._connect_cb.bind(conn);
+        let connect_cb = conn._connect_cb.bind(conn);
         conn._connect_cb = function (req, callback, raw) {
             if (!self._registering) {
                 if (self.processed_features) {
                     // exchange Input hooks to not print the stream:features twice
-                    var xmlInput = conn.xmlInput;
+                    let xmlInput = conn.xmlInput;
                     conn.xmlInput = Strophe.Connection.prototype.xmlInput;
-                    var rawInput = conn.rawInput;
+                    let rawInput = conn.rawInput;
                     conn.rawInput = Strophe.Connection.prototype.rawInput;
                     connect_cb(req, callback, raw);
                     conn.xmlInput = xmlInput;
@@ -91,26 +91,24 @@ Strophe.addConnectionPlugin('register', {
         };
 
         // hooking strophe`s authenticate
-        var auth_old = conn.authenticate.bind(conn);
+        let auth_old = conn.authenticate.bind(conn);
         conn.authenticate = function(matched) {
             if (typeof matched === "undefined") {
-                var conn = this._connection;
+                let conn = this._connection;
 
                 if (!this.fields.username || !this.domain || !this.fields.password) {
                     Strophe.info("Register a JID first!");
                     return;
                 }
 
-                var jid = this.fields.username + "@" + this.domain;
-
-                conn.jid = jid;
+                conn.jid = this.fields.username + "@" + this.domain;
                 conn.authzid = Strophe.getBareJidFromJid(conn.jid);
                 conn.authcid = Strophe.getNodeFromJid(conn.jid);
                 conn.pass = this.fields.password;
 
-                var req = this._connect_cb_data.req;
-                var callback = conn.connect_callback;
-                var raw = this._connect_cb_data.raw;
+                let req = this._connect_cb_data.req;
+                let callback = conn.connect_callback;
+                let raw = this._connect_cb_data.raw;
                 conn._connect_cb(req, callback, raw);
             } else {
                 auth_old(matched);
@@ -147,7 +145,7 @@ Strophe.addConnectionPlugin('register', {
      *      should almost always be set to 1 (the default).
      */
     connect: function(domain, callback, wait, hold, route) {
-        var conn = this._connection;
+        let conn = this._connection;
         this.domain = Strophe.getDomainFromJid(domain);
         this.instructions = "";
         this.fields = {};
@@ -160,7 +158,7 @@ Strophe.addConnectionPlugin('register', {
 
 
     connect_check_user: function(domain, callback, wait, hold, route) {
-        var conn = this._connection;
+        let conn = this._connection;
         this.domain = Strophe.getDomainFromJid(domain);
         this.instructions = "";
         this.fields = {};
@@ -173,7 +171,7 @@ Strophe.addConnectionPlugin('register', {
     },
 
     connect_change_password: function(jid, password, callback, wait, hold, route) {
-        var conn = this._connection;
+        let conn = this._connection;
         this.domain = Strophe.getDomainFromJid(jid);
         this.instructions = "";
         this.fields = {};
@@ -196,12 +194,12 @@ Strophe.addConnectionPlugin('register', {
      *    (Strophe.Request) req - The current request.
      */
     _register_cb: function (req, _callback, raw) {
-        var conn = this._connection;
+        let conn = this._connection;
 
         Strophe.info("_register_cb was called");
         conn.connected = true;
 
-        var bodyWrap = conn._proto._reqToData(req);
+        let bodyWrap = conn._proto._reqToData(req);
         if (!bodyWrap) { return; }
 
         if (conn.xmlInput !== Strophe.Connection.prototype.xmlInput) {
@@ -219,14 +217,14 @@ Strophe.addConnectionPlugin('register', {
             }
         }
 
-        var conncheck = conn._proto._connect_cb(bodyWrap);
+        let conncheck = conn._proto._connect_cb(bodyWrap);
         if (conncheck === Strophe.Status.CONNFAIL) {
             return false;
         }
 
         // Check for the stream:features tag
-        var register = bodyWrap.getElementsByTagName("register");
-        var mechanisms = bodyWrap.getElementsByTagName("mechanism");
+        let register = bodyWrap.getElementsByTagName("register");
+        let mechanisms = bodyWrap.getElementsByTagName("mechanism");
         if (register.length === 0 && mechanisms.length === 0) {
             conn._proto._no_auth_received(_callback);
             return false;
@@ -246,12 +244,12 @@ Strophe.addConnectionPlugin('register', {
         return true;
     },
     _register_cb_check_user: function (req, _callback, raw) {
-        var conn = this._connection;
+        let conn = this._connection;
 
         Strophe.info("_register_cb was called");
         conn.connected = true;
 
-        var bodyWrap = conn._proto._reqToData(req);
+        let bodyWrap = conn._proto._reqToData(req);
         if (!bodyWrap) { return; }
 
         if (conn.xmlInput !== Strophe.Connection.prototype.xmlInput) {
@@ -269,14 +267,14 @@ Strophe.addConnectionPlugin('register', {
             }
         }
 
-        var conncheck = conn._proto._connect_cb(bodyWrap);
+        let conncheck = conn._proto._connect_cb(bodyWrap);
         if (conncheck === Strophe.Status.CONNFAIL) {
             return false;
         }
 
         // Check for the stream:features tag
-        var register = bodyWrap.getElementsByTagName("register");
-        var mechanisms = bodyWrap.getElementsByTagName("mechanism");
+        let register = bodyWrap.getElementsByTagName("register");
+        let mechanisms = bodyWrap.getElementsByTagName("mechanism");
         if (register.length === 0 && mechanisms.length === 0) {
             conn._proto._no_auth_received(_callback);
             return false;
@@ -301,7 +299,7 @@ Strophe.addConnectionPlugin('register', {
      *    false to remove SHOULD contain the registration information currentlSHOULD contain the registration information currentlSHOULD contain the registration information currentlthe handler.
      */
     _get_register_cb: function (stanza) {
-        var i, query, field, conn = this._connection;
+        let i, query, field, conn = this._connection;
         query = stanza.getElementsByTagName("query");
 
         if (query.length !== 1) {
@@ -336,9 +334,9 @@ Strophe.addConnectionPlugin('register', {
      *  and invoke this function to procceed in the registration process.
      */
     submit: function () {
-        var lang = xabber.settings.language;
+        let lang = xabber.settings.language;
         (lang === 'default') && (lang = xabber.get('default_language'));
-        var i, name, query, fields, conn = this._connection;
+        let i, name, query, fields, conn = this._connection;
         query = $iq({type: "set", 'xml:lang': lang, id: uuid()}).c("query", {xmlns:Strophe.NS.REGISTER});
 
         // set required fields
@@ -364,7 +362,7 @@ Strophe.addConnectionPlugin('register', {
      *    false to remove the handler.
      */
     _submit_cb: function (stanza) {
-        var i, query, field, error = null, conn = this._connection;
+        let i, query, field, error = null, conn = this._connection;
 
         query = stanza.getElementsByTagName("query");
         if (query.length > 0) {
@@ -413,9 +411,9 @@ Strophe.addConnectionPlugin('register', {
     },
 
     submit_unregister: function () {
-        var lang = xabber.settings.language;
+        let lang = xabber.settings.language;
         (lang === 'default') && (lang = xabber.get('default_language'));
-        var i, name, query, fields, conn = this._connection;
+        let query, conn = this._connection;
         query = $iq({type: "set", 'xml:lang': lang, id: uuid()}).c("query", {xmlns:Strophe.NS.REGISTER}).c('remove');
 
         conn._addSysHandler(this._submit_unregister_cb.bind(this),
@@ -424,7 +422,7 @@ Strophe.addConnectionPlugin('register', {
     },
 
     _submit_unregister_cb: function (stanza) {
-        var i, error = null, conn = this._connection;
+        let error = null, conn = this._connection;
 
         if (stanza.getAttribute("type") === "error") {
             error = stanza.getElementsByTagName("error");
@@ -494,7 +492,7 @@ function generateChallenge() {
 Strophe.SASLHOTP = function() {};
 Strophe.SASLHOTP.prototype = new Strophe.SASLMechanism("HOTP", true, 100);
 
-Strophe.SASLHOTP.prototype.test = function (connection) {
+Strophe.SASLHOTP.prototype.test = function () {
     return true;
 };
 
@@ -507,7 +505,7 @@ Strophe.SASLHOTP.prototype.onChallenge = function (connection) {
 Strophe.SASLOCRA = function() {};
 Strophe.SASLOCRA.prototype = new Strophe.SASLMechanism("DEVICES-OCRA", true, 150);
 
-Strophe.SASLOCRA.prototype.test = function (connection) {
+Strophe.SASLOCRA.prototype.test = function () {
     return true;
 };
 
@@ -515,7 +513,7 @@ Strophe.SASLOCRA.prototype.onChallenge = function (connection, server_challenge)
 
     if (server_challenge){
         return new Promise((resolve, reject) => {
-            server_challenge = server_challenge.split(String.fromCharCode(0))
+            server_challenge = server_challenge.split(String.fromCharCode(0));
             let sv_response = server_challenge[0],
                 suite = server_challenge[1],
                 sv_challenge = server_challenge[2];
@@ -774,10 +772,10 @@ _.extend(Strophe.Connection.prototype, {
     },
 
     _sasl_challenge_cb: async function(elem) {
-        var challenge = atob(Strophe.getText(elem));
+        let challenge = atob(Strophe.getText(elem));
         if (this._sasl_mechanism.mechname === 'DEVICES-OCRA'){
             this._sasl_mechanism.onChallenge(this, challenge).then((response)=> {
-                var stanza = $build('response', {
+                let stanza = $build('response', {
                     'xmlns': Strophe.NS.SASL
                 });
                 if (response) stanza.t(btoa(response));
@@ -794,8 +792,8 @@ _.extend(Strophe.Connection.prototype, {
             });
 
         } else {
-            var response = await this._sasl_mechanism.onChallenge(this, challenge);
-            var stanza = $build('response', {
+            let response = await this._sasl_mechanism.onChallenge(this, challenge);
+            let stanza = $build('response', {
                 'xmlns': Strophe.NS.SASL
             });
             if (response) stanza.t(btoa(response));
@@ -941,11 +939,11 @@ _.extend(Strophe.Connection.prototype, {
         }
         let handler = function (stanza) {
             let iqtype = stanza.getAttribute('type');
-            if (iqtype == 'result') {
+            if (iqtype === 'result') {
                 if (callback) {
                     callback(stanza);
                 }
-            } else if (iqtype == 'error') {
+            } else if (iqtype === 'error') {
                 if (errback) {
                     errback(stanza);
                 }
@@ -1053,7 +1051,7 @@ _.extend(Strophe.Websocket.prototype, {
                     } else {
                         console.error('data went to pending');
                         console.log(this._conn._data.slice(i));
-                        this._conn.account._pending_stanzas.push(this._conn._data.slice(i))
+                        this._conn.account._pending_stanzas.push(this._conn._data.slice(i));
                         this._conn._data = [];
                         return;
                     }
@@ -1101,10 +1099,10 @@ _.extend(Strophe.Websocket.prototype, {
 
         this._conn.openCheckTimeout = setTimeout(() => { // check of that open was sent but was not received from server
             if (this._conn.open_received) {
-                return;
+
             } else {
                 this._conn.disconnect('disconnected on open not being received');
-                return;
+
             }
         }, 5000)
     },

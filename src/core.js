@@ -8,6 +8,7 @@ let constants = env.constants,
     xabber_i18next = env.xabber_i18next,
     xabber_i18next_sprintf = env.xabber_i18next_sprintf,
     uuid = env.uuid,
+    Backbone = env.Backbone,
     utils = env.utils;
 
 
@@ -33,7 +34,7 @@ let Xabber = Backbone.Model.extend({
                 {storage_name: this.getStorageName(), fetch: 'before'});
         this.settings = this._settings.attributes;
         let url = window.location.host + window.location.pathname.replace(/\//g, "-");
-        if (url[url.length - 1] == "-")
+        if (url[url.length - 1] === "-")
             url.slice(0, url.length - 1);
         this._cache = new Backbone.ModelWithStorage({id: `cache-${url}`},
                 {storage_name: this.getStorageName(), fetch: 'before'});
@@ -58,7 +59,7 @@ let Xabber = Backbone.Model.extend({
     initDefaultLanguage: function () {
         let lang = window.navigator.language,
             progress = Object.keys(client_translation_progress).find(key => !lang.indexOf(key)) || constants.languages_another_locales[lang] && Object.keys(client_translation_progress).find(key => !constants.languages_another_locales[lang].indexOf(key));
-        if (progress != 100)
+        if (progress !== 100)
             lang = 'en';
         this.set("default_language", lang);
     },
@@ -68,7 +69,7 @@ let Xabber = Backbone.Model.extend({
             let language = {};
             language.lang = lang;
             !language.lang && (language.lang = this.settings.language);
-            if (language.lang == 'default' && this.default_translation) {
+            if (language.lang === 'default' && this.default_translation) {
                 language.lang = this.get("default_language");
                 language.translation  = this.default_translation;
                 resolve(language);
@@ -128,7 +129,7 @@ let Xabber = Backbone.Model.extend({
         xabber_i18next.services.pluralResolver.options.compatibilityJSON = 'v0';
         let suffix = xabber_i18next.services.pluralResolver.getSuffix(lang, _count);
         suffix = suffix.replace(/-/g, "_");
-        if (xabber_i18next.language == 'en' || !xabber_i18next.exists(`${id}_plural${suffix}`)) {
+        if (xabber_i18next.language === 'en' || !xabber_i18next.exists(`${id}_plural${suffix}`)) {
             suffix = xabber_i18next.services.pluralResolver.getSuffix("en", _count);
             if (!suffix || suffix && !suffix.length)
                 suffix = '_0';
@@ -379,7 +380,7 @@ let Xabber = Backbone.Model.extend({
             constants.LOG_LEVEL = log_level || constants.LOG_LEVEL_ERROR;
             Strophe.setLogLevel(constants.LOG_LEVEL);
             constants.MATERIAL_COLORS.includes(config.MAIN_COLOR) && (constants.MAIN_COLOR = config.MAIN_COLOR);
-            (this._settings.get("main_color") == 'default') && this._settings.set("main_color", constants.MAIN_COLOR);
+            (this._settings.get("main_color") === 'default') && this._settings.set("main_color", constants.MAIN_COLOR);
             this.trigger("update_main_color");
             if (this._settings.get("load_media") === 'default' && config.PRIVACY_LOAD_MEDIA != null)
                 this._settings.set("load_media", config.PRIVACY_LOAD_MEDIA);
@@ -451,7 +452,7 @@ let Xabber = Backbone.Model.extend({
                     item.url = constants.ASSETS_URL_PREFIX + item.url;
                 });
             }
-            (this._settings.get("emoji_font") == 'default') && this._settings.set("emoji_font", constants.DEFAULT_EMOJI_FONT);
+            (this._settings.get("emoji_font") === 'default') && this._settings.set("emoji_font", constants.DEFAULT_EMOJI_FONT);
 
             if (config.CLIENT_NAME && !config.SHORT_CLIENT_NAME)
                 constants.SHORT_CLIENT_NAME = config.CLIENT_NAME;
@@ -502,7 +503,7 @@ let Xabber = Backbone.Model.extend({
                         self._cache.save('notifications', granted);
                         self._cache.save('endpoint_key', undefined);
                         self.check_config.resolve(true);
-                    })
+                    });
                     if (self._settings.get("emoji_font") === 'system' || !Object.keys(constants.EMOJI_FONTS_LIST).length)
                         emoji_dfd.resolve();
                     else {
@@ -517,7 +518,7 @@ let Xabber = Backbone.Model.extend({
                         }
                     }
                 });
-            })
+            });
             let bc;
             if (constants.USE_TAB_SIGNALS){
                 try {
@@ -534,7 +535,7 @@ let Xabber = Backbone.Model.extend({
                             bc.postMessage(`2`);
                         }
                         if (event.data === `2`) {
-                            bc.disabled_client = true
+                            bc.disabled_client = true;
                             clearTimeout(bc_message_timeout);
                             broadcast_dfd.resolve();
                         }
@@ -608,7 +609,7 @@ let Xabber = Backbone.Model.extend({
         if (this.current_plyr_player.$audio_elem){
             if (!this.current_plyr_player.$audio_elem.voice_message){
                 let f_url = $(this.current_plyr_player.$audio_elem).find('.file-link-download').attr('href');
-                $(this.current_plyr_player.$audio_elem).find('.mdi-play').removeClass('no-uploaded')
+                $(this.current_plyr_player.$audio_elem).find('.mdi-play').removeClass('no-uploaded');
                 this.current_plyr_player.$audio_elem.voice_message = this.current_plyr_player.chat_item.content.renderVoiceMessage($(this.current_plyr_player.$audio_elem).find('.file-container')[0], f_url);
             } else {
                 this.current_plyr_player.$audio_elem.voice_message.playPause()
@@ -704,7 +705,7 @@ let Xabber = Backbone.Model.extend({
         if (this.current_plyr_player && this.current_plyr_player.$audio_elem) {
             if (this.current_plyr_player.$audio_elem.voice_message){
                 let voice_message = this.current_plyr_player.$audio_elem.voice_message;
-                self.$('.chat-head-player-type').text(this.getString("chat_message_voice"))
+                self.$('.chat-head-player-type').text(this.getString("chat_message_voice"));
                 self.$('.btn-play-pause-plyr .mdi-play').hideIf(voice_message.isPlaying());
                 self.$('.btn-play-pause-plyr .mdi-pause').hideIf(!voice_message.isPlaying());
                 self.$('.btn-play-pause-plyr').switchClass('active-plyr', voice_message.isPlaying());
@@ -745,10 +746,10 @@ let Xabber = Backbone.Model.extend({
                 self.$('.player-poster').addClass('hidden');
             }
             self.$('.voice-message-player-avatar').addClass('hidden');
-            if (this.current_plyr_player.provider != 'html5')
-                self.$('.chat-head-player-type').text(this.current_plyr_player.provider)
+            if (this.current_plyr_player.provider !== 'html5')
+                self.$('.chat-head-player-type').text(this.current_plyr_player.provider);
             else
-                self.$('.chat-head-player-type').text(this.getString("chat_message_video"))
+                self.$('.chat-head-player-type').text(this.getString("chat_message_video"));
             self.$('.btn-play-pause-plyr .mdi-play').hideIf(this.current_plyr_player.playing);
             self.$('.btn-play-pause-plyr .mdi-pause').hideIf(!this.current_plyr_player.playing);
             self.$('.btn-play-pause-plyr').switchClass('active-plyr', this.current_plyr_player.playing);
@@ -764,7 +765,7 @@ let Xabber = Backbone.Model.extend({
 
     updatePlyrTitle: function (self) {
         if (!this.current_plyr_player)
-            return
+            return;
         let $title_elem = self.$('.chat-head-player-title .chat-head-player-title-text'),
             title;
         if (this.current_plyr_player && this.current_plyr_player.$audio_elem)
@@ -802,13 +803,13 @@ let Xabber = Backbone.Model.extend({
         this.accounts.each((account) => {
             if (account.get('enabled') && (!account.isConnected() || (account.session && account.session.get('auth_failed')))){
                 is_disconnected = true;
-                return;
+
             }
         });
         this.updateAllMessageCounterOnDisconnect(is_disconnected);
     },
 
-    disconnectWhenConnecting: function (is_fast) {
+    disconnectWhenConnecting: function () {
         this.accounts.each((account) => {
             if (account.session && account.connection && account.get('enabled') && !account.session.get('reconnecting') && !account.session.get('connected')){
                 account.activate();

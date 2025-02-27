@@ -1177,9 +1177,6 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
     clearData: function (sid) {
         // console.error('here')
         let active_sessions = this.get('active_trust_sessions');
-        if (this.account.notifications_content){
-            this.account.notifications_content.updateTrustSession(sid, true);
-        }
 
         delete(active_sessions[sid]);
 
@@ -1200,9 +1197,6 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
 
         this.save('active_trust_sessions', active_sessions);
         this.updateVerificationData();
-        if (this.account.notifications_content){
-            this.account.notifications_content.updateTrustSession(sid);
-        }
         this.account.trigger('active_session_change');
     },
 

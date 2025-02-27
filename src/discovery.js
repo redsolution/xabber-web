@@ -2,10 +2,9 @@ import xabber from "xabber-core";
 
 let env = xabber.env,
     $ = env.$,
-    _ = env._,
     moment = env.moment,
-    Strophe = env.Strophe,
-    $iq = env.$iq;
+    Backbone = env.Backbone,
+    Strophe = env.Strophe;
 
 xabber.ClientFeature = Backbone.Model.extend({
     idAttribute: 'namespace'
@@ -19,7 +18,7 @@ xabber.FeatureView = xabber.BasicView.extend({
         this.$('.feature-check-icon').append(env.templates.svg['check-circle']());
     },
 
-    _initialize: function (options, attrs) {
+    _initialize: function (options) {
         this.render();
         this.model.collection.account.settings_account_modal && this.$el.appendTo(this.model.collection.account.settings_account_modal.$('.capabilities'));
         if (options.single_account && options.single_account.$('.capabilities').length){
@@ -79,7 +78,7 @@ xabber.ClientFeatures = Backbone.Collection.extend({
     },
 
     addFeature: function (namespace, verbose_name) {
-        let feature = this.create({
+        this.create({
             namespace: namespace,
             verbose_name: verbose_name
         });
@@ -88,14 +87,14 @@ xabber.ClientFeatures = Backbone.Collection.extend({
 
     render: function () {
         this.models.forEach((feature) => {
-            let view = new xabber.FeatureView({model: feature});
+            new xabber.FeatureView({model: feature});
         });
     },
 
     renderSingleAccount: function (single_account) {
         single_account.$('.capabilities').html('');
         this.models.forEach((feature) => {
-            let view = new xabber.FeatureView({model: feature, single_account: single_account});
+            new xabber.FeatureView({model: feature, single_account: single_account});
         });
     },
 });
@@ -114,7 +113,7 @@ xabber.ServerFeatures = Backbone.Collection.extend({
     },
 
     request: function () {
-        let dfd = $.Deferred()
+        let dfd = $.Deferred();
         dfd.done((is_changed) => {
             this.account.cached_server_features.getAllFromCachedFeatures((res) => {
                 if (res && res.length && !is_changed){
@@ -209,7 +208,7 @@ xabber.ServerFeatures = Backbone.Collection.extend({
         if (this.get(Strophe.NS.XABBER_NOTIFY) && this.get(Strophe.NS.XABBER_NOTIFY).get('from')){
             let jid = this.get(Strophe.NS.XABBER_NOTIFY).get('from');
             if (this.account.contacts.get(jid)){
-                let chat = this.account.chats.getChat(this.account.contacts.get(jid))
+                let chat = this.account.chats.getChat(this.account.contacts.get(jid));
                 if (!chat.get('notifications')){
                     this.account.cached_sync_conversations.getFromCachedConversations(`${jid}/${Strophe.NS.XABBER_NOTIFY}` ,(item) => {
                         if (!item || !item.conversation)
@@ -221,7 +220,7 @@ xabber.ServerFeatures = Backbone.Collection.extend({
 
         }
         if (this.account.auth_view && !(constants.TRUSTED_DOMAINS.indexOf(this.account.connection.domain) > -1)){
-            this.account.auth_view.first_features_received = true
+            this.account.auth_view.first_features_received = true;
             if (this.account.auth_view.stepped_auth_complete)
                 this.account.auth_view.successFeedback();
         }
@@ -231,13 +230,13 @@ xabber.ServerFeatures = Backbone.Collection.extend({
         let _var = feature.get('var'),
             client_feature = this.account.client_features.get(_var);
         client_feature && client_feature.set('supports', true);
-        (_var != Strophe.NS.SUBSCRIPTION_PREAPPROVAL && _var != Strophe.NS.SYNCHRONIZATION) && this.account.cached_server_features.putInCachedFeatures({
+        (_var !== Strophe.NS.SUBSCRIPTION_PREAPPROVAL && _var !== Strophe.NS.SYNCHRONIZATION) && this.account.cached_server_features.putInCachedFeatures({
             var: _var,
             from: feature.get('from'),
         });
         if (_var === 'media-gallery') {
             this.account.set('gallery_auth', false)
-            if (!(this.account.get('gallery_token') && this.account.get('gallery_url')) || (this.account.get('gallery_url') != feature.get('from')))
+            if (!(this.account.get('gallery_token') && this.account.get('gallery_url')) || (this.account.get('gallery_url') !== feature.get('from')))
                 this.account.initGalleryAuth(feature);
         }
     },
@@ -277,8 +276,8 @@ xabber.Account.addConnPlugin(function () {
         }
         if (!navigator.onLine || downtime > (constants.DOWNTIME_RECONNECTION_TIMEOUT || 15) && downtime_ping && downtime_ping <= (constants.DOWNTIME_RECONNECTION_TIMEOUT || 15) && downtime_ping > 5) {
             if (!navigator.onLine){
-                console.log('navigator: ' + navigator.onLine)
-                console.log('this.connection.connected: ' + this.connection.connected)
+                console.log('navigator: ' + navigator.onLine);
+                console.log('this.connection.connected: ' + this.connection.connected);
                 xabber._settings.get('reconnection_logs') && utils.callback_popup_message('this.connection.connected: ' + this.connection.connected, 2000);
             }
             console.log('downtime main to disconnect: ' + downtime);
@@ -302,20 +301,20 @@ xabber.Account.addConnPlugin(function () {
 }, true, true);
 
 xabber.Account.addFastConnPlugin(function () {
-    this.last_fast_stanza_timestamp = moment.now();
+    // this.last_fast_stanza_timestamp = moment.now();
 
-    this.fast_connection.deleteHandler(this._last_fast_stanza_handler);
-    this._last_fast_stanza_handler = this.fast_connection.addHandler(() => {
-        this.last_fast_stanza_timestamp = moment.now();
-        return true;
-    });
-
-    this.fast_connection.deleteHandler(this._fast_pong_handler);
-    this._fast_pong_handler = this.fast_connection.ping.addPingHandler((ping) => {
-        this.last_fast_stanza_timestamp = moment.now();
-        this.fast_connection.ping.pong(ping);
-        return true;
-    });
+    // this.fast_connection.deleteHandler(this._last_fast_stanza_handler);
+    // this._last_fast_stanza_handler = this.fast_connection.addHandler(() => {
+    //     this.last_fast_stanza_timestamp = moment.now();
+    //     return true;
+    // });
+    //
+    // this.fast_connection.deleteHandler(this._fast_pong_handler);
+    // this._fast_pong_handler = this.fast_connection.ping.addPingHandler((ping) => {
+    //     this.last_fast_stanza_timestamp = moment.now();
+    //     this.fast_connection.ping.pong(ping);
+    //     return true;
+    // });
 
     // if (this._fast_interval_worker)
     //     this._fast_interval_worker.terminate();

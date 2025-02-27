@@ -1348,10 +1348,7 @@ xabber.ToolbarView = xabber.BasicView.extend({
         });
 
         if (xabber.notifications_view && xabber.notifications_view.current_content && xabber.notifications_view.current_content.notification_messages.length){
-            let unread_notifications = xabber.notifications_view.current_content.notification_messages.filter(msg => msg.get('is_unread') && !msg.get('ignored')).length;
-            console.log(unread_notifications);
-            console.log(mentions);
-            mentions += unread_notifications;
+            mentions += xabber.notifications_view.current_content.notification_messages.filter(msg => msg.get('is_unread') && !msg.get('ignored')).length;
         }
         return { msgs: count_msg, all_msgs: count_all_msg, group_msgs: count_group_msg, mentions: mentions, contacts: contacts , mentions_subscriptions: incoming_subs_count };
     },

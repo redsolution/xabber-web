@@ -36,12 +36,10 @@ xabber.DiscoveringView = xabber.BasicView.extend({
         });
     },
 
-    render: function (options) {
+    render: function () {
         this.endDiscovering();
         this.data.set('color','#9E9E9E');
-        options || (options = {});
-        let accounts = xabber.accounts.connected,
-            jid = options.jid || '';
+        let accounts = xabber.accounts.connected;
         this.$('.single-acc').showIf(accounts.length === 1);
         this.$('.multiple-acc').hideIf(accounts.length === 1);
         this.$('.account-field .dropdown-content').empty();
@@ -69,10 +67,7 @@ xabber.DiscoveringView = xabber.BasicView.extend({
     },
 
     isPropertiesVisible: function () {
-        if (this.$('#select-searching-properties').css('display') === 'none')
-            return false;
-        else
-            return true;
+        return this.$('#select-searching-properties').css('display') !== 'none';
     },
 
     discover: function () {
@@ -81,8 +76,6 @@ xabber.DiscoveringView = xabber.BasicView.extend({
             if (this.isPropertiesVisible())
                 this.toggleProperties();
             this.$('.searching-more').html("");
-            let searching_title = this.$('#searching_property_title').val(),
-                searching_sort_by = this.$('#searching_property_sort_by').val();
             this.$('.searching-result-wrap .preloader-wrapper').show();
             this.searchExistingGroupChats(domain);
         }
@@ -174,8 +167,7 @@ xabber.DiscoveringView = xabber.BasicView.extend({
     },
 
     renderAccountItem: function (account) {
-        let $item = $(templates.searching_account_item({jid: account.get('jid')}));
-        return $item;
+        return $(templates.searching_account_item({jid: account.get('jid')}));
     },
 
     selectAccount: function (ev) {
@@ -196,7 +188,7 @@ xabber.DiscoveringView = xabber.BasicView.extend({
                 privacy = $iq_response.find('field[var="anonymous"] value').text(),
                 membership = $iq_response.find('field[var="model"] value').text(),
                 chat_properties = {jid: jid, name: name, privacy: privacy, description: description, membership: membership};
-            this.more_info_view = this.addChild('groupchat_properties', xabber.MoreInfoView,
+            this.addChild('groupchat_properties', xabber.MoreInfoView,
                 {model: this, chat_properties: chat_properties, el: this.$('.searching-more')[0]})
         });
     }
@@ -238,11 +230,11 @@ xabber.Searching = Backbone.Model.extend({
         this.account = options.account;
     },
 
-    getSearchingFields: function () {
-        let this_domain = 'xabber.com',//this.account.connection && this.account.connection.domain,
-            iq_get = $iq({type: 'get', to: 'index.' + this_domain}).c('query', {xmlns: Strophe.NS.INDEX + '#groupchat'});
-        this.account.sendIQFast(iq_get, this.parseSearchingFields);
-    },
+    // getSearchingFields: function () {
+    //     let this_domain = 'xabber.com',//this.account.connection && this.account.connection.domain,
+    //         iq_get = $iq({type: 'get', to: 'index.' + this_domain}).c('query', {xmlns: Strophe.NS.INDEX + '#groupchat'});
+    //     this.account.sendIQFast(iq_get, this.parseSearchingFields);
+    // },
 
     parseSearchingFields: function (iq_result) {
         let $result = $(iq_result),

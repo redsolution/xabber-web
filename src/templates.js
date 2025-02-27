@@ -1,5 +1,5 @@
-    import _ from "underscore";
-    import $ from "jquery";
+import _ from "underscore";
+import $ from "jquery";
 
     _.templateSettings = {
         evaluate : /\{\[([\s\S]+?)\]\}/g,
