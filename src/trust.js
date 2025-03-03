@@ -7,7 +7,7 @@ let env = xabber.env,
     moment = env.moment,
     templates = env.templates.base,
     Strophe = env.Strophe,
-    pretty_datetime = (timestamp) => { return utils.pretty_datetime(timestamp, (xabber.settings.language == 'ru-RU' || xabber.settings.language == 'default' && xabber.get("default_language") == 'ru-RU') && 'D MMMM YYYY HH:mm:ss')},
+    Backbone = env.Backbone,
     pretty_datetime_date = (timestamp) => { return utils.pretty_datetime(timestamp, 'MMM DD, YYYY')},
     _ = env._;
 
@@ -35,7 +35,7 @@ xabber.IncomingTrustSessionView = xabber.BasicView.extend({
         this.listenTo(xabber, 'verification_session_cancelled', this.onSessionCancel);
     },
 
-    onRender: function (options) {
+    onRender: function () {
         this.message_options && this.message_options.msg_item && this.trust.removeAfterHandle(this.message_options.msg_item);
     },
 
@@ -63,12 +63,12 @@ xabber.IncomingTrustSessionView = xabber.BasicView.extend({
     close: function (is_accepted) {
         if (!is_accepted){
 
-            let msg_id = uuid(),
+            let iq_id = uuid(),
                 to = this.contact ? this.contact.get('jid') : this.account.get('jid'),
                 stanza = $iq({
                     type: 'set',
                     to: to,
-                    id: msg_id
+                    id: iq_id
                 });
             stanza.c('notify', {xmlns: Strophe.NS.XABBER_NOTIFY});
             stanza.c('notification', {xmlns: Strophe.NS.XABBER_NOTIFY});
@@ -89,9 +89,14 @@ xabber.IncomingTrustSessionView = xabber.BasicView.extend({
                 if (this.contact){
                     let $stanza = $(stanza.tree());
                     $stanza.attr('to',this.account.get('jid'));
+                    let new_iq_id = uuid();
+                    $stanza.attr('id', new_iq_id);
+                    let new_msg_id = uuid();
+                    $stanza.find('notification forwarded message').attr('id',new_msg_id);
                     $stanza.find('notification forwarded message').attr('to',this.account.get('jid'));
                     $stanza.find(`addresses[xmlns="${Strophe.NS.ADDRESS}"] address[type="to"]`).attr('jid',this.account.get('jid'));
                     this.contact && this.trust.createFailedSessionMsg(this.contact.get('jid'), 'Session cancelled');
+                    stanza = stanza.tree().cloneNode(true);
                     this.account.sendFast(stanza, () => {
                     });
                 }
@@ -321,12 +326,12 @@ xabber.ActiveSessionModalView = xabber.BasicView.extend({
 
     rejectRequest: function () {
 
-        let msg_id = uuid(),
+        let iq_id = uuid(),
             to = this.contact ? this.contact.get('jid') : this.account.get('jid'),
             stanza = $iq({
                 type: 'set',
                 to: to,
-                id: msg_id
+                id: iq_id
             });
         stanza.c('notify', {xmlns: Strophe.NS.XABBER_NOTIFY});
         stanza.c('notification', {xmlns: Strophe.NS.XABBER_NOTIFY});
@@ -350,6 +355,7 @@ xabber.ActiveSessionModalView = xabber.BasicView.extend({
                 $stanza.find('notification forwarded message').attr('to',this.account.get('jid'));
                 $stanza.find(`addresses[xmlns="${Strophe.NS.ADDRESS}"] address[type="to"]`).attr('jid',this.account.get('jid'));
                 this.trust.createFailedSessionMsg(this.contact.get('jid'), 'Session cancelled');
+                stanza = stanza.tree().cloneNode(true);
                 this.account.sendFast(stanza, () => {
                 });
             }
@@ -568,6 +574,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                     $stanza.find('notification forwarded message').attr('to',this.account.get('jid'));
                     $stanza.find(`addresses[xmlns="${Strophe.NS.ADDRESS}"] address[type="to"]`).attr('jid',this.account.get('jid'));
                     this.createFailedSessionMsg(to, 'Session cancelled');
+                    stanza = stanza.tree().cloneNode(true);
                     this.account.sendFast(stanza, () => {
                     });
                 }
@@ -1053,7 +1060,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
         });
     },
 
-    getVerificationState: function (session, chat_content) {
+    getVerificationState: function (session) {
         let state,
             step = session.verification_step;
         if (step === '1a' && session.active_verification_device && session.active_verification_device.device_id){
@@ -1064,8 +1071,6 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
             state = xabber.getString("verification_session_state__request_answered");
         } else if (step === '2a' || step === '2b'){
             state = xabber.getString("verification_session_state__request_proceeding");
-        // } else if (step === '0b' && chat_content){
-        //     state = xabber.getString("chat_content__incoming_session_text");
         } else if (step === '0b'){
             state = xabber.getString("verification_session_state__request_answer_needed");
         }
@@ -1310,8 +1315,8 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
         let $message = $(message),
             received_device_id = options.device_id,
             is_new_devices = false,
-            counter = 0, sharing_type,
-            initial_trusted_devices = JSON.parse(JSON.stringify(this.get('trusted_devices')));
+            counter = 0, sharing_type;
+            // initial_trusted_devices = JSON.parse(JSON.stringify(this.get('trusted_devices')));
 
         let revoked_devices_list = [], changed_devices_jid_list = [],
             distrusted_devices_list = [], retrusted_devices_list = [];
@@ -1328,7 +1333,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
 
         // console.log(received_device_id);
         // console.log(device_fingerprint);
-        // console.log(my_trusted_devices.some(e => e.device_id == received_device_id && e.fingerprint == device_fingerprint));
+        // console.log(my_trusted_devices.some(e => e.device_id === received_device_id && e.fingerprint === device_fingerprint));
         // console.error(message);
 
         if (my_trusted_devices.some(e => e.device_id == received_device_id && e.fingerprint == device_fingerprint && !e.is_me)){
@@ -1662,7 +1667,6 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                     untrusted: tagname === 'distrust',
                     is_revoked: tagname === 'revoked',
                     revocation_timestamp: tagname === 'revoked' && trust_timestamp,
-                    revocation_timestamp: tagname === 'revoked' && trust_timestamp,
                     timestamp: Math.floor(Date.now() / 1000),
                     public_key: utils.ArrayBuffertoBase64(device.get('ik'))
                 }];
@@ -1900,7 +1904,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
             // console.log($item.find('identity').length);
             // console.log(item_device_fingerprint);
             // console.log($item.find('identity').text());
-            // console.log($item.find('identity').text() != item_device_fingerprint);
+            // console.log($item.find('identity').text() !== item_device_fingerprint);
 
             if (!$item.length || !$item.find('identity').length || $item.find('identity').text() != item_device_fingerprint){
                 // console.error('herer');
@@ -2090,10 +2094,9 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
         let trusted_devices = this.get('trusted_devices');
         if (!trusted_devices[jid])
             return false;
-        if (trusted_devices[jid].some(e => e.device_id === device_id))
-            return true;
+        return trusted_devices[jid].some(e => e.device_id === device_id);
 
-        return false;
+
     },
 
     receiveTrustVerificationHeadline: function (message) {
@@ -2228,11 +2231,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
         this.active_sessions_data[sid] && console.log(this.active_sessions_data[sid].session_check_jid);
         if (this.active_sessions_data[sid]
             && (this.active_sessions_data[sid].session_check_jid === Strophe.getBareJidFromJid($message.attr('to'))) && !this.active_sessions_data[sid].verification_started){
-            if ($message.find(`verification-accepted`).length && $('#modals').find('.modal.modal-verification-start').length){
-                let $verifcationStartModal = $('#modals').find('.modal.modal-verification-start');  // change to close opened request view
-                $verifcationStartModal.find('.btn-cancel').click();
-                return;
-            } else if ($message.find(`verification-accepted`).length && $message.find(`verification-accepted`).attr('device-id') != this.omemo.get('device_id')) {
+            if ($message.find(`verification-accepted`).length && $message.find(`verification-accepted`).attr('device-id') != this.omemo.get('device_id')) {
                 this.clearData(sid);
             }
         }
@@ -2327,7 +2326,6 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                     }
                     if ($message.find('hash').length && !$message.find('salt').length && this.active_sessions_data[sid].verification_step === '2a'){
                         this.handleTrustVerificationFinalHash($message, contact, options.msg_item);
-                        return;
                     }
                 });
                 if (this.active_sessions_data[sid].active_verification_device){
@@ -2471,7 +2469,6 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                     }
                     if ($message.find('hash').length && !$message.find('salt').length && this.active_sessions_data[sid].verification_step === '2a'){
                         this.handleTrustVerificationFinalHash($message, null, options.msg_item);
-                        return;
                     }
                 });
                 if (this.active_sessions_data[sid].active_verification_device){
@@ -2492,19 +2489,19 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
     },
 
     getDevicesIKsForTrustVerification: function (device) {
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve) => {
             if (device){
                 this.omemo.store.getIdentityKeyPair().then((own_ik) => {
                     let dfd = new $.Deferred();
                     dfd.done(() => {
                         let own_pubkey = own_ik.pubKey,
                             own_privkey = own_ik.privKey;
-                        if (own_pubkey.byteLength == 33)
+                        if (own_pubkey.byteLength === 33)
                             own_pubkey = own_pubkey.slice(1);
-                        if (own_privkey.byteLength == 33)
+                        if (own_privkey.byteLength === 33)
                             own_privkey = own_privkey.slice(1);
                         let device_pubkey = device.get('ik');
-                        if (device_pubkey.byteLength == 33) // иногда после запуска пустой
+                        if (device_pubkey.byteLength === 33) // иногда после запуска пустой
                             device_pubkey = device_pubkey.slice(1);
 
                         resolve({
@@ -2612,6 +2609,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                                 $msg.find('verification-accepted').attr('device-id', this.account.omemo.get('device_id'));
                                 $msg.find('salt').remove();
                                 $stanza.find(`addresses[xmlns="${Strophe.NS.ADDRESS}"] address[type="to"]`).attr('jid',this.account.get('jid'));
+                                stanza = stanza.tree().cloneNode(true);
                                 this.account.sendFast(stanza, () => {
                                 });
                             }
@@ -2753,6 +2751,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                                 $stanza.find('notification forwarded message').attr('to',this.account.get('jid'));
                                 $stanza.find(`addresses[xmlns="${Strophe.NS.ADDRESS}"] address[type="to"]`).attr('jid',this.account.get('jid'));
                                 contact && this.createFailedSessionMsg(contact.get('jid'), 'Data decryption failed');
+                                stanza = stanza.tree().cloneNode(true);
                                 this.account.sendFast(stanza, () => {
                                 });
                             }
@@ -2862,6 +2861,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                                         $stanza.find('notification forwarded message').attr('to',this.account.get('jid'));
                                         $stanza.find(`addresses[xmlns="${Strophe.NS.ADDRESS}"] address[type="to"]`).attr('jid',this.account.get('jid'));
                                         contact && this.createFailedSessionMsg(contact.get('jid'), 'Data decryption failed');
+                                        stanza = stanza.tree().cloneNode(true);
                                         this.account.sendFast(stanza, () => {
                                         });
                                     }
@@ -3037,6 +3037,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                                             $stanza.find('notification forwarded message').attr('to',this.account.get('jid'));
                                             $stanza.find(`addresses[xmlns="${Strophe.NS.ADDRESS}"] address[type="to"]`).attr('jid',this.account.get('jid'));
                                             contact && this.createFailedSessionMsg(contact.get('jid'), 'Hashes didn\'t match');
+                                            stanza = stanza.tree().cloneNode(true);
                                             this.account.sendFast(stanza, () => {
                                             });
                                         }
@@ -3048,7 +3049,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                                 }
                             })
                         });
-                    }).catch(e => {
+                    }).catch(() => {
                         // console.log(e);
 
                         let msg_id = uuid(),
@@ -3081,6 +3082,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                                 $stanza.find('notification forwarded message').attr('to',this.account.get('jid'));
                                 $stanza.find(`addresses[xmlns="${Strophe.NS.ADDRESS}"] address[type="to"]`).attr('jid',this.account.get('jid'));
                                 contact && this.createFailedSessionMsg(contact.get('jid'), 'Data decryption failed');
+                                stanza = stanza.tree().cloneNode(true);
                                 this.account.sendFast(stanza, () => {
                                 });
                             }
@@ -3090,7 +3092,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                         });
                         this.clearData(sid);
                     });
-                }).catch(e => {
+                }).catch(() => {
                     // console.error(e);
 
                     let msg_id = uuid(),
@@ -3123,6 +3125,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                             $stanza.find('notification forwarded message').attr('to',this.account.get('jid'));
                             $stanza.find(`addresses[xmlns="${Strophe.NS.ADDRESS}"] address[type="to"]`).attr('jid',this.account.get('jid'));
                             contact && this.createFailedSessionMsg(contact.get('jid'), 'Data decryption failed with error');
+                            stanza = stanza.tree().cloneNode(true);
                             this.account.sendFast(stanza, () => {
                             });
                         }
@@ -3217,6 +3220,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                                         $stanza.find('notification forwarded message').attr('to',this.account.get('jid'));
                                         $stanza.find(`addresses[xmlns="${Strophe.NS.ADDRESS}"] address[type="to"]`).attr('jid',this.account.get('jid'));
                                         contact && this.createFailedSessionMsg(contact.get('jid'), 'Hashes didn\'t match in final stanza');
+                                        stanza = stanza.tree().cloneNode(true);
                                         this.account.sendFast(stanza, () => {
                                         });
                                     }
@@ -3391,6 +3395,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                 $stanza.attr('to',this.account.get('jid'));
                 $stanza.find('notification forwarded message').attr('to',this.account.get('jid'));
                 $stanza.find(`addresses[xmlns="${Strophe.NS.ADDRESS}"] address[type="to"]`).attr('jid',this.account.get('jid'));
+                stanza = stanza.tree().cloneNode(true);
                 this.account.sendFast(stanza, () => {
                 });
             }
@@ -3468,8 +3473,8 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
         if (!this.active_sessions_data[sid]) {
             return;
         }
-        let device = this.active_sessions_data[sid].active_verification_device,
-            code = this.active_sessions_data[sid].active_verification_code;
+        let device = this.active_sessions_data[sid].active_verification_device;
+            // code = this.active_sessions_data[sid].active_verification_code;
         this.account.omemo.xabber_trust.addVerificationSessionData(sid, {
             verification_step: 'final',
         });

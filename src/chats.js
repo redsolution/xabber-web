@@ -3890,6 +3890,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
             $stanza.find('notification forwarded message').attr('to',this.account.get('jid'));
             $stanza.find(`addresses[xmlns="${Strophe.NS.ADDRESS}"] address[type="to"]`).attr('jid',this.account.get('jid'));
             this.contact && this.account.omemo.xabber_trust.createFailedSessionMsg(this.contact.get('jid'), 'Session cancelled');
+            stanza = stanza.tree().cloneNode(true);
             this.account.sendFast(stanza, () => {
             });
         });
