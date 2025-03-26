@@ -4170,17 +4170,17 @@ input[type=text].simple-input-field:hover {
     line-height: 16px;
     text-align: center;
     background-color: #388E3C;
-    -webkit-transform: translateX(-50%);
-    -moz-transform: translateX(-50%);
-    -ms-transform: translateX(-50%);
-    -o-transform: translateX(-50%);
-    transform: translateX(-50%);
+    /*-webkit-transform: translateX(-50%);*/
+    /*-moz-transform: translateX(-50%);*/
+    /*-ms-transform: translateX(-50%);*/
+    /*-o-transform: translateX(-50%);*/
+    /*transform: translateX(-50%);*/
 }
 .toolbar .mentions-indicator,
 .toolbar .contacts-indicator,
 .toolbar .all-msg-indicator {
     top: 6px !important;
-    right: 8px !important;
+    right: 16px !important;
     min-width: 16px !important;
     height: 16px !important;
 }

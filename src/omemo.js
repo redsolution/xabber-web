@@ -2910,6 +2910,299 @@ xabber.OMEMOEnablePlaceholder = xabber.BasicView.extend({
 });
 
 xabber.Account.addInitPlugin(function () {
+
+    let checker_object = {
+        callback : async (msg_object) => {
+            return new Promise((resolve) => {
+                if (!msg_object.$message || msg_object.forwarded) {
+                    return resolve(msg_object);
+                }
+                let $message = msg_object.$message,
+                    message = $message[0];
+
+                if (msg_object.type === 'headline') {
+
+                    let from_jid = Strophe.getBareJidFromJid($message.attr('from')),
+                        node = $message.find('items').attr('node');
+
+                    if ($message.find('event[xmlns="' + Strophe.NS.PUBSUB + '#event"]').length) {
+                        if (node === `${Strophe.NS.OMEMO}:devices`) {
+                            if (!this.omemo) {
+                                msg_object.ignore = 'omemo';
+                                return resolve(msg_object);
+                            }
+                            let devices = this.getConnectionForIQ().omemo.parseUserDevices($message);
+                            if (from_jid === this.get('jid')) {
+                                let has_devices = this.omemo.own_devices && Object.keys(this.omemo.own_devices).length,
+                                    has_changes = this.omemo.hasChanges(this.omemo.own_devices, devices);
+                                this.getConnectionForIQ().omemo.devices = devices;
+                                let device_id = this.omemo.get('device_id'),
+                                    device = this.getConnectionForIQ().omemo.devices[device_id];
+                                if (has_changes) {
+                                    this.trigger("devices_updated");
+                                }
+                                if (has_devices && has_changes) {
+                                    this.trigger('trusting_updated');
+                                }
+                            }
+                            else {
+                                let peer = this.omemo.getPeer(from_jid),
+                                    has_changes = this.omemo.hasChanges(peer.devices, devices);
+                                peer.updateDevices(devices);
+                                if (has_changes) {
+                                    this.trigger('trusting_updated');
+                                }
+                            }
+                            msg_object.ignore = 'omemo';
+                            return resolve(msg_object);
+                        }
+                        if (node === `${Strophe.NS.OMEMO}:bundles`) {
+                            if (!this.omemo) {
+                                msg_object.ignore = 'omemo';
+                                return resolve(msg_object);
+                            }
+                            let $item = $message.find('items item').first(),
+                                device_id = $item.attr('id'),
+                                $bundle = $item.children(`bundle[xmlns="${Strophe.NS.OMEMO}"]`), device;
+                            if (from_jid === this.get('jid')) {
+                                let devices = this.getConnectionForIQ().omemo.devices;
+                                if (devices && devices[device_id]) {
+                                    if (!this.omemo.own_devices[device_id])
+                                        this.omemo.own_devices[device_id] = new xabber.Device({jid: this.get('jid'), id: device_id}, { account: this, store: this.omemo.store});
+                                    device = this.omemo.own_devices[device_id];
+                                }
+                            } else {
+                                let peer = this.omemo.peers.get(from_jid);
+                                if (peer) {
+                                    device = peer.devices[device_id];
+                                }
+                            }
+                            if (device) {
+                                let ik = $bundle.find(`ik`).text(),
+                                    device_ik = device.get(`ik`), preKeys = [];
+                                if (!ik) {
+                                    device.set('ik', null);
+                                    msg_object.ignore = 'omemo';
+                                    return resolve(msg_object);
+                                }
+                                $bundle.find('prekeys pk').each((i, pk) => {
+                                    let $pk = $(pk);
+                                    preKeys.push({id: $pk.attr('id'), key: $pk.text()});
+                                });
+                                device.preKeys = preKeys;
+                                device.set('ik', utils.fromBase64toArrayBuffer(ik));
+                                device.set('fingerprint', device.generateFingerprint());
+                                device_ik && (device_ik = utils.ArrayBuffertoBase64(device_ik));
+                                if (!_.isUndefined(device_ik) && device_ik !== ik)
+                                    this.trigger('trusting_updated');
+
+                            }
+                            msg_object.ignore = 'omemo';
+                            return resolve(msg_object);
+                        }
+                    }
+                }
+
+                if (msg_object.type === 'chat') {
+
+                    if ($message.find(`encrypted[xmlns="${Strophe.NS.OMEMO}"]`).length) {
+                        if (!this.omemo) {
+                            msg_object.ignore = 'omemo';
+                            return resolve(msg_object);
+                        }
+                        if ($message.find('result[xmlns="' + Strophe.NS.MAM + '"]').length) {
+                            msg_object.is_mam = true;
+                            msg_object.is_archived = true;
+                        }
+                        if ($message.find('[xmlns="' + Strophe.NS.CARBONS + '"]').length) {
+                            msg_object.carbon_copied = true;
+                        }
+                        let $msg = $message.find(`encrypted[xmlns="${Strophe.NS.OMEMO}"]`).parent(),
+                            jid = (Strophe.getBareJidFromJid($msg.attr('from')) === this.get('jid') ? Strophe.getBareJidFromJid($msg.attr('to')) : Strophe.getBareJidFromJid($msg.attr('from'))) || msg_object.from_jid,
+                            contact = this.contacts.get(msg_object.conversation ? msg_object.conversation : jid),
+                            stanza_id = $msg.children(`stanza-id[by="${this.get('jid')}"]`).attr('id');
+                        let cached_msg;
+                        if (!msg_object.notification_msg && contact) {
+                            cached_msg = stanza_id && this.omemo.cached_messages && this.omemo.cached_messages.getMessage(contact, stanza_id);
+                        }
+                        if (msg_object.notification_msg) {
+                            if ($message.children(`notification[xmlns="${Strophe.NS.XABBER_NOTIFY}"]`).length) {
+                                let $notification_msg = $message.children(`notification[xmlns="${Strophe.NS.XABBER_NOTIFY}"]`).children('forwarded').children('message'),
+                                    origin_id = $notification_msg.children('origin-id').attr('id'),
+                                    true_contact = this.contacts.get(Strophe.getBareJidFromJid($msg.attr('from')));
+                                if (origin_id && true_contact)
+                                    cached_msg = this.omemo.cached_messages && this.omemo.cached_messages.getMessage(true_contact, origin_id);
+                            }
+                        }
+
+                        if (Strophe.getBareJidFromJid($msg.attr('from')) !== this.get('jid') && msg_object.carbon_copied && msg_object.carbon_direction && msg_object.carbon_direction === 'sent') {
+                            msg_object.ignore = 'omemo';
+                            return resolve(msg_object);
+                        }
+
+                        let device_id = $message.find(`encrypted[xmlns="${Strophe.NS.OMEMO}"] header`).attr('sid');
+                        msg_object.device_id = device_id;
+                        if (cached_msg && cached_msg.ephemeral_removed) {
+                            msg_object.ignore = 'omemo';
+                            return resolve(msg_object);
+                        }
+
+                        if (cached_msg && cached_msg.envelope) {
+                            if (!msg_object.replaced) {
+                                msg_object.encrypted = true;
+                                this.omemo.getTrusted($message).then((is_trusted) => {
+                                    msg_object.is_trusted = is_trusted;
+                                    $message.find('body').remove();
+                                    $message.find(`encrypted[xmlns="${Strophe.NS.OMEMO}"]`).replaceWith(cached_msg.envelope);
+                                    if ($message.find('displayed-time').length) {
+                                        msg_object.displayed_time = $message.find('displayed-time').attr('stamp');
+                                    }
+                                    if (msg_object.gallery && msg_object.gallery.deferred)
+                                        msg_object.gallery.deferred.resolve($message, msg_object);
+
+                                    if (!msg_object.not_verified_device) {
+                                        let peer = this.omemo.getPeer(contact.get('jid')),
+                                            device = peer.devices[device_id];
+                                        if (device && device.get('fingerprint')) {
+                                            let trusted = this.omemo.isTrusted(contact.get('jid'), device.id, device.get('fingerprint'));
+                                            if (_.isUndefined(trusted)) {
+                                                msg_object.not_verified_device = device_id;
+                                                msg_object.not_verified_device_no_device = false;
+                                            }
+                                        } else if (Strophe.getBareJidFromJid($msg.attr('from')) !== this.get('jid')) {
+                                            msg_object.not_verified_device = device_id;
+                                            msg_object.not_verified_device_no_device = true;
+                                        }
+                                    }
+                                    return resolve(msg_object);
+                                });
+                                return;
+                            }
+                            else if (msg_object.replaced && $message.find(`encrypted[xmlns="${Strophe.NS.OMEMO}"] header`).attr('sid') === this.get('device_id')) {
+                                msg_object.encrypted = true;
+                                $message.find('body').remove();
+                                $message.find(`encrypted[xmlns="${Strophe.NS.OMEMO}"]`).replaceWith(cached_msg);
+                                let chat = this.chats.getChat(contact, 'encrypted');
+                                chat && chat.messages.createFromStanza(msg_object);
+                                let msg_item = chat.messages.find(msg => msg.get('stanza_id') === stanza_id || msg.get('contact_stanza_id') === stanza_id);
+                                if (msg_item) {
+                                    msg_item.set('last_replace_time', $message.find('replaced').attr('stamp'));
+                                    chat && chat.item_view.updateLastMessage(chat.last_message);
+                                }
+                                msg_object.ignore = 'omemo';
+                                return resolve(msg_object);
+                            }
+                        }
+
+                        if (msg_object.replaced) {
+                            this.omemo.decrypt(message.children('replace').children('message'), msg_object).then((decrypted_msg) => {
+                                if (decrypted_msg) {
+                                    msg_object.encrypted = true;
+                                    stanza_id && this.cached_messages.putMessage(contact, stanza_id, {envelope: decrypted_msg});
+                                    if (!this || !this.get('enabled')) {
+                                        msg_object.ignore = 'omemo';
+                                        return resolve(msg_object);
+                                    }
+                                    $message.find('body').remove();
+                                    $message.find(`encrypted[xmlns="${Strophe.NS.OMEMO}"]`).replaceWith(decrypted_msg);
+                                    let chat = this.chats.getChat(contact, 'encrypted');
+                                    chat && chat.messages.createFromStanza(msg_object);
+                                    let msg_item = chat.messages.find(msg => msg.get('stanza_id') === stanza_id || msg.get('contact_stanza_id') === stanza_id);
+                                    if (msg_item) {
+                                        msg_item.set('last_replace_time', $message.find('replaced').attr('stamp'));
+                                        chat && chat.item_view.updateLastMessage(chat.last_message);
+                                    }
+                                    msg_object.ignore = 'omemo';
+                                    return resolve(msg_object);
+                                }
+                            });
+                        } else {
+                            this.omemo.getTrusted($message).then((is_trusted) => {
+                                msg_object.is_trusted = is_trusted;
+                                return this.omemo.decrypt(message, msg_object);
+                            }).then((decrypted_msg) => {
+                                if (decrypted_msg) {
+                                    msg_object.encrypted = true;
+                                    stanza_id && this.omemo.cached_messages.putMessage(contact, stanza_id, {envelope: decrypted_msg});
+                                    if (!this || !this.get('enabled')) {
+                                        msg_object.ignore = 'omemo';
+                                        return resolve(msg_object);
+                                    }
+                                    $message.find('body').remove();
+                                }
+                                else {
+                                    if (decrypted_msg === null) {
+                                        let chat = this.chats.getChat(contact, 'encrypted');
+                                        if (chat && !chat.get('notifications') && contact && msg_object.synced_msg && msg_object.is_unread) {
+                                            if (!chat.item_view.content)
+                                                chat.item_view.content = new xabber.ChatContentView({chat_item: chat.item_view});
+                                            let contact_stanza_id = $msg.children(`stanza-id[by="${contact.get('jid')}"]`).attr('id');
+                                            chat.sendMarker($msg.attr('id'), 'displayed', stanza_id, contact_stanza_id);
+                                            chat.item_view.content.readMessages();
+                                            // reads this chats messages if last synced message is unread and cannot be decrypted
+                                        }
+                                        chat && chat.item_view.updateLastMessage();
+                                        msg_object.ignore = 'omemo';
+                                        return resolve(msg_object);
+                                    }
+                                    msg_object.not_encrypted = true;
+                                    delete msg_object.is_trusted;
+                                }
+                                $message.find(`encrypted[xmlns="${Strophe.NS.OMEMO}"]`).replaceWith(decrypted_msg);
+                                if (msg_object.gallery && decrypted_msg && msg_object.gallery.deferred)
+                                    msg_object.gallery.deferred.resolve($message, msg_object);
+                                else if (msg_object.gallery && msg_object.gallery.deferred)
+                                    msg_object.gallery.deferred.reject();
+
+                                if (!msg_object.not_verified_device) {
+                                    let peer = this.omemo.getPeer(contact.get('jid')),
+                                        device = peer.devices[device_id];
+                                    if (device && device.get('fingerprint')) {
+                                        let trusted = this.omemo.isTrusted(contact.get('jid'), device.id, device.get('fingerprint'));
+                                        if (_.isUndefined(trusted)) {
+                                            msg_object.not_verified_device = device_id;
+                                            msg_object.not_verified_device_no_device = false;
+                                        }
+                                    } else if (Strophe.getBareJidFromJid($msg.attr('from')) !== this.get('jid')) {
+                                        msg_object.not_verified_device = device_id;
+                                        msg_object.not_verified_device_no_device = true;
+                                    }
+                                }
+                                return resolve(msg_object);
+                            }).catch((e) => {
+                                console.error(e);
+                                if (e.name === 'MessageCounterError') {//for capturing double decryption of same message
+                                    msg_object.ignore = 'omemo';
+                                    return resolve(msg_object);
+                                }
+                                if (msg_object.synced_msg && !msg_object.decryption_retry) {
+                                    msg_object.decryption_retry = true;
+                                    return resolve(msg_object);
+                                }
+                                msg_object.not_encrypted = true;
+                                delete msg_object.is_trusted;
+                                $message.find(`encrypted[xmlns="${Strophe.NS.OMEMO}"]`).remove();
+                                if (msg_object.gallery && msg_object.gallery.deferred)
+                                    msg_object.gallery.deferred.reject();
+
+                                return resolve(msg_object);
+                            });
+                            return;
+                        }
+                        if (msg_object.gallery && msg_object.gallery.deferred)
+                            msg_object.gallery.deferred.reject();
+                    }
+                }
+                return resolve(msg_object);
+            });
+        },
+
+        name: 'xep_omemo',
+        order: 5,
+        handler_name: 'xep_omemo_checker',
+    };
+    this._msg_xep_checkers.push(checker_object);
+
     if (!this.settings.get('omemo'))
         return;
     this.omemo = new xabber.Omemo({id: 'omemo'}, {

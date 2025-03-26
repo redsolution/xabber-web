@@ -61,7 +61,7 @@ module.exports = {
             "xabber-modal-utils": "~/src/utils/modals",
             "xabber-environment": "./environment",
 
-            "xabber-core": "./core",
+            "xabber-core": "~/src/core",
             "xabber-views": "./views",
             "xabber-api-service": "./api-service",
             "xabber-strophe": "./strophe",
@@ -79,6 +79,20 @@ module.exports = {
             "xabber-calls": "./calls",
 
             "xabber-translations-info": "~/translations/translation_progress",
+
+            // xep modules
+            "xabber-xep0280": "~/src/xep_modules/xep0280",
+            "xabber-xep-rewrite": "~/src/xep_modules/xep-rewrite",
+            "xabber-xep-delivery": "~/src/xep_modules/xep-delivery",
+            "xabber-xep-devices": "~/src/xep_modules/xep-devices",
+            "xabber-xep0060": "~/src/xep_modules/xep0060",
+            "xabber-xep0224": "~/src/xep_modules/xep0224",
+            "xabber-xep-groups": "~/src/xep_modules/xep-groups",
+            "xabber-xep-forwards": "~/src/xep_modules/xep-forwards",
+            "xabber-xep-favorites": "~/src/xep_modules/xep-favorites",
+            "xabber-xep0466": "~/src/xep_modules/xep0466",
+            "xabber-xep0353": "~/src/xep_modules/xep0353",
+            "xabber-xep0333": "~/src/xep_modules/xep0333",
 
             // main file
             "xabber": "~/src/xabber",

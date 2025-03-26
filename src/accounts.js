@@ -84,6 +84,7 @@ xabber.Account = Backbone.Model.extend({
             this._added_pres_handlers = [];
             this._pending_stanzas = [];
             this._pending_messages = [];
+            this._msg_xep_checkers = [];
             this.dfd_presence = new $.Deferred();
             this.resources = new xabber.AccountResources(null, {account: this});
             this.password_view = new xabber.ChangePasswordView({model: this});
@@ -135,6 +136,20 @@ xabber.Account = Backbone.Model.extend({
 
         isOnline: function () {
             return this.get('status') !== 'offline';
+        },
+
+        testMsgChildForXeps: async function (msg_object) {
+            this._msg_xep_checkers.sort((a, b) => {
+                return a.order - b.order;
+            });
+
+            for (let checker of this._msg_xep_checkers) {
+                if (msg_object.ignore || !checker.callback) {
+                    return msg_object;
+                }
+                msg_object = await checker.callback(msg_object);
+            }
+            return msg_object;
         },
 
         sendMsg: function (stanza, callback) {

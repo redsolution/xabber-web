@@ -1783,6 +1783,61 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
 
 });
 
+xabber.Account.addInitPlugin(function () {
+
+    let checker_object = {
+        callback : async (msg_object) => {
+            return new Promise((resolve) => {
+                if (!msg_object.$message)
+                    return resolve(msg_object);
+
+                if (!this.server_features.get(Strophe.NS.XABBER_NOTIFY))
+                    return resolve(msg_object);
+
+                let $message = msg_object.$message;
+
+                if (msg_object.type === 'chat') {
+                    let $notify = $message.children(`notification[xmlns="${Strophe.NS.XABBER_NOTIFY}"]`);
+                    if ($notify.length){
+                        if ($message.find(`encrypted[xmlns="${Strophe.NS.OMEMO}"]`).length && !msg_object.forwarded) {
+                            if (this.omemo){
+                                _.extend(msg_object, {
+                                    notification_msg: true,
+                                    conversation: this.server_features.get(Strophe.NS.XABBER_NOTIFY).get('from')
+                                });
+                                return resolve(msg_object);
+                            }
+                            msg_object.ignore = 'notifications';
+                            return resolve(msg_object);
+                        } else {
+                            msg_object.encrypted = false;
+                            let from_bare_jid = Strophe.getBareJidFromJid($message.attr('from')),
+                                contact = this.contacts.mergeContact($message.attr('from')),
+                                stanza_ids = this.chats.receiveStanzaId($message, {from_bare_jid: from_bare_jid});
+
+                            msg_object.chat = this.chats.getChat(contact);
+
+                            _.extend(msg_object, {
+                                notification_msg: true,
+                                encrypted: false,
+                                stanza_id: stanza_ids.stanza_id,
+                                contact_stanza_id: stanza_ids.contact_stanza_id
+                            });
+                            return resolve(msg_object);
+                        }
+                    }
+                }
+                return resolve(msg_object);
+            });
+        },
+
+        name: 'xep_notification',
+        order: 4,
+        handler_name: 'xep_notification_checker',
+    };
+    this._msg_xep_checkers.push(checker_object);
+});
+
 
 xabber.once("start", function () {
 

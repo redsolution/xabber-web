@@ -1013,9 +1013,10 @@ xabber.Contact = Backbone.Model.extend({
             if (this.get('pinned_message'))
                 if (this.get('pinned_message').stanza_id === $msg.find('stanza-id').attr('id'))
                     return;
-            let message = this.account.chats.receiveChatMessage($message, {pinned_message: true});
-            this.set('pinned_message', message);
-            this.renderPinnedMessage(message, pinned_msg_elem);
+            this.account.chats.makeMessageObject($message, {pinned_message: true}).then((message) => {
+                this.set('pinned_message', message);
+                this.renderPinnedMessage(message, pinned_msg_elem);
+            });
         }
     },
 
@@ -3554,7 +3555,7 @@ xabber.MediaBaseView = xabber.BasicView.extend({
                     }, deferred);
                 } else{
                     msg_items = this.contact.getFilesFromStanza($message);
-                    this.account.chats.receiveChatMessage($message, {
+                    this.account.chats.makeMessageObject($message, {
                         searched_message: true,
                         query: query
                     });
@@ -9129,7 +9130,7 @@ xabber.Roster = xabber.ContactsBase.extend({
                     _.each(res, (msg_item) => {
                         let xml = parser.parseFromString(msg_item.xml, "text/xml");
                         msg_item.is_unread && console.error(msg_item.is_unread);
-                        this.account.chats.receiveChatMessage(xml.firstChild,
+                        this.account.chats.makeMessageObject(xml.firstChild,
                             _.extend({
                                 is_archived: true,
                                 is_cached: true,
@@ -9237,86 +9238,96 @@ xabber.Roster = xabber.ContactsBase.extend({
         unread_msgs_count && (options.is_unread = true);
         options.delay = message.children('time');
         (unread_msgs_count === 0) && (options.sync_timestamp = chat_timestamp);
-        message.length && (msg = this.account.chats.receiveChatMessage(message, options));
-        if (msg) {
-            if (!msg.get('is_unread') && $unread_messages.attr('count') > 0 && !msg.isSenderMe()
-                && !(msg.get('type') === 'system')
-            ) {
-                msg.set('is_unread', true);
-                if (chat.get('notifications')){
-                    msg.get('xml') && this.account.cached_notifications.putInCachedNotifications({
-                        stanza_id: msg.get('unique_id'),
-                        xml: msg.get('xml').outerHTML,
-                        is_unread: true,
-                    });
-                }
-            }
-            if (chat.get('notifications')){
-                if (xabber.notifications_view.current_content && xabber.notifications_view.current_content.isVisible() && is_first_sync){
-                    xabber.notifications_view.current_content.onShowNotificationsTab();
-                }
-            }
 
-            if(!(is_invite || encrypted && this.account.omemo)) {
-                if (msg.isSenderMe() && ((msg.get('stanza_id') === last_displayed_msg) || saved))
-                    msg.set('state', constants.MSG_DISPLAYED);
-                else if (msg.isSenderMe())
-                    msg.set('state', constants.MSG_DELIVERED);
-                this.account.messages.add(msg);
-                if ((chat.last_message && (msg.get('timestamp') > chat.last_message.get('timestamp'))) || !chat.last_message){
-                    chat.last_message = msg;
-                    if (chat.get('notifications'))
-                        chat.account.trigger('notification_last_msg_updated', msg.get('stanza_id'));
-                    chat.item_view.updateLastMessage(msg);
-                    msg.get('stanza_id') && chat.set('synced_msg', msg);
+        let dfd = new $.Deferred();
+        dfd.done((msg) => {
+            if (msg) {
+                if (!msg.get('is_unread') && $unread_messages.attr('count') > 0 && !msg.isSenderMe()
+                    && !(msg.get('type') === 'system')
+                ) {
+                    msg.set('is_unread', true);
+                    if (chat.get('notifications')){
+                        msg.get('xml') && this.account.cached_notifications.putInCachedNotifications({
+                            stanza_id: msg.get('unique_id'),
+                            xml: msg.get('xml').outerHTML,
+                            is_unread: true,
+                        });
+                    }
+                }
+                if (chat.get('notifications')){
+                    if (xabber.notifications_view.current_content && xabber.notifications_view.current_content.isVisible() && is_first_sync){
+                        xabber.notifications_view.current_content.onShowNotificationsTab();
+                    }
+                }
+
+                if(!(is_invite || encrypted && this.account.omemo)) {
+                    if (msg.isSenderMe() && ((msg.get('stanza_id') === last_displayed_msg) || saved))
+                        msg.set('state', constants.MSG_DISPLAYED);
+                    else if (msg.isSenderMe())
+                        msg.set('state', constants.MSG_DELIVERED);
+                    this.account.messages.add(msg);
+                    if ((chat.last_message && (msg.get('timestamp') > chat.last_message.get('timestamp'))) || !chat.last_message){
+                        chat.last_message = msg;
+                        if (chat.get('notifications'))
+                            chat.account.trigger('notification_last_msg_updated', msg.get('stanza_id'));
+                        chat.item_view.updateLastMessage(msg);
+                        msg.get('stanza_id') && chat.set('synced_msg', msg);
+                    }
+                }
+                chat.set('first_archive_id', msg.get('stanza_id'));
+            } else if (message.length && !msg){
+                if (!(chat.messages && chat.messages.length)){
+                    chat.set('timestamp', chat_timestamp);
+                    if (!(Number(last_delivered_msg) || Number(last_displayed_msg) || Number(last_read_msg))
+                        && !chat.item_view.content && !chat.get('group_chat')){
+                        chat.item_view.content = new xabber.ChatContentView({chat_item: chat.item_view});
+                    }
+                    chat.item_view.updateEmptyChat();
                 }
             }
-            chat.set('first_archive_id', msg.get('stanza_id'));
-        } else if (message.length && !msg){
-            if (!(chat.messages && chat.messages.length)){
-                chat.set('timestamp', chat_timestamp);
-                if (!(Number(last_delivered_msg) || Number(last_displayed_msg) || Number(last_read_msg))
-                    && !chat.item_view.content && !chat.get('group_chat')){
-                    chat.item_view.content = new xabber.ChatContentView({chat_item: chat.item_view});
+            if (!(encrypted && !this.account.omemo)){
+                let last_read_msg_item = chat.messages.get(last_read_msg);
+                if (last_read_msg_item && unread_msgs_count){
+                    let unread_msgs = chat.messages.filter(m => m.get('timestamp') > last_read_msg_item.get('timestamp') && !m.isSenderMe());
+                    unread_msgs.forEach(message => message.set('is_unread', true));
+                    let readen_unread_msgs = chat.messages.filter(m => m.get('timestamp') > last_read_msg_item.get('timestamp') && !m.isSenderMe() && m.get('was_readen')),
+                        last_readen_unread_msg = readen_unread_msgs[readen_unread_msgs.length - 1];
+                    readen_unread_msgs.forEach((message) => {
+                        message.set('is_unread', false);
+                    });
+                    unread_msgs_count = unread_msgs_count - readen_unread_msgs.length;
+                    (unread_msgs_count < 0) && (unread_msgs_count = 0);
+                    if (last_readen_unread_msg){
+                        chat.sendMarker(last_readen_unread_msg.get('msgid'), 'displayed', last_readen_unread_msg.get('stanza_id'), last_readen_unread_msg.get('contact_stanza_id'), last_readen_unread_msg.get('encrypted') && last_readen_unread_msg.get('ephemeral_timer'), true)
+                    }
                 }
-                chat.item_view.updateEmptyChat();
-            }
-        }
-        if (!(encrypted && !this.account.omemo)){
-            let last_read_msg_item = chat.messages.get(last_read_msg);
-            if (last_read_msg_item && unread_msgs_count){
-                let unread_msgs = chat.messages.filter(m => m.get('timestamp') > last_read_msg_item.get('timestamp') && !m.isSenderMe());
-                unread_msgs.forEach(message => message.set('is_unread', true));
-                let readen_unread_msgs = chat.messages.filter(m => m.get('timestamp') > last_read_msg_item.get('timestamp') && !m.isSenderMe() && m.get('was_readen')),
-                    last_readen_unread_msg = readen_unread_msgs[readen_unread_msgs.length - 1];
-                readen_unread_msgs.forEach((message) => {
-                    message.set('is_unread', false);
-                });
-                unread_msgs_count = unread_msgs_count - readen_unread_msgs.length;
-                (unread_msgs_count < 0) && (unread_msgs_count = 0);
-                if (last_readen_unread_msg){
-                    chat.sendMarker(last_readen_unread_msg.get('msgid'), 'displayed', last_readen_unread_msg.get('stanza_id'), last_readen_unread_msg.get('contact_stanza_id'), last_readen_unread_msg.get('encrypted') && last_readen_unread_msg.get('ephemeral_timer'), true)
+                if (chat.get('notifications') && chat.messages.length && chat.messages.filter(item => item.get('is_unread')).length && last_read_msg_item){
+                    let unread_messages = _.clone(chat.messages.filter(item => item.get('is_unread')));
+                    _.each(unread_messages, (msg_item) => {
+                        if (msg_item.get('timestamp') <= last_read_msg_item.get('timestamp'))
+                            msg_item.set('is_unread', false);
+                    })
                 }
+                chat.messages_unread.reset();
+                chat.set('unread', 0);
+                chat.set('const_unread', unread_msgs_count);
+                if (msg && msg.isSenderMe() && unread_msgs_count && last_read_msg === 0 && !saved)
+                    chat.set('const_unread', 0);
             }
-            if (chat.get('notifications') && chat.messages.length && chat.messages.filter(item => item.get('is_unread')).length && last_read_msg_item){
-                let unread_messages = _.clone(chat.messages.filter(item => item.get('is_unread')));
-                _.each(unread_messages, (msg_item) => {
-                    if (msg_item.get('timestamp') <= last_read_msg_item.get('timestamp'))
-                        msg_item.set('is_unread', false);
-                })
+            if (presence.length)
+                contact && contact.handlePresence(presence[0]);
+            else {
+                contact && contact.set('subscription_request_in', false)
             }
-            chat.messages_unread.reset();
-            chat.set('unread', 0);
-            chat.set('const_unread', unread_msgs_count);
-            if (msg && msg.isSenderMe() && unread_msgs_count && last_read_msg === 0 && !saved)
-                chat.set('const_unread', 0);
+            xabber.toolbar_view.recountAllMessageCounter();
+        });
+        if (message.length){
+            this.account.chats.makeMessageObject(message, options).then((msg) => {
+                dfd.resolve(msg);
+            });
+        } else {
+            dfd.resolve()
         }
-        if (presence.length)
-            contact && contact.handlePresence(presence[0]);
-        else {
-            contact && contact.set('subscription_request_in', false)
-        }
-        xabber.toolbar_view.recountAllMessageCounter();
     },
 
     onSyncIQ: async function (iq, request_with_stamp, synchronization_with_stamp, is_first_sync, is_last_sync, cached_conversations_exclude) {
@@ -9357,7 +9368,7 @@ xabber.Roster = xabber.ContactsBase.extend({
                     let parser = new DOMParser();
                     _.each(res, (msg_item) => {
                         let xml = parser.parseFromString(msg_item.xml, "text/xml");
-                        this.account.chats.receiveChatMessage(xml.firstChild,
+                        this.account.chats.makeMessageObject(xml.firstChild,
                             _.extend({
                                 is_archived: true,
                                 is_cached: true,
