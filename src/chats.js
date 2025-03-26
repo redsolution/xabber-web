@@ -4844,7 +4844,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
                         dataURL = mapCanvas.toDataURL('image/png');
                     map.setTarget(null);
                     map = null;
-                    img.src= dataURL
+                    img && (img.src= dataURL);
                 }
             });
         });
@@ -11505,6 +11505,7 @@ xabber.ChatLocationView = xabber.BasicView.extend({
                 },
                 message = this.model.messages.create(attrs),
                 msg_id = message.get('msgid'),
+                unique_id = message.get('unique_id'),
                 stanza = $msg({
                     to: this.model.get('jid'),
                     type: 'chat',
@@ -11521,6 +11522,8 @@ xabber.ChatLocationView = xabber.BasicView.extend({
                 xmlns: Strophe.NS.GEOLOC,
             }).c('lat').t(lat).up().c('lon').t(lon).up().up().up();
             stanza.c('body').t(body).up();
+
+            this.account._pending_messages.push({chat_hash_id: this.model.id, unique_id: unique_id, timestamp: moment.now()});
             if (this.model.get('encrypted') && this.account.omemo) {
                 stanza.c('envelope', {xmlns: Strophe.NS.SCE}).c('content');
                 if ($(stanza.tree()).children('body').length) {
@@ -14161,50 +14164,47 @@ xabber.Account.addInitPlugin(function () {
 
             let $message = msg_object.$message;
 
-            if (msg_object.type === 'chat'){
+            let from_jid = $message.attr('from') || msg_object.from_jid;
 
-                let from_jid = $message.attr('from') || msg_object.from_jid;
+            if (!from_jid) {
+                from_jid = this.get('jid');
+            }
+            let from_bare_jid = Strophe.getBareJidFromJid(from_jid);
 
-                if (!from_jid) {
-                    from_jid = this.get('jid');
-                }
-                let from_bare_jid = Strophe.getBareJidFromJid(from_jid);
-
-                if (!msg_object.is_archived) {
-                    let $stanza_id, $contact_stanza_id;
-                    $message.children('stanza-id').each((idx, stanza_id) => {
-                        stanza_id = $(stanza_id);
-                        if ($message.children(`x[xmlns="${Strophe.NS.GROUP_CHAT}"]`).length) {
-                            if (stanza_id.attr('by') === from_bare_jid) {
-                                !$stanza_id && ($stanza_id = stanza_id);
-                                $contact_stanza_id = stanza_id;
-                            }
-                            else
-                                $stanza_id = stanza_id;
+            if (!msg_object.is_archived) {
+                let $stanza_id, $contact_stanza_id;
+                $message.children('stanza-id').each((idx, stanza_id) => {
+                    stanza_id = $(stanza_id);
+                    if ($message.children(`x[xmlns="${Strophe.NS.GROUP_CHAT}"]`).length) {
+                        if (stanza_id.attr('by') === from_bare_jid) {
+                            !$stanza_id && ($stanza_id = stanza_id);
+                            $contact_stanza_id = stanza_id;
                         }
-                        else {
-                            if (stanza_id.attr('by') === from_bare_jid)
-                                $contact_stanza_id = stanza_id;
-                            else
-                                $stanza_id = stanza_id;
-                        }
-                    });
-                    (!msg_object.stanza_id && $stanza_id) && (msg_object.stanza_id = $stanza_id.attr('id'));
-                    (!msg_object.contact_stanza_id && $contact_stanza_id) && (msg_object.contact_stanza_id = $contact_stanza_id.attr('id'));
-                }
+                        else
+                            $stanza_id = stanza_id;
+                    }
+                    else {
+                        if (stanza_id.attr('by') === from_bare_jid)
+                            $contact_stanza_id = stanza_id;
+                        else
+                            $stanza_id = stanza_id;
+                    }
+                });
+                (!msg_object.stanza_id && $stanza_id) && (msg_object.stanza_id = $stanza_id.attr('id'));
+                (!msg_object.contact_stanza_id && $contact_stanza_id) && (msg_object.contact_stanza_id = $contact_stanza_id.attr('id'));
+            }
 
-                if (!msg_object.chat){
-                    let to_jid = $message.attr('to'),
-                        to_bare_jid = Strophe.getBareJidFromJid(to_jid);
+            if (!msg_object.chat){
+                let to_jid = $message.attr('to'),
+                    to_bare_jid = Strophe.getBareJidFromJid(to_jid);
 
-                    let is_sender = from_bare_jid === this.get('jid');
+                let is_sender = from_bare_jid === this.get('jid');
 
-                    let contact_jid = is_sender ? to_bare_jid : from_bare_jid;
+                let contact_jid = is_sender ? to_bare_jid : from_bare_jid;
 
-                    let contact = this.contacts.mergeContact(contact_jid);
+                let contact = this.contacts.mergeContact(contact_jid);
 
-                    msg_object.chat = this.chats.getChat(contact, (msg_object.encrypted || msg_object.not_encrypted) && 'encrypted');
-                }
+                msg_object.chat = this.chats.getChat(contact, (msg_object.encrypted || msg_object.not_encrypted) && 'encrypted');
             }
 
             return msg_object;

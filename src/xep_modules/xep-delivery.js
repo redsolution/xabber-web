@@ -43,8 +43,6 @@ xabber.Account.addInitPlugin(function () {
                             msg_object.ignore = 'xep-delivery';
                             return msg_object;
                         }
-                        if (!msg.get('stanza_id') && msg.get('locations'))
-                            msg.set({'stanza_id': stanza_id});
                         let msg_state = chat.get('saved') ? constants.MSG_DISPLAYED : constants.MSG_SENT;
                         msg.set({'state': msg_state, 'time': delivered_time, 'timestamp': Number(moment(delivered_time))}); // delivery receipt, changing on server time
                         chat.setStanzaId(pending_message.unique_id, stanza_id);

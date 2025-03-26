@@ -20,16 +20,21 @@ xabber.Account.addInitPlugin(function () {
                         return msg_object;
                     }
                 }
-                if (!msg_object.is_sender){
+                let from_jid = $message.attr('from') || msg_object.from_jid;
+
+                if (!from_jid) {
+                    from_jid = this.get('jid');
+                }
+                let from_bare_jid = Strophe.getBareJidFromJid(from_jid),
+                    is_sender = from_bare_jid === this.get('jid');
+
+                if (!is_sender){
                     msg_object.ignore = 'xep0280';
                     return msg_object;
                 }
                 let $forwarded = $carbons.children('forwarded');
                 if ($forwarded.length) {
                     msg_object.$message = $forwarded.children('message');
-                    msg_object.from = Strophe.getBareJidFromJid($message.attr('from'));
-                    msg_object.to = Strophe.getBareJidFromJid($message.attr('to'));
-                    msg_object.is_sender = msg_object.from === msg_object.account.get('jid');
                 }
                 if ($carbons.find(`request[xmlns="${Strophe.NS.DELIVERY}"][to="${msg_object.to}"]`).length){
                     msg_object.ignore = 'xep0280';
