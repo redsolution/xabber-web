@@ -58,7 +58,10 @@ xabber.Account.addInitPlugin(function () {
                                 stanza_id: stanza_ids.stanza_id || $mam.attr('id'),
                                 contact_stanza_id: stanza_ids.contact_stanza_id
                             });
-                            return resolve(msg_object);
+                            $forwarded = $message.find('forwarded');
+                            if (!$forwarded.length){
+                                return resolve(msg_object);
+                            }
                         }
                         let forwarded_msgs = [];
                         $forwarded = $message.children(`reference[type="mutable"][xmlns="${Strophe.NS.REFERENCE}"]`).length ?

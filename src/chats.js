@@ -14192,6 +14192,16 @@ xabber.Account.addInitPlugin(function () {
                 });
                 (!msg_object.stanza_id && $stanza_id) && (msg_object.stanza_id = $stanza_id.attr('id'));
                 (!msg_object.contact_stanza_id && $contact_stanza_id) && (msg_object.contact_stanza_id = $contact_stanza_id.attr('id'));
+                if (!msg_object.stanza_id || !msg_object.contact_stanza_id) {
+                    let stanza_ids = this.chats.receiveStanzaId($message,
+                        {
+                            from_bare_jid: from_bare_jid,
+                            carbon_copied: msg_object.carbon_copied,
+                            replaced: msg_object.replaced
+                        });
+                    !msg_object.stanza_id && stanza_ids.stanza_id && (msg_object.stanza_id = stanza_ids.stanza_id);
+                    !msg_object.contact_stanza_id && stanza_ids.contact_stanza_id && (msg_object.contact_stanza_id = stanza_ids.contact_stanza_id);
+                }
             }
 
             if (!msg_object.chat){
