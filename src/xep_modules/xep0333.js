@@ -62,7 +62,7 @@ xabber.Account.addInitPlugin(function () {
 
                 if (!$message.find('body').length || $jingle_msg_propose.length || $jingle_msg_accept.length || $jingle_msg_reject.length) {
                     if (chat.get('saved')){
-                        msg_object.ignore = 'xep0333';;
+                        msg_object.ignore = 'xep0333';
                         return msg_object;
                     }
                     let view = xabber.chats_view.child(chat.contact.hash_id);
@@ -70,7 +70,7 @@ xabber.Account.addInitPlugin(function () {
                         view.content = new xabber.ChatContentView({chat_item: view});
                     if (view && view.content)
                         view.content.receiveNoTextMessage($message, msg_object.carbon_copied);
-                    msg_object.ignore = 'xep0333';;
+                    msg_object.ignore = 'xep0333';
                     return msg_object;
                 }
             }

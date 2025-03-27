@@ -4026,8 +4026,14 @@ xabber.ChatContentView = xabber.BasicView.extend({
                     last_visible_unread_msg = msg;
                 }
             });
-            if (last_visible_unread_msg){
+            if (last_visible_unread_msg && this.model.messages.get($(last_visible_unread_msg).data('uniqueid'))){
                 this.readMessage(this.model.messages.get($(last_visible_unread_msg).data('uniqueid')), $(last_visible_unread_msg), is_context);
+            } else {
+                console.error('MESSAGE WASNT READ')
+                console.log(last_visible_unread_msg);
+                console.log($(last_visible_unread_msg).data('uniqueid'));
+                console.log(this.model.messages.get($(last_visible_unread_msg).data('uniqueid')));
+                console.log(this.model.messages);
             }
         }
     },

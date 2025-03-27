@@ -1798,6 +1798,35 @@ xabber.Account.addInitPlugin(function () {
 
                 if (msg_object.type === 'chat') {
                     let $notify = $message.children(`notification[xmlns="${Strophe.NS.XABBER_NOTIFY}"]`);
+                    if (!$notify.length){
+                        let $forwarded = $message.find('forwarded'),
+                            $delay = msg_object.delay,
+                            from_jid = $message.attr('from') || msg_object.from_jid;
+
+                        let from_bare_jid = Strophe.getBareJidFromJid(from_jid);
+
+                        if ($forwarded.length && !msg_object.xml) {
+                            let $mam = $message.find(`result[xmlns="${Strophe.NS.MAM}"]`);
+                            if ($mam.length) {
+                                $forwarded = $mam.children('forwarded');
+                                if ($forwarded.length) {
+                                    $message = $forwarded.children('message');
+                                    $delay = $forwarded.children('delay');
+                                }
+                                let stanza_ids = this.chats.receiveStanzaId($message, {from_bare_jid: from_bare_jid});
+
+                                _.extend(msg_object, {
+                                    $message: $message,
+                                    is_mam: true,
+                                    delay: $delay,
+                                    stanza_id: stanza_ids.stanza_id || $mam.attr('id'),
+                                    contact_stanza_id: stanza_ids.contact_stanza_id
+                                });
+                                $notify = $message.children(`notification[xmlns="${Strophe.NS.XABBER_NOTIFY}"]`);
+                            }
+                        }
+                    }
+
                     if ($notify.length){
                         if ($message.find(`encrypted[xmlns="${Strophe.NS.OMEMO}"]`).length && !msg_object.forwarded) {
                             if (this.omemo){

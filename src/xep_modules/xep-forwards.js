@@ -11,8 +11,7 @@ xabber.Account.addInitPlugin(function () {
                 if (!msg_object.$message)
                     return resolve(msg_object);
 
-                let $message = msg_object.$message,
-                    $forwarded = $message.find('forwarded');
+                let $message = msg_object.$message;
 
 
                 if (msg_object.type === 'chat'){
@@ -37,7 +36,7 @@ xabber.Account.addInitPlugin(function () {
                             from_jid: from_jid,
                             xml: msg_object.xml
                         });
-                        msg_object.ignore = 'xep-forwards';;
+                        msg_object.ignore = 'xep-forwards';
                         return resolve(msg_object);
                     }
 
