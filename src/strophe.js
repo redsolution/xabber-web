@@ -900,7 +900,7 @@ _.extend(Strophe.Connection.prototype, {
         let uniq_id = uuid(), old_token,
             iq = $iq({
             type: 'set',
-            to: this.domain,
+            to: this.account.get('jid'),
             id: uniq_id
         }).c('register', { xmlns: Strophe.NS.AUTH_DEVICES});
         this.account && (old_token = this.account.get('old_device_token'));

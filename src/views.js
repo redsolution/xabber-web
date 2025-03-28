@@ -1357,6 +1357,10 @@ xabber.ToolbarView = xabber.BasicView.extend({
                     if (chat.get('notifications')){
                         // mentions += chat.get('unread') + chat.get('const_unread');
                     } else {
+                        if (chat.get('unread') || chat.get('const_unread')){
+                            console.error('chat with UNREAD!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
+                            console.error(chat);
+                        }
                         count_all_msg += chat.get('unread') + chat.get('const_unread');
                         if (chat.contact.get('group_chat'))
                             count_group_msg += chat.get('unread') + chat.get('const_unread');

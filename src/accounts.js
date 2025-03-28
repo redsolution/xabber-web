@@ -843,7 +843,7 @@ xabber.Account = Backbone.Model.extend({
             let tokens_list = [],
                 iq = $iq({
                     type: 'get',
-                    to: this.connection.domain
+                    to: this.get('jid')
                 }).c('query', {xmlns: `${Strophe.NS.AUTH_DEVICES}#items`});
             this.sendIQFast(iq, (tokens) => {
                 $(tokens).find('device').each((idx, token) => {
@@ -1192,7 +1192,7 @@ xabber.Account = Backbone.Model.extend({
         revokeXToken: function (token_uid, callback) {
             let iq = $iq({
                 type: 'set',
-                to: this.connection.domain
+                to: this.get('jid')
             }).c('revoke', {xmlns:Strophe.NS.AUTH_DEVICES});
             for (let token_num = 0; token_num < token_uid.length; token_num++)
                 iq.c('device', {id: token_uid[token_num]}).up();
@@ -1216,7 +1216,7 @@ xabber.Account = Backbone.Model.extend({
         revokeAllXTokens: function (callback, errback) {
             let iq = $iq({
                 type: 'set',
-                to: this.connection.domain
+                to: this.get('jid')
             }).c('revoke-all', {xmlns:Strophe.NS.AUTH_DEVICES});
             this.sendIQFast(iq, (success) => {
                     callback && callback(success);

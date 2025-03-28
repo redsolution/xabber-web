@@ -129,6 +129,7 @@ xabber.ServerFeatures = Backbone.Collection.extend({
                 } else {
                     this.connection.disco.info(this.account.domain, null, this.onInfo.bind(this));
                 }
+                this.connection.disco.info(this.account.get('jid'), null, this.onInfo.bind(this));
                 this.connection.disco.items(this.account.domain, null, this.onItems.bind(this));
             });
         });

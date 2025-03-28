@@ -11099,27 +11099,25 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
             ic_name && $template.find('.chat-icon').switchClass(ic_name, (ic_name === 'group-invite' || ic_name === 'server' || ic_name === 'blocked')).html(env.templates.svg[ic_name]());
 
             if (this.current_filter.type && contact.get('groups') && contact.get('groups').length){
-                if (contact.get('groups').length) {
-                    let counter = 0;
-                    _.each(contact.get('groups'), (group) => {
-                        let $template = $(`
-                                <div data-groupname="${group}" title="${group}" class="group ground-color-50">
-                                    <div class="one-line">${group}</div>
-                                </div> `
-                        );
-                        if (counter < 2) {
-                            $template.find('.contact-groups-wrap').append($template);
-                        }  else if (counter === 2) {
-                            $template.find('.contact-groups-wrap').append($(`
-                                <div class="group group-expand ground-color-50">
-                                    <div class="one-line">+ ${contact.get('groups').length - 2}</div>
-                                </div> `
-                            ));
-                        }
-                        $template.find('.contact-expanded-groups-wrap').append($template);
-                        counter++;
-                    })
-                }
+                let counter = 0;
+                _.each(contact.get('groups'), (group) => {
+                    let $group_template = $(`
+                            <div data-groupname="${group}" title="${group}" class="group ground-color-50">
+                                <div class="one-line">${group}</div>
+                            </div> `
+                    );
+                    if (counter < 2) {
+                        $template.find('.contact-groups-wrap').append($group_template);
+                    }  else if (counter === 2) {
+                        $template.find('.contact-groups-wrap').append($(`
+                            <div class="group group-expand ground-color-50">
+                                <div class="one-line">+ ${contact.get('groups').length - 2}</div>
+                            </div> `
+                        ));
+                    }
+                    $template.find('.contact-expanded-groups-wrap').append($group_template.clone());
+                    counter++;
+                })
 
             }
             $template.find('.circle-avatar').setAvatar(image, 32);
