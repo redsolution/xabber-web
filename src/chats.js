@@ -7734,9 +7734,17 @@ xabber.ChatContentView = xabber.BasicView.extend({
         let $elem = $(ev.target),
             $message = $elem.closest('.chat-message'),
             msg = this.model.messages.get($message.data('uniqueid'));
-        if (!msg) {
+        if (!msg && this.account.participant_messages) {
             msg = this.account.participant_messages.get($message.data('uniqueid'));
         }
+        if (!msg && this.account.context_messages) {
+            msg = this.account.context_messages.get($message.data('uniqueid'));
+        }
+        if (!msg && this.account.searched_messages) {
+            msg = this.account.searched_messages.get($message.data('uniqueid'));
+        }
+        if (!msg)
+            return;
         let files = msg.get('files'),
             videos = msg.get('videos'),
             images = msg.get('images'),
@@ -8615,7 +8623,6 @@ xabber.AccountChats = xabber.ChatsBase.extend({
         console.warn(msg_object);
         if (msg_object.ignore && msg_object.final_msg){
             return msg_object.final_msg;
-
         }
         if (msg_object.ignore){
             return;

@@ -129,7 +129,7 @@ xabber.Account.addInitPlugin(function () {
                     else
                         msg_text =  xabber.getString("jingle__system_message__cancelled_call");
                     msg_object.is_unread && (msg_object.reject_contact_stanza_id = msg_object.contact_stanza_id);
-                    chat.messages.createSystemMessage({
+                    let system_message = chat.messages.createSystemMessage({
                         from_jid: chat.account.get('jid'),
                         time: time,
                         session_id: $jingle_msg_reject.attr('id'),
@@ -140,6 +140,7 @@ xabber.Account.addInitPlugin(function () {
                     });
                     if (msg_object.is_archived || msg_object.synced_msg){
                         msg_object.ignore = 'xep0353';
+                        msg_object.final_msg = system_message;
                         return msg_object;
                     }
                     if (xabber.current_voip_call && xabber.current_voip_call.get('session_id') === $jingle_msg_reject.attr('id')) {
@@ -151,6 +152,7 @@ xabber.Account.addInitPlugin(function () {
                         chat.endCall($jingle_msg_reject.children('call').attr('reason') === 'device_busy' ? 'device_busy' : $jingle_msg_reject.children('call').attr('reason') === 'busy' ? 'busy' : 'disconnected');
                     }
                     msg_object.ignore = 'xep0353';
+                    msg_object.final_msg = system_message;
                     return msg_object;
                 }
             }
