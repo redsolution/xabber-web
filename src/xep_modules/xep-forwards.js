@@ -73,6 +73,21 @@ xabber.Account.addInitPlugin(function () {
                                 forwarded_message: forwarded_msgs.length ? forwarded_msgs : null,
                                 xml: $message[0]
                             });
+
+                            $forwarded = $message.find('forwarded');
+                            if (msg_object.forwarded && (!$forwarded.length || (msg_object.xml))) {
+                                msg_object.final_msg = this.forwarded_messages.createFromStanza($message, {
+                                    is_forwarded: true,
+                                    forwarded_message: msg_object.forwarded_message || null,
+                                    delay: $delay,
+                                    replaced: msg_object.replaced,
+                                    from_jid: from_jid,
+                                    xml: msg_object.xml
+                                });
+                                msg_object.ignore = 'xep-forwards';
+                                return resolve(msg_object);
+                            }
+
                             return resolve(msg_object);
                         });
                         let fwd_count = 0;
@@ -95,7 +110,6 @@ xabber.Account.addInitPlugin(function () {
                                 if (fwd_count === $forwarded.length) {
                                     dfd.resolve();
                                 }
-
                             });
                         });
                         return;

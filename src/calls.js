@@ -502,7 +502,7 @@ xabber.CallsView = xabber.BasicView.extend({
             whole_msgs_list = this.filtered_messages;
 
         if ($msg.length){
-            if ($msg.isAlmostScrolledInContainer(this.$('.chat-content'), 1500)) {
+            if ($msg.isAlmostScrolledInContainer(this.$('.calls-right-container'), 1500)) {
                 let index = whole_msgs_list.indexOf(msg),
                     new_rendered_msgs = whole_msgs_list.slice(Math.max(0, index - 5), index);
                 if (new_rendered_msgs.length && !this.load_history_dfd){
