@@ -14185,6 +14185,15 @@ xabber.Account.addInitPlugin(function () {
             }
             let from_bare_jid = Strophe.getBareJidFromJid(from_jid);
 
+
+            let stanza_ids = this.chats.receiveStanzaId($message, {
+                from_bare_jid: from_bare_jid,
+                carbon_copied: msg_object.carbon_copied,
+                replaced: msg_object.replaced
+            });
+            !msg_object.stanza_id && (msg_object.stanza_id = stanza_ids.stanza_id);
+            !msg_object.contact_stanza_id && (msg_object.contact_stanza_id = stanza_ids.contact_stanza_id);
+
             if (!msg_object.is_archived) {
                 let $stanza_id, $contact_stanza_id;
                 $message.children('stanza-id').each((idx, stanza_id) => {
