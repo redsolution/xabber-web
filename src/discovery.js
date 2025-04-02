@@ -44,10 +44,7 @@ xabber.ClientFeatures = Backbone.Collection.extend({
         this.account.on('render_settings', this.render, this);
         this.account.on('render_single_settings', this.renderSingleAccount, this);
         this.connection = this.account.connection;
-        let client_name = uuid();
-        if (xabber.settings.device_metadata === 'contacts' || xabber.settings.device_metadata === 'server'){
-            client_name = constants.CLIENT_NAME;
-        }
+        let client_name = constants.CLIENT_NAME;
         this.connection.disco.addIdentity(
             'client',
             'web',

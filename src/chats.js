@@ -9151,7 +9151,8 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
 
     replaceChatItem: function (item, chats, pinned_chats) {
 
-        this.$('.chat-item').detach();
+        this.$('.chat-list-wrap').children('.chat-list').find('.chat-item').detach();
+        this.$('.chat-list-wrap').children('.pinned-chat-list').find('.chat-item').detach();
         chats.forEach((chat) => {
             this.$('.chat-list').append(chat.item_view.$el);
         });
