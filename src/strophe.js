@@ -199,8 +199,21 @@ Strophe.addConnectionPlugin('register', {
         Strophe.info("_register_cb was called");
         conn.connected = true;
 
-        let bodyWrap = conn._proto._reqToData(req);
-        if (!bodyWrap) { return; }
+        let bodyWrap;
+        try {
+            bodyWrap = /** @type {Element} */
+                '_reqToData' in conn._proto ? conn._proto._reqToData( /** @type {Request} */req) : req;
+        } catch (e) {
+            console.error(e);
+            if (e.name !== Strophe.ErrorCondition.BAD_FORMAT) {
+                throw e;
+            }
+            conn._changeConnectStatus(Strophe.Status.CONNFAIL, Strophe.ErrorCondition.BAD_FORMAT);
+            conn._doDisconnect(Strophe.ErrorCondition.BAD_FORMAT);
+        }
+        if (!bodyWrap) {
+            return;
+        }
 
         if (conn.xmlInput !== Strophe.Connection.prototype.xmlInput) {
             if (bodyWrap.nodeName === conn._proto.strip && bodyWrap.childNodes.length) {
@@ -249,8 +262,21 @@ Strophe.addConnectionPlugin('register', {
         Strophe.info("_register_cb was called");
         conn.connected = true;
 
-        let bodyWrap = conn._proto._reqToData(req);
-        if (!bodyWrap) { return; }
+        let bodyWrap;
+        try {
+            bodyWrap = /** @type {Element} */
+                '_reqToData' in conn._proto ? conn._proto._reqToData( /** @type {Request} */req) : req;
+        } catch (e) {
+            console.error(e);
+            if (e.name !== Strophe.ErrorCondition.BAD_FORMAT) {
+                throw e;
+            }
+            conn._changeConnectStatus(Strophe.Status.CONNFAIL, Strophe.ErrorCondition.BAD_FORMAT);
+            conn._doDisconnect(Strophe.ErrorCondition.BAD_FORMAT);
+        }
+        if (!bodyWrap) {
+            return;
+        }
 
         if (conn.xmlInput !== Strophe.Connection.prototype.xmlInput) {
             if (bodyWrap.nodeName === conn._proto.strip && bodyWrap.childNodes.length) {
@@ -968,11 +994,11 @@ _.extend(Strophe.Connection.prototype, {
             bodyWrap = /** @type {Element} */
                 '_reqToData' in this._proto ? this._proto._reqToData( /** @type {Request} */req) : req;
         } catch (e) {
-            if (e.name !== ErrorCondition.BAD_FORMAT) {
+            if (e.name !== Strophe.ErrorCondition.BAD_FORMAT) {
                 throw e;
             }
-            this._changeConnectStatus(Status.CONNFAIL, ErrorCondition.BAD_FORMAT);
-            this._doDisconnect(ErrorCondition.BAD_FORMAT);
+            this._changeConnectStatus(Strophe.Status.CONNFAIL, Strophe.ErrorCondition.BAD_FORMAT);
+            this._doDisconnect(Strophe.ErrorCondition.BAD_FORMAT);
         }
         if (!bodyWrap) {
             return;
