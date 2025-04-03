@@ -113,6 +113,10 @@ xabber.ServerFeatures = Backbone.Collection.extend({
         let dfd = $.Deferred();
         dfd.done((is_changed) => {
             this.account.cached_server_features.getAllFromCachedFeatures((res) => {
+                res.length && console.error(res[0].var);
+                if (res.length === 1 && res[0].var === 'caps_version'){
+                    is_changed = true;
+                }
                 if (res && res.length && !is_changed){
                     res.forEach((item) => {
                         if (item.var && item.var === 'caps_version')
@@ -233,7 +237,7 @@ xabber.ServerFeatures = Backbone.Collection.extend({
             from: feature.get('from'),
         });
         if (_var === 'media-gallery') {
-            this.account.set('gallery_auth', false)
+            this.account.set('gallery_auth', false);
             if (!(this.account.get('gallery_token') && this.account.get('gallery_url')) || (this.account.get('gallery_url') !== feature.get('from')))
                 this.account.initGalleryAuth(feature);
         }
