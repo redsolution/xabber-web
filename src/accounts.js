@@ -673,7 +673,8 @@ xabber.Account = Backbone.Model.extend({
                 }
             } else if (status === Strophe.Status.CONFLICT) {
                 this.auth_view.errorRegistrationFeedback({jid: xabber.getString("label_xmpp_id")});
-                this.auth_view.data.set('step', 3)
+                this.auth_view.data.set('step', 3);
+                this.auth_view.$('.btn-next').prop('disabled', false);
             } else if (status === Strophe.Status.NOTACCEPTABLE) {
                 if (error_text)
                     this.auth_view.errorRegistrationFeedback({password: error_text});
@@ -681,7 +682,8 @@ xabber.Account = Backbone.Model.extend({
                     condition = condition ? ': ' + condition : '';
                     this.auth_view.errorRegistrationFeedback({password: xabber.getString("xmpp_login__registration_not_filled") + condition});
                 }
-                this.auth_view.data.set('step', 4)
+                this.auth_view.data.set('step', 4);
+                this.auth_view.$('.btn-next').prop('disabled', false);
             } else if (status === Strophe.Status.REGIFAIL) {
                 if (error_text)
                     this.auth_view.errorRegistrationFeedback({password: error_text});
@@ -689,7 +691,8 @@ xabber.Account = Backbone.Model.extend({
                     condition = condition ? ': ' + condition : '';
                     this.auth_view.errorRegistrationFeedback({password: xabber.getString("xmpp_login__registration_failed") + condition});
                 }
-                this.auth_view.data.set('step', 4)
+                this.auth_view.data.set('step', 4);
+                this.auth_view.$('.btn-next').prop('disabled', false);
             }
         },
 
@@ -5749,7 +5752,7 @@ xabber.AuthView = xabber.BasicView.extend({
             (this.$('#sign_in_domain') && this.$('#sign_in_domain').val() || this.$('.xmpp-server-dropdown-wrap .select-auth-xmpp-server .property-value').text())
         ){
             let domain = this.$('#sign_in_domain').val() || this.$('.xmpp-server-dropdown-wrap .select-auth-xmpp-server .property-value').text();
-            jid = jid + '@' + domain
+            jid = jid + '@' + domain;
         }
         if (!jid) {
             if (this.data.get('registration')) {
@@ -5966,6 +5969,7 @@ xabber.XmppLoginPanel = xabber.AuthView.extend({
             this.cancel();
             return;
         }
+        this.$('.btn-next').prop('disabled', true);
         this.data.set('registration', true);
         this.$jid_input.prop('disabled', true);
         this.$password_input.prop('disabled', true);
@@ -6189,6 +6193,8 @@ xabber.XmppLoginPanel = xabber.AuthView.extend({
         let step = this.data.get('step');
         if(typeof step === 'number') {
             step++;
+            if (step === 6)
+                return;
             this.data.set('step', step)
         }
     },
@@ -6675,6 +6681,7 @@ xabber.XmppLoginPanel = xabber.AuthView.extend({
         this.data.set('authentication', false);
         this.$jid_input.prop('disabled', false);
         this.$password_input.prop('disabled', false);
+        this.$('.btn-next').prop('disabled', false);
         if(this.account)
             this.account.destroy();
     },
@@ -6682,6 +6689,7 @@ xabber.XmppLoginPanel = xabber.AuthView.extend({
     successRegistrationFeedback: function () {
         this.$jid_input.prop('disabled', false);
         this.$password_input.prop('disabled', false);
+        this.$('.btn-next').prop('disabled', false);
         this.account.set('deferred_auth', false);
         xabber.toolbar_view.showAllChats()
     },
