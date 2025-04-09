@@ -2069,6 +2069,12 @@ xabber.ToolbarAccountsBlockView = xabber.BasicView.extend({
 
     updateOneInList: function (account) {
         let jid = account.get('jid');
+        xabber.accounts.connected.forEach((acc) => {
+            if (acc.server_features.get(Strophe.NS.XABBER_FAVORITES)) {
+                let saved_chat = acc.chats.getSavedChat();
+                saved_chat.item_view.updateLastMessage();
+            }
+        });
         if (account.get('enabled')) {
             let view = this.child(jid);
             if (view) {
@@ -2130,6 +2136,12 @@ xabber.ToolbarAccountsBlockView = xabber.BasicView.extend({
         if (this.model.enabled.length === 1)
             this.$el.find('.toolbar-item.account-item').addClass('single-item');
         this.$el.find('.toolbar-item.settings-modal').switchClass('hidden', this.model.enabled.length !== 0);
+        xabber.accounts.connected.forEach((acc) => {
+            if (acc.server_features.get(Strophe.NS.XABBER_FAVORITES)) {
+                let saved_chat = acc.chats.getSavedChat();
+                saved_chat.item_view.updateLastMessage();
+            }
+        });
         if (xabber.toolbar_view.$('.toolbar-item.saved-chats.active').length && this.model.enabled.length === 1){
             let previous_chat = xabber.body.screen.get('previous_screen');
             previous_chat.force_open_all_chats = true;

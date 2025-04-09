@@ -1073,6 +1073,7 @@ xabber.ToolbarView = xabber.BasicView.extend({
     },
 
     _initialize: function () {
+        this.recount_debounce = _.debounce(this.recountAllMessageCounterDebounced, 100, false);
         this.$('.add-something').on("change_state", function (ev, state) {
             $(this).switchClass('active', state).find('.mdi')
                     .switchClass('mdi-close', state)
@@ -1391,6 +1392,10 @@ xabber.ToolbarView = xabber.BasicView.extend({
     },
 
     recountAllMessageCounter: function () {
+        this.recount_debounce();
+    },
+
+    recountAllMessageCounterDebounced: function () {
         let unread_messages = this.setAllMessageCounter();
         this.data.set('all_msg_counter', unread_messages.all_msgs);
         this.data.set('msg_counter', unread_messages.msgs);

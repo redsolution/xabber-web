@@ -9501,6 +9501,9 @@ input[type=text].simple-input-field:hover {
     fill: #FFF;
     position: absolute;
 }
+.chat-list-wrap.left-panel-list-wrap .chat-item.saved-chat .circle-avatar .saved-normal-icon path {
+    fill: #FFF !important;
+}
 
 .message-item p,
 .mention-item p,

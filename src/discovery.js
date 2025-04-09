@@ -113,7 +113,6 @@ xabber.ServerFeatures = Backbone.Collection.extend({
         let dfd = $.Deferred();
         dfd.done((is_changed) => {
             this.account.cached_server_features.getAllFromCachedFeatures((res) => {
-                res.length && console.error(res[0].var);
                 if (res.length === 1 && res[0].var === 'caps_version'){
                     is_changed = true;
                 }

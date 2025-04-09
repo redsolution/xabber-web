@@ -6,7 +6,7 @@ let env = xabber.env,
 
 xabber.Account.addInitPlugin(function () {
     let checker_object = {
-        callback : (msg_object) => {
+        callback : async (msg_object) => {
             return new Promise((resolve) => {
                 if (!msg_object.$message)
                     return resolve(msg_object);
