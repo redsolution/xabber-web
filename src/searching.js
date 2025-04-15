@@ -230,12 +230,6 @@ xabber.Searching = Backbone.Model.extend({
         this.account = options.account;
     },
 
-    // getSearchingFields: function () {
-    //     let this_domain = 'xabber.com',//this.account.connection && this.account.connection.domain,
-    //         iq_get = $iq({type: 'get', to: 'index.' + this_domain}).c('query', {xmlns: Strophe.NS.INDEX + '#groupchat'});
-    //     this.account.sendIQFast(iq_get, this.parseSearchingFields);
-    // },
-
     parseSearchingFields: function (iq_result) {
         let $result = $(iq_result),
             $fields = $result.find(`x[xmlns = "${Strophe.NS.XDATA}"] field`),

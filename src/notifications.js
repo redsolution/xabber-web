@@ -55,8 +55,6 @@ xabber.NotificationsView = xabber.BasicView.extend({
         "click .btn-previous-plyr": "previousPlyr",
         "click .btn-stop-plyr": "stopPlyr",
         "click .chat-tool-player-containter": "popupPlyr",
-        // "click .btn-show-search": "showSearch",
-        // "click .close-search-icon": "hideSearch",
         "click .btn-back-to-chats": "clickBackToChats",
         "keyup .search-input": "keyUpSearch",
         "click .search-form": "focusSearch",
@@ -92,7 +90,6 @@ xabber.NotificationsView = xabber.BasicView.extend({
         this.updatePlyrControls();
         this.updatePlyrTime();
         this.updateClientNotifications();
-        // this.hideSearch();
         this.$('.dropdown-button').dropdown({
             inDuration: 100,
             outDuration: 100,
@@ -101,12 +98,6 @@ xabber.NotificationsView = xabber.BasicView.extend({
         });
         this.updateFilterItems();
     },
-
-    // showSearch: function (ev) {
-    // },
-    //
-    // hideSearch: function (ev) {
-    // },
 
     focusSearch: function () {
         this.$('.search-input').focus();
@@ -1079,7 +1070,7 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
 
                     }
                     if (contact.get('group_chat')){
-                        if (contact.invitation && contact.invitation.message && contact.invitation.message.get('inviter_jid')){ //34
+                        if (contact.invitation && contact.invitation.message && contact.invitation.message.get('inviter_jid')){
                             let inviter_contact = account.contacts.get(contact.invitation.message.get('inviter_jid'));
                             if (!inviter_contact){
                                 inviter_contact = account.contacts.mergeContact({jid: contact.invitation.message.get('inviter_jid')})
@@ -1393,7 +1384,6 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
                     $icon.append(env.templates.svg['security']())
                 } else if (msg.get('notification_info')){
                     $icon.text('!');
-                    // $icon.append(env.templates.svg['alert-circle']())
                 } else if (msg.get('notification_mention')){
                     $icon.append(env.templates.svg['bell-mention']())
                 } else if (msg.get('ntf_new_device_msg')){
@@ -1564,7 +1554,7 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
     onScrollY: function () {
         this._prev_scrolltop = this._scrolltop || this._prev_scrolltop || 0;
         this._scrolltop = this.getScrollTop() || this._scrolltop || this._prev_scrolltop || 0;
-        this._is_scrolled_bottom = this.isScrolledToBottom();// mb
+        this._is_scrolled_bottom = this.isScrolledToBottom();
         this.$('.back-to-bottom').hideIf(this.isScrolledToTop());
     },
 
@@ -1687,22 +1677,21 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
         let newest_first_msg = msg_chat.messages.models[0];
 
         if (newest_first_msg) {
-                let chat = newest_first_msg.collection.chat;
-                if (chat.get('history_loaded')){
-                    this.load_history_dfd && (this.load_history_dfd = null);
-                } else {
-                    if (chat.item_view && !chat.item_view.content)
-                        chat.item_view.content = new xabber.ChatContentView({chat_item: chat.item_view});
-                    if (!this.load_history_dfd){
-                        this.load_history_dfd = $.Deferred();
-                        this.load_history_dfd.done(() => {
-                            this.load_history_dfd = null;
-                            this.handleOnScrollRendering('bottom');
-                        });
-                        chat.item_view.content.loadPreviousHistory(null, this.load_history_dfd && this.load_history_dfd);
-                    }
+            let chat = newest_first_msg.collection.chat;
+            if (chat.get('history_loaded')){
+                this.load_history_dfd && (this.load_history_dfd = null);
+            } else {
+                if (chat.item_view && !chat.item_view.content)
+                    chat.item_view.content = new xabber.ChatContentView({chat_item: chat.item_view});
+                if (!this.load_history_dfd){
+                    this.load_history_dfd = $.Deferred();
+                    this.load_history_dfd.done(() => {
+                        this.load_history_dfd = null;
+                        this.handleOnScrollRendering('bottom');
+                    });
+                    chat.item_view.content.loadPreviousHistory(null, this.load_history_dfd && this.load_history_dfd);
                 }
-            // }
+            }
         }
     },
 

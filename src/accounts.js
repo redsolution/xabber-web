@@ -90,7 +90,6 @@ xabber.Account = Backbone.Model.extend({
             this.password_view = new xabber.ChangePasswordView({model: this});
             this.updateColorScheme();
             this.settings.on("change:color", this.updateColorScheme, this);
-            // this.on("change:photo_hash", this.getVCard, this);
             _.each(this._init_plugins, (plugin) => {
                 plugin.call(this);
             });
@@ -174,20 +173,11 @@ xabber.Account = Backbone.Model.extend({
         },
 
         getConnectionForIQ: function () {
-            // let res = this.fast_connection && !this.fast_connection.disconnecting && this.fast_connection.authenticated && this.fast_connection.connected && this.get('status') !== 'offline';
-            // if (res) {
-            //     return this.fast_connection;
-            // } else
-                return this.connection;
+            return this.connection;
         },
 
         sendIQFast: function () {
-            // let res = this.fast_connection && !this.fast_connection.disconnecting && this.fast_connection.authenticated && this.fast_connection.connected && this.get('status') !== 'offline';
-            // if (res) {
-            //     this.fast_connection.sendIQ.apply(this.fast_connection, arguments);
-            //     return res;
-            // } else
-                return this.sendIQ.apply(this, arguments);
+            return this.sendIQ.apply(this, arguments);
         },
 
         sendFast: function (stanza, callback, errback) {
@@ -415,44 +405,6 @@ xabber.Account = Backbone.Model.extend({
         },
 
         createFastConnection: function () {
-            // let jid = this.get('jid'),
-            //     auth_type = this.conn_manager.auth_type,
-            //     password;
-            // if (auth_type === 'token') {
-            //     password = this.settings.get('token');
-            // } else if (auth_type === 'x-token') {
-            //     if (this.get('x_token') && (Number(this.get('x_token').expire)*1000 > moment.now() || !this.get('x_token').expire))
-            //         password = this.get('x_token').token;
-            //     else
-            //         password = undefined;
-            // } else {
-            //     password = this.getPassword();
-            // }
-            // if (!password) {
-            //     return;
-            // }
-            // if (!this.fast_conn_manager) {
-            //     this.fast_conn_manager = new Strophe.ConnectionManager(this.CONNECTION_URL);
-            //     this.fast_connection = this.fast_conn_manager.connection;
-            //     this.fast_connection.account = this;
-            //     this.fast_connection.xmlInput = function (xml) {
-            //         xabber.info('input fast connection');
-            //         xabber.info(xml);
-            //     };
-            //     this.fast_connection.xmlOutput = function (xml) {
-            //         xabber.info('output fast connection');
-            //         xabber.info(xml);
-            //     };
-            // } else{
-            //     this.fast_connection.disconnect();
-            //     return this.createFastConnection();
-            // }
-            // if (auth_type === 'x-token' && this.fast_connection) {
-            //     this.fast_connection.x_token = this.get('x_token');
-            //     this.fast_connection.counter = this.get('hotp_counter');
-            //     this.fast_connection.x_token_auth = true;
-            // }
-            // this.fast_conn_manager.connect(auth_type, jid, password, this.onFastConnected.bind(this));
         },
 
         connect: function () {
@@ -644,7 +596,7 @@ xabber.Account = Backbone.Model.extend({
                 this.connection.flush();
                 if (this._main_interval_worker)
                     this._main_interval_worker.terminate();
-                if (this.session.get('no_reconnect') && this.session.get('auth_failed')) //34
+                if (this.session.get('no_reconnect') && this.session.get('auth_failed'))
                     return;
                 let max_retries = xabber.settings.max_connection_retries;
                 if (max_retries === -1 || this.session.get('conn_retries') < max_retries) {
@@ -852,7 +804,6 @@ xabber.Account = Backbone.Model.extend({
                 $(tokens).find('device').each((idx, token) => {
                     let $token = $(token),
                         client = $token.find('client').text(),
-                        // public_label = $token.find('public-label').text(),
                         device = $token.find('info').text(),
                         description = $token.find('public-label').text(),
                         omemo_id = $token.find('omemo-id').text(),
@@ -906,36 +857,6 @@ xabber.Account = Backbone.Model.extend({
             });
         },
 
-        // onFastConnected: function (status) {
-        //     if (status === Strophe.Status.CONNECTED) {
-        //         if (this.fast_connection.x_token) {
-        //             this.save({
-        //                 x_token: this.fast_connection.x_token,
-        //                 hotp_counter: this.fast_connection.counter,
-        //             });
-        //             this.fast_conn_manager.auth_type = 'x-token';
-        //             this.fast_connection.x_token_auth = true;
-        //             if (this.connection && this.connection.pass)
-        //                 this.fast_connection.pass = this.connection.pass;
-        //         }
-        //         _.each(this._after_fast_connected_plugins, (plugin) => {
-        //             plugin.call(this);
-        //         });
-        //     } else if (status === Strophe.Status.AUTHFAIL || status === Strophe.Status.DISCONNECTED) {
-        //         this.fast_connection && clearTimeout(this.fast_connection.openCheckTimeout);
-        //         if (this._fast_interval_worker)
-        //             this._fast_interval_worker.terminate();
-        //         this.fast_conn_manager = undefined;
-        //         this.fast_connection = undefined;
-        //         if (this.connection && !this.connection.disconnecting
-        //             && this.connection.authenticated && this.connection.connected){
-        //             this.getVCard();
-        //             if (!(this.auth_view && this.auth_view.data.get('authentication')))
-        //                 this.trigger('ready_to_get_roster');
-        //         }
-        //     }
-        // },
-
         onReconnected: function () {
             this.connFeedback(xabber.getString("account_state_connected"));
             this.dfd_presence = new $.Deferred();
@@ -954,7 +875,6 @@ xabber.Account = Backbone.Model.extend({
                 });
 
                 this._main_interval_worker.postMessage({});
-                // this.fast_connection && this._fast_interval_worker.postMessage({});
             });
             this.registerPresenceHandler();
             this.enableCarbons();
@@ -968,18 +888,6 @@ xabber.Account = Backbone.Model.extend({
         },
 
         sendPendingStanzas: function () {
-            // console.log('pending stanzas');
-            // console.log(this._pending_stanzas);
-            // _.each(this._pending_stanzas, (item) => {
-            //     console.log(item);
-            //     if ((item.stanza instanceof Strophe.Builder) || item.is_msg) {
-            //         this.connection.send(item.stanza);
-            //         item.callback && item.callback();
-            //     } else if (item && item.stanza && item.is_iq){
-            //         this.connection.sendIQ.apply(this.connection, item.stanza);
-            //     }
-            // });
-            // this._pending_stanzas = [];
         },
 
         sendPendingMessages: function () {
@@ -1020,7 +928,6 @@ xabber.Account = Backbone.Model.extend({
                 if (this.session.get('no_reconnect')) {
                     this.session.set('no_reconnect', false);
                 } else {
-                    // this.fast_connection && this.fast_connection.connected && this.fast_connection.disconnect();
                     if (this.connection && this.connection.streamManagement
                         && this.connection.streamManagement._isStreamManagementEnabled
                         && this.connection.streamManagement.getResumeToken()){
@@ -1269,7 +1176,6 @@ xabber.Account = Backbone.Model.extend({
                 this.connFeedback(xabber.getString("settings_account__label_state_disconnecting"));
                 this.sendPresence('offline');
                 this.connection.disconnect();
-                // if (this.fast_conn_manager) this.fast_connection.disconnect();
             } else {
                 if (this.session.get('no_reconnect') && this.session.get('auth_failed'))
                     this.connection.disconnect();
@@ -1336,13 +1242,6 @@ xabber.Account = Backbone.Model.extend({
 
         onSetIQResult: function (iq) {
             let to = $(iq).attr('to');
-            // if (this.fast_connection && this.fast_connection.jid === to
-            //     && !this.fast_connection.disconnecting && this.fast_connection.authenticated
-            //     && this.fast_connection.connected && this.get('status') !== 'offline'){
-            //     this.sendIQFast($iq({
-            //         type: 'result', id: iq.getAttribute('id'),
-            //     }));
-            // } else
             if (this.connection && this.connection.jid === to && this.connection.authenticated
                 && !this.connection.disconnecting && this.session.get('connected') && this.get('status') !== 'offline') {
                 this.sendIQ($iq({
@@ -1512,21 +1411,6 @@ xabber.Account = Backbone.Model.extend({
                 });
             }
         },
-
-        // prepareFiles: function (files, callback) {
-        //     files.forEach((file) => {
-        //         let reader = new FileReader();
-        //         reader.onloadend = () => {
-        //             let b64 = reader.result.split('base64,'),
-        //                 binary_file = atob(b64[1]),
-        //                 bytes = new Uint8Array(binary_file.length);
-        //             for (let i = 0; i < binary_file.length; i++)
-        //                 bytes[i] = binary_file.charCodeAt(i);
-        //             this.testFile({size: file.size, name: file.name, hash: sha1(bytes)}, file, callback)
-        //         };
-        //         reader.readAsDataURL(file);
-        //     })
-        // },
 
         handleCommonGalleryErrors: function (response, errback) {
             !errback && (errback = this.gallery_auth_errback);
@@ -1743,12 +1627,6 @@ xabber.Account = Backbone.Model.extend({
             });
         },
 
-        // createMessageFromIQ: function (attrs) {
-        //     let contact = this.contacts.mergeContact(attrs.from_jid),
-        //         chat = this.chats.getChat(contact);
-        //     chat.messages.create(attrs);
-        // },
-
         onPresence: function (presence) {
             let $presence = $(presence),
                 type = presence.getAttribute('type');
@@ -1803,8 +1681,6 @@ xabber.Account = Backbone.Model.extend({
         },
 
         addFastConnPlugin: function (func, conn, reconn) {
-            // return;
-            // conn && this.prototype._after_fast_connected_plugins.push(func);
         }
     });
 
@@ -1834,7 +1710,7 @@ xabber.Accounts = Backbone.CollectionWithStorage.extend({
         _.each(_.clone(this.models), function (account) {
 
             if (!account.get('enabled')){
-                account._revoke_on_connect = $.Deferred(); //34
+                account._revoke_on_connect = $.Deferred();
                 let revoke_timeout = setTimeout(() => {
                     if (account.omemo)
                         account.omemo.destroy();
@@ -1993,7 +1869,7 @@ xabber.AccountToolbarItemView = xabber.BasicView.extend({
         xabber.updateFaviconConnected();
     },
 
-    updateEncryptionWarning: function () { //34
+    updateEncryptionWarning: function () {
         if (!this.model || !this.model.omemo)
             return;
         this.model.omemo.checkOwnFingerprints().then((is_trusted) => {
@@ -2227,21 +2103,10 @@ xabber.Resources = Backbone.Collection.extend({
                 let $identity = $(iq).find('identity[category=client]');
                 if ($identity.length)
                     resource.set('client', $identity.attr('name'));
-                // this.attention_supported = this.isFeatureSupported(iq, Strophe.NS.ATTENTION);
                 callback && callback();
             });
         }
     },
-
-    // isFeatureSupported: function (stanza, ns) {
-    //     let $stanza = $(stanza), is_supported = false;
-    //     $stanza.find('feature').each(function () {
-    //         let namespace = $(this).attr('var');
-    //         if (namespace === ns)
-    //             is_supported = true;
-    //     });
-    //     return is_supported;
-    // },
 });
 
 xabber.ResourcesView = xabber.BasicView.extend({
@@ -2334,7 +2199,6 @@ xabber.AccountVCardModalView = xabber.VCardView.extend({
 xabber.AccountMediaGalleryView = xabber.BasicView.extend({
     template: templates.media_gallery_account,
     events: {
-        // "change input.gallery-upload": "onFileInputChanged",
         "click .gallery-file:not(.gallery-avatar) .btn-delete": "deleteFile",
         "click .gallery-file.gallery-avatar .btn-delete": "deleteAvatar",
         "click .gallery-file .checkbox-field": "selectFile",
@@ -2831,19 +2695,6 @@ xabber.AccountMediaGalleryView = xabber.BasicView.extend({
         });
         this.disableFilesSelect();
     },
-
-    // onFileInputChanged: function (ev) {
-    //     let target = ev.target,
-    //         files = [];
-    //     for (let i = 0; i < target.files.length; i++) {
-    //         files.push(target.files[i]);
-    //     }
-    //
-    //     if (files) {
-    //         this.account.prepareFiles(files, this.openStoragePanel.bind(this));
-    //         $(target).val('')
-    //     }
-    // },
 });
 
 xabber.DeleteFilesFromGalleryView = xabber.BasicView.extend({
@@ -3762,12 +3613,6 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
         this.updateDelSettingsButton();
     },
 
-    // showResources: function (ev) {
-    //     this.$(`.token-resource-wrap`).hideIf(true)
-    //     let resource_id = $(ev.target).attr('data-resource-id');
-    //     this.$(`.token-resource-wrap[data-resource-id="${resource_id}"]`).hideIf(false)
-    // },
-
     hideResources: function (ev) {
         if (!($(ev.target).hasClass('last-auth') && $(ev.target).hasClass('resource') || $(ev.target).closest(".token-resource-wrap").length > 0))
             this.$(`.token-resource-wrap`).hideIf(true)
@@ -4327,10 +4172,6 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
 xabber.AccountSettingsSingleModalView = xabber.AccountSettingsModalView.extend({
     className: 'single-account-settings-panel-wrap',
     template: templates.single_account_settings_modal,
-    // ps_selector: '.right-column',
-    // ps_settings: {
-    //     wheelPropagation: true
-    // },
 
     render: function (view, options) {
         if (!_.isNull(view))
@@ -4520,7 +4361,7 @@ xabber.AccountSettingsItemModalView = xabber.BasicView.extend({
         }
     },
 
-    updateEncryptionWarning: function () { //34
+    updateEncryptionWarning: function () {
         if (!this.model || !this.model.omemo)
             return;
         this.model.omemo.checkOwnFingerprints().then((is_trusted) => {
@@ -4544,8 +4385,6 @@ xabber.AccountSettingsItemModalView = xabber.BasicView.extend({
     },
 
     showConnectionStatus: function () {
-        // this.$('.status').attr('data-status', this.model.get('status'));
-        // this.$('.conn-status').text(this.model.session.get('conn_feedback'));
     },
 
     updateEnabled: function () {
@@ -5873,15 +5712,6 @@ xabber.AuthView = xabber.BasicView.extend({
         this.successFeedback(this.account);
         this.account.auth_view = null;
     },
-
-    // socialAuth: function (ev) {
-    //     let origin = window.location.href,
-    //         provider = $(ev.target).closest('.btn-social').data('provider');
-    //     if (provider == 'email')
-    //         xabber.body.setScreen('login', {'login_screen': 'xabber'});
-    //     else
-    //         window.location.href = constants.XABBER_ACCOUNT_URL + '/social/login/' + provider + '/?origin=' + origin + '&source=Xabber Web';
-    // }
 });
 
 xabber.XmppLoginPanel = xabber.AuthView.extend({

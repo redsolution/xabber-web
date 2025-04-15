@@ -45,8 +45,6 @@ xabber.CallsView = xabber.BasicView.extend({
         "click .chat-message .btn-send-jingle": "sendJingleMessage",
         "click .call-contact-item .btn-send-jingle": "sendJingleMessageContact",
         "click .btn-end-call": "endCall",
-        // "click .btn-show-search": "showSearch",
-        // "click .close-search-icon": "hideSearch",
         "click .btn-back-to-chats": "clickBackToChats",
         "click .calls-filter-main-header": "updateAccountsFilter",
         "click .btn-play-pause-plyr": "playPausePlyr",
@@ -100,7 +98,6 @@ xabber.CallsView = xabber.BasicView.extend({
         this.updatePlyrControls();
         this.updatePlyrTime();
         this.updateClientNotifications();
-        // this.hideSearch();
         this.$('.dropdown-button').dropdown({
             inDuration: 100,
             outDuration: 100,
@@ -108,12 +105,6 @@ xabber.CallsView = xabber.BasicView.extend({
             belowOrigin: true,
         });
     },
-
-    // showSearch: function (ev) {
-    // },
-    //
-    // hideSearch: function (ev) {
-    // },
 
     focusSearch: function () {
         this.$('.search-input').focus();

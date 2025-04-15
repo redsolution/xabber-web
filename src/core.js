@@ -19,7 +19,6 @@ let Xabber = Backbone.Model.extend({
         audio: false,
         video: false,
         client_id: uuid().substring(0, 8),
-        // client_name: 'Xabber for Web 1'
     },
 
     initialize: function () {
@@ -709,7 +708,6 @@ let Xabber = Backbone.Model.extend({
                 self.$('.btn-play-pause-plyr .mdi-play').hideIf(voice_message.isPlaying());
                 self.$('.btn-play-pause-plyr .mdi-pause').hideIf(!voice_message.isPlaying());
                 self.$('.btn-play-pause-plyr').switchClass('active-plyr', voice_message.isPlaying());
-                // this.$('.btn-play-pause-plyr').switchClass('ground-color-500', voice_message.isPlaying());
                 self.$('.btn-previous-plyr').switchClass('before-active-plyr', voice_message.isPlaying());
                 let player_index = this.current_plyr_player.chat_item.model.plyr_players.indexOf(this.current_plyr_player);
                 self.$('.btn-next-plyr').switchClass('disabled', !(player_index >= 0 && player_index < this.current_plyr_player.chat_item.model.plyr_players.length - 1));
@@ -753,7 +751,6 @@ let Xabber = Backbone.Model.extend({
             self.$('.btn-play-pause-plyr .mdi-play').hideIf(this.current_plyr_player.playing);
             self.$('.btn-play-pause-plyr .mdi-pause').hideIf(!this.current_plyr_player.playing);
             self.$('.btn-play-pause-plyr').switchClass('active-plyr', this.current_plyr_player.playing);
-            // self.$('.btn-play-pause-plyr').switchClass('ground-color-500', this.current_plyr_player.playing);
             self.$('.btn-previous-plyr').switchClass('before-active-plyr', this.current_plyr_player.playing);
             let player_index = this.current_plyr_player.chat_item.model.plyr_players.indexOf(this.current_plyr_player.player_item);
             self.$('.btn-next-plyr').switchClass('disabled', !(player_index >= 0 && player_index < this.current_plyr_player.chat_item.model.plyr_players.length - 1));

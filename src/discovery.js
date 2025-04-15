@@ -301,60 +301,6 @@ xabber.Account.addConnPlugin(function () {
     this.server_features.request();
 }, true, true);
 
-xabber.Account.addFastConnPlugin(function () {
-    // this.last_fast_stanza_timestamp = moment.now();
-
-    // this.fast_connection.deleteHandler(this._last_fast_stanza_handler);
-    // this._last_fast_stanza_handler = this.fast_connection.addHandler(() => {
-    //     this.last_fast_stanza_timestamp = moment.now();
-    //     return true;
-    // });
-    //
-    // this.fast_connection.deleteHandler(this._fast_pong_handler);
-    // this._fast_pong_handler = this.fast_connection.ping.addPingHandler((ping) => {
-    //     this.last_fast_stanza_timestamp = moment.now();
-    //     this.fast_connection.ping.pong(ping);
-    //     return true;
-    // });
-
-    // if (this._fast_interval_worker)
-    //     this._fast_interval_worker.terminate();
-    //
-    // this._fast_interval_worker = new Worker(new URL('./worker.js', import.meta.url));
-    //
-    // this._fast_interval_worker.onmessage = () => {
-    //     let downtime = (moment.now() - this.last_fast_stanza_timestamp) / 1000,
-    //         downtime_ping;
-    //     if (this.last_fast_ping_timestamp){
-    //         downtime_ping = (moment.now() - this.last_fast_ping_timestamp) / 1000;
-    //     }
-    //     if (!navigator.onLine || downtime > (constants.DOWNTIME_RECONNECTION_TIMEOUT || 15) && downtime_ping && downtime_ping <= (constants.DOWNTIME_RECONNECTION_TIMEOUT || 15) && downtime_ping > 5) {
-    //         if (!navigator.onLine){
-    //             console.log('navigator: ' + navigator.onLine)
-    //             console.log('this.connection.connected: ' + this.fast_connection.connected)
-    //             xabber._settings.get('reconnection_logs') && utils.callback_popup_message('this.connection.connected: ' + this.fast_connection.connected, 2000);
-    //         }
-    //         console.log('downtime fast to disconnect: ' + downtime);
-    //         downtime_ping && console.log('downtime fast from last ping to disconnect: ' + downtime_ping);
-    //         xabber._settings.get('reconnection_logs') && utils.callback_popup_message('downtime fast to disconnect: ' + downtime, 2000);
-    //         console.log(this.fast_connection.connected);
-    //         if (this.fast_connection.connected)
-    //             this.fast_connection.disconnect();
-    //         else
-    //             this.fast_connection.connect('password', this.fast_connection.jid, this.fast_connection.pass);
-    //         this._fast_interval_worker.terminate();
-    //     }
-    //     if (downtime > (constants.PING_SENDING_INTERVAL || 10)) {
-    //         console.log('downtime fast to ping: ' + downtime);
-    //         downtime_ping && console.log('downtime fast from last ping: ' + downtime_ping);
-    //         this.fast_connection && this.fast_connection.ping.ping(this.get('domain'));
-    //         if (!this.last_fast_ping_timestamp || downtime_ping >= 10){
-    //             this.fast_connection && (this.last_fast_ping_timestamp = moment.now());
-    //         }
-    //     }
-    // };
-}, true, true);
-
 xabber.Account.addConnPlugin(function () {
     let disco = this.connection.disco;
     this.connection.addHandler(disco._onDiscoInfo.bind(disco),

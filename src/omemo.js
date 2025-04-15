@@ -520,30 +520,6 @@ xabber.Fingerprints = xabber.BasicView.extend({
         });
     },
 
-    // editLabel: function () {
-    //     this.$('.set-label').removeClass('hidden');
-    //     this.$('.set-label').focus();
-    //     let saveLabel = (ev) => {
-    //         let label = ev.target.value.trim();
-    //         this.saveLabel(label);
-    //     };
-    //     this.$('.set-label')[0].onblur = saveLabel;
-    //     this.$('input.set-label')[0].onkeydown = (ev) => {
-    //         if (ev.keyCode === constants.KEY_ENTER)
-    //             saveLabel(ev);
-    //     };
-    // },
-
-    // saveLabel: function (label) {
-    //     this.$('.set-label').addClass('hidden');
-    //     if (label === this.account.settings.get('device_label_text'))
-    //         return;
-    //     this.account.settings.save('device_label_text', label);
-    //     this.account.getConnectionForIQ().omemo.publishDevice(this.omemo.get('device_id'), label, () => {
-    //         this.updateOwnFingerprint();
-    //     });
-    // },
-
     updateFingerprints: async function (devices) {
         let counter = 0,
             devices_count = _.keys(devices).length,
@@ -674,7 +650,7 @@ xabber.Fingerprints = xabber.BasicView.extend({
                     let trustedKeyBase64 = utils.ArrayBuffertoBase64(trustedKeyBuffer),
                         trusted_devices = this.omemo.xabber_trust.get('trusted_devices'),
                         to = this.jid, changed, changed_devices = {};
-                    if (trusted_devices[to] && _.isArray(trusted_devices[to])){//34
+                    if (trusted_devices[to] && _.isArray(trusted_devices[to])){
                         if (trusted_devices[to].some(e => e.trusted_key === trustedKeyBase64 && e.untrusted)) {
                             changed = this.omemo.xabber_trust.iterateAndChangeTrustedDevices(to, (trusted_device) => {
                                 let func_changed;
@@ -748,29 +724,6 @@ xabber.Fingerprints = xabber.BasicView.extend({
         let trust_type = this.getTrustType(trust, id, this.jid);
         return templates.fingerprint_item({id,label,trust, trust_type,fingerprint, delete_button, edit_setting, old_fingerprint, error});
     },
-
-    // deleteDevice: function (ev) {
-    //     let $target = $(ev.target).closest('div.row'),
-    //         device_id = Number($target.find('div.device-id').text());
-    //     utils.dialogs.ask(xabber.getString("omemo__dialog_delete_device__header"), xabber.getString("omemo__dialog_delete_device__text", [device_id]), null, { ok_button_text: xabber.getString("omemo__dialog_delete_device__button_delete")}).done((result) => {
-    //         if (result) {
-    //             $target.detach();
-    //             let f_count = this.$('div.fingerprints-list-content').find('div.row').length;
-    //             if (!f_count)
-    //                 this.$('div.fingerprints-list-content').html($(`<div class="empty-table">${xabber.getString("omemo__dialog_fingerprints__text_no_fingerprints")}</div>`));
-    //             this.jid === this.account.get('jid') && f_count++;
-    //             delete this.model.own_devices[device_id];
-    //             let conn = this.account.getConnectionForIQ();
-    //             if (conn && conn.omemo) {
-    //                 delete conn.omemo.devices[device_id];
-    //                 conn.omemo.publishDevice(null, null, () => {
-    //                     $target.detach();
-    //                 });
-    //                 conn.omemo.removeItemFromNode(`${Strophe.NS.OMEMO}:bundles`, device_id);
-    //             }
-    //         }
-    //     });
-    // },
 
     getTrustType: function (trust, device_id, jid) {
         let trust_type = '';
@@ -1094,22 +1047,6 @@ xabber.FingerprintsOwnDevices = xabber.BasicView.extend({
         }
     },
 
-    // ignoreDevice: function (ev) {
-    //     let $target = $(ev.target).closest('div.fingerprints-content'),
-    //         is_trusted = $target.children('.buttons[data-trust]').attr('data-trust');
-    //     $target.children('.buttons[data-trust]').attr('data-trust', 'ignore');
-    //     this.omemo.updateFingerprints(this.jid, this.device_id, this.fingerprint, false);
-    //     let device = this.account.omemo.own_devices[this.device_id];
-    //     if (device && is_trusted !== 'ignore') {
-    //         if (is_trusted === 'error')
-    //             $target.find('.old-fingerprint').detach();
-    //         device.set('trusted', false);
-    //         device.is_session_initiated = false;
-    //         device.preKeys = null;
-    //         this.account.trigger('trusting_updated');
-    //     }
-    // },
-
     addRow: function (id, label, trust, fingerprint, options) {
         options = options || {};
         let edit_setting = id === this.omemo.get('device_id'),
@@ -1141,25 +1078,6 @@ xabber.FingerprintsOwnDevices = xabber.BasicView.extend({
         svg_icon = edit_setting ? 'device-web' : device_icons[Math.floor(Math.random()*device_icons.length)];
         return templates.fingerprint_devices_item({id,label,trust, svg_icon, fingerprint, edit_setting, old_fingerprint, error});
     },
-
-    // deleteDevice: function (ev) {
-    //     let $target = $(ev.target).closest('div.fingerprints-content');
-    //     utils.dialogs.ask(xabber.getString("omemo__dialog_delete_device__header"), xabber.getString("omemo__dialog_delete_device__text", [this.device_id]), null, { ok_button_text: xabber.getString("omemo__dialog_delete_device__button_delete")}).done((result) => {
-    //         if (result) {
-    //             delete this.model.own_devices[this.device_id];
-    //             let conn = this.account.getConnectionForIQ();
-    //             if (conn && conn.omemo) {
-    //                 delete conn.omemo.devices[this.device_id];
-    //                 conn.omemo.publishDevice(null, null, () => {
-    //                     this.account.trigger('trusting_updated');
-    //                     this.close();
-    //                 });
-    //                 conn.omemo.removeItemFromNode(`${Strophe.NS.OMEMO}:bundles`, this.device_id);
-    //             }
-    //         }
-    //     });
-    // },
-
 
     updateColorScheme: function () {
         this.$el.attr('data-color', this.account.settings.get('color'));
@@ -1359,13 +1277,6 @@ xabber.Device = Backbone.Model.extend({
         return sha256(identityKey);
     },
 
-    // closeSession: function (reason) {
-    //     this.account.getConnectionForIQ().omemo.sendOptOut({
-    //         to: this.jid,
-    //         reason: reason
-    //     }, () => {});
-    // },
-
     fillDeviceIK: function () {
         this.getBundle().then((bundle) => {
             this.set('ik', utils.fromBase64toArrayBuffer(bundle.ik));
@@ -1463,7 +1374,7 @@ xabber.Device = Backbone.Model.extend({
         try {
             if (this.get('trusted') === false && (this.id !== this.account.omemo.get('device_id')))
                 return null;
-            if (!this.store.hasSession(this.address.toString()) || !this.is_session_initiated) { // this.preKeys ??
+            if (!this.store.hasSession(this.address.toString()) || !this.is_session_initiated) {
                 if (this.preKeys && !this.preKeys.length)
                     return null;
                 this.is_session_initiated = true;
@@ -1575,14 +1486,6 @@ xabber.Omemo = Backbone.ModelWithStorage.extend({
         })
     },
 
-    // storeSessions: function () {
-    //     let sessions = this.get('sessions');
-    //     for (let session_id in sessions) {
-    //         let session = sessions[session_id];
-    //         session && this.store.put(session_id, session);
-    //     }
-    // },
-
     onOmemoDestroyed: function () {
         if (this.own_devices && Object.keys(this.own_devices).length !== 0)
             this.deleteOwnDevice();
@@ -1637,7 +1540,6 @@ xabber.Omemo = Backbone.ModelWithStorage.extend({
                             xabber.error(err);
                             this._pending_own_devices = false;
                             reject();
-                            // resolve();
                         });
                     } else
                         this._pending_own_devices = false;
@@ -1694,15 +1596,6 @@ xabber.Omemo = Backbone.ModelWithStorage.extend({
                 return null;
         }
     },
-
-    // cacheRetractVersion: function (version) {
-    //     console.log('version ' + version);
-    //     this.save('retract_version', version);
-    // },
-
-    // getRetractVersion: function () {
-    //     return this.get('retract_version');
-    // },
 
     addDevice: function () {
         let device_id = this.get('device_id');
@@ -1770,8 +1663,8 @@ xabber.Omemo = Backbone.ModelWithStorage.extend({
             origin_id = $msg.children('origin-id').attr('id'),
             plaintext = Strophe.serialize($msg.children('envelope')[0]) || "";
 
-        contact && origin_id && this.cached_messages.putMessage(contact, origin_id, {envelope: plaintext});//34
-        is_own && this.cached_messages.putMessageOwn(this.account.get('jid'), origin_id, {envelope: plaintext});//34
+        contact && origin_id && this.cached_messages.putMessage(contact, origin_id, {envelope: plaintext});
+        is_own && this.cached_messages.putMessageOwn(this.account.get('jid'), origin_id, {envelope: plaintext});
 
         // console.log(message);
         // console.log(message.tree().outerHTML);
@@ -2743,12 +2636,6 @@ xabber.SignalProtocolStore = Backbone.Model.extend({
         return Promise.resolve(util.toString(identityKey) === util.toString(trusted));
     },
 
-    // loadIdentityKey: function (identifier) {
-    //     if (identifier === null || identifier === undefined)
-    //         throw new Error("Tried to get identity key for undefined/null key");
-    //     return Promise.resolve(this.get('identityKey' + identifier));
-    // },
-
     saveIdentity: function (identifier, identityKey) {
         if (identifier === null || identifier === undefined)
             throw new Error("Tried to put identity key for undefined/null key");
@@ -2781,7 +2668,6 @@ xabber.SignalProtocolStore = Backbone.Model.extend({
 
     removePreKey: function (keyId) {
         this.trigger('prekey_removed', keyId);
-        // return Promise.resolve(this.remove('25519KeypreKey' + keyId));
     },
 
     /* Returns a signed keypair object or undefined */

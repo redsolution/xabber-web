@@ -20,7 +20,6 @@ import xabber_xep0466 from "xabber-xep0466";
 import xabber_xep0353 from "xabber-xep0353";
 import xabber_xep0333 from "xabber-xep0333";
 import searching from "xabber-searching";
-// import mentions from "xabber-mentions";
 import ui from "xabber-ui";
 import omemo from "xabber-omemo";
 import trust from "xabber-trust";

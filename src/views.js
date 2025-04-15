@@ -147,7 +147,6 @@ xabber.BasicView = Backbone.View.extend({
     },
 
     updateScrollBar: function () {
-        // let start_scrolled_bottom = this.getScrollBottom();
         if (this.ps_container && this.isVisible()) {
             let scroll_top = this.data.get('scroll_top');
             if (typeof scroll_top === "undefined") {
@@ -157,7 +156,6 @@ xabber.BasicView = Backbone.View.extend({
                 this.scrollTo(scroll_top);
             }
         }
-        // this.scrollTo(this.ps_container[0].scrollHeight - this.ps_container[0].offsetHeight - start_scrolled_bottom);
         return this;
     },
 
@@ -475,7 +473,6 @@ xabber.SearchView = xabber.BasicView.extend({
               accounts.forEach((account) => {
                   let first_message = xabber.all_searched_messages.find(message => (message.account.get('jid') === account.get('jid')));
                   if (!first_message || account.searched_msgs_loaded) {
-                      // this._loading_messages = false;
                       return;
                   }
                   options.account = account;
@@ -1356,7 +1353,6 @@ xabber.ToolbarView = xabber.BasicView.extend({
             account.chats.each((chat) => {
                 if (chat.contact && !chat.isMuted()) {
                     if (chat.get('notifications')){
-                        // mentions += chat.get('unread') + chat.get('const_unread');
                     } else {
                         if (chat.get('unread') || chat.get('const_unread')){
                             console.error('chat with UNREAD!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
@@ -2058,7 +2054,6 @@ xabber.SettingsModalView = xabber.BasicView.extend({
         "click .setting.idling label": "setIdling",
         "change #idle_timeout": "setIdlingTimeout",
         "click .setting.notifications label": "setNotifications",
-        // "click .setting.volume-enable label": "setNotificationsVolumeEnabled",
         "click .private-notifications label": "setPrivateNotifications",
         "click .group-notifications label": "setGroupNotifications",
         "click .notifications-lever label": "setNotifications",
@@ -2163,8 +2158,6 @@ xabber.SettingsModalView = xabber.BasicView.extend({
             .prop({checked: settings.idling});
         this.$('#idle_timeout')
             .val(settings.idling_time).prop('disabled', !settings.idling);
-        // this.$(`#notifications_volume_enable`)
-        //     .prop('checked', settings.notifications_volume_enabled);
         this.$('.mapping-service input[type=checkbox]')
             .prop({checked: settings.mapping_service});
         this.$('.reconnection-popup-log input[type=checkbox]')
@@ -2205,8 +2198,6 @@ xabber.SettingsModalView = xabber.BasicView.extend({
         this.$(`.client-main-color-item[data-value="${settings.main_color}"]`).addClass('chosen-client-color');
         let notifications_volume = !isNaN(settings.notifications_volume) ? settings.notifications_volume * 100 : 100;
         this.$(`#notifications_volume`).val(notifications_volume);
-        // this.$('.volume-setting .disabled').switchClass('hidden', settings.notifications_volume_enabled);
-        // this.$('#notifications_volume').prop('disabled', !settings.notifications_volume_enabled);
         this.$('.settings-panel-head span').text(this.$('.settings-block-wrap:not(.hidden)').attr('data-header'));
         this.updateAvatarLabel();
         this.updateSoundsLabel();
@@ -2638,15 +2629,6 @@ xabber.SettingsModalView = xabber.BasicView.extend({
         $target.val(value);
         ev.preventDefault();
     },
-
-    // setNotificationsVolumeEnabled: function (ev) {
-    //     ev.preventDefault();
-    //     let value = !this.model.get('notifications_volume_enabled');
-    //     this.model.save('notifications_volume_enabled', value);
-    //     this.$('#notifications_volume_enable').prop('checked', value);
-    //     this.$('.volume-setting .disabled').switchClass('hidden', value);
-    //     this.$('#notifications_volume').prop('disabled', !value);
-    // },
 
     setNotifications: function (ev) {
         let value = this.model.get('notifications');
@@ -3154,46 +3136,6 @@ xabber.SettingsModalView = xabber.BasicView.extend({
         this.$('.settings-tab[data-block-name="attention-calls"] .settings-block-label').text(sound_on_attention_text);
     },
 });
-
-// xabber.mainColorPicker = xabber.BasicView.extend({
-//     className: 'modal main-modal main-color-picker',
-//     template: templates.color_scheme,
-//     ps_selector: '.modal-content',
-//     ps_settings: {theme: 'item-list'},
-//
-//     events: {
-//         "click .color-value": "setColor",
-//     },
-//
-//     _initialize: function (options) {
-//         this.model = options.model;
-//     },
-//
-//     render: function () {
-//         this.$el.openModal({
-//             ready: () => {
-//                 this.$('.modal-content').css('max-height', Math.min(($(window).height() - 341), 456)).perfectScrollbar({theme: 'item-list'});
-//             },
-//             complete: this.close.bind(this)
-//         });
-//     },
-//
-//     setColor: function (ev) {
-//         let color = $(ev.target).closest('.color-value').attr('data-value');
-//         this.model.save('main_color', color);
-//         xabber.trigger('update_main_color');
-//         this.close();
-//     },
-//
-//     close: function () {
-//         this.$el.closeModal({ complete: () => {
-//                 this.$el.detach();
-//                 this.data.set('visible', false);
-//             }
-//         });
-//     }
-//
-// });
 
 xabber.ColorPicker = xabber.BasicView.extend({
     className: 'modal main-modal color-picker',

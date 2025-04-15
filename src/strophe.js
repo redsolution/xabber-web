@@ -1087,34 +1087,6 @@ _.extend(Strophe.Websocket.prototype, {
         }
     },
 
-    // _onClose: function (e) {
-    //     if (this._conn.connected && !this._conn.disconnecting) {
-    //         Strophe.error('Websocket closed unexpectedly');
-    //         Strophe.error(e);
-    //         Strophe.error(e.code);
-    //         this._conn._doDisconnect();
-    //     } else if (e && e.code === 1006 && !this._conn.connected && this.socket) {
-    //         // in case the onError callback was not called (Safari 10 does not
-    //         // call onerror when the initial connection fails) we need to
-    //         // dispatch a CONNFAIL status update to be consistent with the
-    //         // behavior on other browsers.
-    //         Strophe.error('Websocket closed unexcectedly');
-    //         Strophe.error(e);
-    //         Strophe.error(e.code);
-    //         this._conn._changeConnectStatus(Status.CONNFAIL, 'The WebSocket connection could not be established or was disconnected.');
-    //         this._conn._doDisconnect();
-    //     } else {
-    //         Strophe.debug('Websocket closed');
-    //     }
-    // },
-    //
-    // _onError: function (error) {
-    //     Strophe.error('Websocket error ' + JSON.stringify(error));
-    //     Strophe.error(error);
-    //     this._conn._changeConnectStatus(Status.CONNFAIL, 'The WebSocket connection could not be established or was disconnected.');
-    //     this._disconnect();
-    // },
-
     _onOpen: function() {
         Strophe.debug('Websocket open');
         const start = this._buildStream();

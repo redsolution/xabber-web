@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.4.88","version_description":"added debounce to toolbar unread recount func, fixed handler func for forwards, returned saved messages chats in chats list and fixed its behaviour and handling, fixed duplicating msg in deprecated chat with own account, added chat title changing in saved messages chat depending on amount of enabled accounts"}'
+'{"version_number":"2.4.89","version_description":"removed commented code and console logs, changed chat settings local storage object name,"}'
 )});
