@@ -905,6 +905,7 @@ xabber.Contact = Backbone.Model.extend({
                         thumbnail: $file.children(`thumbnail[xmlns="${Strophe.NS.PUBSUB_AVATAR_METADATA_THUMBNAIL}"]`).attr('uri'),
                         media_type: $file.children('media-type').text(),
                         duration: $file.children('duration').text(),
+                        peaks: $file.children('meters').text(),
                         description: $file.children('desc').text(),
                         height: $file.children('height').text(),
                         width: $file.children('width').text(),
@@ -3323,7 +3324,6 @@ xabber.MediaBaseView = xabber.BasicView.extend({
         } else {
             dfd.reject();
         }
-
     },
 
     loadMoreFiles: function () {
@@ -3381,7 +3381,7 @@ xabber.MediaBaseView = xabber.BasicView.extend({
             this.temporary_items.forEach((item) => {
                 if (this.filter_type === 'filter_voice')
                     item.true_voice = true;
-                let $gallery_file = $(templates.media_item({file: item, is_encrypted: this.encrypted, svg_icon: utils.file_type_icon_svg(item.media_type), filesize: utils.pretty_size(item.size), duration: utils.pretty_duration(item.duration)}));
+                let $gallery_file = $(templates.media_item({file: item, is_encrypted: this.encrypted, svg_icon: utils.file_type_icon_svg(item.media_type), filesize: utils.pretty_size(item.size), duration: utils.pretty_duration(item.duration), peaks: item.peaks}));
                 $gallery_file.appendTo(this.$('.gallery-files'));
             });
         }
@@ -3474,9 +3474,10 @@ xabber.MediaBaseView = xabber.BasicView.extend({
         let $elem = $(ev.target);
         if ($elem.hasClass('no-uploaded') || $elem.hasClass('gallery-audio-file-not-uploaded')) {
             let $audio_elem = $elem.closest('.gallery-file'),
-                f_url = $audio_elem.attr('data-file');
+                f_url = $audio_elem.attr('data-file'),
+                peaks = $audio_elem.attr('data-peaks');
             $audio_elem.find('.mdi-play').removeClass('audio-file-play');
-            $audio_elem[0].voice_message = this.renderVoiceMessage($audio_elem.find('.gallery-file-audio-container')[0], f_url);
+            $audio_elem[0].voice_message = this.renderVoiceMessage($audio_elem.find('.gallery-file-audio-container')[0], f_url, peaks);
             this.prev_audio_message && this.prev_audio_message.voice_message.pause();
             this.prev_audio_message = $audio_elem[0];
 
@@ -3501,13 +3502,13 @@ xabber.MediaBaseView = xabber.BasicView.extend({
         }
     },
 
-    renderVoiceMessage: function (element, file_url) {
+    renderVoiceMessage: function (element, file_url, peaks) {
         let not_expanded_msg = element.innerHTML,
             unique_id = 'waveform' + moment.now(),
             $elem = $(element),
             $msg_element = $elem.closest('.gallery-file');
         $elem.addClass('voice-message-rendering').html($(templates.audio_file_waveform({waveform_id: unique_id})));
-        let aud = this.createAudio(file_url, unique_id);
+        let aud = this.createAudio(unique_id);
 
         aud.on('ready', () => {
             $msg_element.find('.gallery-file-placeholder-background .mdi').removeClass('no-uploaded');
@@ -3515,6 +3516,16 @@ xabber.MediaBaseView = xabber.BasicView.extend({
             let duration = Math.round(aud.getDuration());
             $elem.find('.voice-msg-total-time').text(utils.pretty_duration(duration));
             aud.play();
+        });
+
+        aud.on('waveform-ready', () => {
+            $msg_element.find('.gallery-file-placeholder-background .mdi').removeClass('no-uploaded');
+            $msg_element.find('.gallery-file-placeholder-background').removeClass('gallery-audio-file-not-uploaded');
+            let duration = Math.round(aud.getDuration());
+            $elem.find('.voice-msg-total-time').text(utils.pretty_duration(duration));
+            setTimeout(() => {
+                aud.play();
+            }, 50);
         });
 
         aud.on('error', () => {
@@ -3550,10 +3561,21 @@ xabber.MediaBaseView = xabber.BasicView.extend({
         $elem.find('.voice-message-volume')[0].onchange = () => {
             aud.setVolume($elem.find('.voice-message-volume').val()/100);
         };
+
+        try{
+            if (peaks){
+                let x = aud.load(file_url, peaks.split(' '));
+            } else {
+                aud.load(file_url);
+            }
+        } catch (e) {
+            console.error(e);
+        }
+
         return aud;
     },
 
-    createAudio: function(file_url, unique_id) {
+    createAudio: function(unique_id) {
         let audio = WaveSurfer.create({
             container: "#" + unique_id,
             scrollParent: false,
@@ -3566,7 +3588,7 @@ xabber.MediaBaseView = xabber.BasicView.extend({
             hideScrollBar: true,
             progressColor: '#757575'
         });
-        audio.load(file_url);
+
         audio.setVolume(0.5);
         return audio;
     },

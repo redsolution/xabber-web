@@ -1485,15 +1485,16 @@ xabber.Account = Backbone.Model.extend({
                         metadata = {};
                     file.duration && (metadata.duration = file.duration);
                     formData.append('file', file, file.name);
-                    formData.append('metadata', JSON.stringify(metadata));
                     if (file.size)
                         formData.append('size', file.size);
                     if (file.voice){
                         formData.append('media_type', file.type + '+voice');
                         formData.append('context', 'voice');
+                        file.peaks && (metadata.meters = file.peaks);
                     }
                     else
                         formData.append('media_type', file.type);
+                    formData.append('metadata', JSON.stringify(metadata));
                     $.ajax({
                         type: 'POST',
                         headers: {"Authorization": 'Bearer ' + this.get('gallery_token')},
@@ -2396,9 +2397,10 @@ xabber.AccountMediaGalleryView = xabber.BasicView.extend({
         }
         if ($elem.hasClass('no-uploaded') || $elem.hasClass('gallery-audio-file-not-uploaded')) {
             let $audio_elem = $elem.closest('.gallery-file'),
-                f_url = $audio_elem.attr('data-file');
+                f_url = $audio_elem.attr('data-file'),
+                peaks = $audio_elem.attr('data-peaks');
             $audio_elem.find('.mdi-play').removeClass('audio-file-play');
-            $audio_elem[0].voice_message = this.renderVoiceMessage($audio_elem.find('.gallery-file-audio-container')[0], f_url);
+            $audio_elem[0].voice_message = this.renderVoiceMessage($audio_elem.find('.gallery-file-audio-container')[0], f_url, peaks);
             this.prev_audio_message && this.prev_audio_message.voice_message.pause();
             this.prev_audio_message = $audio_elem[0];
             return;
@@ -2417,7 +2419,7 @@ xabber.AccountMediaGalleryView = xabber.BasicView.extend({
         }
     },
 
-    renderVoiceMessage: function (element, file_url) {
+    renderVoiceMessage: function (element, file_url, peaks) {
         let not_expanded_msg = element.innerHTML,
             unique_id = 'waveform' + moment.now(),
             $elem = $(element),
@@ -2431,6 +2433,16 @@ xabber.AccountMediaGalleryView = xabber.BasicView.extend({
             let duration = Math.round(aud.getDuration());
             $elem.find('.voice-msg-total-time').text(utils.pretty_duration(duration));
             aud.play();
+        });
+
+        aud.on('waveform-ready', () => {
+            $msg_element.find('.gallery-file-placeholder-background .mdi').removeClass('no-uploaded');
+            $msg_element.find('.gallery-file-placeholder-background').removeClass('gallery-audio-file-not-uploaded');
+            let duration = Math.round(aud.getDuration());
+            $elem.find('.voice-msg-total-time').text(utils.pretty_duration(duration));
+            setTimeout(() => {
+                aud.play();
+            }, 50);
         });
 
         aud.on('error', () => {
@@ -2466,6 +2478,16 @@ xabber.AccountMediaGalleryView = xabber.BasicView.extend({
         $elem.find('.voice-message-volume')[0].onchange = () => {
             aud.setVolume($elem.find('.voice-message-volume').val()/100);
         };
+        try{
+            if (peaks){
+                let x = aud.load(file_url, peaks.split(' '));
+            } else {
+                aud.load(file_url);
+            }
+        } catch (e) {
+            console.error(e);
+        }
+
         return aud;
     },
 
@@ -2482,7 +2504,6 @@ xabber.AccountMediaGalleryView = xabber.BasicView.extend({
             hideScrollBar: true,
             progressColor: '#757575'
         });
-        audio.load(file_url);
         audio.setVolume(0.5);
         return audio;
     },
@@ -2571,14 +2592,16 @@ xabber.AccountMediaGalleryView = xabber.BasicView.extend({
         if (response.items && response.items.length){
             response.items.forEach((item) => {
                 item.thumbnail && item.thumbnail.url && (item.thumbnail = item.thumbnail.url);
-                let duration;
+                let duration, peaks = '';
                 item.metadata && item.metadata.duration && (duration = utils.pretty_duration(item.metadata.duration));
+                item.metadata && item.metadata.meters && (peaks = item.metadata.meters);
                 let $gallery_file = $(templates.media_gallery_account_file({
                     file: item,
                     svg_icon: utils.file_type_icon_svg(item.media_type),
                     filesize: utils.pretty_size(item.size),
                     created_at: utils.pretty_date(item.created_at),
                     duration: duration,
+                    peaks: peaks,
                     download_only: false,
                 }));
                 (response.type === 'avatars') && $gallery_file.addClass('gallery-avatar');
@@ -2753,9 +2776,10 @@ xabber.DeleteFilesFromGalleryView = xabber.BasicView.extend({
         }
         if ($elem.hasClass('no-uploaded') || $elem.hasClass('gallery-audio-file-not-uploaded')) {
             let $audio_elem = $elem.closest('.gallery-file'),
-                f_url = $audio_elem.attr('data-file');
+                f_url = $audio_elem.attr('data-file'),
+                peaks = $audio_elem.attr('data-peaks');
             $audio_elem.find('.mdi-play').removeClass('audio-file-play');
-            $audio_elem[0].voice_message = this.gallery_view.renderVoiceMessage($audio_elem.find('.gallery-file-audio-container')[0], f_url);
+            $audio_elem[0].voice_message = this.gallery_view.renderVoiceMessage($audio_elem.find('.gallery-file-audio-container')[0], f_url, peaks);
             this.prev_audio_message && this.prev_audio_message.voice_message.pause();
             this.prev_audio_message = $audio_elem[0];
             return;
@@ -5651,8 +5675,9 @@ xabber.AuthView = xabber.BasicView.extend({
                 if (this.data.get('registration')) {
                     this.account.connection.register.connect(jid, this.account.registerCallback.bind(this.account))
                 }
-                else
+                else {
                     this.account.trigger('start');
+                }
             });
         }
     },

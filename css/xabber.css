@@ -12964,7 +12964,8 @@ canvas {
     justify-content: flex-start;
     flex-direction: row;
     align-items: center;
-    height: 64px;
+    height: 74px;
+    padding-bottom: 8px;
 }
 
 input[type=range].voice-message-volume {

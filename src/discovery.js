@@ -212,13 +212,26 @@ xabber.ServerFeatures = Backbone.Collection.extend({
                 let chat = this.account.chats.getChat(this.account.contacts.get(jid));
                 if (!chat.get('notifications')){
                     this.account.cached_sync_conversations.getFromCachedConversations(`${jid}/${Strophe.NS.XABBER_NOTIFY}` ,(item) => {
-                        if (!item || !item.conversation)
+                        if (!item)
                             return;
-                        this.account.roster.syncConversation(null, null, item.conversation, true);
+                        this.account.roster.syncCachedConversations(true, [item]);
                     });
                 }
             }
-
+        }
+        if (this.get(Strophe.NS.XABBER_FAVORITES) && this.get(Strophe.NS.XABBER_FAVORITES).get('from')){
+            let jid = this.get(Strophe.NS.XABBER_FAVORITES).get('from');
+            if (this.account.contacts.get(jid)){
+                let chat = this.account.chats.getChat(this.account.contacts.get(jid));
+                if (chat && !chat.get('saved')){
+                    chat.destroy();
+                    this.account.cached_sync_conversations.getFromCachedConversations(`${jid}/${Strophe.NS.XABBER_FAVORITES}` ,(item) => {
+                        if (!item)
+                            return;
+                        this.account.roster.syncCachedConversations(true, [item]);
+                    });
+                }
+            }
         }
         if (this.account.auth_view && !(constants.TRUSTED_DOMAINS.indexOf(this.account.connection.domain) > -1)){
             this.account.auth_view.first_features_received = true;

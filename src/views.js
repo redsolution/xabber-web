@@ -1948,9 +1948,14 @@ xabber.PlyrPlayerPopupView = xabber.BasicView.extend({
         if (xabber.current_plyr_player.chat_item.model.plyr_players[player_index + 1].$audio_elem){
             let next_item = xabber.current_plyr_player.chat_item.model.plyr_players[player_index + 1];
             if (!next_item.$audio_elem.voice_message){
+                let msg = this.current_plyr_player.chat_item.model.messages.get($(next_item.$audio_elem).closest('.chat-message').data('uniqueid')),
+                    uri = $(next_item.$audio_elem).closest('.link-file').find('.file-link-download').attr('href'),
+                    file = (msg.get('files') || []).find(f => f.sources[0] === uri),
+                    peaks = file && file.peaks ? file.peaks : null;
+
                 let f_url = $(next_item.$audio_elem).find('.file-link-download').attr('href');
                 $(next_item.$audio_elem).find('.mdi-play').removeClass('no-uploaded');
-                next_item.$audio_elem.voice_message = xabber.current_plyr_player.chat_item.content.renderVoiceMessage($(next_item.$audio_elem).find('.file-container')[0], f_url, xabber.current_plyr_player.chat_item.model);
+                next_item.$audio_elem.voice_message = xabber.current_plyr_player.chat_item.content.renderVoiceMessage($(next_item.$audio_elem).find('.file-container')[0], f_url, xabber.current_plyr_player.chat_item.model, peaks);
             } else {
                 next_item.$audio_elem.voice_message.play()
             }
@@ -1972,9 +1977,14 @@ xabber.PlyrPlayerPopupView = xabber.BasicView.extend({
         if (xabber.current_plyr_player.chat_item.model.plyr_players[player_index - 1].$audio_elem){
             let prev_item = xabber.current_plyr_player.chat_item.model.plyr_players[player_index - 1];
             if (!prev_item.$audio_elem.voice_message){
+                let msg = xabber.current_plyr_player.chat_item.model.messages.get($(prev_item.$audio_elem).closest('.chat-message').data('uniqueid')),
+                    uri = $(prev_item.$audio_elem).closest('.link-file').find('.file-link-download').attr('href'),
+                    file = (msg.get('files') || []).find(f => f.sources[0] === uri),
+                    peaks = file && file.peaks ? file.peaks : null;
+
                 let f_url = $(prev_item.$audio_elem).find('.file-link-download').attr('href');
                 $(prev_item.$audio_elem).find('.mdi-play').removeClass('no-uploaded');
-                prev_item.$audio_elem.voice_message = xabber.current_plyr_player.chat_item.content.renderVoiceMessage($(prev_item.$audio_elem).find('.file-container')[0], f_url, xabber.current_plyr_player.chat_item.model);
+                prev_item.$audio_elem.voice_message = xabber.current_plyr_player.chat_item.content.renderVoiceMessage($(prev_item.$audio_elem).find('.file-container')[0], f_url, xabber.current_plyr_player.chat_item.model, peaks);
             } else {
                 prev_item.$audio_elem.voice_message.play()
             }
@@ -2017,9 +2027,14 @@ xabber.PlyrPlayerPopupView = xabber.BasicView.extend({
             return;
         if (xabber.current_plyr_player.$audio_elem){
             if (!xabber.current_plyr_player.$audio_elem.voice_message){
+                let msg = xabber.current_plyr_player.chat_item.model.messages.get($(xabber.current_plyr_player.$audio_elem).closest('.chat-message').data('uniqueid')),
+                    uri = $(xabber.current_plyr_player.$audio_elem).closest('.link-file').find('.file-link-download').attr('href'),
+                    file = (msg.get('files') || []).find(f => f.sources[0] === uri),
+                    peaks = file && file.peaks ? file.peaks : null;
+
                 let f_url = $(xabber.current_plyr_player.$audio_elem).find('.file-link-download').attr('href');
                 $(xabber.current_plyr_player.$audio_elem).find('.mdi-play').removeClass('no-uploaded');
-                xabber.current_plyr_player.$audio_elem.voice_message = this.content.renderVoiceMessage($(xabber.current_plyr_player.$audio_elem).find('.file-container')[0], f_url);
+                xabber.current_plyr_player.$audio_elem.voice_message = this.content.renderVoiceMessage($(xabber.current_plyr_player.$audio_elem).find('.file-container')[0], f_url, null, peaks);
             } else {
                 xabber.current_plyr_player.$audio_elem.voice_message.playPause();
             }

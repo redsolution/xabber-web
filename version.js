@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.4.89","version_description":"removed commented code and console logs, changed chat settings local storage object name, changed how cached sync conversations are stored and added additional parsing function for handling old cached sync conversations"}'
+'{"version_number":"2.4.90","version_description":"changed waveform generation, added sending and handling of audio peaks, fixed chats waveform generation, fixed saved chats handling if disco feature was not handled before sync conversation, fixed omemo bundle publishing and device id checking, fixed trusted device check on account deletion, changed voice message recording text position"}'
 )});

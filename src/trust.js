@@ -677,7 +677,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                     });
             }, (err) => {
                 let err_code = $(err).find('error').attr('code');
-                if (err_code == 404){
+                if (err_code === '404'){
                     this.createNode(() => {
                         this.account.sendIQFast(iq,
                             (res) => {
@@ -858,7 +858,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
         let jid_trusted_devices = this.get('trusted_devices')[jid],
             changed;
 
-        jid_trusted_devices.forEach((trusted_device, index) => {
+        jid_trusted_devices && jid_trusted_devices.length && jid_trusted_devices.forEach((trusted_device, index) => {
             let func_result = func(trusted_device);
             if (Boolean(func_result.func_changed)){
                 changed = true;

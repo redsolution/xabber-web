@@ -513,6 +513,7 @@ xabber.MessagesBase = Backbone.Collection.extend({
                         size: $file.children('size').text(),
                         type: $file.children('media-type').text(),
                         duration: $file.children('duration').text(),
+                        peaks: $file.children('meters').text(),
                         description: $file.children('desc').text(),
                         height: $file.children('height').text(),
                         width: $file.children('width').text(),
@@ -5376,7 +5377,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
         }
     },
 
-    renderVoiceMessage: function (element, file_url, chat) {
+    renderVoiceMessage: function (element, file_url, chat, peaks) {
         let not_expanded_msg = element.innerHTML,
             unique_id = 'waveform' + moment.now(),
             $elem = $(element),
@@ -5458,6 +5459,17 @@ xabber.ChatContentView = xabber.BasicView.extend({
         $elem.find('.voice-message-volume')[0].onchange = () => {
             aud.setVolume($elem.find('.voice-message-volume').val()/100);
         };
+        try{
+            if (peaks){
+                let x = aud.load(file_url, peaks.split(' '));
+            } else {
+                aud.load(file_url);
+            }
+        } catch (e) {
+            console.error(e);
+        }
+
+        aud._onResize();
         return aud;
     },
 
@@ -5721,7 +5733,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
 
                         let f_url = $message.find('.link-file').find('.file-link-download').attr('href');
                         $message.find('.link-file').find('.mdi-play').removeClass('no-uploaded');
-                        audio_player.$audio_elem.voice_message = this.renderVoiceMessage($message.find('.link-file').find('.file-container')[0], f_url);
+                        audio_player.$audio_elem.voice_message = this.renderVoiceMessage($message.find('.link-file').find('.file-container')[0], f_url, null, file.peaks);
 
                         xabber.trigger('plyr_player_updated');
                     }
@@ -5977,7 +5989,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
                                 }
                                 let f_url = $f_message.find('.link-file').find('.file-link-download').attr('href');
                                 $f_message.find('.link-file').find('.mdi-play').removeClass('no-uploaded');
-                                audio_player.$audio_elem.voice_message = this.renderVoiceMessage($f_message.find('.link-file').find('.file-container')[0], f_url);
+                                audio_player.$audio_elem.voice_message = this.renderVoiceMessage($f_message.find('.link-file').find('.file-container')[0], f_url, null, file.peaks);
                                 xabber.trigger('plyr_player_updated');
                             }
                         });
@@ -6477,6 +6489,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
                 file.height && stanza.c('height').t(file.height).up();
                 file.width && stanza.c('width').t(file.width).up();
                 file.duration && stanza.c('duration').t(file.duration).up();
+                file.peaks && stanza.c('meters').t(file.peaks).up();
                 file.description && stanza.c('desc').t(file.description).up();
                 stanza.up().c('sources');
                 file.sources.forEach((u) => {
@@ -6860,6 +6873,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
                                 encrypted_file = new File([encrypted.payload], uuid().replace(/-/g, ""), {type: file.type});
                             file.voice && (encrypted_file.voice = true);
                             file.duration && (encrypted_file.duration = file.duration);
+                            file.peaks && (encrypted_file.peaks = file.peaks);
                             encrypted_file.key = key;
                             new_files.push(encrypted_file);
                             file_counter++;
@@ -6998,15 +7012,16 @@ xabber.ChatContentView = xabber.BasicView.extend({
             file.width && (metadata.width = file.width);
             file.height && (metadata.height = file.height);
             formData.append('file', file, file.name);
-            formData.append('metadata', JSON.stringify(metadata));
             if (file.size)
                 formData.append('size', file.size);
             if (file.voice){
                 formData.append('media_type', file.type + '+voice');
                 formData.append('context', 'voice');
+                file.peaks && (metadata.meters = file.peaks);
             }
             else
                 formData.append('media_type', file.type);
+            formData.append('metadata', JSON.stringify(metadata));
             clearInterval(_interval);
             message.get('files')[idx].is_errored = false;
             let xhr = new XMLHttpRequest();
@@ -7306,7 +7321,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
                 videos.push(file_new_format);
             }
             else {
-                _.extend(file_new_format, { duration: file_.duration});
+                _.extend(file_new_format, { duration: file_.duration, peaks: file_.peaks});
                 files_.push(file_new_format);
             }
         });
@@ -7408,7 +7423,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
 
                     let f_url = $message.find('.link-file').find('.file-link-download').attr('href');
                     $message.find('.link-file').find('.mdi-play').removeClass('no-uploaded');
-                    audio_player.$audio_elem.voice_message = this.renderVoiceMessage($message.find('.link-file').find('.file-container')[0], f_url);
+                    audio_player.$audio_elem.voice_message = this.renderVoiceMessage($message.find('.link-file').find('.file-container')[0], f_url, null, item.peaks);
 
                     message.set('msg_player_audios', [audio_player]);
                     xabber.trigger('plyr_player_updated');
@@ -7438,7 +7453,6 @@ xabber.ChatContentView = xabber.BasicView.extend({
             hideScrollBar: true,
             progressColor: '#757575'
         });
-        audio.load(file_url);
         audio.setVolume(0.5);
         return audio;
     },
@@ -7947,11 +7961,15 @@ xabber.ChatContentView = xabber.BasicView.extend({
                         this.model.messages.decryptFile(f_url, file.key).then((result) => {
                             if (result === null)
                                 return;
-                            $audio_elem[0].voice_message = this.renderVoiceMessage($audio_elem.find('.file-container')[0], result);
+                            $audio_elem[0].voice_message = this.renderVoiceMessage($audio_elem.find('.file-container')[0], result, null, file.peaks);
                         });
                     }
                 } else {
-                    $audio_elem[0].voice_message = this.renderVoiceMessage($audio_elem.find('.file-container')[0], f_url);
+                    let msg = this.chat_content.model.messages.get($elem.closest('.chat-message').data('uniqueid')),
+                        uri = $elem.closest('.link-file').find('.file-link-download').attr('href'),
+                        file = (msg.get('files') || []).find(f => f.sources[0] === uri),
+                        peaks = file && file.peaks ? file.peaks : null;
+                    $audio_elem[0].voice_message = this.renderVoiceMessage($audio_elem.find('.file-container')[0], f_url, null, peaks);
                 }
                 return;
             }
@@ -8260,11 +8278,15 @@ xabber.ExpandedMessagePanel = xabber.BasicView.extend({
                     this.chat_content.model.messages.decryptFile(f_url, file.key).then((result) => {
                         if (result === null)
                             return;
-                        $audio_elem[0].voice_message = this.chat_content.renderVoiceMessage($audio_elem.find('.file-container')[0], result);
+                        $audio_elem[0].voice_message = this.chat_content.renderVoiceMessage($audio_elem.find('.file-container')[0], result, null, file.peaks);
                     });
                 }
             } else {
-                $audio_elem[0].voice_message = this.chat_content.renderVoiceMessage($audio_elem.find('.file-container')[0], f_url);
+                let msg = this.chat_content.model.messages.get($elem.closest('.chat-message').data('uniqueid')),
+                    uri = $elem.closest('.link-file').find('.file-link-download').attr('href'),
+                    file = (msg.get('files') || []).find(f => f.sources[0] === uri),
+                    peaks = file && file.peaks ? file.peaks : null;
+                $audio_elem[0].voice_message = this.chat_content.renderVoiceMessage($audio_elem.find('.file-container')[0], f_url, null, peaks);
             }
             return;
         }
@@ -12712,7 +12734,22 @@ xabber.ChatBottomView = xabber.BasicView.extend({
                             });
                         file.voice = true;
                         file.duration = Math.round((end_time - start_time)/1000);
-                        this.view.addFileMessage([file], true);
+
+                        let audio = new Audio(URL.createObjectURL(file)),
+                            audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+                        try {
+                            utils.loadAudio(audio, audioContext).then((audioBuffer) => {
+                                file.peaks = utils.getPeaks(audioBuffer).join(' ');
+                                URL.revokeObjectURL(audio);
+                                audioContext.close();
+                                this.view.addFileMessage([file], true);
+                            });
+                        } catch (error) {
+                            console.error('error handling audio:', error);
+                            URL.revokeObjectURL(audioUrl);
+                            audioContext.close();
+                        }
                     }
                     chunks = [];
                 };
@@ -13293,6 +13330,7 @@ xabber.ChatBottomView = xabber.BasicView.extend({
                 file.size && $message.c('size').t(file.size).up();
                 file.height && $message.c('height').t(file.height).up();
                 file.width && $message.c('width').t(file.width).up();
+                file.peaks && stanza.c('meters').t(file.peaks).up();
                 file.duration && $message.c('duration').t(file.duration).up();
                 file.description && $message.c('desc').t(file.description).up();
                 $message.up().c('sources');

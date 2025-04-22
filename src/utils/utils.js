@@ -858,6 +858,44 @@ var utils = {
         return size;
     },
 
+    loadAudio: async function (audio, audioContext) {
+        const response = await fetch(audio.src); // Получаем аудиофайл
+        const arrayBuffer = await response.arrayBuffer();
+        const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+        return audioBuffer;
+    },
+
+    getPeaks: function (audioBuffer, numPeaks) {
+
+        numPeaks = numPeaks || 64;
+
+        const channelData = audioBuffer.getChannelData(0);
+        const peaks = [];
+        const step = Math.floor(channelData.length / numPeaks);
+
+        // Извлекаем максимальные амплитуды для каждого сегмента
+        for (let i = 0; i < numPeaks; i++) {
+            const start = i * step;
+            const end = Math.min(start + step, channelData.length);
+            let max = 0;
+
+            // Находим максимальную амплитуду в сегменте
+            for (let j = start; j < end; j++) {
+                const value = Math.abs(channelData[j]);
+                if (value > max) max = value;
+            }
+
+            peaks.push(max);
+        }
+
+        const maxPeak = Math.max(...peaks);
+        const normalizedPeaks = peaks.map(peak =>
+            Number((maxPeak > 0 ? peak / maxPeak : 0).toFixed(6))
+        );
+
+        return normalizedPeaks;
+    },
+
     generateDeviceName: function () {
         let adjectives = [
             "Adorable",

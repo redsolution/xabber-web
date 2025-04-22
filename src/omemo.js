@@ -544,7 +544,7 @@ xabber.Fingerprints = xabber.BasicView.extend({
         }
         let rows = [];
         for (let device_id in devices) {
-            if (device_id === this.omemo.get('device_id')) {
+            if (device_id == this.omemo.get('device_id')) {
                 counter++;
                 if (devices_count === counter)
                     dfd.resolve(rows);
@@ -611,7 +611,7 @@ xabber.Fingerprints = xabber.BasicView.extend({
             } else {
                 omemo.store.getIdentityKeyPair().then((ik) => {
                     let pubKey = ik.pubKey;
-                    if (pubKey.byteLength === 33)
+                    if (pubKey.byteLength == 33)
                         pubKey = pubKey.slice(1);
                     let fingerprint = Array.from(new Uint8Array(pubKey)).map(b => b.toString(16).padStart(2, "0")).join("");
                     this.$('.this-device-content').append(this.addRow(omemo.get('device_id'), this.account.settings.get('device_label_text'), null, fingerprint));
@@ -702,7 +702,7 @@ xabber.Fingerprints = xabber.BasicView.extend({
     addRow: function (id, label, trust, fingerprint, options) {
         options = options || {};
         let delete_button = this.is_own_devices,
-            edit_setting = id === this.omemo.get('device_id'),
+            edit_setting = id == this.omemo.get('device_id'),
             old_fingerprint = options.old_fingerprint,
             error;
         if (fingerprint.match(/.{1,8}/g))
@@ -833,7 +833,7 @@ xabber.FingerprintsOwnDevices = xabber.BasicView.extend({
         if (device.get('ik')) {
             let f = device.generateFingerprint(),
                 fing = (this.omemo.get('fingerprints')[this.jid] || [])[device_id],
-                is_trusted = fing ? (fing.fingerprint !== f ? 'error' : (fing.trusted ? 'trust' : 'ignore')) : 'unknown';
+                is_trusted = fing ? (fing.fingerprint != f ? 'error' : (fing.trusted ? 'trust' : 'ignore')) : 'unknown';
             this.renderTrustOnFingerprint(is_trusted, $container, context, callback);
         }
         else {
@@ -845,7 +845,7 @@ xabber.FingerprintsOwnDevices = xabber.BasicView.extend({
                     device.set('ik', utils.fromBase64toArrayBuffer(ik));
                     let f = device.generateFingerprint(),
                         fing = (this.omemo.get('fingerprints')[this.jid] || [])[device.id],
-                        is_trusted = fing ? (fing.fingerprint !== f ? 'error' : (fing.trusted ? 'trust' : 'ignore')) : 'unknown';
+                        is_trusted = fing ? (fing.fingerprint != f ? 'error' : (fing.trusted ? 'trust' : 'ignore')) : 'unknown';
                     this.renderTrustOnFingerprint(is_trusted, $container, context, callback);
                 }
             }, () => {
@@ -923,7 +923,7 @@ xabber.FingerprintsOwnDevices = xabber.BasicView.extend({
             let options = {},
                 f = device.generateFingerprint(),
                 fing = (this.omemo.get('fingerprints')[this.jid] || [])[device_id],
-                is_trusted = fing ? (fing.fingerprint !== f ? 'error' : (fing.trusted ? 'trust' : 'ignore')) : 'unknown';
+                is_trusted = fing ? (fing.fingerprint != f ? 'error' : (fing.trusted ? 'trust' : 'ignore')) : 'unknown';
             is_trusted === 'error' && (options.old_fingerprint = fing.fingerprint);
             this.fingerprint = f;
             $container.append(this.addRow(device.id, device.get('label'), is_trusted, f, options));
@@ -939,7 +939,7 @@ xabber.FingerprintsOwnDevices = xabber.BasicView.extend({
                     let options = {},
                         f = device.generateFingerprint(),
                         fing = (this.omemo.get('fingerprints')[this.jid] || [])[device.id],
-                        is_trusted = fing ? (fing.fingerprint !== f ? 'error' : (fing.trusted ? 'trust' : 'ignore')) : 'unknown';
+                        is_trusted = fing ? (fing.fingerprint != f ? 'error' : (fing.trusted ? 'trust' : 'ignore')) : 'unknown';
                     is_trusted === 'error' && (options.old_fingerprint = fing.fingerprint);
                     this.fingerprint = f;
                     $container.append(this.addRow(device.id, device.get('label'), is_trusted, f, options));
@@ -974,7 +974,7 @@ xabber.FingerprintsOwnDevices = xabber.BasicView.extend({
             } else {
                 omemo.store.getIdentityKeyPair().then((ik) => {
                     let pubKey = ik.pubKey;
-                    if (pubKey.byteLength === 33)
+                    if (pubKey.byteLength == 33)
                         pubKey = pubKey.slice(1);
                     let fingerprint = Array.from(new Uint8Array(pubKey)).map(b => b.toString(16).padStart(2, "0")).join("");
                     this.$('.this-device-content').html(this.addRow(omemo.get('device_id'), this.account.settings.get('device_label_text'), null, fingerprint));
@@ -1049,7 +1049,7 @@ xabber.FingerprintsOwnDevices = xabber.BasicView.extend({
 
     addRow: function (id, label, trust, fingerprint, options) {
         options = options || {};
-        let edit_setting = id === this.omemo.get('device_id'),
+        let edit_setting = id == this.omemo.get('device_id'),
             old_fingerprint = options.old_fingerprint,
             device_icons = [
                 'device-cellphone',
@@ -1372,7 +1372,7 @@ xabber.Device = Backbone.Model.extend({
 
     encrypt: async function (plainText) {
         try {
-            if (this.get('trusted') === false && (this.id !== this.account.omemo.get('device_id')))
+            if (this.get('trusted') === false && (this.id != this.account.omemo.get('device_id')))
                 return null;
             if (!this.store.hasSession(this.address.toString()) || !this.is_session_initiated) {
                 if (this.preKeys && !this.preKeys.length)
@@ -1404,7 +1404,7 @@ xabber.Device = Backbone.Model.extend({
             cached_pk = this.getPreKey(),
             id = this.id;
         if (cached_pk) {
-            if (!spk || spk && JSON.stringify(spk) === JSON.stringify(cached_pk.spk) && JSON.stringify(ik) === JSON.stringify(cached_pk.ik))
+            if (!spk || spk && JSON.stringify(spk) == JSON.stringify(cached_pk.spk) && JSON.stringify(ik) == JSON.stringify(cached_pk.ik))
                 pk = cached_pk.pk;
             else
                 this.account.omemo.used_prekeys.put({id, pk, spk, ik});
@@ -1415,7 +1415,7 @@ xabber.Device = Backbone.Model.extend({
         this.fingerprint = this.generateFingerprint();
         let trusted = this.account.omemo.isTrusted(this.jid, id, this.fingerprint);
         this.set('trusted', trusted);
-        if ((this.id !== this.account.omemo.get('device_id')) && trusted === false)
+        if ((this.id != this.account.omemo.get('device_id')) && trusted === false)
             return false;
         this.processPreKey({
             registrationId: Number(id),
@@ -1589,7 +1589,7 @@ xabber.Omemo = Backbone.ModelWithStorage.extend({
             return;
         let fing = fingerprints[jid][device_id];
         if (fing) {
-            if (fing.fingerprint === fingerprint) {
+            if (fing.fingerprint == fingerprint) {
                 return fing.trusted;
             }
             else
@@ -1800,7 +1800,7 @@ xabber.Omemo = Backbone.ModelWithStorage.extend({
                     device.set('ik', utils.fromBase64toArrayBuffer(ik));
                     device.set('fingerprint', device.generateFingerprint());
                     device_ik && (device_ik = utils.ArrayBuffertoBase64(device_ik));
-                    if (!_.isUndefined(device_ik) && device_ik !== ik)
+                    if (!_.isUndefined(device_ik) && device_ik != ik)
                         this.account.trigger('trusting_updated');
                 }
             }
@@ -1879,7 +1879,7 @@ xabber.Omemo = Backbone.ModelWithStorage.extend({
                     });
                     return;
                 }
-                else if (options.replaced && $message.find(`encrypted[xmlns="${Strophe.NS.OMEMO}"] header`).attr('sid') === this.get('device_id')) {
+                else if (options.replaced && $message.find(`encrypted[xmlns="${Strophe.NS.OMEMO}"] header`).attr('sid') == this.get('device_id')) {
                     options.encrypted = true;
                     $message.find('body').remove();
                     $message.find(`encrypted[xmlns="${Strophe.NS.OMEMO}"]`).replaceWith(cached_msg);
@@ -2004,7 +2004,7 @@ xabber.Omemo = Backbone.ModelWithStorage.extend({
                 counter = Object.keys(this.own_devices).length;
                 for (let device_id in this.own_devices) {
                     let device = this.own_devices[device_id];
-                    if (device_id === this.get('device_id')) {
+                    if (device_id == this.get('device_id')) {
                         counter--;
                         !counter && dfd.resolve(is_trusted);
                         continue;
@@ -2054,7 +2054,7 @@ xabber.Omemo = Backbone.ModelWithStorage.extend({
                     this.onOwnDevicesUpdated().then(() => {
                         counter = Object.keys(this.own_devices).length;
                         for (let device_id in this.own_devices) {
-                            if (device_id === this.get('device_id')) {
+                            if (device_id == this.get('device_id')) {
                                 counter--;
                                 !counter && dfd.resolve(is_trusted);
                                 continue;
@@ -2301,7 +2301,7 @@ xabber.Omemo = Backbone.ModelWithStorage.extend({
 
         let encryptedData = this.parseEncrypted($encrypted),
             deviceId = this.get('device_id'),
-            ownPreKeysArr =  encryptedData.keys.filter(preKey => preKey.deviceId === deviceId),
+            ownPreKeysArr =  encryptedData.keys.filter(preKey => preKey.deviceId == deviceId),
             ownPreKey = ownPreKeysArr[0];
         // console.log($message);
         // console.log($encrypted);
@@ -2455,7 +2455,7 @@ xabber.Omemo = Backbone.ModelWithStorage.extend({
                 dfd.resolve();
             });
         }, (err) => {
-            if (($(err).find('error').attr('code') === 404)){
+            if (($(err).find('error').attr('code') === '404')){
                 this.account.getConnectionForIQ().omemo.createBundleNode(() => {
                     this.publish(spk, ik.pubKey, pks, () => {
                         dfd.resolve();

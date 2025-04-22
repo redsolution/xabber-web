@@ -607,9 +607,14 @@ let Xabber = Backbone.Model.extend({
             return;
         if (this.current_plyr_player.$audio_elem){
             if (!this.current_plyr_player.$audio_elem.voice_message){
+                let msg = this.current_plyr_player.chat_item.model.messages.get(this.current_plyr_player.$audio_elem.closest('.chat-message').data('uniqueid')),
+                    uri = this.current_plyr_player.$audio_elem.closest('.link-file').find('.file-link-download').attr('href'),
+                    file = (msg.get('files') || []).find(f => f.sources[0] === uri),
+                    peaks = file && file.peaks ? file.peaks : null;
+
                 let f_url = $(this.current_plyr_player.$audio_elem).find('.file-link-download').attr('href');
                 $(this.current_plyr_player.$audio_elem).find('.mdi-play').removeClass('no-uploaded');
-                this.current_plyr_player.$audio_elem.voice_message = this.current_plyr_player.chat_item.content.renderVoiceMessage($(this.current_plyr_player.$audio_elem).find('.file-container')[0], f_url);
+                this.current_plyr_player.$audio_elem.voice_message = this.current_plyr_player.chat_item.content.renderVoiceMessage($(this.current_plyr_player.$audio_elem).find('.file-container')[0], f_url, null, peaks);
             } else {
                 this.current_plyr_player.$audio_elem.voice_message.playPause()
             }
@@ -653,9 +658,14 @@ let Xabber = Backbone.Model.extend({
         if (this.current_plyr_player.chat_item.model.plyr_players[player_index + 1].$audio_elem){
             let next_item = this.current_plyr_player.chat_item.model.plyr_players[player_index + 1];
             if (!next_item.$audio_elem.voice_message){
+                let msg = this.current_plyr_player.chat_item.model.messages.get($(next_item.$audio_elem).closest('.chat-message').data('uniqueid')),
+                    uri = $(next_item.$audio_elem).closest('.link-file').find('.file-link-download').attr('href'),
+                    file = (msg.get('files') || []).find(f => f.sources[0] === uri),
+                    peaks = file && file.peaks ? file.peaks : null;
+
                 let f_url = $(next_item.$audio_elem).find('.file-link-download').attr('href');
                 $(next_item.$audio_elem).find('.mdi-play').removeClass('no-uploaded');
-                next_item.$audio_elem.voice_message = this.current_plyr_player.chat_item.content.renderVoiceMessage($(next_item.$audio_elem).find('.file-container')[0], f_url, this.current_plyr_player.chat_item.model);
+                next_item.$audio_elem.voice_message = this.current_plyr_player.chat_item.content.renderVoiceMessage($(next_item.$audio_elem).find('.file-container')[0], f_url, this.current_plyr_player.chat_item.model, peaks);
             } else {
                 next_item.$audio_elem.voice_message.play()
             }
@@ -680,9 +690,13 @@ let Xabber = Backbone.Model.extend({
         if (this.current_plyr_player.chat_item.model.plyr_players[player_index - 1].$audio_elem){
             let prev_item = this.current_plyr_player.chat_item.model.plyr_players[player_index - 1];
             if (!prev_item.$audio_elem.voice_message){
+                let msg = this.current_plyr_player.chat_item.model.messages.get($(prev_item.$audio_elem).closest('.chat-message').data('uniqueid')),
+                    uri = $(prev_item.$audio_elem).closest('.link-file').find('.file-link-download').attr('href'),
+                    file = (msg.get('files') || []).find(f => f.sources[0] === uri),
+                    peaks = file && file.peaks ? file.peaks : null;
                 let f_url = $(prev_item.$audio_elem).find('.file-link-download').attr('href');
                 $(prev_item.$audio_elem).find('.mdi-play').removeClass('no-uploaded');
-                prev_item.$audio_elem.voice_message = this.current_plyr_player.chat_item.content.renderVoiceMessage($(prev_item.$audio_elem).find('.file-container')[0], f_url, this.current_plyr_player.chat_item.model);
+                prev_item.$audio_elem.voice_message = this.current_plyr_player.chat_item.content.renderVoiceMessage($(prev_item.$audio_elem).find('.file-container')[0], f_url, this.current_plyr_player.chat_item.model, peaks);
             } else {
                 prev_item.$audio_elem.voice_message.play()
             }

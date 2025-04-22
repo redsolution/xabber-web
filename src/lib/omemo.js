@@ -43,7 +43,7 @@
                 }, function (err) {
                     resulted = true;
                     // console.error(err);
-                    if ($(err).find('error').attr('code') == 404 && !jid)
+                    if ($(err).find('error').attr('code') === '404' && !jid)
                         createDeviceNode.call(this, callback);
                     else
                         errback && errback(err);
