@@ -376,6 +376,7 @@ import $ from "jquery";
     addSvgTemplate('svg.edit');
     addSvgTemplate('svg.edit-outline');
     addSvgTemplate('svg.arrow-collapse');
+    addSvgTemplate('svg.arrow-left');
     addSvgTemplate('svg.check-circle');
     addSvgTemplate('svg.blocked-add');
     addSvgTemplate('svg.information-outline');

@@ -1403,10 +1403,11 @@ xabber.JingleMessage = Backbone.Model.extend({
             if ((session.active_verification_device && session.active_verification_device.peer_jid === this.get('jid')) || session.session_check_jid === this.get('jid')){
                 if (!original_value){
                     setTimeout(() => {
+                        let message_text = this.account.omemo.xabber_trust.getVerificationStateLabel(session);
                         this.messages.createSystemMessage({ //change to chat timestamp update
                             from_jid: this.contact.get('jid'),
                             auth_request: true,
-                            message: xabber.getString("verification_session_state__incoming_label")
+                            message: message_text
                         });
                     }, 1000)
                 }
@@ -5399,6 +5400,12 @@ xabber.ChatContentView = xabber.BasicView.extend({
             let duration = Math.round(aud.getDuration());
             hideShowCursor();
             $elem.find('.voice-msg-total-time').text(utils.pretty_duration(duration));
+        });
+
+        aud.on('waveform-ready', () => {
+            setTimeout(() => {
+                aud.fireEvent('interaction');
+            }, 10)
         });
 
         aud.on('error', () => {
@@ -11496,6 +11503,13 @@ xabber.ChatBottomView = xabber.BasicView.extend({
         "click .attach-media": "showMediaPopup",
         "mouseup .message-input-panel": "stopWritingVoiceMessage",
         "mousedown .attach-voice-message": "writeVoiceMessage",
+        "click .locked-voice-message:not(.locked-voice-message-stopped) .attach-locked-voice-message": "sendLockedVoiceMessage",
+        "click .locked-voice-message-stopped .attach-locked-voice-message": "sendLockedStoppedMessage",
+        "click .stop-locked-voice-message": "stopLockedVoiceMessage",
+        "click .mdi-play": "playPauseVoiceMessage",
+        "click .mdi-pause": "playPauseVoiceMessage",
+        "click .btn-clear-voice-message": "deleteLockedVoiceMessage",
+        "click .audio-control-panel": "seekToStart",
         "click .chat-mention": "onMentionButtonClick",
         "click .close-forward": "unsetForwardedMessages",
         "click .close-attachments": "removeAttachments",
@@ -12000,12 +12014,12 @@ xabber.ChatBottomView = xabber.BasicView.extend({
     },
 
     displayMicrophone: function () {
-        this.$('.mdi-send').addClass('hidden');
+        this.$('.send-message').addClass('hidden');
         this.$('.attach-voice-message').removeClass('hidden');
     },
 
     displaySend: function () {
-        this.$('.mdi-send').removeClass('hidden');
+        this.$('.send-message').removeClass('hidden');
         this.$('.attach-voice-message').addClass('hidden');
     },
 
@@ -12628,11 +12642,77 @@ xabber.ChatBottomView = xabber.BasicView.extend({
         }
     },
 
-    stopWritingVoiceMessage: function () {
-        let $bottom_panel = this.$('.message-input-panel');
-        if ($bottom_panel.find('.recording').length > 0) {
-            $bottom_panel.find('.recording').removeClass('recording');
+    stopWritingVoiceMessage: function (ev) {
+        let $item = $(ev.target),
+            $bottom_panel = this.$('.message-input-panel');
+        if ($item.closest('.voice-message-lock-wrap').length){
+            $bottom_panel.addClass('locked-voice-message');
+        } else if (!$bottom_panel.hasClass('locked-voice-message')) {
+            if ($bottom_panel.find('.recording').length > 0) {
+                $bottom_panel.find('.recording').removeClass('recording');
+            }
         }
+    },
+
+    sendLockedVoiceMessage: function () {
+        clearInterval(this.timerId);
+        clearInterval(this.timerIdDot);
+        this.mediaRecorder && (this.mediaRecorder.stop_status = 'locked');
+        this.mediaRecorder && this.mediaRecorder.stop();
+        this.$('.message-input-panel').removeClass('voice-message-recording');
+        this.$('.message-input-panel').removeClass('locked-voice-message');
+        this.$('.send-area .attach-voice-message').removeClass('recording ground-color-50');
+        this.model.set('recording_voice_message', false);
+    },
+
+    stopLockedVoiceMessage: function (ev) {
+        clearInterval(this.timerId);
+        clearInterval(this.timerIdDot);
+        this.mediaRecorder && (this.mediaRecorder.stop_status = 'locked_stopped');
+        this.mediaRecorder && this.mediaRecorder.stop();
+        this.$('.message-input-panel').addClass('locked-voice-message-stopped');
+    },
+
+    playPauseVoiceMessage: function () {
+        this.locked_stopped_audio && this.locked_stopped_audio.playPause();
+    },
+
+    seekToStart: function () {
+        this.locked_stopped_audio && this.locked_stopped_audio.seekTo(0);
+    },
+
+    deleteLockedVoiceMessage: function () {
+        this.locked_stopped_audio.stop();
+        this.locked_stopped_audio_file = null;
+        this.locked_stopped_audio = null;
+        this.chunks = [];
+        this.$('.message-input-panel').removeClass('voice-message-recording');
+        this.$('.message-input-panel').removeClass('locked-voice-message');
+        this.$('.message-input-panel').removeClass('locked-voice-message-stopped');
+        this.$('.send-area .attach-voice-message').removeClass('recording ground-color-50');
+        this.$('.chat-bottom-voice-message-rendered').prop('class', 'chat-bottom-voice-message-rendered ground-color-500');
+        this.model.set('recording_voice_message', false);
+    },
+
+    sendLockedStoppedMessage: function () {
+        let file = this.locked_stopped_audio_file;
+
+        let audio = new Audio(URL.createObjectURL(file)),
+            audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+        try {
+            utils.loadAudio(audio, audioContext).then((audioBuffer) => {
+                file.peaks = utils.getPeaks(audioBuffer).join(' ');
+                URL.revokeObjectURL(audio);
+                audioContext.close();
+                this.view.addFileMessage([file], true);
+            });
+        } catch (error) {
+            console.error('error handling audio:', error);
+            URL.revokeObjectURL(audioUrl);
+            audioContext.close();
+        }
+        this.deleteLockedVoiceMessage();
     },
 
     writeVoiceMessage: function (ev) {
@@ -12650,26 +12730,29 @@ xabber.ChatBottomView = xabber.BasicView.extend({
     },
 
     initAudio: function() {
+        this.$('.message-input-panel').removeClass('locked-voice-message');
+
         navigator.getUserMedia = (navigator.mozGetUserMedia || navigator.msGetUserMedia || navigator.webkitGetUserMedia || navigator.getUserMedia);
         if (navigator.getUserMedia) {
             this.model.set('recording_voice_message', true)
+
+            this.chunks = [];
             let constraints = { audio: true, channelCount: 1 },
-                chunks = [],
                 $mic = this.$('.send-area .attach-voice-message'),
                 onSuccess = (stream) => {
-                if (!$mic.is(":hover")) {
-                    $mic.removeClass('recording ground-color-50');
-                    this.model.set('recording_voice_message', false)
-                    return;
-                }
-                let mediaRecorder = new opusRecorder({
+                    if (!$mic.is(":hover")) {
+                        $mic.removeClass('recording ground-color-50');
+                        this.model.set('recording_voice_message', false)
+                        return;
+                    }
+                    this.mediaRecorder = new opusRecorder({
                         encoderPath: opusRecorderEncoderPath,
                         encoderSampleRate: 16000,
                         numberOfChannels: 1
-                }),
-                    timer = 1, start_time, end_time,
-                    mic_hover = true;
-                    mediaRecorder.onstart = () => {
+                    });
+                    let timer = 1, start_time, end_time,
+                        mic_hover = true;
+                    this.mediaRecorder.onstart = () => {
                         if (xabber.settings.typing_notifications) {
                             this.view.sendChatState('composing', 'voice');
                             this._chatstate_send_timeout = setInterval(() => {
@@ -12679,85 +12762,119 @@ xabber.ChatBottomView = xabber.BasicView.extend({
                         start_time = moment.now();
                         let $bottom_panel = this.$('.message-input-panel'),
                             $timer_elem = this.$('.input-voice-message .timer'),
+                            $border_elem = this.$('.input-voice-message-border'),
                             $status_msg = this.$('.input-voice-message .voice-msg-status'),
                             $voice_visualizer = this.$('.input-voice-message .voice-visualizer');
                         $timer_elem.text('0:00');
                         $status_msg.css('color', '#9E9E9E').text(xabber.getString("chat_bottom__placeholder__cancel_write_voice"));
                         $bottom_panel.addClass('voice-message-recording');
 
-                        let timerId = setInterval(() => {
-                                if ($mic.hasClass('recording') && (timer < constants.VOICE_MSG_TIME)) {
+                        this.timerId = setInterval(() => {
+                            if (!$bottom_panel.hasClass('locked-voice-message')){
+                                if (timer >= constants.VOICE_MSG_TIME){
+                                    $bottom_panel.addClass('locked-voice-message');
+                                    this.stopLockedVoiceMessage();
+                                    return;
+                                }
+                                if ($mic.hasClass('recording')) {
                                     if (timer%1 === 0)
                                         $timer_elem.text(utils.pretty_duration(timer));
                                     timer = (timer*10 + 2)/10;
-                                    mic_hover = $bottom_panel.is(":hover");
+                                    mic_hover = $border_elem.is(":hover");
                                     if (!mic_hover)
                                         $status_msg.css('color', '#D32F2F').text(xabber.getString("chat_bottom__placeholder__cancel_write_voice_short"));
+                                    else if (this.$('.voice-message-lock-wrap').is(':hover'))
+                                        $status_msg.css('color', '#9E9E9E').text(xabber.getString("chat_bottom__placeholder__lock_write_voice"));
                                     else
                                         $status_msg.css('color', '#9E9E9E').text(xabber.getString("chat_bottom__placeholder__cancel_write_voice"));
-                                }
-                                else
-                                {
-                                    mic_hover = $bottom_panel.is(":hover");
-                                    mediaRecorder.stop();
+                                } else {
+                                    mic_hover = $border_elem.is(":hover");
+                                    this.mediaRecorder.stop();
                                     $mic.removeClass('recording ground-color-50');
+                                    $bottom_panel.removeClass('locked-voice-message');
                                     $bottom_panel.removeClass('voice-message-recording');
                                     this.model.set('recording_voice_message', false);
-                                    clearInterval(timerId);
+                                    clearInterval(this.timerId);
+                                    clearInterval(this.timerIdDot);
                                 }
-                            }, 200),
-                            flag = false,
-                            timerIdDot = setInterval(() => {
-                                if ($mic.hasClass('recording')) {
-                                    if (flag)
-                                        $voice_visualizer.css('background-color', '#FFF');
-                                    else
-                                        $voice_visualizer.css('background-color', '#D32F2F');
-                                    flag = !flag;
+                            } else {
+                                if ((timer < constants.VOICE_MSG_TIME)){
+                                    if (timer%1 === 0)
+                                        $timer_elem.text(utils.pretty_duration(timer));
+                                    timer = (timer*10 + 2)/10;
+                                    mic_hover = true;
+
+                                    $status_msg.css('color', '#9E9E9E').text(xabber.getString("chat_bottom__placeholder__lock_write_voice_send"));
+                                } else {
+                                    this.stopLockedVoiceMessage();
                                 }
+                            }
+                        }, 200);
+
+                        let flag = false;
+                        this.timerIdDot = setInterval(() => {
+                                if (flag)
+                                    $voice_visualizer.css('background-color', '#FFF');
                                 else
-                                    clearInterval(timerIdDot);
+                                    $voice_visualizer.css('background-color', '#D32F2F');
+                                flag = !flag;
                             }, 500);
                     };
 
-                    mediaRecorder.start();
+                    this.mediaRecorder.start();
+                    this.getCurrentVolume(stream);
 
-                mediaRecorder.onstop = () => {
-                    clearInterval(this._chatstate_send_timeout);
-                    (xabber.settings.typing_notifications) && this.view.sendChatState('paused');
-                    end_time = moment.now();
-                    if (mic_hover && ((end_time - start_time)/1000 >= 1.5)) {
-                        let audio_name = ("voice message " + moment().format('YYYY-MM-DD HH:mm:ss') + '.ogg'), audio_type = 'audio/ogg; codecs=opus',
-                            blob = new Blob([chunks], { 'type' : audio_type}),
-                            file = new File([blob], audio_name, {
-                                type: audio_type,
-                            });
-                        file.voice = true;
-                        file.duration = Math.round((end_time - start_time)/1000);
+                    this.mediaRecorder.onstop = () => {
+                        stream.getAudioTracks().forEach(function (track) {
+                            track.stop();
+                        });
+                        this.$('.voice-message-sound-volume').removeClass('voice-message-sound-volume');
+                        clearInterval(this._chatstate_send_timeout);
+                        clearInterval(this.timerId);
+                        clearInterval(this.timerIdDot);
+                        clearInterval(this.volumeInterval);
+                        (xabber.settings.typing_notifications) && this.view.sendChatState('paused');
+                        end_time = moment.now();
+                        if (mic_hover && ((end_time - start_time)/1000 >= 1.5)) {
+                            let audio_name = ("voice message " + moment().format('YYYY-MM-DD HH:mm:ss') + '.ogg'), audio_type = 'audio/ogg; codecs=opus',
+                                blob = new Blob([this.chunks], { 'type' : audio_type}),
+                                file = new File([blob], audio_name, {
+                                    type: audio_type,
+                                });
+                            file.voice = true;
+                            file.duration = Math.round((end_time - start_time)/1000);
+                            if (this.mediaRecorder.stop_status === 'locked_stopped') {
+                                this.locked_stopped_audio_file = file;
+                                let audio = new Audio(URL.createObjectURL(file));
+                                this.locked_stopped_audio = this.renderVoiceMessage(this.$('.chat-bottom-voice-message-rendered'), audio)
 
-                        let audio = new Audio(URL.createObjectURL(file)),
-                            audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                            } else {
+                                let audio = new Audio(URL.createObjectURL(file)),
+                                    audioContext = new (window.AudioContext || window.webkitAudioContext)();
 
-                        try {
-                            utils.loadAudio(audio, audioContext).then((audioBuffer) => {
-                                file.peaks = utils.getPeaks(audioBuffer).join(' ');
-                                URL.revokeObjectURL(audio);
-                                audioContext.close();
-                                this.view.addFileMessage([file], true);
-                            });
-                        } catch (error) {
-                            console.error('error handling audio:', error);
-                            URL.revokeObjectURL(audioUrl);
-                            audioContext.close();
+                                try {
+                                    utils.loadAudio(audio, audioContext).then((audioBuffer) => {
+                                        file.peaks = utils.getPeaks(audioBuffer).join(' ');
+                                        URL.revokeObjectURL(audio);
+                                        audioContext.close();
+                                        this.view.addFileMessage([file], true);
+                                    });
+                                } catch (error) {
+                                    console.error('error handling audio:', error);
+                                    URL.revokeObjectURL(audioUrl);
+                                    audioContext.close();
+                                }
+                                this.chunks = [];
+                                this.$('.message-input-panel').removeClass('locked-voice-message');
+                            }
                         }
-                    }
-                    chunks = [];
-                };
+                        this.mediaRecorder = null;
+                    };
 
-                mediaRecorder.ondataavailable = (e) => {
-                    chunks = e;
+                    this.mediaRecorder.ondataavailable = (e) => {
+                        this.chunks = e;
+                    };
                 };
-            };
 
             let onError = (error) => {
                 console.log(xabber.getString("file_upload__error", [error]));
@@ -12766,6 +12883,132 @@ xabber.ChatBottomView = xabber.BasicView.extend({
 
             window.navigator.getUserMedia(constraints, onSuccess, onError);
         }
+    },
+
+    getCurrentVolume: function (stream) {
+        let audioContext = new AudioContext();
+        let audioSource = audioContext.createMediaStreamSource(stream);
+        let analyser = audioContext.createAnalyser();
+        analyser.fftSize = 512;
+        analyser.minDecibels = -127;
+        analyser.maxDecibels = 0;
+        analyser.smoothingTimeConstant = 0.4;
+        audioSource.connect(analyser);
+        let volumes = new Uint8Array(analyser.frequencyBinCount);
+        let volumeCallback = () => {
+            analyser.getByteFrequencyData(volumes);
+            let volumeSum = 0;
+            for(const volume of volumes)
+                volumeSum += volume;
+            let averageVolume = volumeSum / volumes.length;
+            let current_volume_percent = (averageVolume * 100) / 127;
+            this.setCurrentVolume(current_volume_percent);
+        };
+        this.$('.attach-voice-message').addClass('voice-message-sound-volume');
+        this.$('.attach-locked-voice-message').addClass('voice-message-sound-volume');
+        this.volumeInterval = setInterval(volumeCallback, 100);;
+    },
+
+    setCurrentVolume: function (vol) {
+        let $buttons = this.$('.voice-message-sound-volume');
+        $buttons.each((idx, item) => {
+            let value = Math.round(15 * vol/100);
+            value > 15 && (value = 15);
+            value = `${value}px`;
+            item.style.setProperty("--volume", value);
+        });
+    },
+
+    renderVoiceMessage: function (element, file_url) {
+        let unique_id = 'waveform' + moment.now(),
+            $elem = $(element),
+            $msg_element = $elem.closest('.link-file');
+
+        $elem.addClass('voice-message-rendering').html($(templates.messages.audio_file_waveform({waveform_id: unique_id})));
+        $elem.find('.audio-control-panel').html('');
+        let aud = WaveSurfer.create({
+            container: $elem.find('#' + unique_id)[0],
+            scrollParent: false,
+            barWidth: 2,
+            height: 24,
+            barHeight: 24,
+            barMinHeight: 1,
+            cursorColor: 'rgba(0,0,0,0)',
+            autoCenter: false,
+            normalize: true,
+            hideScrollBar: true,
+            progressColor: '#bdbdbd',
+            waveColor: '#fff'
+        });
+        aud.setVolume(1);
+
+        let hideShowCursor = () => {
+            let current_time = aud.getCurrentTime(),
+                duration = aud.getDuration();
+            if (current_time === 0 || current_time === duration)
+                $elem.addClass('wave-cursor-hidden');
+            else
+                $elem.removeClass('wave-cursor-hidden');
+        };
+
+        aud.on('ready', () => {
+            let duration = Math.round(aud.getDuration());
+            hideShowCursor();
+            $elem.find('.audio-control-panel').text(utils.pretty_duration(duration));
+        });
+
+        aud.on('error', (e) => {
+            console.error(e);
+            // $elem.removeClass('voice-message-rendering');
+            aud.unAll();
+            // $elem.find('.voice-message-play').get(0).remove();
+            utils.callback_popup_message(xabber.getString("jingle__error__audio_not_supported"), 3000);
+        });
+
+        aud.on('play', () => {
+            $elem.closest('.message-input-panel').addClass('playing');
+            $elem.removeClass('wave-cursor-hidden');
+            let timerId = setInterval(function() {
+                let cur_time = Math.round(aud.getCurrentTime());
+                if (aud.isPlaying())
+                    $elem.find('.audio-control-panel').text(utils.pretty_duration(cur_time));
+                else
+                    clearInterval(timerId);
+            }, 100);
+        });
+
+        aud.on('finish', () => {
+            hideShowCursor();
+            $elem.closest('.message-input-panel').removeClass('playing');
+        });
+
+        aud.on('pause', () => {
+            $elem.closest('.message-input-panel').removeClass('playing');
+            let duration = Math.round(aud.getDuration());
+            $elem.find('.audio-control-panel').text(utils.pretty_duration(duration));
+            hideShowCursor();
+        });
+
+        aud.on('seek', () => {
+            hideShowCursor();
+        });
+
+        aud.stopTime = () => {
+            aud.stop();
+        };
+
+        // $elem.find('.voice-message-volume')[0].onchange = () => {
+        //     aud.setVolume($elem.find('.voice-message-volume').val()/100);
+        // };
+
+        try{
+            aud.load(file_url);
+        } catch (e) {
+            console.error(e);
+        }
+
+        aud._onResize();
+        return aud;
     },
 
     typeEmoticon: function (emoji) {

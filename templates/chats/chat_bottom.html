@@ -3,6 +3,21 @@
             <div class="account-indicator ground-color-700"></div>
             <div class="my-avatar circle-avatar circle-image-fix"></div>
         </div>
+        <div class="input-voice-message-border border-color-700">
+            <div class="voice-message-lock-wrap">
+                <i class="mdi mdi-stop mdi-32px ground-color-500 hover-ground-color-300 stop-locked-voice-message"></i>
+                <div class="voice-message-lock-text">
+                    <svg class="voice-message-lock-border-icon mdi mdi-16px mdi-svg-template" data-svgname="arrow-left"></svg>
+                    <span>{[print(xabber.getString("chat_bottom__placeholder__lock_write_voice_hover"))]}</span>
+                    <svg class="voice-message-lock-border-icon mdi mdi-16px mdi-svg-template" data-svgname="arrow-left"></svg>
+                </div>
+                <div class="voice-message-lock-text-hover text-color-700">
+                    <svg class="mdi voice-message-lock-border-icon-hover mdi-16px mdi-svg-template mdi-lock-voice fill-color-700" data-svgname="lock"></svg>
+                    <span>{[print(xabber.getString("chat_bottom__placeholder__lock_write_voice_hover"))]}</span>
+                    <svg class="mdi  voice-message-lock-border-icon-hover mdi-16px mdi-svg-template mdi- fill-color-700 " data-svgname="lock"></svg>
+                </div>
+            </div>
+        </div>
         <div class="message-form">
             <div class="fwd-messages-preview noselect hidden">
                 <div class="msg-border ground-color-700">
@@ -43,6 +58,12 @@
                 <div class="timer">0:00</div>
                 <div class="voice-msg-status">{[print(xabber.getString("chat_bottom__placeholder__cancel_write_voice"))]}</div>
             </div>
+            <div class="chat-bottom-voice-message-rendered ground-color-500">
+
+            </div>
+            <i class="mdi mdi-play mdi-32px ground-color-500 hover-ground-color-300"></i>
+            <i class="mdi mdi-pause mdi-32px ground-color-500 hover-ground-color-300"></i>
+            <svg class="mdi btn-clear-voice-message mdi-24px mdi-svg-template fill-color-500" data-svgname="trash"></svg>
             <div class="input-toolbar">
                 <div class="attach attach-file">
                     <input type="file" title='{[print(xabber.getString("chat_bottom__tooltip_send_file"))]}' multiple>
@@ -72,6 +93,7 @@
             <i class="send-message mdi mdi-32px mdi-send text-color-700 hover-text-color-500 hidden"></i>
             <svg class="send-message send-message-encrypted mdi mdi-32px mdi-send fill-color-700 hover-fill-color-500 hidden mdi-svg-template" data-svgname="send-encrypted"></svg>
             <i class="mdi mdi-32px mdi-microphone attach-voice-message text-color-700 hover-text-color-500"></i>
+            <i class="mdi mdi-32px mdi-send attach-locked-voice-message text-color-700 hover-text-color-500"></i>
             <div class="ephemeral-timer-time text-color-700"></div>
         </div>
     </div>
