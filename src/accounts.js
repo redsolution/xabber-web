@@ -3066,6 +3066,7 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
         "click .show-code": "showCode",
         'click .accept-request': "acceptRequest",
         'click .decline-request': "rejectRequest",
+        'click .btn-manage-xabber-account': "openXabberAccountSettings",
     },
 
     _initialize: function (options) {
@@ -3194,6 +3195,12 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
             height = this.$('.right-column').height();
         this.ps_container.css('height', height + 'px');
         this.updateScrollBar();
+    },
+
+    openXabberAccountSettings: function () {
+        console.error('OPENN');
+        return;
+        utils.dialogs.common('', '<iframe class="xabber-account-manage-frame" src="' + frame_url +'"></iframe>', null, null, null, 'xabber-account-manage-modal');
     },
 
     verifyDevices: function () {

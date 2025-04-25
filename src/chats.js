@@ -12909,7 +12909,7 @@ xabber.ChatBottomView = xabber.BasicView.extend({
         };
         this.$('.attach-voice-message').addClass('voice-message-sound-volume');
         this.$('.attach-locked-voice-message').addClass('voice-message-sound-volume');
-        this.volumeInterval = setInterval(volumeCallback, 100);;
+        this.volumeInterval = setInterval(volumeCallback, 100);
     },
 
     setCurrentVolume: function (vol) {
