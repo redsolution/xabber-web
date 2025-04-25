@@ -12679,6 +12679,10 @@ xabber.ChatBottomView = xabber.BasicView.extend({
 
     seekToStart: function () {
         this.locked_stopped_audio && this.locked_stopped_audio.seekTo(0);
+        if (this.locked_stopped_audio && !this.locked_stopped_audio.isPlaying()){
+            let duration = Math.round(this.locked_stopped_audio.getDuration());
+            this.$('.chat-bottom-voice-message-rendered').find('.audio-control-panel').text(utils.pretty_duration(duration));
+        }
     },
 
     deleteLockedVoiceMessage: function () {
@@ -12982,13 +12986,13 @@ xabber.ChatBottomView = xabber.BasicView.extend({
 
         aud.on('finish', () => {
             hideShowCursor();
+            let duration = Math.round(aud.getDuration());
+            $elem.find('.audio-control-panel').text(utils.pretty_duration(duration));
             $elem.closest('.message-input-panel').removeClass('playing');
         });
 
         aud.on('pause', () => {
             $elem.closest('.message-input-panel').removeClass('playing');
-            let duration = Math.round(aud.getDuration());
-            $elem.find('.audio-control-panel').text(utils.pretty_duration(duration));
             hideShowCursor();
         });
 

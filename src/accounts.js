@@ -3199,8 +3199,7 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
 
     openXabberAccountSettings: function () {
         console.error('OPENN');
-        return;
-        utils.dialogs.common('', '<iframe class="xabber-account-manage-frame" src="' + frame_url +'"></iframe>', null, null, null, 'xabber-account-manage-modal');
+        // utils.dialogs.common('', '<iframe class="xabber-account-manage-frame" src="' + frame_url +'"></iframe>', null, null, null, 'xabber-account-manage-modal');
     },
 
     verifyDevices: function () {

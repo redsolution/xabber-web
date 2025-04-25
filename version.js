@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.4.93","version_description":"updated translations, initial xabber account button and iframe, fixed text and indicator width in voice message recording"}'
+'{"version_number":"2.4.94","version_description":"fixed translations, changed current time in recorder voice message"}'
 )});
