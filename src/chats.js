@@ -12691,6 +12691,7 @@ xabber.ChatBottomView = xabber.BasicView.extend({
         this.$('.message-input-panel').removeClass('locked-voice-message-stopped');
         this.$('.send-area .attach-voice-message').removeClass('recording ground-color-50');
         this.$('.chat-bottom-voice-message-rendered').prop('class', 'chat-bottom-voice-message-rendered ground-color-500');
+        this.$('.chat-bottom-voice-message-rendered').html('');
         this.model.set('recording_voice_message', false);
     },
 
@@ -12731,6 +12732,8 @@ xabber.ChatBottomView = xabber.BasicView.extend({
 
     initAudio: function() {
         this.$('.message-input-panel').removeClass('locked-voice-message');
+        this.$('.message-input-panel').removeClass('locked-voice-message-stopped');
+        this.$('.chat-bottom-voice-message-rendered').html('');
 
         navigator.getUserMedia = (navigator.mozGetUserMedia || navigator.msGetUserMedia || navigator.webkitGetUserMedia || navigator.getUserMedia);
         if (navigator.getUserMedia) {

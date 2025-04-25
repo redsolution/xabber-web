@@ -11826,7 +11826,7 @@ img.fwd-img-preview {
     margin: 0 auto;
     line-height: 16px;
     font-size: 13px;
-    padding-right: 58px;
+    padding-left: 108px;
 }
 
 .link-file {
@@ -12909,15 +12909,15 @@ img.fwd-img-preview {
 }
 .send-area .attach-voice-message.voice-message-sound-volume,
 .locked-voice-message .send-area .attach-locked-voice-message.voice-message-sound-volume{
-    background: #E0E0E0 !important;
-    outline: 0px solid #e0e0e0;
-    transition: outline-width 0.01s linear;
+    background: #e0e0e0 !important;
+    bottom: 61px;
+    height: 40px;
+    left: 12px;
+    outline: 0 solid #e0e0e0;
     outline-width: var(--volume);
-    height: 32px;
-    bottom: 65px;
-    width: 32px;
-    padding: 0;
-    left: 16px;
+    padding: 4px;
+    transition: outline-width .01s linear;
+    width: 40px;
 }
 .send-area .attach-locked-voice-message,
 .send-area .attach-voice-message {
@@ -12975,6 +12975,8 @@ canvas {
     line-height: 16px;
     color: rgb(80, 80, 80);
     margin-top: 1px;
+    min-width: 38px;
+    text-align: end;
 }
 
 .voice-visualizer {
@@ -12982,8 +12984,8 @@ canvas {
     height: 10px;
     border-radius: 100%;
     background-color: #D32F2F;
-    margin-left: 24px;
-    margin-right: 8px;
+    margin-left: 8px;
+    margin-right: 22px;
     transition: background-color 0.5s ease-out;
 }
 
@@ -13010,10 +13012,10 @@ canvas {
 }
 .input-voice-message-border {
     display: none;
-    border: 0.5px dashed;
+    border: 1px dotted;
     position: absolute;
     top: 0;
-    width: calc(100% - 24px);
+    width: calc(100% - 16px);
     height: calc(100% - 16px);
     z-index: 1000;
     left: 0;
@@ -13086,7 +13088,7 @@ canvas {
     display: block;
     font-size: 24px;
     position: absolute;
-    right: 66px;
+    left: 74px;
     text-align: center;
     width: 36px;
     height: 36px;
@@ -13097,7 +13099,7 @@ canvas {
     display: none
 }
 .voice-message-recording.locked-voice-message .input-voice-message {
-    width: calc(100% - 40px);
+    /*width: calc(100% - 40px);*/
 }
 
 .voice-message-recording.locked-voice-message.locked-voice-message-stopped .mdi-stop,
@@ -13113,30 +13115,32 @@ canvas {
     height: 36px;
     margin-bottom: 23px;
     margin-left: 26px;
+    margin-right: 8px;
     margin-top: 15px;
     max-width: unset;
     min-width: unset;
     padding: 6px;
     position: relative;
-    right: 1px;
+    left: -16px;
     z-index: 1001;
 }
 .voice-message-recording.locked-voice-message.locked-voice-message-stopped .chat-bottom-voice-message-rendered .audio-control-panel{
     color: #fff;
-    text-align: center;
-    position: absolute;
-    left: 16px;
-    width: fit-content;
-    line-height: 24px;
-    height: 24px;
-    top: 4px;
     cursor: pointer;
+    height: 24px;
+    line-height: 24px;
+    position: absolute;
+    right: 16px;
+    text-align: end;
+    top: 4px;
+    width: fit-content;
+    min-width: 38px;
 }
 .voice-message-recording.locked-voice-message.locked-voice-message-stopped .chat-bottom-voice-message-rendered .waveform{
     border: none;
     box-shadow: none;
     height: 24px;
-    left: 56px;
+    left: 40px;
     overflow: hidden;
     padding: 0;
     position: absolute;
@@ -13153,25 +13157,25 @@ canvas {
 .voice-message-recording.locked-voice-message.locked-voice-message-stopped .btn-clear-voice-message{
     cursor: pointer;
     display: block !important;
-    left: 62px;
+    right: 82px;
     position: absolute;
     top: 27px;
     z-index: 1002;
 }
 .voice-message-recording.locked-voice-message.locked-voice-message-stopped .mdi-pause,
 .voice-message-recording.locked-voice-message.locked-voice-message-stopped:not(.playing) .mdi-play{
+    border-radius: 18px;
     color: #fff;
     cursor: pointer;
     display: block !important;
-    position: absolute;
-    right: 90px;
-    top: 21px;
-    z-index: 1002;
-    height: 36px;
-    width: 36px;
-    padding: 2px 6px;
     font-size: 24px;
-    border-radius: 18px;
+    height: 36px;
+    padding: 2px 6px;
+    position: absolute;
+    left: 74px;
+    top: 21px;
+    width: 36px;
+    z-index: 1002;
 }
 .message-input-panel .btn-clear-voice-message,
 .message-input-panel .mdi-play,
