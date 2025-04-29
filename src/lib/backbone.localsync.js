@@ -49,102 +49,132 @@
 
     _.extend(IndexedDB.prototype, {
         put: function(objStoreName, obj,callback) {
-            if (!this.db || this.closed) {
-                callback && callback(false);
-                return;
+            try {
+                if (!this.db || this.closed) {
+                    callback && callback(false);
+                    return;
+                }
+                let db_writer = this.db.transaction([objStoreName], 'readwrite').objectStore(objStoreName),
+                    request = db_writer.put(obj);
+                request.onsuccess = function () {
+                    callback && callback(true);
+                }.bind(this);
+                request.onerror = function () {
+                    callback && callback(false);
+                }.bind(this);
+            } catch (e) {
+                console.error(e);
+                window.location.reload(true);
             }
-            let db_writer = this.db.transaction([objStoreName], 'readwrite').objectStore(objStoreName),
-                request = db_writer.put(obj);
-            request.onsuccess = function () {
-                callback && callback(true);
-            }.bind(this);
-            request.onerror = function () {
-                callback && callback(false);
-            }.bind(this);
         },
 
         get_all: function (objStoreName, value, callback) {
-            if (!this.db || this.closed) {
-                callback && callback(null);
-                return;
-            }
-            let db_reader = this.db.transaction([objStoreName], 'readonly').objectStore(objStoreName),
-                request;
-            if (_.isNull(value))
-                request = db_reader.getAll();
-            else
-                request = db_reader.getAll(value);
-            request.onsuccess = function(event) {
-                var matching = event.target.result;
-                if (matching !== undefined) {
-                    callback && callback(matching);
-                } else {
+            try {
+                if (!this.db || this.closed) {
                     callback && callback(null);
+                    return;
                 }
-            }.bind(this);
+                let db_reader = this.db.transaction([objStoreName], 'readonly').objectStore(objStoreName),
+                    request;
+                if (_.isNull(value))
+                    request = db_reader.getAll();
+                else
+                    request = db_reader.getAll(value);
+                request.onsuccess = function(event) {
+                    var matching = event.target.result;
+                    if (matching !== undefined) {
+                        callback && callback(matching);
+                    } else {
+                        callback && callback(null);
+                    }
+                }.bind(this);
+            } catch (e) {
+                console.error(e);
+                window.location.reload(true);
+            }
         },
 
         get: function (objStoreName, value, callback) {
-            if (!this.db || this.closed) {
-                callback && callback(null);
-                return;
-            }
-            let db_reader = this.db.transaction([objStoreName], 'readonly').objectStore(objStoreName),
-                request = db_reader.get(value);
-            request.onsuccess = function(event) {
-                var matching = event.target.result;
-                if (matching !== undefined) {
-                    callback && callback(matching);
-                } else {
+            try {
+                if (!this.db || this.closed) {
                     callback && callback(null);
+                    return;
                 }
-            }.bind(this);
+                let db_reader = this.db.transaction([objStoreName], 'readonly').objectStore(objStoreName),
+                    request = db_reader.get(value);
+                request.onsuccess = function(event) {
+                    var matching = event.target.result;
+                    if (matching !== undefined) {
+                        callback && callback(matching);
+                    } else {
+                        callback && callback(null);
+                    }
+                }.bind(this);
+            } catch (e) {
+                console.error(e);
+                window.location.reload(true);
+            }
         },
 
         remove: function (objStoreName, value, callback) {
-            if (!this.db || this.closed) {
-                callback && callback(false);
-                return;
+            try {
+                if (!this.db || this.closed) {
+                    callback && callback(false);
+                    return;
+                }
+                let db_writer = this.db.transaction([objStoreName], 'readwrite').objectStore(objStoreName);
+                var request = db_writer.delete(value);
+                request.onsuccess = function () {
+                    callback && callback(true);
+                }.bind(this);
+                request.onerror = function () {
+                    callback && callback(false);
+                }.bind(this);
+            } catch (e) {
+                console.error(e);
+                window.location.reload(true);
             }
-            let db_writer = this.db.transaction([objStoreName], 'readwrite').objectStore(objStoreName);
-            var request = db_writer.delete(value);
-            request.onsuccess = function () {
-                callback && callback(true);
-            }.bind(this);
-            request.onerror = function () {
-                callback && callback(false);
-            }.bind(this);
         },
 
         clear_database: function (objStoreName, callback) {
-            if (!this.db || this.closed) {
-                callback && callback(false);
-                return;
+            try {
+                if (!this.db || this.closed) {
+                    callback && callback(false);
+                    return;
+                }
+                let db_writer = this.db.transaction([objStoreName], 'readwrite').objectStore(objStoreName);
+                var request = db_writer.clear();
+                request.onsuccess = function () {
+                    callback && callback(true);
+                }.bind(this);
+                request.onerror = function () {
+                    callback && callback(false);
+                }.bind(this);
+            } catch (e) {
+                console.error(e);
+                window.location.reload(true);
             }
-            let db_writer = this.db.transaction([objStoreName], 'readwrite').objectStore(objStoreName);
-            var request = db_writer.clear();
-            request.onsuccess = function () {
-                callback && callback(true);
-            }.bind(this);
-            request.onerror = function () {
-                callback && callback(false);
-            }.bind(this);
         },
 
         delete_database: function (objStoreName, callback) {
-            if (!this.db) {
-                callback && callback(false);
-                return;
+            try {
+                if (!this.db) {
+                    callback && callback(false);
+                    return;
+                }
+                this.closed = true;
+                this.db.close();
+                let db_deleter = indexedDB.deleteDatabase(this.name);
+                db_deleter.onsuccess = function () {
+                    callback && callback(true);
+                }.bind(this);
+                db_deleter.onerror = function () {
+                    callback && callback(false);
+                }.bind(this);
+            } catch (e) {
+                console.error(e);
+                window.location.reload(true);
             }
-            this.closed = true;
-            this.db.close();
-            let db_deleter = indexedDB.deleteDatabase(this.name);
-            db_deleter.onsuccess = function () {
-                callback && callback(true);
-            }.bind(this);
-            db_deleter.onerror = function () {
-                callback && callback(false);
-            }.bind(this);
         }
     });
 

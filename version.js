@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.4.94","version_description":"fixed translations, changed current time in recorder voice message"}'
+'{"version_number":"2.4.95","version_description":"added post message handling to iframe, added xmpp auth mechanism for iframe, added try catch on db transaction error,"}'
 )});

@@ -156,6 +156,10 @@ export default {
                 dialog.$modal.addClass(dialog_options.modal_class)
             }
 
+            if (dialog_options.iframe_text) {
+                dialog.$modal.find('.dialog-text').html(text);
+            }
+
             if (dialog_options.no_dialog_options) {
                 dialog.$modal.find('.dialog-options-wrap').html('');
             }

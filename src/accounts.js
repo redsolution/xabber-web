@@ -1264,10 +1264,13 @@ xabber.Account = Backbone.Model.extend({
                 from_jid = $incoming_iq.attr('from');
             if ($confirm.length) {
                 request_code = $confirm.attr('id');
-                if (this.get('gallery_auth_request_code')) {
+                if (this.get('gallery_auth_request_code') && this.get('gallery_auth_request_code') == $incoming_iq.attr('id')) {
                     this.onAuthCode(request_code)
                 }
-                else {
+                else if (this.get('service_auth_request_code') && this.get('service_auth_request_code') == $incoming_iq.attr('id')) {
+                    this.onServiceAuthCode(request_code)
+
+                } else {
                     this.gallery_code_requests.push({
                         id: $incoming_iq.attr('id'),
                         code: request_code
@@ -1312,6 +1315,31 @@ xabber.Account = Backbone.Model.extend({
             }
         },
 
+        testXabberServiceTokenExpire: function(callback, errback) {
+            let currentTime = new Date(),
+                tokenExpireTime = new Date(this.get('service_token_expires'));
+
+            console.error(currentTime);
+            console.error(tokenExpireTime);
+            console.error(currentTime < tokenExpireTime);
+            if (this.get('service_auth')){
+                this.once('service_token_authenticated', callback)
+            }
+            else if (currentTime < tokenExpireTime){
+                callback && callback();
+            }
+            else if (constants.XABBER_SERVICE_IFRAME_URL){
+                this.initServiceAuth(errback);
+                this.once('service_token_authenticated', callback)
+            }
+            else {
+                this.set('service_url', undefined);
+                this.set('service_token', undefined);
+                this.set('service_token_expires', undefined);
+                callback && callback();
+            }
+        },
+
         testGalleryFileSlot: function(file, callback) {
             if (this.get('gallery_token') && this.get('gallery_url')){
                 let reader = new FileReader();
@@ -1343,6 +1371,46 @@ xabber.Account = Backbone.Model.extend({
                     callback && callback(false)
                 };
                 reader.readAsDataURL(file);
+            }
+        },
+
+        initServiceAuth: function(errback) {
+            let service_url = constants.XABBER_SERVICE_URL;
+            if (service_url && !this.get('service_auth')) {
+                this.set('service_token', undefined);
+                this.set('service_token_expires', undefined);
+                this.set('service_auth', true);
+                this.service_iq_answered = false;
+                $.ajax({
+                    type: 'POST',
+                    url: service_url + 'xmpp_auth/code_request/',
+                    dataType: 'json',
+                    contentType: "application/json",
+                    data: JSON.stringify({jid: this.jid, type: "iq"}),
+                    success: (response) => {
+                        if (response.request_id){
+                            this.set('service_auth_request_code', response.request_id); //34
+                            if (this.gallery_code_requests.length){
+                                let verifying_code = this.gallery_code_requests.find(verifying_mess => (verifying_mess.id === this.get('service_auth_request_code')));
+                                if (verifying_code && verifying_code.code)
+                                    this.onServiceAuthCode(verifying_code.code)
+                            }
+                            setTimeout(() => {
+                                if (!this.service_iq_answered){
+                                    this.set('service_auth', false);
+                                    this.gallery_code_requests = [];
+                                    errback && errback();
+                                }
+                            }, 5000)
+                        }
+                    },
+                    error: (response) => {
+                        console.error(response);
+                        this.set('service_auth', false);
+                        this.gallery_code_requests = [];
+                        errback && errback();
+                    }
+                });
             }
         },
 
@@ -1406,6 +1474,36 @@ xabber.Account = Backbone.Model.extend({
                     error: (response) => {
                         this.set('gallery_auth', false);
                         this.handleCommonGalleryErrors(response);
+                        console.log(response)
+                    }
+                });
+            }
+        },
+
+        onServiceAuthCode: function (confirm_code) {
+            this.gallery_code_requests = [];
+            this.set('service_auth_request_code', undefined);
+            let service_url = constants.XABBER_SERVICE_URL;
+            if (service_url && confirm_code) {
+                this.service_iq_answered = true;
+                $.ajax({
+                    type: 'POST',
+                    url: service_url + 'xmpp_auth/confirm/',
+                    dataType: 'json',
+                    contentType: "application/json",
+                    data: JSON.stringify({jid: this.id, code: confirm_code}),
+                    success: (response) => {
+                        if (response.token)
+                            this.set('service_token', response.token);
+                        if (response.expires) {
+                            let normalizedString = response.expires.replace(/\+00:00Z$/, "Z");
+                            this.set('service_token_expires', normalizedString);
+                        }
+                        this.trigger('service_token_authenticated');
+                        this.set('service_auth', false)
+                    },
+                    error: (response) => {
+                        this.set('service_auth', false);
                         console.log(response)
                     }
                 });
@@ -3198,8 +3296,43 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
     },
 
     openXabberAccountSettings: function () {
-        console.error('OPENN');
-        // utils.dialogs.common('', '<iframe class="xabber-account-manage-frame" src="' + frame_url +'"></iframe>', null, null, null, 'xabber-account-manage-modal');
+        this.model.testXabberServiceTokenExpire(()=> {
+            let token = this.model.get('service_token'),
+                iframe_window;
+            console.error(token);
+            if (!token)
+                return;
+            let iframe = document.createElement('iframe');
+
+            let handleServiceMessage = (event) => {
+                console.error(event);
+                console.error(event.origin);
+                console.error(constants.XABBER_SERVICE_IFRAME_URL);
+                console.error(event.origin !== constants.XABBER_SERVICE_IFRAME_URL);
+                console.error(event.data);
+                event.data && event.data.type && console.error(event.data.type);
+                console.error(event.data && event.data.type && event.data.type === 'REQUEST_TOKEN');
+                if (event.origin !== constants.XABBER_SERVICE_IFRAME_URL)
+                    return;
+                if (event.data && event.data.type && event.data.type === 'REQUEST_TOKEN') {
+                    console.log('send');
+                    iframe_window.postMessage(
+                        { type: 'TOKEN_RESPONSE', token },
+                        event.origin
+                    );
+                    window.removeEventListener('message', handleServiceMessage);
+
+                }
+            };
+            iframe.classList.add("xabber-account-manage-frame");
+            iframe.src = constants.XABBER_SERVICE_IFRAME_URL;
+            utils.dialogs.common('', iframe, null, {iframe_text: true}, null, 'xabber-account-manage-modal');
+            iframe_window = iframe.contentWindow || iframe;
+            console.log('iframe_window.addEventListener');
+            window.addEventListener("message", handleServiceMessage);
+            console.log(iframe_window);
+
+        });
     },
 
     verifyDevices: function () {

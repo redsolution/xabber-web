@@ -12,6 +12,9 @@ var constants = {
     FAVICON_NOTIFICATION: "assets/images/favicon-notification.png",
     BACKGROUND_IMAGE: "assets/images/background.png",
 
+    XABBER_SERVICE_URL: '',
+    XABBER_SERVICE_IFRAME_URL: '',
+
     WIDTH_MEDIUM: 1650,
     WIDTH_NARROW: 1280,
     WIDTH_TINY: 1152,
