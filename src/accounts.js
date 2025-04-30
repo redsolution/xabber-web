@@ -4391,6 +4391,7 @@ xabber.AccountSettingsSingleModalView = xabber.AccountSettingsModalView.extend({
         this.$('.right-column').addClass('hidden');
         this.$('.btn-back-settings').removeClass('hidden');
         this.$('.btn-back-subsettings-account').addClass('hidden');
+        this.$('.main-info-wrap').switchClass('xabber-account-button-visible', constants.XABBER_SERVICE_IFRAME_URL && constants.XABBER_SERVICE_URL);
         this.updateHeight();
         this.updateBlockedLabel();
         if (options && options.account_block_name) {
