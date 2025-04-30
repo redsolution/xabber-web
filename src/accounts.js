@@ -3273,6 +3273,7 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
         this.$('.btn-sorting').addClass('hidden');
         this.$('.settings-panel-head-title').removeClass('hidden');
         this.$('.media-gallery-button.btn-more').addClass('hidden');
+        this.$('.main-info-wrap').switchClass('xabber-account-button-visible', constants.XABBER_SERVICE_IFRAME_URL && constants.XABBER_SERVICE_URL);
         this.updateHeight();
         this.updateBlockedLabel();
         if (options && options.block_name) {
@@ -3296,6 +3297,10 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
     },
 
     openXabberAccountSettings: function () {
+        if (!(constants.XABBER_SERVICE_IFRAME_URL && constants.XABBER_SERVICE_URL))
+            return;
+        let modal = utils.dialogs.common('', '', null, {iframe_text: true}, null, 'xabber-account-manage-modal');
+
         this.model.testXabberServiceTokenExpire(()=> {
             let token = this.model.get('service_token'),
                 iframe_window;
@@ -3326,7 +3331,7 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
             };
             iframe.classList.add("xabber-account-manage-frame");
             iframe.src = constants.XABBER_SERVICE_IFRAME_URL;
-            utils.dialogs.common('', iframe, null, {iframe_text: true}, null, 'xabber-account-manage-modal');
+            modal.$modal.find('.dialog-text').html(iframe);
             iframe_window = iframe.contentWindow || iframe;
             console.log('iframe_window.addEventListener');
             window.addEventListener("message", handleServiceMessage);
