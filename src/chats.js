@@ -724,15 +724,18 @@ xabber.MessagesBase = Backbone.Collection.extend({
                                       resolve(enc_file);
                                   });
                               } catch (e) {
+                                  console.error(e);
                                   resolve(null)
                               }
                           };
                           filereader.readAsArrayBuffer(blob);
                       } catch (e) {
+                          console.error(e);
                           resolve(null)
                       }
                   });
-              }).catch(() => {
+              }).catch((e) => {
+                  console.error(e);
                   resolve(null)
               });
           });
@@ -4035,8 +4038,6 @@ xabber.ChatContentView = xabber.BasicView.extend({
     },
 
     hideMessagesAfterSkipping: function () {
-        console.warn(this.model.get('last_sync_unread_id'));
-        console.warn(this.model.get('synced_msg'));
         if (this.model.get('last_sync_unread_id') && this.model.get('synced_msg')){
             if (this.model.get('synced_msg').attributes && !this.model.get('synced_msg').attributes.is_unread && !this.model.get('synced_msg').attributes.is_unread_archived){
                 this.$('.chat-message.after-skip-message').removeClass('after-skip-message');
@@ -5739,10 +5740,22 @@ xabber.ChatContentView = xabber.BasicView.extend({
                         }
 
                         let f_url = $message.find('.link-file').find('.file-link-download').attr('href');
-                        $message.find('.link-file').find('.mdi-play').removeClass('no-uploaded');
-                        audio_player.$audio_elem.voice_message = this.renderVoiceMessage($message.find('.link-file').find('.file-container')[0], f_url, null, file.peaks);
 
-                        xabber.trigger('plyr_player_updated');
+                        if (file && file.key) {
+                            this.model.messages.decryptFile(f_url, file.key).then((result) => {
+                                if (result === null)
+                                    return;
+                                $message.find('.link-file').find('.mdi-play').removeClass('no-uploaded');
+                                audio_player.$audio_elem.voice_message = this.renderVoiceMessage($message.find('.link-file').find('.file-container')[0], result, null, file.peaks);
+
+                                xabber.trigger('plyr_player_updated');
+                            });
+                        } else {
+                            $message.find('.link-file').find('.mdi-play').removeClass('no-uploaded');
+                            audio_player.$audio_elem.voice_message = this.renderVoiceMessage($message.find('.link-file').find('.file-container')[0], f_url, null, file.peaks);
+
+                            xabber.trigger('plyr_player_updated');
+                        }
                     }
                 });
             }
@@ -7429,11 +7442,22 @@ xabber.ChatContentView = xabber.BasicView.extend({
                     }
 
                     let f_url = $message.find('.link-file').find('.file-link-download').attr('href');
-                    $message.find('.link-file').find('.mdi-play').removeClass('no-uploaded');
-                    audio_player.$audio_elem.voice_message = this.renderVoiceMessage($message.find('.link-file').find('.file-container')[0], f_url, null, item.peaks);
 
-                    message.set('msg_player_audios', [audio_player]);
-                    xabber.trigger('plyr_player_updated');
+                    if (item && item.key) {
+                        this.model.messages.decryptFile(f_url, item.key).then((result) => {
+                            if (result === null)
+                                return;
+                            $message.find('.link-file').find('.mdi-play').removeClass('no-uploaded');
+                            audio_player.$audio_elem.voice_message = this.renderVoiceMessage($message.find('.link-file').find('.file-container')[0], result, null, item.peaks);
+                            message.set('msg_player_audios', [audio_player]);
+                            xabber.trigger('plyr_player_updated');
+                        });
+                    } else {
+                        $message.find('.link-file').find('.mdi-play').removeClass('no-uploaded');
+                        audio_player.$audio_elem.voice_message = this.renderVoiceMessage($message.find('.link-file').find('.file-container')[0], f_url, null, item.peaks);
+                        message.set('msg_player_audios', [audio_player]);
+                        xabber.trigger('plyr_player_updated');
+                    }
                 }
             });
         }
@@ -8586,8 +8610,8 @@ xabber.AccountChats = xabber.ChatsBase.extend({
         msg_object.account = this.account;
 
         msg_object = await this.account.testMsgChildForXeps(msg_object);
-        console.warn('msg parsed');
-        console.warn(msg_object);
+        // console.warn('msg parsed');
+        // console.warn(msg_object);
         if (msg_object.ignore && msg_object.final_msg){
             return msg_object.final_msg;
         }

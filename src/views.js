@@ -1355,8 +1355,8 @@ xabber.ToolbarView = xabber.BasicView.extend({
                     if (chat.get('notifications')){
                     } else {
                         if (chat.get('unread') || chat.get('const_unread')){
-                            console.error('chat with UNREAD!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
-                            console.error(chat);
+                            // console.error('chat with UNREAD!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
+                            // console.error(chat);
                         }
                         count_all_msg += chat.get('unread') + chat.get('const_unread');
                         if (chat.contact.get('group_chat'))
