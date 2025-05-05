@@ -1389,7 +1389,7 @@ xabber.Account = Backbone.Model.extend({
                     data: JSON.stringify({jid: this.jid, type: "iq"}),
                     success: (response) => {
                         if (response.request_id){
-                            this.set('service_auth_request_code', response.request_id); //34
+                            this.set('service_auth_request_code', response.request_id);
                             if (this.gallery_code_requests.length){
                                 let verifying_code = this.gallery_code_requests.find(verifying_mess => (verifying_mess.id === this.get('service_auth_request_code')));
                                 if (verifying_code && verifying_code.code)
@@ -3307,35 +3307,48 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
             console.error(token);
             if (!token)
                 return;
-            let iframe = document.createElement('iframe');
+            try {
+                fetch(constants.XABBER_SERVICE_IFRAME_URL)
+                    .then(response => {
+                        if (response.ok) {
+                            console.log('Страница доступна, статус:', response.status);
+                            let iframe = document.createElement('iframe');
 
-            let handleServiceMessage = (event) => {
-                console.error(event);
-                console.error(event.origin);
-                console.error(constants.XABBER_SERVICE_IFRAME_URL);
-                console.error(event.origin !== constants.XABBER_SERVICE_IFRAME_URL);
-                console.error(event.data);
-                event.data && event.data.type && console.error(event.data.type);
-                console.error(event.data && event.data.type && event.data.type === 'REQUEST_TOKEN');
-                if (event.origin !== constants.XABBER_SERVICE_IFRAME_URL)
-                    return;
-                if (event.data && event.data.type && event.data.type === 'REQUEST_TOKEN') {
-                    console.log('send');
-                    iframe_window.postMessage(
-                        { type: 'TOKEN_RESPONSE', token },
-                        event.origin
-                    );
-                    window.removeEventListener('message', handleServiceMessage);
+                            let handleServiceMessage = (event) => {
+                                console.error(event);
+                                console.error(event.origin);
+                                console.error(constants.XABBER_SERVICE_IFRAME_URL);
+                                console.error(event.origin !== constants.XABBER_SERVICE_IFRAME_URL);
+                                console.error(event.data);
+                                event.data && event.data.type && console.error(event.data.type);
+                                console.error(event.data && event.data.type && event.data.type === 'REQUEST_TOKEN');
+                                if (event.origin !== constants.XABBER_SERVICE_IFRAME_URL)
+                                    return;
+                                if (event.data && event.data.type && event.data.type === 'REQUEST_TOKEN') {
+                                    console.log('send');
+                                    iframe_window.postMessage(
+                                        { type: 'TOKEN_RESPONSE', token },
+                                        event.origin
+                                    );
+                                    window.removeEventListener('message', handleServiceMessage);
 
-                }
-            };
-            iframe.classList.add("xabber-account-manage-frame");
-            iframe.src = constants.XABBER_SERVICE_IFRAME_URL;
-            modal.$modal.find('.dialog-text').html(iframe);
-            iframe_window = iframe.contentWindow || iframe;
-            console.log('iframe_window.addEventListener');
-            window.addEventListener("message", handleServiceMessage);
-            console.log(iframe_window);
+                                }
+                            };
+                            iframe.classList.add("xabber-account-manage-frame");
+                            iframe.src = constants.XABBER_SERVICE_IFRAME_URL;
+                            modal.$modal.find('.dialog-text').html(iframe);
+                            iframe_window = iframe.contentWindow || iframe;
+                            console.log('iframe_window.addEventListener');
+                            window.addEventListener("message", handleServiceMessage);
+                            console.log(iframe_window);
+                        } else {
+                            console.error('Ошибка загрузки:', response.status);
+                        }
+                    })
+                    .catch(error => console.error('Ошибка:', error));
+            } catch (e) {
+                console.error('Ошибка:', e)
+            }
 
         });
     },

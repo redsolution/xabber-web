@@ -6455,7 +6455,7 @@ xabber.GroupChatSettings = Backbone.ModelWithStorage.extend({
             return [];
     },
 
-    updateParticipant: function (jid, participant_info) { //34
+    updateParticipant: function (jid, participant_info) {
         let all_participants_lists = _.clone(this.get('participants_lists')),
             chat_participants = all_participants_lists.find(list => list.jid === jid),
             version = chat_participants && chat_participants.version || 0,
