@@ -11825,8 +11825,9 @@ img.fwd-img-preview {
     color: #9E9E9E;
     margin: 0 auto;
     line-height: 16px;
-    font-size: 13px;
-    padding-left: 92px;
+    font-size: 16px;
+    padding-left: 132px;
+    text-align: center;
 }
 
 .link-file {
@@ -12919,6 +12920,13 @@ img.fwd-img-preview {
     transition: outline-width .01s linear;
     width: 40px;
 }
+.locked-voice-message .send-area .attach-locked-voice-message.voice-message-sound-volume{
+    width: 48px;
+    height: 48px;
+    bottom: 57px;
+    left: 8px;
+    padding: 8px;
+}
 .send-area .attach-locked-voice-message,
 .send-area .attach-voice-message {
     border-radius: 50%;
@@ -12977,6 +12985,7 @@ canvas {
     margin-top: 1px;
     min-width: 38px;
     text-align: end;
+    margin-right: 40px;
 }
 
 .voice-visualizer {
@@ -12984,8 +12993,8 @@ canvas {
     height: 10px;
     border-radius: 100%;
     background-color: #D32F2F;
-    margin-left: 8px;
-    margin-right: 22px;
+    margin-right: 0px;
+    margin-left: 30px;
     transition: background-color 0.5s ease-out;
     min-width: 10px;
 }
@@ -13077,6 +13086,28 @@ canvas {
 }
 .voice-message-recording .input-voice-message-border {
     display: block;
+}
+.voice-message-recording .input-voice-message-background {
+    display: none;
+}
+.voice-message-recording.voice-message-recording-cancel .input-voice-message-background {
+    background: #FFEBEE;
+    background: rgb(255 235 238 / 50%);
+    border-radius: 12px;
+    display: block;
+    height: calc(100% - 16px);
+    left: 0;
+    overflow: hidden;
+    position: absolute;
+    top: 0;
+    width: calc(100% - 16px);
+    z-index: -1;
+}
+.voice-message-recording.voice-message-recording-cancel .input-voice-message-border {
+    border-color: #d32f2f !important;
+}
+.voice-message-recording.voice-message-recording-cancel .input-voice-message-border .voice-message-lock-wrap{
+    display:none;
 }
 .voice-message-recording .input-voice-message-border .voice-message-lock-border-icon {
     rotate: 270deg;
@@ -13571,6 +13602,9 @@ input[type=range].voice-message-volume:focus {
 }
 .settings-panel-wrap .settings-panel .settings-block-wrap.media-gallery {
     min-height: 400px;
+}
+.settings-panel-wrap .settings-panel .settings-block-wrap.media-gallery .gallery-files:not(.grid) .gallery-file {
+    z-index: 0;
 }
 .settings-panel-wrap .settings-panel .settings-panel-head .description {
     color: #616161;

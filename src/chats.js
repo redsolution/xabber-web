@@ -8005,6 +8005,9 @@ xabber.ChatContentView = xabber.BasicView.extend({
                 return;
             }
 
+            if ($elem.closest(".file-container").length) {
+                return;
+            }
             if ($elem.hasClass('mdi-play') && !($elem.closest(".video-file-wrap").length > 0)) {
                 let $audio_elem = $elem.closest('.link-file');
                 $audio_elem[0].voice_message.play();
@@ -11017,7 +11020,7 @@ xabber.InvitationPanelView = xabber.SearchView.extend({
                           this.renderFiles(response)
                       },
                       error: (response) => {
-                          this.model.handleCommonGalleryErrors(response);
+                          this.model.handleCommonGalleryErrors(response, null, this.createLibrary, arguments, this);
                           console.log(response);
                           this.$('.library-wrap[data-screen="image"] .preloader-wrapper').remove()
                       }
@@ -11035,7 +11038,7 @@ xabber.InvitationPanelView = xabber.SearchView.extend({
                           this.renderFiles(response)
                       },
                       error: (response) => {
-                          this.model.handleCommonGalleryErrors(response);
+                          this.model.handleCommonGalleryErrors(response, null, this.createLibrary, arguments, this);
                           console.log(response);
                           this.$('.library-wrap[data-screen="video"] .preloader-wrapper').remove()
                       }
@@ -12671,6 +12674,7 @@ xabber.ChatBottomView = xabber.BasicView.extend({
             $bottom_panel = this.$('.message-input-panel');
         if ($item.closest('.voice-message-lock-wrap').length){
             $bottom_panel.addClass('locked-voice-message');
+            this.$('.message-input-panel').removeClass('voice-message-recording-cancel');
         } else if (!$bottom_panel.hasClass('locked-voice-message')) {
             if ($bottom_panel.find('.recording').length > 0) {
                 $bottom_panel.find('.recording').removeClass('recording');
@@ -12694,6 +12698,7 @@ xabber.ChatBottomView = xabber.BasicView.extend({
         clearInterval(this.timerIdDot);
         this.mediaRecorder && (this.mediaRecorder.stop_status = 'locked_stopped');
         this.mediaRecorder && this.mediaRecorder.stop();
+        this.$('.message-input-panel').removeClass('voice-message-recording-cancel');
         this.$('.message-input-panel').addClass('locked-voice-message-stopped');
     },
 
@@ -12710,7 +12715,7 @@ xabber.ChatBottomView = xabber.BasicView.extend({
     },
 
     deleteLockedVoiceMessage: function () {
-        this.locked_stopped_audio.stop();
+        this.locked_stopped_audio && this.locked_stopped_audio.stop();
         this.locked_stopped_audio_file = null;
         this.locked_stopped_audio = null;
         this.chunks = [];
@@ -12761,6 +12766,7 @@ xabber.ChatBottomView = xabber.BasicView.extend({
     initAudio: function() {
         this.$('.message-input-panel').removeClass('locked-voice-message');
         this.$('.message-input-panel').removeClass('locked-voice-message-stopped');
+        this.$('.message-input-panel').removeClass('voice-message-recording-cancel');
         this.$('.chat-bottom-voice-message-rendered').html('');
 
         navigator.getUserMedia = (navigator.mozGetUserMedia || navigator.msGetUserMedia || navigator.webkitGetUserMedia || navigator.getUserMedia);
@@ -12812,12 +12818,16 @@ xabber.ChatBottomView = xabber.BasicView.extend({
                                         $timer_elem.text(utils.pretty_duration(timer));
                                     timer = (timer*10 + 2)/10;
                                     mic_hover = $border_elem.is(":hover");
-                                    if (!mic_hover)
+                                    if (!mic_hover) {
+                                        $bottom_panel.addClass('voice-message-recording-cancel');
                                         $status_msg.css('color', '#D32F2F').text(xabber.getString("chat_bottom__placeholder__cancel_write_voice_short"));
-                                    else if (this.$('.voice-message-lock-wrap').is(':hover'))
+                                    } else if (this.$('.voice-message-lock-wrap').is(':hover')) {
+                                        $bottom_panel.removeClass('voice-message-recording-cancel');
                                         $status_msg.css('color', '#9E9E9E').text(xabber.getString("chat_bottom__placeholder__lock_write_voice"));
-                                    else
+                                    } else {
+                                        $bottom_panel.removeClass('voice-message-recording-cancel');
                                         $status_msg.css('color', '#9E9E9E').text(xabber.getString("chat_bottom__placeholder__cancel_write_voice"));
+                                    }
                                 } else {
                                     mic_hover = $border_elem.is(":hover");
                                     this.mediaRecorder.stop();
@@ -12856,9 +12866,13 @@ xabber.ChatBottomView = xabber.BasicView.extend({
                     this.getCurrentVolume(stream);
 
                     this.mediaRecorder.onstop = () => {
+                        if (this.mediaRecorder.stop_status === 'locked_stopped'){
+                            mic_hover = true;
+                        }
                         stream.getAudioTracks().forEach(function (track) {
                             track.stop();
                         });
+                        this.$('.message-input-panel').removeClass('voice-message-recording-cancel');
                         this.$('.voice-message-sound-volume').removeClass('voice-message-sound-volume');
                         clearInterval(this._chatstate_send_timeout);
                         clearInterval(this.timerId);
@@ -12968,8 +12982,8 @@ xabber.ChatBottomView = xabber.BasicView.extend({
             autoCenter: false,
             normalize: true,
             hideScrollBar: true,
-            progressColor: '#bdbdbd',
-            waveColor: '#fff'
+            progressColor: '#fff',
+            waveColor: 'rgba(255,255,255,0.5)'
         });
         aud.setVolume(1);
 

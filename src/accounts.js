@@ -1510,14 +1510,17 @@ xabber.Account = Backbone.Model.extend({
             }
         },
 
-        handleCommonGalleryErrors: function (response, errback) {
+        handleCommonGalleryErrors: function (response, errback, original_function, args, context) {
             !errback && (errback = this.gallery_auth_errback);
             this.gallery_auth_errback = undefined;
             let err_text;
             response && response.responseJSON && response.responseJSON.error && (err_text = response.responseJSON.error);
             if (response.status === 401){
                 if (this.server_features.get('media-gallery')){
-                    this.initGalleryAuth(this.server_features.get('media-gallery'), errback)
+                    if (original_function && args && context){
+                        this.once('gallery_token_authenticated', () => { setTimeout(()=>{original_function.apply(context, args)},100) });
+                    }
+                    this.initGalleryAuth(this.server_features.get('media-gallery'), errback);
                 } else {
                     this.set('gallery_url', null);
                     this.set('gallery_token', null);
@@ -1547,7 +1550,7 @@ xabber.Account = Backbone.Model.extend({
                             callback && callback(response)
                         },
                         error: (response) => {
-                            this.handleCommonGalleryErrors(response);
+                            this.handleCommonGalleryErrors(response, null, this.getStorageStats, arguments, this);
                             console.log(response)
                         }
                     });
@@ -1605,7 +1608,7 @@ xabber.Account = Backbone.Model.extend({
                             callback && callback(response);
                         },
                         error: (response) => {
-                            this.handleCommonGalleryErrors(response);
+                            this.handleCommonGalleryErrors(response, null, this.uploadFile, arguments, this);
                             console.log(response);
                             errback && errback(response);
                         }
@@ -1635,7 +1638,7 @@ xabber.Account = Backbone.Model.extend({
                             callback && callback(response)
                         },
                         error: (response) => {
-                            this.handleCommonGalleryErrors(response);
+                            this.handleCommonGalleryErrors(response, null, this.uploadAvatar, arguments, this);
                             console.log(response);
                             errback && errback(response)
                         }
@@ -1660,7 +1663,7 @@ xabber.Account = Backbone.Model.extend({
                             callback && callback(response)
                         },
                         error: (response) => {
-                            this.handleCommonGalleryErrors(response);
+                            this.handleCommonGalleryErrors(response, null, this.deleteFile, arguments, this);
                             console.log(response);
                             errback && errback(response)
                         }
@@ -1685,7 +1688,7 @@ xabber.Account = Backbone.Model.extend({
                             callback && callback(response)
                         },
                         error: (response) => {
-                            this.handleCommonGalleryErrors(response);
+                            this.handleCommonGalleryErrors(response, null, this.deleteFileByUrl, arguments, this);
                             console.log(response);
                             errback && errback(response)
                         }
@@ -1718,7 +1721,7 @@ xabber.Account = Backbone.Model.extend({
                             callback && callback(response)
                         },
                         error: (response) => {
-                            this.handleCommonGalleryErrors(response);
+                            this.handleCommonGalleryErrors(response, null, this.getOpenGraphData, arguments, this);
                             errback && errback(response);
                             console.log(response)
                         }
@@ -2636,7 +2639,7 @@ xabber.AccountMediaGalleryView = xabber.BasicView.extend({
                         this.loading_files = false
                     },
                     error: (response) => {
-                        this.account.handleCommonGalleryErrors(response);
+                        this.account.handleCommonGalleryErrors(response, null, this.getFiles, arguments, this);
                         this.current_rendered_type = undefined;
                         console.log(response);
                         this.loading_files = false;
@@ -2671,7 +2674,7 @@ xabber.AccountMediaGalleryView = xabber.BasicView.extend({
                         this.loading_files = false
                     },
                     error: (response) => {
-                        this.account.handleCommonGalleryErrors(response);
+                        this.account.handleCommonGalleryErrors(response, null, this.getAvatars, arguments, this);
                         this.current_rendered_type = undefined;
                         console.log(response);
                         this.loading_files = false;
@@ -2762,7 +2765,7 @@ xabber.AccountMediaGalleryView = xabber.BasicView.extend({
                         $target.detach();
                     },
                     error: (response) => {
-                        this.account.handleCommonGalleryErrors(response);
+                        this.account.handleCommonGalleryErrors(response, null, this.deleteAvatar, arguments, this);
                         console.log(response);
                     }
                 });
@@ -3087,7 +3090,7 @@ xabber.DeleteFilesFromGalleryView = xabber.BasicView.extend({
                             this.close();
                         },
                         error: (response) => {
-                            this.account.handleCommonGalleryErrors(response);
+                            this.account.handleCommonGalleryErrors(response, null, this.deleteFilesFiltered, arguments, this);
                             this.close();
                             console.log(response)
                         }
@@ -4926,7 +4929,7 @@ xabber.SetAvatarView = xabber.BasicView.extend({
                         this.renderFiles(response)
                     },
                     error: (response) => {
-                        this.model.handleCommonGalleryErrors(response);
+                        this.model.handleCommonGalleryErrors(response, null, this.createLibrary, arguments, this);
                         console.log(response);
                         this.$('.library-wrap .preloader-wrapper').remove()
                     }
