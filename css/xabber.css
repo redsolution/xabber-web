@@ -11683,9 +11683,12 @@ img.fwd-img-preview {
 }
 .chat-content-wrap[data-trust=true] .chat-message.not-verified-previously .not-decrypted-icon svg path,
 .chat-content-wrap[data-trust=true] .chat-message.not-existing-device .not-decrypted-icon svg path,
-.chat-content-wrap[data-trust=true] .chat-message.not-verified .not-decrypted-icon svg path,
 .chat-content-wrap[data-trust=true] .chat-message.not-decrypted .not-decrypted-icon svg path{
     fill: #388E3C !important;
+}
+
+.chat-content-wrap[data-trust=true] .chat-message.not-verified .not-decrypted-icon{
+    display: none !important;
 }
 
 .chat-content-wrap[data-trust=none] .chat-message.not-verified-previously .not-decrypted-icon svg path,

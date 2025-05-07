@@ -12983,7 +12983,7 @@ xabber.ChatBottomView = xabber.BasicView.extend({
             normalize: true,
             hideScrollBar: true,
             progressColor: '#fff',
-            waveColor: 'rgba(255,255,255,0.5)'
+            waveColor: 'rgba(255,255,255,0.66)'
         });
         aud.setVolume(1);
 
