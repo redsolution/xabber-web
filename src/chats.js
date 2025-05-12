@@ -5397,9 +5397,10 @@ xabber.ChatContentView = xabber.BasicView.extend({
                 $msg_element.removeClass('wave-cursor-hidden');
         };
 
+        hideShowCursor();
+
         aud.on('ready', () => {
             let duration = Math.round(aud.getDuration());
-            hideShowCursor();
             $elem.find('.voice-msg-total-time').text(utils.pretty_duration(duration));
         });
 
@@ -5834,6 +5835,13 @@ xabber.ChatContentView = xabber.BasicView.extend({
                     template_for_file_content = $(templates.messages.file_loading(file_attrs));
                     template_for_file_content.find('.file-loading-container').html(templates.messages.loading_circle());
                     $message.find('.chat-msg-media-content.chat-main-upload-media').append(template_for_file_content);
+                    if (item.voice){
+                        template_for_file_content.find('.file-container').html('');
+                        let audio = new Audio(URL.createObjectURL(item));
+                        this.renderVoiceMessage(template_for_file_content.find('.file-container'), audio, null, item.peaks);
+                        template_for_file_content.find('.file-container').addClass('uploading-voice-message');
+                        template_for_file_content.find('.file-container').closest('.link-file').addClass('wave-cursor-hidden')
+                    }
                 });
             }
         }
@@ -7334,6 +7342,9 @@ xabber.ChatContentView = xabber.BasicView.extend({
             }
             if (utils.isImageType(file_.type)) {
                 _.extend(file_new_format, { width: file_.width, height: file_.height });
+                if (file_.sources && file_.sources[0] && file_new_format.sources && file_new_format.sources[0]){
+                    _.extend(file_new_format, { original_sources: [file_.sources[0]] });
+                }
                 images.push(file_new_format);
             }
             else if (utils.isVideoType(file_.type)) {
@@ -7349,20 +7360,24 @@ xabber.ChatContentView = xabber.BasicView.extend({
         $message.find('.unuploaded-file').remove();
         //  loaded and send image
         if (images.length > 0) {
-            if (images.length > 1) {
-                let template_for_images;
-                if (images.length > 6) {
+            let images_copy = images, template_for_images;
+            if (images_copy.some(item => Boolean(item.original_sources))){
+                images_copy = this.updateToOriginalSources(images_copy);
+            }
+            if (images_copy.length > 1) {
+                let template_for_images_copy;
+                if (images_copy.length > 6) {
                     let tpl_name = 'template-for-6',
-                        hidden_images = images.length - 5;
+                        hidden_images = images_copy.length - 5;
                     !xabber.settings.load_media && (tpl_name = 'hidden-template-for-6');
-                    template_for_images = $(templates.messages[tpl_name]({images}));
+                    template_for_images = $(templates.messages[tpl_name]({images: images_copy}));
                     template_for_images.find('.last-image').addClass('hidden-images');
                     template_for_images.find('.image-counter').text('+' + hidden_images);
                 }
                 else {
-                    let tpl_name = 'template-for-' + images.length;
-                    !xabber.settings.load_media && (tpl_name = 'hidden-template-for-' + images.length);
-                    template_for_images = $(templates.messages[tpl_name]({images}));
+                    let tpl_name = 'template-for-' + images_copy.length;
+                    !xabber.settings.load_media && (tpl_name = 'hidden-template-for-' + images_copy.length);
+                    template_for_images = $(templates.messages[tpl_name]({images: images_copy}));
                 }
                 if (!xabber.settings.load_media) {
                     template_for_images.find('img').removeClass('uploaded-img-for-collage popup-img').addClass('unloaded-img')
@@ -7373,8 +7388,8 @@ xabber.ChatContentView = xabber.BasicView.extend({
                 !xabber.settings.load_media && $message.find('.chat-msg-media-content.chat-main-upload-media .img-content-template').first().append($('<div class="img-privacy-warning"/>').text(xabber.getString("load_image_privacy_warning")))
             }
             else {
-                let img = this.createImage(images[0]),
-                    img_content = self.createImageContainer(images[0]);
+                let img = this.createImage(images_copy[0]),
+                    img_content = self.createImageContainer(images_copy[0]);
                 img.onload = () => {
                     this.imageOnload($message);
                 };
@@ -7486,6 +7501,17 @@ xabber.ChatContentView = xabber.BasicView.extend({
         });
         audio.setVolume(0.5);
         return audio;
+    },
+
+    updateToOriginalSources: function(images) {
+        images = JSON.parse(JSON.stringify(images));
+
+        _.each(images, (image) => {
+            if (image.original_sources){
+                image.sources = image.original_sources;
+            }
+        });
+        return images;
     },
 
     createImage: function(image) {
@@ -14416,8 +14442,9 @@ xabber.Account.addConnPlugin(function () {
     if (_.isUndefined(this.settings.get('omemo')) && !this.omemo_enable_placeholder) {
         this.omemo_enable_placeholder = new xabber.OMEMOEnablePlaceholder({account: this});
     }
-    if (!(this.auth_view && this.auth_view.data.get('authentication')))
+    if (!(this.auth_view && this.auth_view.data.get('authentication'))) {
         this.trigger('ready_to_get_roster');
+    }
 }, true, true);
 
 xabber.once("start", function () {

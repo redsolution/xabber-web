@@ -11877,7 +11877,10 @@ img.fwd-img-preview {
 .voice-message-play {
     margin-left: 15px;
 }
-
+.uploading-voice-message .waveform,
+.uploading-voice-message .audio-control-panel{
+    pointer-events: none;
+}
 .waveform {
     width: 100%;
     height: 24px;

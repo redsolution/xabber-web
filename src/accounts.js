@@ -6603,6 +6603,7 @@ xabber.XmppLoginPanel = xabber.AuthView.extend({
         this.data.set('registration', false);
         this.data.set('authentication', false);
         !this.account.get('deferred_auth') && xabber.body.setScreen('all-chats', {right: null});
+        this.account.trigger('ready_to_get_roster');
         this.account.auth_view = null;
     },
 
