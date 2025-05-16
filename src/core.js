@@ -649,8 +649,21 @@ let Xabber = Backbone.Model.extend({
         if ($item.closest('.chat-tool-plyr-controls').length){
             return;
         }
-        if (this.plyr_player_popup)
-            this.plyr_player_popup.minimizePopup();
+        if (this.current_plyr_player.$audio_elem){
+            if (!(this.current_plyr_player && this.current_plyr_player.chat_item && this.current_plyr_player.message_unique_id))
+                return;
+            let chat = this.current_plyr_player.chat_item.model;
+            this.chats_view.openChat(chat.item_view, {right_contact_save: true, clear_search: false});
+            this.body.setScreen(this.body.screen.get('name'), {right: 'message_context', model: chat });
+            if (this.body.screen.get('right_contact') && this.body.screen.get('right') === 'message_context') {
+                chat.contact.showDetailsRight('all-chats', {right_saved: false});
+            }
+            chat.getMessageContext(this.current_plyr_player.message_unique_id, {message: true});
+
+        } else {
+            if (this.plyr_player_popup)
+                this.plyr_player_popup.minimizePopup();
+        }
     },
 
     nextPlyr: function () {

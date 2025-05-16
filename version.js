@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.4.102","version_description":"fixed sync not working after auth, changed how images are rendered in chat after they are uploaded, added waveform generation on upload stage of voice message sending, changed visuals of waveform when it generates"}'
+'{"version_number":"2.4.103","version_description":"changed default font to system-ui, changed chat-content positioning, added on player press func to open message if it is voice message player, changed color for player control buttons, changed show unread button active color to client color, "}'
 )});
