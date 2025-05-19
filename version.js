@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.4.103","version_description":"changed default font to system-ui, changed chat-content positioning, added on player press func to open message if it is voice message player, changed color for player control buttons, changed show unread button active color to client color, "}'
+'{"version_number":"2.4.104","version_description":"changed xabber account iframe location, added func to update iframe height on open and window resizing, fixed placeholder opening after context message opening"}'
 )});

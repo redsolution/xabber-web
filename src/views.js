@@ -1324,7 +1324,7 @@ xabber.ToolbarView = xabber.BasicView.extend({
             xabber.chats_view.active_chat.model.trigger('hide_chat');
             xabber.chats_view.active_chat = null;
         }
-        xabber.body.setScreen('all-chats', {chat_item: null});
+        xabber.body.setScreen('all-chats', {chat_item: null, right: null, model: null });
         let $el = $(ev.target).closest('.toolbar-item:not(.toolbar-logo)');
         this.$('.toolbar-item:not(.toolbar-logo):not(.account-item)').removeClass('active unread');
         $el.addClass('active');

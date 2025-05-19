@@ -1397,7 +1397,7 @@ xabber.Account = Backbone.Model.extend({
                             }
                             setTimeout(() => {
                                 if (!this.service_iq_answered){
-                                    this.set('service_auth', false);
+                                    this.save('service_auth', false);
                                     this.gallery_code_requests = [];
                                     errback && errback();
                                 }
@@ -1406,7 +1406,7 @@ xabber.Account = Backbone.Model.extend({
                     },
                     error: (response) => {
                         console.error(response);
-                        this.set('service_auth', false);
+                        this.save('service_auth', false);
                         this.gallery_code_requests = [];
                         errback && errback();
                     }
@@ -1500,10 +1500,10 @@ xabber.Account = Backbone.Model.extend({
                             this.set('service_token_expires', normalizedString);
                         }
                         this.trigger('service_token_authenticated');
-                        this.set('service_auth', false)
+                        this.save('service_auth', false)
                     },
                     error: (response) => {
-                        this.set('service_auth', false);
+                        this.save('service_auth', false);
                         console.log(response)
                     }
                 });
@@ -3135,6 +3135,7 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
         "click .settings-tab[data-block-name='status']": "openChangeStatus",
         "click .settings-tabs-wrap .settings-tab:not(.delete-account):not(.settings-non-tab)": "jumpToBlock",
         "click .tokens-wrap .settings-tab.token-wrap": "jumpToBlock",
+        "click .btn-manage-xabber-account.settings-tab": "jumpToBlock",
         "click .settings-tab.delete-account": "deleteAccount",
         "click .settings-tab.unregister-account": "unregisterAccount",
 
@@ -3167,7 +3168,6 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
         "click .show-code": "showCode",
         'click .accept-request': "acceptRequest",
         'click .decline-request': "rejectRequest",
-        'click .btn-manage-xabber-account': "openXabberAccountSettings",
     },
 
     _initialize: function (options) {
@@ -3222,6 +3222,7 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
         this.listenTo(this.model, 'change:auth_type', this.updateView);
         this.listenTo(this.model, 'destroy', this.remove);
         this.listenTo(this.model, 'active_session_change', this.renderActiveTrustSession);
+        this.listenTo(xabber, 'update_layout', this.updateFrameHeight);
         if (options && !options.single_account_modal) {
             $(document).on("keyup.account_settings_modal", (ev) => {
                 if (ev.keyCode === constants.KEY_ESCAPE && this.data.get('visible') && !options.single_account_modal) {
@@ -3249,6 +3250,7 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
         this.updateTrustItems();
         this.updateView();
         this.showQRCode();
+        this.$('.xabber-account-frame-wrap').html('');
         this.$('.main-resource .client').text(constants.CLIENT_NAME);
         this.$('.main-resource .resource').text(this.model.resource);
         this.$('.main-resource .priority').text(this.model.get('priority'));
@@ -3299,36 +3301,37 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
         this.updateScrollBar();
     },
 
+    updateFrameHeight: function () {
+        let $iframe = this.$('.xabber-account-manage-frame');
+        if ($iframe.length){
+            $iframe.css('height', `${($(window).height() * 0.8) - 74}px`);
+            this.updateHeight();
+        }
+    },
+
     openXabberAccountSettings: function () {
         if (!(constants.XABBER_SERVICE_IFRAME_URL && constants.XABBER_SERVICE_URL))
             return;
-        let modal = utils.dialogs.common('', '', null, {iframe_text: true}, null, 'xabber-account-manage-modal');
+        this.$('.xabber-account-frame-wrap').html(`<div class="preloader-wrapper-frame-wrap">${env.templates.contacts.preloader()}</div>`);
+
+        this.updateHeight();
 
         this.model.testXabberServiceTokenExpire(()=> {
             let token = this.model.get('service_token'),
                 iframe_window;
-            console.error(token);
             if (!token)
                 return;
             try {
                 fetch(constants.XABBER_SERVICE_IFRAME_URL)
                     .then(response => {
                         if (response.ok) {
-                            console.log('Страница доступна, статус:', response.status);
                             let iframe = document.createElement('iframe');
 
                             let handleServiceMessage = (event) => {
-                                console.error(event);
-                                console.error(event.origin);
-                                console.error(constants.XABBER_SERVICE_IFRAME_URL);
-                                console.error(event.origin !== constants.XABBER_SERVICE_IFRAME_URL);
-                                console.error(event.data);
                                 event.data && event.data.type && console.error(event.data.type);
-                                console.error(event.data && event.data.type && event.data.type === 'REQUEST_TOKEN');
                                 if (event.origin !== constants.XABBER_SERVICE_IFRAME_URL)
                                     return;
                                 if (event.data && event.data.type && event.data.type === 'REQUEST_TOKEN') {
-                                    console.log('send');
                                     iframe_window.postMessage(
                                         { type: 'TOKEN_RESPONSE', token },
                                         event.origin
@@ -3339,18 +3342,17 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
                             };
                             iframe.classList.add("xabber-account-manage-frame");
                             iframe.src = constants.XABBER_SERVICE_IFRAME_URL;
-                            modal.$modal.find('.dialog-text').html(iframe);
+                            this.$('.xabber-account-frame-wrap').html(iframe);
+                            this.updateFrameHeight();
                             iframe_window = iframe.contentWindow || iframe;
-                            console.log('iframe_window.addEventListener');
                             window.addEventListener("message", handleServiceMessage);
-                            console.log(iframe_window);
                         } else {
-                            console.error('Ошибка загрузки:', response.status);
+                            console.error('Loading error:', response.status);
                         }
                     })
-                    .catch(error => console.error('Ошибка:', error));
+                    .catch(error => console.error('Error:', error));
             } catch (e) {
-                console.error('Ошибка:', e)
+                console.error('Error:', e)
             }
 
         });
@@ -3556,6 +3558,8 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
         if ($(ev.target).closest('.device-encryption').length || $(ev.target).closest('.btn-revoke-token').length)
             return;
 
+        this.$('.xabber-account-frame-wrap').html('');
+
         let $tab = $(ev.target).closest('.settings-tab'),
             $elem = this.$('.settings-block-wrap.' + $tab.attr('data-block-name')),
             block_name = $tab.attr('data-block-name');
@@ -3591,6 +3595,9 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
             $elem.attr('data-token-uid', $tab.attr('data-token-uid'));
             this.updateDeviceInformation($tab.attr('data-token-uid'));
         }
+        if (block_name === 'xabber-account-frame-tab'){
+            this.openXabberAccountSettings();
+        }
         this.$('.btn-back-subsettings-account').attr('data-subblock-parent-name', '');
         if ($tab.closest('.right-column') && $tab.attr('data-subblock-parent-name')) {
             this.$('.btn-back-settings').addClass('hidden');
@@ -3606,6 +3613,7 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
     },
 
     backToMenuHandler: function () {
+        this.$('.xabber-account-frame-wrap').html('');
         this.$('.left-column').removeClass('hidden');
         this.$('.right-column').addClass('hidden');
         this.scrollToTop();
@@ -3619,6 +3627,8 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
     backToSubMenuHandler: function (ev) {
         let $tab = $(ev.target).closest('.btn-back-subsettings-account'),
             block_name = $tab.attr('data-subblock-parent-name');
+        this.$('.xabber-account-frame-wrap').html('');
+
         if (!block_name){
             this.backToMenu(ev);
             return;
@@ -4383,6 +4393,7 @@ xabber.AccountSettingsSingleModalView = xabber.AccountSettingsModalView.extend({
         this.updateGroupsLabel();
         this.updateView();
         this.showQRCode();
+        this.$('.xabber-account-frame-wrap').html('');
         this.$('.main-resource .client').text(constants.CLIENT_NAME);
         this.$('.main-resource .resource').text(this.model.resource);
         this.$('.main-resource .priority').text(this.model.get('priority'));

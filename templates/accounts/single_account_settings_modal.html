@@ -91,7 +91,7 @@
         </div>
         <div class="name one-line"></div>
         <div class="jid one-line"></div>
-        <div class="btn-manage-xabber-account">{[print(xabber.getString("account_profile_manage_xabber_account"))]}</div>
+        <div class="btn-manage-xabber-account settings-tab" data-block-name="xabber-account-frame-tab">{[print(xabber.getString("settings_account__xabber_account_frame"))]}</div>
     </div>
     <div class="settings-tabs-wrap">
         <div class="settings-tab" data-block-name="profile">
@@ -279,6 +279,12 @@
             <div data-header='{[print(xabber.getString("settings_account__edit_profile"))]}' class="settings-block-wrap vcard-tab">
                 <div class="settings-subblock-wrap">
                     <div class="vcard">
+                    </div>
+                </div>
+            </div>
+            <div data-header='{[print(xabber.getString("settings_account__xabber_account_frame"))]}' class="settings-block-wrap xabber-account-frame-tab">
+                <div class="settings-subblock-wrap">
+                    <div class="xabber-account-frame-wrap">
                     </div>
                 </div>
             </div>
