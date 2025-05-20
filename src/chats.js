@@ -3346,7 +3346,10 @@ xabber.ChatItemView = xabber.BasicView.extend({
       },
 
       render: function () {
-          this.$('.chat-content').css('height', 'calc(100% - 32px)');
+          this.$('.chat-content').css({
+              'max-height': 'calc(100% - 32px)',
+              'top': 'calc(100% - 32px)'
+          });
           this.$('.participant-messages-header .messages-by-header .participant-nickname').text(this.member_nickname);
           this.$('.participant-messages-header').removeClass('hidden');
           this.scrollToBottom();

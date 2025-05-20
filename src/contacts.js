@@ -945,7 +945,10 @@ xabber.Contact = Backbone.Model.extend({
     renderPinnedMessage: function (message, pinned_msg_elem) {
         if (!message) {
             pinned_msg_elem.html("");
-            pinned_msg_elem.siblings('.chat-content').css({'height':'100%'});
+            pinned_msg_elem.siblings('.chat-content').css({
+                'max-height':'100%',
+                'top':'100%',
+            });
         }
         else {
             let images = message.get('images') || [],
@@ -1008,7 +1011,8 @@ xabber.Contact = Backbone.Model.extend({
             pinned_msg_elem.html(pinned_msg_html).emojify('.chat-msg-content', {emoji_size: 18});
             let height_pinned_msg = pinned_msg_elem.height();
             pinned_msg_elem.siblings('.chat-content').css({
-                'height': 'calc(100% - ' + height_pinned_msg + 'px)'
+                'max-height': 'calc(100% - ' + height_pinned_msg + 'px)',
+                'top': 'calc(100% - ' + height_pinned_msg + 'px)'
             });
             pinned_msg_elem.attr('data-uniqueid', message.get('unique_id'));
         }
