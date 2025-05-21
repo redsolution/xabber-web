@@ -9102,6 +9102,8 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
             if (previous_chat){
                 previous_chat.chat_item = null;
                 previous_chat.right_contact = '';
+                previous_chat.right = null;
+                previous_chat.model = null;
                 xabber.body.screen.set('previous_screen', previous_chat);
             }
         }

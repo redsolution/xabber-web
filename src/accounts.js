@@ -913,6 +913,11 @@ xabber.Account = Backbone.Model.extend({
 
         onDisconnected: function () {
             this.disconnected_timestamp = this.last_stanza_timestamp;
+            if (xabber.current_plyr_player && xabber.current_plyr_player.chat_item
+                && xabber.current_plyr_player.chat_item.account
+                && xabber.current_plyr_player.chat_item.account.get('jid') === this.get('jid')){
+                xabber.stopPlyr();
+            }
             if (this.session.get('delete')) {
                 this.destroy();
                 return;
