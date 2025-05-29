@@ -238,6 +238,7 @@ let Xabber = Backbone.Model.extend({
     },
 
     cacheFavicons: async function () {
+        this._cache.save('placeholder_loading', URL.createObjectURL(await fetch(constants.LOADING_PLACEHOLDER).then(r => r.blob())));
         this._cache.save('favicon', URL.createObjectURL(await fetch(constants.FAVICON_DEFAULT).then(r => r.blob())));
         this._cache.save('favicon_gray', URL.createObjectURL(await fetch(constants.FAVICON_DEFAULT_GREY).then(r => r.blob())));
         this._cache.save('favicon_message', URL.createObjectURL(await fetch(constants.FAVICON_MESSAGE).then(r => r.blob())));
@@ -469,6 +470,7 @@ let Xabber = Backbone.Model.extend({
                     _.extend(constants, {TURN_SERVERS_LIST: [config.TURN_SERVERS_LIST]});
             }
 
+            constants.LOADING_PLACEHOLDER = constants.ASSETS_URL_PREFIX + constants.LOADING_PLACEHOLDER;
             constants.FAVICON_DEFAULT = constants.ASSETS_URL_PREFIX + constants.FAVICON_DEFAULT;
             constants.FAVICON_DEFAULT_GREY = constants.ASSETS_URL_PREFIX + constants.FAVICON_DEFAULT_GREY;
             constants.FAVICON_MESSAGE = constants.ASSETS_URL_PREFIX + constants.FAVICON_MESSAGE;
@@ -746,7 +748,7 @@ let Xabber = Backbone.Model.extend({
                 self.$('.mdi-player-type-icon').addClass('hidden');
                 self.$('.player-poster').addClass('hidden');
                 self.$('.voice-message-player-avatar').removeClass('hidden');
-                self.$('.voice-message-player-avatar').setAvatar(this.current_plyr_player.contact_avatar, 32);
+                self.$('.voice-message-player-avatar').setAvatar(this.current_plyr_player.contact_avatar, 32, this.current_plyr_player.chat_item && this.current_plyr_player.chat_item.account);
                 self.updatePlyrTitle();
                 let duration = Math.round(voice_message.getDuration());
                 self.$('.chat-head-player-total-time').text(utils.pretty_duration(duration));

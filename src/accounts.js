@@ -70,6 +70,7 @@ xabber.Account = Backbone.Model.extend({
                 conn_feedback: xabber.getString("connection__error__text_disconnected")
             });
             this.gallery_code_requests = [];
+            this.proxy_code_requests = [];
             this.session.on("change:connected", this.onChangedConnected, this);
             this.CONNECTION_URL = _attrs.websocket_connection_url || constants.CONNECTION_URL;
             this.conn_manager = new Strophe.ConnectionManager(this.CONNECTION_URL, {'x-token': true});
@@ -1271,12 +1272,16 @@ xabber.Account = Backbone.Model.extend({
                 request_code = $confirm.attr('id');
                 if (this.get('gallery_auth_request_code') && this.get('gallery_auth_request_code') == $incoming_iq.attr('id')) {
                     this.onAuthCode(request_code)
-                }
-                else if (this.get('service_auth_request_code') && this.get('service_auth_request_code') == $incoming_iq.attr('id')) {
-                    this.onServiceAuthCode(request_code)
-
+                } else if (this.get('service_auth_request_code') && this.get('service_auth_request_code') == $incoming_iq.attr('id')) {
+                    this.onServiceAuthCode(request_code);
+                } else if (this.get('proxy_viewer_auth_request_code') && this.get('proxy_viewer_auth_request_code') == $incoming_iq.attr('id')) {
+                    this.onProxyViewerAuthCode(request_code)
                 } else {
                     this.gallery_code_requests.push({
+                        id: $incoming_iq.attr('id'),
+                        code: request_code
+                    });
+                    this.proxy_code_requests.push({
                         id: $incoming_iq.attr('id'),
                         code: request_code
                     });
@@ -1320,13 +1325,26 @@ xabber.Account = Backbone.Model.extend({
             }
         },
 
+        testProxyViewerExpire: function(callback, errback) {
+            let currentTime = new Date(),
+                tokenExpireTime = new Date(this.get('proxy_viewer_token_expires'));
+            if (this.get('proxy_viewer_auth')){
+                this.once('proxy_viewer_token_authenticated', callback)
+            }
+            else if (currentTime < tokenExpireTime){
+                callback && callback();
+            }
+            else if (this.get('proxy_viewer_url')){
+                this.initProxyViewerAuth(this.server_features.get('proxy-viewer'), errback);
+                this.once('proxy_viewer_token_authenticated', callback)
+            }
+            else if (!this.server_features.get('proxy-viewer')){
+            }
+        },
+
         testXabberServiceTokenExpire: function(callback, errback) {
             let currentTime = new Date(),
                 tokenExpireTime = new Date(this.get('service_token_expires'));
-
-            console.error(currentTime);
-            console.error(tokenExpireTime);
-            console.error(currentTime < tokenExpireTime);
             if (this.get('service_auth')){
                 this.once('service_token_authenticated', callback)
             }
@@ -1457,6 +1475,44 @@ xabber.Account = Backbone.Model.extend({
             }
         },
 
+        initProxyViewerAuth: function(proxy_viewer_feature, errback) {
+            proxy_viewer_feature && this.save('proxy_viewer_url', proxy_viewer_feature.get('from'));
+            if (this.get('proxy_viewer_url') && !this.get('proxy_viewer_auth')) {
+                this.set('proxy_viewer_token', undefined);
+                this.set('proxy_viewer_token_expires', undefined);
+                this.set('proxy_viewer_auth', true);
+                this.proxy_viewer_iq_answered = false;
+                $.ajax({
+                    type: 'POST',
+                    url: this.get('proxy_viewer_url') + 'xmpp_auth/code_request/',
+                    dataType: 'json',
+                    contentType: "application/json",
+                    data: JSON.stringify({jid: this.jid, type: "iq"}),
+                    success: (response) => {
+                        if (response.request_id){
+                            this.set('proxy_viewer_auth_request_code', response.request_id);
+                            this.proxy_viewer_auth_errback = errback;
+                            if (this.proxy_code_requests.length){
+                                let verifying_code = this.proxy_code_requests.find(verifying_mess => (verifying_mess.id === this.get('proxy_viewer_auth_request_code')));
+                                if (verifying_code && verifying_code.code)
+                                    this.onProxyViewerAuthCode(verifying_code.code)
+                            }
+                            setTimeout(() => {
+                                if (!this.proxy_viewer_iq_answered)
+                                    this.handleCommonProxyViewerErrors({status: 500}, errback)
+                            }, 5000)
+                        }
+                    },
+                    error: (response) => {
+                        this.handleCommonProxyViewerErrors(response, errback);
+                        this.set('proxy_viewer_auth', false);
+                        this.proxy_code_requests = [];
+                        console.log(response)
+                    }
+                });
+            }
+        },
+
         onAuthCode: function (confirm_code) {
             this.gallery_code_requests = [];
             this.set('gallery_auth_request_code', undefined);
@@ -1479,6 +1535,37 @@ xabber.Account = Backbone.Model.extend({
                     error: (response) => {
                         this.set('gallery_auth', false);
                         this.handleCommonGalleryErrors(response);
+                        console.log(response)
+                    }
+                });
+            }
+        },
+
+        onProxyViewerAuthCode: function (confirm_code) {
+            this.proxy_viewer_code_requests = [];
+            this.set('proxy_viewer_auth_request_code', undefined);
+            if (confirm_code) {
+                this.proxy_viewer_iq_answered = true;
+                $.ajax({
+                    type: 'POST',
+                    url: this.get('proxy_viewer_url') + 'xmpp_auth/confirm/',
+                    dataType: 'json',
+                    contentType: "application/json",
+                    data: JSON.stringify({jid: this.id, code: confirm_code}),
+                    success: (response) => {
+                        console.error(response);
+                        if (response.token)
+                            this.set('proxy_viewer_token', response.token);
+                        if (response.expires) {
+                            let normalizedString = response.expires.replace(/\+00:00Z$/, "Z");
+                            this.save('proxy_viewer_token_expires', normalizedString);
+                        }
+                        this.trigger('proxy_viewer_token_authenticated');
+                        this.set('proxy_viewer_auth', false)
+                    },
+                    error: (response) => {
+                        this.set('proxy_viewer_auth', false);
+                        this.handleCommonProxyViewerErrors(response);
                         console.log(response)
                     }
                 });
@@ -1540,6 +1627,31 @@ xabber.Account = Backbone.Model.extend({
             }
         },
 
+        handleCommonProxyViewerErrors: function (response, errback, original_function, args, context) {
+            !errback && (errback = this.proxy_viewer_auth_errback);
+            this.proxy_viewer_auth_errback = undefined;
+            let err_text;
+            response && response.responseJSON && response.responseJSON.error && (err_text = response.responseJSON.error);
+            if (response.status === 401){
+                if (this.server_features.get('proxy-viewer')){
+                    if (original_function && args && context){
+                        this.once('proxy_viewer_token_authenticated', () => { setTimeout(()=>{original_function.apply(context, args)},100) });
+                    }
+                    this.initProxyViewerAuth(this.server_features.get('proxy-viewer'), errback);
+                } else {
+                    this.save('proxy_viewer_url', null);
+                    this.set('proxy_viewer_token', null);
+                    errback && errback('No Proxy Viewer server feature');
+                }
+            } else if (response.status === 500) {
+                this.save('proxy_viewer_url', null);
+                this.set('proxy_viewer_token', null);
+                errback && errback(xabber.getString("proxy_viewer_server_error"));
+            } else {
+                errback && errback('Proxy Viewer error - ' + (err_text || response.status));
+            }
+        },
+
         getStorageStats: function (params, callback) {
             this.testGalleryTokenExpire(() => {
                 params && (params = {});
@@ -1582,6 +1694,32 @@ xabber.Account = Backbone.Model.extend({
                     });
 
             });
+        },
+
+        getProxyUrl: function (original_url, callback, errback, is_whole_url) {
+            let is_proxy_enabled = this && this.get('proxy_viewer_url') && this.get('proxy_viewer_token');
+            if (is_proxy_enabled){
+                let url = is_whole_url ? original_url :`${this.get('proxy_viewer_url')}proxy/geturl/?url=${original_url}`;
+                this.testProxyViewerExpire(() => {
+                    $.ajax({
+                        type: 'GET',
+                        url: url,
+                        dataType: 'json',
+                        contentType: "application/json",
+                        headers: {"Authorization": 'Bearer ' + this.get('proxy_viewer_token')},
+                        success: (response) => {
+                            callback && callback(response)
+                        },
+                        error: (response) => {
+                            console.error(response);
+                            errback && errback(response)
+                        }
+                    });
+                }, (err) => {
+                    console.error(err);
+                    errback && errback(response)
+                })
+            }
         },
 
         uploadFile: function (file, callback, errback) {
@@ -2001,7 +2139,7 @@ xabber.AccountToolbarItemView = xabber.BasicView.extend({
 
     updateAvatar: function () {
         let image = this.model.cached_image;
-        this.$('.circle-avatar').setAvatar(image, this.avatar_size);
+        this.$('.circle-avatar').setAvatar(image, this.avatar_size, this.model);
     },
 
     updateColorScheme: function () {
@@ -3665,7 +3803,7 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
 
     updateAvatar: function () {
         let image = this.model.cached_image;
-        this.$('.circle-avatar').setAvatar(image, this.avatar_size);
+        this.$('.circle-avatar').setAvatar(image, this.avatar_size, this.model);
     },
 
     updateBlocks: function () {
@@ -3744,7 +3882,7 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
         utils.images.getAvatarFromFile(file).done((image, hash, size) => {
             if (image) {
                 this.model.pubAvatar({base64: image, hash: hash, size: size, type: file.type, file: file}, () => {
-                    this.$('.circle-avatar').setAvatar(image, this.avatar_size);
+                    this.$('.circle-avatar').setAvatar(image, this.avatar_size, this.model);
                     this.$('.circle-avatar').find('.preloader-wrap').removeClass('visible').find('.preloader-wrapper').removeClass('active');
                 }, () => {
                     this.$('.circle-avatar').find('.preloader-wrap').removeClass('visible').find('.preloader-wrapper').removeClass('active');

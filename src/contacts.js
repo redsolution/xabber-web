@@ -1264,7 +1264,7 @@ xabber.ContactItemView = xabber.BasicView.extend({
     },
 
     updateAvatar: function () {
-        this.$('.circle-avatar').setAvatar(this.model.cached_image, this.avatar_size);
+        this.$('.circle-avatar').setAvatar(this.model.cached_image, this.avatar_size, this.account);
     },
 
     updateStatus: function () {
@@ -1869,7 +1869,7 @@ xabber.ContactDetailsViewRight = xabber.BasicView.extend({
 
     updateAvatar: function () {
         let image = this.model.cached_image;
-        this.$('.circle-avatar').setAvatar(image, this.avatar_size);
+        this.$('.circle-avatar').setAvatar(image, this.avatar_size, this.account);
     },
 
     updateButtons: function () {
@@ -2658,7 +2658,7 @@ xabber.GroupChatDetailsViewRight = xabber.BasicView.extend({
 
     updateAvatar: function () {
         let image = this.model.cached_image;
-        this.$('.main-info .circle-avatar').setAvatar(image, this.avatar_size);
+        this.$('.main-info .circle-avatar').setAvatar(image, this.avatar_size, this.account);
     },
 
     openRegularChat: function () {
@@ -3157,7 +3157,7 @@ xabber.InvitationsView = xabber.BasicView.extend({
                     $item_view = $(templates.group_chats.invited_member_item(user)),
                     avatar = Images.getDefaultAvatar(user.jid);
                 this.$el.append($item_view);
-                $item_view.find('.circle-avatar').setAvatar(avatar, this.member_avatar_size);
+                $item_view.find('.circle-avatar').setAvatar(avatar, this.member_avatar_size, this.account);
             });
             if (!$(response).find('query').find('user').length)
                 this.$el.html(this.$error.text(xabber.getString("group_settings__invitations__no_pending_invitations")));
@@ -3292,14 +3292,17 @@ xabber.MediaBaseView = xabber.BasicView.extend({
                 this.temporary_items.forEach((item, idx) => {
                     if (this.filter_type === 'filter_image' && constants.MIME_TYPES.image.includes(item.media_type) ||
                         this.filter_type === 'filter_video' && constants.MIME_TYPES.video.includes(item.media_type) ||
-                        this.filter_type === 'filter_voice' && constants.MIME_TYPES.audio.includes(item.media_type) ||
+                        this.filter_type === 'filter_voice' && constants.MIME_TYPES.audio.includes(item.media_type) && item.voice ||
                         this.filter_type === 'filter_files' &&
                         !(
                             constants.MIME_TYPES.image.includes(item.media_type) ||
                             constants.MIME_TYPES.video.includes(item.media_type) ||
-                            constants.MIME_TYPES.audio.includes(item.media_type)
+                            constants.MIME_TYPES.audio.includes(item.media_type) && item.voice
                         )){
-                        if (this.filter_type === 'filter_image' && item.sources && item.sources[0]){
+
+                        let is_proxy = this.account.server_features.get('proxy-viewer') && this.account.get('proxy_viewer_url') && this.account.get('proxy_viewer_token');
+
+                        if (this.filter_type === 'filter_image' && item.sources && item.sources[0] && !is_proxy){
                             this.chat.messages.decryptFile(item.sources[0], item.key).then((result) => {
                                 item.sources[0] = result;
                                 item.thumbnail = null;
@@ -3345,7 +3348,10 @@ xabber.MediaBaseView = xabber.BasicView.extend({
         let files_count = 0;
         this.temporary_items = this.filterEncryptedFiles();
 
-        if (this.temporary_items.length)
+        let is_proxy = this.account.server_features.get('proxy-viewer') && this.account.get('proxy_viewer_url') && this.account.get('proxy_viewer_token');
+
+
+        if (this.temporary_items.length && !is_proxy)
             this.temporary_items.forEach((item, idx) => {
                 let source = item.sources[0];
                 if (!item.key){
@@ -3377,6 +3383,49 @@ xabber.MediaBaseView = xabber.BasicView.extend({
         this.updateMedia();
     },
 
+    updateMediaSrcToProxy: function (file, $template) {
+        let url;
+        if (file.original_thumbnail){
+            url = file.original_thumbnail;
+        } else if (file.voice || file.has_encrypted_files && !file.media_type.includes('video')) {
+            url = file.original_source;
+        }
+        if (this.filter_type === 'filter_files')
+            url = null;
+        if (file.media_type.includes('image') && !url){
+            url = file.original_source;
+        }
+        let finished,
+            uniq_id = uuid();
+
+        if (url){
+            this.account.getProxyUrl(url, (response) => {
+                if (!response || !response.url) {
+                    console.error(response);
+                    return;
+                }
+                finished = true;
+                let proxy_url = response.url;
+
+                if (file.key){
+                    this.chat.messages.decryptFile(proxy_url, file.key).then((result) => {
+                        $template.attr('data-file', result);
+                        $template.find('img').attr('data-mfp-src', result);
+                        $template.find('img').attr('src', result);
+                        $template.removeClass('hidden');
+                    });
+                } else {
+                    $template.attr('data-file', proxy_url);
+                    $template.find('img').attr('data-mfp-src', proxy_url);
+                    $template.find('img').attr('src', proxy_url);
+                    $template.removeClass('hidden');
+                }
+            }, () => {
+                $template.addClass('hidden');
+            });
+        }
+    },
+
     updateMedia: function () {
         if (!this.active)
             return;
@@ -3385,8 +3434,21 @@ xabber.MediaBaseView = xabber.BasicView.extend({
             this.temporary_items.forEach((item) => {
                 if (this.filter_type === 'filter_voice')
                     item.true_voice = true;
+                let is_proxy = this.account.server_features.get('proxy-viewer') && this.account.get('proxy_viewer_url') && this.account.get('proxy_viewer_token');
+                if (is_proxy){
+                    item.original_source = item.sources[0];
+                    item.sources = [xabber.cache.placeholder_loading];
+                    if (item.thumbnail){
+                        item.original_thumbnail = item.thumbnail;
+                        item.thumbnail = [xabber.cache.placeholder_loading];
+                    }
+                }
                 let $gallery_file = $(templates.media_item({file: item, is_encrypted: this.encrypted, svg_icon: utils.file_type_icon_svg(item.media_type), filesize: utils.pretty_size(item.size), duration: utils.pretty_duration(item.duration), peaks: item.peaks}));
-                $gallery_file.appendTo(this.$('.gallery-files'));
+
+                if (is_proxy){
+                    this.updateMediaSrcToProxy(item, $gallery_file);
+                }
+                $gallery_file.appendTo(this.$('.gallery-files')); //34
             });
         }
         this.temporary_items = [];
@@ -3818,7 +3880,7 @@ xabber.BlockedView = xabber.BasicView.extend({
                     $item_view = $(templates.group_chats.invited_member_item(user)),
                     avatar = Images.getDefaultAvatar(user.jid);
                 this.$el.append($item_view);
-                $item_view.find('.circle-avatar').setAvatar(avatar, this.member_avatar_size);
+                $item_view.find('.circle-avatar').setAvatar(avatar, this.member_avatar_size, this.account);
             });
             if (!$(response).find('query').children.length)
                 this.$el.append(this.$error.text(xabber.getString("groupchat_blocklist_empty")));
@@ -4012,15 +4074,15 @@ xabber.ParticipantsView = xabber.BasicView.extend({
     updateMemberAvatar: function (member) {
         let image = Images.getDefaultAvatar(member.nickname || member.jid || member.id),
             $avatar = (member.id) ? this.$('tr[data-id="'+ member.id +'"] .circle-avatar') : this.$('.list-item[data-jid="'+ member.jid +'"] .circle-avatar');
-        $avatar.setAvatar(image, this.member_avatar_size);
+        $avatar.setAvatar(image, this.member_avatar_size, this.account);
         if (member.avatar) {
             let cached_avatar = this.account.chat_settings.getB64Avatar(member.id);
             if (this.account.chat_settings.getHashAvatar(member.id) === member.avatar && cached_avatar)
-                $avatar.setAvatar(cached_avatar, this.member_avatar_size);
+                $avatar.setAvatar(cached_avatar, this.member_avatar_size, this.account);
             else {
                 if (member.avatar_url){
                     this.account.chat_settings.updateCachedAvatars(member.id, member.avatar, member.avatar_url);
-                    this.$('.list-item[data-id="'+ member.id +'"] .circle-avatar').setAvatar(member.avatar_url, this.member_avatar_size);
+                    this.$('.list-item[data-id="'+ member.id +'"] .circle-avatar').setAvatar(member.avatar_url, this.member_avatar_size, this.account);
                     if (this.account.get('jid') === member.jid) {
                         this.model.my_info.set({avatar: member.avatar, 'b64_avatar': member.avatar_url});
                         this.model.trigger('update_my_info');
@@ -4030,7 +4092,7 @@ xabber.ParticipantsView = xabber.BasicView.extend({
                     let node = `${Strophe.NS.PUBSUB_AVATAR_DATA}#${member.id}`;
                     this.model.getAvatar(member.avatar, node, (avatar) => {
                         this.account.chat_settings.updateCachedAvatars(member.id, member.avatar, avatar);
-                        this.$('.list-item[data-id="'+ member.id +'"] .circle-avatar').setAvatar(avatar, this.member_avatar_size);
+                        this.$('.list-item[data-id="'+ member.id +'"] .circle-avatar').setAvatar(avatar, this.member_avatar_size, this.account);
                         if (this.account.get('jid') === member.jid) {
                             this.model.my_info.set('b64_avatar', avatar);
                             this.model.trigger('update_my_info');
@@ -4258,15 +4320,15 @@ xabber.ParticipantsViewRight = xabber.BasicView.extend({
     updateMemberAvatar: function (member) {
         let image = Images.getDefaultAvatar(member.nickname || member.jid || member.id),
             $avatar = (member.id) ? this.$('tr[data-id="'+ member.id +'"] .circle-avatar') : this.$('.list-item[data-jid="'+ member.jid +'"] .circle-avatar');
-        $avatar.setAvatar(image, this.member_avatar_size);
+        $avatar.setAvatar(image, this.member_avatar_size, this.account);
         if (member.avatar) {
             let cached_avatar = this.account.chat_settings.getB64Avatar(member.id);
             if (this.account.chat_settings.getHashAvatar(member.id) === member.avatar && cached_avatar)
-                $avatar.setAvatar(cached_avatar, this.member_avatar_size);
+                $avatar.setAvatar(cached_avatar, this.member_avatar_size, this.account);
             else {
                 if (member.avatar_url){
                     this.account.chat_settings.updateCachedAvatars(member.id, member.avatar, member.avatar_url);
-                    this.$('.list-item[data-id="'+ member.id +'"] .circle-avatar').setAvatar(member.avatar_url, this.member_avatar_size);
+                    this.$('.list-item[data-id="'+ member.id +'"] .circle-avatar').setAvatar(member.avatar_url, this.member_avatar_size, this.account);
                     if (this.account.get('jid') === member.jid) {
                         this.model.my_info.set({avatar: member.avatar, 'b64_avatar': member.avatar_url});
                         this.model.trigger('update_my_info');
@@ -4276,7 +4338,7 @@ xabber.ParticipantsViewRight = xabber.BasicView.extend({
                     let node = `${Strophe.NS.PUBSUB_AVATAR_DATA}#${member.id}`;
                     this.model.getAvatar(member.avatar, node, (avatar) => {
                         this.account.chat_settings.updateCachedAvatars(member.id, member.avatar, avatar);
-                        this.$('.list-item[data-id="'+ member.id +'"] .circle-avatar').setAvatar(avatar, this.member_avatar_size);
+                        this.$('.list-item[data-id="'+ member.id +'"] .circle-avatar').setAvatar(avatar, this.member_avatar_size, this.account);
                         if (this.account.get('jid') === member.jid) {
                             this.model.my_info.set('b64_avatar', avatar);
                             this.model.trigger('update_my_info');
@@ -4459,26 +4521,26 @@ xabber.ParticipantPropertiesView = xabber.BasicView.extend({
         let participant_id = member.get('id'),
             $avatar = this.$(`.participant-details-item[data-id="${participant_id}"] .circle-avatar`);
         member.image = Images.getDefaultAvatar(member.get('nickname') || member.get('jid') || participant_id);
-        $avatar.setAvatar(member.image, this.member_details_avatar_size);
+        $avatar.setAvatar(member.image, this.member_details_avatar_size, this.account);
         this.$('.participant-details-item[data-id="'+ member.id +'"]').emojify('.badge', {emoji_size: 18});
         if (member.get('avatar')) {
             if (this.account.chat_settings.getHashAvatar(participant_id) === member.get('avatar') && (this.account.chat_settings.getB64Avatar(participant_id)))
-                $avatar.setAvatar(this.account.chat_settings.getB64Avatar(participant_id), this.member_details_avatar_size);
+                $avatar.setAvatar(this.account.chat_settings.getB64Avatar(participant_id), this.member_details_avatar_size, this.account);
             else {
                 if (member.get('avatar_url')){
-                    $avatar.setAvatar(member.get('avatar_url'), this.member_details_avatar_size);
+                    $avatar.setAvatar(member.get('avatar_url'), this.member_details_avatar_size, this.account);
                 }
                 else {
                     let node = Strophe.NS.PUBSUB_AVATAR_DATA + '#' + participant_id;
                     this.contact.getAvatar(member.get('avatar'), node, (avatar) => {
-                        this.$(`.circle-avatar`).setAvatar(avatar, this.member_details_avatar_size);
+                        this.$(`.circle-avatar`).setAvatar(avatar, this.member_details_avatar_size, this.account);
                     });
                 }
             }
         }
         else {
             if (this.account.chat_settings.getHashAvatar(participant_id))
-                $avatar.setAvatar(this.account.chat_settings.getB64Avatar(participant_id), this.member_details_avatar_size);
+                $avatar.setAvatar(this.account.chat_settings.getB64Avatar(participant_id), this.member_details_avatar_size, this.account);
         }
     },
 
@@ -4509,7 +4571,7 @@ xabber.ParticipantPropertiesView = xabber.BasicView.extend({
             if (image) {
                 file.base64 = image;
                 this.new_avatar = file;
-                this.$('.circle-avatar').addClass('changed').setAvatar(image, this.member_details_avatar_size);
+                this.$('.circle-avatar').addClass('changed').setAvatar(image, this.member_details_avatar_size, this.account);
                 this.updateSaveButton();
             }
         });
@@ -4787,7 +4849,7 @@ xabber.ParticipantPropertiesView = xabber.BasicView.extend({
             this.contact.pubAvatar(changed_avatar, ('#' + member_id), () => {
                 this.$('.buttons-wrap button').removeClass('non-active');
                 $participant_avatar.find('.preloader-wrap').removeClass('visible').find('.preloader-wrapper').removeClass('active');
-                this.$(`.participant-details-item[data-id="${member_id}"] .circle-avatar`).setAvatar(changed_avatar.base64, this.member_details_avatar_size);
+                this.$(`.participant-details-item[data-id="${member_id}"] .circle-avatar`).setAvatar(changed_avatar.base64, this.member_details_avatar_size, this.account);
                 this.close();
             }, (error) => {
                 this.$('.buttons-wrap button').removeClass('non-active');
@@ -5163,26 +5225,26 @@ xabber.ParticipantPropertiesViewRight = xabber.BasicView.extend({
         let participant_id = member.get('id'),
             $avatar = this.$(`.circle-avatar`);
         member.image = Images.getDefaultAvatar(member.get('nickname') || member.get('jid') || participant_id);
-        $avatar.setAvatar(member.image, this.member_details_avatar_size);
+        $avatar.setAvatar(member.image, this.member_details_avatar_size, this.account);
         $avatar.removeClass('changed');
         if (member.get('avatar')) {
             if (this.account.chat_settings.getHashAvatar(participant_id) === member.get('avatar') && (this.account.chat_settings.getB64Avatar(participant_id)) && !url_forced)
-                $avatar.setAvatar(this.account.chat_settings.getB64Avatar(participant_id), this.member_details_avatar_size);
+                $avatar.setAvatar(this.account.chat_settings.getB64Avatar(participant_id), this.member_details_avatar_size, this.account);
             else {
                 if (member.get('avatar_url')){
-                    $avatar.setAvatar(member.get('avatar_url'), this.member_details_avatar_size);
+                    $avatar.setAvatar(member.get('avatar_url'), this.member_details_avatar_size, this.account);
                 }
                 else {
                     let node = Strophe.NS.PUBSUB_AVATAR_DATA + '#' + participant_id;
                     this.contact.getAvatar(member.get('avatar'), node, (avatar) => {
-                        this.$(`.circle-avatar`).setAvatar(avatar, this.member_details_avatar_size);
+                        this.$(`.circle-avatar`).setAvatar(avatar, this.member_details_avatar_size, this.account);
                     });
                 }
             }
         }
         else {
             if (this.account.chat_settings.getHashAvatar(participant_id))
-                $avatar.setAvatar(this.account.chat_settings.getB64Avatar(participant_id), this.member_details_avatar_size);
+                $avatar.setAvatar(this.account.chat_settings.getB64Avatar(participant_id), this.member_details_avatar_size, this.account);
         }
     },
 
@@ -5239,7 +5301,7 @@ xabber.ParticipantPropertiesViewRight = xabber.BasicView.extend({
                 file.base64 = image;
                 this.new_avatar = file;
                 this.$('.participant-details-edit-wrap .circle-avatar').addClass('changed');
-                this.$('.circle-avatar').setAvatar(image, this.member_details_avatar_size);
+                this.$('.circle-avatar').setAvatar(image, this.member_details_avatar_size, this.account);
                 this.updateSaveButton();
             }
         });
@@ -5586,7 +5648,7 @@ xabber.ParticipantPropertiesViewRight = xabber.BasicView.extend({
         if (changed_avatar)
             this.contact.pubAvatar(changed_avatar, ('#' + member_id), () => {
                 $participant_avatar.find('.preloader-wrap').removeClass('visible').find('.preloader-wrapper').removeClass('active');
-                this.$(`.circle-avatar`).setAvatar(changed_avatar.base64, this.member_details_avatar_size);
+                this.$(`.circle-avatar`).setAvatar(changed_avatar.base64, this.member_details_avatar_size, this.account);
                 this.close();
             }, function (error) {
                 $participant_avatar.find('.preloader-wrap').removeClass('visible').find('.preloader-wrapper').removeClass('active');
@@ -6670,7 +6732,7 @@ xabber.GroupchatInvitationView = xabber.BasicView.extend({
 
     updateAvatar: function () {
         let image = this.model.cached_image;
-        this.$('.circle-avatar').setAvatar(image, this.avatar_size);
+        this.$('.circle-avatar').setAvatar(image, this.avatar_size, this.account);
     },
 
     updateName: function () {
@@ -7857,7 +7919,7 @@ xabber.GroupEditView = xabber.BasicView.extend({
 
     updateAvatar: function () {
         let image = this.model.cached_image;
-        this.$('.main-info .circle-avatar').setAvatar(image, this.avatar_size);
+        this.$('.main-info .circle-avatar').setAvatar(image, this.avatar_size, this.account);
     },
 
     showMembershipProperty: function () {
@@ -9781,7 +9843,7 @@ xabber.AccountRosterView = xabber.BasicView.extend({
 
     updateAvatar: function () {
         let image = this.account.cached_image;
-        this.$info.find('.circle-avatar').setAvatar(image, this.avatar_size);
+        this.$info.find('.circle-avatar').setAvatar(image, this.avatar_size, this.account);
     },
 
     updateColorScheme: function () {
@@ -10427,7 +10489,7 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
                 }));
                 this.$('.notification-subscriptions-content-wrap').append($template);
                 let image = contact.cached_image;
-                $template.find('.circle-avatar.subscribe-avatar').setAvatar(image, 64);
+                $template.find('.circle-avatar.subscribe-avatar').setAvatar(image, 64, account);
                 $template.attr('data-color', contact.account.settings.get('color'));
                 $template.attr('data-counter', subs_counter);
                 subs_counter++;
@@ -11270,7 +11332,7 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
                 account_color: contact.account.settings.get('color'),
             }));
             let image = contact.cached_image;
-            $template.find('.circle-avatar').setAvatar(image, 32);
+            $template.find('.circle-avatar').setAvatar(image, 32, contact.account);
 
             let ic_name = contact.getIcon();
             ic_name && $template.find('.chat-icon').switchClass(ic_name, (ic_name === 'group-invite' || ic_name === 'server' || ic_name === 'blocked')).html(env.templates.svg[ic_name]());
@@ -11297,7 +11359,7 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
                 })
 
             }
-            $template.find('.circle-avatar').setAvatar(image, 32);
+            $template.find('.circle-avatar').setAvatar(image, 32, contact.account);
             this.$('.contact-list').append($template);
             if (!this.current_filter.type){
                 if (contact.get('group_chat') && preview_groupchats_counter < 5){
@@ -11525,7 +11587,7 @@ xabber.AddContactView = xabber.BasicView.extend({
 
     renderAccountItem: function (account) {
         let $item = $(templates.add_contact_account_item({jid: account.get('jid'), name: account.get('name')}));
-        $item.find('.circle-avatar').setAvatar(account.cached_image, this.avatar_size);
+        $item.find('.circle-avatar').setAvatar(account.cached_image, this.avatar_size, account);
         return $item;
     },
 

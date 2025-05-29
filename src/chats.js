@@ -2359,7 +2359,7 @@ xabber.ChatItemView = xabber.BasicView.extend({
         if (this.model.get('saved'))
             return;
         let image = this.contact.cached_image;
-        this.$('.circle-avatar').setAvatar(image, this.avatar_size);
+        this.$('.circle-avatar').setAvatar(image, this.avatar_size, this.account);
     },
 
     updateEncrypted: function () {
@@ -3966,12 +3966,12 @@ xabber.ChatContentView = xabber.BasicView.extend({
         if (contact === this.contact) {
             this.$(`.chat-message.with-author[data-from="${jid}"]`).each(function () {
                 $(this).find('.left-side .circle-avatar').setAvatar(
-                    image, this.avatar_size);
+                    image, this.avatar_size, this.account);
             });
         } else {
             this.$(`.fwd-message.with-author[data-from="${jid}"]`).each(function () {
                 $(this).find('.fwd-left-side .circle-avatar').setAvatar(
-                    image, this.avatar_size);
+                    image, this.avatar_size, this.account);
             });
         }
     },
@@ -4000,11 +4000,11 @@ xabber.ChatContentView = xabber.BasicView.extend({
             jid = this.account.get('jid');
         this.$(`.chat-message.with-author[data-from="${jid}"]`).each(function () {
             $(this).find('.left-side .circle-avatar').setAvatar(
-                image, this.avatar_size);
+                image, this.avatar_size, this.account);
         });
         this.$(`.fwd-message.with-author[data-from="${jid}"]`).each(function () {
             $(this).find('.fwd-left-side .circle-avatar').setAvatar(
-                image, this.avatar_size);
+                image, this.avatar_size, this.account);
         });
     },
 
@@ -5382,7 +5382,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
         }
     },
 
-    renderVoiceMessage: function (element, file_url, chat, peaks) {
+    renderVoiceMessage: function (element, file_url, chat, peaks, file_key) {
         let not_expanded_msg = element.innerHTML,
             unique_id = 'waveform' + moment.now(),
             $elem = $(element),
@@ -5410,7 +5410,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
         aud.on('waveform-ready', () => {
             setTimeout(() => {
                 aud.fireEvent('interaction');
-            }, 10)
+            }, 1000)
         });
 
         aud.on('error', () => {
@@ -5472,10 +5472,38 @@ xabber.ChatContentView = xabber.BasicView.extend({
             aud.setVolume($elem.find('.voice-message-volume').val()/100);
         };
         try{
-            if (peaks){
-                let x = aud.load(file_url, peaks.split(' '));
+            if (this.account.server_features.get('proxy-viewer') && this.account.get('proxy_viewer_url') && this.account.get('proxy_viewer_token') && !file_url.includes('blob')){
+                this.account.getProxyUrl(file_url, (response) => {
+                    if (!response || !response.url) {
+                        console.error(response);
+                        return;
+                    }
+                    let url = response.url;
+
+                    if (file_key){
+                        this.model.messages.decryptFile(url, file_key).then((result) => {
+                            if (result === null)// smth about how file not decrypted
+                                return;
+                            if (peaks){
+                                let x = aud.load(result, peaks.split(' '));
+                            } else {
+                                aud.load(result);
+                            }
+                        });
+                    } else {
+                        if (peaks){
+                            let x = aud.load(url, peaks.split(' '));
+                        } else {
+                            aud.load(url);
+                        }
+                    }
+                });
             } else {
-                aud.load(file_url);
+                if (peaks){
+                    let x = aud.load(file_url, peaks.split(' '));
+                } else {
+                    aud.load(file_url);
+                }
             }
         } catch (e) {
             console.error(e);
@@ -5485,20 +5513,169 @@ xabber.ChatContentView = xabber.BasicView.extend({
         return aud;
     },
 
-    createImageGrid: function (attrs) {
+
+    replaceVideoThubmnailsToProxy: function (original_files, callback) {
+        let files = JSON.parse(JSON.stringify(original_files)),
+            dfd = new $.Deferred();
+        dfd.done(() => {
+            callback && callback(files)
+        });
+        let counter = 0;
+        let onFileLoop = (file, idx) => {
+            let no_touch;
+            _.each(file.sources, (source) => {
+                if (source.includes('blob')) {
+                    no_touch = true
+                    return;
+                }
+            });
+            if (no_touch){
+                counter++;
+                if (counter === original_files.length)
+                    dfd.resolve();
+                return;
+            }
+
+            file.key = original_files[idx].key;
+            file.proxy_video = true;
+
+            if (file.thumbnail){
+                this.account.getProxyUrl(file.thumbnail, (response) => {
+                    if (!response || !response.url) {
+                        counter++;
+                        if (counter === original_files.length)
+                            dfd.resolve();
+                        return;
+                    }
+                    console.error(response);
+                    file.thumbnail = response.url;
+                    counter++;
+                    if (counter === original_files.length)
+                        dfd.resolve();
+                });
+            } else {
+                file.thumbnail = null;
+                counter++;
+                if (counter === original_files.length)
+                    dfd.resolve();
+            }
+        };
+        _.each(files, onFileLoop);
+    },
+
+    replaceSourcesToPlaceholder: function (original_files) {
+        if (!original_files || !original_files.length)
+            return original_files;
+        let files;
+        if (this.account.server_features.get('proxy-viewer') && this.account.get('proxy_viewer_url') && this.account.get('proxy_viewer_token')){
+            files = JSON.parse(JSON.stringify(original_files));
+            _.each(files, (file, idx) => {
+                if (!file.original_sources){
+                    let proxy_sources_list = [],
+                        no_touch;
+                    _.each(file.sources, (source) => {
+                        if (source.includes('blob')) {
+                            no_touch = true
+                            return;
+                        }
+                        proxy_sources_list.push(`${this.account.get('proxy_viewer_url')}proxy/geturl/?url=${source}`)
+                    });
+                    if (no_touch)
+                        return;
+                    file.sources = [xabber.cache.placeholder_loading];
+                    file.upload_id = idx;
+                    file.key = original_files[idx].key;
+                    file.proxy_sources_list = proxy_sources_list
+                }
+            });
+        }
+        return files;
+    },
+
+    loadAndReplaceImagesToProxy: function (files, $message, is_encrypted, fwd_images) {
+        let onFileLoop = (file, idx, list) => {
+            if (!file.proxy_sources_list || !file.proxy_sources_list.length){
+                console.error('no proxy file');
+                console.error(file)
+                return;
+            }
+            if (list.length === 1){
+                $message.find(`.uploaded-img`).css({'object-fit': 'contain'});
+            } else {
+                $message.find(`div[data-upload-file-id="${file.upload_id}"] img`).css({'object-fit': 'contain'});
+            }
+            this.account.getProxyUrl(file.proxy_sources_list[0], (response) => {
+                if (!response || !response.url) {
+                    return;
+                }
+                let url = response.url;
+                if (file.key){
+                    this.model.messages.decryptFile(url, file.key).then((result) => {
+                        if (result === null)// smth about how file not decrypted
+                            return;
+
+                        if (list.length === 1){
+                            $message.find(`.uploaded-img`).attr('data-mfp-src', result);
+                            $message.find(`.uploaded-img`).attr('src', result);
+                            $message.find(`.uploaded-img`)[0] && ($message.find(`.uploaded-img`)[0].onload = () => {
+                                $message.find(`.uploaded-img`).css({'object-fit': ''});
+                            });
+                        } else {
+                            $message.find(`div[data-upload-file-id="${file.upload_id}"] img`).attr('data-mfp-src', result);
+                            $message.find(`div[data-upload-file-id="${file.upload_id}"] img`).attr('src', result);
+                            $message.find(`div[data-upload-file-id="${file.upload_id}"] img`)[0] && ($message.find(`div[data-upload-file-id="${file.upload_id}"] img`)[0].onload = () => {
+                                $message.find(`div[data-upload-file-id="${file.upload_id}`).css({'object-fit': ''})
+                            });
+                        }
+                    });
+                } else {
+                    if (list.length === 1){
+                        $message.find(`.uploaded-img`).attr('data-mfp-src', url);
+                        $message.find(`.uploaded-img`).attr('src', url);
+                        $message.find(`.uploaded-img`)[0] && ($message.find(`.uploaded-img`)[0].onload = () => {
+                            $message.find(`.uploaded-img`).css({'object-fit': ''});
+                        });
+                    } else {
+                        $message.find(`div[data-upload-file-id="${file.upload_id}"] img`).attr('data-mfp-src', url);
+                        $message.find(`div[data-upload-file-id="${file.upload_id}"] img`).attr('src', url);
+                        $message.find(`div[data-upload-file-id="${file.upload_id}"] img`)[0] && ($message.find(`div[data-upload-file-id="${file.upload_id}"] img`)[0].onload = () => {
+                            $message.find(`div[data-upload-file-id="${file.upload_id}"] img`).css({'object-fit': ''});
+                        });
+
+                    }
+                }
+            }, (response) => {
+                console.error(response.status);
+                console.error($message);
+                if (list.length === 1){
+                    $message.find(`.uploaded-img`).attr('data-mfp-src', '');
+                    $message.find(`.uploaded-img`).attr('src', '');
+                } else {
+                    $message.find(`div[data-upload-file-id="${file.upload_id}"] img`).attr('data-mfp-src', '');
+                    $message.find(`div[data-upload-file-id="${file.upload_id}"] img`).attr('src', '');
+                }
+
+            }, true);
+        };
+        _.each(files, onFileLoop);
+        _.each(fwd_images, onFileLoop);
+    },
+
+    createImageGrid: function (images) {
         let template_for_images;
-        if (attrs.images.length > 6) {
+
+        if (images.length > 6) {
             let tpl_name = 'template-for-6',
-                hidden_images = attrs.images.length - 5;
+                hidden_images = images.length - 5;
             !xabber.settings.load_media && (tpl_name = 'hidden-template-for-6');
-            template_for_images = $(templates.messages[tpl_name](attrs));
+            template_for_images = $(templates.messages[tpl_name]({images}));
             template_for_images.find('.last-image').addClass('hidden-images');
             template_for_images.find('.image-counter').text('+' + hidden_images);
         }
         else {
-            let tpl_name = 'template-for-' + attrs.images.length;
-            !xabber.settings.load_media && (tpl_name = 'hidden-template-for-' + attrs.images.length);
-            template_for_images = $(templates.messages[tpl_name](attrs));
+            let tpl_name = 'template-for-' + images.length;
+            !xabber.settings.load_media && (tpl_name = 'hidden-template-for-' + images.length);
+            template_for_images = $(templates.messages[tpl_name]({images}));
         }
         if (!xabber.settings.load_media) {
             template_for_images.find('img').removeClass('uploaded-img-for-collage popup-img').addClass('unloaded-img');
@@ -5528,7 +5705,13 @@ xabber.ChatContentView = xabber.BasicView.extend({
             badge = user_info.badge,
             from_id = user_info.id,
             has_encrypted_files = attrs.has_encrypted_files,
+            proxy_images,
             audio_player_list = [];
+
+        if (this.account.server_features.get('proxy-viewer') && this.account.get('proxy_viewer_url') && this.account.get('proxy_viewer_token') && attrs.type !== 'file_upload'){
+            images = this.replaceSourcesToPlaceholder(images);
+            proxy_images = true;
+        }
 
         username = user_info.nickname || this.model.get('saved') && this.account.get('name') || (attrs.from_jid === this.contact.get('jid') && this.contact.get('name'));
         if (!username) {
@@ -5592,7 +5775,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
 
         if (is_image) {
             if (images.length > 1) {
-                template_for_images = this.createImageGrid(attrs);
+                template_for_images = this.createImageGrid(images);
             }
         }
 
@@ -5682,14 +5865,21 @@ xabber.ChatContentView = xabber.BasicView.extend({
             }
         }
         if (is_video) {
-            let video_content = this.createVideoContainer();
-            $message.find('.chat-msg-media-content').append(video_content);
-            videos.forEach((video, idx) => {
-                let video_el = this.createVideo(video, idx);
-                $message.find('.video-content').append(video_el);
-            });
-            this.videoOnload($message, message);
-            $message.removeClass('file-upload noselect');
+            let updateVideoInMessage = (copied_videos) => {
+                let video_content = this.createVideoContainer();
+                $message.find('.chat-msg-media-content').append(video_content);
+                copied_videos.forEach((video, idx) => {
+                    let video_el = this.createVideo(video, idx);
+                    $message.find('.video-content').append(video_el);
+                });
+                this.videoOnload($message, message);
+                $message.removeClass('file-upload noselect');
+            }
+            if (this.account.server_features.get('proxy-viewer') && this.account.get('proxy_viewer_url') && this.account.get('proxy_viewer_token') && attrs.type !== 'file_upload'){
+                this.replaceVideoThubmnailsToProxy(videos, updateVideoInMessage);
+            } else {
+                updateVideoInMessage(videos);
+            }
         }
 
         if (is_file && attrs.type !== 'file_upload') {
@@ -5746,14 +5936,20 @@ xabber.ChatContentView = xabber.BasicView.extend({
                         let f_url = $message.find('.link-file').find('.file-link-download').attr('href');
 
                         if (file && file.key) {
-                            this.model.messages.decryptFile(f_url, file.key).then((result) => {
-                                if (result === null)
-                                    return;
+                            if (this.account.server_features.get('proxy-viewer') && this.account.get('proxy_viewer_url') && this.account.get('proxy_viewer_token')){
                                 $message.find('.link-file').find('.mdi-play').removeClass('no-uploaded');
-                                audio_player.$audio_elem.voice_message = this.renderVoiceMessage($message.find('.link-file').find('.file-container')[0], result, null, file.peaks);
-
+                                audio_player.$audio_elem.voice_message = this.renderVoiceMessage($message.find('.link-file').find('.file-container')[0], f_url, null, file.peaks, file.key);
                                 xabber.trigger('plyr_player_updated');
-                            });
+                            } else {
+                                this.model.messages.decryptFile(f_url, file.key).then((result) => {
+                                    if (result === null)
+                                        return;
+                                    $message.find('.link-file').find('.mdi-play').removeClass('no-uploaded');
+                                    audio_player.$audio_elem.voice_message = this.renderVoiceMessage($message.find('.link-file').find('.file-container')[0], result, null, file.peaks);
+
+                                    xabber.trigger('plyr_player_updated');
+                                });
+                            }
                         } else {
                             $message.find('.link-file').find('.mdi-play').removeClass('no-uploaded');
                             audio_player.$audio_elem.voice_message = this.renderVoiceMessage($message.find('.link-file').find('.file-container')[0], f_url, null, file.peaks);
@@ -5841,7 +6037,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
                     if (item.voice){
                         template_for_file_content.find('.file-container').html('');
                         let audio = new Audio(URL.createObjectURL(item));
-                        this.renderVoiceMessage(template_for_file_content.find('.file-container'), audio, null, item.peaks);
+                        this.renderVoiceMessage(template_for_file_content.find('.file-container'), audio, null, item.peaks, item.key);
                         template_for_file_content.find('.file-container').addClass('uploading-voice-message');
                         template_for_file_content.find('.file-container').closest('.link-file').addClass('wave-cursor-hidden')
                     }
@@ -5949,9 +6145,13 @@ xabber.ChatContentView = xabber.BasicView.extend({
                     $f_message.children('.msg-wrap').children('.fwd-msgs-block').append($('<a/>', {class: 'collapsed-forwarded-message', 'data-uniqueid': attrs.unique_id}).text(fwd_messages_link));
                 }
 
+                if (this.account.server_features.get('proxy-viewer') && this.account.get('proxy_viewer_url') && this.account.get('proxy_viewer_token')){
+                    images_forward = this.replaceSourcesToPlaceholder(images_forward);
+                }
+
                 if (is_image_forward) {
                     if (images_forward.length > 1) {
-                        template_for_images = this.createImageGrid(attrs);
+                        template_for_images = this.createImageGrid(images_forward);
                         $f_message.find('.chat-msg-media-content').html(template_for_images);
                         !xabber.settings.load_media && $f_message.find('.img-content-template').first().append($('<div class="img-privacy-warning"/>').text(xabber.getString("load_image_privacy_warning")))
                     }
@@ -5966,14 +6166,21 @@ xabber.ChatContentView = xabber.BasicView.extend({
                     }
                 }
                 if (is_forward_video) {
-                    let video_content = this.createVideoContainer();
-                    $f_message.find('.chat-msg-media-content').append(video_content);
-                    attrs.videos.forEach((video, idx) => {
-                        let video_el = this.createVideo(video, idx);
-                        $f_message.find('.video-content').append(video_el);
-                    });
-                    this.videoOnload($message, message);
-                    $f_message.removeClass('file-upload noselect');
+                    let updateVideoInMessage = (copied_videos) => {
+                            let video_content = this.createVideoContainer();
+                            $f_message.find('.chat-msg-media-content').append(video_content);
+                            copied_videos.forEach((video, idx) => {
+                                let video_el = this.createVideo(video, idx);
+                                $f_message.find('.video-content').append(video_el);
+                            });
+                            this.videoOnload($message, message);
+                            $f_message.removeClass('file-upload noselect');
+                        }
+                    if (this.account.server_features.get('proxy-viewer') && this.account.get('proxy_viewer_url') && this.account.get('proxy_viewer_token')){
+                        this.replaceVideoThubmnailsToProxy(attrs.videos, updateVideoInMessage);
+                    } else {
+                        updateVideoInMessage(attrs.videos);
+                    }
                 }
 
                 if (is_forward_file) {
@@ -6020,7 +6227,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
                                 }
                                 let f_url = $f_message.find('.link-file').find('.file-link-download').attr('href');
                                 $f_message.find('.link-file').find('.mdi-play').removeClass('no-uploaded');
-                                audio_player.$audio_elem.voice_message = this.renderVoiceMessage($f_message.find('.link-file').find('.file-container')[0], f_url, null, file.peaks);
+                                audio_player.$audio_elem.voice_message = this.renderVoiceMessage($f_message.find('.link-file').find('.file-container')[0], f_url, null, file.peaks, file.key);
                                 xabber.trigger('plyr_player_updated');
                             }
                         });
@@ -6072,6 +6279,10 @@ xabber.ChatContentView = xabber.BasicView.extend({
                     $f_message.find('.chat-msg-content').append(data_form);
                 }
                 $message.children('.msg-wrap').length ? $message.children('.msg-wrap').children('.fwd-msgs-block').append($f_message) : $message.children('.fwd-msgs-block').append($f_message);
+
+                if (this.account.server_features.get('proxy-viewer') && this.account.get('proxy_viewer_url') && this.account.get('proxy_viewer_token') && attrs.type !== 'file_upload'){
+                    this.loadAndReplaceImagesToProxy(null, $f_message, attrs.encrypted || this.model.get('encrypted') || has_encrypted_files, images_forward);
+                }
             });
             this.updateScrollBar();
             if (this.model.get('saved') && $message.hasClass('saved-main')) {
@@ -6081,7 +6292,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
         else
             $message.find('.fwd-msgs-block').remove();
 
-        if (attrs.encrypted || this.model.get('encrypted') || has_encrypted_files) {
+        if ((attrs.encrypted || this.model.get('encrypted') || has_encrypted_files) && !proxy_images) {
             this.decryptImages(message, has_encrypted_files);
         }
 
@@ -6117,6 +6328,9 @@ xabber.ChatContentView = xabber.BasicView.extend({
         message.set('msg_player_audios', audio_player_list);
         $message = $message.hyperlinkify({selector: '.chat-text-content', embed_video: true}).emojify('.chat-text-content', {tag_name: 'div', emoji_size: utils.emoji_size(emoji)}).emojify('.chat-msg-author-badge', {emoji_size: 16});
         message.set('msg_el', $message);
+        if (this.account.server_features.get('proxy-viewer') && this.account.get('proxy_viewer_url') && this.account.get('proxy_viewer_token') && attrs.type !== 'file_upload'){ //34
+            this.loadAndReplaceImagesToProxy(images, $message, attrs.encrypted || this.model.get('encrypted') || has_encrypted_files);
+        }
         return $message;
     },
 
@@ -6142,6 +6356,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
                 player = {video_src: $(item).attr('data-src')};
                 player.provider = $(item).attr('data-provider');
                 player.video_id = $(item).attr('data-msg-video-id');
+                player.proxy_video = $(item).attr('data-proxy');
                 player.msg_time = $msg.attr('data-time');
                 player.chat_item = this.model.item_view;
                 player.message_id = idx;
@@ -6198,24 +6413,24 @@ xabber.ChatContentView = xabber.BasicView.extend({
                 image = author && author.cached_image || Images.getDefaultAvatar(author);
             }
         }
-        $avatar.setAvatar(image, this.avatar_size);
+        $avatar.setAvatar(image, this.avatar_size, this.account);
         if ($msg.data('avatar')) {
             if ($msg.data('from-id')) {
                 if (this.account.chat_settings.getHashAvatar($msg.data('from-id')) === $msg.data('avatar') && (this.account.chat_settings.getB64Avatar($msg.data('from-id')))) {
-                    $avatar.setAvatar(this.account.chat_settings.getB64Avatar($msg.data('from-id')), this.avatar_size);
+                    $avatar.setAvatar(this.account.chat_settings.getB64Avatar($msg.data('from-id')), this.avatar_size, this.account);
                 }
                 else {
                     let pending_avatar = this._pending_avatars.find(a => a.hash === $msg.data('avatar'));
                     if (pending_avatar) {
                         pending_avatar.dfd.done((data_avatar) => {
-                            $avatar.setAvatar(data_avatar, this.avatar_size);
+                            $avatar.setAvatar(data_avatar, this.avatar_size, this.account);
                             let idx = this._pending_avatars.indexOf(pending_avatar);
                             if (idx > -1)
                                 this._pending_avatars.splice(idx, 1);
                         });
                     } else {
                         if($msg.data('avatar-url')){
-                            $avatar.setAvatar($msg.data('avatar-url'), this.avatar_size);
+                            $avatar.setAvatar($msg.data('avatar-url'), this.avatar_size, this.account);
                             this.account.chat_settings.updateCachedAvatars($msg.data('from-id'), $msg.data('avatar'), $msg.data('avatar-url'));
                         }
                         else
@@ -6223,7 +6438,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
                             let node = Strophe.NS.PUBSUB_AVATAR_DATA + '#' + $msg.data('from-id'), dfd = new $.Deferred();
                             this._pending_avatars.push({hash: $msg.data('avatar'), dfd: dfd});
                             this.contact.getAvatar($msg.data('avatar'), node, (data_avatar) => {
-                                $avatar.setAvatar(data_avatar, this.avatar_size);
+                                $avatar.setAvatar(data_avatar, this.avatar_size, this.account);
                                 this.account.chat_settings.updateCachedAvatars($msg.data('from-id'), $msg.data('avatar'), data_avatar);
                                 dfd.resolve(data_avatar);
                             });
@@ -6263,22 +6478,22 @@ xabber.ChatContentView = xabber.BasicView.extend({
         } else if (contact) {
             image = contact.cached_image || (this.model.get('group_chat') ? Images.getDefaultAvatar($fwd_message.find('.msg-wrap .fwd-msg-author').text()) : Images.getDefaultAvatar(contact));
         }
-        $avatar.setAvatar(image, this.avatar_size);
+        $avatar.setAvatar(image, this.avatar_size, this.account);
         $avatar.removeClass('hidden');
         if ($fwd_message.data('avatar')) {
             if ($fwd_message.data('from-id')) {
                 if ((this.account.chat_settings.getHashAvatar($fwd_message.data('from-id')) === $fwd_message.data('avatar')) && (this.account.chat_settings.getB64Avatar($fwd_message.data('from-id')))) {
-                    $avatar.setAvatar(this.account.chat_settings.getB64Avatar($fwd_message.data('from-id')), this.avatar_size);
+                    $avatar.setAvatar(this.account.chat_settings.getB64Avatar($fwd_message.data('from-id')), this.avatar_size, this.account);
                 }
                 else {
                     if($fwd_message.data('avatar-url')){
-                        $avatar.setAvatar($fwd_message.data('avatar-url'), this.avatar_size);
+                        $avatar.setAvatar($fwd_message.data('avatar-url'), this.avatar_size, this.account);
                         this.account.chat_settings.updateCachedAvatars($fwd_message.data('from-id'), $fwd_message.data('avatar'), $fwd_message.data('avatar-url'));
                     }
                     else {
                         let node = Strophe.NS.PUBSUB_AVATAR_DATA + '#' + $fwd_message.data('from-id');
                         this.contact && this.contact.getAvatar($fwd_message.data('avatar'), node, (data_avatar) => {
-                            $avatar.setAvatar(data_avatar, this.avatar_size);
+                            $avatar.setAvatar(data_avatar, this.avatar_size, this.account);
                             this.account.chat_settings.updateCachedAvatars($fwd_message.data('from-id'), $fwd_message.data('avatar'), data_avatar);
                         });
                     }
@@ -7462,17 +7677,24 @@ xabber.ChatContentView = xabber.BasicView.extend({
                     let f_url = $message.find('.link-file').find('.file-link-download').attr('href');
 
                     if (item && item.key) {
-                        this.model.messages.decryptFile(f_url, item.key).then((result) => {
-                            if (result === null)
-                                return;
+                        if (this.account.server_features.get('proxy-viewer') && this.account.get('proxy_viewer_url') && this.account.get('proxy_viewer_token')){
                             $message.find('.link-file').find('.mdi-play').removeClass('no-uploaded');
-                            audio_player.$audio_elem.voice_message = this.renderVoiceMessage($message.find('.link-file').find('.file-container')[0], result, null, item.peaks);
+                            audio_player.$audio_elem.voice_message = this.renderVoiceMessage($message.find('.link-file').find('.file-container')[0], f_url, null, item.peaks, item.key);
                             message.set('msg_player_audios', [audio_player]);
                             xabber.trigger('plyr_player_updated');
-                        });
+                        } else {
+                            this.model.messages.decryptFile(f_url, item.key).then((result) => { //34
+                                if (result === null)
+                                    return;
+                                $message.find('.link-file').find('.mdi-play').removeClass('no-uploaded');
+                                audio_player.$audio_elem.voice_message = this.renderVoiceMessage($message.find('.link-file').find('.file-container')[0], result, null, item.peaks);
+                                message.set('msg_player_audios', [audio_player]);
+                                xabber.trigger('plyr_player_updated');
+                            });
+                        }
                     } else {
                         $message.find('.link-file').find('.mdi-play').removeClass('no-uploaded');
-                        audio_player.$audio_elem.voice_message = this.renderVoiceMessage($message.find('.link-file').find('.file-container')[0], f_url, null, item.peaks);
+                        audio_player.$audio_elem.voice_message = this.renderVoiceMessage($message.find('.link-file').find('.file-container')[0], f_url, null, item.peaks, item.key);
                         message.set('msg_player_audios', [audio_player]);
                         xabber.trigger('plyr_player_updated');
                     }
@@ -7548,7 +7770,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
 
     createVideo: function(video, idx) {
         video.pretty_size = utils.pretty_size(video.size);
-        let video_attrs = {video_src: video.sources[0], thumbnail: video.thumbnail, video_id: idx},
+        let video_attrs = {video_src: video.sources[0], thumbnail: video.thumbnail, proxy_video: video.proxy_video, video_id: idx},
             $video_wrap_template = $(templates.messages.video(video_attrs));
         if (video.thumbnail){
             setTimeout(() => {
@@ -7872,6 +8094,47 @@ xabber.ChatContentView = xabber.BasicView.extend({
         $elem.closest('.chat-message').removeClass('unread-message-background');
     },
 
+    handleProxyFileLoad: function (file) {
+
+        let no_touch;
+        _.each(file.sources, (source) => {
+            if (source.includes('blob')) {
+                no_touch = true
+                return;
+            }
+        });
+
+        if (no_touch)
+            return;
+
+        utils.callback_popup_message(xabber.getString("proxy_file_load_download_has_started"), 5000);
+
+        this.account.getProxyUrl(file.sources[0], (response) => {
+            if (!response || !response.url) {
+                console.error(response);
+                return;
+            }
+            let url = response.url;
+            if (file.key){
+                this.model.messages.decryptFile(url, file.key).then((result) => {
+                    if (result === null){
+                        return;
+                    }// smth about how file not decrypted
+
+                    let download = document.createElement("a");
+                    download.href = result;
+                    download.download = file.name;
+                    download.click();
+
+                }).catch((e) => {
+                    console.error(e);
+                });
+            } else {
+                xabber.openWindow(url);
+            }
+        }, null);
+    },
+
     onClickMessage: function (ev) {
         let $elem = $(ev.target);
         if (this.model.get('notifications')){
@@ -7880,23 +8143,27 @@ xabber.ChatContentView = xabber.BasicView.extend({
         }
         if ($elem.hasClass('not-decrypted-icon') || $elem.closest('.dropdown-content').length || $elem.closest('.not-decrypted-icon').length)
             return;
-        if ($elem.hasClass('file-link-download')) {
+        if ($elem.hasClass('file-link-download')) { // сделать проверку на прокси и отдельные функции скачивания
             ev.preventDefault();
             let msg = this.model.messages.get($elem.closest('.chat-message').data('uniqueid')) || this.account.context_messages.get($elem.closest('.chat-message').data('uniqueid')),
                 uri = $elem.attr('href'),
                 file = (msg.get('files') || []).find(f => f.sources[0] === uri);
-            if (file && file.key) {
-                this.model.messages.decryptFile(uri,file.key).then((result) => {
-                    if (result === null)
-                        return;
-                    let download = document.createElement("a");
-                    download.href = result;
-                    download.download = file.name;
-                    download.click();
-                });
-                return;
-            } else
-                xabber.openWindow($elem.attr('href'));
+            if (this.account.server_features.get('proxy-viewer') && this.account.get('proxy_viewer_url') && this.account.get('proxy_viewer_token')){
+                this.handleProxyFileLoad(file);
+            } else {
+                if (file && file.key) {
+                    this.model.messages.decryptFile(uri,file.key).then((result) => {
+                        if (result === null)
+                            return;
+                        let download = document.createElement("a");
+                        download.href = result;
+                        download.download = file.name;
+                        download.click();
+                    });
+                    return;
+                } else
+                    xabber.openWindow($elem.attr('href'));
+            }
         }
         if ($elem.hasClass('msg-delivering-state') ||  $elem.hasClass('not-decrypted-tooltip') || $elem.hasClass('audio-control-panel') || $elem.hasClass('voice-msg-current-time') || $elem.hasClass('voice-msg-total-time')) {
             return;
@@ -8017,12 +8284,16 @@ xabber.ChatContentView = xabber.BasicView.extend({
                     let msg = this.model.messages.get($elem.closest('.chat-message').data('uniqueid')),
                         uri = $elem.closest('.link-file').find('.file-link-download').attr('href'),
                         file = (msg.get('files') || []).find(f => f.sources[0] === uri);
-                    if (file && file.key) {
-                        this.model.messages.decryptFile(f_url, file.key).then((result) => {
-                            if (result === null)
-                                return;
-                            $audio_elem[0].voice_message = this.renderVoiceMessage($audio_elem.find('.file-container')[0], result, null, file.peaks);
-                        });
+                    if (file && file.key) { //34
+                        if (this.account.server_features.get('proxy-viewer') && this.account.get('proxy_viewer_url') && this.account.get('proxy_viewer_token')){
+                            audio_player.$audio_elem.voice_message = this.renderVoiceMessage($audio_elem.find('.file-container')[0], f_url, null, file.peaks, file.key);
+                        } else {
+                            this.model.messages.decryptFile(f_url, file.key).then((result) => {
+                                if (result === null)
+                                    return;
+                                $audio_elem[0].voice_message = this.renderVoiceMessage($audio_elem.find('.file-container')[0], result, null, file.peaks);
+                            });
+                        }
                     }
                 } else {
                     let msg = this.chat_content.model.messages.get($elem.closest('.chat-message').data('uniqueid')),
@@ -8338,11 +8609,15 @@ xabber.ExpandedMessagePanel = xabber.BasicView.extend({
                     uri = $elem.closest('.link-file').find('.file-link-download').attr('href'),
                     file = (msg.get('files') || []).find(f => f.sources[0] === uri);
                 if (file && file.key) {
-                    this.chat_content.model.messages.decryptFile(f_url, file.key).then((result) => {
-                        if (result === null)
-                            return;
-                        $audio_elem[0].voice_message = this.chat_content.renderVoiceMessage($audio_elem.find('.file-container')[0], result, null, file.peaks);
-                    });
+                    if (this.account.server_features.get('proxy-viewer') && this.account.get('proxy_viewer_url') && this.account.get('proxy_viewer_token')){
+                        audio_player.$audio_elem.voice_message = this.renderVoiceMessage($audio_elem.find('.file-container')[0], f_url, null, file.peaks, file.key);
+                    } else {
+                        this.chat_content.model.messages.decryptFile(f_url, file.key).then((result) => { //34
+                            if (result === null)
+                                return;
+                            $audio_elem[0].voice_message = this.chat_content.renderVoiceMessage($audio_elem.find('.file-container')[0], result, null, file.peaks);
+                        });
+                    }
                 }
             } else {
                 let msg = this.chat_content.model.messages.get($elem.closest('.chat-message').data('uniqueid')),
@@ -8792,7 +9067,7 @@ xabber.AddGroupChatView = xabber.SearchView.extend({
 
     renderAccountItem: function (account) {
         let $item = $(templates.add_chat_account_item({jid: account.get('jid'), name: account.get('name')}));
-        $item.find('.circle-avatar').setAvatar(account.cached_image, this.avatar_size);
+        $item.find('.circle-avatar').setAvatar(account.cached_image, this.avatar_size, account);
         return $item;
     },
 
@@ -9603,7 +9878,7 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
 
       updateAvatar: function () {
           let image = this.contact.cached_image;
-          this.$('.circle-avatar').setAvatar(image, this.avatar_size);
+          this.$('.circle-avatar').setAvatar(image, this.avatar_size, this.account);
       },
 
       updateStatus: function () {
@@ -10558,7 +10833,7 @@ xabber.InvitationPanelView = xabber.SearchView.extend({
 
     updateAvatar: function () {
         let image = this.contact.cached_image;
-        this.$('.circle-avatar').setAvatar(image, this.avatar_size);
+        this.$('.circle-avatar').setAvatar(image, this.avatar_size, this.account);
     },
 
     onContactChanged: function () {
@@ -11988,7 +12263,7 @@ xabber.ChatBottomView = xabber.BasicView.extend({
             if (!avatar && this.account.cached_image)
                 avatar = this.account.cached_image;
             !avatar && (avatar = Images.getDefaultAvatar(nickname));
-            this.$('.my-avatar.circle-avatar').setAvatar(avatar, this.avatar_size);
+            this.$('.my-avatar.circle-avatar').setAvatar(avatar, this.avatar_size, this.account);
         }
         else {
             this.$('.account-jid').show();
@@ -12013,7 +12288,7 @@ xabber.ChatBottomView = xabber.BasicView.extend({
         }
         else
             image = this.account.cached_image;
-        this.$('.my-avatar.circle-avatar').setAvatar(image, this.avatar_size);
+        this.$('.my-avatar.circle-avatar').setAvatar(image, this.avatar_size, this.account);
     },
 
     focusOnInput: function () {
@@ -12159,12 +12434,12 @@ xabber.ChatBottomView = xabber.BasicView.extend({
                         return;
                     attrs.nickname = attrs.nickname ? Strophe.xmlescape(attrs.nickname) : attrs.id;
                     let mention_item = $(templates.group_chats.mention_item(attrs));
-                    mention_item.find('.circle-avatar').setAvatar(participant.get('b64_avatar') || utils.images.getDefaultAvatar(participant.get('nickname') || participant.get('jid') || participant.get('id')), this.mention_avatar_size);
+                    mention_item.find('.circle-avatar').setAvatar(participant.get('b64_avatar') || utils.images.getDefaultAvatar(participant.get('nickname') || participant.get('jid') || participant.get('id')), this.mention_avatar_size, this.account);
                     mention_item.find('.nickname').text().replace(mention_text, mention_text.bold());
                     this.$('.mentions-list').append(mention_item);
                 });
                 let mention_all = $(templates.group_chats.mention_item({jid: "", nickname: xabber.getString("chat_bottom__mentions_list__item_everyone"), id: ""}));
-                mention_all.find('.circle-avatar').setAvatar(this.contact.cached_image, this.mention_avatar_size);
+                mention_all.find('.circle-avatar').setAvatar(this.contact.cached_image, this.mention_avatar_size, this.account);
                 mention_all.find('.one-line.jid').text(this.getParticipantsList());
                 this.$('.mentions-list').append(mention_all);
                 this.$('.mentions-list').children('.mention-item').first().addClass('active');

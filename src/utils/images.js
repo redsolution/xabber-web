@@ -153,14 +153,33 @@ var compressImage = function (file) {
     return deferred.promise();
 };
 
-var setCss = function (image_el, cached_image, img_size) {
-    var $image_el = $(image_el),
-        css = {
-            backgroundImage: 'url("' + cached_image.url + '")',
-            backgroundSize: 'cover',
-            backgroundColor: '#FFF'
-        };
-    $image_el.css(css);
+var setCss = function (image_el, cached_image, img_size, account) {
+    let is_proxy_enabled = account && account.get('proxy_viewer_url') && account.get('proxy_viewer_token');
+    if (account && cached_image.url && !cached_image.url.includes('blob') && !cached_image.url.includes(account.get('proxy_viewer_url')) && is_proxy_enabled){
+        account.getProxyUrl(cached_image.url, (response) => {
+            if (!response || !response.url) {
+                console.error(response);
+                return;
+            }
+            let proxy_url = response.url;
+
+            var $image_el = $(image_el),
+                css = {
+                    backgroundImage: 'url("' + proxy_url + '")',
+                    backgroundSize: 'cover',
+                    backgroundColor: '#FFF'
+                };
+            $image_el.css(css);
+        });
+    } else {
+        var $image_el = $(image_el),
+            css = {
+                backgroundImage: 'url("' + cached_image.url + '")',
+                backgroundSize: 'cover',
+                backgroundColor: '#FFF'
+            };
+        $image_el.css(css);
+    }
 };
 
 var getCachedBackground = function (base64) {
@@ -211,9 +230,9 @@ var getAvatarFromFile = function (file) {
      return deferred.promise();
 };
 
-$.fn.setAvatar = function (image, size) {
+$.fn.setAvatar = function (image, size, account) {
     var cached_image = getCachedImage(image);
-    setCss(this, cached_image, size);
+    setCss(this, cached_image, size, account);
 };
 
 export default {

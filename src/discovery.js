@@ -204,6 +204,13 @@ xabber.ServerFeatures = Backbone.Collection.extend({
                         from: media_gallery_url.text()
                     });
                 }
+                let proxy_viewer_url = $(this).find('field[var="' + Strophe.NS.PROXY_VIEWER + '"] value');
+                if (proxy_viewer_url.length && proxy_viewer_url.text()){
+                    self.create({
+                        'var': 'proxy-viewer',
+                        from: proxy_viewer_url.text()
+                    });
+                }
             }
         });
         if (this.get(Strophe.NS.XABBER_NOTIFY) && this.get(Strophe.NS.XABBER_NOTIFY).get('from')){
@@ -252,6 +259,11 @@ xabber.ServerFeatures = Backbone.Collection.extend({
             this.account.set('gallery_auth', false);
             if (!(this.account.get('gallery_token') && this.account.get('gallery_url')) || (this.account.get('gallery_url') !== feature.get('from')))
                 this.account.initGalleryAuth(feature);
+        }
+        if (_var === 'proxy-viewer') {
+            this.account.set('proxy_viewer_auth', false);
+            if (!(this.account.get('proxy_viewer_token') && this.account.get('proxy_viewer_url')) || (this.account.get('proxy_viewer_url') !== feature.get('from')))
+                this.account.initProxyViewerAuth(feature);
         }
     },
 });

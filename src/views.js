@@ -1585,7 +1585,7 @@ xabber.JingleMessageView = xabber.BasicView.extend({
 
     updateAvatar: function () {
         let image = this.contact.cached_image;
-        this.$('.circle-avatar').setAvatar(image, this.avatar_size);
+        this.$('.circle-avatar').setAvatar(image, this.avatar_size, this.account);
     },
 
     updateBackground: function () {
@@ -1886,14 +1886,50 @@ xabber.PlyrPlayerPopupView = xabber.BasicView.extend({
             options.player.video_file.type && (options.player.type = options.player.video_file.type);
         }
 
-        if (options.player && options.player.key && options.player.chat_item.model && options.player.video_src && !options.player.video_decrypted){
-            options.player.chat_item.model.messages.decryptFile(options.player.video_src, options.player.key).then((result) => {
-                options.player.video_src = result;
-                options.player.video_decrypted = true;
+        if (options.player.proxy_video){
+            this.loadProxyVideo(options, dfd);
+        } else{
+            if (options.player && options.player.key && options.player.chat_item.model && options.player.video_src && !options.player.video_decrypted){
+                options.player.chat_item.model.messages.decryptFile(options.player.video_src, options.player.key).then((result) => {
+                    options.player.video_src = result;
+                    options.player.video_decrypted = true;
+                    dfd.resolve();
+                });
+            } else
                 dfd.resolve();
-            });
-        } else
-            dfd.resolve();
+        }
+    },
+
+    loadProxyVideo: function (options, dfd) {
+        let key = options.player.key,
+            account = options.player.chat_item.account;
+
+        if (!account)
+            return;
+
+        account.getProxyUrl(options.player.video_src, (response) => {
+            if (!response || !response.url) {
+                console.error(response);
+                return;
+            }
+            let url = response.url;
+            if (key){
+                options.player.chat_item.model.messages.decryptFile(url, key).then((result) => {
+                    if (result === null){
+                        return;
+                    }// smth about how file not decrypted
+
+                    options.player.video_src = result;
+                    options.player.video_decrypted = true;
+                    dfd.resolve();
+                }).catch((e) => {
+                    console.error(e);
+                });
+            } else {
+                options.player.video_src = url;
+                dfd.resolve();
+            }
+        });
     },
 
     closePopup: function () {

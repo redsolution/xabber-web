@@ -182,7 +182,7 @@ xabber.CallsView = xabber.BasicView.extend({
 
             let author = contact || $msg.find('.msg-wrap .chat-msg-author').text() || $msg.data('from'),
                 image = author && author.cached_image || utils.images.getDefaultAvatar(author);
-            this.$('.active-call-container .circle-avatar').setAvatar(image, this.avatar_size);
+            this.$('.active-call-container .circle-avatar').setAvatar(image, this.avatar_size, contact.account);
             this.$('.active-call-container .call-contact-name').text(contact.get('name'));
             xabber.current_voip_call.current_timer && this.$('.active-call-container .call-duration').text(utils.pretty_duration(xabber.current_voip_call.current_timer));
             this._duration_Interval = setInterval(() => {
@@ -243,7 +243,7 @@ xabber.CallsView = xabber.BasicView.extend({
             contacts_list = contacts_list.slice(0,5);
             _.each(contacts_list, (item) => {
                 let $template = $(templates.call_contact_item({jid: item.contact.get('jid'), name: item.contact.get('name'), count: item.count}));
-                $template.find('.circle-avatar').setAvatar(item.contact.cached_image || utils.images.getDefaultAvatar(item.contact), 32);
+                $template.find('.circle-avatar').setAvatar(item.contact.cached_image || utils.images.getDefaultAvatar(item.contact), 32, item.contact.account);
                 this.$('.calls-contacts-container').append($template);
                 this.$('.calls-contacts-wrap').removeClass('hidden');
             });
@@ -691,7 +691,7 @@ xabber.CallsView = xabber.BasicView.extend({
 
         let author = contact || $msg.find('.msg-wrap .chat-msg-author').text() || $msg.data('from');
         image = author && author.cached_image || utils.images.getDefaultAvatar(author);
-        $avatar.setAvatar(image, this.avatar_size);
+        $avatar.setAvatar(image, this.avatar_size, contact.account);
     },
 
     updateAccountsFilter: function (item, collection, options, force_render) {

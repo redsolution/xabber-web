@@ -1060,7 +1060,7 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
                                     }
                                     if (avatars_count < 11 && member.avatar_url){
                                         let $avatar = $(`<div class="circle-avatar member-avatar${!member.in_roster ? ' not-contact-member' : ''}" data-jid="${member.jid}" data-avatar-url="${member.avatar_url}"></div>`);
-                                        $avatar.setAvatar(member.avatar_url, 64);
+                                        $avatar.setAvatar(member.avatar_url, 64, account);
                                         $template.find('.subscription-item-members-avatars').append($avatar);
                                         avatars_count++;
                                     }
@@ -1076,10 +1076,10 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
                                 inviter_contact = account.contacts.mergeContact({jid: contact.invitation.message.get('inviter_jid')})
                             }
                             let inviter_image = inviter_contact.cached_image;
-                            $template.find('.circle-avatar.subscribe-avatar').setAvatar(inviter_image, 64);
+                            $template.find('.circle-avatar.subscribe-avatar').setAvatar(inviter_image, 64, account);
 
                             let group_image = contact.cached_image;
-                            $template.find('.circle-avatar.group-avatar').setAvatar(group_image, 64);
+                            $template.find('.circle-avatar.group-avatar').setAvatar(group_image, 64, account);
 
                             $template.find('.subscription-invitation-item-group-wrap').removeClass('hidden');
                             let group_name = xabber.getString("groupchat_public_group");

@@ -313,7 +313,7 @@ xabber.MentionItemView = xabber.BasicView.extend({
             this.updateName();
             if (!this.contact.get('photo_hash')) {
                 let default_avatar = Images.getDefaultAvatar(contact_name);
-                this.$('.circle-avatar').setAvatar(default_avatar, this.avatar_size);
+                this.$('.circle-avatar').setAvatar(default_avatar, this.avatar_size, this.account);
             }
         }
     },
@@ -386,28 +386,28 @@ xabber.MentionItemView = xabber.BasicView.extend({
             if (user_info.avatar) {
                 image = user_info.b64_avatar || this.account.chat_settings.getB64Avatar(user_info.id);
                 if (image) {
-                    this.$('.circle-avatar').setAvatar(image, this.avatar_size);
+                    this.$('.circle-avatar').setAvatar(image, this.avatar_size, this.account);
                 }
                 else {
                     let node = Strophe.NS.PUBSUB_AVATAR_DATA + '#' + user_info.id;
                     this.contact.getAvatar(user_info.avatar, node, (data_avatar) => {
                         image = data_avatar;
                         this.account.chat_settings.updateCachedAvatars(user_info.id, user_info.avatar, data_avatar);
-                        this.$('.circle-avatar').setAvatar(image, this.avatar_size);
+                        this.$('.circle-avatar').setAvatar(image, this.avatar_size, this.account);
                     }, () => {
                         let default_avatar = Images.getDefaultAvatar(user_info.nickname || user_info.jid || user_info.id);
-                        this.$('.circle-avatar').setAvatar(default_avatar, this.avatar_size);
+                        this.$('.circle-avatar').setAvatar(default_avatar, this.avatar_size, this.account);
                     });
                 }
             }
             else {
                 let default_avatar = Images.getDefaultAvatar(user_info.nickname || user_info.jid || user_info.id);
-                this.$('.circle-avatar').setAvatar(default_avatar, this.avatar_size);
+                this.$('.circle-avatar').setAvatar(default_avatar, this.avatar_size, this.account);
             }
         }
         else {
             image = this.contact.cached_image;
-            this.$('.circle-avatar').setAvatar(image, this.avatar_size);
+            this.$('.circle-avatar').setAvatar(image, this.avatar_size, this.account);
         }
     },
 
