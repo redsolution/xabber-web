@@ -16498,6 +16498,13 @@ input[type=range].voice-message-volume:focus {
 .modal.delete-files-modal button:hover:disabled{
     background: none;
 }
+/* ----------------- HYPERLINK MODAL -------------------- */
+.modal.modal-hyperlink .modal-footer.extended .optional-button{
+    float: left !important;
+}
+.modal.modal-hyperlink .modal-footer.extended .btn-cancel{
+    float: right !important;
+}
 /* ----------------- GALLERY VIDEO MODAL -------------------- */
 
 .modal.gallery-video-modal{

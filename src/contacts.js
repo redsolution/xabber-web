@@ -3395,8 +3395,6 @@ xabber.MediaBaseView = xabber.BasicView.extend({
         if (file.media_type.includes('image') && !url){
             url = file.original_source;
         }
-        let finished,
-            uniq_id = uuid();
 
         if (url){
             this.account.getProxyUrl(url, (response) => {
@@ -3404,7 +3402,6 @@ xabber.MediaBaseView = xabber.BasicView.extend({
                     console.error(response);
                     return;
                 }
-                finished = true;
                 let proxy_url = response.url;
 
                 if (file.key){

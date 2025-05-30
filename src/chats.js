@@ -5382,18 +5382,22 @@ xabber.ChatContentView = xabber.BasicView.extend({
         }
     },
 
-    renderVoiceMessage: function (element, file_url, chat, peaks, file_key) {
+    renderVoiceMessage: function (element, file_url, chat, file, file_key) {
         let not_expanded_msg = element.innerHTML,
             unique_id = 'waveform' + moment.now(),
             $elem = $(element),
             $msg_element = $elem.closest('.link-file');
+        let peaks, duration;
+        if (file){
+            peaks = file.peaks;
+            duration = utils.pretty_duration(file.duration);
+        }
         chat = chat || this.model;
         $elem.addClass('voice-message-rendering').html($(templates.messages.audio_file_waveform({waveform_id: unique_id})));
         let aud = this.createAudio(file_url, $elem.find('#' + unique_id));
 
         let hideShowCursor = () => {
-            let current_time = aud.getCurrentTime(),
-                duration = aud.getDuration();
+            let current_time = aud.getCurrentTime();
             if (current_time === 0 || current_time === duration)
                 $msg_element.addClass('wave-cursor-hidden');
             else
@@ -5403,14 +5407,13 @@ xabber.ChatContentView = xabber.BasicView.extend({
         hideShowCursor();
 
         aud.on('ready', () => {
-            let duration = Math.round(aud.getDuration());
-            $elem.find('.voice-msg-total-time').text(utils.pretty_duration(duration));
+            !duration && (duration = utils.pretty_duration(Math.round(aud.getDuration())));
+            duration && $elem.find('.voice-msg-total-time').text(duration);
         });
 
         aud.on('waveform-ready', () => {
-            setTimeout(() => {
-                aud.fireEvent('interaction');
-            }, 1000)
+            !duration && (duration = utils.pretty_duration(Math.round(aud.getDuration())));
+            duration && $elem.find('.voice-msg-total-time').text(duration);
         });
 
         aud.on('error', () => {
@@ -5938,21 +5941,21 @@ xabber.ChatContentView = xabber.BasicView.extend({
                         if (file && file.key) {
                             if (this.account.server_features.get('proxy-viewer') && this.account.get('proxy_viewer_url') && this.account.get('proxy_viewer_token')){
                                 $message.find('.link-file').find('.mdi-play').removeClass('no-uploaded');
-                                audio_player.$audio_elem.voice_message = this.renderVoiceMessage($message.find('.link-file').find('.file-container')[0], f_url, null, file.peaks, file.key);
+                                audio_player.$audio_elem.voice_message = this.renderVoiceMessage($message.find('.link-file').find('.file-container')[0], f_url, null, file, file.key);
                                 xabber.trigger('plyr_player_updated');
                             } else {
                                 this.model.messages.decryptFile(f_url, file.key).then((result) => {
                                     if (result === null)
                                         return;
                                     $message.find('.link-file').find('.mdi-play').removeClass('no-uploaded');
-                                    audio_player.$audio_elem.voice_message = this.renderVoiceMessage($message.find('.link-file').find('.file-container')[0], result, null, file.peaks);
+                                    audio_player.$audio_elem.voice_message = this.renderVoiceMessage($message.find('.link-file').find('.file-container')[0], result, null, file);
 
                                     xabber.trigger('plyr_player_updated');
                                 });
                             }
                         } else {
                             $message.find('.link-file').find('.mdi-play').removeClass('no-uploaded');
-                            audio_player.$audio_elem.voice_message = this.renderVoiceMessage($message.find('.link-file').find('.file-container')[0], f_url, null, file.peaks);
+                            audio_player.$audio_elem.voice_message = this.renderVoiceMessage($message.find('.link-file').find('.file-container')[0], f_url, null, file);
 
                             xabber.trigger('plyr_player_updated');
                         }
@@ -6037,7 +6040,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
                     if (item.voice){
                         template_for_file_content.find('.file-container').html('');
                         let audio = new Audio(URL.createObjectURL(item));
-                        this.renderVoiceMessage(template_for_file_content.find('.file-container'), audio, null, item.peaks, item.key);
+                        this.renderVoiceMessage(template_for_file_content.find('.file-container'), audio, null, item, item.key);
                         template_for_file_content.find('.file-container').addClass('uploading-voice-message');
                         template_for_file_content.find('.file-container').closest('.link-file').addClass('wave-cursor-hidden')
                     }
@@ -6227,7 +6230,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
                                 }
                                 let f_url = $f_message.find('.link-file').find('.file-link-download').attr('href');
                                 $f_message.find('.link-file').find('.mdi-play').removeClass('no-uploaded');
-                                audio_player.$audio_elem.voice_message = this.renderVoiceMessage($f_message.find('.link-file').find('.file-container')[0], f_url, null, file.peaks, file.key);
+                                audio_player.$audio_elem.voice_message = this.renderVoiceMessage($f_message.find('.link-file').find('.file-container')[0], f_url, null, file, file.key);
                                 xabber.trigger('plyr_player_updated');
                             }
                         });
@@ -7679,7 +7682,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
                     if (item && item.key) {
                         if (this.account.server_features.get('proxy-viewer') && this.account.get('proxy_viewer_url') && this.account.get('proxy_viewer_token')){
                             $message.find('.link-file').find('.mdi-play').removeClass('no-uploaded');
-                            audio_player.$audio_elem.voice_message = this.renderVoiceMessage($message.find('.link-file').find('.file-container')[0], f_url, null, item.peaks, item.key);
+                            audio_player.$audio_elem.voice_message = this.renderVoiceMessage($message.find('.link-file').find('.file-container')[0], f_url, null, item, item.key);
                             message.set('msg_player_audios', [audio_player]);
                             xabber.trigger('plyr_player_updated');
                         } else {
@@ -7687,14 +7690,14 @@ xabber.ChatContentView = xabber.BasicView.extend({
                                 if (result === null)
                                     return;
                                 $message.find('.link-file').find('.mdi-play').removeClass('no-uploaded');
-                                audio_player.$audio_elem.voice_message = this.renderVoiceMessage($message.find('.link-file').find('.file-container')[0], result, null, item.peaks);
+                                audio_player.$audio_elem.voice_message = this.renderVoiceMessage($message.find('.link-file').find('.file-container')[0], result, null, item);
                                 message.set('msg_player_audios', [audio_player]);
                                 xabber.trigger('plyr_player_updated');
                             });
                         }
                     } else {
                         $message.find('.link-file').find('.mdi-play').removeClass('no-uploaded');
-                        audio_player.$audio_elem.voice_message = this.renderVoiceMessage($message.find('.link-file').find('.file-container')[0], f_url, null, item.peaks, item.key);
+                        audio_player.$audio_elem.voice_message = this.renderVoiceMessage($message.find('.link-file').find('.file-container')[0], f_url, null, item, item.key);
                         message.set('msg_player_audios', [audio_player]);
                         xabber.trigger('plyr_player_updated');
                     }
@@ -8286,12 +8289,12 @@ xabber.ChatContentView = xabber.BasicView.extend({
                         file = (msg.get('files') || []).find(f => f.sources[0] === uri);
                     if (file && file.key) { //34
                         if (this.account.server_features.get('proxy-viewer') && this.account.get('proxy_viewer_url') && this.account.get('proxy_viewer_token')){
-                            audio_player.$audio_elem.voice_message = this.renderVoiceMessage($audio_elem.find('.file-container')[0], f_url, null, file.peaks, file.key);
+                            audio_player.$audio_elem.voice_message = this.renderVoiceMessage($audio_elem.find('.file-container')[0], f_url, null, file, file.key);
                         } else {
                             this.model.messages.decryptFile(f_url, file.key).then((result) => {
                                 if (result === null)
                                     return;
-                                $audio_elem[0].voice_message = this.renderVoiceMessage($audio_elem.find('.file-container')[0], result, null, file.peaks);
+                                $audio_elem[0].voice_message = this.renderVoiceMessage($audio_elem.find('.file-container')[0], result, null, file);
                             });
                         }
                     }
@@ -8300,7 +8303,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
                         uri = $elem.closest('.link-file').find('.file-link-download').attr('href'),
                         file = (msg.get('files') || []).find(f => f.sources[0] === uri),
                         peaks = file && file.peaks ? file.peaks : null;
-                    $audio_elem[0].voice_message = this.renderVoiceMessage($audio_elem.find('.file-container')[0], f_url, null, peaks);
+                    $audio_elem[0].voice_message = this.renderVoiceMessage($audio_elem.find('.file-container')[0], f_url, null, file);
                 }
                 return;
             }
@@ -8324,7 +8327,16 @@ xabber.ChatContentView = xabber.BasicView.extend({
                 ev && ev.preventDefault();
                 $elem.blur();
                 let link = $elem.attr('href');
-                utils.dialogs.ask(xabber.getString("open_this_link"), decodeURI(link), null, {ok_button_text: xabber.getString("open")}).done((result) => {
+                utils.dialogs.ask_extended(xabber.getString("open_this_link"), decodeURI(link),
+                    {modal_class: 'modal-hyperlink'}, {
+                    ok_button_text: xabber.getString("open"),
+                    optional_button: 'copy-link',
+                    optional_button_text: xabber.getString("action_copy_link")
+                }).done((result) => {
+                    if (result === 'copy-link') {
+                        utils.copyTextToClipboard(decodeURI(link));
+                        return;
+                    }
                     if (result)
                         utils.openWindow(link);
                 });
@@ -8610,12 +8622,12 @@ xabber.ExpandedMessagePanel = xabber.BasicView.extend({
                     file = (msg.get('files') || []).find(f => f.sources[0] === uri);
                 if (file && file.key) {
                     if (this.account.server_features.get('proxy-viewer') && this.account.get('proxy_viewer_url') && this.account.get('proxy_viewer_token')){
-                        audio_player.$audio_elem.voice_message = this.renderVoiceMessage($audio_elem.find('.file-container')[0], f_url, null, file.peaks, file.key);
+                        audio_player.$audio_elem.voice_message = this.renderVoiceMessage($audio_elem.find('.file-container')[0], f_url, null, file, file.key);
                     } else {
                         this.chat_content.model.messages.decryptFile(f_url, file.key).then((result) => { //34
                             if (result === null)
                                 return;
-                            $audio_elem[0].voice_message = this.chat_content.renderVoiceMessage($audio_elem.find('.file-container')[0], result, null, file.peaks);
+                            $audio_elem[0].voice_message = this.chat_content.renderVoiceMessage($audio_elem.find('.file-container')[0], result, null, file);
                         });
                     }
                 }
@@ -8624,7 +8636,7 @@ xabber.ExpandedMessagePanel = xabber.BasicView.extend({
                     uri = $elem.closest('.link-file').find('.file-link-download').attr('href'),
                     file = (msg.get('files') || []).find(f => f.sources[0] === uri),
                     peaks = file && file.peaks ? file.peaks : null;
-                $audio_elem[0].voice_message = this.chat_content.renderVoiceMessage($audio_elem.find('.file-container')[0], f_url, null, peaks);
+                $audio_elem[0].voice_message = this.chat_content.renderVoiceMessage($audio_elem.find('.file-container')[0], f_url, null, file);
             }
             return;
         }
