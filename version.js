@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.4.108","version_description":"copy link btn in hyperlink modal, fixed waveform creation when peaks are transmitted"}'
+'{"version_number":"2.4.109","version_description":"frame nesting level control and title changing, token deletion on account deletion"}'
 )});

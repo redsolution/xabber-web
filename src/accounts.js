@@ -3376,6 +3376,7 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
     },
 
     render: function (options) {
+        this.clearFrameInfo();
         this.$('.circle-avatar.dropdown-button').dropdown({
             inDuration: 100,
             outDuration: 100,
@@ -3452,6 +3453,60 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
         }
     },
 
+    handleServiceMessage: function (event) {
+        if (!this.iframe_window) {
+            this.clearFrameInfo();
+            return;
+        }
+        if (event.origin !== constants.XABBER_SERVICE_IFRAME_URL)
+            return;
+        if (event.data && event.data.type && event.data.type === 'REQUEST_TOKEN') {
+            this.iframe_window_origin = event.origin;
+            this.iframe_window.postMessage(
+                {
+                    type: 'TOKEN_RESPONSE',
+                    token: this.model.get('service_token'),
+                },
+                event.origin
+            );
+        }
+        if (event.data && event.data.type && event.data.type === 'ACCOUNT_DELETED') {
+            this.backToMenu();
+            this.model.set('service_token', null);
+            this.model.set('service_token_expires', null);
+        }
+        if (event.data && event.data.type && event.data.type === 'BREADCRUMBS' && event.data.breadcrumbs) {
+            let breadcrumbs = event.data.breadcrumbs;
+            if (breadcrumbs.length > 1 && breadcrumbs[breadcrumbs.length - 1].name){
+                let title = breadcrumbs[breadcrumbs.length - 1].name;
+                this.$('.settings-panel-head-title').text(title);
+                this.$('.btn-back-settings').addClass('btn-back-frame');
+
+            } else {
+                this.$('.settings-panel-head-title').text(xabber.getString("settings_account__xabber_account_frame"));
+                this.$('.btn-back-settings').removeClass('btn-back-frame');
+            }
+        }
+
+    },
+
+    frameBackToMenu: function () {
+        if (this.iframe_window && this.iframe_window_origin){
+            this.iframe_window.postMessage(
+                {
+                    type: 'BREADCRUMBS_BACK',
+                },
+                this.iframe_window_origin
+            );
+        }
+    },
+
+    clearFrameInfo: function () {
+        this.$('.btn-back-settings').removeClass('btn-back-frame');
+        this.iframe_window = null;
+        this.iframe_window_origin = null;
+    },
+
     openXabberAccountSettings: function () {
         if (!(constants.XABBER_SERVICE_IFRAME_URL && constants.XABBER_SERVICE_URL))
             return;
@@ -3459,10 +3514,8 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
 
         this.updateHeight();
 
-        this.model.testXabberServiceTokenExpire(()=> {
-            let token = this.model.get('service_token'),
-                iframe_window;
-            if (!token)
+        this.model.testXabberServiceTokenExpire(() => {
+            if (!this.model.get('service_token'))
                 return;
             try {
                 fetch(constants.XABBER_SERVICE_IFRAME_URL)
@@ -3470,25 +3523,16 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
                         if (response.ok) {
                             let iframe = document.createElement('iframe');
 
-                            let handleServiceMessage = (event) => {
-                                event.data && event.data.type && console.error(event.data.type);
-                                if (event.origin !== constants.XABBER_SERVICE_IFRAME_URL)
-                                    return;
-                                if (event.data && event.data.type && event.data.type === 'REQUEST_TOKEN') {
-                                    iframe_window.postMessage(
-                                        { type: 'TOKEN_RESPONSE', token },
-                                        event.origin
-                                    );
-                                    window.removeEventListener('message', handleServiceMessage);
-
-                                }
-                            };
                             iframe.classList.add("xabber-account-manage-frame");
                             iframe.src = constants.XABBER_SERVICE_IFRAME_URL;
                             this.$('.xabber-account-frame-wrap').html(iframe);
                             this.updateFrameHeight();
-                            iframe_window = iframe.contentWindow || iframe;
-                            window.addEventListener("message", handleServiceMessage);
+                            this.iframe_window = iframe.contentWindow || iframe;
+                            if (!this._iframe_msg_handler_created){
+                                this._iframe_msg_handler_created = true;
+                                window.addEventListener("message", this.handleServiceMessage.bind(this));
+                            }
+
                         } else {
                             console.error('Loading error:', response.status);
                         }
@@ -3755,7 +3799,12 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
         this.backToMenuHandler(ev);
     },
 
-    backToMenuHandler: function () {
+    backToMenuHandler: function (ev) {
+        if ($(ev.target).closest('.btn-back-settings').hasClass('btn-back-frame')){
+            this.frameBackToMenu();
+            return;
+        }
+        this.clearFrameInfo();
         this.$('.xabber-account-frame-wrap').html('');
         this.$('.left-column').removeClass('hidden');
         this.$('.right-column').addClass('hidden');
@@ -3852,6 +3901,7 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
     },
 
     closeSettings: function () {
+        this.clearFrameInfo();
         xabber.settings_modal_view.closeSettings();
     },
 
