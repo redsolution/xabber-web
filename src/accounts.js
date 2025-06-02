@@ -4632,7 +4632,9 @@ xabber.AccountSettingsSingleModalView = xabber.AccountSettingsModalView.extend({
     },
 
     backToMenu: function (ev) {
-        this.parent.$('.left-column .settings-tabs-wrap.global-settings-tabs').removeClass('hidden');
+        if (!$(ev.target).closest('.btn-back-settings').hasClass('btn-back-frame')){
+            this.parent.$('.left-column .settings-tabs-wrap.global-settings-tabs').removeClass('hidden');
+        }
         this.backToMenuHandler(ev);
     },
 

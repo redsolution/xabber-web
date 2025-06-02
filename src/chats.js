@@ -5394,7 +5394,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
         }
         chat = chat || this.model;
         $elem.addClass('voice-message-rendering').html($(templates.messages.audio_file_waveform({waveform_id: unique_id})));
-        let aud = this.createAudio(file_url, $elem.find('#' + unique_id));
+        let aud = this.createAudio($elem.find('#' + unique_id));
 
         let hideShowCursor = () => {
             let current_time = aud.getCurrentTime();
@@ -5475,7 +5475,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
             aud.setVolume($elem.find('.voice-message-volume').val()/100);
         };
         try{
-            if (this.account.server_features.get('proxy-viewer') && this.account.get('proxy_viewer_url') && this.account.get('proxy_viewer_token') && !file_url.includes('blob')){
+            if (this.account.server_features.get('proxy-viewer') && this.account.get('proxy_viewer_url') && this.account.get('proxy_viewer_token') && file_url.includes && !file_url.includes('blob')){
                 this.account.getProxyUrl(file_url, (response) => {
                     if (!response || !response.url) {
                         console.error(response);
@@ -7714,7 +7714,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
         this.scrollToBottom();
     },
 
-    createAudio: function(file_url, $elem) {
+    createAudio: function($elem) {
         let audio = WaveSurfer.create({
             container: $elem[0],
             scrollParent: false,
