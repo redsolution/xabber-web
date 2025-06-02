@@ -979,7 +979,8 @@ xabber.CallsView = xabber.BasicView.extend({
         let $jingle_msg_reject = $message.find(`reject[xmlns="${Strophe.NS.JINGLE_MSG}"]`);
 
         if ($jingle_msg_reject.length) {
-            let from_jid = $message.attr('from') || options.from_jid;
+            let from_jid = $message.attr('from') || options.from_jid,
+                to_jid = $message.attr('to');
             if ($jingle_msg_reject.children('call').length) {
                 let duration = $jingle_msg_reject.children('call').attr('duration'),
                     initiator = $jingle_msg_reject.children('call').attr('initiator');
@@ -994,7 +995,13 @@ xabber.CallsView = xabber.BasicView.extend({
                         options.jingle_duration = utils.pretty_duration(duration);
                     }
                 } else {
-                    if (initiator === account.get('jid') || Strophe.getBareJidFromJid(from_jid) === account.get('jid')){
+                    if (initiator === account.get('jid') && Strophe.getBareJidFromJid(from_jid) === account.get('jid')){
+                        options.jingle_call_status = 'outgoing_missed';
+                        options.jingle_iniator = initiator;
+                    } else if (initiator === account.get('jid') && Strophe.getBareJidFromJid(to_jid) === account.get('jid')){
+                        options.jingle_call_status = 'outgoing_declined';
+                        options.jingle_iniator = initiator;
+                    } else if (initiator !== account.get('jid') && Strophe.getBareJidFromJid(from_jid) === account.get('jid')) {
                         options.jingle_call_status = 'declined';
                         options.jingle_iniator = initiator;
                     } else {

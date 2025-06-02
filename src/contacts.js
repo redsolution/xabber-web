@@ -11329,7 +11329,6 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
                 account_color: contact.account.settings.get('color'),
             }));
             let image = contact.cached_image;
-            $template.find('.circle-avatar').setAvatar(image, 32, contact.account);
 
             let ic_name = contact.getIcon();
             ic_name && $template.find('.chat-icon').switchClass(ic_name, (ic_name === 'group-invite' || ic_name === 'server' || ic_name === 'blocked')).html(env.templates.svg[ic_name]());

@@ -11,17 +11,20 @@
         <div class="chat-msg-author-wrap">
             <div class="chat-msg-author one-line">{{username}}</div>
         </div>
-
         {[ if (jingle_call_status === 'outgoing') {]}
-        <svg class="call-icon mdi fill-color-blue-700 mdi-svg-template" data-svgname="call-made"></svg>
-        {[} else if (jingle_call_status === 'missed') {]}
-        <svg class="call-icon mdi fill-color-red-700 mdi-svg-template" data-svgname="call-missed"></svg>
+        <svg class="call-icon mdi fill-color-green-700 mdi-svg-template" data-svgname="call-made"></svg>
+        {[} else if (jingle_call_status === 'outgoing_missed') {]}
+        <svg class="call-icon mdi fill-color-red-700 mdi-svg-template" data-svgname="call-made"></svg>
+        {[} else if (jingle_call_status === 'outgoing_declined') {]}
+        <svg class="call-icon mdi fill-color-red-700 mdi-svg-template" data-svgname="call-declined"></svg>
         {[} else if (jingle_call_status === 'incoming') {]}
         <svg class="call-icon mdi fill-color-green-700 mdi-svg-template" data-svgname="call-received"></svg>
+        {[} else if (jingle_call_status === 'missed') {]}
+        <svg class="call-icon mdi fill-color-red-700 mdi-svg-template" data-svgname="call-received"></svg>
         {[} else if (jingle_call_status === 'declined') {]}
-        <svg class="call-icon mdi fill-color-grey-500 mdi-svg-template" data-svgname="call-noanswer"></svg>
+        <svg class="call-icon mdi fill-color-red-700 mdi-svg-template" data-svgname="call-rejected"></svg>
         {[} else {]}
-        <svg class="call-icon mdi fill-color-red-700 mdi-svg-template" data-svgname="call-missed"></svg>
+        <svg class="call-icon mdi fill-color-red-700 mdi-svg-template" data-svgname="call-declined"></svg>
         {[}]}
         <div class="chat-msg-content chat-text-content">{[if (time){]}{{time}}, {[}]}{{message}}{[if (jingle_duration){]}, {{jingle_duration}} {[}]}</div>
     </div>

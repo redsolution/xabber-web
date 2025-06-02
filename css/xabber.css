@@ -23239,6 +23239,9 @@ ul.restrictions-list-content>li {
 .calls-content .chat-content{
     padding-top: 15px;
     padding-right: 24px;
+    height: 100%;
+    top: unset;
+    transform: none;
 }
 .calls-content .chat-content .chat-msg-content{
     padding-left: 20px;
@@ -23578,6 +23581,9 @@ ul.restrictions-list-content>li {
 }
 .notifications-content .chat-content{
     padding: 15px 10px 0 4px;
+    height: 100%;
+    top: unset;
+    transform: none;
 }
 .panel-wrap .notification-subscriptions-wrap{
     margin: 0 16px 32px;

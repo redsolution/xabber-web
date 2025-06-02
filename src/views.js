@@ -2385,12 +2385,14 @@ xabber.SettingsModalView = xabber.BasicView.extend({
         this.updateHeight();
     },
 
-    updateHeight: function () {
+    updateHeight: function (is_frame_enabled) {
         let height;
         if (!this.$('.left-column.main-left-column').hasClass('hidden'))
             height = this.$('.left-column.main-left-column').height();
         if (!this.$('.right-column.main-right-column').hasClass('hidden'))
             height = this.$('.right-column.main-right-column').height();
+        if (is_frame_enabled)
+            height = height + 8;
         this.ps_container.css('height', height + 'px');
         setTimeout(() => {
             this.updateScrollBar();

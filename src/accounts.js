@@ -3435,21 +3435,30 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
         return this;
     },
 
-    updateHeight: function () {
+    updateHeight: function (is_frame_enabled) {
         let height;
         if (!this.$('.left-column').hasClass('hidden'))
             height = this.$('.left-column').height();
         if (!this.$('.right-column').hasClass('hidden'))
             height = this.$('.right-column').height();
+        if (is_frame_enabled)
+            height = height + 8;
         this.ps_container.css('height', height + 'px');
-        this.updateScrollBar();
+        setTimeout(() => {
+            this.updateScrollBar();
+        }, 500)
     },
 
     updateFrameHeight: function () {
         let $iframe = this.$('.xabber-account-manage-frame');
         if ($iframe.length){
             $iframe.css('height', `${($(window).height() * 0.8) - 74}px`);
-            this.updateHeight();
+            this.updateHeight(true);
+        }
+        let $iframe_wrap = this.$('.xabber-account-frame-wrap');
+        if ($iframe_wrap.length){
+            $iframe_wrap.css('height', `${($(window).height() * 0.8) - 74}px`);
+            this.updateHeight(true);
         }
     },
 
@@ -3510,6 +3519,7 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
     openXabberAccountSettings: function () {
         if (!(constants.XABBER_SERVICE_IFRAME_URL && constants.XABBER_SERVICE_URL))
             return;
+        this.updateFrameHeight();
         this.$('.xabber-account-frame-wrap').html(`<div class="preloader-wrapper-frame-wrap">${env.templates.contacts.preloader()}</div>`);
 
         this.updateHeight();
@@ -4643,8 +4653,8 @@ xabber.AccountSettingsSingleModalView = xabber.AccountSettingsModalView.extend({
         this.backToSubMenuHandler(ev);
     },
 
-    updateHeight: function () {
-        this.parent.updateHeight();
+    updateHeight: function (is_frame_enabled) {
+        this.parent.updateHeight(is_frame_enabled);
     },
 });
 
