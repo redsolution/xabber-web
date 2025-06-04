@@ -9634,7 +9634,7 @@ input[type=text].simple-input-field:hover {
     margin: 0;
 }
 .chat-list-wrap.left-panel-list-wrap .chat-item .chat-title {
-    font-size: 18px;
+    font-size: var(--chat-item-title-font-size);
     line-height: 22px;
     color: #212121;
     margin: 0;
@@ -9749,7 +9749,7 @@ input[type=text].simple-input-field:hover {
 
 .chat-list-wrap.left-panel-list-wrap .chat-item .last-msg {
     width: calc(100% - 56px);
-    font-size: 13px;
+    font-size: var(--chat-item-msg-font-size);
     font-weight: 300;
     color: #757575;
     margin-top: 6px;
@@ -11224,6 +11224,9 @@ input[type=text].simple-input-field:hover {
     font-size: 12px;
     line-height: 20px;
     color: #212121;
+}
+.chat-message .chat-msg-content {
+    font-size: var(--msg-font-size);
 }
 
 .chat-message .chat-msg-media-content{
@@ -22182,6 +22185,9 @@ input[type=range].voice-message-volume:focus {
     left: 40%;
     width: 30px;
     height: 30px;
+}
+.messages-list-wrap .messages-list{
+    min-height: 80px;
 }
 
 .left-panel-wrap .left-panel-list-wrap .chats-title,

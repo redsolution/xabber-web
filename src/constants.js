@@ -132,6 +132,33 @@ var constants = {
         }
     ],
 
+    FONT_SIZES_LIST: [
+        {
+            type: 'small',
+            chat_font_size: 13,
+            chat_item_title_font_size: 16,
+            chat_item_msg_font_size: 12,
+        },
+        {
+            type: 'normal',
+            chat_font_size: 14,
+            chat_item_title_font_size: 18,
+            chat_item_msg_font_size: 13,
+        },
+        {
+            type: 'large',
+            chat_font_size: 16,
+            chat_item_title_font_size: 19,
+            chat_item_msg_font_size: 14,
+        },
+        {
+            type: 'xlarge',
+            chat_font_size: 18,
+            chat_item_title_font_size: 20,
+            chat_item_msg_font_size: 15,
+        },
+    ],
+
     JINGLE_MSG_PROPOSE: 0,
     JINGLE_MSG_REJECT: 1,
     JINGLE_MSG_ACCEPT: 2,

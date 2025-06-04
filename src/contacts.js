@@ -9276,8 +9276,9 @@ xabber.Roster = xabber.ContactsBase.extend({
                 if(!(is_invite || encrypted && this.account.omemo)) {
                     if (msg.isSenderMe() && ((msg.get('stanza_id') === last_displayed_msg) || saved))
                         msg.set('state', constants.MSG_DISPLAYED);
-                    else if (msg.isSenderMe())
+                    else if (msg.isSenderMe() && msg.get('state') !== constants.MSG_SENT) {
                         msg.set('state', constants.MSG_DELIVERED);
+                    }
                     this.account.messages.add(msg);
                     if ((chat.last_message && (msg.get('timestamp') > chat.last_message.get('timestamp'))) || !chat.last_message){
                         chat.last_message = msg;

@@ -305,6 +305,7 @@ let Xabber = Backbone.Model.extend({
                 appearance: {blur: 0, vignetting: 0, color: '#E0E0E0'},
                 main_color: 'default',
                 emoji_font: 'default',
+                font_size: 'normal',
                 sound_on_private_message: 'beep_up',
                 sound_on_group_message: 'beep_up',
                 call_attention: true,
@@ -468,6 +469,10 @@ let Xabber = Backbone.Model.extend({
                     _.extend(constants, {TURN_SERVERS_LIST: config.TURN_SERVERS_LIST});
                 else if (_.isObject(config.TURN_SERVERS_LIST) && Object.keys(config.TURN_SERVERS_LIST).length)
                     _.extend(constants, {TURN_SERVERS_LIST: [config.TURN_SERVERS_LIST]});
+            }
+            if (config.FONT_SIZES_LIST) {
+                if (_.isArray(config.FONT_SIZES_LIST))
+                    _.extend(constants, {FONT_SIZES_LIST: config.FONT_SIZES_LIST});
             }
 
             constants.LOADING_PLACEHOLDER = constants.ASSETS_URL_PREFIX + constants.LOADING_PLACEHOLDER;

@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.4.111","version_description":"changed call icons, added new call msg states, fixed frame height and scrolling, removed unused avatar setting in contact item template, fixed notifications and calls chat content position"}'
+'{"version_number":"2.4.112","version_description":"added caching of avatar proxy urls, added callback queue on trying to request proxy url for same avatar url, added configurable font size setting in settings modal, fixed sync setting delivered state on message which has received state, added min-height to messages search container "}'
 )});

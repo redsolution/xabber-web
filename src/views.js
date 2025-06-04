@@ -898,9 +898,11 @@ xabber.Body = xabber.NodeView.extend({
         this.updateBackground();
         this.updateMainColor();
         this.updateAvatarShape();
+        this.updateFontSize();
         $('#modals').insertAfter(this.$el);
         this.listenTo(xabber, 'update_main_color', this.updateMainColor);
         this.listenTo(xabber, 'update_avatar_shape', this.updateAvatarShape);
+        this.listenTo(xabber, 'update_font_size', this.updateFontSize);
     },
 
     addScreen: function (name, attrs) {
@@ -924,6 +926,37 @@ xabber.Body = xabber.NodeView.extend({
         $(constants.CONTAINER_ELEMENT).switchClass('squircle-avatars', shape === 'squircle');
     },
 
+    updateFontSize: function () {
+        let font_size = xabber.settings.font_size;
+        if (constants.FONT_SIZES_LIST && constants.FONT_SIZES_LIST.length){
+            let font_size_item = constants.FONT_SIZES_LIST.find(item => item.type === font_size);
+            if (font_size_item){
+                let chat_font_size = font_size_item.chat_font_size,
+                    chat_item_title_font_size = font_size_item.chat_item_title_font_size,
+                    chat_item_msg_font_size = font_size_item.chat_item_msg_font_size,
+                    container = $(constants.CONTAINER_ELEMENT)[0];
+                if (container){
+                    container.style.setProperty('--msg-font-size', `${chat_font_size}px`);
+                    container.style.setProperty('--chat-item-title-font-size', `${chat_item_title_font_size}px`);
+                    container.style.setProperty('--chat-item-msg-font-size', `${chat_item_msg_font_size}px`);
+                }
+            } else {
+                this.setDefaultFontSize();
+            }
+        } else {
+            this.setDefaultFontSize();
+        }
+    },
+
+    setDefaultFontSize: function () {
+        let container = $(constants.CONTAINER_ELEMENT)[0];
+        if (container){
+            container.style.setProperty('--msg-font-size', `14px`);
+            container.style.setProperty('--chat-item-title-font-size', `18px`);
+            container.style.setProperty('--chat-item-msg-font-size', `13px`);
+        }
+
+    },
     updateBackground: function () {
         let background_settings = xabber.settings.background || {};
         if (background_settings.image) {
@@ -2134,6 +2167,7 @@ xabber.SettingsModalView = xabber.BasicView.extend({
         "click .selected-color-wrap": "openColorPicker",
         "click .client-main-color-item": "chooseMainColor",
         "change .background input[type=radio][name=background]": "setBackground",
+        "change .settings-font-size input[type=radio][name=font-size]": "setFontSize",
         "click .current-background-wrap": "changeBackgroundImage",
         "change .hotkeys input[type=radio][name=hotkeys]": "setHotkeys",
         "change .avatar-shape input[type=radio][name=avatar_shape]": "setAvatarShape",
@@ -2254,6 +2288,7 @@ xabber.SettingsModalView = xabber.BasicView.extend({
         this.updateSoundsLabel();
         this.updateDescription();
         this.updateBackgroundSetting();
+        this.updateFontSizeSetting();
         this.updateColor();
         this.updateMainColor();
         this.updateLanguage();
@@ -2319,6 +2354,26 @@ xabber.SettingsModalView = xabber.BasicView.extend({
 
     updateMainColor: function () {
         this.$('.toolbar-main-color-setting').attr('data-color', this.model.get('main_color'));
+    },
+
+    updateFontSizeSetting: function () {
+        if (constants.FONT_SIZES_LIST && constants.FONT_SIZES_LIST.length){
+            this.$('.settings-font-size-hidable').removeClass('hidden');
+            this.$('.settings-font-size form').html('');
+            _.each(constants.FONT_SIZES_LIST, (item) => {
+                this.$('.settings-font-size form').append($(`
+        <p>
+            <input class="with-gap" name="font-size" value="${item.type}" type="radio" id="${this.cid}-${item.type}-font-size" />
+            <label for="${this.cid}-${item.type}-font-size">${xabber.getString(`chats_font_size_${item.type}`)}</label>
+        </p>
+`));
+            });
+            this.$(`.settings-font-size input[type=radio][name=font-size][value=${xabber.settings.font_size}]`)
+                .prop('checked', true);
+        } else {
+            this.$('.settings-font-size-hidable').addClass('hidden');
+        }
+
     },
 
     updateBackgroundSetting: function () {
@@ -2866,6 +2921,11 @@ xabber.SettingsModalView = xabber.BasicView.extend({
             let background_view = new xabber.SetBackgroundView();
             background_view.render({type: value, model: this.model});
         }
+    },
+
+    setFontSize: function (ev) {
+        this.model.save('font_size', ev.target.value);
+        xabber.trigger('update_font_size');
     },
 
     changeBackgroundImage: function () {

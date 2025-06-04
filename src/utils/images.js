@@ -6,6 +6,8 @@ var _ = deps._,
 
 var _image_cache = {};
 
+var _proxy_url_callbacks = {};
+
 var COLORS = [
     "#1abc9c", "#16a085", "#f1c40f", "#f39c12",
     "#2ecc71", "#27ae60", "#e67e22", "#d35400",
@@ -37,17 +39,33 @@ var b64toBlob = function (b64Data, contentType, sliceSize) {
     return blob;
 };
 
-var CachedImage = function (image) {
+var CachedImage = function (image, proxy_url) {
+    if (proxy_url){
+        this.url = proxy_url;
+        this.is_proxy_url = true;
+        _image_cache[image] = this;
+        return this;
+    }
     this.url = window.URL.createObjectURL(b64toBlob(image));
     _image_cache[image] = this;
     return this;
 };
 
-var getCachedImage = function (image) {
+var getCachedImage = function (image, account) {
+    let is_proxy_enabled = account && account.get('proxy_viewer_url') && account.get('proxy_viewer_token');
+    if (account && (
+        ((_.isObject(image) || (image instanceof CachedImage)) && image.url && !image.url.includes('blob') && !image.url.includes(account.get('proxy_viewer_url')) && _image_cache[image.url] && _image_cache[image.url].is_proxy_url)
+        || (_.isString(image) && image.indexOf('http') === 0 && !image.includes('blob') && !image.includes(account.get('proxy_viewer_url')) && _image_cache[image] && _image_cache[image].is_proxy_url)
+    ) && is_proxy_enabled){
+
+        let cached_image = image.url ?  _image_cache[image.url] : _image_cache[image];
+
+        return cached_image;
+    }
     // save often used image and get blob url for it
     if (image instanceof CachedImage) {
         return image;
-    } else if (image && (_.isString(image) && image.indexOf('http') == 0 || _.isObject(image) && image.url && image.url.indexOf('http') == 0)) {
+    } else if (image && (_.isString(image) && image.indexOf('http') === 0 || _.isObject(image) && image.url && image.url.indexOf('http') === 0)) {
         if (_.isString(image))
             return {url: image};
         else if (_.isObject(image))
@@ -154,30 +172,62 @@ var compressImage = function (file) {
 };
 
 var setCss = function (image_el, cached_image, img_size, account) {
+    let $image_el = $(image_el),css;
+    if (cached_image.is_proxy_url){
+        css = {
+            backgroundImage: 'url("' + cached_image.url + '")',
+            backgroundSize: 'cover',
+            backgroundColor: '#FFF'
+        };
+        $image_el.css(css);
+        return;
+    }
     let is_proxy_enabled = account && account.get('proxy_viewer_url') && account.get('proxy_viewer_token');
     if (account && cached_image.url && !cached_image.url.includes('blob') && !cached_image.url.includes(account.get('proxy_viewer_url')) && is_proxy_enabled){
-        account.getProxyUrl(cached_image.url, (response) => {
-            if (!response || !response.url) {
-                console.error(response);
-                return;
-            }
-            let proxy_url = response.url;
 
-            var $image_el = $(image_el),
-                css = {
-                    backgroundImage: 'url("' + proxy_url + '")',
-                    backgroundSize: 'cover',
-                    backgroundColor: '#FFF'
-                };
-            $image_el.css(css);
-        });
-    } else {
-        var $image_el = $(image_el),
+        let callback = (proxy_url) => {
             css = {
-                backgroundImage: 'url("' + cached_image.url + '")',
+                backgroundImage: 'url("' + proxy_url + '")',
                 backgroundSize: 'cover',
                 backgroundColor: '#FFF'
             };
+            $image_el.css(css);
+        };
+        let send_request;
+
+        if (_proxy_url_callbacks[cached_image.url] && _proxy_url_callbacks[cached_image.url].length){
+            _proxy_url_callbacks[cached_image.url] = _proxy_url_callbacks[cached_image.url].concat([callback]);
+        } else {
+            _proxy_url_callbacks[cached_image.url] = [callback];
+            send_request = true;
+        }
+
+        if (send_request){
+            account.getProxyUrl(cached_image.url, (response) => {
+                if (!response || !response.url) {
+                    console.error(response);
+                    return;
+                }
+                let proxy_url = response.url;
+
+                let cached_proxy_url = new CachedImage(cached_image.url, proxy_url);
+
+                if (_proxy_url_callbacks[cached_image.url] && _proxy_url_callbacks[cached_image.url].length){
+                    _.each(_proxy_url_callbacks[cached_image.url], (cached_callback) => {
+                        cached_callback && typeof(cached_callback) === 'function' && cached_callback(cached_proxy_url.url);
+                    });
+                    _proxy_url_callbacks[cached_image.url] = [];
+                } else {
+                    callback && callback(cached_proxy_url.url);
+                }
+            });
+        }
+    } else {
+        css = {
+            backgroundImage: 'url("' + cached_image.url + '")',
+            backgroundSize: 'cover',
+            backgroundColor: '#FFF'
+        };
         $image_el.css(css);
     }
 };
@@ -231,7 +281,7 @@ var getAvatarFromFile = function (file) {
 };
 
 $.fn.setAvatar = function (image, size, account) {
-    var cached_image = getCachedImage(image);
+    var cached_image = getCachedImage(image, account);
     setCss(this, cached_image, size, account);
 };
 
