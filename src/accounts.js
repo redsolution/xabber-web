@@ -3810,7 +3810,7 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
     },
 
     backToMenuHandler: function (ev) {
-        if ($(ev.target).closest('.btn-back-settings').hasClass('btn-back-frame')){
+        if (ev && $(ev.target).closest('.btn-back-settings').hasClass('btn-back-frame')){
             this.frameBackToMenu();
             return;
         }
