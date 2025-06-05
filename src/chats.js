@@ -14293,14 +14293,40 @@ xabber.ChatBottomContainer = xabber.Container.extend({
 xabber.ChatPlaceholderView = xabber.BasicView.extend({
     className: 'placeholder-wrap chat-placeholder-wrap noselect',
     template: templates.chat_placeholder,
+    events: {
+        "click .btn-open-settings":              "showSettings",
+    },
 
     _initialize: function () {
+        this.updatePlaceholderAccounts();
+        this.listenTo(xabber.accounts, 'add destroy change:enabled update_order', this.updatePlaceholderAccounts);
         this.listenTo(xabber, 'update_placeholder', this.onPlaceholderUpdate);
         this.listenTo(xabber, 'update_screen', this.onPlaceholderUpdate);
         this.listenTo(xabber, 'update_css', this.onPlaceholderUpdate);
     },
 
+    showSettings: function () {
+        xabber.body.setScreen('settings-modal', {account_block_name: null, block_name: null});
+        xabber.trigger('update_placeholder');
+    },
+
+    updatePlaceholderAccounts: function () {
+        this.$('.no-accounts-placeholder').switchClass('hidden', xabber.accounts.enabled.length !== 0);
+        this.$('.text').switchClass('hidden', xabber.accounts.enabled.length === 0);
+        xabber.toolbar_view.$el.switchClass('toolbar-disabled', xabber.accounts.enabled.length === 0);
+        if (xabber.accounts.enabled.length === 0){
+            this.$el.css('width', xabber.main_panel.$el.css('width'));
+            this.$el.addClass('fullscreen-placeholder');
+        } else {
+            this.$el.removeClass('fullscreen-placeholder');
+        }
+    },
+
     onPlaceholderUpdate: function () {
+        if (xabber.accounts.enabled.length === 0){
+            this.updatePlaceholderAccounts()
+            return;
+        }
         if (xabber.toolbar_view.$('.toolbar-item.geolocation-chats.active').length){
             this.$('.text').text(xabber.getString("message_manager_error_not_implemented"));
             this.$el.css('width', xabber.main_panel.$el.css('width'));

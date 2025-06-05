@@ -2185,6 +2185,7 @@ xabber.ToolbarAccountsBlockView = xabber.BasicView.extend({
                 this.$el.find('.toolbar-item.account-item').addClass('single-item');
         });
         this.$el.find('.toolbar-item.settings-modal').switchClass('hidden', this.model.enabled.length !== 0);
+        xabber.toolbar_view.$('.toolbar-item:not(.settings-modal):not(.add-something)').switchClass('disabled', this.model.enabled.length === 0);
         this.parent.updateScrollBar();
     },
 
@@ -2248,6 +2249,7 @@ xabber.ToolbarAccountsBlockView = xabber.BasicView.extend({
         if (this.model.enabled.length === 1)
             this.$el.find('.toolbar-item.account-item').addClass('single-item');
         this.$el.find('.toolbar-item.settings-modal').switchClass('hidden', this.model.enabled.length !== 0);
+        xabber.toolbar_view.$('.toolbar-item:not(.settings-modal):not(.add-something)').switchClass('disabled', this.model.enabled.length === 0);
         this.parent.updateScrollBar();
     },
 
@@ -2257,6 +2259,7 @@ xabber.ToolbarAccountsBlockView = xabber.BasicView.extend({
         if (this.model.enabled.length === 1)
             this.$el.find('.toolbar-item.account-item').addClass('single-item');
         this.$el.find('.toolbar-item.settings-modal').switchClass('hidden', this.model.enabled.length !== 0);
+        xabber.toolbar_view.$('.toolbar-item:not(.settings-modal):not(.add-something)').switchClass('disabled', this.model.enabled.length === 0);
         xabber.accounts.connected.forEach((acc) => {
             if (acc.server_features.get(Strophe.NS.XABBER_FAVORITES)) {
                 let saved_chat = acc.chats.getSavedChat();
@@ -4642,7 +4645,7 @@ xabber.AccountSettingsSingleModalView = xabber.AccountSettingsModalView.extend({
     },
 
     backToMenu: function (ev) {
-        if (!$(ev.target).closest('.btn-back-settings').hasClass('btn-back-frame')){
+        if (ev && !$(ev.target).closest('.btn-back-settings').hasClass('btn-back-frame')){
             this.parent.$('.left-column .settings-tabs-wrap.global-settings-tabs').removeClass('hidden');
         }
         this.backToMenuHandler(ev);

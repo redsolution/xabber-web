@@ -1676,7 +1676,10 @@ body {
     height: 48px;
     cursor: pointer;
 }
-
+.toolbar .toolbar-item.disabled{
+    pointer-events: none;
+    opacity: 0.66;
+}
 .toolbar .account-item {
     height: 56px;
 }
@@ -1711,6 +1714,10 @@ body {
     /*color: #9E9E9E;*/
     color: #E0E0E0;
     pointer-events: none;
+}
+
+.toolbar.toolbar-disabled .toolbar-item .toolbar-icon {
+    color: #E0E0E0 !important;
 }
 
 .toolbar .toolbar-item svg.toolbar-icon path {
@@ -4143,7 +4150,7 @@ input[type=text].simple-input-field:hover {
     display: none;
 }
 
-.toolbar .active .border {
+.toolbar:not(.toolbar-disabled) .active .border {
     display: block !important;
 }
 
@@ -9964,13 +9971,37 @@ input[type=text].simple-input-field:hover {
     background: #fff;
 }
 
+.placeholder-wrap .no-accounts-placeholder:not(.btn-open-settings),
 .placeholder-wrap .text {
     width: 200px;
     margin: auto;
     font-size: 18px;
     text-align: center;
     color: #616161;
+}
 
+.placeholder-wrap .no-accounts-placeholder:not(.btn-open-settings){
+    width: fit-content;
+    max-width: 80%
+}
+.placeholder-wrap .btn-open-settings {
+    width: unset;
+    margin: unset;
+    text-align: center;
+    position: absolute;
+    top: calc(50% + 50px);
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: #e0e0e0;
+    height: 36px;
+    line-height: 36px;
+    padding: 0 10px;
+    border-radius: 2px;
+    font-size: 16px;
+    cursor:pointer
+}
+.placeholder-wrap .btn-open-settings:hover {
+    opacity: 0.75;
 }
 
 .chat-head-wrap {
@@ -11021,7 +11052,7 @@ input[type=text].simple-input-field:hover {
     width: 100%;
     height: 30px;
     padding: 8px 96px 8px 64px;
-    font-size: 12px;
+    font-size: var(--msg-font-size);
     line-height: 14px;
     text-align: center;
     color: #9E9E9E;
@@ -11150,7 +11181,7 @@ input[type=text].simple-input-field:hover {
 .chat-message.with-author.without-username .chat-msg-author-wrap,
 .fwd-message .fwd-msg-author-wrap {
     display: none;
-    height: 16px;
+    height: calc(var(--msg-font-size) + 4px);
 }
 
 .chat-message.with-author .chat-msg-author-wrap,
@@ -11162,7 +11193,7 @@ input[type=text].simple-input-field:hover {
 .chat-message .chat-msg-author,
 .chat-message .fwd-msg-author {
     max-width: 70%;
-    font-size: 12px;
+    font-size: var(--msg-font-size);
     line-height: 16px;
     display: inline-block;
 }
@@ -11262,7 +11293,7 @@ input[type=text].simple-input-field:hover {
 }
 
 .chat-message .fwd-msgs-block {
-    font-size: 12px;
+    font-size: var(--msg-font-size);
     padding-left: 8px;
     margin-bottom: 4px;
 }
@@ -11612,8 +11643,7 @@ img.fwd-img-preview {
     position: absolute;
     top: 11px;
     left: 20px;
-    max-width: 64px;
-    font-size: 12px;
+    font-size: var(--msg-font-size);
     line-height: 14px;
     color: #BDBDBD;
 }
@@ -12241,8 +12271,8 @@ img.fwd-img-preview {
 
 .fwd-message .msg-time {
     position: relative;
-    max-width: 120px;
-    font-size: 12px;
+    max-width: calc(var(--msg-font-size) * 10);
+    font-size: var(--msg-font-size);
     line-height: 16px;
     margin-left: 4px;
     color: #BDBDBD;
@@ -13424,7 +13454,7 @@ input[type=range].voice-message-volume:focus {
 
 .input-toolbar .account-jid, .input-toolbar .account-nickname, .input-toolbar .account-badge, .input-toolbar .account-role {
     margin-left: 4px;
-    font-size: 12px;
+    font-size: var(--msg-font-size);
 }
 
 .input-toolbar .account-nickname, .input-toolbar .account-badge, .input-toolbar .account-role {
