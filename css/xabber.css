@@ -23281,7 +23281,7 @@ ul.restrictions-list-content>li {
 }
 .calls-content .chat-content .chat-msg-content{
     padding-left: 20px;
-    font-size: 14px;
+    /*font-size: 14px;*/
 }
 .calls-content .chat-content .chat-message{
     margin: 4px auto;
@@ -23300,7 +23300,7 @@ ul.restrictions-list-content>li {
 }
 .calls-content .chat-content .chat-msg-author{
     font-weight: 500;
-    font-size: 14px;
+    /*font-size: 14px;*/
 }
 .calls-content .chat-content .btn-send-jingle{
     height: 36px;
@@ -23322,7 +23322,7 @@ ul.restrictions-list-content>li {
 .calls-content .chat-content .call-icon{
     height: 16px;
     position: absolute;
-    top: 27px;
+    top: 33px;
     width: 16px;
 }
 .calls-content-wrap .back-to-bottom{
@@ -23886,7 +23886,7 @@ ul.restrictions-list-content>li {
     padding: 0 96px 0 84px;
 }
 .notifications-content-wrap .chat-msg-content{
-    font-size: 14px;
+    /*font-size: 14px;*/
 }
 /*.notifications-content-wrap .chat-day-indicator{*/
     /*box-shadow: 0 1px 1px -1px rgba(0, 0, 0, .25);*/

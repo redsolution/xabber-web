@@ -1717,7 +1717,7 @@ xabber.Account = Backbone.Model.extend({
                     });
                 }, (err) => {
                     console.error(err);
-                    errback && errback(response)
+                    errback && errback(err)
                 })
             }
         },
