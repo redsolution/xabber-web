@@ -14851,7 +14851,7 @@ xabber.once("start", function () {
     }, this);
 
     this.on("clear_search", function () {
-        this.contacts_view.clearSearch();
+        this.contacts_view.clearSearch(true);
         this.chats_view.clearSearch();
     }, this);
 }, xabber);

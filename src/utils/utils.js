@@ -1308,6 +1308,25 @@ var utils = {
         }
     },
 
+    moveCursorToEndTextarea: function (target) {
+        let range, selection;
+        if(document.createRange) {
+            range = document.createRange();
+            range.selectNodeContents(target);
+            range.collapse(false);
+            selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            range.detach();
+        } else if(document.selection) {
+            range = document.body.createTextRange();
+            range.moveToElementText(target);
+            range.collapse(false);
+            range.select();
+            range.detach();
+        }
+    },
+
     fromBase64toArrayBuffer: function (b64_string) {
         return Uint8Array.from(atob(b64_string), c => c.charCodeAt(0)).buffer;
     },
