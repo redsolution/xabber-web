@@ -6331,7 +6331,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
         message.set('msg_player_audios', audio_player_list);
         $message = $message.hyperlinkify({selector: '.chat-text-content', embed_video: true}).emojify('.chat-text-content', {tag_name: 'div', emoji_size: utils.emoji_size(emoji)}).emojify('.chat-msg-author-badge', {emoji_size: 16});
         message.set('msg_el', $message);
-        if (this.account.server_features.get('proxy-viewer') && this.account.get('proxy_viewer_url') && this.account.get('proxy_viewer_token') && attrs.type !== 'file_upload'){ //34
+        if (this.account.server_features.get('proxy-viewer') && this.account.get('proxy_viewer_url') && this.account.get('proxy_viewer_token') && attrs.type !== 'file_upload'){
             this.loadAndReplaceImagesToProxy(images, $message, attrs.encrypted || this.model.get('encrypted') || has_encrypted_files);
         }
         return $message;
@@ -7686,7 +7686,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
                             message.set('msg_player_audios', [audio_player]);
                             xabber.trigger('plyr_player_updated');
                         } else {
-                            this.model.messages.decryptFile(f_url, item.key).then((result) => { //34
+                            this.model.messages.decryptFile(f_url, item.key).then((result) => {
                                 if (result === null)
                                     return;
                                 $message.find('.link-file').find('.mdi-play').removeClass('no-uploaded');
@@ -8287,7 +8287,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
                     let msg = this.model.messages.get($elem.closest('.chat-message').data('uniqueid')),
                         uri = $elem.closest('.link-file').find('.file-link-download').attr('href'),
                         file = (msg.get('files') || []).find(f => f.sources[0] === uri);
-                    if (file && file.key) { //34
+                    if (file && file.key) {
                         if (this.account.server_features.get('proxy-viewer') && this.account.get('proxy_viewer_url') && this.account.get('proxy_viewer_token')){
                             audio_player.$audio_elem.voice_message = this.renderVoiceMessage($audio_elem.find('.file-container')[0], f_url, null, file, file.key);
                         } else {
@@ -8624,7 +8624,7 @@ xabber.ExpandedMessagePanel = xabber.BasicView.extend({
                     if (this.account.server_features.get('proxy-viewer') && this.account.get('proxy_viewer_url') && this.account.get('proxy_viewer_token')){
                         audio_player.$audio_elem.voice_message = this.renderVoiceMessage($audio_elem.find('.file-container')[0], f_url, null, file, file.key);
                     } else {
-                        this.chat_content.model.messages.decryptFile(f_url, file.key).then((result) => { //34
+                        this.chat_content.model.messages.decryptFile(f_url, file.key).then((result) => {
                             if (result === null)
                                 return;
                             $audio_elem[0].voice_message = this.chat_content.renderVoiceMessage($audio_elem.find('.file-container')[0], result, null, file);

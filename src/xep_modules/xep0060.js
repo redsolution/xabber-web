@@ -21,8 +21,6 @@ xabber.Account.addInitPlugin(function () {
                     from_jid = Strophe.getBareJidFromJid($message.attr('from')),
                     node = $message.find('items').attr('node');
 
-                console.log(node);
-                console.log(node.indexOf(Strophe.NS.OMEMO));
                 if (node.indexOf(Strophe.NS.OMEMO) > -1){
                     console.log(msg_object);
                     msg_object.ignore = 'xep0060';

@@ -3420,6 +3420,10 @@ xabber.MediaBaseView = xabber.BasicView.extend({
             }, () => {
                 $template.addClass('hidden');
             });
+        } else if (file.media_type.includes('video') && !file.original_thumbnail) {
+            $template.attr('data-file', file.original_source);
+            $template.find('img').remove();
+            $template.removeClass('hidden');
         }
     },
 

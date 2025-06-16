@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.4.116","version_description":"fixed opening and filtering speed in contacts view, added forced contacts filtering on search input"}'
+'{"version_number":"2.4.117","version_description":"fixed contact media thumbnails for video files, changed font size for message input, fixed context message appearance for calls system messages "}'
 )});

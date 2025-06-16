@@ -110,7 +110,7 @@ xabber.Account.addInitPlugin(function () {
                     return msg_object;
                 }
                 if ($jingle_msg_reject.length) {
-                    if (xabber.calls_view) {
+                    if (xabber.calls_view && !msg_object.context_message) {
                         xabber.calls_view.receiveChatMessage(chat.account, $message[0], msg_object);
                     }
                     if (chat.messages.filter(m => m.get('session_id') === $jingle_msg_reject.attr('id')).length){
@@ -129,7 +129,9 @@ xabber.Account.addInitPlugin(function () {
                     else
                         msg_text =  xabber.getString("jingle__system_message__cancelled_call");
                     msg_object.is_unread && (msg_object.reject_contact_stanza_id = msg_object.contact_stanza_id);
-                    let system_message = chat.messages.createSystemMessage({
+                    let actual_messages_context = msg_object.context_message ? this.context_messages : chat.messages;
+
+                    let system_message = actual_messages_context.createSystemMessage({
                         from_jid: chat.account.get('jid'),
                         time: time,
                         session_id: $jingle_msg_reject.attr('id'),
