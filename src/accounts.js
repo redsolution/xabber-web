@@ -1719,6 +1719,10 @@ xabber.Account = Backbone.Model.extend({
                     console.error(err);
                     errback && errback(err)
                 })
+            } else {
+                console.error('noproxy');
+                this.test_images && console.error(this.get('proxy_viewer_url'));
+                this.test_images && console.error(this.get('proxy_viewer_token'));
             }
         },
 

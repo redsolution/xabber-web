@@ -1297,6 +1297,8 @@ body {
 .right-panel-wrap {
     width: 71.5%;
     min-width: 41.5%;
+    display: flex;
+    flex-direction: column;
 }
 
 .right-contact-panel-wrap .container {
@@ -1404,12 +1406,12 @@ body {
 }
 
 .chat-body-container {
-    width: 100%;
     left: 50%;
-    transform: translate(-50%, 0);
-    position: absolute;
-    top: 64px;
-    bottom: 106px;
+    position: relative;
+    transform: translate(-50%);
+    width: 100%;
+    flex: 1;
+    overflow: auto;
 }
 
 .chat-body-placeholder-container {
@@ -1436,12 +1438,10 @@ body {
 }
 
 .chat-bottom-container {
-    position: absolute;
-    transform: translate(-50%, 0);
+    background-color: #fff;
     bottom: 0;
-    left: 50%;
     max-width: 100%;
-    background-color: #FFF;
+    position: relative;
 }
 
 .chat-bottom-blocked-wrap {
@@ -1457,10 +1457,9 @@ body {
 }
 
 .panel-head {
-    position: absolute;
-    width: 100%;
     height: 72px;
-    /*box-shadow: 0 0 1px 0 rgba(0,0,0,0.25);*/
+    position: relative;
+    width: 100%;
     z-index: 100;
 }
 
@@ -6432,7 +6431,6 @@ input[type=text].simple-input-field:hover {
 
 .roster-head .contacts-header {
     float: left;
-    /* TODO: width */
     height: 24px;
     font-size: 20px;
     line-height: 24px;
@@ -13438,6 +13436,7 @@ input[type=range].voice-message-volume:focus {
 .input-toolbar .account-info-wrap {
     margin: 0 0 0 auto;
     height: 100%;
+    white-space: nowrap;
 }
 
 .input-toolbar .last-emoticons .emoji-wrap {

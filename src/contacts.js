@@ -8909,12 +8909,10 @@ xabber.Roster = xabber.ContactsBase.extend({
             } else if (contact.get('known')) {
                 groups = [];
             }
-            // TODO: optimize
-            let groups_to_remove = this.groups.filter(function (group) {
-                return !_.contains(groups, group.get('id'));
-            });
-            _.each(groups_to_remove, function (group) {
-                group.removeContact(contact);
+            _.each(this.groups.models, function (group) {
+                if (!_.contains(groups, group.get('id'))){
+                    group.removeContact(contact);
+                }
             });
             _.each(groups, _.bind(this.addContactToGroup, this, contact));
             contact.trigger('update_groups');
@@ -8922,7 +8920,7 @@ xabber.Roster = xabber.ContactsBase.extend({
     },
 
     onContactRemoved: function (contact) {
-        _.each(this.groups.filter(), function (group) {
+        _.each(this.groups.models, function (group) {
             group.removeContact(contact);
         });
     },
@@ -9409,7 +9407,6 @@ xabber.Roster = xabber.ContactsBase.extend({
                     let parser = new DOMParser();
                     _.each(res, (msg_item) => {
                         let xml = parser.parseFromString(msg_item.xml, "text/xml");
-                        msg_item.is_unread && console.error(msg_item.is_unread);
                         this.account.chats.makeMessageObject(xml.firstChild,
                             _.extend({
                                 is_archived: true,

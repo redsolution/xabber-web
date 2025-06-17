@@ -12133,7 +12133,6 @@ xabber.ChatBottomView = xabber.BasicView.extend({
         this.focusOnInput();
         this.manageSelectedMessages();
         this.updateLeftIndicator(xabber.accounts);
-        xabber.chat_body.updateHeight();
         return this;
     },
 
@@ -12171,7 +12170,6 @@ xabber.ChatBottomView = xabber.BasicView.extend({
                         this.$el.prepend(templates.encryption_warning({color: 'amber', message: xabber.getString("omemo__alert_new_device_yours__text_new_device")}));
                     else if (is_trusted === 'error')
                         this.$el.prepend(templates.encryption_warning({color: 'red', message: xabber.getString("omemo__alert_keys_changed_yours__text_keys_changed")}));
-                    xabber.chat_body.updateHeight();
                 }
                 this.account.omemo.checkContactFingerprints(this.contact).then((obj) => {
                     let is_contact_trusted = obj.trust,
@@ -12198,7 +12196,6 @@ xabber.ChatBottomView = xabber.BasicView.extend({
                     this.view.$el.attr('data-trust', is_contact_trusted);
                     this.view.$('.chat-message:not([data-trust=untrusted])').attr('data-trust', is_contact_trusted);
                     this.view.$('.chat-day-indicator:not(.fixed-day-indicator-wrap)').attr('data-trust', is_contact_trusted);
-                    xabber.chat_body.updateHeight();
                     is_scrolled_bottom && this.view.scrollToBottom();
                     (this.model.get('active') && this.model.get('display')) && this.focusOnInput();
                 });
@@ -12649,7 +12646,6 @@ xabber.ChatBottomView = xabber.BasicView.extend({
         }
         $rich_textarea.updateRichTextarea();
         this.focusOnInput();
-        xabber.chat_body.updateHeight();
     },
 
     onCut: function () {
@@ -12769,7 +12765,6 @@ xabber.ChatBottomView = xabber.BasicView.extend({
                             }
                         });
                         this.link_references = this.link_references.concat(res);
-                        xabber.chat_body.updateHeight();
                         this.scrollToBottom();
                     });
                     if ((res.image_height && res.image_width) || !res.image){
@@ -12821,7 +12816,6 @@ xabber.ChatBottomView = xabber.BasicView.extend({
         this.link_references = this.link_references.filter(item => item.original_text !== url);
         this.currently_loaded_link_references = this.currently_loaded_link_references.filter(item => item !== url);
         this.link_reference_exempted = this.link_reference_exempted.concat([url]);
-        xabber.chat_body.updateHeight();
         this.scrollToBottom();
     },
 
@@ -12832,7 +12826,6 @@ xabber.ChatBottomView = xabber.BasicView.extend({
             this.$('.message-reference-preview').addClass('hidden');
         this.link_references = [];
         this.currently_loaded_link_references = [];
-        xabber.chat_body.updateHeight();
         this.scrollToBottom();
     },
 
@@ -12857,7 +12850,6 @@ xabber.ChatBottomView = xabber.BasicView.extend({
                 filetype: utils.pretty_file_type(file.type),
             })));
             this.attached_files = this.attached_files.concat([file]);
-            xabber.chat_body.updateHeight();
             this.scrollToBottom();
         });
         files && files.length && this.$('.attached-image').length && this.$('.attached-image').magnificPopup({
@@ -12889,7 +12881,6 @@ xabber.ChatBottomView = xabber.BasicView.extend({
         if (!(this.$('.message-reference-preview-container').children('div.message-reference-preview-attached').length > 0))
             this.$('.message-reference-preview').addClass('hidden');
         this.attached_files = this.attached_files.filter(item => item.uid !== id);
-        xabber.chat_body.updateHeight();
         this.scrollToBottom();
     },
 
@@ -12898,7 +12889,6 @@ xabber.ChatBottomView = xabber.BasicView.extend({
         if (!(this.$('.message-reference-preview-container').children('div.message-reference-preview-attached').length > 0))
             this.$('.message-reference-preview').addClass('hidden');
         this.attached_files = [];
-        xabber.chat_body.updateHeight();
         this.scrollToBottom();
     },
 
@@ -12923,7 +12913,6 @@ xabber.ChatBottomView = xabber.BasicView.extend({
                 domain: item.url ? utils.getDomainFromUrl(item.url) : item.site_name,
                 url: null
             })));
-            xabber.chat_body.updateHeight();
         });
         files.forEach((file) => {
             if (!file)
@@ -12950,7 +12939,6 @@ xabber.ChatBottomView = xabber.BasicView.extend({
                     filetype: utils.pretty_file_type(file.type),
                 })));
             }
-            xabber.chat_body.updateHeight();
         });
         ((link_references && link_references.length) || (files && files.length)) && this.$('.attached-image').length && this.$('.attached-image').magnificPopup({
             type: 'image',
@@ -13391,7 +13379,6 @@ xabber.ChatBottomView = xabber.BasicView.extend({
             this.quill.formatText(caret_idx, 1, 'mention', false);
         }
         this.quill.setSelection(caret_idx + 1);
-        xabber.chat_body.updateHeight();
     },
 
     renderLastEmoticons: function () {
@@ -13656,7 +13643,6 @@ xabber.ChatBottomView = xabber.BasicView.extend({
         this.$('.fwd-messages-preview .msg-text').html(Strophe.xmlescape(msg_text));
         this.$('.fwd-messages-preview').emojify('.msg-text', {emoji_size: 18});
         this.displaySend();
-        xabber.chat_body.updateHeight();
         let markup_body = utils.markupBodyMessage(message, 'mention'),
             emoji_node = markup_body.emojify({tag_name: 'div'}),
             arr_text = emoji_node.split('\n');
@@ -13675,7 +13661,6 @@ xabber.ChatBottomView = xabber.BasicView.extend({
         this.click_counter = 0;
         this.setDefaultPlaceholder();
         this.displaySend();
-        xabber.chat_body.updateHeight();
         let markup_body = utils.markupBodyMessage(message, 'mention'),
             emoji_node = markup_body.emojify({tag_name: 'div'}),
             arr_text = emoji_node.split('\n');
@@ -13755,7 +13740,6 @@ xabber.ChatBottomView = xabber.BasicView.extend({
                 this.$('.fwd-messages-preview .msg-text').html($img_html_preview);
             }
         }
-        xabber.chat_body.updateHeight();
         this.displaySend();
     },
 
@@ -13791,7 +13775,6 @@ xabber.ChatBottomView = xabber.BasicView.extend({
             this.displayMicrophone();
         else
             this.displaySend();
-        xabber.chat_body.updateHeight();
         this.focusOnInput();
     },
 
@@ -14217,19 +14200,6 @@ xabber.ChatHeadContainer = xabber.Container.extend({
 
 xabber.ChatBodyContainer = xabber.Container.extend({
     className: 'chat-body-container',
-
-    // TODO: refactor CSS and remove this
-    updateHeight: function () {
-        let bottom_height = xabber.chat_bottom.$el.height() + parseInt(xabber.chat_bottom.$el.css('bottom'));
-        if (bottom_height) {
-            let current_bottom = parseInt(this.$el.css('bottom'));
-            this.$el.css({bottom: bottom_height});
-            if (this.view) {
-                this.view.updateScrollBar();
-                (bottom_height !== current_bottom) && !this.view.isScrolledToBottom() && this.view.scrollTo(this.view.ps_container[0].scrollTop + (bottom_height - current_bottom));
-            }
-        }
-    },
 
     updateBodyNotifications: function (chat) {
         if (chat.get('notifications')){
