@@ -106,7 +106,16 @@ xabber.ServerFeatures = Backbone.Collection.extend({
     initialize: function (models, options) {
         this.account = options.account;
         this.connection = this.account.connection;
+        this._features_handled_counter = 0;
         this.on("add", this.onFeatureAdded, this);
+    },
+
+    onHandledFeatures: function () {
+        if (this._features_handled_counter === 0){
+            this.account.set('features_handled', true);
+            if (!this.account.get('roster_ready_called'))
+                this.account.trigger('ready_to_get_roster')
+        }
     },
 
     request: function () {
@@ -116,6 +125,7 @@ xabber.ServerFeatures = Backbone.Collection.extend({
                 if (res.length === 1 && res[0].var === 'caps_version'){
                     is_changed = true;
                 }
+                this._features_handled_counter = 0;
                 if (res && res.length && !is_changed){
                     res.forEach((item) => {
                         if (item.var && item.var === 'caps_version')
@@ -127,10 +137,13 @@ xabber.ServerFeatures = Backbone.Collection.extend({
                     });
                     this.is_cached = true;
                 } else {
-                    this.connection.disco.info(this.account.domain, null, this.onInfo.bind(this));
+                    this._features_handled_counter++;
+                    this.connection.disco.info(this.account.domain, null, this.onInfo.bind(this), this.onError.bind(this), 3000);
                 }
-                this.connection.disco.info(this.account.get('jid'), null, this.onInfo.bind(this));
-                this.connection.disco.items(this.account.domain, null, this.onItems.bind(this));
+                this._features_handled_counter++;
+                this._features_handled_counter++;
+                this.connection.disco.info(this.account.get('jid'), null, this.onInfo.bind(this), this.onError.bind(this), 3000);
+                this.connection.disco.items(this.account.domain, null, this.onItems.bind(this), this.onError.bind(this), 3000);
             });
         });
 
@@ -163,6 +176,11 @@ xabber.ServerFeatures = Backbone.Collection.extend({
         }
     },
 
+    onError: function () {
+        this._features_handled_counter--;
+        this.onHandledFeatures();
+    },
+
     onItems: function (stanza) {
         let groupchat_servers_list = [];
         $(stanza).find('query item').each((idx, item) => {
@@ -173,12 +191,15 @@ xabber.ServerFeatures = Backbone.Collection.extend({
                 groupchat_servers_list.push(jid);
                 this.account.set('groupchat_servers_list', groupchat_servers_list);
             }
+            this._features_handled_counter++;
             this.connection.disco.addItem(jid, name, node, () => {});
             this.connection.disco.info(
                 jid,
                 node,
-                this.onInfo.bind(this));
+                this.onInfo.bind(this), this.onError.bind(this), 3000);
         });
+        this._features_handled_counter--;
+        this.onHandledFeatures();
     },
 
     onInfo: function (stanza) {
@@ -193,6 +214,13 @@ xabber.ServerFeatures = Backbone.Collection.extend({
                 'var': namespace,
                 from: from
             });
+            if (namespace === Strophe.NS.DISCO_ITEMS && from !== self.connection.domain){
+                let node = null;
+                $stanza.find('query').attr('node') && (node = $stanza.find('query').attr('node'));
+
+                self._features_handled_counter++;
+                self.connection.disco.items(from, node, self.onItems.bind(self), self.onError.bind(self), 3000);
+            }
         });
         $stanza.find('x').each(function () {
             let form_type_val = $(this).find('field[var="FORM_TYPE"] value');
@@ -245,6 +273,8 @@ xabber.ServerFeatures = Backbone.Collection.extend({
             if (this.account.auth_view.stepped_auth_complete)
                 this.account.auth_view.successFeedback();
         }
+        this._features_handled_counter--;
+        this.onHandledFeatures();
     },
 
     onFeatureAdded: function (feature) {
@@ -269,6 +299,7 @@ xabber.ServerFeatures = Backbone.Collection.extend({
 });
 
 xabber.Account.addInitPlugin(function () {
+    this.set('features_handled', false);
     this.client_features = new xabber.ClientFeatures(null, {account: this});
     this.server_features = new xabber.ServerFeatures(null, {account: this});
 });

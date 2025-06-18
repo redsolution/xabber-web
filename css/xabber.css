@@ -10686,12 +10686,12 @@ input[type=text].simple-input-field:hover {
 }
 
 .chat-content-wrap .pinned-message .chat-msg-content {
-    font-size: 12px;
+    font-size: var(--chat-item-msg-font-size);
 }
 
 .chat-content-wrap .pinned-message .chat-msg-author {
     font-weight: 400;
-    font-size: 12px;
+    font-size: var(--chat-item-msg-font-size);
     vertical-align: bottom;
 }
 
@@ -10708,7 +10708,7 @@ input[type=text].simple-input-field:hover {
 .chat-content-wrap .pinned-message .msg-time {
     color: #9E9E9E;
     padding: 0px 2px;
-    font-size: 12px;
+    font-size: var(--chat-item-msg-font-size);
     vertical-align: bottom;
     line-height: 16px;
 }

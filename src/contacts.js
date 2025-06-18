@@ -12003,6 +12003,10 @@ xabber.Account.addInitPlugin(function () {
     this._added_pres_handlers.push(this.contacts.handlePresence.bind(this.contacts));
 
     this.on("ready_to_get_roster", function () {
+        console.warn(this.get('features_handled'));
+        if (!this.get('features_handled') || this.get('roster_ready_called'))
+            return;
+        this.set('roster_ready_called', true);
         let dfd = new $.Deferred();
         dfd.done(() => {
             let resumed;
@@ -12058,6 +12062,7 @@ xabber.Account.addInitPlugin(function () {
 });
 
 xabber.Account.addConnPlugin(function () {
+    this.set('roster_ready_called', false);
     this.registerIQHandler();
     this.registerSyncedIQHandler();
     if (this.roster) {
