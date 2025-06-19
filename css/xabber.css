@@ -10543,7 +10543,7 @@ input[type=text].simple-input-field:hover {
 .chat-tools-wrap .contact-mute-dropdown {
     top: 101px !important;
     left: initial !important;
-    right: 100.5% !important;
+    right: 100.1% !important;
     min-width: 200px !important;
     width: fit-content!important;
     overflow: hidden;
