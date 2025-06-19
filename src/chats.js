@@ -2394,8 +2394,6 @@ xabber.ChatItemView = xabber.BasicView.extend({
     },
 
     updateArchivedState: function () {
-        console.error('change archive state');
-        console.error(this.model.get('archived'));
         if (!this.contact)
             return;
         let archived = this.model.get('archived');

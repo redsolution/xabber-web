@@ -173,8 +173,6 @@ var compressImage = function (file) {
 
 var setCss = function (image_el, cached_image, img_size, account) {
     let $image_el = $(image_el),css;
-    account && account.test_images && console.error(cached_image);
-    account && account.test_images && console.error(_image_cache);
     if (cached_image.is_proxy_url){
         css = {
             backgroundImage: 'url("' + cached_image.url + '")',
@@ -185,7 +183,6 @@ var setCss = function (image_el, cached_image, img_size, account) {
         return;
     }
     let is_proxy_enabled = account && account.get('proxy_viewer_url') && account.get('proxy_viewer_token');
-    account && account.test_images && console.error(is_proxy_enabled);
     if (account && cached_image.url && !cached_image.url.includes('blob') && !cached_image.url.includes(account.get('proxy_viewer_url')) && is_proxy_enabled){
 
         let callback = (proxy_url) => {
@@ -205,9 +202,6 @@ var setCss = function (image_el, cached_image, img_size, account) {
             send_request = true;
         }
 
-        account && account.test_images && console.error(_proxy_url_callbacks);
-        account && account.test_images && console.error(_proxy_url_callbacks[cached_image.url]);
-        account && account.test_images && console.error(_proxy_url_callbacks[cached_image.url].length);
         if (send_request){
             account.getProxyUrl(cached_image.url, (response) => {
                 if (!response || !response.url) {
