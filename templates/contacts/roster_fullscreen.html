@@ -21,6 +21,10 @@
                         <svg class="filter-icon mdi fill-color-grey-500 mdi mdi-svg-template" data-svgname="vcard-outline"></svg>
                         <div class="name one-line">{[print(xabber.getString("notifications_window__subscriptions_header"))]}<span></span></div>
                     </div>
+                    <div class="filter-item-wrap invitation-filter-item-wrap" data-filter="invitations">
+                        <svg class="filter-icon mdi fill-color-grey-500 mdi mdi-svg-template" data-svgname="invite-outline"></svg>
+                        <div class="name one-line">{[print(xabber.getString("notifications_window__type_filter_invitations"))]}<span></span></div>
+                    </div>
                     <!--<div class="filter-item-wrap" data-filter="online">-->
                     <!--<svg class="filter-icon mdi fill-color-grey-500 mdi-svg-template" data-svgname="alert-circle"></svg>-->
                     <!--<div class="name one-line">{[print(xabber.getString("contacts_window__type_filter_online"))]}</div>-->
@@ -135,6 +139,18 @@
                     <div class="notification-subscriptions-button-wrap">
 
                         <div class="notification-subscriptions-button filter-item-wrap" data-filter="subscription">
+                            {[print(xabber.getString("show_all"))]}
+                        </div>
+                    </div>
+                </div>
+                <div class="contacts-invitations-wrap">
+                    <div class="contacts-invitations-header">
+                        {[print(xabber.getString("notifications_window__type_filter_invitations"))]}
+                    </div>
+                    <div class="contacts-invitations-content-wrap">
+                    </div>
+                    <div class="contacts-invitations-button-wrap">
+                        <div class="contacts-invitations-button filter-item-wrap" data-filter="invitations">
                             {[print(xabber.getString("show_all"))]}
                         </div>
                     </div>

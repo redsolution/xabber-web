@@ -7010,9 +7010,232 @@ input[type=text].simple-input-field:hover {
     font-weight: 500;
     cursor: pointer;
 }
-.contacts-panel-wrap .contact-list-wrap .roster-contact-item-wrap .contact-name:hover{
+.contacts-panel-wrap .contact-list-wrap .roster-contact-item-wrap:not(.groupchat-item-wrap) .contact-name:hover{
     opacity: 0.8;
 }
+.contacts-panel-wrap .contact-list-wrap .roster-contact-item-wrap.groupchat-item-wrap .contact-name-wrap{
+    width: 25%;
+}
+.contacts-panel-wrap .contact-list-wrap .roster-contact-item-wrap.groupchat-item-wrap .contact-name-wrap .contact-name{
+    width: calc(100% - 32px);
+    margin-top: 9px;
+}
+.contacts-panel-wrap .contact-list-wrap .roster-contact-item-wrap.groupchat-item-wrap .contact-name-wrap .groupchat-item-type{
+    margin-left: 16px;
+    font-size: 12px;
+    font-weight: 400;
+    color: rgba(158, 158, 158, 1);
+    text-transform: lowercase;
+    cursor: pointer;
+}
+.contacts-panel-wrap .contact-list-wrap .roster-contact-item-wrap.groupchat-item-wrap .groupchat-item-members-text{
+    color: rgba(158, 158, 158, 1);
+    font-size: 11px;
+}
+.contacts-panel-wrap .contact-list-wrap .roster-contact-item-wrap.groupchat-item-wrap .groupchat-item-members-text .invitation-notifications-item-member-name{
+    color: #424242;
+    cursor: pointer;
+}
+.contacts-panel-wrap .contact-list-wrap .roster-contact-item-wrap.groupchat-item-wrap .groupchat-item-members-avatars{
+    display: flex;
+    margin-bottom: 4px;
+    margin-top: 4px;
+
+}
+.roster-left-container.narrow-panel .contacts-panel-wrap .contact-list-wrap .roster-contact-item-wrap.groupchat-item-wrap .contact-name-wrap{
+    width: 31%;
+}
+.roster-left-container.narrow-panel .contacts-panel-wrap .contact-list-wrap .roster-contact-item-wrap.groupchat-item-wrap .groupchat-item-details{
+    width: 48%;
+}
+.contacts-panel-wrap .contact-list-wrap .roster-contact-item-wrap.groupchat-item-wrap .groupchat-item-details{
+    padding: 6px 0;
+    width: 40%;
+}
+.contacts-panel-wrap .contact-list-wrap .roster-contact-item-wrap.groupchat-item-wrap .groupchat-item-members-avatars .circle-avatar.avatar-outline-wrap{
+    width: 28px;
+    height: 28px;
+    position: relative;
+    background: #fff !important;
+    margin-top: -2px;
+    margin-right: -8px;
+}
+.contacts-panel-wrap .contact-list-wrap .roster-contact-item-wrap.groupchat-item-wrap .groupchat-item-members-avatars .circle-avatar.avatar-outline-wrap:first-child{
+    margin-left: -2px;
+}
+.contacts-panel-wrap .contact-list-wrap .roster-contact-item-wrap.groupchat-item-wrap .groupchat-item-members-avatars .circle-avatar.avatar-outline-wrap:before{
+    opacity: 0;
+}
+.contacts-panel-wrap .contact-list-wrap .roster-contact-item-wrap.groupchat-item-wrap .groupchat-item-members-avatars .circle-avatar.member-avatar{
+    height: 24px;
+    position: absolute;
+    top: 2px;
+    width: 24px;
+    left: 2px;
+    cursor: pointer;
+}
+.contacts-invitations-wrap {
+    padding: 0 16px;
+    position: relative;
+    margin-bottom: 12px;
+}
+.contacts-invitations-wrap .contacts-invitations-header{
+    font-size: 14px;
+    margin-top: 8px;
+    font-weight: 500;
+    height: 16px;
+    color: rgba(158, 158, 158, 1);
+    margin-left: 8px;
+    margin-bottom: 8px;
+}
+.contacts-invitations-wrap .contacts-invitations-item{
+    align-items: flex-start;
+    display: flex;
+    font-size: 14px;
+    justify-content: flex-start;
+    min-height: 56px;
+    position: relative;
+    background: #fafafa;
+}
+.contacts-invitations-wrap .avatar-wrap{
+    height: 40px;
+    margin-left: 16px;
+    margin-top: 8px;
+    position: relative;
+    width: 40px;
+}
+.contacts-invitations-wrap .avatar-wrap .account-indicator-background-exclude{
+    display: block;
+    height: 40px;
+    -webkit-mask-repeat: round;
+    mask-repeat: round;
+    position: absolute;
+    width: 40px;
+}
+.contacts-invitations-wrap .avatar-wrap .account-indicator-background-exclude .group-avatar,
+.contacts-invitations-wrap .avatar-wrap .account-indicator-background-exclude .account-indicator{
+    display: block;
+    height: 40px;
+    -webkit-mask-repeat: round;
+    mask-repeat: round;
+    position: absolute;
+    width: 40px;
+}
+.contacts-invitations-wrap .avatar-wrap .inviter-avatar{
+    display: block;
+    height: 20px;
+    -webkit-mask-repeat: round;
+    mask-repeat: round;
+    position: absolute;
+    width: 20px;
+    bottom: -2px;
+    right: -2px;
+    cursor: pointer;
+}
+
+.roster-left-container.narrow-panel .contacts-invitations-wrap .contacts-invitations-name-wrap{
+    width: 31%;
+}
+.roster-left-container.narrow-panel .contacts-invitations-wrap .contacts-invitations-details-wrap{
+    margin-right: 98px;
+}
+.contacts-invitations-wrap .contacts-invitations-name-wrap{
+    width: 25%;
+}
+.contacts-invitations-wrap .contacts-invitations-name-wrap .contacts-invitations-item-name{
+    font-weight: 500;
+    margin-left: 16px;
+    margin-top: 9px;
+    width: calc(100% - 32px);
+}
+.contacts-invitations-wrap .contacts-invitations-name-wrap .contacts-invitations-item-type{
+    color: #9e9e9e;
+    font-size: 12px;
+    font-weight: 400;
+    margin-left: 16px;
+    text-transform: lowercase;
+}
+.contacts-invitations-wrap .contacts-invitations-details-wrap{
+    padding: 6px 0;
+    margin-right: 98px;
+    flex: 1;
+}
+.contacts-invitations-wrap .contacts-invitations-details-wrap .contacts-invitations-item-members-text{
+    color: #9e9e9e;
+    font-size: 11px;
+}
+.contacts-panel-wrap .contact-list-wrap .roster-contact-item-wrap.groupchat-item-wrap .groupchat-item-members-text .invitation-notifications-item-member-name:hover,
+.contacts-invitations-wrap .contacts-invitations-details-wrap .contacts-invitations-item-members-text .contacts-invitations-item-member-name:hover{
+    opacity: 0.7;
+}
+.contacts-invitations-wrap .contacts-invitations-details-wrap .contacts-invitations-item-members-text .contacts-invitations-item-member-name{
+    color: #424242;
+    cursor: pointer;
+}
+.contacts-invitations-wrap .contacts-invitations-details-wrap .contacts-invitations-item-members-avatars{
+    display: flex;
+    margin-top: 4px;
+    margin-bottom: 4px;
+}
+.contacts-invitations-wrap .contacts-invitations-details-wrap .contacts-invitations-item-members-avatars .circle-avatar.avatar-outline-wrap:first-child{
+    display: flex;
+    margin-bottom: 4px;
+}
+.contacts-invitations-wrap .contacts-invitations-details-wrap .contacts-invitations-item-members-avatars .circle-avatar.avatar-outline-wrap{
+    background: #fff !important;
+    height: 28px;
+    margin-right: -8px;
+    margin-top: -2px;
+    position: relative;
+    width: 28px;
+}
+.contacts-invitations-wrap .contacts-invitations-details-wrap .contacts-invitations-item-members-avatars .circle-avatar.avatar-outline-wrap:before{
+    opacity: 0;
+}
+.contacts-invitations-wrap .contacts-invitations-details-wrap .contacts-invitations-item-members-avatars .circle-avatar.avatar-outline-wrap .member-avatar{
+    height: 24px;
+    left: 2px;
+    position: absolute;
+    top: 2px;
+    width: 24px;
+    cursor: pointer;
+}
+.contacts-invitations-wrap .btn-join-group{
+    height: 28px;
+    right: 48px;
+    position: absolute;
+    top: 8px;
+    font-size: 16px;
+    color: #fff;
+    padding: 5px 10px;
+    line-height: 17px;
+    border-radius: 14px;
+    cursor: pointer;
+}
+.contacts-invitations-wrap .btn-decline-invitation{
+    position: absolute;
+    right: 16px;
+    top: 10px;
+    color: rgba(158, 158, 158, 1);
+    cursor: pointer;
+}
+.contacts-invitations-wrap .contacts-invitations-button-wrap{
+    height: 20px;
+    position: absolute;
+    right: 24px;
+    top: 0;
+}
+.contacts-invitations-wrap .contacts-invitations-button-wrap .contacts-invitations-button{
+    color: #9e9e9e;
+    cursor: pointer;
+    font-size: 14px;
+    line-height: 22px;
+    margin-left: 70px;
+    text-decoration-line: underline;
+    text-decoration-style: dotted;
+    text-underline-offset: 2px;
+}
+
 .contacts-panel-wrap .contact-list-wrap .roster-contact-item-wrap .contact-jid{
     width: 35%;
     margin-left: 16px;
@@ -23374,6 +23597,7 @@ ul.restrictions-list-content>li {
     outline: none;
 }
 .notifications-content-wrap.invitation-content .notification-subscriptions-header,
+.roster-left-container.invitation-content .contacts-invitations-header,
 .roster-left-container.subscription-content .notification-subscriptions-header,
 .notifications-content-wrap.subscription-content .notification-subscriptions-header{
     display: none;
@@ -23384,6 +23608,7 @@ ul.restrictions-list-content>li {
     margin-bottom: 16px;
 }
 .notifications-content-wrap.invitation-content .notification-subscriptions-button-wrap,
+.roster-left-container.invitation-content .contacts-invitations-button-wrap,
 .roster-left-container.subscription-content .notification-subscriptions-button-wrap,
 .notifications-content-wrap.subscription-content .notification-subscriptions-button-wrap{
     display: none !important;
@@ -23445,6 +23670,7 @@ ul.restrictions-list-content>li {
     position: relative;
     margin-bottom: 8px;
 }
+.filter-item-wrap.invitation-filter-item-wrap,
 .filter-item-wrap.subscription-item-wrap{
     margin-top: 16px;
 }
@@ -23602,6 +23828,8 @@ ul.restrictions-list-content>li {
 /*}*/
 .roster-left-container.subscription-content .roster-sorting-wrap,
 .roster-left-container.subscription-content .contact-list-wrap,
+.roster-left-container.invitation-content .roster-sorting-wrap,
+.roster-left-container.invitation-content .contact-list-wrap,
 .chat-content-wrap.subscription-content-hidden .notification-subscriptions-wrap{
     display: none;
 }

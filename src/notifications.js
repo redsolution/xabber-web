@@ -974,7 +974,7 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
         if (!$item || !$item.length)
             return;
         let $invite_item = $item.closest('.notification-subscription-item'),
-            account_jid = $invite_item .attr('data-account-jid'),
+            account_jid = $invite_item.attr('data-account-jid'),
             contact_jid = $item.attr('data-jid'),
             update_avatar;
 

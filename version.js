@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.4.121","version_description":"fixed cached sync conversation status parsing"}'
+'{"version_number":"2.4.122","version_description":"contacts groups redesign, invitations in contacts tab"}'
 )});
