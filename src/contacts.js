@@ -10312,7 +10312,7 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
         "click .contacts-invitations-item-member-name": "onClickParticipant",
         "click .invitation-notifications-item-member-name": "onClickParticipant",
         "click .member-avatar": "onClickParticipant",
-        "click .inviter-avatar": "onClickParticipant",
+        "click .contacts-invitations-item-inviter-details-wrap": "onClickParticipant",
         "click .btn-join-group": "joinGroup",
         "click .btn-decline-invitation": "declineInvitation",
     },
@@ -10894,7 +10894,7 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
         this.$el.removeClass('invitation-content');
         this.$('.contacts-type-filter-content .filter-item-wrap').removeClass('selected-filter');
         this.$('.notifications-subscriptions .notification-subscription-item').slice(2).addClass('hidden');
-        this.$('.contacts-invitations-wrap .contacts-invitations-item').slice(1).addClass('hidden');
+        this.$('.contacts-invitations-wrap .contacts-invitations-item').slice(2).addClass('hidden');
 
         this.$(`.tab-active-filters-wrap .tab-filter-item`).remove();
 
@@ -11378,8 +11378,8 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
             $item = $(ev.target).closest('.invitation-notifications-item-member-name');
         } else if ($(ev.target).closest('.circle-avatar.member-avatar').length) {
             $item = $(ev.target).closest('.circle-avatar.member-avatar');
-        } else if ($(ev.target).closest('.inviter-avatar').length) {
-            $item = $(ev.target).closest('.inviter-avatar');
+        } else if ($(ev.target).closest('.contacts-invitations-item-inviter-details-wrap').length) {
+            $item = $(ev.target).closest('.contacts-invitations-item-inviter-details-wrap');
         }
         if (!$item || !$item.length)
             return;
@@ -11467,16 +11467,31 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
                     account: account.get('jid'),
                 }));
                 this.$('.contacts-invitations-content-wrap').append($template);
+                let group_info_dfd = new $.Deferred();
+                group_info_dfd.done(() => {
+                    contact.attributes.group_info
+                    && contact.attributes.group_info.description
+                    && $template.find('.contacts-invitations-item-main-text').html(contact.attributes.group_info.description);
+                });
+                if (!contact.attributes.group_info || _.isUndefined(contact.attributes.group_info.description)){
+                    contact.getVCard(() => {
+                        group_info_dfd.resolve();
+                    })
+                } else {
+                    group_info_dfd.resolve();
+                }
                 if (contact.invitation){
                     if (contact.invitation.members_count) {
 
-                        let names_count = 0,
+                        let roster_members_count = 0,
+                            // names_count = 0,
                             avatars_count = 0,
                             members = contact.invitation.participants;
 
-                        contact.invitation.members_count &&
-                        $template.find('.contacts-invitations-item-members-text').html(`<span class="contacts-invitations-item-members-count">${xabber.getString("groupchats_some_members", [Number(contact.invitation.members_count)])}</span>`);
-                        $template.find('.contacts-invitations-item-members-text').append(`<span>${contact.invitation.members_count ? ', ' : ''}${xabber.getString("including")}</span>`);
+                        // contact.invitation.members_count &&
+                        // $template.find('.contacts-invitations-item-members-text').html(`<span class="contacts-invitations-item-members-count">${xabber.getString("groupchats_some_members", [Number(contact.invitation.members_count)])}</span>`);
+                        // $template.find('.contacts-invitations-item-members-text').append(`<span>${contact.invitation.members_count ? ', ' : ''}${xabber.getString("including")}</span>`);
+
 
                         _.each(members, (member, idx) => {
                             let in_roster = member.in_roster,
@@ -11490,19 +11505,22 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
                             } else {
                                 avatar_url = Images.getDefaultAvatar(member.name ? member.name : jid);
                             }
-                            if (names_count < 5){
-                                $template.find('.contacts-invitations-item-members-text')
-                                    .append(` <span class="contacts-invitations-item-member-name${!in_roster ? ' not-contact-member' : ''}" data-jid="${member.jid}" data-avatar-url="${avatar_url}">${member.name}</span>${(names_count === 4 || (names_count + 1) === contact.invitation.participants.length) ? '.' : ',' }`);
-                                names_count++;
-                            }
+                            member.in_roster && (roster_members_count++);
+                            // if (names_count < 5){
+                            //     $template.find('.contacts-invitations-item-members-text')
+                            //         .append(` <span class="contacts-invitations-item-member-name${!in_roster ? ' not-contact-member' : ''}" data-jid="${member.jid}" data-avatar-url="${avatar_url}">${member.name}</span>${(names_count === 4 || (names_count + 1) === contact.invitation.participants.length) ? '.' : ',' }`);
+                            //     names_count++;
+                            // }
                             if (avatars_count < 9 && avatar_url){
                                 let $avatar = $(`<div class="circle-avatar avatar-outline-wrap"><div class="circle-avatar member-avatar${!in_roster ? ' not-contact-member' : ''}" data-jid="${member.jid}" data-avatar-url="${avatar_url}"></div></div>`);
-                                $avatar.find('.member-avatar').setAvatar(avatar_url, 24, contact.account);
+                                $avatar.find('.member-avatar').setAvatar(avatar_url, 32, contact.account);
                                 $avatar.css('z-index', 10 - idx);
                                 $template.find('.contacts-invitations-item-members-avatars').append($avatar);
                                 avatars_count++;
                             }
                         });
+
+                        $template.find('.contacts-invitations-item-type').text(`${xabber.getString("groupchats_some_members", [Number(contact.invitation.members_count)])}${roster_members_count ? ' · ' + xabber.getString("groupchats_some_contacts", [Number(roster_members_count)]) : ''}`);
                     }
 
                 }
@@ -11513,18 +11531,22 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
                     }
                     let inviter_image = inviter_contact.cached_image;
                     $template.find('.circle-avatar.inviter-avatar').setAvatar(inviter_image, 24, account);
-                    $template.find('.circle-avatar.inviter-avatar').attr('data-jid', contact.invitation.message.get('inviter_jid'));
-                    $template.find('.circle-avatar.inviter-avatar').attr('data-avatar-url', inviter_image);
+                    $template.find('.contacts-invitations-item-inviter-details-wrap').attr('data-jid', contact.invitation.message.get('inviter_jid'));
 
                     let group_image = contact.cached_image;
                     $template.find('.circle-avatar.group-avatar').setAvatar(group_image, 48, account);
 
-                    let group_name = xabber.getString("groupchat_public_group");
+
+                    let icon_name = 'group-public';
                     if (contact.get('incognito_chat'))
-                        group_name = xabber.getString("groupchat_incognito_group");
+                        icon_name = 'group-incognito';
                     if (contact.get('private_chat'))
-                        group_name = xabber.getString("groupchat_private_chat");
-                    $template.find('.contacts-invitations-item-type').text(group_name);
+                        icon_name = 'group-private';
+                    $template.find('.notification-icon.group-invite-icon').html(env.templates.svg[icon_name]());
+
+                    $template.find('.contacts-invitations-item-inviter-text').html(`<div>${xabber.getString("invited_by")} <span class="text-color-500">${inviter_contact.get('name')}${contact.invitation.message.get('message') ? ':' : '.'}</span>\</div><div class="contacts-invitations-item-inviter-msg-text"></div>`);
+
+                    contact.invitation.message && $template.find('.contacts-invitations-item-inviter-msg-text').text(contact.invitation.message.get('message'));
 
                 }
                 $template.attr('data-color', contact.account.settings.get('color'));
@@ -11541,21 +11563,21 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
         this.$('.contacts-invitations-wrap').switchClass('hidden', inv_counter === 0);
         this.$('.invitation-filter-item-wrap').switchClass('hidden', inv_counter === 0);
         this.$('.filter-item-wrap[data-filter="invitations"] span').text(inv_counter || '');
-        this.current_filter.type !== 'invitations' && this.$('.contacts-invitations-wrap .contacts-invitations-item').slice(1).addClass('hidden');
+        this.current_filter.type !== 'invitations' && this.$('.contacts-invitations-wrap .contacts-invitations-item').slice(2).addClass('hidden');
         if (inv_counter === 0 && this.$el.hasClass('invitation-content')){
             this.removeSubscriptionsFilter();
         }
     },
 
     renderContactItem: function (contact) {
-        let group_details_text = '', no_members_count_group_details;
+        let group_details_text = '';
         if (contact.get('group_chat')){
 
-            no_members_count_group_details = group_details_text = xabber.getString("groupchat_public_group");
+            group_details_text = xabber.getString("groupchat_public_group");
             if (contact.get('incognito_chat'))
-                no_members_count_group_details = group_details_text = xabber.getString("groupchat_incognito_group");
+                group_details_text = xabber.getString("groupchat_incognito_group");
             if (contact.get('private_chat'))
-                no_members_count_group_details = group_details_text = xabber.getString("groupchat_private_chat");
+                group_details_text = xabber.getString("groupchat_private_chat");
 
             if (contact.get('group_info') && contact.get('group_info').members_num){
                 group_details_text += ', ' + xabber.getQuantityString("contact_groupchat_status_member", contact.get('group_info').members_num);
@@ -11578,9 +11600,8 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
             let members_count = 0;
             if (contact.get('group_info') && contact.get('group_info').members_num){
                 members_count = contact.get('group_info').members_num;
-                $template.find('.groupchat-item-members-text').html(`<span class="invitation-notifications-item-members-count">${xabber.getString("groupchats_some_members", [Number(members_count)])}</span>`);
+                // $template.find('.groupchat-item-members-text').html(`<span class="invitation-notifications-item-members-count">${xabber.getString("groupchats_some_members", [Number(members_count)])}</span>`);
             }
-            $template.find('.groupchat-item-type').text(no_members_count_group_details);
             !contact.participants.length && contact.participants.getCachedParticipants();
             if (contact.participants.length){
 
@@ -11591,9 +11612,10 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
                         return 1;
                 });
 
-                let names_count = 0,
+                let roster_members_count = 0,
+                    // names_count = 0,
                     avatars_count = 0;
-                $template.find('.groupchat-item-members-text').append(`<span>${members_count ? ', ' : ''}${xabber.getString("including")}</span>`);
+                // $template.find('.groupchat-item-members-text').append(`<span>${members_count ? ', ' : ''}${xabber.getString("including")}</span>`);
                 _.each(members, (member, idx) => {
                     let in_roster, jid = member.get('jid'), avatar_url;
                     if (!jid)
@@ -11608,20 +11630,22 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
                     if (jid && contact.account.contacts.get(jid) && contact.account.contacts.get(jid).get('in_roster')) {
                         in_roster = true;
                     }
+                    in_roster && roster_members_count++;
 
-                    if (names_count < 5){
-                        $template.find('.groupchat-item-members-text')
-                            .append(` <span class="invitation-notifications-item-member-name${!in_roster ? ' not-contact-member' : ''}" data-jid="${member.get('jid')}" data-avatar-url="${avatar_url}">${member.get('nickname')}</span>${(names_count === 4 || (names_count + 1) === contact.participants.length) ? '.' : ',' }`);
-                        names_count++;
-                    }
+                    // if (names_count < 5){
+                    //     $template.find('.groupchat-item-members-text')
+                    //         .append(` <span class="invitation-notifications-item-member-name${!in_roster ? ' not-contact-member' : ''}" data-jid="${member.get('jid')}" data-avatar-url="${avatar_url}">${member.get('nickname')}</span>${(names_count === 4 || (names_count + 1) === contact.participants.length) ? '.' : ',' }`);
+                    //     names_count++;
+                    // }
                     if (avatars_count < 4){
                         let $avatar = $(`<div class="circle-avatar avatar-outline-wrap"><div class="circle-avatar member-avatar${!in_roster ? ' not-contact-member' : ''}" data-jid="${member.get('jid')}" data-avatar-url="${avatar_url}"></div></div>`);
-                        $avatar.find('.member-avatar').setAvatar(avatar_url, 24, contact.account);
+                        $avatar.find('.member-avatar').setAvatar(avatar_url, 32, contact.account);
                         $avatar.css('z-index', 5 - idx);
                         $template.find('.groupchat-item-members-avatars').append($avatar);
                         avatars_count++;
                     }
                 });
+                $template.find('.groupchat-item-type').text(`${xabber.getString("groupchats_some_members", [Number(members_count)])}${roster_members_count ? ' · ' + xabber.getString("groupchats_some_contacts", [Number(roster_members_count)]) : ''}`);
                 contact.participants.sort();
             }
         }
