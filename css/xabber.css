@@ -7015,11 +7015,28 @@ input[type=text].simple-input-field:hover {
     opacity: 0.8;
 }
 .contacts-panel-wrap .contact-list-wrap .roster-contact-item-wrap.groupchat-item-wrap .contact-name-wrap{
-    width: 25%;
+    flex: 1;
 }
 .contacts-panel-wrap .contact-list-wrap .roster-contact-item-wrap.groupchat-item-wrap .contact-name-wrap .contact-name{
     width: calc(100% - 32px);
-    margin-top: 9px;
+    margin-top: 6px;
+    font-size: 16px;
+}
+.contacts-panel-wrap .contact-list-wrap .roster-contact-item-wrap.groupchat-item-wrap .contact-name-wrap .groupchat-item-description{
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    color: #9e9e9e;
+    display: -webkit-box;
+    font-size: 14px;
+    line-height: 20px;
+    margin-right: 8px;
+    overflow: hidden;
+    overflow-wrap: normal;
+    text-overflow: ellipsis;
+    white-space: pre-line;
+    word-break: break-word;
+    margin-left: 16px;
+
 }
 .contacts-panel-wrap .contact-list-wrap .roster-contact-item-wrap.groupchat-item-wrap .contact-name-wrap .groupchat-item-type{
     margin-left: 16px;
@@ -7044,7 +7061,7 @@ input[type=text].simple-input-field:hover {
 
 }
 .roster-left-container.narrow-panel .contacts-panel-wrap .contact-list-wrap .roster-contact-item-wrap.groupchat-item-wrap .contact-name-wrap{
-    width: 31%;
+    /*width: 31%;*/
 }
 .roster-left-container.narrow-panel .contacts-panel-wrap .contact-list-wrap .roster-contact-item-wrap.groupchat-item-wrap .groupchat-item-details{
     width: 48%;
@@ -7075,19 +7092,25 @@ input[type=text].simple-input-field:hover {
     left: 2px;
     cursor: pointer;
 }
+.roster-left-container.invitation-content .contacts-invitations-wrap{
+    background: unset;
+}
 .contacts-invitations-wrap {
-    padding: 0 16px;
-    position: relative;
+    margin: 0 16px;
     margin-bottom: 12px;
+    padding: 1px 0 16px;
+    position: relative;
+    border-radius: 16px;
+    background: #fafafa;
 }
 .contacts-invitations-wrap .contacts-invitations-header{
+    color: #9e9e9e;
     font-size: 14px;
-    margin-top: 8px;
     font-weight: 500;
     height: 16px;
-    color: rgba(158, 158, 158, 1);
-    margin-left: 8px;
     margin-bottom: 10px;
+    margin-left: 16px;
+    margin-top: 9px;
 }
 .contacts-invitations-wrap .contacts-invitations-item{
     align-items: flex-start;
@@ -7096,12 +7119,8 @@ input[type=text].simple-input-field:hover {
     justify-content: flex-start;
     min-height: 56px;
     position: relative;
-    background: #fafafa;
 }
-.invitation-content .contacts-invitations-wrap .contacts-invitations-item{
-    background: unset;
-}
-.invitation-content .contacts-invitations-wrap .contacts-invitations-item:hover{
+.contacts-invitations-wrap .contacts-invitations-item:hover{
     background: #fafafa;
 }
 .contacts-invitations-wrap .avatar-wrap{
@@ -7132,6 +7151,9 @@ input[type=text].simple-input-field:hover {
     border-radius: 50%;
     pointer-events: none;
 }
+.contacts-invitations-wrap .avatar-wrap .notification-icon svg{
+    position: absolute;
+}
 .contacts-invitations-wrap .avatar-wrap .notification-icon path{
     fill: #fff;
 }
@@ -7147,105 +7169,92 @@ input[type=text].simple-input-field:hover {
 }
 
 .roster-left-container.narrow-panel .contacts-invitations-wrap .contacts-invitations-name-wrap{
-    width: 31%;
-}
-.roster-left-container.narrow-panel .contacts-invitations-wrap .contacts-invitations-details-wrap{
-    margin-right: 104px;
 }
 .contacts-invitations-wrap .contacts-invitations-name-wrap{
-    width: 25%;
+    flex: 1;
+    margin-right: 122px;
 }
 .contacts-invitations-wrap .contacts-invitations-name-wrap .contacts-invitations-item-name{
     font-weight: 500;
     margin-left: 16px;
     margin-top: 9px;
     width: calc(100% - 32px);
+    font-size: 16px;
 }
 .contacts-invitations-wrap .contacts-invitations-name-wrap .contacts-invitations-item-type{
     color: #9e9e9e;
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 400;
-    margin-left: 16px;
     text-transform: lowercase;
+    margin-bottom: 6px;
 }
-.contacts-invitations-wrap .contacts-invitations-details-wrap{
-    padding: 6px 0;
-    margin-right: 122px;
-    flex: 1;
-    max-width: 57%;
-}
-.contacts-invitations-wrap .contacts-invitations-details-wrap .contacts-invitations-item-main-text{
-    -webkit-line-clamp: 2;
+.contacts-invitations-wrap .contacts-invitations-item-main-text{
+    -webkit-line-clamp: 1;
     -webkit-box-orient: vertical;
+    color: #9e9e9e;
     display: -webkit-box;
+    font-size: 14px;
+    line-height: 20px;
     margin-right: 8px;
+    margin-left: 16px;
     overflow: hidden;
     overflow-wrap: normal;
+    text-overflow: ellipsis;
     white-space: pre-line;
     word-break: break-word;
-    text-overflow: ellipsis;
+    margin-bottom: 8px;
+}
+.contacts-invitations-wrap .contacts-invitations-item-main-text:empty{
+    margin-bottom: 0;
+}
+.contacts-invitations-wrap .contacts-invitations-item-inviter-details-wrap{
     color: #9e9e9e;
-    line-height: 20px;
-    font-size: 14px;
-}
-.contacts-invitations-wrap .contacts-invitations-details-wrap .contacts-invitations-item-inviter-details-wrap{
-    border-radius: 8px;
-    background-color: rgba(238, 238, 238, 1);
-    padding: 4px 8px 4px 40px;
-    margin-right: 36px;
+    cursor: pointer;
     font-size: 12px;
-    color: rgba(158, 158, 158, 1);
+    margin: 2px 0 12px 16px;
     position: relative;
-    min-height: 40px;
-    cursor: pointer;
-    margin: 4px 0;
 }
-.contacts-invitations-wrap .contacts-invitations-details-wrap .inviter-avatar{
-    display: block;
-    height: 24px;
-    -webkit-mask-repeat: round;
-    mask-repeat: round;
-    position: absolute;
-    width: 24px;
-    top: 6px;
-    left: 8px;
-    cursor: pointer;
-    word-wrap: break-word;
-}
-.contacts-invitations-wrap .contacts-invitations-details-wrap .contacts-invitations-item-inviter-msg-text{
-    color: rgba(97, 97, 97, 1);
+.contacts-invitations-wrap .contacts-invitations-item-inviter-msg-text{
+    color: rgba(0, 0, 0, .87);
     font-size: 12px;
     line-height: 14px;
     word-break: break-word;
+    border-left: 2px solid;
+    padding-left: 4px;
 }
-.contacts-invitations-wrap .contacts-invitations-details-wrap .contacts-invitations-item-inviter-text{
-    min-height: 32px;
+.contacts-invitations-wrap .contacts-invitations-item-inviter-text{
     display: flex;
     flex-direction: column;
     justify-content: center;
 }
-.contacts-invitations-wrap .contacts-invitations-details-wrap .contacts-invitations-item-members-text{
+.contacts-invitations-wrap .contacts-invitations-item-members-text{
     color: #9e9e9e;
     font-size: 11px;
 }
 .contacts-panel-wrap .contact-list-wrap .roster-contact-item-wrap.groupchat-item-wrap .groupchat-item-members-text .invitation-notifications-item-member-name:hover,
-.contacts-invitations-wrap .contacts-invitations-details-wrap .contacts-invitations-item-members-text .contacts-invitations-item-member-name:hover{
+.contacts-invitations-wrap .contacts-invitations-item-members-text .contacts-invitations-item-member-name:hover{
     opacity: 0.7;
 }
-.contacts-invitations-wrap .contacts-invitations-details-wrap .contacts-invitations-item-members-text .contacts-invitations-item-member-name{
+.contacts-invitations-wrap .contacts-invitations-item-members-text .contacts-invitations-item-member-name{
     color: #424242;
     cursor: pointer;
 }
-.contacts-invitations-wrap .contacts-invitations-details-wrap .contacts-invitations-item-members-avatars{
+.contacts-invitations-wrap .contacts-invitations-item-members-wrap{
     display: flex;
-    margin-top: 4px;
+    margin-left: 16px;
+    align-items: center;
+}
+.contacts-invitations-wrap .contacts-invitations-item-members-avatars{
+    display: flex;
+}
+.contacts-invitations-wrap .contacts-invitations-item-members-avatars .circle-avatar.avatar-outline-wrap:first-child{
+    display: flex;
     margin-bottom: 4px;
 }
-.contacts-invitations-wrap .contacts-invitations-details-wrap .contacts-invitations-item-members-avatars .circle-avatar.avatar-outline-wrap:first-child{
-    display: flex;
-    margin-bottom: 4px;
+.contacts-invitations-wrap .contacts-invitations-item-members-avatars .circle-avatar.avatar-outline-wrap:last-child{
+    margin-right: 12px;
 }
-.contacts-invitations-wrap .contacts-invitations-details-wrap .contacts-invitations-item-members-avatars .circle-avatar.avatar-outline-wrap{
+.contacts-invitations-wrap .contacts-invitations-item-members-avatars .circle-avatar.avatar-outline-wrap{
     background: #fff !important;
     height: 36px;
     margin-right: -8px;
@@ -7253,10 +7262,10 @@ input[type=text].simple-input-field:hover {
     position: relative;
     width: 36px;
 }
-.contacts-invitations-wrap .contacts-invitations-details-wrap .contacts-invitations-item-members-avatars .circle-avatar.avatar-outline-wrap:before{
+.contacts-invitations-wrap .contacts-invitations-item-members-avatars .circle-avatar.avatar-outline-wrap:before{
     opacity: 0;
 }
-.contacts-invitations-wrap .contacts-invitations-details-wrap .contacts-invitations-item-members-avatars .circle-avatar.avatar-outline-wrap .member-avatar{
+.contacts-invitations-wrap .contacts-invitations-item-members-avatars .circle-avatar.avatar-outline-wrap .member-avatar{
     height: 32px;
     left: 2px;
     position: absolute;
@@ -7287,7 +7296,7 @@ input[type=text].simple-input-field:hover {
     height: 20px;
     position: absolute;
     right: 24px;
-    top: 0;
+    top: 9px;
 }
 .contacts-invitations-wrap .contacts-invitations-button-wrap .contacts-invitations-button{
     color: #9e9e9e;

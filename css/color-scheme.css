@@ -4351,3 +4351,61 @@
 [data-main-color=blue-grey] .text-main-color-900 {
   color: #263238;
 }
+
+[data-color=red] .border-color-500 {
+  border-color: #F44336 !important;
+}
+[data-color=pink] .border-color-500 {
+  border-color: #E91E63 !important;
+}
+[data-color=purple] .border-color-500 {
+  border-color: #9C27B0 !important;
+}
+[data-color=deep-purple] .border-color-500 {
+  border-color: #673AB7 !important;
+}
+[data-color=indigo] .border-color-500 {
+  border-color: #3F51B5 !important;
+}
+[data-color=blue] .border-color-500 {
+  border-color: #2196F3 !important;
+}
+[data-color=light-blue] .border-color-500 {
+  border-color: #03A9F4 !important;
+}
+[data-color=cyan] .border-color-500 {
+  border-color: #00BCD4 !important;
+}
+[data-color=teal] .border-color-500 {
+  border-color: #009688 !important;
+}
+[data-color=green] .border-color-500 {
+  border-color: #4CAF50 !important;
+}
+[data-color=light-green] .border-color-500 {
+  border-color: #8BC34A !important;
+}
+[data-color=lime] .border-color-500 {
+  border-color: #CDDC39 !important;
+}
+[data-color=yellow] .border-color-500 {
+  border-color: #FFEB3B !important;
+}
+[data-color=amber] .border-color-500 {
+  border-color: #FFC107 !important;
+}
+[data-color=orange] .border-color-500 {
+  border-color: #FF9800 !important;
+}
+[data-color=deep-orange] .border-color-500 {
+  border-color: #FF5722 !important;
+}
+[data-color=brown] .border-color-500 {
+  border-color: #795548 !important;
+}
+[data-color=grey] .border-color-500 {
+  border-color: #9E9E9E !important;
+}
+[data-color=blue-grey] .border-color-500 {
+  border-color: #607D8B !important;
+}

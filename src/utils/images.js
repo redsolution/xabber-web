@@ -171,7 +171,7 @@ var compressImage = function (file) {
     return deferred.promise();
 };
 
-var setCss = function (image_el, cached_image, img_size, account) {
+var setCss = function (image_el, cached_image, img_size, account, name) {
     let $image_el = $(image_el),css;
     if (cached_image.is_proxy_url){
         css = {
@@ -222,6 +222,10 @@ var setCss = function (image_el, cached_image, img_size, account) {
                 }
             }, (err) => {
                 console.error(err);
+                if (err.status === 404 && name){
+                    image_el.setAvatar(getDefaultAvatar(name), img_size);
+                    _proxy_url_callbacks[cached_image.url] = [];
+                }
             });
         }
     } else {
@@ -282,9 +286,9 @@ var getAvatarFromFile = function (file) {
      return deferred.promise();
 };
 
-$.fn.setAvatar = function (image, size, account) {
+$.fn.setAvatar = function (image, size, account, name) {
     var cached_image = getCachedImage(image, account);
-    setCss(this, cached_image, size, account);
+    setCss(this, cached_image, size, account, name);
 };
 
 export default {
