@@ -7193,6 +7193,14 @@ input[type=text].simple-input-field:hover {
     width: 48px;
     flex-shrink: 0
 }
+.contacts-panel-wrap .contacts-content-wrap .contact-list-wrap .roster-contact-item-wrap.groupchat-item-wrap .account-indicator,
+.contacts-content-wrap .contacts-invitations-wrap .avatar-wrap .account-indicator-background-exclude .account-indicator{
+    display: none;
+}
+.contacts-panel-wrap .contacts-content-wrap.contacts-multiple-accounts .contact-list-wrap .roster-contact-item-wrap.groupchat-item-wrap .account-indicator,
+.contacts-content-wrap.contacts-multiple-accounts .contacts-invitations-wrap .avatar-wrap .account-indicator-background-exclude .account-indicator{
+    display: block;
+}
 
 .roster-left-container.narrow-panel .contacts-invitations-wrap .contacts-invitations-name-wrap{
 }
@@ -23785,6 +23793,7 @@ ul.restrictions-list-content>li {
 }
 .notifications-content-filters .filter-item-wrap.subscription-item-wrap span,
 .contacts-panel-wrap .contacts-panel-left-side .filter-item-wrap.subscription-item-wrap span,
+.contacts-panel-wrap .contacts-panel-left-side .filter-item-wrap.invitation-filter-item-wrap span,
 .notifications-content-filters .filter-item-wrap.invitation-item-wrap span{
     background-color: #388e3c;
     border-radius: 11px;

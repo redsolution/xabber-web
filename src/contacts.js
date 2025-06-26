@@ -10281,9 +10281,9 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
         "click .contacts-home-items-wrap .filter-item-wrap": "filterContent",
         "click .notification-subscriptions-button": "filterContent",
         "click .contacts-invitations-button": "filterContent",
-        "click .btn-subfilter": "filterSubContent",
+        // "click .btn-subfilter": "filterSubContent",
         "click .btn-accounts-filter": "filterAccount",
-        "click .contacts-group-filter-content .filter-item-wrap": "filterByGroup",
+        "click .contacts-group-filter-content .filter-item-wrap:not(.subfilter-item)": "filterByGroup",
         "click .contact-groups-wrap .group:not(.group-expand)": "filterByGroup",
         "click .contact-expanded-groups-wrap .group:not(.group-expand)": "filterByGroup",
         "click .contact-domain": "filterByDomain",
@@ -10404,10 +10404,10 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
         }
         if (this.is_groupchats){
             this.current_filter = {type: 'groupchat'};
-            this.current_type_subfilter = 'groups';
+            // this.current_type_subfilter = 'groups';
         } else {
             this.current_filter = {type: 'contacts'};
-            this.current_type_subfilter = 'contacts';
+            // this.current_type_subfilter = 'contacts';
         }
         this.current_filter_groups_list = [];
         this.current_filter_domain = null;
@@ -10704,6 +10704,7 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
             selected_jid = this.current_filter_account;
         }
         this.$('.tab-account-filter-item').switchClass('hidden', accounts.length === 1 || !accounts.length);
+        this.$('.contacts-content-wrap').switchClass('contacts-multiple-accounts', accounts.length && accounts.length > 1);
         if (accounts.length){
             try{
                 this.$('.additional-filter-variant').remove();
@@ -10773,7 +10774,7 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
                 if (this.current_filter.type && this.current_filter.type !== 'subscription' && !custom_count_value){
                     custom_count_value = 0
                 }
-                this.$('.contacts-group-filter-content').append(this.renderGroupFilterItem(group, custom_count_value));
+                custom_count_value && this.$('.contacts-group-filter-content').append(this.renderGroupFilterItem(group, custom_count_value));
             });
         } else {
             if(this.current_filter_account === 'all' && accounts.length){
@@ -10804,7 +10805,7 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
                                     $group.find('span').text(initial_count + group.get('counter').all);
                             }
                         } else {
-                            this.$('.contacts-group-filter-content').append(this.renderGroupFilterItem(group, custom_count_value));
+                            custom_count_value && this.$('.contacts-group-filter-content').append(this.renderGroupFilterItem(group, custom_count_value));
                         }
                     });
                 })
@@ -10851,20 +10852,19 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
         this.$('.contacts-invitations-wrap .contacts-invitations-item').slice(1).addClass('hidden');
 
         this.$(`.tab-active-filters-wrap .tab-filter-item`).remove();
-        if (filter_type === 'contacts') {
-            this.$('.contact-list-wrap').removeClass('hidden');
-            this.$('.notification-subscriptions-wrap').addClass('hidden');
-            this.current_filter = {type: filter_type};
-            this.$(`.contacts-type-filter-content .filter-item-wrap[data-filter="${filter_type}"]`).addClass('selected-filter');
-            this.current_type_subfilter = 'contacts';
-        } else if (filter_type === 'groupchat') {
+        let normal_interaction_list = [
+            'contacts',
+            'contacts-online',
+            'groupchat',
+            'groupchats-public',
+            'groupchats-incognito',
+        ];
+        if (normal_interaction_list.includes(filter_type)) {
             this.$('.contact-list-wrap').removeClass('hidden');
             this.$('.notification-subscriptions-wrap').addClass('hidden');
             this.current_filter = { type: filter_type };
             this.$(`.contacts-type-filter-content .filter-item-wrap[data-filter="${filter_type}"]`).addClass('selected-filter');
-            this.current_type_subfilter = 'groups';
         } else if (filter_type === 'subscription'){
-
             this.current_filter = { type: filter_type };
             this.$el.addClass('subscription-content');
             $(templates.tab_filter_item_main_color({
@@ -10873,7 +10873,7 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
                 text: xabber.getString(`notifications_window__type_filter_subscription`)
             })).insertBefore(this.$('.search-form'));
             this.$(`.contacts-type-filter-content .filter-item-wrap[data-filter="${filter_type}"]`).addClass('selected-filter');
-            this.current_type_subfilter = 'subscription';
+            // this.current_type_subfilter = 'subscription';
             this.$('.notification-subscription-item').removeClass('hidden');
             this.$('.notification-subscriptions-wrap').removeClass('hidden');
         } else if (filter_type === 'invitations'){
@@ -10887,7 +10887,7 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
                 text: xabber.getString(`notifications_window__type_filter_invitations`)
             })).insertBefore(this.$('.search-form'));
             this.$(`.contacts-type-filter-content .filter-item-wrap[data-filter="${filter_type}"]`).addClass('selected-filter');
-            this.current_type_subfilter = 'invitations';
+            // this.current_type_subfilter = 'invitations';
             this.$('.contacts-invitations-item').removeClass('hidden');
             this.$('.contacts-invitations-wrap').removeClass('hidden');
         }
@@ -10904,7 +10904,7 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
 
     removeSubscriptionsFilter: function () {
         this.current_filter = {};
-        this.current_type_subfilter = '';
+        // this.current_type_subfilter = '';
         this.$el.removeClass('subscription-content');
         this.$el.removeClass('invitation-content');
         this.$('.contacts-type-filter-content .filter-item-wrap').removeClass('selected-filter');
@@ -10926,13 +10926,13 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
     },
 
     filterSubContent: function (ev) {
-        let $item = $(ev.target).closest('.btn-subfilter');
-
-        this.current_type_subfilter = $item.attr('data-subfilter');
-
-        this.updateSubFilter();
-        this.contacts = [];
-        this.processUpdateContacts(true, true);
+        // let $item = $(ev.target).closest('.subfilter-item');
+        //
+        // this.current_type_subfilter = $item.attr('data-subfilter');
+        //
+        // this.updateSubFilter();
+        // this.contacts = [];
+        // this.processUpdateContacts(true, true);
     },
 
     filterAccount: function (ev) {
@@ -11150,22 +11150,22 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
     },
 
     updateSubFilter: function () {
-        let contacts_filters = [
-            'contacts',
-            'online'
-        ],
-            groups_filters = [
-                'groups',
-                'public',
-                'incognito'
-        ],
-            sub_filter_parent_type,
-            item_text = this.$(`.btn-subfilter[data-subfilter="${this.current_type_subfilter}"]`).text();
-        if (contacts_filters.includes(this.current_type_subfilter)){
-            sub_filter_parent_type = 'contacts';
-        } else if (groups_filters.includes(this.current_type_subfilter)){
-            sub_filter_parent_type = 'groups';
-        }
+        // let contacts_filters = [
+        //     'contacts',
+        //     'online'
+        // ],
+        //     groups_filters = [
+        //         'groups',
+        //         'public',
+        //         'incognito'
+        // ],
+        //     sub_filter_parent_type,
+        //     item_text = this.$(`.btn-subfilter[data-subfilter="${this.current_type_subfilter}"]`).text();
+        // if (contacts_filters.includes(this.current_type_subfilter)){
+        //     sub_filter_parent_type = 'contacts';
+        // } else if (groups_filters.includes(this.current_type_subfilter)){
+        //     sub_filter_parent_type = 'groups';
+        // }
         if (this.account){
             this.$('.tab-active-filters-wrap').attr('data-color', this.account.settings.get('color'));
             this.$('.tab-account-filter-item .tab-filter-item-text').text(this.account.get('jid'));
@@ -11174,8 +11174,8 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
             this.$('.tab-account-filter-item .tab-filter-item-text').text(xabber.getString("notifications_window__type_filter_all_accounts"));
         }
         this.$(`.tab-additional-filter-item:not(.tab-account-filter-item)`).addClass('hidden');
-        this.$(`.tab-additional-filter-item[data-type="${sub_filter_parent_type}"]`).removeClass('hidden');
-        this.$(`.tab-additional-filter-item[data-type="${sub_filter_parent_type}"] .tab-filter-item-text`).text(item_text);
+        // this.$(`.tab-additional-filter-item[data-type="${sub_filter_parent_type}"]`).removeClass('hidden');
+        // this.$(`.tab-additional-filter-item[data-type="${sub_filter_parent_type}"] .tab-filter-item-text`).text(item_text);
     },
 
     updateAccountColor: function (account) {
@@ -11236,10 +11236,10 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
         if (!this.current_filter.type){
             if (this.is_groupchats){
                 this.current_filter = {type: 'groupchat'};
-                this.current_type_subfilter = 'groups';
+                // this.current_type_subfilter = 'groups';
             } else {
                 this.current_filter = {type: 'contacts'};
-                this.current_type_subfilter = 'contacts';
+                // this.current_type_subfilter = 'contacts';
             }
             this.$('.contacts-type-filter-content .filter-item-wrap').removeClass('selected-filter');
             this.$(`.contacts-type-filter-content .filter-item-wrap[data-filter="${this.current_filter.type}"]`).addClass('selected-filter');
@@ -11249,7 +11249,7 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
             this.$('.roster-sorting-wrap').removeClass('hidden');
             this.$('.contacts-home-wrap').addClass('hidden');
         }
-        if (this.current_filter.type || this.current_filter_groups_list.length || this.current_filter_domain || this.current_filter_query || this.current_type_subfilter) {
+        if (this.current_filter.type || this.current_filter_groups_list.length || this.current_filter_domain || this.current_filter_query) {
             return this.getFilteredContacts(force_scroll);
         }
         this.contacts = [];
@@ -11333,20 +11333,23 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
                     if (!contact.get('jid').includes(this.current_filter_query) && !contact.get('name').includes(this.current_filter_query))
                         return;
                 }
-                if (this.current_type_subfilter){
-                    if (this.current_type_subfilter === 'online' && constants.STATUS_WEIGHTS[contact.get('status')] >= 6)
-                        return;
-                    if (this.current_type_subfilter === 'public' && contact.get('incognito_chat'))
-                        return;
-                    if (this.current_type_subfilter === 'incognito' && !contact.get('incognito_chat'))
-                        return;
+                if (this.current_filter.type === 'contacts-online' && constants.STATUS_WEIGHTS[contact.get('status')] >= 6){
+                    return;
                 }
-                if (this.current_filter.type === 'groupchat' && contact.get('group_chat')){
+                if (this.current_filter.type === 'groupchats-public' && contact.get('incognito_chat')){
+                    return;
+                }
+                if (this.current_filter.type === 'groupchats-incognito' && !contact.get('incognito_chat')){
+                    return;
+                }
+                if ((this.current_filter.type === 'groupchat'
+                    || this.current_filter.type === 'groupchats-public'
+                    || this.current_filter.type === 'groupchats-incognito') && contact.get('group_chat')){
                     this.contacts.push(contact);
                     return;
                 } else if (contact.get('group_chat'))
                     return;
-                if (this.current_filter.type === 'contacts'){
+                if (this.current_filter.type === 'contacts' || this.current_filter.type === 'contacts-online'){
                     this.contacts.push(contact);
                 }
             });
@@ -11611,7 +11614,7 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
             }
 
         }
-        let template_name = group_details_text && this.current_filter.type === 'groupchat' ? templates.roster_groupchat_item : templates.roster_contact_item;
+        let template_name = group_details_text && this.is_groupchats ? templates.roster_groupchat_item : templates.roster_contact_item;
 
         let $template = $(template_name({
             status: contact.get('status'),
@@ -11623,7 +11626,7 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
             account_color: contact.account.settings.get('color'),
         }));
 
-        if (group_details_text && this.current_filter.type === 'groupchat'){
+        if (group_details_text && this.is_groupchats){
             let members_count = 0,
                 group_description;
             if (contact.get('group_info') && contact.get('group_info').members_num){
@@ -11774,8 +11777,8 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
                 this.$('.groupchats-home-header span').text(account_contacts.filter(contact => contact.get('group_chat')).length);
             }
         }
-        this.$('.contact-list').switchClass('groupchat-list', this.current_filter.type && this.current_filter.type === 'groupchat');
-        this.$('.roster-sorting-wrap').switchClass('hidden2', this.current_filter.type && (this.current_filter.type === 'groupchat' || this.current_filter.type === 'invitations'));
+        this.$('.contact-list').switchClass('groupchat-list', this.is_groupchats);
+        this.$('.roster-sorting-wrap').switchClass('hidden2', this.is_groupchats);
         if (this._current_expanded_groups_item.account_jid && this._current_expanded_groups_item.contact_jid) {
             this.$(`.roster-contact-item-wrap[data-jid="${this._current_expanded_groups_item.contact_jid}"][data-account-jid="${this._current_expanded_groups_item.account_jid}"] .contact-expanded-groups-wrap`).removeClass('hidden');
         }

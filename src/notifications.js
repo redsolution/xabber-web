@@ -1022,6 +1022,9 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
     },
 
     updateAllIncomingSubscriptions: function () {
+        this.$('.notification-subscriptions-wrap.notifications-invitations').addClass('hidden');
+        return;
+
         this.$('.notification-subscriptions-content-wrap').html('');
         this.$('.notification-invitations-content-wrap').html('');
         let accounts = xabber.accounts.enabled;
