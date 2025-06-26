@@ -4162,6 +4162,7 @@ input[type=text].simple-input-field:hover {
 
 .toolbar .mentions-indicator,
 .toolbar .contacts-indicator,
+.toolbar .groupchats-indicator,
 .toolbar .msg-indicator,
 .toolbar .group-msg-indicator,
 .toolbar .archive-msg-indicator,
@@ -4184,6 +4185,7 @@ input[type=text].simple-input-field:hover {
 }
 .toolbar .mentions-indicator,
 .toolbar .contacts-indicator,
+.toolbar .groupchats-indicator,
 .toolbar .all-msg-indicator {
     top: 6px !important;
     right: 16px !important;
@@ -4201,6 +4203,7 @@ input[type=text].simple-input-field:hover {
 
 .toolbar .mentions-indicator.unread,
 .toolbar .contacts-indicator.unread,
+.toolbar .groupchats-indicator.unread,
 .toolbar .msg-indicator.unread,
 .toolbar .group-msg-indicator.unread,
 .toolbar .archive-msg-indicator.unread,
@@ -6982,6 +6985,29 @@ input[type=text].simple-input-field:hover {
 }
 .contacts-panel-wrap .contact-list-wrap .roster-contact-item-wrap .account-indicator-background-exclude{
     cursor: pointer;
+    height: 40px;
+    margin-left: 16px;
+    margin-top: 8px;
+    width: 40px;
+    position: relative;
+}
+.contacts-panel-wrap .contact-list-wrap .roster-contact-item-wrap .account-indicator{
+    display: block;
+    position: absolute;
+    width: 40px;
+    height: 40px;
+    -webkit-mask-repeat: round;
+    mask-repeat: round;
+}
+.contacts-panel-wrap .contact-list-wrap .roster-contact-item-wrap .circle-avatar{
+    cursor: pointer;
+    height: 40px;
+    /*margin-left: 16px;*/
+    /*margin-top: 8px;*/
+    width: 40px;
+}
+.contacts-panel-wrap .contact-list-wrap .roster-contact-item-wrap.groupchat-item-wrap .account-indicator-background-exclude{
+    cursor: pointer;
     height: 48px;
     margin-left: 24px;
     margin-top: 6px;
@@ -6989,7 +7015,7 @@ input[type=text].simple-input-field:hover {
     width: 48px;
     margin-bottom: 6px;
 }
-.contacts-panel-wrap .contact-list-wrap .roster-contact-item-wrap .account-indicator{
+.contacts-panel-wrap .contact-list-wrap .roster-contact-item-wrap.groupchat-item-wrap .account-indicator{
     display: block;
     position: absolute;
     width: 48px;
@@ -6997,7 +7023,7 @@ input[type=text].simple-input-field:hover {
     -webkit-mask-repeat: round;
     mask-repeat: round;
 }
-.contacts-panel-wrap .contact-list-wrap .roster-contact-item-wrap .circle-avatar{
+.contacts-panel-wrap .contact-list-wrap .roster-contact-item-wrap.groupchat-item-wrap .circle-avatar{
     cursor: pointer;
     height: 48px;
     /*margin-left: 16px;*/
@@ -7356,6 +7382,12 @@ input[type=text].simple-input-field:hover {
     display: none;
 }
 .contacts-panel-wrap .contact-list-wrap .groupchat-list .roster-contact-item-wrap .status{
+    height: 16px;
+    left: 42px;
+    top: 34px;
+    width: 16px;
+}
+.contacts-panel-wrap .contact-list-wrap .groupchat-list .roster-contact-item-wrap.groupchat-item-wrap .status{
     height: 16px;
     left: 56px;
     top: 38px;

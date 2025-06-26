@@ -1089,6 +1089,7 @@ xabber.ToolbarView = xabber.BasicView.extend({
         "click .toolbar-logo":             "clickAllChats",
         "click .all-chats":             "showAllChats",
         "click .contacts":              "showContacts",
+        "click .groupchats":              "showGroupchats",
         "click .archive-chats":         "showArchive",
         "click .saved-chats":           "showSavedChats",
         "click .mentions":              "showNotifications",
@@ -1123,7 +1124,7 @@ xabber.ToolbarView = xabber.BasicView.extend({
         this.listenTo(this.data, 'change:group_msg_counter', this.onChangedGroupMessageCounter);
         this.listenTo(this.data, 'change:mentions_counter', this.onChangedMentionsCounter);
         this.listenTo(this.data, 'change:contacts_counter', this.onChangedContactsCounter);
-        this.listenTo(this.data, 'change:mentions_subscriptions', this.onChangedMentionsSubscriptions);
+        this.listenTo(this.data, 'change:invitations_counter', this.onChangedInvitationsCounter);
         this.listenTo(this.data, 'change:msg_counter', this.onChangedMessageCounter);
         this.data.set({msg_counter: 0});
         this.data.set({group_msg_counter: 0});
@@ -1204,7 +1205,7 @@ xabber.ToolbarView = xabber.BasicView.extend({
             this.$('.toolbar-item:not(.toolbar-logo).jingle-calls').addClass('active');
             return;
         }
-        if (_.contains(['all-chats', 'contacts',
+        if (_.contains(['all-chats', 'contacts', 'groupchats',
                         'settings', 'settings-modal', 'search', 'jingle-calls', 'geolocation-chats', 'about'], name)) {
             this.$('.toolbar-item:not(.toolbar-logo).'+name).addClass('active');
         }
@@ -1327,6 +1328,18 @@ xabber.ToolbarView = xabber.BasicView.extend({
         xabber.trigger('update_placeholder');
     },
 
+    showGroupchats: function () {
+        if (this.data.get('account_filtering')){
+            this.data.set('account_filtering', null);
+            this.$('.toolbar-item.account-item').removeClass('active');
+        }
+        if (!xabber.accounts.enabled.length || !xabber.accounts.connected.length)
+            return;
+
+        xabber.body.setScreen('groupchats', {right: 'contacts', contacts: xabber.groupchats_view});
+        xabber.trigger('update_placeholder');
+    },
+
     showCalls: function () {
         if (this.data.get('account_filtering')){
             this.data.set('account_filtering', null);
@@ -1381,7 +1394,7 @@ xabber.ToolbarView = xabber.BasicView.extend({
     },
 
     setAllMessageCounter: function () {
-        let count_msg = 0, count_all_msg = 0, count_group_msg = 0, mentions = 0, contacts = 0, incoming_subs_count = 0;
+        let count_msg = 0, count_all_msg = 0, count_group_msg = 0, mentions = 0, contacts = 0, invitations_counter = 0;
         xabber.accounts.each((account) => {
             account.chats.each((chat) => {
                 if (chat.contact && !chat.isMuted()) {
@@ -1402,8 +1415,7 @@ xabber.ToolbarView = xabber.BasicView.extend({
             let incoming_subscriptions = account.contacts.filter(item => ((item.get('subscription_request_in') && item.get('subscription') !== 'both'))).length;
             let incoming_invitations = account.contacts.filter(item => (item.get('invitation') && !item.get('removed'))).length;
 
-            incoming_invitations && (mentions += incoming_invitations);
-            incoming_invitations && (incoming_subs_count += incoming_invitations);
+            incoming_invitations && (invitations_counter += incoming_invitations);
             incoming_subscriptions && (contacts += incoming_subscriptions);
 
             if (account.omemo && account.omemo.xabber_trust){
@@ -1417,7 +1429,7 @@ xabber.ToolbarView = xabber.BasicView.extend({
         if (xabber.notifications_view && xabber.notifications_view.current_content && xabber.notifications_view.current_content.notification_messages.length){
             mentions += xabber.notifications_view.current_content.notification_messages.filter(msg => msg.get('is_unread') && !msg.get('ignored')).length;
         }
-        return { msgs: count_msg, all_msgs: count_all_msg, group_msgs: count_group_msg, mentions: mentions, contacts: contacts , mentions_subscriptions: incoming_subs_count };
+        return { msgs: count_msg, all_msgs: count_all_msg, group_msgs: count_group_msg, mentions: mentions, contacts: contacts , invitations_counter: invitations_counter };
     },
 
     recountAllMessageCounter: function () {
@@ -1431,7 +1443,7 @@ xabber.ToolbarView = xabber.BasicView.extend({
         this.data.set('group_msg_counter', unread_messages.group_msgs);
         this.data.set('mentions_counter', unread_messages.mentions);
         this.data.set('contacts_counter', unread_messages.contacts);
-        this.data.set('mentions_subscriptions', unread_messages.mentions_subscriptions);
+        this.data.set('invitations_counter', unread_messages.invitations_counter);
         xabber.recountAllMessageCounter();
     },
 
@@ -1459,13 +1471,11 @@ xabber.ToolbarView = xabber.BasicView.extend({
         this.$('.contacts-indicator').switchClass('unread', c).text(c);
     },
 
-    onChangedMentionsSubscriptions: function () {
-        let incoming = this.data.get('mentions_subscriptions');
-        if (incoming) {
-            this.$('.mentions-indicator').addClass('indicatior-subscription');
-        } else {
-            this.$('.mentions-indicator').removeClass('indicatior-subscription');
-        }
+    onChangedInvitationsCounter: function () {
+        let c = this.data.get('invitations_counter');
+        if (c >= 100)
+            c = '99+';
+        this.$('.groupchats-indicator').switchClass('unread', c).text(c);
     },
 
     onChangedAllMessageCounter: function () {

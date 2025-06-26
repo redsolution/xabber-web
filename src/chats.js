@@ -14822,6 +14822,7 @@ xabber.once("start", function () {
 
     this.on("clear_search", function () {
         this.contacts_view.clearSearch(true);
+        this.groupchats_view.clearSearch(true);
         this.chats_view.clearSearch();
     }, this);
 }, xabber);

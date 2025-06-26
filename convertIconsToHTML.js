@@ -83,6 +83,8 @@ let badges_names = [
         'check',
         'unread',
         'unread-outline',
+        'account-group',
+        'account-group-variant',
         'call-outline',
         'call',
         'call-hangup',

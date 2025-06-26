@@ -19,7 +19,7 @@ xabber.once("start", function () {
             if (xabber.body.$el.siblings('#modals').children('.open').length)
                 return;
         }
-        if (attrs.chat_item && (attrs.name === 'mentions' || attrs.name === 'contacts' || attrs.name === 'all-chats') && (attrs.right === 'chat' || attrs.right === 'participant_messages' || attrs.right === 'message_context' || attrs.right === 'searched_messages')) {
+        if (attrs.chat_item && (attrs.name === 'mentions' || attrs.name === 'contacts' || attrs.name === 'groupchats' || attrs.name === 'all-chats') && (attrs.right === 'chat' || attrs.right === 'participant_messages' || attrs.right === 'message_context' || attrs.right === 'searched_messages')) {
             if (window.$('.message-actions-panel').length && !window.$('.message-actions-panel').hasClass('hidden')) {
                 if (!ev.ctrlKey && !ev.metaKey) {
                     switch (ev.keyCode) {
@@ -126,7 +126,8 @@ xabber.once("start", function () {
 
         if ((this.body.screen.get('notifications') || (this.body.screen.get('previous_screen') && this.body.screen.get('previous_screen').notifications))
             || (this.body.screen.get('calls') || (this.body.screen.get('previous_screen') && this.body.screen.get('previous_screen').calls))
-        || (this.body.screen.get('name') === 'contacts' || (this.body.screen.get('previous_screen') && this.body.screen.get('previous_screen').name === 'contacts' && this.body.screen.get('previous_screen').contacts))) {
+        || (this.body.screen.get('name') === 'contacts' || (this.body.screen.get('previous_screen') && this.body.screen.get('previous_screen').name === 'contacts' && this.body.screen.get('previous_screen').contacts))
+            || (this.body.screen.get('name') === 'groupchats' || (this.body.screen.get('previous_screen') && this.body.screen.get('previous_screen').name === 'groupchats' && this.body.screen.get('previous_screen').contacts))) {
             left_panel_width = 0;
             right_panel_width = panel_width;
         }
@@ -167,7 +168,8 @@ xabber.once("start", function () {
         }
         this.left_panel.$el.switchClass('hidden', (this.body.screen.get('notifications')  || (this.body.screen.get('previous_screen') && this.body.screen.get('previous_screen').notifications))
             || (this.body.screen.get('calls') || (this.body.screen.get('previous_screen') && this.body.screen.get('previous_screen').calls))
-            || (this.body.screen.get('name') === 'contacts' || (this.body.screen.get('previous_screen') && this.body.screen.get('previous_screen').name === 'contacts' && this.body.screen.get('previous_screen').contacts)));
+            || (this.body.screen.get('name') === 'contacts' || (this.body.screen.get('previous_screen') && this.body.screen.get('previous_screen').name === 'contacts' && this.body.screen.get('previous_screen').contacts))
+            || (this.body.screen.get('name') === 'groupchats' || (this.body.screen.get('previous_screen') && this.body.screen.get('previous_screen').name === 'groupchats' && this.body.screen.get('previous_screen').contacts)));
         if (left_panel_width === 0){
             let fake_left_panel_width = right_panel_width * 0.264;
             if (fake_left_panel_width <= 288)
@@ -188,6 +190,7 @@ xabber.once("start", function () {
             this.right_panel.$el.switchClass('chat-head-wide', right_panel_width > 1000);
         }
         this.contacts_view.$el.switchClass('narrow-panel', right_panel_width < 1000);
+        this.groupchats_view.$el.switchClass('narrow-panel', right_panel_width < 1000);
         this.main_panel.setCustomCss({
             width: panel_width,
         });
@@ -253,6 +256,7 @@ xabber.once("start", function () {
         path_group_invitation = new this.ViewPath('contact.invitation'),
         path_enable_view = new this.ViewPath('omemo_item.account.omemo_enable_view'),
         path_contacts_body = new this.ViewPath('contacts'),
+        path_groupchats_body = new this.ViewPath('groupchats'),
         path_calls_body = new this.ViewPath('calls'),
         path_contact_details_right = new this.ViewPath('contact.details_view_right'),
         path_contact_details_right_encrypted = new this.ViewPath('contact.details_view_right_encrypted'),
@@ -260,6 +264,15 @@ xabber.once("start", function () {
         path_details_participants = new this.ViewPath('contact.details_view.participants');
 
     this.body.addScreen('contacts', {
+        blur_overlay: null,
+        toolbar: null,
+        main: {
+            right: { contacts_body: null },
+            right_contact: {},
+        },
+        roster: null
+    });
+    this.body.addScreen('groupchats', {
         blur_overlay: null,
         toolbar: null,
         main: {
@@ -345,6 +358,11 @@ xabber.once("start", function () {
         if (options.contacts && options.right === 'contacts') {
             return {
                 contacts_body: path_contacts_body,
+            };
+        }
+        if (options.contacts && options.right === 'groupchats') {
+            return {
+                contacts_body: path_groupchats_body,
             };
         }
         if (options.calls && options.right === 'calls') {

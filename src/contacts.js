@@ -1709,6 +1709,8 @@ xabber.ContactDetailsViewRight = xabber.BasicView.extend({
         if (is_contacts) {
             if (!(_.isUndefined(xabber.contacts_view.saved_scroll) || _.isNull(xabber.contacts_view.saved_scroll)))
                 xabber.contacts_view.saved_scroll = null;
+            if (!(_.isUndefined(xabber.groupchats_view.saved_scroll) || _.isNull(xabber.groupchats_view.saved_scroll)))
+                xabber.groupchats_view.saved_scroll = null;
             if (xabber.notifications_view.current_content
                 && !(_.isUndefined(xabber.notifications_view.current_content.saved_scroll) || _.isNull(xabber.notifications_view.current_content.saved_scroll)))
                 xabber.notifications_view.current_content.saved_scroll = null;
@@ -2676,6 +2678,8 @@ xabber.GroupChatDetailsViewRight = xabber.BasicView.extend({
         if (is_contacts) {
             if (!(_.isUndefined(xabber.contacts_view.saved_scroll) || _.isNull(xabber.contacts_view.saved_scroll)))
                 xabber.contacts_view.saved_scroll = null;
+            if (!(_.isUndefined(xabber.groupchats_view.saved_scroll) || _.isNull(xabber.groupchats_view.saved_scroll)))
+                xabber.groupchats_view.saved_scroll = null;
             if (xabber.notifications_view.current_content
                 && !(_.isUndefined(xabber.notifications_view.current_content.saved_scroll) || _.isNull(xabber.notifications_view.current_content.saved_scroll)))
                 xabber.notifications_view.current_content.saved_scroll = null;
@@ -10317,7 +10321,9 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
         "click .btn-decline-invitation": "declineInvitation",
     },
 
-    _initialize: function () {
+    _initialize: function (options) {
+        if (options.is_groupchats)
+            this.is_groupchats = true;
         this._settings = xabber._roster_settings;
         this.contacts = [];
         this.accounts = [];
@@ -10358,6 +10364,9 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
     },
 
     render: function () {
+        this.is_groupchats && this.$('.contacts-filter-main-header').text(xabber.getString("contacts_window__type_filter_groupchat"));
+        this.$('.contacts-type-filter-content .filter-item-wrap.groupchats-filter-item').switchClass('hidden2', !this.is_groupchats);
+        this.$('.contacts-type-filter-content .filter-item-wrap:not(.groupchats-filter-item)').switchClass('hidden2', this.is_groupchats);
         if (_.isUndefined(this.saved_scroll) || _.isNull(this.saved_scroll) ){
             this.clickClearFilter();
         } else {
@@ -10389,11 +10398,17 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
     clickClearFilter: function () {
         this.clearSearch();
         if (xabber.accounts.enabled.length === 1) {
-        this.current_filter_account = xabber.accounts.enabled[0].get('jid');
+            this.current_filter_account = xabber.accounts.enabled[0].get('jid');
         } else {
             this.current_filter_account = 'all';
         }
-        this.current_filter = {};
+        if (this.is_groupchats){
+            this.current_filter = {type: 'groupchat'};
+            this.current_type_subfilter = 'groups';
+        } else {
+            this.current_filter = {type: 'contacts'};
+            this.current_type_subfilter = 'contacts';
+        }
         this.current_filter_groups_list = [];
         this.current_filter_domain = null;
         this.sorting_type = 'name';
@@ -10401,7 +10416,7 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
         this.$el.removeClass('invitations-content');
         this.$(`.tab-active-filters-wrap .tab-filter-item`).remove();
         this.$('.contacts-type-filter-content .filter-item-wrap').removeClass('selected-filter');
-        this.current_type_subfilter = '';
+        this.$(`.contacts-type-filter-content .filter-item-wrap[data-filter="${this.current_filter.type}"]`).addClass('selected-filter');
         this.updateAccountsFilter(true);
         this.updateSubFilter();
         this.processUpdateContacts(true, true);
@@ -11211,15 +11226,24 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
     },
 
     showDefault: function () {
-        this.$('.contact-list-wrap').addClass('hidden');
-        this.$('.roster-sorting-wrap').addClass('hidden');
-        this.$('.contacts-home-wrap').removeClass('hidden');
+        // this.$('.contact-list-wrap').addClass('hidden');
+        // this.$('.roster-sorting-wrap').addClass('hidden');
+        // this.$('.contacts-home-wrap').removeClass('hidden');
 
     },
 
     processUpdateContacts: function (force_scroll, not_debounced) {
         if (!this.current_filter.type){
-            this.showDefault();
+            if (this.is_groupchats){
+                this.current_filter = {type: 'groupchat'};
+                this.current_type_subfilter = 'groups';
+            } else {
+                this.current_filter = {type: 'contacts'};
+                this.current_type_subfilter = 'contacts';
+            }
+            this.$('.contacts-type-filter-content .filter-item-wrap').removeClass('selected-filter');
+            this.$(`.contacts-type-filter-content .filter-item-wrap[data-filter="${this.current_filter.type}"]`).addClass('selected-filter');
+            this.updateSubFilter();
         } else {
             this.$('.contact-list-wrap').removeClass('hidden');
             this.$('.roster-sorting-wrap').removeClass('hidden');
@@ -11699,7 +11723,11 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
             this.$(`.roster-sorting-item[data-sort="${this.sorting_type.replace('-', '')}"]`).addClass('selected-sorting');
             this.$(`.roster-sorting-item.selected-sorting`).switchClass('reverted-sorting', this.sorting_type.includes('-'));
         } else {
-            this.$('.contact-list').append($(`<div class="roster-empty-text">${[xabber.getString("roster_empty")]}</div>`));
+            if (this.is_groupchats){
+                this.$('.contact-list').append($(`<div class="roster-empty-text">${[xabber.getString("roster_empty_groupchats")]}</div>`));
+            } else {
+                this.$('.contact-list').append($(`<div class="roster-empty-text">${[xabber.getString("roster_empty")]}</div>`));
+            }
         }
         let preview_contacts_counter = 0,
             preview_groupchats_counter = 0;
@@ -12424,6 +12452,7 @@ xabber.once("start", function () {
     this.settings.roster = this._roster_settings.attributes;
 
     !this.contacts_view && (this.contacts_view = new xabber.RosterFullScreenView({model: this.accounts}));
+    !this.groupchats_view && (this.groupchats_view = new xabber.RosterFullScreenView({model: this.accounts, is_groupchats: true}));
 
     this.contacts_body = this.right_panel.addChild('contacts_body',
         this.ContactsBodyContainer);

@@ -13,7 +13,7 @@
                         <svg class="filter-icon mdi fill-color-grey-500 mdi-svg-template" data-svgname="account-outline"></svg>
                         <div class="name one-line">{[print(xabber.getString("contacts"))]}<span></span></div>
                     </div>
-                    <div class="filter-item-wrap" data-filter="groupchat">
+                    <div class="filter-item-wrap groupchats-filter-item" data-filter="groupchat">
                         <svg class="filter-icon mdi fill-color-grey-500 mdi-svg-template" data-svgname="group-public-outline"></svg>
                         <div class="name one-line">{[print(xabber.getString("contacts_window__type_filter_groupchat"))]}<span></span></div>
                     </div>
@@ -21,7 +21,7 @@
                         <svg class="filter-icon mdi fill-color-grey-500 mdi mdi-svg-template" data-svgname="vcard-outline"></svg>
                         <div class="name one-line">{[print(xabber.getString("notifications_window__subscriptions_header"))]}<span></span></div>
                     </div>
-                    <div class="filter-item-wrap invitation-filter-item-wrap" data-filter="invitations">
+                    <div class="filter-item-wrap groupchats-filter-item invitation-filter-item-wrap" data-filter="invitations">
                         <svg class="filter-icon mdi fill-color-grey-500 mdi mdi-svg-template" data-svgname="invite-outline"></svg>
                         <div class="name one-line">{[print(xabber.getString("notifications_window__type_filter_invitations"))]}<span></span></div>
                     </div>
@@ -169,24 +169,24 @@
                     <div class="contact-list item-list">
                     </div>
                 </div>
-                <div class="contacts-home-wrap left-panel-list-wrap">
-                    <div class="contacts-home-items-wrap">
-                        <div class="contacts-list-header contacts-home-header filter-item-wrap" data-filter="contacts">{[print(xabber.getString("contacts"))]}<span></span></div>
-                        <div class="contact-item-list contacts-preview-list no-select">
-                        </div>
-                        <div class="btn-add-contact contacts-home-items-button text-main-color-500">
-                            <i class="mdi mdi-24px mdi-account-plus"></i>{[print(xabber.getString("add_contact"))]}
-                        </div>
-                    </div>
-                    <div class="contacts-home-items-wrap">
-                        <div class="contacts-list-header groupchats-home-header filter-item-wrap" data-filter="groupchat">{[print(xabber.getString("contacts_window__type_filter_groupchat"))]}<span></span></div>
-                        <div class="contact-item-list groupchats-preview-list no-select">
-                        </div>
-                        <div class="btn-create-group contacts-home-items-button text-main-color-500">
-                            <i class="mdi mdi-24px mdi-account-multiple-plus"></i>{[print(xabber.getString("create_group"))]}
-                        </div>
-                    </div>
-                </div>
+                <!--<div class="contacts-home-wrap left-panel-list-wrap">-->
+                    <!--<div class="contacts-home-items-wrap">-->
+                        <!--<div class="contacts-list-header contacts-home-header filter-item-wrap" data-filter="contacts">{[print(xabber.getString("contacts"))]}<span></span></div>-->
+                        <!--<div class="contact-item-list contacts-preview-list no-select">-->
+                        <!--</div>-->
+                        <!--<div class="btn-add-contact contacts-home-items-button text-main-color-500">-->
+                            <!--<i class="mdi mdi-24px mdi-account-plus"></i>{[print(xabber.getString("add_contact"))]}-->
+                        <!--</div>-->
+                    <!--</div>-->
+                    <!--<div class="contacts-home-items-wrap">-->
+                        <!--<div class="contacts-list-header groupchats-home-header filter-item-wrap" data-filter="groupchat">{[print(xabber.getString("contacts_window__type_filter_groupchat"))]}<span></span></div>-->
+                        <!--<div class="contact-item-list groupchats-preview-list no-select">-->
+                        <!--</div>-->
+                        <!--<div class="btn-create-group contacts-home-items-button text-main-color-500">-->
+                            <!--<i class="mdi mdi-24px mdi-account-multiple-plus"></i>{[print(xabber.getString("create_group"))]}-->
+                        <!--</div>-->
+                    <!--</div>-->
+                <!--</div>-->
             </div>
         </div>
     </div>

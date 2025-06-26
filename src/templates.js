@@ -340,6 +340,8 @@ import $ from "jquery";
     addSvgTemplate('svg.call-outline');
     addSvgTemplate('svg.unread');
     addSvgTemplate('svg.unread-outline');
+    addSvgTemplate('svg.account-group');
+    addSvgTemplate('svg.account-group-variant');
     addSvgTemplate('svg.call');
     addSvgTemplate('svg.call-hangup');
     addSvgTemplate('svg.call-received');
