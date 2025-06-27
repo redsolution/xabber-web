@@ -23822,6 +23822,13 @@ ul.restrictions-list-content>li {
 .contacts-panel-wrap .contacts-panel-left-side .filter-item-wrap.groupchats-filter-item .badge-icon svg{
     transform: scale(1.5) translate(-17.5%, -17.5%);
 }
+.contacts-panel-wrap .contacts-panel-left-side .filter-item-wrap i.filter-icon{
+    color: #9e9e9e !important;
+    text-align: center;
+}
+.contacts-panel-wrap .contacts-panel-left-side .filter-item-wrap i.filter-icon:before{
+    font-size: 22px;
+}
 .contacts-panel-wrap .contacts-panel-left-side .filter-item-wrap .filter-icon,
 .calls-content-filters .filter-item-wrap .filter-icon,
 .notifications-content-wrap .filter-item-wrap .filter-icon{
