@@ -22,13 +22,17 @@
                         <div class="name one-line">{[print(xabber.getString("notifications_window__subscriptions_header"))]}<span></span></div>
                     </div>
 
-                    <div class="filter-item-wrap groupchats-filter-item" data-filter="groupchat">
-                        <svg class="filter-icon mdi fill-color-grey-500 mdi-svg-template" data-svgname="group-public-outline"></svg>
-                        <div class="name one-line">{[print(xabber.getString("contacts_window__type_filter_groupchat"))]}<span></span></div>
-                    </div>
+                    <!--<div class="filter-item-wrap groupchats-filter-item" data-filter="groupchat">-->
+                        <!--<svg class="filter-icon mdi fill-color-grey-500 mdi-svg-template" data-svgname="group-public-outline"></svg>-->
+                        <!--<div class="name one-line">{[print(xabber.getString("contacts_window__type_filter_groupchat"))]}<span></span></div>-->
+                    <!--</div>-->
                     <div class="filter-item-wrap groupchats-filter-item" data-filter="groupchats-public">
                         <svg class="filter-icon mdi fill-color-grey-500 mdi-svg-template" data-svgname="group-public-outline"></svg>
                         <div class="name one-line">{[print(xabber.getString("groupchat_privacy_type_public"))]}<span></span></div>
+                    </div>
+                    <div class="filter-item-wrap groupchats-filter-item" data-filter="groupchats-private">
+                        <svg class="filter-icon mdi fill-color-grey-500 mdi-svg-template" data-svgname="group-public-outline"></svg>
+                        <div class="name one-line">{[print(xabber.getString("settings__section_notifications__private_chats"))]}<span></span></div>
                     </div>
                     <div class="filter-item-wrap groupchats-filter-item" data-filter="groupchats-incognito">
                         <svg class="filter-icon mdi fill-color-grey-500 mdi-svg-template" data-svgname="group-public-outline"></svg>
@@ -36,7 +40,7 @@
                     </div>
                     <div class="filter-item-wrap groupchats-filter-item invitation-filter-item-wrap" data-filter="invitations">
                         <svg class="filter-icon mdi fill-color-grey-500 mdi mdi-svg-template" data-svgname="invite-outline"></svg>
-                        <div class="name one-line">{[print(xabber.getString("notifications_window__type_filter_invitations"))]}<span></span></div>
+                        <div class="name one-line">{[print(xabber.getString("blocked_tabs_name__invitations"))]}<span></span></div>
                     </div>
                     <!--<div class="filter-item-wrap" data-filter="online">-->
                     <!--<svg class="filter-icon mdi fill-color-grey-500 mdi-svg-template" data-svgname="alert-circle"></svg>-->
@@ -158,7 +162,7 @@
                 </div>
                 <div class="contacts-invitations-wrap">
                     <div class="contacts-invitations-header">
-                        {[print(xabber.getString("notifications_window__type_filter_invitations"))]}
+                        {[print(xabber.getString("blocked_tabs_name__invitations"))]}
                     </div>
                     <div class="contacts-invitations-content-wrap">
                     </div>

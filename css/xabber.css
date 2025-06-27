@@ -6911,6 +6911,9 @@ input[type=text].simple-input-field:hover {
     height: inherit;
     padding: 15px 10px 0 4px;
 }
+.contacts-panel-wrap .contacts-content-wrap.groupchats-content-wrap{
+    padding-top: 4px;
+}
 .contacts-panel-wrap .contact-list-wrap{
     position: relative;
     border: none;
@@ -6980,6 +6983,10 @@ input[type=text].simple-input-field:hover {
     align-items: flex-start;
     position: relative;
 }
+.contacts-panel-wrap .contact-list-wrap .roster-contact-item-wrap.groupchat-item-wrap{
+    align-items: center;
+    margin-bottom: 8px;
+}
 .contacts-panel-wrap .contact-list-wrap .roster-contact-item-wrap:hover{
     background: #FAFAFA;
 }
@@ -7045,7 +7052,7 @@ input[type=text].simple-input-field:hover {
 }
 .contacts-panel-wrap .contact-list-wrap .roster-contact-item-wrap.groupchat-item-wrap .contact-name-wrap .contact-name{
     width: calc(100% - 32px);
-    margin-top: 6px;
+    margin-top: 0;
     font-size: 18px;
 }
 .contacts-panel-wrap .contact-list-wrap .roster-contact-item-wrap.groupchat-item-wrap .contact-name-wrap .groupchat-item-description{

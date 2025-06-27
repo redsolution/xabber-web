@@ -360,11 +360,6 @@ xabber.once("start", function () {
                 contacts_body: path_contacts_body,
             };
         }
-        if (options.contacts && options.right === 'groupchats') {
-            return {
-                contacts_body: path_groupchats_body,
-            };
-        }
         if (options.calls && options.right === 'calls') {
             return {
                 calls_body: path_calls_body,

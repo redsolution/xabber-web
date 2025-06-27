@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.4.128","version_description":"changed contacts view filtering"}'
+'{"version_number":"2.4.129","version_description":"contacts tab design, fixes and changes in filtration and counting"}'
 )});
