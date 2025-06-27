@@ -10417,7 +10417,7 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
         this.current_filter_domain = null;
         this.sorting_type = 'name';
         this.$el.removeClass('subscription-content');
-        this.$el.removeClass('invitations-content');
+        this.$el.removeClass('invitation-content');
         this.$(`.tab-active-filters-wrap .tab-filter-item`).remove();
         this.$('.contacts-type-filter-content .filter-item-wrap').removeClass('selected-filter');
         this.$(`.contacts-type-filter-content .filter-item-wrap[data-filter="${this.current_filter.type}"]`).addClass('selected-filter');
@@ -10790,7 +10790,7 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
                 if (this.current_filter.type && this.current_filter.type !== 'subscription' && !custom_count_value){
                     custom_count_value = 0
                 }
-                if (!custom_count_value && !(this.current_filter.type === 'groupchats-public' || this.current_filter.type === 'groupchats-incognito' || this.current_filter.type === 'groupchats-private'))
+                if (!custom_count_value && !(this.current_filter.type === 'groupchat' || this.current_filter.type === 'groupchats-public' || this.current_filter.type === 'groupchats-incognito' || this.current_filter.type === 'groupchats-private' || this.current_filter.type === 'invitations'))
                     return;
                 this.$('.contacts-group-filter-content').append(this.renderGroupFilterItem(group, custom_count_value));
             });
@@ -10835,7 +10835,7 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
                                     $group.find('span').text(initial_count + group.get('counter').all);
                             }
                         } else {
-                            if (!custom_count_value && !(this.current_filter.type === 'groupchats-public' || this.current_filter.type === 'groupchats-incognito' || this.current_filter.type === 'groupchats-private'))
+                            if (!custom_count_value && !(this.current_filter.type === 'groupchats-public' || this.current_filter.type === 'groupchats-incognito' || this.current_filter.type === 'groupchats-private' || this.current_filter.type === 'invitations'))
                                 return;
                             this.$('.contacts-group-filter-content').append(this.renderGroupFilterItem(group, custom_count_value));
                         }
@@ -10901,21 +10901,21 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
         if (normal_interaction_list.includes(filter_type)) {
             this.$('.contact-list-wrap').removeClass('hidden');
             this.$('.notification-subscriptions-wrap').addClass('hidden');
-            filter_type !== 'contacts' && filter_type !== 'groupchat' && $(templates.tab_filter_item_main_color({
-                value: filter_type,
-                type: filter_type,
-                text: xabber.getString(tab_filter_text[filter_type])
-            })).insertBefore(this.$('.search-form'));
+            // filter_type !== 'contacts' && filter_type !== 'groupchat' && $(templates.tab_filter_item_main_color({
+            //     value: filter_type,
+            //     type: filter_type,
+            //     text: xabber.getString(tab_filter_text[filter_type])
+            // })).insertBefore(this.$('.search-form'));
             this.current_filter = { type: filter_type };
             this.$(`.contacts-type-filter-content .filter-item-wrap[data-filter="${filter_type}"]`).addClass('selected-filter');
         } else if (filter_type === 'subscription'){
             this.current_filter = { type: filter_type };
             this.$el.addClass('subscription-content');
-            $(templates.tab_filter_item_main_color({
-                value: 'subscriptions',
-                type: 'subscriptions',
-                text: xabber.getString(`notifications_window__type_filter_subscription`)
-            })).insertBefore(this.$('.search-form'));
+            // $(templates.tab_filter_item_main_color({
+            //     value: 'subscriptions',
+            //     type: 'subscriptions',
+            //     text: xabber.getString(`notifications_window__type_filter_subscription`)
+            // })).insertBefore(this.$('.search-form'));
             this.$(`.contacts-type-filter-content .filter-item-wrap[data-filter="${filter_type}"]`).addClass('selected-filter');
             // this.current_type_subfilter = 'subscription';
             this.$('.notification-subscription-item').removeClass('hidden');
@@ -10925,11 +10925,11 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
             this.current_filter = { type: filter_type };
             this.$el.addClass('invitation-content');
             this.$('.notification-subscriptions-wrap').addClass('hidden');
-            $(templates.tab_filter_item_main_color({
-                value: 'invitations',
-                type: 'invitations',
-                text: xabber.getString(`blocked_tabs_name__invitations`)
-            })).insertBefore(this.$('.search-form'));
+            // $(templates.tab_filter_item_main_color({
+            //     value: 'invitations',
+            //     type: 'invitations',
+            //     text: xabber.getString(`blocked_tabs_name__invitations`)
+            // })).insertBefore(this.$('.search-form'));
             this.$(`.contacts-type-filter-content .filter-item-wrap[data-filter="${filter_type}"]`).addClass('selected-filter');
             // this.current_type_subfilter = 'invitations';
             this.$('.contacts-invitations-item').removeClass('hidden');
@@ -11166,6 +11166,7 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
         $item.remove();
 
         this.contacts = [];
+        this.updateGroupsFilter();
         this.processUpdateContacts(true, true);
     },
 

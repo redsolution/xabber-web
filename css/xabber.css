@@ -6985,7 +6985,7 @@ input[type=text].simple-input-field:hover {
 }
 .contacts-panel-wrap .contact-list-wrap .roster-contact-item-wrap.groupchat-item-wrap{
     align-items: center;
-    margin-bottom: 8px;
+    margin-bottom: 4px;
 }
 .contacts-panel-wrap .contact-list-wrap .roster-contact-item-wrap:hover{
     background: #FAFAFA;
@@ -7152,6 +7152,7 @@ input[type=text].simple-input-field:hover {
     justify-content: flex-start;
     min-height: 56px;
     position: relative;
+    margin-bottom: 4px;
 }
 .contacts-invitations-wrap .contacts-invitations-item:hover{
     background: #fafafa;
@@ -7159,7 +7160,7 @@ input[type=text].simple-input-field:hover {
 .contacts-invitations-wrap .avatar-wrap{
     height: 48px;
     margin-left: 24px;
-    margin-top: 6px;
+    margin-top: 9px;
     margin-bottom: 6px;
     position: relative;
     width: 48px;
@@ -7384,6 +7385,7 @@ input[type=text].simple-input-field:hover {
 .contacts-panel-wrap .contact-list-wrap .roster-contact-item-wrap .btn-edit{
     position: absolute;
     right: 16px;
+    height: 24px;
     top: 50%;
     transform: translate(0, -50%);
     display:none;
@@ -7416,6 +7418,9 @@ input[type=text].simple-input-field:hover {
     flex-wrap: nowrap;
     width: 25%;
     margin: 16px 0 8px 16px;
+}
+.contacts-panel-wrap .contact-list-wrap .roster-contact-item-wrap.groupchat-item-wrap .contact-groups-wrap{
+    margin-right: 48px;
 }
 .contacts-panel-wrap .contact-list-wrap .roster-contact-item-wrap .contact-expanded-groups-wrap .group,
 .contacts-panel-wrap .contact-list-wrap .roster-contact-item-wrap .contact-groups-wrap .group{
@@ -23813,6 +23818,9 @@ ul.restrictions-list-content>li {
     padding: 0px 5px;
     text-align: center;
     letter-spacing: .03rem;
+}
+.contacts-panel-wrap .contacts-panel-left-side .filter-item-wrap.groupchats-filter-item .badge-icon svg{
+    transform: scale(1.5) translate(-17.5%, -17.5%);
 }
 .contacts-panel-wrap .contacts-panel-left-side .filter-item-wrap .filter-icon,
 .calls-content-filters .filter-item-wrap .filter-icon,
