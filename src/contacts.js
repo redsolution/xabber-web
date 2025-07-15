@@ -6598,6 +6598,38 @@ xabber.GroupChatSettings = Backbone.ModelWithStorage.extend({
     }
 });
 
+xabber.CounterChangesLogging = Backbone.ModelWithStorage.extend({
+
+    defaults: () => {
+        return {
+            counters_list: []
+        }
+    },
+
+    updateCountersList: function (account) {
+        let counters_list = _.clone(this.get('counters_list'));
+
+        let stack;
+
+        try {
+            throw new Error('');
+        }
+        catch (error) {
+            stack = error.stack || '';
+        }
+
+        counters_list.push({
+            counter: account && account.get('hotp_counter'),
+            time: new Date(),
+            account_jid: account && account.get('jid'),
+            account_device_id: account && account.get('x_token') && account.get('x_token').token_uid,
+            expire_time: account && account.get('x_token') && account.get('x_token').expire && new Date(account.get('x_token').expire * 1000),
+            trace: stack,
+        });
+        this.save('counters_list', counters_list);
+    },
+});
+
 xabber.GroupchatInvitationView = xabber.BasicView.extend({
     className: 'details-panel invitation-view',
     template: templates.group_chats.invitation,
@@ -12433,6 +12465,11 @@ xabber.Account.addInitPlugin(function () {
     this.groupchat_settings = new xabber.GroupChatSettings({id: 'group-chat-settings'}, {
         account: this,
         storage_name: xabber.getStorageName() + '-group-chat-settings-' + this.get('jid'),
+        fetch: 'after'
+    });
+    this.counter_changes_logging = new xabber.CounterChangesLogging({id: 'counter-changes'}, {
+        account: this,
+        storage_name: xabber.getStorageName() + '-counter-changes-' + this.get('jid'),
         fetch: 'after'
     });
     this.groups = new xabber.Groups(null, {account: this});

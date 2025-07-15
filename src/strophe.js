@@ -730,6 +730,7 @@ _.extend(Strophe.Connection.prototype, {
                 this.account.save({
                     hotp_counter: this.counter,
                 });
+                this.account.counter_changes_logging.updateCountersList(this.account);
             }
             break;
         }
@@ -811,6 +812,7 @@ _.extend(Strophe.Connection.prototype, {
                     this.account.save({
                         hotp_counter: this.counter,
                     });
+                    this.account.counter_changes_logging.updateCountersList(this.account);
                 }
                 return true;
             }, (err)=> {
@@ -886,6 +888,7 @@ _.extend(Strophe.Connection.prototype, {
                             hotp_counter: this.counter,
                             password: null,
                         });
+                        this.account.counter_changes_logging.updateCountersList(this.account);
                     }
                 }, () => {
                     this._send_auth_bind();

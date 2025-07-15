@@ -76,10 +76,12 @@ xabber.Account = Backbone.Model.extend({
             this.conn_manager = new Strophe.ConnectionManager(this.CONNECTION_URL, {'x-token': true});
             this.connection = this.conn_manager.connection;
             this.get('x_token') && (this.connection.x_token = this.get('x_token'));
-            if (this.connection.x_token && this.connection.x_token.counter && !this.get('hotp_counter'))
+            if (this.connection.x_token && this.connection.x_token.counter && !this.get('hotp_counter')) {
                 this.save({
                     hotp_counter: this.connection.x_token.counter,
                 });
+                this.counter_changes_logging.updateCountersList(this);
+            }
             this.get('hotp_counter') && (this.connection.counter = this.get('hotp_counter'));
             this.on("destroy", this.onDestroy, this);
             this._added_pres_handlers = [];
@@ -509,6 +511,7 @@ xabber.Account = Backbone.Model.extend({
                         x_token: this.connection.x_token,
                         hotp_counter: this.connection.counter,
                     });
+                    this.counter_changes_logging.updateCountersList(this);
                     this.conn_manager.auth_type = 'x-token';
                 }
 
@@ -570,6 +573,7 @@ xabber.Account = Backbone.Model.extend({
                         x_token: this.connection.x_token,
                         hotp_counter: this.connection.counter,
                     });
+                    this.counter_changes_logging.updateCountersList(this);
                 }
                 this.createFastConnection();
                 this.connection.connect_callback = this.connectionCallback.bind(this);
