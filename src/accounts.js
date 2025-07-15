@@ -3490,10 +3490,13 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
                 event.origin
             );
         }
-        if (event.data && event.data.type && event.data.type === 'ACCOUNT_DELETED') {
+        if (event.data && event.data.type && (event.data.type === 'ACCOUNT_DELETED' || event.data.type === 'ACCOUNT_UNAUTHORIZED')) {
             this.backToMenu();
             this.model.set('service_token', null);
             this.model.set('service_token_expires', null);
+            if (event.data.type === 'ACCOUNT_UNAUTHORIZED'){
+                this.$('.btn-manage-xabber-account.settings-tab').click();
+            }
         }
         if (event.data && event.data.type && event.data.type === 'BREADCRUMBS' && event.data.breadcrumbs) {
             let breadcrumbs = event.data.breadcrumbs;
