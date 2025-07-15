@@ -1603,83 +1603,99 @@ xabber.ContactDetailsViewRight = xabber.BasicView.extend({
     },
 
     _initialize: function (options) {
-        this.encrypted = options.encrypted;
-        this.ps_container = this.$('.panel-content-wrap');
-        this.account = this.model.account;
-        this.chat = this.account.chats.getChat(this.model, options.encrypted && 'encrypted');
-        this.name_field = new xabber.ContactNameWidget({
-            el: this.$('.name-wrap')[0],
-            model: this.model
-        });
-        this.name_field.$('.contact-name-input').prop('disabled', true);
-        if (!this.encrypted){
-            this.contact_edit_view = this.addChild('edit', xabber.ContactEditView,
-                {model: this.model, el: this.$('.edit-block-wrap')[0]});
+        if (options.saved) {
+            this.saved = true;
+            this.ps_container = this.$('.panel-content-wrap');
+            this.chat = options.chat;
+            this.account = this.chat.account;
+            this.contact_searched_messages_view = this.addChild('search', xabber.ContactSearchedMessagesView,
+                {model: this.chat, is_saved: true, query_text: '1', el: this.$('.search-messages-block-wrap')[0]});
+            this.updateColorScheme();
+            this.listenTo(this.account.settings, 'change:color', this.updateColorScheme);
+
+        } else {
+            this.encrypted = options.encrypted;
+            this.ps_container = this.$('.panel-content-wrap');
+            this.account = this.model.account;
+            this.chat = this.account.chats.getChat(this.model, options.encrypted && 'encrypted');
+            this.name_field = new xabber.ContactNameWidget({
+                el: this.$('.name-wrap')[0],
+                model: this.model
+            });
+            this.name_field.$('.contact-name-input').prop('disabled', true);
+            if (!this.encrypted){
+                this.contact_edit_view = this.addChild('edit', xabber.ContactEditView,
+                    {model: this.model, el: this.$('.edit-block-wrap')[0]});
+            }
+            this.contact_searched_messages_view = this.addChild('search', xabber.ContactSearchedMessagesView,
+                {model: this.account.chats.getChat(this.model), query_text: '1', el: this.$('.search-messages-block-wrap')[0]});
+            this.vcard_view = this.addChild('vcard', xabber.ContactRightVCardView,
+                {model: this.model, el: this.$('.vcard')[0]});
+            this.edit_groups_view = this.addChild('groups',
+                xabber.ContactEditGroupsView, {el: this.$('.groups-block-wrap')[0]});
+            this.updateName();
+            this.updateStatus();
+            this.updateAvatar();
+            this.updateButtons();
+            this.updateColorScheme();
+            this.ps_container.on("ps-scroll-y", this.onScroll.bind(this));
+            this.listenTo(this.account.settings, 'change:color', this.updateColorScheme);
+            this.listenTo(this.model, 'change', this.update);
+            this.listenTo(this.chat, 'change:muted', this.updateNotifications);
+            this.listenTo(xabber, 'change:video', this.updateJingleButtons);
+            this.listenTo(xabber, 'change:audio', this.updateJingleButtons);
+            this.listenTo(xabber, 'update_layout', this.updateIndicator);
         }
-        this.contact_searched_messages_view = this.addChild('search', xabber.ContactSearchedMessagesView,
-            {model: this.account.chats.getChat(this.model), query_text: '1', el: this.$('.search-messages-block-wrap')[0]});
-        this.vcard_view = this.addChild('vcard', xabber.ContactRightVCardView,
-            {model: this.model, el: this.$('.vcard')[0]});
-        this.edit_groups_view = this.addChild('groups',
-            xabber.ContactEditGroupsView, {el: this.$('.groups-block-wrap')[0]});
-        this.updateName();
-        this.updateStatus();
-        this.updateAvatar();
-        this.updateButtons();
-        this.updateColorScheme();
-        this.ps_container.on("ps-scroll-y", this.onScroll.bind(this));
-        this.listenTo(this.account.settings, 'change:color', this.updateColorScheme);
-        this.listenTo(this.model, 'change', this.update);
-        this.listenTo(this.chat, 'change:muted', this.updateNotifications);
-        this.listenTo(xabber, 'change:video', this.updateJingleButtons);
-        this.listenTo(xabber, 'change:audio', this.updateJingleButtons);
-        this.listenTo(xabber, 'update_layout', this.updateIndicator);
     },
 
     render: function (options) {
-        if (!this.model.get('vcard_updated')) {
-            this.vcard_view.refresh();
-        }
-        if (!this.model.get('saved_search_panel')) {
-            if (this.ps_container.length) {
-                this.ps_container.perfectScrollbar(
-                    _.extend(this.ps_settings || {}, xabber.ps_settings)
-                );
+        if (this.saved) {
+            this.$('.qr-code-content-wrap').addClass('hidden');
+        } else {
+            if (!this.model.get('vcard_updated')) {
+                this.vcard_view.refresh();
             }
+            if (!this.model.get('saved_search_panel')) {
+                if (this.ps_container.length) {
+                    this.ps_container.perfectScrollbar(
+                        _.extend(this.ps_settings || {}, xabber.ps_settings)
+                    );
+                }
+            }
+            else {
+                this.ps_container.perfectScrollbar('destroy');
+            }
+            this.$('.btn-mute').dropdown({
+                inDuration: 100,
+                outDuration: 100,
+                hover: false
+            });
+            if (this.encrypted){
+                this.$('.btn-search-messages').remove();
+                this.$('.btn-edit').remove();
+                this.$('.btn-qr-code').remove()
+            }
+            this.$('.btn-notifications').dropdown({
+                inDuration: 100,
+                outDuration: 100,
+                hover: false, // Activate on hover
+            });
+            this.updateChilds();
+            this.updateSubscriptions();
+            this.updateJingleButtons();
+            this.updateStatusMsg();
+            this.updateName();
+            this.updateNotifications();
+            this.updateButtons();
+            this.hideQRCode();
+            this.updateAvatar();
+            this.updateList('image');
+            if (options && options.right_contact_modal)
+                this.makeModal();
+            this.onScroll();
+            this.model.resources.models.forEach((resource) => {this.model.resources.requestInfo(resource)});
+            $(window).bind("keydown.contact_panel", this.keydownHandler.bind(this));
         }
-        else {
-            this.ps_container.perfectScrollbar('destroy');
-        }
-        this.$('.btn-mute').dropdown({
-            inDuration: 100,
-            outDuration: 100,
-            hover: false
-        });
-        if (this.encrypted){
-            this.$('.btn-search-messages').remove();
-            this.$('.btn-edit').remove();
-            this.$('.btn-qr-code').remove()
-        }
-        this.$('.btn-notifications').dropdown({
-            inDuration: 100,
-            outDuration: 100,
-            hover: false, // Activate on hover
-        });
-        this.updateChilds();
-        this.updateSubscriptions();
-        this.updateJingleButtons();
-        this.updateStatusMsg();
-        this.updateName();
-        this.updateNotifications();
-        this.updateButtons();
-        this.hideQRCode();
-        this.updateAvatar();
-        this.updateList('image');
-        if (options && options.right_contact_modal)
-            this.makeModal();
-        this.onScroll();
-        this.model.resources.models.forEach((resource) => {this.model.resources.requestInfo(resource)});
-        $(window).bind("keydown.contact_panel", this.keydownHandler.bind(this));
     },
 
     updateChilds: function () {
@@ -1786,7 +1802,7 @@ xabber.ContactDetailsViewRight = xabber.BasicView.extend({
     },
 
     onChangedVisibility: function () {
-        this.model.set('display', this.isVisible());
+        this.model && this.model.set('display', this.isVisible());
     },
 
     updateJingleButtons: function () {
@@ -1817,7 +1833,7 @@ xabber.ContactDetailsViewRight = xabber.BasicView.extend({
     },
 
     onScroll: function () {
-        if (this.model.get('saved_search_panel') && !this.model.get('search_hidden')){
+        if (this.model && this.model.get('saved_search_panel') && !this.model.get('search_hidden')){
             this.ps_container.perfectScrollbar('destroy');
             return true;
         }
@@ -2032,9 +2048,9 @@ xabber.ContactDetailsViewRight = xabber.BasicView.extend({
         if (this.ps_container.length) {
             this.ps_container.perfectScrollbar('destroy');
         }
-        this.model.set('search_hidden', false);
+        this.model && this.model.set('search_hidden', false);
         this.makeStatic();
-        this.$('.search-wrap').hideIf(this.model.get('search_hidden'));
+        this.$('.search-wrap').hideIf(this.model && this.model.get('search_hidden'));
         if (is_modal && !is_chat_head && xabber.right_contact_panel.$el.css('z-index') === '0'){
             xabber.right_contact_panel.setCustomCss({'z-index' : 499});
             this.modal_z_index_timeout = setTimeout(() => {

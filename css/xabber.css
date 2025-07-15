@@ -10317,7 +10317,7 @@ input[type=text].simple-input-field:hover {
     position: fixed;
     left: 50%;
     transform: translate(-50%, 0);
-    z-index: 1000;
+    z-index: 400;
     background: #fff;
 }
 
@@ -18406,6 +18406,11 @@ input[type=range].voice-message-volume:focus {
 .details-panel-right .search-wrap .chat-message .msg-wrap{
     height: 100%;
     padding: 0 0 0 72px;
+}
+
+.details-panel-right .search-wrap .chat-message .msg-wrap .chat-msg-author{
+    max-width: 100%;
+    margin-right: 80px;
 }
 
 .details-panel-right .search-wrap .chat-message .chat-msg-content{

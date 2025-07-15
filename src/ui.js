@@ -259,6 +259,7 @@ xabber.once("start", function () {
         path_groupchats_body = new this.ViewPath('groupchats'),
         path_calls_body = new this.ViewPath('calls'),
         path_contact_details_right = new this.ViewPath('contact.details_view_right'),
+        path_saved_contact_details_right = new this.ViewPath('chat_item.model.details_view_right'),
         path_contact_details_right_encrypted = new this.ViewPath('contact.details_view_right_encrypted'),
         path_participant_messages = new this.ViewPath('model.messages_view'),
         path_details_participants = new this.ViewPath('contact.details_view.participants');
@@ -395,6 +396,9 @@ xabber.once("start", function () {
     this.right_contact_panel.patchTree = function (tree, options) {
         if (options.right_contact === undefined)
             return;
+        if (options.right_contact === 'contact_details_saved') {
+            return { details: path_saved_contact_details_right };
+        }
         if (options.right_contact === 'contact_details') {
             return { details: path_contact_details_right };
         }
