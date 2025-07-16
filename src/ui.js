@@ -103,11 +103,13 @@ xabber.once("start", function () {
             };
             if ((right_panel_width - 384) < 128) {
                 right_contact_panel_width = right_panel_width;
-                this.right_contact_panel.$el.removeClass('background-click')
+                this.right_contact_panel.$el.removeClass('background-click');
+                this.right_contact_panel.$el.addClass('narrow-right-panel');
             }
             else {
                 right_contact_panel_width = 384;
-                this.right_contact_panel.$el.addClass('background-click')
+                this.right_contact_panel.$el.addClass('background-click');
+                this.right_contact_panel.$el.removeClass('narrow-right-panel');
             }
         }
         else {
@@ -115,7 +117,8 @@ xabber.once("start", function () {
                 position : 'static',
                 'z-index' : 0,
             };
-            this.right_contact_panel.$el.removeClass('background-click')
+            this.right_contact_panel.$el.removeClass('background-click');
+            this.right_contact_panel.$el.removeClass('narrow-right-panel');
 
         }
 

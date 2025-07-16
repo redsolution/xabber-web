@@ -1049,6 +1049,41 @@ xabber.Account = Backbone.Model.extend({
                 return "";
         },
 
+        getMessageByStanzaIdInSavedChat: function (stanza_id, callback) {
+            let queryid = uuid(),
+                account = this,
+                is_fast = account.fast_connection && !account.fast_connection.disconnecting && account.fast_connection.authenticated && account.fast_connection.connected && account.get('status') !== 'offline',
+                conn = is_fast ? account.fast_connection : account.connection,
+                chat = account.chats.getSavedChat(),
+                receiver = chat.get('jid'),
+                iq = $iq({type: 'set'})
+                    .c('query', {xmlns: Strophe.NS.MAM, queryid: queryid})
+                    .c('x', {xmlns: Strophe.NS.DATAFORM, type: 'submit'})
+                    .c('field', {'var': 'FORM_TYPE', type: 'hidden'})
+                    .c('value').t(Strophe.NS.MAM).up().up()
+                    .c('field', {'var': 'ids'})
+                    .c('value').t(stanza_id).up().up()
+                    .c('field', {'var': 'with'})
+                    .c('value').t(chat.get('jid')).up().up();
+            if (this.server_features.get(Strophe.NS.ARCHIVE))    {
+                iq.c('field', {'var': `conversation-type`});
+                let sync_type = chat.get('sync_type') ? chat.get('sync_type') : chat.getConversationType(chat);
+                iq.c('value').t(sync_type).up().up();
+            }
+            let handler = conn.addHandler((message) => {
+                let $msg = $(message);
+                if ($msg.find('result').attr('queryid') === queryid)
+                    callback && callback($msg);
+                return true;
+            }, Strophe.NS.MAM, null, null, null, null, {query_id: queryid} );
+            this.sendIQFast(iq, () => {
+                    this.connection.deleteHandler(handler);
+                }, () => {
+                    this.connection.deleteHandler(handler);
+                }
+            );
+        },
+
         vcardPhotoUpdated: function (photo) {
             let stanza = $pres().c('x', {xmlns: Strophe.NS.VCARD_UPDATE}).c('photo').t(this.getAvatarHash(photo)).up().up();
             return this.sendPres(stanza);

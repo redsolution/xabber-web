@@ -1063,7 +1063,7 @@ xabber.Contact = Backbone.Model.extend({
         if (!this.details_view_right_encrypted && options.encrypted)
             this.details_view_right_encrypted = new xabber.ContactDetailsViewRight({model: this, encrypted: true});
         screen || (screen = 'contacts');
-        if (xabber.body.screen.get('right_contact') && options.type !== 'search' && options.type !== 'members' && options.type !== 'participant' && !options.right_saved) {
+        if (xabber.body.screen.get('right_contact') && options.type !== 'members' && options.type !== 'participant' && !options.right_saved) {
             this.set('search_hidden', true);
             let attrs = {right_contact: '', contact: this};
             (screen === 'contacts') && (attrs.chat_item = null);
@@ -1107,7 +1107,7 @@ xabber.Contact = Backbone.Model.extend({
                 xabber.body.setScreen(screen, attrs);
             }
             if (this.details_view_right && this.details_view_right.contact_searched_messages_view){
-                this.details_view_right.contact_searched_messages_view.hideSearch();
+                this.details_view_right.contact_searched_messages_view.hideSearch(null, true);
                 if (options.type === 'search') {
                     this.details_view_right.contact_searched_messages_view.clearSearch();
                     this.details_view_right.showSearchMessages(null, true);
@@ -1777,7 +1777,10 @@ xabber.ContactDetailsViewRight = xabber.BasicView.extend({
     },
 
     closeDetails: function () {
-        this.model.showDetailsRight(xabber.body.screen.get('name'));
+        if (this.saved){
+            this.chat.trigger('open', {clear_search: true, right_force_close: true});
+        } else
+            this.model.showDetailsRight(xabber.body.screen.get('name'));
     },
 
     updateColorScheme: function () {

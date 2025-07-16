@@ -1780,7 +1780,8 @@ xabber.JingleMessage = Backbone.Model.extend({
                 return item.get('origin_id') === unique_id;
             });
             if (!message) {
-                this.contact.getMessageByStanzaId(unique_id, ($message) => {
+                let getMessageFunc = this.contact ? this.contact.getMessageByStanzaId.bind(this.contact) : this.account.getMessageByStanzaIdInSavedChat.bind(this.account);
+                    getMessageFunc(unique_id, ($message) => {
                     if (options.encrypted && this.account.omemo) {
                         let omemo_dfd = new $.Deferred;
                         omemo_dfd.done(($msg, msg_options) => {
@@ -1799,7 +1800,9 @@ xabber.JingleMessage = Backbone.Model.extend({
                         }, omemo_dfd);
 
                     } else {
-                        this.account.chats.makeMessageObject($msg[0], msg_options).then((msg)=>{
+                        this.account.chats.makeMessageObject($message, {
+                            searched_message: true,
+                        }).then((msg)=>{
                             message = msg;
                             dfd.resolve();
                         });
@@ -3131,6 +3134,8 @@ xabber.ChatItemView = xabber.BasicView.extend({
           this.model = options.model;
           this.contact = options.contact;
           this.is_saved = options.is_saved;
+          if (this.is_saved)
+              this.parent.model = this.model;
           this.account = this.model.account;
           this.$search_form = this.$('.search-form-header');
           this.timer = null;
@@ -3150,16 +3155,28 @@ xabber.ChatItemView = xabber.BasicView.extend({
           if (this.searched_messages)
               this.account.searched_messages.add(this.searched_messages.toJSON(), {silent : true});
           this.listenTo(this.account.searched_messages, 'add', this.addMessage);
-          if (this.parent.model && this.parent.model.get('saved_search_panel')) {
-              this.$el.html(this.parent.model.get('saved_search_panel'));
-              this.model.set('saved_search_panel', undefined);
-          }
-          else {
-              this.emptyChat();
-              this.$el.html(this.template());
-              this.emptyChat();
-              if (this.parent.model && this.parent.model.get('search_hidden'))
-                  this.hideSearch();
+          if (this.is_saved){
+              if (this.model && this.model.get('saved_search_panel')) {
+                  this.$el.html(this.model.get('saved_search_panel'));
+                  this.model.set('saved_search_panel', undefined);
+              }
+              else {
+                  this.emptyChat();
+                  this.$el.html(this.template());
+                  this.emptyChat();
+              }
+          } else {
+              if (this.parent.model && this.parent.model.get('saved_search_panel')) {
+                  this.$el.html(this.parent.model.get('saved_search_panel'));
+                  this.model.set('saved_search_panel', undefined);
+              }
+              else {
+                  this.emptyChat();
+                  this.$el.html(this.template());
+                  this.emptyChat();
+                  if (this.parent.model && this.parent.model.get('search_hidden'))
+                      this.hideSearch();
+              }
           }
           this.ps_container = this.$('.search-messages-content-wrap');
           if (this.ps_container.length) {
@@ -3170,8 +3187,13 @@ xabber.ChatItemView = xabber.BasicView.extend({
           this.$search_form = this.$('.search-form-header');
           if (this.parent.model && this.parent.model.get('saved_search_panel')) {
               this.$search_form.find('input').focus();
-              if (this.parent.model && this.parent.model.get('saved_search_panel_scroll'))
-                  this.scrollTo(this.parent.model.get('saved_search_panel_scroll'));
+              if (this.is_saved){
+                  if (this.model && this.model.get('saved_search_panel_scroll'))
+                      this.scrollTo(this.model.get('saved_search_panel_scroll'));
+              } else {
+                  if (this.parent.model && this.parent.model.get('saved_search_panel_scroll'))
+                      this.scrollTo(this.parent.model.get('saved_search_panel_scroll'));
+              }
           }
       },
 
@@ -3300,10 +3322,18 @@ xabber.ChatItemView = xabber.BasicView.extend({
           }
       },
 
-      hideSearch: function (ev) {
+      hideSearch: function (ev, force_open) {
           if (this.is_saved){
-              this.emptyChat();
-              this.model.trigger('open', {clear_search: true, right_force_close: true});
+              if (xabber.body.screen.get('right') === 'message_context' && !force_open){
+                  xabber.body.setScreen('all-chats', {}, {
+                      right_contact_save: false,
+                      right_force_close: true,
+                      clear_search: true,
+                      open_by_click: true
+                  });
+              } else {
+                  this.model.trigger('open', {clear_search: true, right_force_close: true, open_by_click: true});
+              }
           } else {
               this.parent.model && this.parent.model.set('search_hidden', true);
               this.$('.search-input').val('');
@@ -3315,16 +3345,30 @@ xabber.ChatItemView = xabber.BasicView.extend({
               }
               this.parent.$('.panel-background-clickable').removeClass('fading-search-background');
               this.$('.search-wrap').hideIf(this.parent.model && this.parent.model.get('search_hidden'));
-              ev && this.parent.openChat();
+
+              if (xabber.body.screen.get('right') === 'message_context' && !force_open){
+                  xabber.body.setScreen('all-chats', {}, {
+                      right_contact_save: false,
+                      right_force_close: true,
+                      clear_search: true
+                  });
+              } else {
+                  ev && this.parent.openChat();
+              }
           }
       },
 
       onClickMessage: function (ev) {
           let $elem = $(ev.target),
               $msg = $elem.closest('.chat-message');
+          if (xabber.right_contact_panel.$el.hasClass('narrow-right-panel') || xabber.right_contact_panel.$el.hasClass('background-click')){
+              this.hideSearch(true);
+          }
           this.parent.model && this.parent.model.set('saved_search_panel_scroll', this.ps_container[0].scrollTop);
+          this.is_saved && this.model && this.model.set('saved_search_panel_scroll', this.ps_container[0].scrollTop);
           this.ps_container.perfectScrollbar('destroy');
           this.parent.model && this.parent.model.set('saved_search_panel', this.$el.clone());
+          this.is_saved && this.model && this.model.set('saved_search_panel', this.$el.clone());
           this.model.getMessageContext($msg.data('uniqueid'), {searched_messages: true});
       }
   });
@@ -10573,7 +10617,16 @@ xabber.InvitationPanelView = xabber.SearchView.extend({
           if (!this.model.details_view_right)
               this.model.details_view_right = new xabber.ContactDetailsViewRight({chat: chat, saved: true});
           if (this.model.details_view_right.isVisible()){
-              chat.trigger('open', {clear_search: true, right_force_close: true});
+              if (xabber.body.screen.get('right') === 'message_context'){
+                  xabber.body.setScreen('all-chats', {}, {
+                      right_contact_save: false,
+                      right_force_close: true,
+                      clear_search: true,
+                      open_by_click: true
+                  });
+              } else {
+                  chat.trigger('open', {clear_search: true, right_force_close: true, open_by_click: true});
+              }
               return;
           }
           let attrs = {
