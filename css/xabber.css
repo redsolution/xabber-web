@@ -24570,14 +24570,14 @@ ul.restrictions-list-content>li {
 }
 /* chat bottom active session */
 .chat-incoming-session-notification:not(.hidden) {
-    bottom: 100%;
+    top: 0;
     display: block;
     height: 176px;
     max-width: 768px;
     padding: 6px 90px 0 64px;
-    position: relative;
+    position: absolute;
     left: 50%;
-    transform: translate(-50%, 0);
+    transform: translate(-50%);
     width: 100%;
     z-index: 4;
 }

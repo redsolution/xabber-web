@@ -64,7 +64,9 @@ xabber.once("start", function () {
         options || (options = {});
         this.updateContainersLayout();
         xabber.trigger('update_css', options);
+        xabber.set('ps-container-update', true);
         this.body.$('.ps-container').perfectScrollbar('update');
+        xabber.set('ps-container-update', false);
     };
 
     this.updateContainersLayout = function () {

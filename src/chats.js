@@ -3849,6 +3849,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
     },
 
     updateActiveSessionHeight: function () {
+        this._is_scrolled_bottom && this.scrollToBottom();
         if (!this.model.get('encrypted'))
             return;
         let after_element = this.$('.chat-content');
@@ -4263,7 +4264,8 @@ xabber.ChatContentView = xabber.BasicView.extend({
     onScrollY: function () {
         this._prev_scrolltop = this._scrolltop || this._prev_scrolltop || 0;
         this._scrolltop = this.getScrollTop() || this._scrolltop || this._prev_scrolltop || 0;
-        this._is_scrolled_bottom = this.isScrolledToBottom();
+        if (!xabber.get('ps-container-update'))
+            this._is_scrolled_bottom = this.isScrolledToBottom();
         if (this._scrolltop === 0 && this.$('.subscription-buttons-wrap').hasClass('hidden')) {
             this.$('.fixed-day-indicator-wrap').css('opacity', 1);
             this.current_day_indicator = pretty_date(parseInt(this.$('.chat-content').children().first().data('time')));
