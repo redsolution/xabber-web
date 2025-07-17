@@ -1662,7 +1662,7 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
                 if ($msg.isAlmostScrolledInContainer(this.$('.chat-content'), 1500) || force_render || no_filtered_messages || !this.rendered_messages.length) {
                     let index = whole_msgs_list.indexOf(msg),
                         new_rendered_msgs = whole_msgs_list.slice(Math.max(0, index - 5), index);
-                    if (new_rendered_msgs.length && !force_load && no_filtered_messages && !this.load_history_dfd){
+                    if (new_rendered_msgs.length && !force_load && !this.load_history_dfd){
                         new_rendered_msgs = new_rendered_msgs.filter(item => !this.rendered_messages.some(rendered_msg => rendered_msg.get('unique_id') === item.get('unique_id')));
 
                         if (new_rendered_msgs.length) {
@@ -1677,7 +1677,7 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
                         this._scroll_rendering = false;
                         return true;
                     } else if (!force_render) {
-                            if (!this.load_history_dfd){
+                        if (!this.load_history_dfd){
                             this.handleOnScrollLoading(msg);
                         }
                     }
