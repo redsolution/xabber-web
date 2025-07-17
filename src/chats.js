@@ -5652,6 +5652,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
     },
 
     loadAndReplaceImagesToProxy: function (files, $message, is_encrypted, fwd_images) {
+        $message = $message.children('.msg-wrap').children('.chat-msg-media-content');
         let onFileLoop = (file, idx, list) => {
             if (!file.proxy_sources_list || !file.proxy_sources_list.length){
                 console.error('no proxy file');
