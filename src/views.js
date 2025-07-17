@@ -3132,7 +3132,7 @@ xabber.SettingsModalView = xabber.BasicView.extend({
         this.$('.emoji_font .emojis-preview').addClass('hidden');
         this.$('.emoji_font .emoji-font-attribution-text').addClass('hidden');
 
-        if (emoji_font && (emoji_font.is_outside_url || (emoji_font.no_glyph && utils.getBrowser() === "Firefox")) && value !== 'system'){
+        if (value !== 'system'){
             this.$('.emoji_font .emoji-font-external-url-text').switchClass('hidden', !emoji_font.is_outside_url);
             this.$('.emoji_font .emoji-font-not-supported-text').switchClass('hidden', !(emoji_font.no_glyph && utils.getBrowser() === "Firefox"));
             this.$('.emoji_font .emoji-font-not-supported-text').switchClass('also-external', emoji_font.is_outside_url && emoji_font.no_glyph);

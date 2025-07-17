@@ -18408,12 +18408,14 @@ input[type=range].voice-message-volume:focus {
 
 .details-panel-right .search-wrap .chat-message .msg-wrap{
     height: 100%;
-    padding: 0 0 0 72px;
+    padding: 0 80px 0 72px;
+}
+.details-panel-right .search-wrap .chat-message .right-side{
+    width: 80px;
 }
 
 .details-panel-right .search-wrap .chat-message .msg-wrap .chat-msg-author{
     max-width: 100%;
-    margin-right: 80px;
 }
 
 .details-panel-right .search-wrap .chat-message .chat-msg-content{
@@ -18433,10 +18435,12 @@ input[type=range].voice-message-volume:focus {
 }
 
 .details-panel-right .search-wrap .chat-message .msg-time{
-    right: 14px;
-    top: 18px;
-    max-width: unset;
     font-size: 12px;
+    width: calc(100% - 8px);
+    left: unset;
+    right: 8px;
+    text-align: center;
+    top: 18px;
 }
 
 .details-panel-right .full-vcard-wrap {

@@ -3513,6 +3513,7 @@ xabber.ChatItemView = xabber.BasicView.extend({
               out_request = this.contact.get('subscription_request_out');
           this.$('.button').removeClass('hidden');
           this.$('.subscription-info').text("");
+          this.$('.btn-allow-subscribe-dropdown').hideIf(subscription === 'to');
           this.$el.addClass('hidden');
           if (subscription === 'both' || this.contact.get('blocked'))
               return;
@@ -3534,13 +3535,18 @@ xabber.ChatItemView = xabber.BasicView.extend({
           } else {
               return;
           }
-          this.$el.removeClass('hidden');
+          !this.is_hidden && this.$el.removeClass('hidden');
           this.$el.closest('.chat-content-wrap').children('.chat-content').addClass('with-before');
       },
 
       hideElement: function () {
           this.$el.addClass('hidden');
+          this.is_hidden = true;
+          setTimeout(() => {
+              this.is_hidden = false;
+          }, 1500)
           this.$el.closest('.chat-content-wrap').children('.chat-content').removeClass('with-before');
+
       },
 
       declineSubscription: function () {
@@ -10237,6 +10243,7 @@ xabber.InvitationPanelView = xabber.SearchView.extend({
         this.account = account;
         this.contact = contact;
         this.clearPanel();
+        this.updateCounter();
         this.$(`textarea[name="invitation_text"]`).val('');
         this.$('.invitation-reason-wrap').addClass('hidden');
         xabber.contacts_left_view.$(`.account-roster-wrap[data-jid="${this.account.get('jid')}"] .roster-group`).each((idx, item) => {
@@ -10301,7 +10308,6 @@ xabber.InvitationPanelView = xabber.SearchView.extend({
 
     clearPanel: function () {
         this.$('.modal-footer .errors').text('');
-        this.$('.counter').text('');
         this.$('.contacts-list-wrap').empty();
         this.clearSearch();
     },
@@ -10484,7 +10490,11 @@ xabber.InvitationPanelView = xabber.SearchView.extend({
 
     updateCounter: function () {
         let selected_counter = this.$('.list-item.click-selected').length;
-        (selected_counter) ? this.$('.counter').removeClass('hidden').text(selected_counter) : this.$('.counter').text('');
+        if (selected_counter === 0) {
+            this.$('.btn-add').text(xabber.getString("invitation_view_invite_button"))
+        } else {
+            this.$('.btn-add').text(xabber.getQuantityString("invitation_view_invite_button_plural", selected_counter))
+        }
     }
 
 });
