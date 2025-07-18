@@ -1,4 +1,5 @@
-import deps from "xabber-dependencies"
+import deps from "xabber-dependencies";
+import constants from "xabber-constants";
 
 var _ = deps._,
     $ = deps.$,
@@ -20,6 +21,50 @@ var COLORS = [
 
 var MAX_SIZE = 200;
 var MAX_IMG_SIZE = 1280;
+
+
+var loadCachedUrls = function () {
+    let urls_storage, storage_name;
+    for (let key in window.localStorage) {
+        if (key.includes('cache-avatar-urls') && key.startsWith(constants.STORAGE_NAME + '-' + constants.STORAGE_VERSION + '-')) {
+            storage_name = key;
+            urls_storage = localStorage.getItem(key);
+        }
+    }
+    if (urls_storage){
+        try{
+            urls_storage = JSON.parse(urls_storage);
+            _image_cache = urls_storage.cached_urls;
+        } catch (e) {
+            console.error(e);
+        }
+    }
+};
+loadCachedUrls();
+
+var updateCachedUrls = function () {
+    let local_storage_item, storage_name;
+    for (let key in window.localStorage) {
+        if (key.includes('cache-avatar-urls') && key.startsWith(constants.STORAGE_NAME + '-' + constants.STORAGE_VERSION + '-')) {
+            storage_name = key;
+        }
+    }
+    if (storage_name){
+        local_storage_item = JSON.parse(localStorage.getItem(storage_name));
+
+        let no_blob_image_cache = {};
+        for (let image_key in _image_cache) {
+            if (_image_cache[image_key] !== null && _image_cache[image_key] !== undefined && !_image_cache[image_key].is_blob) {
+                no_blob_image_cache[image_key] = _image_cache[image_key];
+            }
+        }
+        local_storage_item.cached_urls = no_blob_image_cache;
+        localStorage.setItem(storage_name, JSON.stringify(local_storage_item));
+    }
+
+};
+
+var update_cached_urls = _.debounce(updateCachedUrls, 400, false);
 
 var b64toBlob = function (b64Data, contentType, sliceSize) {
     contentType = contentType || '';
@@ -44,9 +89,11 @@ var CachedImage = function (image, proxy_url) {
         this.url = proxy_url;
         this.is_proxy_url = true;
         _image_cache[image] = this;
+        update_cached_urls();
         return this;
     }
     this.url = window.URL.createObjectURL(b64toBlob(image));
+    this.is_blob = true;
     _image_cache[image] = this;
     return this;
 };
