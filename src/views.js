@@ -1292,7 +1292,7 @@ xabber.ToolbarView = xabber.BasicView.extend({
             this.$('.toolbar-item:not(.account-item):not(.toolbar-logo)').removeClass('active unread')
                 .filter('.mentions').addClass('active');
 
-            xabber.body.setScreen('notifications', {right: 'notifications', notifications: xabber.notifications_view});
+            xabber.body.setScreen('notifications', {right: 'notifications', notifications: xabber.notifications_view}, {right_force_close: true});
             xabber.notifications_view && xabber.notifications_view.onShowNotificationsTab();
         } catch (e) {
             console.error(e);
@@ -1325,7 +1325,7 @@ xabber.ToolbarView = xabber.BasicView.extend({
         if (!xabber.accounts.enabled.length || !xabber.accounts.connected.length)
             return;
 
-        xabber.body.setScreen('contacts', {right: 'contacts', contacts: xabber.contacts_view});
+        xabber.body.setScreen('contacts', {right: 'contacts', contacts: xabber.contacts_view}, {right_force_close: true});
         xabber.trigger('update_placeholder');
     },
 
@@ -1337,7 +1337,7 @@ xabber.ToolbarView = xabber.BasicView.extend({
         if (!xabber.accounts.enabled.length || !xabber.accounts.connected.length)
             return;
 
-        xabber.body.setScreen('groupchats', {right: 'contacts', contacts: xabber.groupchats_view});
+        xabber.body.setScreen('groupchats', {right: 'contacts', contacts: xabber.groupchats_view}, {right_force_close: true});
         xabber.trigger('update_placeholder');
     },
 

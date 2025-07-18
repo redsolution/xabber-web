@@ -6032,7 +6032,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
             $(files).each((idx, file_) => {
                 file_.upload_id = idx;
                 if (utils.isImageType(file_.type)) {
-                    file_.sources = [file_.key ? file_.image_prev.src : window.URL.createObjectURL(new Blob([file_])),];
+                    file_.sources = [file_.key ? file_.image_prev.src : window.URL.createObjectURL(new Blob([file_], {type: file_.type})),];
                     images.push(file_);
                 }
             });
@@ -12945,7 +12945,7 @@ xabber.ChatBottomView = xabber.BasicView.extend({
             this.$('.message-reference-preview-container').append($(templates.messages.attached_file({
                 file: file,
                 uid: id,
-                blob: utils.isImageType(file.type) ? file.key ? file.image_prev.src : window.URL.createObjectURL(new Blob([file])) : null,
+                blob: utils.isImageType(file.type) ? file.key ? file.image_prev.src : window.URL.createObjectURL(new Blob([file], {type: file.type})) : null,
                 filesize: utils.pretty_size(file.size),
                 typeicon: utils.file_type_icon(file.type),
                 filetype: utils.pretty_file_type(file.type),
@@ -13025,7 +13025,7 @@ xabber.ChatBottomView = xabber.BasicView.extend({
                 this.$('.message-reference-preview-container').append($(templates.messages.attached_file({
                     file: file,
                     uid: id,
-                    blob: utils.isImageType(file.type) ? file.key ? file.image_prev.src : window.URL.createObjectURL(new Blob([file])) : null,
+                    blob: utils.isImageType(file.type) ? file.key ? file.image_prev.src : window.URL.createObjectURL(new Blob([file], {type: file.type})) : null,
                     filesize: utils.pretty_size(file.size),
                     typeicon: utils.file_type_icon(file.type),
                     filetype: utils.pretty_file_type(file.type),
