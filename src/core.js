@@ -37,11 +37,8 @@ let Xabber = Backbone.Model.extend({
             url.slice(0, url.length - 1);
         this._cache = new Backbone.ModelWithStorage({id: `cache-${url}`},
                 {storage_name: this.getStorageName(), fetch: 'before'});
-        this._avatar_urls_cache = new Backbone.ModelWithStorage({id: `cache-avatar-urls-${url}`},
-                {storage_name: this.getStorageName(), fetch: 'before'});
         this.cache = this._cache.attributes;
         this.cache.client_id && (this.set('client_id', this.cache.client_id));
-        this._avatar_urls_cache.save('version_time', new Date());
         this._cache.save('client_id', this.get('client_id'));
         this.extendFunction();
         this.plyr_players = [];

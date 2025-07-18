@@ -1738,26 +1738,47 @@ xabber.Account = Backbone.Model.extend({
         getProxyUrl: function (original_url, callback, errback, is_whole_url) {
             let is_proxy_enabled = this && this.get('proxy_viewer_url') && this.get('proxy_viewer_token');
             if (is_proxy_enabled){
-                let url = is_whole_url ? original_url :`${this.get('proxy_viewer_url')}proxy/geturl/?url=${original_url}`;
-                this.testProxyViewerExpire(() => {
-                    $.ajax({
-                        type: 'GET',
-                        url: url,
-                        dataType: 'json',
-                        contentType: "application/json",
-                        headers: {"Authorization": 'Bearer ' + this.get('proxy_viewer_token')},
-                        success: (response) => {
-                            callback && callback(response)
-                        },
-                        error: (response) => {
-                            console.error(response);
-                            errback && errback(response)
-                        }
-                    });
-                }, (err) => {
-                    console.error(err);
-                    errback && errback(err)
-                })
+                xabber.cached_proxy_urls.getFromCachedProxyUrls(original_url, (res) => {
+                   if (res){
+                       if (res.proxy_url){
+                           callback && callback({url: res.proxy_url})
+                       } else {
+                           errback && errback({status: res.error})
+                       }
+                   } else {
+                       let url = is_whole_url ? original_url :`${this.get('proxy_viewer_url')}proxy/geturl/?url=${original_url}`;
+                       this.testProxyViewerExpire(() => {
+                           $.ajax({
+                               type: 'GET',
+                               url: url,
+                               dataType: 'json',
+                               contentType: "application/json",
+                               headers: {"Authorization": 'Bearer ' + this.get('proxy_viewer_token')},
+                               success: (response) => {
+                                   xabber.cached_proxy_urls.putInCachedProxyUrls({
+                                       original_url: original_url,
+                                       proxy_url: response.url,
+                                       error: !response.url,
+                                   }, () => {
+                                       callback && callback(response)
+                                   });
+                               },
+                               error: (response) => {
+                                   console.error(response);
+                                   xabber.cached_proxy_urls.putInCachedProxyUrls({
+                                       original_url: original_url,
+                                       error: response.status,
+                                   }, () => {
+                                       errback && errback(response)
+                                   });
+                               }
+                           });
+                       }, (err) => {
+                           console.error(err);
+                           errback && errback(err)
+                       })
+                   }
+                });
             } else {
                 console.error('noproxy');
                 this.test_images && console.error(this.get('proxy_viewer_url'));
@@ -7308,6 +7329,42 @@ xabber.UnregisterAccountView = xabber.XmppLoginPanel.extend({
     }
 });
 
+
+xabber.CachedProxyUrls = Backbone.ModelWithDataBase.extend({
+
+    putInCachedProxyUrls: function (value, callback) {
+        this.database.put('cached_proxy_urls_items', value, function (response_value) {
+            callback && callback(response_value);
+        });
+    },
+
+    getFromCachedProxyUrls: function (value, callback) {
+        this.database.get('cached_proxy_urls_items', value, function (response_value) {
+            callback && callback(response_value);
+        });
+    },
+
+    getAllFromCachedProxyUrls: function (callback) {
+        this.database.get_all('cached_proxy_urls_items', null, function (response_value) {
+            callback && callback(response_value || []);
+        });
+    },
+
+    removeFromCachedProxyUrls: function (value, callback) {
+        this.database.remove('cached_proxy_urls_items', value, function (response_value) {
+            callback && callback(response_value);
+        });
+    },
+
+    clearDataBase: function () {
+        this.database.clear_database('cached_proxy_urls_items');
+    },
+
+    deleteDataBase: function () {
+        this.database.delete_database('cached_proxy_urls_items');
+    }
+});
+
 xabber.once("start", function () {
     this.xmpp_login_panel = xabber.login_page.addChild('xmpp_login', this.XmppLoginPanel);
     this.account_settings_modal = xabber.main_overlay_panel.addChild('account_settings_modal',
@@ -7317,6 +7374,12 @@ xabber.once("start", function () {
         storage_name: this.getStorageName() + '-accounts'
     });
     this.accounts.fetch();
+
+    this.cached_proxy_urls = new xabber.CachedProxyUrls(null, {
+        name:'cached-proxy-urls',
+        objStoreName: 'cached_proxy_urls_items',
+        primKey: 'original_url'
+    });
 
     this.trigger('accounts_ready');
 
