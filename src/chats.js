@@ -11942,6 +11942,7 @@ xabber.ChatBottomView = xabber.BasicView.extend({
         "click": "onClickBottom",
         "click .ql-editor": "focusOnInput",
         "click .my-avatar": "showAccountSettings",
+        "click .account-info-wrap": "showAccountSettings",
         "keyup .input-message .rich-textarea": "keyUp",
         "keydown .input-message .rich-textarea": "keyDown",
         "change .attach-file input": "onFileInputChanged",

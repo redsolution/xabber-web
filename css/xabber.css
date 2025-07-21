@@ -12673,6 +12673,7 @@ img.fwd-img-preview {
     left: 10px;
     width: 48px;
     height: 48px;
+    z-index: 1;
 }
 
 .message-input-panel .circle-avatar:hover {
@@ -13792,6 +13793,7 @@ input[type=range].voice-message-volume:focus {
     margin: 0 0 0 auto;
     height: 100%;
     white-space: nowrap;
+    cursor: pointer;
 }
 
 .input-toolbar .last-emoticons .emoji-wrap {
