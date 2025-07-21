@@ -11411,6 +11411,12 @@ input[type=text].simple-input-field:hover {
     color: #9E9E9E;
     text-transform: capitalize;
 }
+.notifications-content-wrap .chat-day-indicator {
+    transition: background-color .3s;
+}
+.notifications-content-wrap .chat-day-indicator.date-from-context{
+    background-color: #EEE;
+}
 
 .chat-notification {
     position: relative;
@@ -13299,18 +13305,26 @@ img.fwd-img-preview {
 .send-area .attach-locked-voice-message{
     display: none;
 }
+.send-area .attach-voice-message.recording{
+    color: #fff !important;
+}
 .locked-voice-message .send-area .attach-locked-voice-message{
     display: block;
     z-index: 1001;
     cursor: pointer;
 }
+.locked-voice-message .send-area .attach-locked-voice-message:not(.voice-message-sound-volume){
+    background: transparent !important;
+}
 .send-area .attach-voice-message.voice-message-sound-volume,
 .locked-voice-message .send-area .attach-locked-voice-message.voice-message-sound-volume{
-    background: #e0e0e0 !important;
+    /*background: #e0e0e0 !important;*/
     bottom: 61px;
+    color: #fff !important;
     height: 40px;
     left: 12px;
     outline: 0 solid #e0e0e0;
+    outline-offset: -1px;
     outline-width: var(--volume);
     padding: 4px;
     transition: outline-width .01s linear;

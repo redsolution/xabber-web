@@ -13097,7 +13097,7 @@ xabber.ChatBottomView = xabber.BasicView.extend({
         this.mediaRecorder && this.mediaRecorder.stop();
         this.$('.message-input-panel').removeClass('voice-message-recording');
         this.$('.message-input-panel').removeClass('locked-voice-message');
-        this.$('.send-area .attach-voice-message').removeClass('recording ground-color-50');
+        this.$('.send-area .attach-voice-message').removeClass('recording ground-color-500');
         this.model.set('recording_voice_message', false);
     },
 
@@ -13130,7 +13130,7 @@ xabber.ChatBottomView = xabber.BasicView.extend({
         this.$('.message-input-panel').removeClass('voice-message-recording');
         this.$('.message-input-panel').removeClass('locked-voice-message');
         this.$('.message-input-panel').removeClass('locked-voice-message-stopped');
-        this.$('.send-area .attach-voice-message').removeClass('recording ground-color-50');
+        this.$('.send-area .attach-voice-message').removeClass('recording ground-color-500');
         this.$('.chat-bottom-voice-message-rendered').prop('class', 'chat-bottom-voice-message-rendered ground-color-500');
         this.$('.chat-bottom-voice-message-rendered').html('');
         this.model.set('recording_voice_message', false);
@@ -13165,9 +13165,11 @@ xabber.ChatBottomView = xabber.BasicView.extend({
         if ($elem.hasClass('recording'))
             $elem.removeClass('recording');
         else {
-            $elem.addClass('recording ground-color-50');
-            if (!this.model.get('recording_voice_message'))
-                this.initAudio();
+            $elem.addClass('recording ground-color-500');
+            setTimeout(() => {
+                if (!this.model.get('recording_voice_message'))
+                    this.initAudio();
+            }, 10)
         }
     },
 
@@ -13186,7 +13188,7 @@ xabber.ChatBottomView = xabber.BasicView.extend({
                 $mic = this.$('.send-area .attach-voice-message'),
                 onSuccess = (stream) => {
                     if (!$mic.is(":hover")) {
-                        $mic.removeClass('recording ground-color-50');
+                        $mic.removeClass('recording ground-color-500');
                         this.model.set('recording_voice_message', false)
                         return;
                     }
@@ -13239,7 +13241,7 @@ xabber.ChatBottomView = xabber.BasicView.extend({
                                 } else {
                                     mic_hover = $border_elem.is(":hover");
                                     this.mediaRecorder.stop();
-                                    $mic.removeClass('recording ground-color-50');
+                                    $mic.removeClass('recording ground-color-500');
                                     $bottom_panel.removeClass('locked-voice-message');
                                     $bottom_panel.removeClass('voice-message-recording');
                                     this.model.set('recording_voice_message', false);
@@ -13331,7 +13333,7 @@ xabber.ChatBottomView = xabber.BasicView.extend({
 
             let onError = (error) => {
                 console.log(xabber.getString("file_upload__error", [error]));
-                $mic.removeClass('recording ground-color-50');
+                $mic.removeClass('recording ground-color-500');
             };
 
             window.navigator.getUserMedia(constraints, onSuccess, onError);

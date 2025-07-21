@@ -955,6 +955,15 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
                 this.$('.chat-content').removeClass('hidden');
                 this.$el.children('.preloader-wrapper').addClass('hidden');
                 this.handleOnScrollRendering('bottom', true);
+
+                let $prevDateElement = firstElementInDay.prev('.chat-day-indicator');
+                if ($prevDateElement.length){
+
+                    $prevDateElement.addClass('date-from-context');
+                    setTimeout(() => {
+                        $prevDateElement.removeClass('date-from-context')
+                    }, 1000);
+                }
                 this.scrollTo(firstElementInDay.position().top + this.getScrollTop() - 40);
                 this.handleOnScrollRendering('bottom');
             } else {
