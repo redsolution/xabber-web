@@ -531,6 +531,7 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
         this.filter_type = 'all';
         this.notifications_chats = [];
         this.notification_messages = new xabber.Messages(null, {});
+
         this.listenTo(this.notification_messages, 'change:last_replace_time', this.updateMessage);
         this.listenTo(this.notification_messages, 'add', this.addMessage);
         this.listenTo(this.notification_messages, 'change:is_unread', this.onChangedReadState);
@@ -851,6 +852,10 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
 
     onShowNotificationsTab: function () {
         xabber.notifications_view.clearFilter();
+        if (!this.$el.children('.preloader-wrapper').length)
+            this.$el.append($(env.templates.contacts.preloader()));
+        this.$el.children('.preloader-wrapper').addClass('hidden');
+        this.$el.children('.preloader-wrapper').removeClass('visible');
         this.onScroll();
         this.renderMessages();
         setTimeout(() => {
@@ -931,26 +936,34 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
     showDay: function (ev) {
         let $item = $(ev.target).closest('.notifications-calendar-day');
 
+        if (_.isNaN(Number($item.attr('data-activity-value'))) || !Number($item.attr('data-activity-value')))
+            return;
 
         let startOfDayTimestamp = parseInt($item.attr('data-timestamp'), 10),
             endOfDayTimestamp = startOfDayTimestamp + 86400000;
 
-        let firstElementInDay = $('.chat-message[data-time]').filter(function() {
+        let firstElementInDay = this.$('.chat-message[data-time]').filter(function() {
             let elementTime = parseInt($(this).attr("data-time"), 10);
             return elementTime >= startOfDayTimestamp && elementTime < endOfDayTimestamp;
         }).first();
 
+        this.$('.chat-content').addClass('hidden');
+        this.$el.children('.preloader-wrapper').removeClass('hidden');
 
-        if (firstElementInDay.length) {
-            this.handleOnScrollRendering('bottom', true);
-            this.scrollTo(firstElementInDay.position().top + this.getScrollTop() - 40);
-            this.handleOnScrollRendering('bottom');
-        } else {
-            let fully_rendered = this.handleOnScrollRendering('bottom', true);
-            if (!fully_rendered){
-                this.showDay(ev);
+        setTimeout(() => {
+            if (firstElementInDay.length) {
+                this.$('.chat-content').removeClass('hidden');
+                this.$el.children('.preloader-wrapper').addClass('hidden');
+                this.handleOnScrollRendering('bottom', true);
+                this.scrollTo(firstElementInDay.position().top + this.getScrollTop() - 40);
+                this.handleOnScrollRendering('bottom');
+            } else {
+                let fully_rendered = this.handleOnScrollRendering('bottom', true, 200);
+                if (!fully_rendered){
+                    this.showDay(ev);
+                }
             }
-        }
+        }, 10);
     },
 
     readMessage: function (last_visible_msg, $last_visible_msg, is_context) {
@@ -1584,7 +1597,8 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
         this.$('.back-to-bottom').hideIf(this.isScrolledToTop());
     },
 
-    handleOnScrollRendering: function (scroll_direction, force_render) {
+    handleOnScrollRendering: function (scroll_direction, force_render, msg_amount) { //34
+        msg_amount = msg_amount || 5;
         if (!scroll_direction || this._scroll_rendering || !this.isVisible())
             return true;
         if (!this.rendered_messages)
@@ -1661,7 +1675,7 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
             if ($msg.length || no_filtered_messages || !this.rendered_messages.length){
                 if ($msg.isAlmostScrolledInContainer(this.$('.chat-content'), 1500) || force_render || no_filtered_messages || !this.rendered_messages.length) {
                     let index = whole_msgs_list.indexOf(msg),
-                        new_rendered_msgs = whole_msgs_list.slice(Math.max(0, index - 5), index);
+                        new_rendered_msgs = whole_msgs_list.slice(Math.max(0, index - msg_amount), index);
                     if (new_rendered_msgs.length && !force_load && !this.load_history_dfd){
                         new_rendered_msgs = new_rendered_msgs.filter(item => !this.rendered_messages.some(rendered_msg => rendered_msg.get('unique_id') === item.get('unique_id')));
 

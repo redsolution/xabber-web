@@ -20447,6 +20447,7 @@ input[type=range].voice-message-volume:focus {
 .details-panel-right .participant-details-info-wrap .participant-details-item .participant-info .participant-info-text{
     position: relative;
     padding: 0 32px;
+    min-height: 50px;
 }
 
 .details-panel-right .participant-details-info-wrap .participant-details-item .participant-info .nickname{
@@ -20462,7 +20463,7 @@ input[type=range].voice-message-volume:focus {
 .details-panel-right .participant-details-info-wrap .participant-details-item .participant-info .my-flag{
     font-size: 14px;
     letter-spacing: 0;
-    line-height: 14px;
+    line-height: 18px;
     color: #9E9E9E;
     text-align: center;
 }
@@ -24000,6 +24001,13 @@ ul.restrictions-list-content>li {
     top: unset;
     transform: none;
 }
+.notifications-content .chat-content-wrap .preloader-wrapper{
+    position: absolute;
+    top: calc(50% - 18px);
+    left: calc(50% - 18px);
+    width: 36px;
+    height: 36px;
+}
 .panel-wrap .notification-subscriptions-wrap{
     margin: 0 16px 32px;
     position: relative;
@@ -24321,11 +24329,15 @@ ul.restrictions-list-content>li {
 .notifications-calendars-wrap .future{
     font-weight: 400;
     color: #BDBDBD;
+    pointer-events: none;
 }
 .notifications-calendars-wrap .calendar-rows-wrap{
     display: flex;
     flex-direction: column-reverse;
     margin-left: 8px;
+}
+.notifications-calendars-wrap .notifications-calendar-day[data-activity-value="0"]{
+    pointer-events: none;
 }
 .notifications-calendars-wrap td .notifications-calendar-day{
     border-radius: 50%;

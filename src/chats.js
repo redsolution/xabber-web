@@ -3346,7 +3346,7 @@ xabber.ChatItemView = xabber.BasicView.extend({
               this.parent.$('.panel-background-clickable').removeClass('fading-search-background');
               this.$('.search-wrap').hideIf(this.parent.model && this.parent.model.get('search_hidden'));
 
-              if (xabber.body.screen.get('right') === 'message_context' && !force_open){
+              if ((xabber.body.screen.get('right') === 'message_context' && !force_open) || ev){
                   xabber.body.setScreen('all-chats', {}, {
                       right_contact_save: false,
                       right_force_close: true,

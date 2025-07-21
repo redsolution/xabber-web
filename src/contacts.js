@@ -5124,7 +5124,7 @@ xabber.ParticipantPropertiesViewRight = xabber.BasicView.extend({
             list_name = $target.data('value');
         this.$('.tabs').animate({scrollLeft: $target.position().left}, 400);
         this.ps_container.animate(
-            {scrollTop: this.$('.bottom-block').position().top + this.ps_container.scrollTop() - 120},
+            {scrollTop: this.$('.bottom-block').position().top + this.ps_container.scrollTop() - 110},
             400,
             () => {
                 this.onScroll();
@@ -5227,7 +5227,7 @@ xabber.ParticipantPropertiesViewRight = xabber.BasicView.extend({
         let bottom_block_scroll;
         if (this.$('.bottom-block'))
             bottom_block_scroll = this.$('.bottom-block').get(0).getBoundingClientRect().top;
-        if (!_.isUndefined(bottom_block_scroll) && bottom_block_scroll <= 170) {
+        if (!_.isUndefined(bottom_block_scroll) && bottom_block_scroll <= 180) {
             this.$('.btn-back').addClass('btn-top');
             this.$('.participant-details-item .buttons-wrap').addClass('hidden2');
             this.$('.btn-search-messages').hideIf(true);
@@ -5519,13 +5519,13 @@ xabber.ParticipantPropertiesViewRight = xabber.BasicView.extend({
                 if (attrs.expires) {
                     this.actual_rights.push({name: attrs.name, expires: attrs.expires});
                     this.$('.right-item #' + attrs.name).prop('checked', true).addClass(attrs.expires);
-                    if (attrs.expires !== 0) {
+                    if (Number(attrs.expires) !== 0) {
                         let $current_restriction = this.$('.right-item.restriction-' + attrs.name);
-                        if ($current_restriction.find('.select-timer .property-value').length)
+                        if ($current_restriction.find('.select-timer .property-value').length) {
                             $current_restriction.find('.select-timer .property-value').attr('data-value', attrs.expires)
                                 .removeClass('default-value')
-                                .text(moment(Number(attrs.expires)*1000).fromNow());
-                        else{
+                                .text(moment(Number(attrs.expires) * 1000).fromNow());
+                        } else {
                             $current_restriction.append($('<div class="select-timer"/>'));
                             $current_restriction.find('.select-timer').attr('data-value', attrs.expires)
                                 .text(moment(Number(attrs.expires)*1000).fromNow())
