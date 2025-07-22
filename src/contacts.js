@@ -9198,25 +9198,7 @@ xabber.Roster = xabber.ContactsBase.extend({
                 chat.item_view.content.loadNotificationsHistoryToPreviousLastMsg();
             }
             xabber.accounts.trigger('notification_chat_created');
-            this.account.cached_notifications.getAllFromCachedNotifications((res) => {
-                if (res.length){
-                    let parser = new DOMParser();
-                    _.each(res, (msg_item) => {
-                        let xml = parser.parseFromString(msg_item.xml, "text/xml");
-                        msg_item.is_unread && console.error(msg_item.is_unread);
-                        this.account.chats.makeMessageObject(xml.firstChild,
-                            _.extend({
-                                is_archived: true,
-                                is_cached: true,
-                                is_cached_unread: msg_item.is_unread,
-                            }, {})
-                        )
-                    });
-                    if (xabber.notifications_view.current_content && xabber.notifications_view.current_content.isVisible() && is_first_sync){
-                        xabber.notifications_view.current_content.onShowNotificationsTab();
-                    }
-                }
-            });
+            this.account.cached_notifications.handleCachedNotifications(this);
         }
         if ($item.attr('pinned') || $item.attr('pinned') === '0'){
             chat.set('pinned', $item.attr('pinned'));
@@ -9461,24 +9443,7 @@ xabber.Roster = xabber.ContactsBase.extend({
             contact.set('subscription', 'both');
             chat.set('last_read_msg', last_read_msg);
             xabber.accounts.trigger('notification_chat_created');
-            this.account.cached_notifications.getAllFromCachedNotifications((res) => {
-                if (res.length){
-                    let parser = new DOMParser();
-                    _.each(res, (msg_item) => {
-                        let xml = parser.parseFromString(msg_item.xml, "text/xml");
-                        this.account.chats.makeMessageObject(xml.firstChild,
-                            _.extend({
-                                is_archived: true,
-                                is_cached: true,
-                                is_cached_unread: msg_item.is_unread,
-                            }, {})
-                        )
-                    });
-                    if (xabber.notifications_view.current_content && xabber.notifications_view.current_content.isVisible() && is_first_sync){
-                        xabber.notifications_view.current_content.onShowNotificationsTab();
-                    }
-                }
-            });
+            this.account.cached_notifications.handleCachedNotifications(this);
         }
         if (pinned_timestamp || pinned_timestamp === '0'){
             chat.set('pinned', pinned_timestamp);
@@ -9690,24 +9655,7 @@ xabber.Roster = xabber.ContactsBase.extend({
                 chat.item_view.content.loadNotificationsHistoryToPreviousLastMsg();
             }
             xabber.accounts.trigger('notification_chat_created');
-            this.account.cached_notifications.getAllFromCachedNotifications((res) => {
-                if (res.length){
-                    let parser = new DOMParser();
-                    _.each(res, (msg_item) => {
-                        let xml = parser.parseFromString(msg_item.xml, "text/xml");
-                        this.account.chats.makeMessageObject(xml.firstChild,
-                            _.extend({
-                                is_archived: true,
-                                is_cached: true,
-                                is_cached_unread: msg_item.is_unread,
-                            }, {})
-                        )
-                    });
-                    if (xabber.notifications_view.current_content && xabber.notifications_view.current_content.isVisible() && is_first_sync){
-                        xabber.notifications_view.current_content.onShowNotificationsTab();
-                    }
-                }
-            });
+            this.account.cached_notifications.handleCachedNotifications(this);
         }
 
         if (!$(iq).find('conversation').length || $(iq).find('conversation').length < constants.SYNCHRONIZATION_RSM_MAX ){
@@ -12334,9 +12282,22 @@ xabber.CachedSyncConversations = Backbone.ModelWithDataBase.extend({
 
 xabber.CachedNotifications = Backbone.ModelWithDataBase.extend({
     putInCachedNotifications: function (value, callback) {
-        this.database.put('notification_items', value, function (response_value) {
-            callback && callback(response_value);
-        });
+        try{
+            let parser = new DOMParser();
+
+            let xml = parser.parseFromString(value.xml, "text/xml"),
+                notification_date = $(xml.firstChild).children('time').attr('stamp'),
+                previous_month_first_day_date = moment(Date.now()).subtract(1, 'months').startOf('month').format();
+            if (notification_date && notification_date >= previous_month_first_day_date) {
+                this.database.put('notification_items', value, function (response_value) {
+                    callback && callback(response_value);
+                });
+            } else {
+                callback && callback(false);
+            }
+        } catch (e) {
+            console.error(e);
+        }
     },
 
     getFromCachedNotifications: function (value, callback) {
@@ -12348,6 +12309,34 @@ xabber.CachedNotifications = Backbone.ModelWithDataBase.extend({
     getAllFromCachedNotifications: function (callback) {
         this.database.get_all('notification_items', null, function (response_value) {
             callback && callback(response_value || []);
+        });
+    },
+
+    handleCachedNotifications: function (self) {
+        this.getAllFromCachedNotifications((res) => {
+            console.error(res.length);
+            if (res.length){
+                let parser = new DOMParser();
+                _.each(res, (msg_item) => {
+                    let xml = parser.parseFromString(msg_item.xml, "text/xml"),
+                        notification_date = $(xml.firstChild).children('time').attr('stamp'),
+                        previous_month_first_day_date = moment(Date.now()).subtract(1, 'months').startOf('month').format();
+                    if (notification_date >= previous_month_first_day_date){
+                        self.account.chats.makeMessageObject(xml.firstChild,
+                            _.extend({
+                                is_archived: true,
+                                is_cached: true,
+                                is_cached_unread: msg_item.is_unread,
+                            }, {})
+                        )
+                    } else {
+                        this.removeFromCachedNotifications(msg_item.stanza_id);
+                    }
+                });
+                if (xabber.notifications_view.current_content && xabber.notifications_view.current_content.isVisible() && is_first_sync){
+                    xabber.notifications_view.current_content.onShowNotificationsTab();
+                }
+            }
         });
     },
 

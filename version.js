@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.4.147","version_description":"changed participants messages block design, fixed open participant on avatar click in participant messages"}'
+'{"version_number":"2.4.149","version_description":"added cached notifications clearing and checking if date is after first day of previous month"}'
 )});
