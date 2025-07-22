@@ -8304,7 +8304,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
                 if (this.model.get('group_chat')) {
                     let member_id = (is_forwarded) ? $fwd_message.attr('data-from-id') : $msg.attr('data-from-id'),
                         unique_id = (is_forwarded) ? $fwd_message.attr('data-uniqueid') : $msg.attr('data-uniqueid'),
-                        msg = this.model.messages.get(unique_id) || this.account.context_messages.get(unique_id) || this.account.searched_messages.get(unique_id),
+                        msg = this.model.messages.get(unique_id) || this.account.context_messages && this.account.context_messages.get(unique_id) || this.account.searched_messages && this.account.searched_messages.get(unique_id),
                         user_info = msg && msg.get('user_info');
                     member_id && this.showParticipantProperties(member_id, user_info);
                     return;
