@@ -1777,17 +1777,33 @@ xabber.JingleMessage = Backbone.Model.extend({
                 });
                 this.account.context_messages.add(message);
                 this.messages_view.messagesRequest({after: stanza_id}, () => {
-                    let screen = 'all-chats';
-                    if (options.mention)
-                        screen = 'mentions';
-                    else if (options.message)
-                        screen = xabber.body.screen.get('name');
-                    xabber.body.setScreen(screen, {
-                        right: 'message_context',
-                        model: this,
-                        right_contact_modal: false,
-                    }, {
-                        right_contact_save: true,
+                    this.messages_view.messagesRequest({before: stanza_id}, () => {
+                        let screen = 'all-chats';
+                        if (options.mention)
+                            screen = 'mentions';
+                        else if (options.message)
+                            screen = xabber.body.screen.get('name');
+                        xabber.body.setScreen(screen, {
+                            right: 'message_context',
+                            model: this,
+                            right_contact_modal: false,
+                        }, {
+                            right_contact_save: true,
+                        });
+
+                    }, () => {
+                        let screen = 'all-chats';
+                        if (options.mention)
+                            screen = 'mentions';
+                        else if (options.message)
+                            screen = xabber.body.screen.get('name');
+                        xabber.body.setScreen(screen, {
+                            right: 'message_context',
+                            model: this,
+                            right_contact_modal: false,
+                        }, {
+                            right_contact_save: true,
+                        });
                     });
                 }, (err) => {
                     if (err === 'no_messages'){
@@ -3039,6 +3055,9 @@ xabber.ChatItemView = xabber.BasicView.extend({
               index = this.account.context_messages.indexOf(message);
           if (message.get('stanza_id') === this.stanza_id) {
               $message.addClass('message-from-context');
+              setTimeout(() => {
+                  this.scrollToChildPlus($message, -(this.$el.height()/2));
+              }, 1000);
               setTimeout(() => {
                   $message.removeClass('message-from-context')
               }, 3000);

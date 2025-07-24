@@ -704,7 +704,7 @@ var utils = {
                 markup_body[end_idx] += '</' + mention_tag + '>';
                 return;
             }
-            markup_body[start_idx] = '<' + mention_tag + ' data-target="' + target + '" class="mention' + (mention.me ? ' ground-color-100' : '') + '">' + markup_body[start_idx];
+            markup_body[start_idx] = '<' + mention_tag + ' data-target="' + target + '" class="mention' + (mention.me ? ' ground-color-100' : '') + (mention.is_everyone ? ' mention-everyone' : '') + '">' + markup_body[start_idx];
             markup_body[end_idx] += '</' + mention_tag + '>';
         }.bind(this));
 

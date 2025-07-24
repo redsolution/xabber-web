@@ -24311,6 +24311,10 @@ ul.restrictions-list-content>li {
 .notifications-content-wrap .chat-message .msg-wrap{
     padding: 0 96px 0 84px;
 }
+.chat-message .chat-msg-content .mention.mention-everyone:hover,
+.notifications-content-wrap .chat-message .chat-msg-content .mention:hover{
+    text-decoration: unset;
+}
 .notifications-content-wrap .chat-msg-content{
     /*font-size: 14px;*/
 }
