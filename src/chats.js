@@ -443,6 +443,12 @@ xabber.MessagesBase = Backbone.Collection.extend({
                 $message.children(`reference[xmlns="${Strophe.NS.REFERENCE}"]`) :
                 $message.children('envelope').children('content').children(`reference[xmlns="${Strophe.NS.REFERENCE}"]`);
         }
+        if (options.notification_msg && !attrs.ntf_new_device_msg){
+            if ($notification_msg.children(`mentions[xmlns="${Strophe.NS.GROUP_CHAT}"]`).length){
+                attrs.notification_mention = true;
+                attrs.mention_msg_uniqueid = $notification_msg.children('archived').attr('id') || $message.children('origin-id').attr('id') || $message.attr('id')
+            }
+        }
 
         references.each((idx, reference) => {
             let $reference = $(reference),
@@ -450,7 +456,7 @@ xabber.MessagesBase = Backbone.Collection.extend({
                 begin = parseInt($reference.attr('begin')),
                 end = parseInt($reference.attr('end'));
             if (type === 'decoration') {
-                if ($reference.children(`link[xmlns="${Strophe.NS.MARKUP}"]`).length && $reference.children(`link[xmlns="${Strophe.NS.MARKUP}"]`).text().startsWith('xmpp:') && $reference.children(`link[xmlns="${Strophe.NS.MARKUP}"]`).text().includes('?members')) {
+                if ($reference.children(`link[xmlns="${Strophe.NS.MARKUP}"]`).length && $reference.children(`link[xmlns="${Strophe.NS.MARKUP}"]`).text().startsWith('xmpp:')) {
                     let $mention = $reference.children(`link[xmlns="${Strophe.NS.MARKUP}"]`),
                         target = $mention.text(),
                         is_everyone = target.endsWith('?members'),
@@ -462,10 +468,6 @@ xabber.MessagesBase = Backbone.Collection.extend({
                         is_gc: is_gc,
                         is_everyone: is_everyone
                     });
-                    if (options.notification_msg && !attrs.ntf_new_device_msg){
-                        attrs.notification_mention = true;
-                        attrs.mention_msg_uniqueid = $notification_msg.children('archived').attr('id') || $message.children('origin-id').attr('id') || $message.attr('id')
-                    }
                 } else {
                     let markup = [];
                     $reference.children().each((i, child_ref) => {
