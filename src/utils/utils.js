@@ -686,7 +686,7 @@ var utils = {
             if (start_idx > markup_body.length - 1)
                 return;
             if (mention.is_gc) {
-                let id = target.match(/\?id=\w*/),
+                let id = target.match(/\;id=\w*/),
                     jid = target.match(/\?jid=.*/);
                 if (id)
                     target = id[0].slice(4);
@@ -700,7 +700,7 @@ var utils = {
             else
                 target = target.slice(5);
             if (mention_tag === 'mention'){
-                markup_body[start_idx] = '<' + mention_tag + ' data-target="?jid=' + target + '">' + markup_body[start_idx];
+                markup_body[start_idx] = '<' + mention_tag + ' data-target="?jid=' + target + '">' + markup_body[start_idx]; //34
                 markup_body[end_idx] += '</' + mention_tag + '>';
                 return;
             }

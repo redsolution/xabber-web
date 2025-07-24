@@ -414,6 +414,7 @@ import $ from "jquery";
     addSvgTemplate('svg.star-face');
     addSvgTemplate('svg.alarm-bell');
     addSvgTemplate('svg.label-outline');
+    addSvgTemplate('svg.chat-outline');
     addSvgTemplate('svg.id');
     addSvgTemplate('svg.expires');
     addSvgTemplate('svg.database');

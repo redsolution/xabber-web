@@ -428,6 +428,9 @@ xabber.MessagesBase = Backbone.Collection.extend({
                 if ($notification_msg.find('verification-failed').length || $notification_msg.find('verification-rejected').length){
                     attrs.ignored = true;
                 }
+                if ($notification_msg.find('verification-successful').length){
+                    attrs.security_notification = true;
+                }
             }
         }
         options.encrypted && _.extend(attrs, {encrypted: true});
@@ -447,11 +450,22 @@ xabber.MessagesBase = Backbone.Collection.extend({
                 begin = parseInt($reference.attr('begin')),
                 end = parseInt($reference.attr('end'));
             if (type === 'decoration') {
-                if ($reference.children(`mention[xmlns="${Strophe.NS.MARKUP}"]`).length) {
-                    let $mention = $reference.children(`mention[xmlns="${Strophe.NS.MARKUP}"]`),
+                if ($reference.children(`link[xmlns="${Strophe.NS.MARKUP}"]`).length && $reference.children(`link[xmlns="${Strophe.NS.MARKUP}"]`).text().startsWith('xmpp:')) {
+                    let $mention = $reference.children(`link[xmlns="${Strophe.NS.MARKUP}"]`),
                         target = $mention.text(),
-                        is_gc = $mention.attr('node') === Strophe.NS.GROUP_CHAT;
-                    mentions.push({start: begin, end: end, target: target, is_gc: is_gc});
+                        is_everyone = target.endsWith('?members'),
+                        is_gc = true;
+                    mentions.push({
+                        start: begin,
+                        end: end,
+                        target: target,
+                        is_gc: is_gc,
+                        is_everyone: is_everyone
+                    });
+                    if (options.notification_msg){
+                        attrs.notification_mention = true;
+                        attrs.mention_msg_uniqueid = $notification_msg.children('archived').attr('id') || $message.children('origin-id').attr('id') || $message.attr('id')
+                    }
                 } else {
                     let markup = [];
                     $reference.children().each((i, child_ref) => {
@@ -538,7 +552,9 @@ xabber.MessagesBase = Backbone.Collection.extend({
             } else if (type === 'data') {}
         });
 
-        $message.children('x[xmlns="' + Strophe.NS.GROUP_CHAT + '"]').each((idx, x_elem) => {
+        let groupchat_message = options.notification_msg ? $notification_msg : $message
+
+        groupchat_message.children('x[xmlns="' + Strophe.NS.GROUP_CHAT + '"]').each((idx, x_elem) => {
             let $reference = $(x_elem).children(`reference[type="mutable"][xmlns="${Strophe.NS.REFERENCE}"]`),
                 $user = $reference.children(`user[xmlns="${Strophe.NS.GROUP_CHAT}"]`).first();
                 if ($reference.length) {
@@ -558,7 +574,7 @@ xabber.MessagesBase = Backbone.Collection.extend({
                             badge: $user.children('badge').text()
                         },
                         from_jid: user_jid || user_id,
-                        groupchat_jid: Strophe.getBareJidFromJid(options.is_sender ? $message.attr('to') : $message.attr('from'))
+                        groupchat_jid: Strophe.getBareJidFromJid(options.is_sender ? groupchat_message.attr('to') : groupchat_message.attr('from'))
                     });
                 }
         });
@@ -1771,6 +1787,12 @@ xabber.JingleMessage = Backbone.Model.extend({
                     }, {
                         right_contact_save: true,
                     });
+                }, (err) => {
+                    if (err === 'no_messages'){
+                        if (this.item_view && !this.item_view.content)
+                            this.item_view.content = new xabber.ChatContentView({chat_item: this});
+                        this.item_view.content.backToBottom();
+                    }
                 });
             }
 
@@ -2962,7 +2984,7 @@ xabber.ChatItemView = xabber.BasicView.extend({
           this.$history_feedback.addClass('hidden');
       },
 
-      messagesRequest: function (query, callback) {
+      messagesRequest: function (query, callback, errback) {
           let messages = [],
               options = query || {},
               queryid = uuid();
@@ -2982,6 +3004,9 @@ xabber.ChatItemView = xabber.BasicView.extend({
                   if (options.before && (messages.length < options.max))
                       this.first_history_loaded = true;
                   let count = 0;
+                  if (!messages.length){
+                      errback && errback('no_messages');
+                  }
                   $(messages).each((idx, message) => {
                       let $message = $(message);
                       this.account.chats.makeMessageObject($message, {context_message: true}).then(() => {
@@ -4985,7 +5010,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
             message.get('mentions').forEach((mention) => {
                 let mention_target = mention.target || "";
                 if (this.contact.get('group_chat') || message.get('groupchat_jid')) {
-                    let id = mention_target.match(/\?id=\w*/),
+                    let id = mention_target.match(/\;id=\w*/),
                         jid = mention_target.match(/\?jid=.*/);
                     if (id && this.contact.my_info) {
                         mention_target = id[0].slice(4);
@@ -5871,8 +5896,14 @@ xabber.ChatContentView = xabber.BasicView.extend({
         if (attrs.notification_info){
             markup_body = xabber.getString("notification_info_message", [attrs.from_jid, `<i class="text-color-grey-500">${markup_body}</i>`]);
         }
-        if (attrs.notification_mention && attrs.notification_mention_jid && attrs.notification_mention_id){
-            markup_body = xabber.getString("notification_mention_message", ['placeholder name', attrs.notification_mention_jid, '<i class="text-color-grey-500">Tempora mutantur, nos et mutamur in illis</i>']);
+        if (attrs.notification_mention){
+            let groupchat = this.account.contacts.get(attrs.groupchat_jid);
+
+            markup_body = xabber.getString("notification_mention_message", [
+                (attrs.user_info && (attrs.user_info.nickname || attrs.user_info.jid)) || attrs.from_jid,
+                groupchat && groupchat.get('name') || '',
+                markup_body
+            ]);
         }
 
         if (this.model.get('saved') && !markup_body.length && attrs.forwarded_message && attrs.forwarded_message.length === 1) {
@@ -6731,16 +6762,32 @@ xabber.ChatContentView = xabber.BasicView.extend({
         }
 
         if (message.get('mentions') && message.get('mentions').length) {
+            let is_gc;
+            if (message.get('mentions').some(item => item.is_gc)){
+                stanza.c('mentions', {
+                    xmlns: Strophe.NS.GROUP_CHAT,
+                });
+                message.get('mentions').forEach((mention) => {
+                    let id = mention.target.match(/\;id=\w*/),
+                        target;
+                    if (id)
+                        target = id[0].slice(4);
+
+                    !mention.is_everyone && target && stanza.c('user', {
+                        id: target,
+                    }).up();
+                });
+                stanza.up();
+            }
             message.get('mentions').forEach((mention) => {
                 let mention_attrs = {xmlns: Strophe.NS.MARKUP};
-                mention.is_gc && (mention_attrs.node = Strophe.NS.GROUP_CHAT);
                 stanza.c('reference', {
                     xmlns: Strophe.NS.REFERENCE,
                     begin: mention.start + legacy_body.length,
                     end: mention.end + legacy_body.length,
                     type: 'decoration',
                 })
-                    .c('mention', mention_attrs).t(mention.target).up().up();
+                    .c('link', mention_attrs).t(mention.target).up().up();
             });
         }
 
@@ -8766,7 +8813,7 @@ xabber.Chats = xabber.ChatsBase.extend({
                     target = paramValue.target;
                 } else {
                     data = JSON.parse(paramValue);
-                    target = data.jid ? ('?jid=' + data.jid) : (data.id ?  ('?id=' + data.id) : "");
+                    target = data.id ?  ('?members;id=' + data.id) : "?members";
                     node.innerHTML = data.nickname;
                 }
                 data.is_me && node.classList.add('ground-color-100');
@@ -13579,12 +13626,14 @@ xabber.ChatBottomView = xabber.BasicView.extend({
                                 is_gc = this.contact.get('group_chat'),
                                 target = $($rich_textarea.find('mention')[mentions.length]).attr('data-target');
                             content_attrs.splice(mention_idx, mention_idx + 1);
+                            let is_everyone = target === '?members';
                             target = is_gc ? ('xmpp:' + this.contact.get('jid') + target) : ('xmpp:' + target);
                             mentions.push({
                                 start: start_idx,
                                 end: end_idx,
                                 target: target,
-                                is_gc: is_gc
+                                is_gc: is_gc,
+                                is_everyone: is_everyone
                             });
                         }
                         if (content.attributes.blockquote) {
@@ -13991,11 +14040,33 @@ xabber.ChatBottomView = xabber.BasicView.extend({
             $message.c('reference', {xmlns: Strophe.NS.REFERENCE, begin: blockquote.start + Array.from(forwarded_body).length, end: blockquote.end + Array.from(forwarded_body).length, type: 'decoration'})
                 .c('quote', {xmlns: Strophe.NS.MARKUP}).up().up();
         });
+        let is_gc;
+        if (mentions.some(item => item.is_gc)){
+            $message.c('mentions', {
+                xmlns: Strophe.NS.GROUP_CHAT,
+            });
+            mentions.forEach((mention) => {
+                let id = mention.target.match(/\;id=\w*/),
+                    target;
+                if (id)
+                    target = id[0].slice(4);
+
+                !mention.is_everyone && target && $message.c('user', {
+                    id: target,
+                }).up();
+            });
+            $message.up();
+        }
         mentions.forEach((mention) => {
             let mention_attrs = {xmlns: Strophe.NS.MARKUP};
             mention.is_gc && (mention_attrs.node = Strophe.NS.GROUP_CHAT);
-            $message.c('reference', {xmlns: Strophe.NS.REFERENCE, begin: mention.start + Array.from(forwarded_body).length, end: mention.end + Array.from(forwarded_body).length, type: 'decoration'})
-                .c('mention', mention_attrs).t(mention.target).up().up();
+            $message.c('reference', {
+                xmlns: Strophe.NS.REFERENCE,
+                begin: mention.start + Array.from(forwarded_body).length,
+                end: mention.end + Array.from(forwarded_body).length,
+                type: 'decoration'
+            })
+                .c('link', mention_attrs).t(mention.target).up().up();
         });
 
         if (files && files.length) {

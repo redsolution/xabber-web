@@ -32,7 +32,7 @@ xabber.Mention = Backbone.Model.extend({
         if (this.message.get('mentions') && this.message.get('mentions').length) {
             this.message.get('mentions').forEach((mention) => {
                 let mention_target = mention.target || "",
-                    id = mention_target.match(/\?id=\w*/),
+                    id = mention_target.match(/\;id=\w*/),
                     jid = mention_target.match(/\?jid=.*/);
                 if (id)
                     mention_target = id[0].slice(4);

@@ -619,20 +619,34 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
         if (!chat || !chat.item_view|| !chat.item_view.content) {
             return;
         }
-        let is_in_unread = chat.messages_unread.get(msg);
-        if (msg.get('is_unread'))
+        if ($elem.hasClass('unread-message-background')){
+            let is_in_unread = chat.messages_unread.get(msg);
+            if (msg.get('is_unread')){}
             msg.set('is_unread', false);
-        if (!is_in_unread && chat.get('const_unread') !== 0 && !isNaN(Number(chat.get('const_unread')))) {
-            let const_unread = chat.get('const_unread');
-            const_unread = --const_unread;
-            chat.set('const_unread', const_unread);
+            if (!is_in_unread && chat.get('const_unread') !== 0 && !isNaN(Number(chat.get('const_unread')))) {
+                let const_unread = chat.get('const_unread');
+                const_unread = --const_unread;
+                chat.set('const_unread', const_unread);
+            }
+            xabber.notifications_view.showReadAllBtn();
+            if (!this.$('.unread-message-background').length){
+                chat.set('const_unread', 0);
+            }
+            xabber.toolbar_view.recountAllMessageCounter();
+            this.recountFilteredCount();
+            return;
         }
-        xabber.notifications_view.showReadAllBtn();
-        if (!this.$('.unread-message-background').length){
-            chat.set('const_unread', 0);
+        if (msg.get('notification_mention') && msg.get('groupchat_jid') && msg.get('mention_msg_uniqueid')){
+            let groupchat_contact = msg.collection.account.contacts.get(msg.get('groupchat_jid')),
+                groupchat = msg.collection.account.chats.getChat(groupchat_contact),
+                account  = msg.collection.account;
+
+            xabber.body.setScreen('all-chats');
+            xabber.chats_view.openChat(groupchat.item_view, {clear_search: true, screen: 'all-chats'});
+            account.searched_messages = new xabber.Messages(null, {account: account});
+            groupchat.getMessageContext(msg.get('mention_msg_uniqueid'));
+
         }
-        xabber.toolbar_view.recountAllMessageCounter();
-        this.recountFilteredCount();
     },
 
     recountFilteredCount: function () {
@@ -1224,6 +1238,9 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
                 }
                 if ($notification_msg.find('verification-failed').length || $notification_msg.find('verification-rejected').length){
                     ignored = true;
+                }
+                if ($notification_msg.find('verification-successful').length){
+                    message.set('message', xabber.getString("notifications_successful_verification_msg"));
                 }
             }
         }

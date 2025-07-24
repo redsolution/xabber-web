@@ -9198,7 +9198,11 @@ xabber.Roster = xabber.ContactsBase.extend({
                 chat.item_view.content.loadNotificationsHistoryToPreviousLastMsg();
             }
             xabber.accounts.trigger('notification_chat_created');
-            this.account.cached_notifications.handleCachedNotifications(this);
+            this.account.cached_notifications.handleCachedNotifications(this, () => {
+                if (xabber.notifications_view.current_content && xabber.notifications_view.current_content.isVisible() && is_first_sync){
+                    xabber.notifications_view.current_content.onShowNotificationsTab();
+                }
+            });
         }
         if ($item.attr('pinned') || $item.attr('pinned') === '0'){
             chat.set('pinned', $item.attr('pinned'));
@@ -9443,7 +9447,11 @@ xabber.Roster = xabber.ContactsBase.extend({
             contact.set('subscription', 'both');
             chat.set('last_read_msg', last_read_msg);
             xabber.accounts.trigger('notification_chat_created');
-            this.account.cached_notifications.handleCachedNotifications(this);
+            this.account.cached_notifications.handleCachedNotifications(this, () => {
+                if (xabber.notifications_view.current_content && xabber.notifications_view.current_content.isVisible() && is_first_sync){
+                    xabber.notifications_view.current_content.onShowNotificationsTab();
+                }
+            });
         }
         if (pinned_timestamp || pinned_timestamp === '0'){
             chat.set('pinned', pinned_timestamp);
@@ -9655,7 +9663,11 @@ xabber.Roster = xabber.ContactsBase.extend({
                 chat.item_view.content.loadNotificationsHistoryToPreviousLastMsg();
             }
             xabber.accounts.trigger('notification_chat_created');
-            this.account.cached_notifications.handleCachedNotifications(this);
+            this.account.cached_notifications.handleCachedNotifications(this, () => {
+                if (xabber.notifications_view.current_content && xabber.notifications_view.current_content.isVisible() && is_first_sync){
+                    xabber.notifications_view.current_content.onShowNotificationsTab();
+                }
+            });
         }
 
         if (!$(iq).find('conversation').length || $(iq).find('conversation').length < constants.SYNCHRONIZATION_RSM_MAX ){
@@ -12289,6 +12301,7 @@ xabber.CachedNotifications = Backbone.ModelWithDataBase.extend({
                 notification_date = $(xml.firstChild).children('time').attr('stamp'),
                 previous_month_first_day_date = moment(Date.now()).subtract(1, 'months').startOf('month').format();
             if (notification_date && notification_date >= previous_month_first_day_date) {
+                value.notification_date = notification_date;
                 this.database.put('notification_items', value, function (response_value) {
                     callback && callback(response_value);
                 });
@@ -12312,14 +12325,14 @@ xabber.CachedNotifications = Backbone.ModelWithDataBase.extend({
         });
     },
 
-    handleCachedNotifications: function (self) {
+    handleCachedNotifications: function (self, callback) {
         this.getAllFromCachedNotifications((res) => {
             console.error(res.length);
             if (res.length){
                 let parser = new DOMParser();
                 _.each(res, (msg_item) => {
                     let xml = parser.parseFromString(msg_item.xml, "text/xml"),
-                        notification_date = $(xml.firstChild).children('time').attr('stamp'),
+                        notification_date = msg_item.notification_date || $(xml.firstChild).children('time').attr('stamp'),
                         previous_month_first_day_date = moment(Date.now()).subtract(1, 'months').startOf('month').format();
                     if (notification_date >= previous_month_first_day_date){
                         self.account.chats.makeMessageObject(xml.firstChild,
@@ -12333,10 +12346,8 @@ xabber.CachedNotifications = Backbone.ModelWithDataBase.extend({
                         this.removeFromCachedNotifications(msg_item.stanza_id);
                     }
                 });
-                if (xabber.notifications_view.current_content && xabber.notifications_view.current_content.isVisible() && is_first_sync){
-                    xabber.notifications_view.current_content.onShowNotificationsTab();
-                }
             }
+            callback && callback();
         });
     },
 

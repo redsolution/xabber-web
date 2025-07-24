@@ -24,6 +24,7 @@ let badges_names = [
         'database',
         'label',
         'label-outline',
+        'chat-outline',
         'download',
         'lock',
         'lock-open',
