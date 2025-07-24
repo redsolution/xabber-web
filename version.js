@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.4.150","version_description":"changed mentions handling and sending, added open message on mention in notifications, changed notifications caching, added notification date caching, fixed notifications tab update on cached notifications parsing, changed groupchats tab filtration icons, added text for successful omemo verification notification"}'
+'{"version_number":"2.4.151","version_description":"fixed groupchats icon transform, fixed own mention highlighting in notifications and context messages, changed mentions handling"}'
 )});

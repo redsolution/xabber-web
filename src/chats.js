@@ -450,7 +450,7 @@ xabber.MessagesBase = Backbone.Collection.extend({
                 begin = parseInt($reference.attr('begin')),
                 end = parseInt($reference.attr('end'));
             if (type === 'decoration') {
-                if ($reference.children(`link[xmlns="${Strophe.NS.MARKUP}"]`).length && $reference.children(`link[xmlns="${Strophe.NS.MARKUP}"]`).text().startsWith('xmpp:')) {
+                if ($reference.children(`link[xmlns="${Strophe.NS.MARKUP}"]`).length && $reference.children(`link[xmlns="${Strophe.NS.MARKUP}"]`).text().startsWith('xmpp:') && $reference.children(`link[xmlns="${Strophe.NS.MARKUP}"]`).text().includes('?members')) {
                     let $mention = $reference.children(`link[xmlns="${Strophe.NS.MARKUP}"]`),
                         target = $mention.text(),
                         is_everyone = target.endsWith('?members'),
@@ -462,7 +462,7 @@ xabber.MessagesBase = Backbone.Collection.extend({
                         is_gc: is_gc,
                         is_everyone: is_everyone
                     });
-                    if (options.notification_msg){
+                    if (options.notification_msg && !attrs.ntf_new_device_msg){
                         attrs.notification_mention = true;
                         attrs.mention_msg_uniqueid = $notification_msg.children('archived').attr('id') || $message.children('origin-id').attr('id') || $message.attr('id')
                     }
@@ -5012,11 +5012,21 @@ xabber.ChatContentView = xabber.BasicView.extend({
                 if (this.contact.get('group_chat') || message.get('groupchat_jid')) {
                     let id = mention_target.match(/\;id=\w*/),
                         jid = mention_target.match(/\?jid=.*/);
-                    if (id && this.contact.my_info) {
-                        mention_target = id[0].slice(4);
-                        (mention_target === this.contact.my_info.get('id')) && (mention.me = true);
+                    let contact = this.contact;
+                    if (message.get('notification_mention') && message.get('groupchat_jid')){
+                        contact = this.account.contacts.get(message.get('groupchat_jid'));
                     }
-                    else if (jid) {
+
+                    if (id && contact.my_info) {
+                        mention_target = id[0].slice(4);
+                        (mention_target === contact.my_info.get('id')) && (mention.me = true);
+                    } else if (id && contact.participants && contact.participants.length){
+                        let own_info = contact.participants.find(item => item.get('jid') === this.account.get('jid'));
+                        if (own_info){
+                            mention_target = id[0].slice(4);
+                            (mention_target === own_info.get('id')) && (mention.me = true);
+                        }
+                    } else if (jid) {
                         mention_target = jid[0].slice(5);
                         (mention_target === this.account.get('jid')) && (mention.me = true);
                     }
@@ -5031,7 +5041,6 @@ xabber.ChatContentView = xabber.BasicView.extend({
     },
 
     onMessage: function (message) {
-        this.updateMentions(message);
         this.account.messages.add(message);
         let is_scrolled_to_bottom = this.isScrolledToBottom(),
             scrolled_from_bottom = this.getScrollBottom(),
@@ -5775,6 +5784,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
     },
 
     buildMessageHtml: function (message) {
+        this.updateMentions(message);
         let attrs = _.clone(message.attributes),
             is_sender = (message instanceof xabber.Message) ? message.isSenderMe() : false,
             user_info = attrs.user_info || {}, username,
