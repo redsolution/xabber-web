@@ -400,6 +400,7 @@ import $ from "jquery";
     addSvgTemplate('svg.channel');
     addSvgTemplate('svg.rss');
     addSvgTemplate('svg.rss-variant');
+    addSvgTemplate('svg.info');
     addSvgTemplate('svg.server');
     addSvgTemplate('svg.volume-off-variant');
     addSvgTemplate('svg.message-group');

@@ -10,7 +10,8 @@ let badges_names = [
         'mobile',
         'rss-variant',
         'rss',
-        'server'
+        'server',
+        'info',
     ],
     material_icons = [
         'account-cancel',

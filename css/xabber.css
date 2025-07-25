@@ -9170,6 +9170,7 @@ input[type=text].simple-input-field:hover {
 /* -------------- BACK TO BOTTOM LABEL ---------------- */
 
 .back-to-bottom,
+.back-to-mentions,
 .back-to-unread {
     position: absolute;
     padding: 2px 0 0;
@@ -9182,12 +9183,23 @@ input[type=text].simple-input-field:hover {
     background-color: #FAFAFA;
     box-shadow: 0 0 2px 0 rgba(0,0,0,0.55);
 }
+.back-to-mentions:before{
+    position: absolute;
+    width: 36px;
+    left: 0;
+    top: 0;
+    font-size: 27px !important;
+    text-align: center;
+    pointer-events: none
+}
 
 .encryption-warning ~ .back-to-bottom,
+.encryption-warning ~ .back-to-mentions,
 .encryption-warning ~ .back-to-unread{
     bottom: 76px;
 }
 
+.back-to-mentions .back-to-mentions-counter,
 .back-to-unread .back-to-unread-counter{
     background-color: #388e3c;
     border-radius: 10px;
@@ -9204,7 +9216,12 @@ input[type=text].simple-input-field:hover {
     font-style: normal;
     text-align: center;
 }
-
+.back-to-mentions .back-to-mentions-counter{
+    right: -12px;
+    left: unset;
+    pointer-events: none;
+}
+.back-to-mentions .back-to-mentions-counter:empty,
 .back-to-unread .back-to-unread-counter:empty{
     display: none;
 }
@@ -10199,6 +10216,7 @@ input[type=text].simple-input-field:hover {
 .chat-item .chat-item-notifications-wrap .msg-counter,
 .chat-item .chat-item-notifications-wrap .msg-chat-error,
 .chat-item .chat-item-notifications-wrap .msg-chat-session,
+.chat-item .chat-item-notifications-wrap .msg-chat-mention,
 .chat-item .chat-item-notifications-wrap .msg-incoming-subscription{
     position:static !important;
     margin-left: 4px;
@@ -10207,6 +10225,8 @@ input[type=text].simple-input-field:hover {
     width: 14px;
     padding: 1px !important;
 }
+.chat-item .chat-item-notifications-wrap .msg-chat-mention polygon,
+.chat-item .chat-item-notifications-wrap .msg-chat-mention path,
 .chat-item .chat-item-notifications-wrap .msg-incoming-subscription polygon{
     fill: #FFF;
 }
@@ -10239,6 +10259,7 @@ input[type=text].simple-input-field:hover {
 .chat-list-wrap.left-panel-list-wrap .chat-item .msg-incoming-subscription,
 .chat-list-wrap.left-panel-list-wrap .chat-item .msg-chat-error,
 .chat-list-wrap.left-panel-list-wrap .chat-item .msg-chat-session,
+.chat-list-wrap.left-panel-list-wrap .chat-item .msg-chat-mention,
 .chat-list-wrap.left-panel-list-wrap .chat-item .msg-counter {
     position: absolute;
     right: 3px;
@@ -10254,7 +10275,8 @@ input[type=text].simple-input-field:hover {
     background-color: #388E3C;
 }
 
-.chat-list-wrap.left-panel-list-wrap .chat-item .msg-incoming-subscription{
+.chat-list-wrap.left-panel-list-wrap .chat-item .msg-incoming-subscription,
+.chat-list-wrap.left-panel-list-wrap .chat-item .msg-chat-mention{
     width: 18px;
     padding: 3px !important;
 }
@@ -24143,7 +24165,7 @@ ul.restrictions-list-content>li {
     position: absolute;
     right: 8px;
     bottom: 16px;
-    outline: 2px solid #fff;
+    outline: 1px solid #fff;
 }
 .notifications-content-wrap .chat-message .left-side .notification-icon{
     font-size: 10px;

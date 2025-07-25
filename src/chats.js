@@ -1806,10 +1806,40 @@ xabber.JingleMessage = Backbone.Model.extend({
                         });
                     });
                 }, (err) => {
-                    if (err === 'no_messages'){
+                    if (err === 'no_messages' && !options.force_context){
                         if (this.item_view && !this.item_view.content)
                             this.item_view.content = new xabber.ChatContentView({chat_item: this});
                         this.item_view.content.backToBottom();
+                    } else if (err === 'no_messages' ){
+                        this.messages_view.messagesRequest({before: stanza_id}, () => {
+                            let screen = 'all-chats';
+                            if (options.mention)
+                                screen = 'mentions';
+                            else if (options.message)
+                                screen = xabber.body.screen.get('name');
+                            xabber.body.setScreen(screen, {
+                                right: 'message_context',
+                                model: this,
+                                right_contact_modal: false,
+                            }, {
+                                right_contact_save: true,
+                            });
+
+                        }, () => {
+                            let screen = 'all-chats';
+                            if (options.mention)
+                                screen = 'mentions';
+                            else if (options.message)
+                                screen = xabber.body.screen.get('name');
+                            xabber.body.setScreen(screen, {
+                                right: 'message_context',
+                                model: this,
+                                right_contact_modal: false,
+                            }, {
+                                right_contact_save: true,
+                            });
+                        });
+
                     }
                 });
             }
@@ -2225,6 +2255,7 @@ xabber.ChatItemView = xabber.BasicView.extend({
         this.listenTo(this.model, 'change:active_verification_session', this.updateChatSession);
         this.listenTo(this.model, 'change:notifications', this.updateNotificationsState);
         this.listenTo(this.model, 'change:muted', this.updateMutedState);
+        this.listenTo(this.model, 'change:mentions_value', this.updateUnreadMentions);
         this.listenTo(this.model, 'open', this.open);
         this.listenTo(this.model, 'remove_opened_chat', this.onClosed);
         this.listenTo(this.model.messages, 'add', this.updateChatCard);
@@ -2379,6 +2410,11 @@ xabber.ChatItemView = xabber.BasicView.extend({
             this.$el.removeClass('hidden2');
         }
         xabber.trigger('new_incoming_subscription');
+    },
+
+    updateUnreadMentions: function () {
+        this.$('.msg-chat-mention').showIf(this.model.get('mentions_value') && this.model.get('mentions_value').unread_mentions);
+        this.updateTextClipping();
     },
 
     updateChatError: function () {
@@ -2898,6 +2934,7 @@ xabber.ChatItemView = xabber.BasicView.extend({
           'click .chat-msg-location-content': 'onClickLocation',
           'mouseover .chat-msg-location-content.no-title': 'onHoverLocation',
           'click .mdi-link-variant': 'onClickLink',
+          "click .back-to-mentions": "openUnreadMention",
           'click .msg-copy-location' : 'onClickLocationLink',
           "keyup .messages-search-form": "keyupSearch"
       },
@@ -2912,6 +2949,7 @@ xabber.ChatItemView = xabber.BasicView.extend({
           this.$history_feedback = this.$('.load-history-feedback');
           this.account.context_messages = new xabber.Messages(null, {account: this.account});
           this.listenTo(this.account.context_messages, 'change:last_replace_time', this.chat_content.updateMessage);
+          this.listenTo(this.model, 'change:mentions_value', this.chat_content.updateUnreadMentions.bind(this));
           this.listenTo(this.account.context_messages, 'add', this.addMessage);
           this.listenTo(this.account.context_messages, 'change:is_unread', this.onChangedReadState);
           this.listenTo(xabber, 'plyr_player_updated', this.onUpdatePlyr);
@@ -2920,6 +2958,7 @@ xabber.ChatItemView = xabber.BasicView.extend({
       render: function () {
           this.scrollToTop();
           this.onUpdatePlyr();
+          this.chat_content.updateUnreadMentions.bind(this)();
           this.$('.back-to-bottom').hideIf(this.isScrolledToBottom());
           this.encrypted && this.$el.attr('data-trust', true)
       },
@@ -2943,6 +2982,10 @@ xabber.ChatItemView = xabber.BasicView.extend({
                   }
               }
           this.$('.back-to-bottom').hideIf(this.isScrolledToBottom());
+      },
+
+      openUnreadMention: function () {
+          this.chat_content.openUnreadMention.bind(this)();
       },
 
       onScroll: function () {
@@ -2975,6 +3018,7 @@ xabber.ChatItemView = xabber.BasicView.extend({
           this._onscroll_read_messages_timeout = setTimeout(() => {
               this.chat_content.readVisibleMessages(true);
           }, 100)
+          this.chat_content.updateUnreadMentions.bind(this)();
       },
 
       onChangedReadState: function (message) {
@@ -3654,6 +3698,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
         "click .btn-cancel-searching": "cancelSearch",
         "click .back-to-bottom": "backToBottom",
         "click .back-to-unread:not(.back-to-bottom)": "scrollToUnreadWithButton",
+        "click .back-to-mentions": "openUnreadMention",
         "click .btn-retry-send-message": "retrySendMessage",
         "click .btn-delete-message": "removeFileErrorMessage",
         "click .not-decrypted-tooltip .btn-manage-devices": "openDevicesWindow",
@@ -3706,6 +3751,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
         this.listenTo(this.model.messages, 'change:last_replace_time', this.updateMessage);
         this.listenTo(this.model, 'change:unread', this.updateCounter);
         this.listenTo(this.model, 'change:const_unread', this.updateCounter);
+        this.listenTo(this.model, 'change:mentions_value', this.updateUnreadMentions);
         if (this.contact) {
             this.subscription_buttons = new xabber.SubscriptionButtonsView({contact: this.contact, el: this.$('.subscription-buttons-wrap')[0]});
             this.listenTo(this.contact, 'change:blocked', this.updateBlockedState);
@@ -3739,6 +3785,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
         this.updateContactStatus();
         this.updateWaveforms();
         this.onUpdatePlyr();
+        this.updateUnreadMentions();
         if (this.contact) {
             this.contact.get('group_chat') && this.updatePinnedMessage();
             this.subscription_buttons.render();
@@ -4230,9 +4277,11 @@ xabber.ChatContentView = xabber.BasicView.extend({
             this.model.set('last_read_msg', msg.get('stanza_id'));
             this.model.set('prev_last_read_msg', msg.get('stanza_id'));
         }
-        !this.model.get('notifications') && this.model.set('const_unread', 0);
+        // !this.model.get('notifications') && this.model.set('const_unread', 0);
+        this.model.set('const_unread', 0);
         this.model.set('show_new_unread', false);
-        !this.model.get('notifications') && _.each(unread_messages, (msg) => {
+        // !this.model.get('notifications') && _.each(unread_messages, (msg) => {
+        _.each(unread_messages, (msg) => {
             if (!timestamp || msg.get('timestamp') <= timestamp) {
                 msg.set('is_unread', false);
             }
@@ -4240,7 +4289,8 @@ xabber.ChatContentView = xabber.BasicView.extend({
         if (this.model.last_message && this.model.last_message.get('is_unread') && !unread_messages.length){
             let msg = this.model.last_message;
             this.model.sendMarker(msg.get('msgid'), 'displayed', msg.get('stanza_id'), msg.get('contact_stanza_id'), msg.get('encrypted') && msg.get('ephemeral_timer'));
-            !this.model.get('notifications') && msg.set('is_unread', false);
+            // !this.model.get('notifications') && msg.set('is_unread', false);
+            msg.set('is_unread', false);
             msg.get('stanza_id') && this.model.set('last_read_msg', msg.get('stanza_id'));
             msg.get('stanza_id') && this.model.set('prev_last_read_msg', msg.get('stanza_id'));
         }
@@ -4256,7 +4306,8 @@ xabber.ChatContentView = xabber.BasicView.extend({
         }
         if (!unread_messages.length) {
             let unread_messages = _.clone(this.model.messages.models).filter(item => Boolean(item.get('is_unread')));
-            !this.model.get('notifications') && _.each(unread_messages, (msg) => {
+            // !this.model.get('notifications') && _.each(unread_messages, (msg) => {
+            _.each(unread_messages, (msg) => {
                 msg.set('is_unread', false);
             });
         }
@@ -4313,6 +4364,27 @@ xabber.ChatContentView = xabber.BasicView.extend({
         this.$('.back-to-unread').showIf(!this.isScrolledToBottom() && this.$(`.chat-message.unread-message`).length);
     },
 
+    openUnreadMention: function () {
+        if (this.model.get('mentions_value') && this.model.get('mentions_value').first_mention_id){
+            this.account.searched_messages = new xabber.Messages(null, {account: this.account});
+            this.model.getMessageContext(this.model.get('mentions_value').first_mention_id, {force_context: true});
+            if (xabber.notifications_view && xabber.notifications_view.current_content && this.model.get('mentions_value').notification_unique_id){
+                xabber.notifications_view.current_content.readMessage(this.model.get('mentions_value').notification_unique_id);
+            }
+        }
+    },
+
+    updateUnreadMentions: function () {
+        let unread_mentions = this.model.get('mentions_value') && this.model.get('mentions_value').unread_mentions;
+        this.$('.back-to-mentions').showIf(this.model.get('mentions_value') && this.model.get('mentions_value').unread_mentions);
+        this.$('.back-to-mentions-counter').text(unread_mentions || '');
+        if (!this.$('.back-to-bottom:not(.back-to-unread)').hasClass('hidden') && !this.$('.back-to-bottom:not(.back-to-unread)').hasClass('hidden')){
+            this.$('.back-to-mentions').css('margin-bottom', '44px');
+        } else {
+            this.$('.back-to-mentions').css('margin-bottom', '');
+        }
+    },
+
     onScrollY: function () {
         this._prev_scrolltop = this._scrolltop || this._prev_scrolltop || 0;
         this._scrolltop = this.getScrollTop() || this._scrolltop || this._prev_scrolltop || 0;
@@ -4326,6 +4398,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
         this.$('.back-to-bottom:not(.back-to-unread)').hideIf(this.isScrolledToBottom() || this.$(`.chat-message.unread-message`).length);
         this.$('.back-to-unread').showIf(!this.isScrolledToBottom() && this.$(`.chat-message.unread-message`).length);
         this.$('.back-to-unread').removeClass('back-to-bottom');
+        this.updateUnreadMentions();
     },
 
     onScroll: function (ev, is_focused) {
