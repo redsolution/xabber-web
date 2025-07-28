@@ -795,9 +795,17 @@ xabber.Contact = Backbone.Model.extend({
                 callback && callback($msg);
             return true;
         }, Strophe.NS.MAM, null, null, null, null, {query_id: queryid} );
-        this.account.sendIQFast(iq, () => {
+        this.account.sendIQFast(iq, (res) => {
+            if (
+                $(res).find('fin').length && $(res).find('fin').attr('complete') === 'true'
+                && $(res).find('fin').find('count').length && $(res).find('fin').find('count').text() === '0'
+            ){
+                callback && callback('no_messages');
+            }
+
                 this.account.connection.deleteHandler(handler);
-            }, () => {
+            }, (err) => {
+
                 this.account.connection.deleteHandler(handler);
             }
         );

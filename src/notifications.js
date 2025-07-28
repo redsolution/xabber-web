@@ -611,7 +611,7 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
             msg = this.notification_messages.get(unique_id);
 
         let chat;
-        if (msg.collection && msg.collection.chat) {
+        if (msg && msg.collection && msg.collection.chat) {
             chat = msg.collection.chat;
         }
         if (chat && chat.item_view && !chat.item_view.content)
@@ -632,32 +632,41 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
             });
             return;
         }
-        // if ($elem.hasClass('unread-message-background')){
-        //     let is_in_unread = chat.messages_unread.get(msg);
-        //     if (msg.get('is_unread')){}
-        //     msg.set('is_unread', false);
-        //     if (!is_in_unread && chat.get('const_unread') !== 0 && !isNaN(Number(chat.get('const_unread')))) {
-        //         let const_unread = chat.get('const_unread');
-        //         const_unread = --const_unread;
-        //         chat.set('const_unread', const_unread);
-        //     }
-        //     xabber.notifications_view.showReadAllBtn();
-        //     if (!this.$('.unread-message-background').length){
-        //         chat.set('const_unread', 0);
-        //     }
-        //     xabber.toolbar_view.recountAllMessageCounter();
-        //     this.recountFilteredCount();
-        //     return;
-        // }
+        if ($elem.hasClass('unread-message-background')){
+            let is_in_unread = chat.messages_unread.get(msg);
+            if (msg.get('is_unread')){}
+            msg.set('is_unread', false);
+            if (!is_in_unread && chat.get('const_unread') !== 0 && !isNaN(Number(chat.get('const_unread')))) {
+                let const_unread = chat.get('const_unread');
+                const_unread = --const_unread;
+                chat.set('const_unread', const_unread);
+            }
+            xabber.notifications_view.showReadAllBtn();
+            if (!this.$('.unread-message-background').length){
+                chat.set('const_unread', 0);
+            }
+            xabber.toolbar_view.recountAllMessageCounter();
+            this.recountFilteredCount();
+        }
         if (msg.get('notification_mention') && msg.get('groupchat_jid') && msg.get('mention_msg_uniqueid')){
             let groupchat_contact = msg.collection.account.contacts.get(msg.get('groupchat_jid')),
                 groupchat = msg.collection.account.chats.getChat(groupchat_contact),
                 account  = msg.collection.account;
 
-            xabber.body.setScreen('all-chats');
-            xabber.chats_view.openChat(groupchat.item_view, {clear_search: true, screen: 'all-chats'});
-            account.searched_messages = new xabber.Messages(null, {account: account});
-            groupchat.getMessageContext(msg.get('mention_msg_uniqueid'));
+            groupchat.getMessageContext(msg.get('mention_msg_uniqueid'), {open_mention_notification: true }, () => {
+
+                let remove_list = this.notification_messages.filter(item => item.get('unique_id') === msg.get('unique_id')),
+                    new_list = this.notification_messages.filter(item => item.get('unique_id') !== msg.get('unique_id'));
+
+                _.each(remove_list, (item) => {
+                    this.removeMessageFromDOM(item);
+                });
+                remove_list.length && this.notification_messages.reset(new_list);
+
+                account.cached_notifications.removeFromCachedNotifications(msg.get('stanza_id'));
+                account.retractMessageById(msg.get('stanza_id'), account.get('jid'), chat.get('jid'), chat.get('sync_type'));
+
+            });
 
         }
     },
@@ -928,9 +937,7 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
             }
         } else {
             $msg.removeClass('unread-message');
-            setTimeout(() => {
-                $msg.removeClass('unread-message-background');
-            }, 1000);
+            $msg.removeClass('unread-message-background');
 
             if (message.collection && message.collection.account){
                 message.get('xml') && message.collection.account.cached_notifications.putInCachedNotifications({
@@ -953,6 +960,18 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
             let groupchat_contact = message.collection.account.contacts.get(message.get('groupchat_jid')),
                 groupchat = message.collection.account.chats.getChat(groupchat_contact);
 
+            let mention_messages = message.collection.filter(item => item.get('notification_mention')
+                && item.get('groupchat_jid')
+                && item.get('mention_msg_uniqueid')
+                && item.get('is_unread')
+            ), list_of_mention_ids;
+            if (mention_messages.length){
+                list_of_mention_ids = mention_messages.map(item => {
+                return {
+                    msg_id: item.get('mention_msg_uniqueid'),
+                    notification_id: item.get('unique_id')
+                }});
+            }
             if (groupchat.get('mentions_value')){
                 let mentions_value = groupchat.get('mentions_value');
                 if (is_unread)
@@ -983,14 +1002,19 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
                         mentions_value = null;
                     }
                 }
+                mentions_value && (mentions_value.mention_ids_list = []);
+                list_of_mention_ids && mentions_value && (mentions_value.mention_ids_list = list_of_mention_ids);
                 groupchat.set('mentions_value', mentions_value);
+                groupchat.trigger('update_unread_mentions');
             } else if (is_unread) {
                 groupchat.set('mentions_value', {
                     unread_mentions: 1,
                     first_mention_id: message.get('mention_msg_uniqueid'),
                     first_mention_timestamp: message.get('timestamp'),
                     notification_unique_id: message.get('unique_id'),
+                    mention_ids_list: list_of_mention_ids || [],
                 });
+                groupchat.trigger('update_unread_mentions');
             }
         }
     },

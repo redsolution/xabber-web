@@ -9217,8 +9217,8 @@ input[type=text].simple-input-field:hover {
     text-align: center;
 }
 .back-to-mentions .back-to-mentions-counter{
-    right: -12px;
-    left: unset;
+    /*right: -12px;*/
+    /*left: unset;*/
     pointer-events: none;
 }
 .back-to-mentions .back-to-mentions-counter:empty,
@@ -9970,7 +9970,12 @@ input[type=text].simple-input-field:hover {
     top: 0px;
     left: 0px;
 }
-.status-bulb svg,
+.status-bulb svg{
+    left: -1px;
+    pointer-events: none;
+    position: absolute;
+    top: -1px;
+}
 .chat-head-wrap .chat-icon svg {
     position: absolute;
     pointer-events: none;

@@ -1757,7 +1757,7 @@ xabber.JingleMessage = Backbone.Model.extend({
           }
       },
 
-    getMessageContext: function (unique_id, options) {
+    getMessageContext: function (unique_id, options, errback) {
         options = options || {};
         let messages = options.mention && this.account.messages || options.searched_messages && !options.encrypted && this.account.searched_messages || options.message && xabber.all_searched_messages || this.account.messages,
             message = messages.get(unique_id),
@@ -1765,6 +1765,10 @@ xabber.JingleMessage = Backbone.Model.extend({
 
         dfd.done(() => {
             if (message) {
+                if (options.open_mention_notification){
+                    xabber.body.setScreen('all-chats');
+                    xabber.chats_view.openChat(this.item_view, {clear_search: true, screen: 'all-chats'});
+                }
                 if (options.searched_messages)
                     message.set('searched_message', false);
                 let stanza_id = message.get('stanza_id');
@@ -1808,7 +1812,7 @@ xabber.JingleMessage = Backbone.Model.extend({
                 }, (err) => {
                     if (err === 'no_messages' && !options.force_context){
                         if (this.item_view && !this.item_view.content)
-                            this.item_view.content = new xabber.ChatContentView({chat_item: this});
+                            this.item_view.content = new xabber.ChatContentView({chat_item: this.item_view});
                         this.item_view.content.backToBottom();
                     } else if (err === 'no_messages' ){
                         this.messages_view.messagesRequest({before: stanza_id}, () => {
@@ -1851,7 +1855,18 @@ xabber.JingleMessage = Backbone.Model.extend({
             });
             if (!message) {
                 let getMessageFunc = this.contact ? this.contact.getMessageByStanzaId.bind(this.contact) : this.account.getMessageByStanzaIdInSavedChat.bind(this.account);
-                    getMessageFunc(unique_id, ($message) => {
+                getMessageFunc(unique_id, ($message) => {
+                    if ($message === 'no_messages'){
+                        if (options.open_mention_notification){
+                            utils.dialogs.common('', xabber.getString("message_was_deleted"), {ok_button: xabber.getString('ok')});
+                            errback && errback()
+                        }
+                        dfd.resolve();
+                        return;
+                    }
+                    if (options.open_mention_notification){
+                        this.account.searched_messages = new xabber.Messages(null, {account: this.account});
+                    }
                     if (options.encrypted && this.account.omemo) {
                         let omemo_dfd = new $.Deferred;
                         omemo_dfd.done(($msg, msg_options) => {
@@ -3265,7 +3280,7 @@ xabber.ChatItemView = xabber.BasicView.extend({
                   this.$el.html(this.template());
                   this.emptyChat();
                   if (this.parent.model && this.parent.model.get('search_hidden'))
-                      this.hideSearch();
+                      this.hideSearch(null, true);
               }
           }
           this.ps_container = this.$('.search-messages-content-wrap');
@@ -3751,7 +3766,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
         this.listenTo(this.model.messages, 'change:last_replace_time', this.updateMessage);
         this.listenTo(this.model, 'change:unread', this.updateCounter);
         this.listenTo(this.model, 'change:const_unread', this.updateCounter);
-        this.listenTo(this.model, 'change:mentions_value', this.updateUnreadMentions);
+        this.listenTo(this.model, 'update_unread_mentions', this.updateUnreadMentions);
         if (this.contact) {
             this.subscription_buttons = new xabber.SubscriptionButtonsView({contact: this.contact, el: this.$('.subscription-buttons-wrap')[0]});
             this.listenTo(this.contact, 'change:blocked', this.updateBlockedState);
@@ -4172,6 +4187,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
     },
 
     readVisibleMessages: function (is_context) {
+        this.readVisibleMentions(is_context);
         let self = is_context ? this.model.messages_view : this;
         if (!self.isVisible())
             return;
@@ -4191,6 +4207,25 @@ xabber.ChatContentView = xabber.BasicView.extend({
                 console.log(this.model.messages.get($(last_visible_unread_msg).data('uniqueid')));
                 console.log(this.model.messages);
             }
+        }
+    },
+    readVisibleMentions: function (is_context) {
+        let self = is_context ? this.model.messages_view : this;
+        if (!self.isVisible())
+            return;
+        if (self.$('.chat-message').length && xabber.get('focused') && !xabber.get('idle')){
+            let mention_ids = this.model && this.model.get('mentions_value') && this.model.get('mentions_value').mention_ids_list;
+
+            if (!mention_ids || !mention_ids.length)
+                return;
+
+            _.each(mention_ids, (item) => {
+                let $msg = self.$(`.chat-message[data-uniqueid="${item.msg_id}"]`);
+                if ($msg.length && $msg.isVisibleInContainer(self.$('.chat-content'))){
+                    xabber.notifications_view.current_content.readMessage(item.notification_id); // сделать связку
+                    this.updateUnreadMentions();
+                }
+            });
         }
     },
 
@@ -4277,11 +4312,11 @@ xabber.ChatContentView = xabber.BasicView.extend({
             this.model.set('last_read_msg', msg.get('stanza_id'));
             this.model.set('prev_last_read_msg', msg.get('stanza_id'));
         }
-        // !this.model.get('notifications') && this.model.set('const_unread', 0);
-        this.model.set('const_unread', 0);
+        !this.model.get('notifications') && this.model.set('const_unread', 0);
+        // this.model.set('const_unread', 0);
         this.model.set('show_new_unread', false);
-        // !this.model.get('notifications') && _.each(unread_messages, (msg) => {
-        _.each(unread_messages, (msg) => {
+        !this.model.get('notifications') && _.each(unread_messages, (msg) => {
+        // _.each(unread_messages, (msg) => {
             if (!timestamp || msg.get('timestamp') <= timestamp) {
                 msg.set('is_unread', false);
             }
@@ -4289,8 +4324,8 @@ xabber.ChatContentView = xabber.BasicView.extend({
         if (this.model.last_message && this.model.last_message.get('is_unread') && !unread_messages.length){
             let msg = this.model.last_message;
             this.model.sendMarker(msg.get('msgid'), 'displayed', msg.get('stanza_id'), msg.get('contact_stanza_id'), msg.get('encrypted') && msg.get('ephemeral_timer'));
-            // !this.model.get('notifications') && msg.set('is_unread', false);
-            msg.set('is_unread', false);
+            !this.model.get('notifications') && msg.set('is_unread', false);
+            // msg.set('is_unread', false);
             msg.get('stanza_id') && this.model.set('last_read_msg', msg.get('stanza_id'));
             msg.get('stanza_id') && this.model.set('prev_last_read_msg', msg.get('stanza_id'));
         }
@@ -4306,8 +4341,8 @@ xabber.ChatContentView = xabber.BasicView.extend({
         }
         if (!unread_messages.length) {
             let unread_messages = _.clone(this.model.messages.models).filter(item => Boolean(item.get('is_unread')));
-            // !this.model.get('notifications') && _.each(unread_messages, (msg) => {
-            _.each(unread_messages, (msg) => {
+            !this.model.get('notifications') && _.each(unread_messages, (msg) => {
+            // _.each(unread_messages, (msg) => {
                 msg.set('is_unread', false);
             });
         }
@@ -4375,13 +4410,15 @@ xabber.ChatContentView = xabber.BasicView.extend({
     },
 
     updateUnreadMentions: function () {
-        let unread_mentions = this.model.get('mentions_value') && this.model.get('mentions_value').unread_mentions;
         this.$('.back-to-mentions').showIf(this.model.get('mentions_value') && this.model.get('mentions_value').unread_mentions);
-        this.$('.back-to-mentions-counter').text(unread_mentions || '');
-        if (!this.$('.back-to-bottom:not(.back-to-unread)').hasClass('hidden') && !this.$('.back-to-bottom:not(.back-to-unread)').hasClass('hidden')){
-            this.$('.back-to-mentions').css('margin-bottom', '44px');
-        } else {
-            this.$('.back-to-mentions').css('margin-bottom', '');
+        if (this.model.get('mentions_value') && this.model.get('mentions_value').unread_mentions){
+            let unread_mentions = this.model.get('mentions_value') && this.model.get('mentions_value').unread_mentions;
+            this.$('.back-to-mentions-counter').text(unread_mentions || '');
+            if (this.$('.back-to-bottom:not(.back-to-unread)').hasClass('hidden') && this.$('.back-to-unread').hasClass('hidden')){
+                this.$('.back-to-mentions').css('margin-bottom', '');
+            } else {
+                this.$('.back-to-mentions').css('margin-bottom', '44px');
+            }
         }
     },
 

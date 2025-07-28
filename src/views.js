@@ -150,7 +150,11 @@ xabber.BasicView = Backbone.View.extend({
         if (this.ps_container && this.isVisible()) {
             let scroll_top = this.data.get('scroll_top');
             if (typeof scroll_top === "undefined") {
-                this.ps_container.perfectScrollbar('update');
+                try{
+                    this.ps_container.perfectScrollbar('update');
+                } catch (e) {
+                    console.error(e);
+                }
             } else {
                 this.data.set('scroll_top', undefined);
                 this.scrollTo(scroll_top);
