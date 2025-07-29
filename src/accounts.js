@@ -492,7 +492,7 @@ xabber.Account = Backbone.Model.extend({
             this.session.set({conn_status: status, conn_condition: condition});
             if ((status === Strophe.Status.ERROR) && (condition === 'conflict') && !this.session.get('delete')) {
                 this.onConnectionConflict();
-            } else if (status === Strophe.Status.ERROR && (condition === 'connection-timeout')) {
+            } else if ((status === Strophe.Status.ERROR && (condition === 'connection-timeout')) || status === Strophe.Status.CONNFAIL) {
                 this.session.set('connection_timeout', true);
             } else if (status === Strophe.Status.ERROR && (condition === 'policy-violation')) {
                 this.onAuthFailed(condition);
@@ -552,7 +552,9 @@ xabber.Account = Backbone.Model.extend({
                     ready_to_send: false,
                 });
                 if (this.session.get('connection_timeout')){
-                    this.connect();
+                    setTimeout(() => {
+                        this.connect();
+                    }, 5000)
                 }
             }
         },

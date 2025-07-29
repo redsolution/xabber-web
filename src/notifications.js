@@ -121,9 +121,15 @@ xabber.NotificationsView = xabber.BasicView.extend({
     },
 
     clickClearFilter: function () {
-        this.clearFilter();
-        this.updateAccountsFilter();
-        this.updateFilterItems();
+        if (this.current_content && this.current_content.notifications_chats && this.current_content.notifications_chats.length){
+            if (this.current_content.filter_type === 'all' && this.current_content.notifications_chats.length === 1)
+                this.current_content.scrollToTop();
+            else {
+                this.clearFilter();
+                this.updateAccountsFilter();
+                this.updateFilterItems();
+            }
+        }
     },
 
     updateClientNotifications: function () {

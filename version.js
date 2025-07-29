@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.4.156","version_description":"added system notification type handling, added that type to trust notifications"}'
+'{"version_number":"2.4.157","version_description":"changed header click func in notifications if no active filtration, added reconnection on connfail, changed leave group btn text"}'
 )});

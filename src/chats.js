@@ -11393,6 +11393,7 @@ xabber.InvitationPanelView = xabber.SearchView.extend({
         this.updateIcon();
         this.$('.btn-jingle-message').showIf(!is_group_chat && xabber.get('audio') || xabber.current_voip_call);
         this.$('.btn-jingle-message').hideIf(!xabber.settings.jingle_calls);
+        this.$('.btn-delete-chat span').text((is_group_chat && xabber.getString("groupchat_leave_full")) || xabber.getString("delete_chat"));
         this.$('.contact-status').hideIf(is_group_chat);
         this.updateMenu();
     },
