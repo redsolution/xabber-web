@@ -6618,7 +6618,12 @@ xabber.CounterChangesLogging = Backbone.ModelWithStorage.extend({
     },
 
     updateCountersList: function (account) {
+        console.error(this.get('counters_list'));
+        console.error(this.get('counters_list').length);
         let counters_list = _.clone(this.get('counters_list'));
+        if (counters_list && counters_list.length > 250){
+            counters_list = [];
+        }
 
         let stack;
 
