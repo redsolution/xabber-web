@@ -229,7 +229,7 @@ xabber.Fingerprints = xabber.BasicView.extend({
                 id: msg_id
             });
         stanza.c('notify', {xmlns: Strophe.NS.XABBER_NOTIFY});
-        stanza.c('notification', {xmlns: Strophe.NS.XABBER_NOTIFY});
+        stanza.c('notification', {xmlns: Strophe.NS.XABBER_NOTIFY, type: 'system'});
         stanza.c('forwarded', {xmlns: Strophe.NS.FORWARD});
         stanza.c('message', {
             to: this.jid,
@@ -416,7 +416,7 @@ xabber.Fingerprints = xabber.BasicView.extend({
                 id: msg_id
             });
         stanza.c('notify', {xmlns: Strophe.NS.XABBER_NOTIFY});
-        stanza.c('notification', {xmlns: Strophe.NS.XABBER_NOTIFY});
+        stanza.c('notification', {xmlns: Strophe.NS.XABBER_NOTIFY, type: 'system'});
         stanza.c('forwarded', {xmlns: Strophe.NS.FORWARD});
         stanza.c('message', {
             to: to,
@@ -790,7 +790,7 @@ xabber.FingerprintsOwnDevices = xabber.BasicView.extend({
                 id: msg_id
             });
         stanza.c('notify', {xmlns: Strophe.NS.XABBER_NOTIFY});
-        stanza.c('notification', {xmlns: Strophe.NS.XABBER_NOTIFY});
+        stanza.c('notification', {xmlns: Strophe.NS.XABBER_NOTIFY, type: 'system'});
         stanza.c('forwarded', {xmlns: Strophe.NS.FORWARD});
         stanza.c('message', {
             to: this.account.get('jid'),

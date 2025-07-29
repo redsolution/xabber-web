@@ -71,7 +71,7 @@ xabber.IncomingTrustSessionView = xabber.BasicView.extend({
                     id: iq_id
                 });
             stanza.c('notify', {xmlns: Strophe.NS.XABBER_NOTIFY});
-            stanza.c('notification', {xmlns: Strophe.NS.XABBER_NOTIFY});
+            stanza.c('notification', {xmlns: Strophe.NS.XABBER_NOTIFY, type: 'system'});
             stanza.c('forwarded', {xmlns: Strophe.NS.FORWARD});
             stanza.c('message', {
                 to: to,
@@ -328,7 +328,7 @@ xabber.ActiveSessionModalView = xabber.BasicView.extend({
                 id: iq_id
             });
         stanza.c('notify', {xmlns: Strophe.NS.XABBER_NOTIFY});
-        stanza.c('notification', {xmlns: Strophe.NS.XABBER_NOTIFY});
+        stanza.c('notification', {xmlns: Strophe.NS.XABBER_NOTIFY, type: 'system'});
         stanza.c('forwarded', {xmlns: Strophe.NS.FORWARD});
         stanza.c('message', {
             to: to,
@@ -547,7 +547,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                     id: msg_id
                 });
             stanza.c('notify', {xmlns: Strophe.NS.XABBER_NOTIFY});
-            stanza.c('notification', {xmlns: Strophe.NS.XABBER_NOTIFY});
+            stanza.c('notification', {xmlns: Strophe.NS.XABBER_NOTIFY, type: 'system'});
             stanza.c('forwarded', {xmlns: Strophe.NS.FORWARD});
             stanza.c('message', {
                 to: to,
@@ -790,7 +790,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                     id: msg_id
                 });
                 final_stanza.c('notify', {xmlns: Strophe.NS.XABBER_NOTIFY});
-                final_stanza.c('notification', {xmlns: Strophe.NS.XABBER_NOTIFY});
+                final_stanza.c('notification', {xmlns: Strophe.NS.XABBER_NOTIFY, type: 'system'});
                 final_stanza.c('forwarded', {xmlns: Strophe.NS.FORWARD});
 
                 final_stanza.cnode(stanza.tree()).up();
@@ -2303,7 +2303,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                         id: msg_id
                     });
                 stanza.c('notify', {xmlns: Strophe.NS.XABBER_NOTIFY});
-                stanza.c('notification', {xmlns: Strophe.NS.XABBER_NOTIFY});
+                stanza.c('notification', {xmlns: Strophe.NS.XABBER_NOTIFY, type: 'system'});
                 stanza.c('forwarded', {xmlns: Strophe.NS.FORWARD});
                 stanza.c('message', {
                     to: to,
@@ -2393,7 +2393,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                                             id: msg_id
                                         });
                                     stanza.c('notify', {xmlns: Strophe.NS.XABBER_NOTIFY});
-                                    stanza.c('notification', {xmlns: Strophe.NS.XABBER_NOTIFY});
+                                    stanza.c('notification', {xmlns: Strophe.NS.XABBER_NOTIFY, type: 'system'});
                                     stanza.c('forwarded', {xmlns: Strophe.NS.FORWARD});
                                     stanza.c('message', {
                                         to: to,
@@ -2440,7 +2440,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                                 id: msg_id
                             });
                         stanza.c('notify', {xmlns: Strophe.NS.XABBER_NOTIFY});
-                        stanza.c('notification', {xmlns: Strophe.NS.XABBER_NOTIFY});
+                        stanza.c('notification', {xmlns: Strophe.NS.XABBER_NOTIFY, type: 'system'});
                         stanza.c('forwarded', {xmlns: Strophe.NS.FORWARD});
                         stanza.c('message', {
                             to: to,
@@ -2498,7 +2498,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                                                     id: msg_id
                                                 });
                                             stanza.c('notify', {xmlns: Strophe.NS.XABBER_NOTIFY});
-                                            stanza.c('notification', {xmlns: Strophe.NS.XABBER_NOTIFY});
+                                            stanza.c('notification', {xmlns: Strophe.NS.XABBER_NOTIFY, type: 'system'});
                                             stanza.c('forwarded', {xmlns: Strophe.NS.FORWARD});
                                             stanza.c('message', {
                                                 to: to,
@@ -2545,7 +2545,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                                         id: msg_id
                                     });
                                 stanza.c('notify', {xmlns: Strophe.NS.XABBER_NOTIFY});
-                                stanza.c('notification', {xmlns: Strophe.NS.XABBER_NOTIFY});
+                                stanza.c('notification', {xmlns: Strophe.NS.XABBER_NOTIFY, type: 'system'});
                                 stanza.c('forwarded', {xmlns: Strophe.NS.FORWARD});
                                 stanza.c('message', {
                                     to: to,
@@ -2636,7 +2636,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                                                     id: msg_id
                                                 });
                                             stanza.c('notify', {xmlns: Strophe.NS.XABBER_NOTIFY});
-                                            stanza.c('notification', {xmlns: Strophe.NS.XABBER_NOTIFY});
+                                            stanza.c('notification', {xmlns: Strophe.NS.XABBER_NOTIFY, type: 'system'});
                                             stanza.c('forwarded', {xmlns: Strophe.NS.FORWARD});
                                             stanza.c('message', {
                                                 to: to,
@@ -2675,7 +2675,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                                             id: msg_id
                                         });
                                     stanza.c('notify', {xmlns: Strophe.NS.XABBER_NOTIFY});
-                                    stanza.c('notification', {xmlns: Strophe.NS.XABBER_NOTIFY});
+                                    stanza.c('notification', {xmlns: Strophe.NS.XABBER_NOTIFY, type: 'system'});
                                     stanza.c('forwarded', {xmlns: Strophe.NS.FORWARD});
                                     stanza.c('message', {
                                         to: to,
@@ -2717,7 +2717,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                                 id: msg_id
                             });
                         stanza.c('notify', {xmlns: Strophe.NS.XABBER_NOTIFY});
-                        stanza.c('notification', {xmlns: Strophe.NS.XABBER_NOTIFY});
+                        stanza.c('notification', {xmlns: Strophe.NS.XABBER_NOTIFY, type: 'system'});
                         stanza.c('forwarded', {xmlns: Strophe.NS.FORWARD});
                         stanza.c('message', {
                             to: to,
@@ -2757,7 +2757,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                             id: msg_id
                         });
                     stanza.c('notify', {xmlns: Strophe.NS.XABBER_NOTIFY});
-                    stanza.c('notification', {xmlns: Strophe.NS.XABBER_NOTIFY});
+                    stanza.c('notification', {xmlns: Strophe.NS.XABBER_NOTIFY, type: 'system'});
                     stanza.c('forwarded', {xmlns: Strophe.NS.FORWARD});
                     stanza.c('message', {
                         to: to,
@@ -2842,7 +2842,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                                         id: msg_id
                                     });
                                 stanza.c('notify', {xmlns: Strophe.NS.XABBER_NOTIFY});
-                                stanza.c('notification', {xmlns: Strophe.NS.XABBER_NOTIFY});
+                                stanza.c('notification', {xmlns: Strophe.NS.XABBER_NOTIFY, type: 'system'});
                                 stanza.c('forwarded', {xmlns: Strophe.NS.FORWARD});
                                 stanza.c('message', {
                                     to: to,
@@ -2953,7 +2953,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                 id: msg_id
             });
         stanza.c('notify', {xmlns: Strophe.NS.XABBER_NOTIFY});
-        stanza.c('notification', {xmlns: Strophe.NS.XABBER_NOTIFY});
+        stanza.c('notification', {xmlns: Strophe.NS.XABBER_NOTIFY, category: 'security'});
         stanza.c('forwarded', {xmlns: Strophe.NS.FORWARD});
         stanza.c('message', {
             to: to,

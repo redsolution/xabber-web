@@ -3637,7 +3637,7 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
                 id: msg_id
             });
         stanza.c('notify', {xmlns: Strophe.NS.XABBER_NOTIFY});
-        stanza.c('notification', {xmlns: Strophe.NS.XABBER_NOTIFY});
+        stanza.c('notification', {xmlns: Strophe.NS.XABBER_NOTIFY, type: 'system'});
         stanza.c('forwarded', {xmlns: Strophe.NS.FORWARD});
         stanza.c('message', {
             to: this.model.get('jid'),
@@ -3776,7 +3776,7 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
                 id: msg_id
             });
         stanza.c('notify', {xmlns: Strophe.NS.XABBER_NOTIFY});
-        stanza.c('notification', {xmlns: Strophe.NS.XABBER_NOTIFY});
+        stanza.c('notification', {xmlns: Strophe.NS.XABBER_NOTIFY, type: 'system'});
         stanza.c('forwarded', {xmlns: Strophe.NS.FORWARD});
         stanza.c('message', {
             to: to,

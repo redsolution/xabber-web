@@ -325,6 +325,10 @@ xabber.MessagesBase = Backbone.Collection.extend({
         }
 
         let $notification_msg;
+        if ($message.children(`notification[xmlns="${Strophe.NS.XABBER_NOTIFY}"]`).length
+            && $message.children(`notification[xmlns="${Strophe.NS.XABBER_NOTIFY}"]`).attr('type') === 'system'){
+            options.ignored = true
+        }
         if (options.notification_msg){
             if ($message.children(`notification[xmlns="${Strophe.NS.XABBER_NOTIFY}"]`).children('info').length){
                 $notification_msg = $message.children(`notification[xmlns="${Strophe.NS.XABBER_NOTIFY}"]`).children('info');
@@ -377,6 +381,7 @@ xabber.MessagesBase = Backbone.Collection.extend({
                 not_verified_device: options.not_verified_device || null,
                 not_verified_device_no_device: options.not_verified_device_no_device || null,
                 device_id: options.device_id || null,
+                ignored: options.ignored || null,
             },
             mentions = [], blockquotes = [], markups = [], mutable_content = [], files = [], images = [], videos = [], locations = [], link_references = [];
 
@@ -422,12 +427,12 @@ xabber.MessagesBase = Backbone.Collection.extend({
             }
 
             if (attrs.notification_trust_msg || $notification_msg.children(`authenticated-key-exchange[xmlns="${Strophe.NS.XABBER_TRUST}"]`).length) {
-                if (!$notification_msg.find('verification-successful').length && !$notification_msg.find('verification-failed').length && !$notification_msg.find('verification-rejected').length){
-                    attrs.ignored = true;
-                }
-                if ($notification_msg.find('verification-failed').length || $notification_msg.find('verification-rejected').length){
-                    attrs.ignored = true;
-                }
+                // if (!$notification_msg.find('verification-successful').length && !$notification_msg.find('verification-failed').length && !$notification_msg.find('verification-rejected').length){
+                //     attrs.ignored = true;
+                // }
+                // if ($notification_msg.find('verification-failed').length || $notification_msg.find('verification-rejected').length){
+                //     attrs.ignored = true;
+                // }
                 if ($notification_msg.find('verification-successful').length){
                     attrs.security_notification = true;
                 }
@@ -3925,7 +3930,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
                 id: msg_id
             });
         stanza.c('notify', {xmlns: Strophe.NS.XABBER_NOTIFY});
-        stanza.c('notification', {xmlns: Strophe.NS.XABBER_NOTIFY});
+        stanza.c('notification', {xmlns: Strophe.NS.XABBER_NOTIFY, type: 'system'});
         stanza.c('forwarded', {xmlns: Strophe.NS.FORWARD});
         stanza.c('message', {
             to: to,
@@ -11056,7 +11061,7 @@ xabber.InvitationPanelView = xabber.SearchView.extend({
                   id: msg_id
               });
           stanza.c('notify', {xmlns: Strophe.NS.XABBER_NOTIFY});
-          stanza.c('notification', {xmlns: Strophe.NS.XABBER_NOTIFY});
+          stanza.c('notification', {xmlns: Strophe.NS.XABBER_NOTIFY, type: 'system'});
           stanza.c('forwarded', {xmlns: Strophe.NS.FORWARD});
           stanza.c('message', {
               to: this.contact.get('jid'),

@@ -1337,17 +1337,14 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
             return;
         }
 
-        let $notification_msg, ignored;
+        let $notification_msg;
+
+        if (message.get('ignored'))
+            message.set('is_unread', false);
 
         if (message.get('notification_msg') && message.get('notification_msg_content')){
             $notification_msg = $(message.get('notification_msg_content'));
             if (message.get('notification_trust_msg') || $notification_msg.children(`authenticated-key-exchange[xmlns="${Strophe.NS.XABBER_TRUST}"]`).length) {
-                if (!$notification_msg.find('verification-successful').length && !$notification_msg.find('verification-failed').length && !$notification_msg.find('verification-rejected').length){
-                    ignored = true;
-                }
-                if ($notification_msg.find('verification-failed').length || $notification_msg.find('verification-rejected').length){
-                    ignored = true;
-                }
                 if ($notification_msg.find('verification-successful').length){
                     message.set('message', xabber.getString("notifications_successful_verification_msg"));
                 }
@@ -1355,9 +1352,6 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
         }
         if (message.get('notification_msg') && message.get('notification_msg_content')){
             if (message.get('notification_trust_msg') || $notification_msg.children(`authenticated-key-exchange[xmlns="${Strophe.NS.XABBER_TRUST}"]`).length) {
-                if (ignored){
-                    message.set('is_unread', false);
-                }
                 if (chat.account.omemo && chat.account.omemo.xabber_trust){
                     if (message.get('device_id')){
                         chat.account.omemo.xabber_trust.addToSequentialProcessingList($notification_msg[0], {
@@ -1440,8 +1434,9 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
         }
 
 
-        if (message.get('ignored'))
+        if (message.get('ignored')) {
             $message.addClass('hidden');
+        }
 
         let $next_message = $message.nextAll('.chat-message:not(.hidden)').first();
         this.updateMessageInChat($message[0], message);
