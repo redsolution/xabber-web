@@ -551,9 +551,9 @@ xabber.Account = Backbone.Model.extend({
                     connected: false,
                     ready_to_send: false,
                 });
-                if (this.session.get('connection_timeout')){
+                if (this.session.get('connection_timeout')) {
                     setTimeout(() => {
-                        this.connect();
+                        this.reconnect();
                     }, 5000)
                 }
             }
