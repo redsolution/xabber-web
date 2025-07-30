@@ -1506,6 +1506,10 @@ xabber.JingleMessage = Backbone.Model.extend({
                 });
                 if (!last_read_msg){
                     this.contact.getMessageByStanzaId(this.get('last_read_msg'), ($message) => {
+                        if ($message === 'no_messages'){
+                            deferred.resolve()
+                            return;
+                        }
                         this.account.chats.makeMessageObject($message, {is_archived: true}).then((msg) => {
                             last_read_msg = msg;
                             deferred.resolve()
@@ -2048,6 +2052,10 @@ xabber.JingleMessage = Backbone.Model.extend({
             deferred.done(() => {
                 if (!new_last_read_msg){
                     this.contact.getMessageByStanzaId(stanza_id, ($message) => {
+                        if ($message === 'no_messages'){
+                            second_deferred.resolve()
+                            return;
+                        }
                         this.account.chats.makeMessageObject($message, {is_archived: true}).then((msg) => {
                             new_last_read_msg = msg;
                             second_deferred.resolve()
@@ -2059,6 +2067,10 @@ xabber.JingleMessage = Backbone.Model.extend({
             });
             if (!last_read_msg){
                 this.contact.getMessageByStanzaId(last_read_msg_id, ($message) => {
+                    if ($message === 'no_messages'){
+                        deferred.resolve()
+                        return;
+                    }
                     this.account.chats.makeMessageObject($message, {is_archived: true}).then((msg) => {
                         new_last_read_msg = msg;
                         deferred.resolve()
@@ -3121,10 +3133,13 @@ xabber.ChatItemView = xabber.BasicView.extend({
               $message.addClass('message-from-context');
               setTimeout(() => {
                   this.scrollToChildPlus($message, -(this.$el.height()/2));
+              }, 100);
+              setTimeout(() => {
+                  this.scrollToChildPlus($message, -(this.$el.height()/2));
               }, 1000);
               setTimeout(() => {
                   $message.removeClass('message-from-context')
-              }, 3000);
+              }, 4500);
           }
           this.addMessageHTML($message, message, index, this.account.context_messages.findLastIndex());
       },
@@ -5219,6 +5234,10 @@ xabber.ChatContentView = xabber.BasicView.extend({
                     });
                     if (!last_read_msg){
                         this.contact.getMessageByStanzaId(this.model.get('last_read_msg'), ($message) => {
+                            if ($message === 'no_messages'){
+                                deferred.resolve()
+                                return;
+                            }
                             this.account.chats.makeMessageObject($message, {is_archived: true}).then((msg) => {
                                 last_read_msg = msg
                                 deferred.resolve();

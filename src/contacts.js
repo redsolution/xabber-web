@@ -756,7 +756,12 @@ xabber.Contact = Backbone.Model.extend({
                 if (pinned_msg_elem) {
                     if (pinned_message) {
                         this.getMessageByStanzaId(pinned_message, ($message) => {
-                            this.parsePinnedMessage($message, pinned_msg_elem);
+                            if ($message === 'no_messages') {
+                                this.set('pinned_message', undefined);
+                                this.parsePinnedMessage(undefined, pinned_msg_elem);
+                            } else {
+                                this.parsePinnedMessage($message, pinned_msg_elem);
+                            }
                         });
                     }
                     else {
