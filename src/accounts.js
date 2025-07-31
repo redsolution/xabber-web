@@ -942,8 +942,8 @@ xabber.Account = Backbone.Model.extend({
                 } else {
                     if (this.connection && this.connection.streamManagement
                         && this.connection.streamManagement._isStreamManagementEnabled
-                        && this.connection.streamManagement.getResumeToken()){
-                        this.connection._test_id = '3456';
+                        && this.connection.streamManagement.getResumeToken()
+                        && this.connection.streamManagement._connectionStatus === Strophe.Status.DISCONNECTED){
                         this.connection.streamManagement.resume(() => {
                             this.reconnect()
                         });
