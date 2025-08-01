@@ -10436,7 +10436,7 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
             this.current_filter_account = 'all';
         }
         if (this.is_groupchats){
-            this.current_filter = {type: 'groupchat'};
+            this.current_filter = {type: 'groupchats-public'};
             // this.current_type_subfilter = 'groups';
         } else {
             this.current_filter = {type: 'contacts'};
@@ -10541,6 +10541,7 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
                 let $template = $(env.templates.notifications.incoming_subscriptions_item({
                     name: contact.get('name'),
                     jid: contact.get('jid'),
+                    dropdown_id: uuid(),
                     account: account.get('jid'),
                     text: contact.get('subscription_request_in_text'),
                     counter: contact.get('invitation') ? inv_counter : subs_counter,
@@ -10555,10 +10556,17 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
                 $template.find('.notification-icon.subscribe-icon').html(env.templates.svg['group-invite']());
                 if (!subs_color_set && !contact.get('invitation')){
                     this.$('.notification-subscriptions-wrap.notifications-subscriptions').prop('class', 'notification-subscriptions-wrap notifications-subscriptions');
-                    this.$('.notification-subscriptions-wrap.notifications-subscriptions').addClass(`outline-color-${contact.account.settings.get('color')}-300`);
+                    // this.$('.notification-subscriptions-wrap.notifications-subscriptions').addClass(`outline-color-${contact.account.settings.get('color')}-300`);
                     subs_color_set = true;
                 }
-                this.prepareShowMoreText($template);
+
+                $template.find('.dropdown-button').dropdown({
+                    inDuration: 100,
+                    outDuration: 100,
+                    constrainWidth: false,
+                    hover: false,
+                    alignment: 'right'
+                });
             });
         });
         if (subs_counter > 0) {
@@ -10568,7 +10576,7 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
         }
         this.$('.subscription-item-wrap').switchClass('hidden', subs_counter === 0);
         this.$('.notification-subscriptions-wrap.notifications-subscriptions').switchClass('hidden', subs_counter === 0);
-        if (this.current_filter && this.current_filter.type && this.current_filter.type !== 'subscription'){
+        if (this.current_filter && this.current_filter.type && this.current_filter.type !== 'subscription' && this.current_filter.type !== 'contacts'){
             this.$('.notification-subscriptions-wrap.notifications-subscriptions').addClass('hidden');
         }
         this.current_filter.type !== 'subscription' && this.$('.notifications-subscriptions .notification-subscription-item').slice(2).addClass('hidden');
@@ -10902,7 +10910,7 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
             filter_type = $item.attr('data-filter');
 
         if ($item.hasClass('selected-filter')){
-            this.clickClearFilter();
+            // this.clickClearFilter();
             return;
         }
 
@@ -11561,7 +11569,7 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
         }
         let inv_counter = 0;
 
-        if (!(this.current_filter.type && (this.current_filter.type === 'groupchat' || this.current_filter.type === 'invitations'))) {
+        if (!(this.current_filter.type && (this.current_filter.type === 'groupchats-public' || this.current_filter.type === 'invitations'))) {
             this.$('.contacts-invitations-wrap').addClass('hidden');
 
             _.each(accounts, (account) => {
@@ -11807,6 +11815,7 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
         this.$('.contact-list').html('');
         this.$('.groupchats-preview-list').html('');
         this.$('.contacts-preview-list').html('');
+        this.updateAllIncomingSubscriptions();
         this.updateIncomingInvitations();
         if (this.contacts.length){
             this.$(`.roster-sorting-item`).removeClass('selected-sorting');
