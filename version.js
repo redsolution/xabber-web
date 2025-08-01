@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.4.163","version_description":"contacts and groupchats tab design"}'
+'{"version_number":"2.4.164","version_description":"fixed mentions reference length with emoji symbols"}'
 )});

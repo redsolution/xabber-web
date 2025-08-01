@@ -13817,7 +13817,7 @@ xabber.ChatBottomView = xabber.BasicView.extend({
                     if (content.attributes) {
                         let content_attrs = [],
                             start_idx = content_concat.length,
-                            end_idx = start_idx + ((content.insert && content.insert.emoji) ? 1 : _.escape(content.insert).length);
+                            end_idx = start_idx + ((content.insert && content.insert.emoji) ? 1 : [..._.escape(content.insert)].length);
                         for (let attr in content.attributes)
                             (attr !== 'alt' && attr !== 'blockquote') && content_attrs.push(attr);
                         if (content_attrs.indexOf('mention') > -1) {
