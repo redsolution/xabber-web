@@ -348,6 +348,7 @@ xabber.NotificationsView = xabber.BasicView.extend({
             return;
         if (!this.current_content)
             return;
+        this.current_content.readNotifications();
         this.current_content.readAllNotifications();
     },
 
@@ -651,6 +652,7 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
             if (!this.$('.unread-message-background').length){
                 chat.set('const_unread', 0);
             }
+            chat.sendMarker(msg.get('msgid'), 'displayed', msg.get('stanza_id'), msg.get('contact_stanza_id'));
             xabber.toolbar_view.recountAllMessageCounter();
             this.recountFilteredCount();
         }
@@ -905,7 +907,7 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
         }, 1500);
     },
 
-    readNotifications: function () {
+    readNotifications: function () { //34
         if (!this.isVisible() || !xabber.get('focused'))
             return;
         _.each(this.notifications_chats, (chat_item) => {
@@ -1723,9 +1725,9 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
 
         let scroll_read_timer = this._long_reading_timeout || is_focused ? 100 : 100;
         clearTimeout(this._onscroll_read_messages_timeout);
-        this._onscroll_read_messages_timeout = setTimeout(() => {
-            this.readNotifications();
-        }, scroll_read_timer);
+        // this._onscroll_read_messages_timeout = setTimeout(() => {
+        //     this.readNotifications();
+        // }, scroll_read_timer);
         this.handleOnScrollRendering('bottom');
         this._long_reading_timeout = false;
     },
