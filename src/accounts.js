@@ -455,6 +455,11 @@ xabber.Account = Backbone.Model.extend({
 
         reconnect: function (is_fast) {
             console.error('reconnect called');
+            if (!this.get('enabled')){
+                console.error('reconnect called on disabled account');
+                this.deactivate();
+                return;
+            }
             let conn_retries = this.session.get('conn_retries'),
                 timeout = conn_retries < 3 ? constants.RECONNECTION_TIMEOUTS[conn_retries] : 20000;
             if (is_fast)
@@ -472,6 +477,11 @@ xabber.Account = Backbone.Model.extend({
                 this.connection.x_token = this.get('x_token');
             this.connection.account = this;
             setTimeout(() => {
+                if (!this.get('enabled')){
+                    console.error('reconnect timeout called on disabled account');
+                    this.deactivate();
+                    return;
+                }
                 if (this.isConnected())
                     return;
                 this.connFeedback(xabber.getString("application_state_connecting"));

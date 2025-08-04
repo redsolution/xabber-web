@@ -11569,7 +11569,7 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
         }
         let inv_counter = 0;
 
-        if (!(this.current_filter.type && (this.current_filter.type === 'groupchats-public' || this.current_filter.type === 'invitations'))) {
+        if (!(this.current_filter.type && (this.current_filter.type === 'groupchats-public' || this.current_filter.type === 'groupchats-incognito' || this.current_filter.type === 'invitations'))) {
             this.$('.contacts-invitations-wrap').addClass('hidden');
 
             _.each(accounts, (account) => {
