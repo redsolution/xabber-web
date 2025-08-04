@@ -652,7 +652,6 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
             if (!this.$('.unread-message-background').length){
                 chat.set('const_unread', 0);
             }
-            chat.sendMarker(msg.get('msgid'), 'displayed', msg.get('stanza_id'), msg.get('contact_stanza_id'));
             xabber.toolbar_view.recountAllMessageCounter();
             this.recountFilteredCount();
         }

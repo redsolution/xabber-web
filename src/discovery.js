@@ -309,8 +309,6 @@ xabber.Account.addConnPlugin(function () {
 
     this.connection.deleteHandler(this._last_stanza_handler);
     this._last_stanza_handler = this.connection.addHandler(() => {
-        console.error(this);
-        console.error(this.get('enabled'));
         if (!this.get('enabled')){
             console.error('received stanza on disabled account');
             this.deactivate();

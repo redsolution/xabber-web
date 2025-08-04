@@ -3775,6 +3775,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
         this.$history_feedback = this.$('.load-history-feedback');
         this.$pinned_message = this.$('.pinned-message');
         this.$search_form = this.$('.search-form-header');
+        this._waveforms_render_list = [];
         this.$el.attr('data-id', this.model.id);
         this.updateContentColorScheme();
         if ((this.model.sync_created && this.model.last_message) || options.new_message && !options.new_message.get('synced_from_server') && options.new_message.get('encrypted') && this.model.get('encrypted')){
@@ -4123,6 +4124,12 @@ xabber.ChatContentView = xabber.BasicView.extend({
     },
 
     onChangedVisibility: function () {
+        if (this.isVisible() && this._waveforms_render_list && this._waveforms_render_list.length ){
+            _.each(this._waveforms_render_list, (aud) => {
+                aud._onResize();
+            })
+            this._waveforms_render_list = [];
+        }
         if (this.isVisible()) {
             this.model.set({display: true, active: true});
         } else {
@@ -5794,8 +5801,10 @@ xabber.ChatContentView = xabber.BasicView.extend({
         } catch (e) {
             console.error(e);
         }
-
         aud._onResize();
+        if (!this.isVisible() && this._waveforms_render_list){
+            this._waveforms_render_list.push(aud);
+        }
         return aud;
     },
 
