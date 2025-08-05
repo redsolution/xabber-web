@@ -1774,10 +1774,11 @@ xabber.JingleMessage = Backbone.Model.extend({
 
         dfd.done(() => {
             if (message) {
-                if (options.open_mention_notification){
-                    xabber.body.setScreen('all-chats');
-                    xabber.chats_view.openChat(this.item_view, {clear_search: true, screen: 'all-chats'});
-                }
+                // if (options.open_mention_notification){
+                xabber.body.setScreen('all-chats', {
+                });
+                xabber.chats_view.openChat(this.item_view, {clear_search: true, screen: 'all-chats', force_show_placeholder: true});
+                // }
                 if (options.searched_messages)
                     message.set('searched_message', false);
                 let stanza_id = message.get('stanza_id');
@@ -1803,6 +1804,7 @@ xabber.JingleMessage = Backbone.Model.extend({
                         }, {
                             right_contact_save: true,
                         });
+                        this.messages_view.onOpenAfterMessagesRequest();
 
                     }, () => {
                         let screen = 'all-chats';
@@ -1817,12 +1819,14 @@ xabber.JingleMessage = Backbone.Model.extend({
                         }, {
                             right_contact_save: true,
                         });
+                        this.messages_view.onOpenAfterMessagesRequest();
                     });
                 }, (err) => {
                     if (err === 'no_messages' && !options.force_context){
                         if (this.item_view && !this.item_view.content)
                             this.item_view.content = new xabber.ChatContentView({chat_item: this.item_view});
-                        this.item_view.content.backToBottom();
+                        xabber.chats_view.openChat(this.item_view, {clear_search: true, screen: 'all-chats'});
+                        this.item_view.content.backToBottom({not_ev: true, stanza_id: stanza_id});
                     } else if (err === 'no_messages' ){
                         this.messages_view.messagesRequest({before: stanza_id}, () => {
                             let screen = 'all-chats';
@@ -1837,6 +1841,7 @@ xabber.JingleMessage = Backbone.Model.extend({
                             }, {
                                 right_contact_save: true,
                             });
+                            this.messages_view.onOpenAfterMessagesRequest();
 
                         }, () => {
                             let screen = 'all-chats';
@@ -1851,6 +1856,7 @@ xabber.JingleMessage = Backbone.Model.extend({
                             }, {
                                 right_contact_save: true,
                             });
+                            this.messages_view.onOpenAfterMessagesRequest();
                         });
 
                     }
@@ -2975,6 +2981,7 @@ xabber.ChatItemView = xabber.BasicView.extend({
       __initialize: function (options) {
           options = options || {};
           this.stanza_id = options.stanza_id_context;
+          this.scrolled_to_message = false;
           this.encrypted = options.encrypted;
           this.mention_context = options.mention_context;
           if (!this.model.item_view.content)
@@ -2987,6 +2994,7 @@ xabber.ChatItemView = xabber.BasicView.extend({
           this.listenTo(this.account.context_messages, 'change:is_unread', this.onChangedReadState);
           this.listenTo(this.model, 'change:unread', this.updateCounter);
           this.listenTo(this.model, 'change:const_unread', this.updateCounter);
+          this.listenTo(this.model, 'created_context_message', this.onOpenAfterMessagesRequest);
           this.listenTo(xabber, 'plyr_player_updated', this.onUpdatePlyr);
       },
 
@@ -3022,6 +3030,20 @@ xabber.ChatItemView = xabber.BasicView.extend({
           this.$('.back-to-bottom:not(.back-to-unread)').hideIf(this.isScrolledToBottom() || this.$(`.chat-message.unread-message`).length);
           this.$('.back-to-unread').showIf(!this.isScrolledToBottom() && this.$(`.chat-message.unread-message`).length);
           this.$('.back-to-unread').removeClass('back-to-bottom');
+      },
+
+      onOpenAfterMessagesRequest: function () {
+          if (this.scrolled_to_message)
+              return;
+          let $msg = this.$(`.chat-message[data-uniqueid="${this.stanza_id}"]`);
+          if ($msg.length) {
+              $msg.addClass('message-from-context');
+              this.scrollToChildPlus($msg, -(this.$el.height()/2));
+              this.scrolled_to_message = true;
+              setTimeout(() => {
+                  $msg.removeClass('message-from-context')
+              }, 4500);
+          }
       },
 
       openUnreadMention: function () {
@@ -3147,16 +3169,7 @@ xabber.ChatItemView = xabber.BasicView.extend({
           let $message = this.chat_content.buildMessageHtml(message).addClass('context-message'),
               index = this.account.context_messages.indexOf(message);
           if (message.get('stanza_id') === this.stanza_id) {
-              $message.addClass('message-from-context');
-              setTimeout(() => {
-                  this.scrollToChildPlus($message, -(this.$el.height()/2));
-              }, 100);
-              setTimeout(() => {
-                  this.scrollToChildPlus($message, -(this.$el.height()/2));
-              }, 1000);
-              setTimeout(() => {
-                  $message.removeClass('message-from-context')
-              }, 4500);
+              this.model.trigger('created_context_message')
           }
           this.addMessageHTML($message, message, index, this.account.context_messages.findLastIndex());
       },
@@ -4622,7 +4635,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
         }
     },
 
-    backToBottom: function () {
+    backToBottom: function (ev) {
         this.model.set('last_sync_unread_id', undefined);
         this.hideMessagesAfterSkipping();
         this._no_scrolling_event = true;
@@ -4634,6 +4647,23 @@ xabber.ChatContentView = xabber.BasicView.extend({
         this._long_reading_timeout = false;
         this._no_scrolling_event = false;
         this.scrollToBottom();
+        if (ev && ev.not_ev && ev.stanza_id){
+            this.showContextMessage(ev.stanza_id);
+        }
+    },
+
+    showContextMessage: function (stanza_id) {
+        if (!stanza_id)
+            return;
+        let $msg = this.$(`.chat-message[data-uniqueid="${stanza_id}"]`);
+        if ($msg.length) {
+            $msg.addClass('message-from-context');
+            this.scrollToChildPlus($msg, -(this.$el.height()/2));
+            setTimeout(() => {
+                $msg.removeClass('message-from-context')
+            }, 4500);
+        }
+
     },
 
     MAMRequest: function (options, callback, errback) {
@@ -9898,6 +9928,7 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
                 xabber.body.setScreen((options.screen || 'all-chats'), {
                     right: 'chat',
                     clear_search: options.clear_search,
+                    show_placeholder: options.force_show_placeholder,
                     chat_item: view,
                     blocked: view.model.get('blocked')
                 },{right_contact_save: options.right_contact_save, right_force_close: options.right_force_close} );
