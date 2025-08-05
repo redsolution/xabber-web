@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.4.167","version_description":"fixed waveform rendering, disabled marker sending on notification item click"}'
+    '{"version_number":"2.4.168","version_description":"removed displayed marker on mention click reading"}'
 )});

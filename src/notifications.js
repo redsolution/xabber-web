@@ -1032,8 +1032,8 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
             let chat = message.collection.chat;
 
             let is_in_unread = chat.messages_unread.get(message);
-            if (message.get('is_unread')){}
-            message.set('is_unread', false);
+            if (message.get('is_unread'))
+                message.set('is_unread', false);
             if (!is_in_unread && chat.get('const_unread') !== 0 && !isNaN(Number(chat.get('const_unread')))) {
                 let const_unread = chat.get('const_unread');
                 const_unread = --const_unread;
@@ -1046,7 +1046,7 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
             xabber.toolbar_view.recountAllMessageCounter();
             this.recountFilteredCount();
 
-            chat.sendMarker(message.get('msgid'), 'displayed', message.get('stanza_id'), message.get('contact_stanza_id'));
+            // chat.sendMarker(message.get('msgid'), 'displayed', message.get('stanza_id'), message.get('contact_stanza_id'));
         }
     },
 
@@ -1084,6 +1084,7 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
         this.$el.children('.preloader-wrapper').removeClass('hidden');
 
         setTimeout(() => {
+            console.error(firstElementInDay);
             if (firstElementInDay.length) {
                 this.$('.chat-content').removeClass('hidden');
                 this.$el.children('.preloader-wrapper').addClass('hidden');
@@ -1101,6 +1102,7 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
                 this.handleOnScrollRendering('bottom');
             } else {
                 let fully_rendered = this.handleOnScrollRendering('bottom', true, 200);
+                console.error(fully_rendered);
                 if (!fully_rendered){
                     this.showDay(ev);
                 }
@@ -1737,8 +1739,10 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
 
     handleOnScrollRendering: function (scroll_direction, force_render, msg_amount) { //34
         msg_amount = msg_amount || 5;
-        if (!scroll_direction || this._scroll_rendering || !this.isVisible())
+        if (!scroll_direction || this._scroll_rendering || !this.isVisible()) {
+            console.error('heere');
             return true;
+        }
         if (!this.rendered_messages)
             this.rendered_messages = [];
         this._scroll_rendering = true;
@@ -1757,14 +1761,20 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
                     no_filtered_messages = true;
                 }
                 let chat_filtered_messages = this.rendered_messages.filter(item => item.collection && item.collection.account.get('jid') === chat.account.get('jid'));
-                if (!chat_filtered_messages.length)
+                if (!chat_filtered_messages.length){
+                    console.error('heere');
                     return;
-                if (chat_filtered_messages[0].get('unique_id') === chat.messages.filter(item => !item.get('ignored'))[0].get('unique_id') && chat.get('history_loaded'))
+                }
+                if (chat_filtered_messages[0].get('unique_id') === chat.messages.filter(item => !item.get('ignored'))[0].get('unique_id') && chat.get('history_loaded')){
+                    console.error('heere');
                     return;
+                }
                 if (this.filtered_messages && this.filtered_messages.filter(item => item.collection && item.collection.account.get('jid') === chat.account.get('jid')).length
                     && chat_filtered_messages[0].get('unique_id') === this.filtered_messages.filter(item => item.collection && item.collection.account.get('jid') === chat.account.get('jid'))[0].get('unique_id')
-                    && chat.get('history_loaded'))
+                    && chat.get('history_loaded')){
+                    console.error('heere');
                     return;
+                }
                 filtered_chats_messages.push(chat_filtered_messages)
             });
 
@@ -1772,8 +1782,10 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
                 msg = this.rendered_messages[0];
             } else if (filtered_chats_messages.length) {
                 _.each(filtered_chats_messages, (list) => {
-                    if (!list.length)
+                    if (!list.length){
+                        console.error('heere');
                         return;
+                    }
                     let first_msg = list[0];
                     if (!msg || (msg.get('timestamp') < first_msg.get('timestamp'))) {
                         msg = first_msg;
@@ -1790,6 +1802,7 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
             }
             if (!msg) {
                 this._scroll_rendering = true;
+                console.error('heere');
                 return true;
             }
 
@@ -1799,6 +1812,7 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
 
             if (this.filtered_accounts.length || this.filter_type !== 'all') {
                 this.updateFilteredMessages();
+                console.error('he');
                 whole_msgs_list = this.filtered_messages;
                 if (this._previously_filtered && whole_msgs_list.length === this._previous_msg_count && this.rendered_messages.length === whole_msgs_list.length){
                     force_load = true
@@ -1807,13 +1821,23 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
                 this._previous_msg_count = whole_msgs_list.length;
 
             } else {
+                console.error('he');
                 whole_msgs_list =  this.notification_messages.filter(item => !item.get('ignored') && item.collection.account.get('jid') === msg.collection.account.get('jid'));
                 this._previously_filtered = false;
             }
+            console.error($msg.length || no_filtered_messages || !this.rendered_messages.length);
             if ($msg.length || no_filtered_messages || !this.rendered_messages.length){
+                console.error($msg.isAlmostScrolledInContainer(this.$('.chat-content'), 1500) || force_render || no_filtered_messages || !this.rendered_messages.length);
                 if ($msg.isAlmostScrolledInContainer(this.$('.chat-content'), 1500) || force_render || no_filtered_messages || !this.rendered_messages.length) {
+                    console.error(whole_msgs_list);
+                    console.error(whole_msgs_list.length);
+                    console.error(msg);
                     let index = whole_msgs_list.indexOf(msg),
                         new_rendered_msgs = whole_msgs_list.slice(Math.max(0, index - msg_amount), index);
+                    console.error(Math.max(0, index - msg_amount));
+                    console.error(index);
+                    console.error(new_rendered_msgs);
+                    console.error(new_rendered_msgs.length);
                     if (new_rendered_msgs.length && !force_load && !this.load_history_dfd){
                         new_rendered_msgs = new_rendered_msgs.filter(item => !this.rendered_messages.some(rendered_msg => rendered_msg.get('unique_id') === item.get('unique_id')));
 
@@ -1821,14 +1845,19 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
                             this.rendered_messages = [...new_rendered_msgs, ...this.rendered_messages];
                             this.rendered_messages.sort((a, b) => a.get('timestamp') - b.get('timestamp'));
 
+                            console.error(new_rendered_msgs.length);
                             for (let i = new_rendered_msgs.length - 1; i >= 0; i--) {
+                                console.error(new_rendered_msgs[i]);
                                 this.renderMessage(new_rendered_msgs[i], this.rendered_messages);
+                                console.error('rendered');
                             }
                         }
                     } else if (force_render) {
                         this._scroll_rendering = false;
+                        console.error('heere');
                         return true;
                     } else if (!force_render) {
+                        console.error(this.load_history_dfd);
                         if (!this.load_history_dfd){
                             this.handleOnScrollLoading(msg);
                         }
@@ -1837,10 +1866,12 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
                 }
             } else if (force_render) {
                 this._scroll_rendering = false;
+                console.error('heere');
                 return true;
             }
 
         } else if (scroll_direction === 'top') {
+            console.error('heere');
             return true;
         }
         this._scroll_rendering = false;
