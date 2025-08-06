@@ -2643,7 +2643,7 @@ xabber.ChatItemView = xabber.BasicView.extend({
         if (!this.model.get('active') && this.model.item_view && this.model.item_view.content && this.model.item_view.content.bottom && this.model.item_view.content.bottom.$('.input-message .rich-textarea').getTextFromRichTextarea().trim()){
             let draft_message = this.model.item_view.content.bottom.$('.input-message .rich-textarea').getTextFromRichTextarea();
             this.$('.last-msg').html(draft_message).prepend($(`<span class="text-color-700">${xabber.getString("draft")}: </span>`));
-            this.$el.emojify('.last-msg', {emoji_size: 16}).hyperlinkify({selector: '.last-msg', decode_uri: true});
+            this.$el.emojify('.last-msg', {emoji_size: 16});
             msg && this.model.set({timestamp: msg.get('timestamp')});
             return;
         }
@@ -2783,7 +2783,7 @@ xabber.ChatItemView = xabber.BasicView.extend({
         if (msg.get('not_encrypted')) {
             this.$('.last-msg').html(this.$('.last-msg').html().italics());
         }
-        this.$el.emojify('.last-msg', {emoji_size: 16}).hyperlinkify({selector: '.last-msg', decode_uri: true});
+        this.$el.emojify('.last-msg', {emoji_size: 16});
         this.$('.last-msg-date').text(utils.pretty_short_datetime_recent_chat(msg_time));
         this.$('.msg-delivering-state').showIf(msg.get('type') !== 'system' && msg.isSenderMe() && (msg.get('state') !== constants.MSG_ARCHIVED) && !msg.get('notification_msg'))
             .attr('data-state', msg.getState());
@@ -4029,7 +4029,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
             return;
         let after_element = this.$('.chat-content');
         if (!this.$('.notification-trust-session').length) {
-            after_element.length && after_element[0].style.setProperty('--active-session-item-height', '0px');
+            after_element.length && after_element[0].style.setProperty('--active-session-item-height', '100px');
             return;
         }
         this.$('.notification-trust-session').switchClass('low-width', this.$('.chat-incoming-session-notification').width() < 360 );
@@ -10332,7 +10332,7 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
               if (msg_from)
                   this.$('.last-msg').prepend($('<span class=text-color-700>' + msg_from + ': ' + '</span>'));
           }
-          this.$el.emojify('.last-msg', {emoji_size: 16}).hyperlinkify({selector: '.last-msg', decode_uri: true});
+          this.$el.emojify('.last-msg', {emoji_size: 16});
           this.$('.last-msg-date').text(utils.pretty_short_datetime_recent_chat(msg_time))
               .attr('title', pretty_datetime(msg_time));
           this.$('.msg-delivering-state').showIf(msg.isSenderMe() && (msg.get('state') !== constants.MSG_ARCHIVED) && !msg.get('notification_msg'))
