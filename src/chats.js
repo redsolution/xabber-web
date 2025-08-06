@@ -3001,11 +3001,8 @@ xabber.ChatItemView = xabber.BasicView.extend({
       render: function () {
           this.scrollToTop();
           this.onUpdatePlyr();
-          this.updateCounter();
           this.chat_content.updateUnreadMentions.bind(this)();
-          this.$('.back-to-bottom:not(.back-to-unread)').hideIf(this.isScrolledToBottom() || this.$(`.chat-message.unread-message`).length);
-          this.$('.back-to-unread').showIf(!this.isScrolledToBottom() && this.$(`.chat-message.unread-message`).length);
-          this.$('.back-to-unread').removeClass('back-to-bottom');
+          this.updateCounter();
           this.encrypted && this.$el.attr('data-trust', true)
       },
 
@@ -3027,9 +3024,7 @@ xabber.ChatItemView = xabber.BasicView.extend({
                       });
                   }
               }
-          this.$('.back-to-bottom:not(.back-to-unread)').hideIf(this.isScrolledToBottom() || this.$(`.chat-message.unread-message`).length);
-          this.$('.back-to-unread').showIf(!this.isScrolledToBottom() && this.$(`.chat-message.unread-message`).length);
-          this.$('.back-to-unread').removeClass('back-to-bottom');
+          this.updateCounter();
       },
 
       onOpenAfterMessagesRequest: function () {
@@ -3043,6 +3038,7 @@ xabber.ChatItemView = xabber.BasicView.extend({
               setTimeout(() => {
                   $msg.removeClass('message-from-context')
               }, 4500);
+              this.updateCounter();
           }
       },
 
@@ -3050,8 +3046,21 @@ xabber.ChatItemView = xabber.BasicView.extend({
           this.chat_content.openUnreadMention.bind(this)();
       },
 
+      onChangedVisibility: function () {
+          if (this.isVisible() && this.chat_content && this.chat_content._waveforms_render_list && this.chat_content._waveforms_render_list.length ){
+              _.each(this.chat_content._waveforms_render_list, (aud) => {
+                  aud._onResize();
+              })
+              this.chat_content._waveforms_render_list = [];
+          }
+      },
+
       updateCounter: function () {
-          this.chat_content.updateCounter.bind(this)();
+          let unread = this.model.get('unread') + this.model.get('const_unread');
+          this.$('.back-to-unread-counter').text(unread || '');
+          this.$('.back-to-bottom:not(.back-to-unread)').hideIf(this.isScrolledToBottom() || unread);
+          this.$('.back-to-unread').showIf(!this.isScrolledToBottom() && unread);
+          this.$('.back-to-unread').removeClass('back-to-bottom');
       },
 
       scrollToUnreadWithButton: function () {
@@ -3090,6 +3099,7 @@ xabber.ChatItemView = xabber.BasicView.extend({
               this.chat_content.readVisibleMessages(true);
           }, 100)
           this.chat_content.updateUnreadMentions.bind(this)();
+          this.updateCounter();
       },
 
       onChangedReadState: function (message) {
@@ -5644,6 +5654,8 @@ xabber.ChatContentView = xabber.BasicView.extend({
             if (!$message.length) return;
             message = this.model.messages.get($message.data('uniqueid'));
         }
+        if (this.account.get('gallery_token') && this.account.get('gallery_url'))
+            this.bottom.deleteFilesFromMessages([message]);
         message && message.destroy();
         if ($message_in_chat) {
             this.removeMessageFromDOM($message_in_chat);
@@ -5748,8 +5760,13 @@ xabber.ChatContentView = xabber.BasicView.extend({
             $msg_element.addClass('playing');
             $msg_element.removeClass('wave-cursor-hidden');
             let is_popup;
+            let msg_unique_id;
+            if ($msg_element.closest('.chat-message').length)
+                msg_unique_id = $msg_element.closest('.chat-message').attr('data-uniqueid');
             xabber.current_plyr_player && (is_popup = xabber.current_plyr_player.is_popup);
-            xabber.current_plyr_player = chat.plyr_players.find(item => item.$audio_elem === $msg_element[0]);
+            xabber.current_plyr_player = chat.plyr_players.find(item => {
+                return (item.$audio_elem === $msg_element[0]) || (item.message_unique_id === msg_unique_id);
+            });
             xabber.current_plyr_player && (xabber.current_plyr_player.chat_item = chat.item_view);
             xabber.current_plyr_player && (xabber.current_plyr_player.is_popup = is_popup);
             let other_players = xabber.plyr_players.filter(other => other != xabber.current_plyr_player);

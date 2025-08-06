@@ -11035,7 +11035,7 @@ input[type=text].simple-input-field:hover {
 .chat-content-wrap .participant-messages-header .btn-retract-messages{
     cursor: pointer;
     margin-right: 24px;
-    margin-top: 2px;
+    margin-top: 1px;
     text-transform: capitalize;
     white-space: nowrap;
 }

@@ -5570,7 +5570,7 @@ xabber.ParticipantPropertiesViewRight = xabber.BasicView.extend({
                 setTimeout(() => {
                     contact.pres('subscribe');
                 }, 500);
-                this.close();
+                this.parent.closeDetails();
                 contact.set('in_roster', true);
                 contact.trigger("open_chat", contact);
                 contact.trigger('remove_invite', contact);
@@ -5585,7 +5585,7 @@ xabber.ParticipantPropertiesViewRight = xabber.BasicView.extend({
                 if (private_chat_jid) {
                     let contact = this.account.contacts.mergeContact(private_chat_jid),
                         chat = this.account.chats.getChat(contact);
-                    this.close();
+                    this.parent.closeDetails();
                     chat && chat.trigger('open');
                     return;
                 }
@@ -5597,11 +5597,11 @@ xabber.ParticipantPropertiesViewRight = xabber.BasicView.extend({
         else {
             if (participant_in_roster)
                 if (participant_in_roster.get('in_roster')) {
-                    this.close();
+                    this.parent.closeDetails();
                     participant_in_roster.trigger('open_chat', participant_in_roster);
                     return;
                 }
-            this.close();
+            this.parent.closeDetails();
             xabber.add_contact_view.show({
                 account: this.account,
                 jid: participant_jid
