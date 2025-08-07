@@ -634,11 +634,11 @@ xabber.MessagesBase = Backbone.Collection.extend({
         options.echo_msg && ($delay = $message.children('time'));
         options.is_cached && ($delay = $message.children('time'));
         if (options.is_cached){
-            attrs.is_cached = true
+            attrs.is_cached = true;
         }
-        if (options.is_cached && options.is_cached_unread){
-            attrs.is_unread = true;
-            attrs.is_unread_archived = true;
+        if (options.is_cached && !_.isUndefined(options.is_cached_unread)){
+            attrs.is_unread = options.is_cached_unread;
+            attrs.is_unread_archived = options.is_cached_unread;
         }
         $delay.length && (attrs.time = $delay.attr('stamp'));
         (attrs.carbon_copied || from_jid === account.get('jid') && (options.is_archived || options.synced_msg)) && (attrs.state = constants.MSG_SENT);
@@ -4334,7 +4334,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
     readMessage: function (last_visible_msg, $last_visible_msg, is_context) {
         clearTimeout(this._read_last_message_timeout);
         this._read_last_message_timeout = setTimeout(() => {
-            this.model.sendMarker(last_visible_msg.get('msgid'), 'displayed', last_visible_msg.get('stanza_id'), last_visible_msg.get('contact_stanza_id'), last_visible_msg.get('encrypted') && last_visible_msg.get('ephemeral_timer'));
+            !this.model.get('notifications') && this.model.sendMarker(last_visible_msg.get('msgid'), 'displayed', last_visible_msg.get('stanza_id'), last_visible_msg.get('contact_stanza_id'), last_visible_msg.get('encrypted') && last_visible_msg.get('ephemeral_timer'));
             this.model.set('last_read_msg', last_visible_msg.get('stanza_id'));
             this.model.set('prev_last_read_msg', last_visible_msg.get('stanza_id'));
 
@@ -4386,11 +4386,11 @@ xabber.ChatContentView = xabber.BasicView.extend({
         }
     },
 
-    readMessages: function (timestamp) {
+    readMessages: function (timestamp, force_read_notifications) {
         let unread_messages = _.clone(this.model.messages_unread.models);
         if (unread_messages.length) {
             let msg = unread_messages[unread_messages.length - 1];
-            this.model.sendMarker(msg.get('msgid'), 'displayed', msg.get('stanza_id'), msg.get('contact_stanza_id'), msg.get('encrypted') && msg.get('ephemeral_timer'));
+            (!this.model.get('notifications') || force_read_notifications) && this.model.sendMarker(msg.get('msgid'), 'displayed', msg.get('stanza_id'), msg.get('contact_stanza_id'), msg.get('encrypted') && msg.get('ephemeral_timer')); //34
             this.model.set('last_read_msg', msg.get('stanza_id'));
             this.model.set('prev_last_read_msg', msg.get('stanza_id'));
         }
@@ -4405,7 +4405,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
         });
         if (this.model.last_message && this.model.last_message.get('is_unread') && !unread_messages.length){
             let msg = this.model.last_message;
-            this.model.sendMarker(msg.get('msgid'), 'displayed', msg.get('stanza_id'), msg.get('contact_stanza_id'), msg.get('encrypted') && msg.get('ephemeral_timer'));
+            (!this.model.get('notifications') || force_read_notifications) && this.model.sendMarker(msg.get('msgid'), 'displayed', msg.get('stanza_id'), msg.get('contact_stanza_id'), msg.get('encrypted') && msg.get('ephemeral_timer'));
             !this.model.get('notifications') && msg.set('is_unread', false);
             // msg.set('is_unread', false);
             msg.get('stanza_id') && this.model.set('last_read_msg', msg.get('stanza_id'));
@@ -4415,7 +4415,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
             let messages = _.clone(this.model.messages.models),
                 msg = messages[messages.length - 2];
             if (msg && msg.get('is_unread')) {
-                this.model.sendMarker(msg.get('msgid'), 'displayed', msg.get('stanza_id'), msg.get('contact_stanza_id'), msg.get('encrypted') && msg.get('ephemeral_timer'));
+                (!this.model.get('notifications') || force_read_notifications) && this.model.sendMarker(msg.get('msgid'), 'displayed', msg.get('stanza_id'), msg.get('contact_stanza_id'), msg.get('encrypted') && msg.get('ephemeral_timer'));
                 msg.set('is_unread', false);
                 msg.get('stanza_id') && this.model.set('last_read_msg', msg.get('stanza_id'));
                 msg.get('stanza_id') && this.model.set('prev_last_read_msg', msg.get('stanza_id'));

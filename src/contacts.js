@@ -9323,8 +9323,8 @@ xabber.Roster = xabber.ContactsBase.extend({
                 if (!msg.get('is_unread') && $unread_messages.attr('count') > 0 && !msg.isSenderMe()
                     && !(msg.get('type') === 'system')
                 ) {
-                    msg.set('is_unread', true);
-                    if (chat.get('notifications')){
+                    !msg.get('is_cached') && msg.set('is_unread', true);
+                    if (chat.get('notifications') && !msg.get('is_cached')){
                         msg.get('xml') && this.account.cached_notifications.putInCachedNotifications({
                             stanza_id: msg.get('unique_id'),
                             xml: msg.get('xml').outerHTML,
@@ -9368,7 +9368,9 @@ xabber.Roster = xabber.ContactsBase.extend({
                 let last_read_msg_item = chat.messages.get(last_read_msg);
                 if (last_read_msg_item && unread_msgs_count){
                     let unread_msgs = chat.messages.filter(m => m.get('timestamp') > last_read_msg_item.get('timestamp') && !m.isSenderMe());
-                    unread_msgs.forEach(message => message.set('is_unread', true));
+                    unread_msgs.forEach(message => {
+                        !message.get('is_cached') && message.set('is_unread', true)
+                    });
                     let readen_unread_msgs = chat.messages.filter(m => m.get('timestamp') > last_read_msg_item.get('timestamp') && !m.isSenderMe() && m.get('was_readen')),
                         last_readen_unread_msg = readen_unread_msgs[readen_unread_msgs.length - 1];
                     readen_unread_msgs.forEach((message) => {
@@ -9376,7 +9378,7 @@ xabber.Roster = xabber.ContactsBase.extend({
                     });
                     unread_msgs_count = unread_msgs_count - readen_unread_msgs.length;
                     (unread_msgs_count < 0) && (unread_msgs_count = 0);
-                    if (last_readen_unread_msg){
+                    if (last_readen_unread_msg && !chat.get('notifications')){
                         chat.sendMarker(last_readen_unread_msg.get('msgid'), 'displayed', last_readen_unread_msg.get('stanza_id'), last_readen_unread_msg.get('contact_stanza_id'), last_readen_unread_msg.get('encrypted') && last_readen_unread_msg.get('ephemeral_timer'), true)
                     }
                 }
@@ -9563,8 +9565,8 @@ xabber.Roster = xabber.ContactsBase.extend({
                 if (!msg.get('is_unread') && unread_msgs_count > 0 && !msg.isSenderMe()
                     && !(msg.get('type') === 'system')
                 ) {
-                    msg.set('is_unread', true);
-                    if (chat.get('notifications')){
+                    !msg.get('is_cached') && msg.set('is_unread', true);
+                    if (chat.get('notifications') && !msg.get('is_cached')){
                         msg.get('xml') && this.account.cached_notifications.putInCachedNotifications({
                             stanza_id: msg.get('unique_id'),
                             xml: msg.get('xml').outerHTML,
@@ -9607,7 +9609,9 @@ xabber.Roster = xabber.ContactsBase.extend({
                 let last_read_msg_item = chat.messages.get(last_read_msg);
                 if (last_read_msg_item && unread_msgs_count){
                     let unread_msgs = chat.messages.filter(m => m.get('timestamp') > last_read_msg_item.get('timestamp') && !m.isSenderMe());
-                    unread_msgs.forEach(message => message.set('is_unread', true));
+                    unread_msgs.forEach(message => {
+                        !message.get('is_cached') && message.set('is_unread', true)
+                    });
                     let readen_unread_msgs = chat.messages.filter(m => m.get('timestamp') > last_read_msg_item.get('timestamp') && !m.isSenderMe() && m.get('was_readen')),
                         last_readen_unread_msg = readen_unread_msgs[readen_unread_msgs.length - 1];
                     readen_unread_msgs.forEach((message) => {
@@ -9615,7 +9619,7 @@ xabber.Roster = xabber.ContactsBase.extend({
                     });
                     unread_msgs_count = unread_msgs_count - readen_unread_msgs.length;
                     (unread_msgs_count < 0) && (unread_msgs_count = 0);
-                    if (last_readen_unread_msg){
+                    if (last_readen_unread_msg && !chat.get('notifications')){
                         chat.sendMarker(last_readen_unread_msg.get('msgid'), 'displayed', last_readen_unread_msg.get('stanza_id'), last_readen_unread_msg.get('contact_stanza_id'), last_readen_unread_msg.get('encrypted') && last_readen_unread_msg.get('ephemeral_timer'), true)
                     }
                 }

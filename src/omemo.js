@@ -1936,7 +1936,7 @@ xabber.Omemo = Backbone.ModelWithStorage.extend({
                                 if (!chat.item_view.content)
                                     chat.item_view.content = new xabber.ChatContentView({chat_item: chat.item_view});
                                 let contact_stanza_id = $msg.children(`stanza-id[by="${contact.get('jid')}"]`).attr('id');
-                                chat.sendMarker($msg.attr('id'), 'displayed', stanza_id, contact_stanza_id);
+                                !chat.get('notifications') && chat.sendMarker($msg.attr('id'), 'displayed', stanza_id, contact_stanza_id);
                                 chat.item_view.content.readMessages();
                                 // reads this chats messages if last synced message is unread and cannot be decrypted
                             }
@@ -3023,7 +3023,7 @@ xabber.Account.addInitPlugin(function () {
                                             if (!chat.item_view.content)
                                                 chat.item_view.content = new xabber.ChatContentView({chat_item: chat.item_view});
                                             let contact_stanza_id = $msg.children(`stanza-id[by="${contact.get('jid')}"]`).attr('id');
-                                            chat.sendMarker($msg.attr('id'), 'displayed', stanza_id, contact_stanza_id);
+                                            !chat.get('notifications') && chat.sendMarker($msg.attr('id'), 'displayed', stanza_id, contact_stanza_id);
                                             chat.item_view.content.readMessages();
                                             // reads this chats messages if last synced message is unread and cannot be decrypted
                                         }

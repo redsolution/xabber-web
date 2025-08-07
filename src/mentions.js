@@ -238,7 +238,7 @@ xabber.MentionsView = xabber.SearchPanelView.extend({
                     contact_archive_id = mention.message.get('contact_archive_id'),
                     chat = account.chats.getChat(mention.contact);
                 mention.message.set('is_unread', false);
-                chat.sendMarker(msgid, 'displayed', archive_id, contact_archive_id);
+                !chat.get('notifications') && chat.sendMarker(msgid, 'displayed', archive_id, contact_archive_id);
             }));
         });
     },
@@ -415,7 +415,7 @@ xabber.MentionItemView = xabber.BasicView.extend({
         let message = this.model.message,
             chat = this.account.chats.getChat(this.contact);
         this.model.message.set('is_unread', false);
-        chat.sendMarker(message.get('origin_id'), 'displayed', message.get('stanza_id'), message.get('contact_stanza_id'));
+        !chat.get('notifications') && chat.sendMarker(message.get('origin_id'), 'displayed', message.get('stanza_id'), message.get('contact_stanza_id'));
         this.model.set('active', true);
         this.contact.trigger("open_mention", this.contact, message.get('unique_id'));
     },

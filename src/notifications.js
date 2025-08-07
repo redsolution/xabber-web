@@ -915,7 +915,7 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
             if (chat_item.chat.item_view && !chat_item.chat.item_view.content)
                 chat_item.chat.item_view.content = new xabber.ChatContentView({chat_item: chat_item.chat.item_view});
             if ((chat_item.chat.get('unread') || chat_item.chat.get('const_unread')) && chat_item.chat.last_message){
-                chat_item.chat.item_view.content.readMessages();
+                chat_item.chat.item_view.content.readMessages(null, true);
                 chat_item.chat.account.cached_notifications.getAllFromCachedNotifications((res) => {
                     if (res.length){
                         res = res.filter(item => item.is_unread);

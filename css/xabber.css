@@ -22746,7 +22746,10 @@ input[type=range].voice-message-volume:focus {
 
 .add-user-group-chat .roster-contact {
     height: 48px;
-    padding: 7px 31px 5px 72px;
+    padding: 5px 31px 5px 72px;
+}
+.add-user-group-chat .roster-contact .status{
+    top: 18px;
 }
 .add-user-group-chat .roster-contact .blocked-indicator {
     display: none;
