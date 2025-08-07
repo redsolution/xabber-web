@@ -7095,7 +7095,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
                     xmlns: Strophe.NS.PUBSUB_AVATAR_METADATA_THUMBNAIL,
                     uri: file.thumbnail
                 }).up();
-                file.created && stanza.c('created').t(file.created).up();
+                file.hash && stanza.c('hash', {xmlns: Strophe.NS.HASH}).t(file.hash).up();
                 file.name && stanza.c('name').t(file.name).up();
                 file.size && stanza.c('size').t(file.size).up();
                 file.height && stanza.c('height').t(file.height).up();
@@ -7922,7 +7922,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
             file_.key && (file_new_format.key = file_.key);
             file_.voice && (file_new_format.voice = true);
             if (this.account.get('gallery_token') && this.account.get('gallery_url')){
-                _.extend(file_new_format, { id: file_.id, created: file_.created_at, thumbnail: file_.thumbnail });
+                _.extend(file_new_format, { id: file_.id, hash: file_.hash,  thumbnail: file_.thumbnail });
             }
             if (utils.isImageType(file_.type)) {
                 _.extend(file_new_format, { width: file_.width, height: file_.height });
@@ -13466,7 +13466,7 @@ xabber.ChatBottomView = xabber.BasicView.extend({
         }
         let $elem = $(ev.target);
         if ($elem.hasClass('recording'))
-            $elem.removeClass('recording');
+            $elem.removeClass('recording ground-color-500');
         else {
             $elem.addClass('recording ground-color-500');
             setTimeout(() => {
@@ -13594,7 +13594,7 @@ xabber.ChatBottomView = xabber.BasicView.extend({
                         (xabber.settings.typing_notifications) && this.view.sendChatState('paused');
                         end_time = moment.now();
                         if (mic_hover && ((end_time - start_time)/1000 >= 1.5)) {
-                            let audio_name = ("voice message " + moment().format('YYYY-MM-DD HH:mm:ss') + '.ogg'), audio_type = 'audio/ogg; codecs=opus',
+                            let audio_name = ("voice_message_" + moment().format('YYYY-MM-DD_HH:mm:ss') + '.ogg'), audio_type = 'audio/ogg; codecs=opus',
                                 blob = new Blob([this.chunks], { 'type' : audio_type}),
                                 file = new File([blob], audio_name, {
                                     type: audio_type,
@@ -13635,11 +13635,19 @@ xabber.ChatBottomView = xabber.BasicView.extend({
                 };
 
             let onError = (error) => {
-                console.log(xabber.getString("file_upload__error", [error]));
+                console.error({error});
+                if (error.name === 'NotFoundError')
+                    utils.dialogs.error(xabber.getString("audio_error_record_failed_no_device"));
+                else
+                    utils.dialogs.error(xabber.getString("file_upload__error", [error]));
                 $mic.removeClass('recording ground-color-500');
+                this.model.set('recording_voice_message', false)
             };
 
             window.navigator.getUserMedia(constraints, onSuccess, onError);
+        } else {
+            utils.dialogs.error(xabber.getString("message_manager_error_cant_record_voice"));
+            $mic.removeClass('recording ground-color-500');
         }
     },
 
@@ -14345,7 +14353,7 @@ xabber.ChatBottomView = xabber.BasicView.extend({
                     xmlns: Strophe.NS.PUBSUB_AVATAR_METADATA_THUMBNAIL,
                     uri: file.thumbnail
                 }).up();
-                file.created && $message.c('created').t(file.created).up();
+                file.hash && $message.c('hash', {xmlns: Strophe.NS.HASH}).t(file.hash).up();
                 file.name && $message.c('name').t(file.name).up();
                 file.size && $message.c('size').t(file.size).up();
                 file.height && $message.c('height').t(file.height).up();

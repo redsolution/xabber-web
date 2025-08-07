@@ -914,7 +914,6 @@ xabber.Contact = Backbone.Model.extend({
                         hash: $file.children(`hash[xmlns="${Strophe.NS.HASH}"]`).text(),
                         size: $file.children('size').text(),
                         uniqueid: $message.attr('id') || cached_stanza_id ,
-                        created_at: $file.children('created').text(),
                         thumbnail: $file.children(`thumbnail[xmlns="${Strophe.NS.PUBSUB_AVATAR_METADATA_THUMBNAIL}"]`).attr('uri'),
                         media_type: $file.children('media-type').text(),
                         duration: $file.children('duration').text(),
