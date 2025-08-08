@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.4.174","version_description":"removed created and added hash sending in file upload reference, fixed on error handling in voice message recording, added error tooltip on missing recording device,"}'
+'{"version_number":"2.4.175","version_description":"added encryptd chat system message when contacts trusted devices are changed, fixed groupchat files deletion, chats view search clear on sending voice messages, removed selectable text from msg time"}'
 )});

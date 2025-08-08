@@ -99,7 +99,7 @@ xabber.Message = Backbone.Model.extend({
         }
         if (!this.collection.chat.item_view.content)
             this.collection.chat.item_view.content = new xabber.ChatContentView({chat_item: this.collection.chat.item_view});
-        this.collection.chat.item_view.content.removeMessage(this);
+        this.collection.chat.item_view.content.removeMessage(this, true);
     },
 
     checkEphemeralTimer: function () {
@@ -1410,10 +1410,87 @@ xabber.JingleMessage = Backbone.Model.extend({
         this.on("get_retractions_list", this.getAllMessageRetractions, this);
         this.on("change:timestamp", this.onChangedTimestamp, this);
         this.on("update_last_read_msg", this.onChangedLastReadMsg, this);
+        this.account && this.account.once('change:omemo_enabled', this.onOmemoEnable, this);
         this.onTrustSessionUpdate();
+        this.onOmemoEnable();
     },
 
     onChangedTimestamp: function () {
+    },
+
+    onOmemoEnable: function () {
+          console.error(!this.get('encrypted') || this.get('devices_checking_activated') || !this.account || !this.account.omemo || !this.account.omemo.xabber_trust);
+        console.error(this.get('jid'));
+        console.error(this);
+        if (!this.get('encrypted') || this.get('devices_checking_activated') || !this.account || !this.account.omemo || !this.account.omemo.xabber_trust)
+            return;
+        this.set('devices_checking_activated', true)
+        console.error(this.get('jid'));
+        this.account.omemo.xabber_trust.on('trust_updated change:trusted_devices', this.onTrustedDevicesUpdated, this);
+        this.onTrustedDevicesUpdated();
+    },
+
+    onTrustedDevicesUpdated: function () {
+        console.error(!this.get('encrypted') || !this.account.omemo || !this.account.omemo.xabber_trust);
+        if (!this.get('encrypted') || !this.account.omemo || !this.account.omemo.xabber_trust)
+            return;
+        let trusted_devices = this.account.omemo.xabber_trust.get('trusted_devices'),
+            jid = this.get('jid');
+        console.error(trusted_devices);
+        console.error(this.account.omemo.xabber_trust.get('trusted_devices'));
+        console.error(jid);
+        console.error(trusted_devices[jid]);
+        trusted_devices[jid] && console.error(trusted_devices[jid].length);
+
+        if (trusted_devices[jid] && trusted_devices[jid].length){
+            let latest_timestamp = {};
+            _.each(trusted_devices[jid], (device) => {
+                if (!latest_timestamp.timestamp) {
+                    latest_timestamp.timestamp = device.timestamp;
+                    latest_timestamp.device_id = device.device_id;
+                    latest_timestamp.last_revoke = null;
+                } else {
+                    if (device.timestamp > latest_timestamp.timestamp){
+                        latest_timestamp.timestamp = device.timestamp;
+                        latest_timestamp.device_id = device.device_id;
+                        latest_timestamp.last_revoke = null;
+                    }
+                    if (device.revocation_timestamp && Number(device.revocation_timestamp)
+                        && Number(device.revocation_timestamp) > latest_timestamp.timestamp
+                    ){
+                        latest_timestamp.timestamp = Number(device.revocation_timestamp);
+                        latest_timestamp.device_id = device.device_id;
+                        latest_timestamp.last_revoke = Number(device.revocation_timestamp);
+                    }
+                }
+            });
+            let latest_trust_timestamp = this.get('latest_trust_timestamp');
+            if (latest_trust_timestamp){
+                if (!(latest_timestamp.timestamp === latest_trust_timestamp.timestamp)
+                ){
+                    let last_updated_devices = trusted_devices[jid].filter(item => (item.timestamp === latest_timestamp.timestamp && !item.revocation_timestamp)
+                        || (latest_timestamp.last_revoke && Number(item.revocation_timestamp)
+                            && Number(item.revocation_timestamp) === latest_timestamp.last_revoke)
+                    );
+                    console.error(last_updated_devices);
+                    _.each(last_updated_devices, (last_updated_device) => {
+                        this.messages.createSystemMessage({
+                            from_jid: jid,
+                            message: last_updated_device.revocation_timestamp ?
+                                `This device trust was revoked by ${this.contact.get('name')} : <b>${last_updated_device.device_id}</b>`
+                                : `New trusted device was added by ${this.contact.get('name')} : <b>${last_updated_device.device_id}</b>`
+                        });
+                    });
+
+                }
+            }
+            console.error(this);
+            console.error(jid);
+            console.error(latest_timestamp);
+            console.error('latest_trust_timestamp !!!!!!!!!!!!!!!!!!!!!!!!!');
+            this.set('latest_trust_timestamp', latest_timestamp)
+
+        }
     },
 
     onTrustSessionUpdate: function () {
@@ -5643,7 +5720,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
         this.updateScrollBar();
     },
 
-    removeMessage: function (item) {
+    removeMessage: function (item, ephemeral) {
         let message, $message, $message_in_chat;
         if (item instanceof xabber.Message) {
             message = item;
@@ -5654,7 +5731,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
             if (!$message.length) return;
             message = this.model.messages.get($message.data('uniqueid'));
         }
-        if (this.account.get('gallery_token') && this.account.get('gallery_url'))
+        if (this.account.get('gallery_token') && this.account.get('gallery_url') && ephemeral)
             this.bottom.deleteFilesFromMessages([message]);
         message && message.destroy();
         if ($message_in_chat) {
@@ -13451,6 +13528,7 @@ xabber.ChatBottomView = xabber.BasicView.extend({
                 URL.revokeObjectURL(audio);
                 audioContext.close();
                 this.view.addFileMessage([file], true);
+                xabber.chats_view.clearSearch();
             });
         } catch (error) {
             console.error('error handling audio:', error);
@@ -13616,6 +13694,7 @@ xabber.ChatBottomView = xabber.BasicView.extend({
                                         URL.revokeObjectURL(audio);
                                         audioContext.close();
                                         this.view.addFileMessage([file], true);
+                                        xabber.chats_view.clearSearch();
                                     });
                                 } catch (error) {
                                     console.error('error handling audio:', error);

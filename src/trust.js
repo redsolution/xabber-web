@@ -2978,7 +2978,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                 this.account.sendFast(stanza, () => {
                 });
             }
-            console.log(stanza.tree());
+            stanza && stanza.tree && console.log(stanza.tree());
             this.clearData(sid);
             utils.callback_popup_message(xabber.getString("trust_verification_verification_succeded"), 5000);
         });
