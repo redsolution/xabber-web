@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.4.175","version_description":"added encryptd chat system message when contacts trusted devices are changed, fixed groupchat files deletion, chats view search clear on sending voice messages, removed selectable text from msg time"}'
+'{"version_number":"2.4.176","version_description":"fixed chats loading after logging in, fixed forwarded preview text not escaping html, fixed plyr video src when using proxy, added default title for plyr videos, fixed delete btn in gallery, fixed encryption warning click in modal settings,"}'
 )});

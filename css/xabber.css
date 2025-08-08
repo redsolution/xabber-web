@@ -14068,8 +14068,8 @@ input[type=range].voice-message-volume:focus {
 .settings-panel-wrap .settings-panel .settings-block-wrap.media-gallery {
     min-height: 400px;
 }
-.settings-panel-wrap .settings-panel .settings-block-wrap.media-gallery .gallery-files:not(.grid) .gallery-file {
-    z-index: 0;
+.settings-panel-wrap .settings-panel .settings-block-wrap.media-gallery .gallery-files:not(.grid) .gallery-file .dropdown-content {
+    z-index: 1 !important;
 }
 .settings-panel-wrap .settings-panel .settings-panel-head .description {
     color: #616161;
@@ -14809,6 +14809,9 @@ input[type=range].voice-message-volume:focus {
     right: 27px;
     height: 24px;
     width: 24px;
+}
+.settings-panel-wrap .settings-tabs-wrap .settings-tab .device-encryption{
+    pointer-events: none;
 }
 .settings-panel-wrap .settings-tabs-wrap .settings-tab .device-encryption path{
     fill: #ffa000 !important;

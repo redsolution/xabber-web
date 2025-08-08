@@ -1419,28 +1419,28 @@ xabber.JingleMessage = Backbone.Model.extend({
     },
 
     onOmemoEnable: function () {
-          console.error(!this.get('encrypted') || this.get('devices_checking_activated') || !this.account || !this.account.omemo || !this.account.omemo.xabber_trust);
-        console.error(this.get('jid'));
-        console.error(this);
+          // console.error(!this.get('encrypted') || this.get('devices_checking_activated') || !this.account || !this.account.omemo || !this.account.omemo.xabber_trust);
+        // console.error(this.get('jid'));
+        // console.error(this);
         if (!this.get('encrypted') || this.get('devices_checking_activated') || !this.account || !this.account.omemo || !this.account.omemo.xabber_trust)
             return;
         this.set('devices_checking_activated', true)
-        console.error(this.get('jid'));
+        // console.error(this.get('jid'));
         this.account.omemo.xabber_trust.on('trust_updated change:trusted_devices', this.onTrustedDevicesUpdated, this);
         this.onTrustedDevicesUpdated();
     },
 
     onTrustedDevicesUpdated: function () {
-        console.error(!this.get('encrypted') || !this.account.omemo || !this.account.omemo.xabber_trust);
+        // console.error(!this.get('encrypted') || !this.account.omemo || !this.account.omemo.xabber_trust);
         if (!this.get('encrypted') || !this.account.omemo || !this.account.omemo.xabber_trust)
             return;
         let trusted_devices = this.account.omemo.xabber_trust.get('trusted_devices'),
             jid = this.get('jid');
-        console.error(trusted_devices);
-        console.error(this.account.omemo.xabber_trust.get('trusted_devices'));
-        console.error(jid);
-        console.error(trusted_devices[jid]);
-        trusted_devices[jid] && console.error(trusted_devices[jid].length);
+        // console.error(trusted_devices);
+        // console.error(this.account.omemo.xabber_trust.get('trusted_devices'));
+        // console.error(jid);
+        // console.error(trusted_devices[jid]);
+        // trusted_devices[jid] && console.error(trusted_devices[jid].length);
 
         if (trusted_devices[jid] && trusted_devices[jid].length){
             let latest_timestamp = {};
@@ -1472,7 +1472,7 @@ xabber.JingleMessage = Backbone.Model.extend({
                         || (latest_timestamp.last_revoke && Number(item.revocation_timestamp)
                             && Number(item.revocation_timestamp) === latest_timestamp.last_revoke)
                     );
-                    console.error(last_updated_devices);
+                    // console.error(last_updated_devices);
                     _.each(last_updated_devices, (last_updated_device) => {
                         this.messages.createSystemMessage({
                             from_jid: jid,
@@ -1484,10 +1484,10 @@ xabber.JingleMessage = Backbone.Model.extend({
 
                 }
             }
-            console.error(this);
-            console.error(jid);
-            console.error(latest_timestamp);
-            console.error('latest_trust_timestamp !!!!!!!!!!!!!!!!!!!!!!!!!');
+            // console.error(this);
+            // console.error(jid);
+            // console.error(latest_timestamp);
+            // console.error('latest_trust_timestamp !!!!!!!!!!!!!!!!!!!!!!!!!');
             this.set('latest_trust_timestamp', latest_timestamp)
 
         }
@@ -9914,7 +9914,7 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
         active_toolbar.hasClass('chats') && this.replaceChatItem(item, this.model.filter(chat => (!chat.get('saved') && !chat.contact.get('group_chat') && (!chat.get('archived') && !chat.get('notifications'))) && (chat.get('pinned') === '0' || !chat.get('pinned'))), this.model.filter(chat => (!chat.get('saved') && !chat.contact.get('group_chat') && (!chat.get('archived') && !chat.get('notifications'))) && chat.get('pinned') !== '0' && chat.get('pinned')));
 
         (
-            active_toolbar.hasClass('all-chats') || active_toolbar.hasClass('settings-modal')
+            active_toolbar.hasClass('all-chats') || !active_toolbar.length || active_toolbar.hasClass('settings-modal')
             || (xabber.accounts.enabled.length === 1 && active_toolbar.hasClass('saved-chats'))
         )
         && this.replaceChatItem(item,
@@ -14230,7 +14230,7 @@ xabber.ChatBottomView = xabber.BasicView.extend({
             }
             this.$('.fwd-messages-preview .msg-author').text(msg_author);
             if (_.isUndefined(image_preview)) {
-                this.$('.fwd-messages-preview .msg-text').html(msg_text);
+                this.$('.fwd-messages-preview .msg-text').html(Strophe.xmlescape(msg_text));
             }
             else {
                 this.$('.fwd-messages-preview .msg-text').html($img_html_preview);

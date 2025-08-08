@@ -1934,7 +1934,7 @@ xabber.PlyrPlayerPopupView = xabber.BasicView.extend({
             options.player.video_file.type && (options.player.type = options.player.video_file.type);
         }
 
-        if (options.player.proxy_video){
+        if (options.player.proxy_video && !options.player.proxied){
             this.loadProxyVideo(options, dfd);
         } else{
             if (options.player && options.player.key && options.player.chat_item.model && options.player.video_src && !options.player.video_decrypted){
@@ -1968,6 +1968,7 @@ xabber.PlyrPlayerPopupView = xabber.BasicView.extend({
                     }// smth about how file not decrypted
 
                     options.player.video_src = result;
+                    options.player.proxied = true;
                     options.player.video_decrypted = true;
                     dfd.resolve();
                 }).catch((e) => {
@@ -1975,6 +1976,7 @@ xabber.PlyrPlayerPopupView = xabber.BasicView.extend({
                 });
             } else {
                 options.player.video_src = url;
+                options.player.proxied = true;
                 dfd.resolve();
             }
         });
