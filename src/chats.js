@@ -1474,6 +1474,8 @@ xabber.JingleMessage = Backbone.Model.extend({
                     );
                     // console.error(last_updated_devices);
                     _.each(last_updated_devices, (last_updated_device) => {
+                        if (last_updated_device.after_trust && !last_updated_device.revocation_timestamp)
+                            return;
                         this.messages.createSystemMessage({
                             from_jid: jid,
                             message: last_updated_device.revocation_timestamp ?
