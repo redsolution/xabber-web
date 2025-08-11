@@ -6935,13 +6935,6 @@ xabber.ChatContentView = xabber.BasicView.extend({
         if ($msg.find('.plyr-video-container').length) {
             this.initPlyrEmbedPlayer($msg, msg);
         }
-        ($msg.find('.not-decrypted-icon').length) && $msg.find('.not-decrypted-icon').dropdown({
-            inDuration: 100,
-            outDuration: 100,
-            constrainWidth: false,
-            hover: false,
-            alignment: 'right'
-        });
         let $prev_msg = $msg.prevAll('.chat-message').first();
         if (!$prev_msg.length) {
             this.getDateIndicator($msg.data('time')).insertBefore($msg);
@@ -8585,7 +8578,21 @@ xabber.ChatContentView = xabber.BasicView.extend({
             this.onClickNotification(ev);
             return;
         }
-        if ($elem.hasClass('not-decrypted-icon') || $elem.closest('.dropdown-content').length || $elem.closest('.not-decrypted-icon').length)
+        if ($elem.hasClass('not-decrypted-icon') || $elem.closest('.not-decrypted-icon').length){
+            if ($elem.closest('.not-decrypted-icon').length && !$elem.closest('.not-decrypted-icon').hasClass('not-decrypted-dropdown-active')) {
+                $elem.closest('.not-decrypted-icon').dropdown({//34
+                    inDuration: 100,
+                    outDuration: 100,
+                    constrainWidth: false,
+                    hover: false,
+                    alignment: 'right'
+                });
+                $elem.closest('.not-decrypted-icon').addClass('not-decrypted-dropdown-active');
+                $elem.closest('.not-decrypted-icon').click();
+            }
+            return;
+        }
+        if ($elem.closest('.dropdown-content').length)
             return;
         if ($elem.hasClass('file-link-download')) { // сделать проверку на прокси и отдельные функции скачивания
             ev.preventDefault();

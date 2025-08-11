@@ -808,7 +808,7 @@ let Xabber = Backbone.Model.extend({
                 this.current_plyr_player.provider === 'html5' ?
                     this.current_plyr_player.source.substring(this.current_plyr_player.source.lastIndexOf('/')+1)
                     : this.getString("chat_message_video");
-        !title && (title = this.getString("chat_message_video"));
+        this.current_plyr_player && !this.current_plyr_player.$audio_elem && !title && (title = this.getString("chat_message_video"));
         $title_elem.text(title);
         if (self.$('.chat-head-player-title')[0] && utils.isOverflownWidth(self.$('.chat-head-player-title')[0])){
             $title_elem.addClass('active-animation-player-title');
