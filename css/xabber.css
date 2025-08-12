@@ -1457,7 +1457,7 @@ body {
 }
 
 .panel-head {
-    height: 72px;
+    height: 64px;
     position: relative;
     width: 100%;
     z-index: 100;
@@ -6774,8 +6774,8 @@ input[type=text].simple-input-field:hover {
 .contacts-panel-wrap .panel-head{
     border: none;
     box-shadow: none;
-    height: 72px;
-    min-height: 72px;
+    height: 64px;
+    min-height: 64px;
     padding: 22px 0 16px;
     position: absolute;
     display: flex;
@@ -6838,7 +6838,7 @@ input[type=text].simple-input-field:hover {
     position: relative;
     top: -11px;
     flex-shrink: unset;
-    height: 72px;
+    height: 64px;
     float: right;
     width: fit-content;
     margin: 0;
@@ -6851,8 +6851,8 @@ input[type=text].simple-input-field:hover {
     right: 0;
 }
 .tab-active-filters-wrap{
-    margin: 3px 0 0 4px;
-    padding: 8px 0 0 8px;
+    margin: 11px 0 0 12px;
+    /*padding: 8px 0 0 8px;*/
     position: relative;
     resize: both;
 }
@@ -23705,8 +23705,8 @@ ul.restrictions-list-content>li {
     border: none;
     box-shadow: none;
     display: flex;
-    height: 72px;
-    min-height: 72px;
+    height: 64px;
+    min-height: 64px;
     padding: 22px 0 16px;
     position: absolute;
     z-index: 1;
@@ -23933,8 +23933,8 @@ ul.restrictions-list-content>li {
 }
 .notifications-content-wrap .notifications-utility{
     font-size: 20px;
-    height: 72px;
-    padding: 20px 6px 28px 32px;
+    height: 64px;
+    padding: 20px 6px 20px 32px;
     width: 100%;
     position: absolute;
     z-index: 1;
