@@ -7823,7 +7823,14 @@ input[type=text].simple-input-field:hover {
 .roster-left-container .roster-account-info,
 .forward-panel-modal .roster-contact{
     height: 56px;
-    padding: 11px 31px 11px 60px;
+    padding: 10px 31px 8px 60px;
+}
+.roster-left-container .roster-contact{
+    cursor: pointer;
+    height: 72px;
+    overflow: hidden;
+    padding: 13px 8px 14px 82px;
+    position: relative;
 }
 
 .roster-left-container .roster-account-info .circle-avatar {
@@ -7850,6 +7857,12 @@ input[type=text].simple-input-field:hover {
     height: 32px;
 }
 
+.roster-left-container .roster-contact .circle-avatar {
+    position: static;
+    width: 48px !important;
+    height: 48px !important;
+}
+
 .roster-left-container .roster-contact .account-indicator-background-exclude,
 .forward-panel-modal .roster-contact .account-indicator-background-exclude {
     position: absolute;
@@ -7858,6 +7871,14 @@ input[type=text].simple-input-field:hover {
     width: 32px !important;
     height: 32px !important;
 }
+.roster-left-container .roster-contact .account-indicator-background-exclude {
+    height: 48px !important;
+    left: 16px;
+    position: absolute;
+    top: 12px;
+    width: 48px !important;
+    z-index: 1;
+}
 
 .roster-left-container .roster-contact .account-indicator,
 .forward-panel-modal .roster-contact .account-indicator {
@@ -7865,6 +7886,11 @@ input[type=text].simple-input-field:hover {
     position: absolute;
     width: 32px !important;
     height: 32px !important;
+}
+.roster-left-container .roster-contact .account-indicator{
+
+    width: 48px !important;
+    height: 48px !important;
 }
 
 .roster-left-container .roster-contact .name,
@@ -7893,6 +7919,8 @@ input[type=text].simple-input-field:hover {
 
 .roster-left-container .roster-contact .name {
     float: left;
+    font-size: var(--chat-item-title-font-size);
+    color: #212121;
 }
 
 .pinned-icon {
@@ -7931,12 +7959,31 @@ input[type=text].simple-input-field:hover {
     color: #616161;
     opacity: 0.5;
 }
+.roster-left-container .roster-contact .jid {
+    color: #757575;
+    font-size: var(--chat-item-msg-font-size);
+    font-weight: 300;
+    line-height: 16px;
+    margin-top: 6px;
+    opacity: 1;
+    height: 16px;
+}
 
 .roster-left-container .roster-contact .status,
 .roster-left-container .roster-account-info-wrap .status,
 .forward-panel-modal .roster-contact .status {
     top: 23px;
     right: 14px;
+}
+.roster-left-container .roster-contact .status{
+    border-radius: 50%;
+    height: 12px;
+    left: 52px;
+    outline: 1.125px solid #fff;
+    position: absolute;
+    top: 46px;
+    width: 12px;
+    z-index: 2;
 }
 
 .roster-left-container .roster-account-info-wrap .status {
@@ -7959,7 +8006,12 @@ input[type=text].simple-input-field:hover {
 }
 
 .forward-panel-modal .roster-contact .status {
-    right: 20px;
+    left: 51px;
+    top: 38px;
+    z-index: 2;
+    outline: 1.125px solid #fff;
+    height: 11.9px;
+    width: 11.9px;
 }
 
 .roster-left-container .roster-account-info-wrap .status-button {
@@ -9840,6 +9892,10 @@ input[type=text].simple-input-field:hover {
     width: 40px;
     height: 40px;
     z-index: 1;
+}
+.forward-panel-modal .list-item.roster-contact .account-indicator-background-exclude{
+    top: 13px;
+    left: 28px;
 }
 .forward-panel-modal .list-item .account-indicator{
     width: 40px;
@@ -22782,7 +22838,26 @@ input[type=range].voice-message-volume:focus {
 }
 
 .forward-panel-modal .list-item {
-    padding: 11px 24px 11px 74px;
+    padding: 10px 24px 10px 74px;
+    margin-top: 4px;
+}
+.forward-panel-modal .list-item.roster-contact .name-wrap {
+    height: 17px !important;
+}
+.forward-panel-modal .list-item.roster-contact .name {
+    color: #212121;
+    font-size: 16px;
+    line-height: 17px;
+    height: 17px !important;
+}
+.forward-panel-modal .list-item.roster-contact .jid {
+    color: #757575;
+    font-size: 11px;
+    font-weight: 300;
+    height: 16px;
+    line-height: 16px;
+    margin-top: 0;
+    opacity: 1;
 }
 
 .forward-panel-modal .chat-item .msg-delivering-state {
@@ -22797,13 +22872,33 @@ input[type=range].voice-message-volume:focus {
 .forward-panel-modal .list-item:hover {
     background-color: #F5F5F5;
 }
-
+.forward-panel-modal .list-item.roster-contact .account-indicator-background-exclude,
 .forward-panel-modal .list-item .account-indicator-background-exclude {
     left: 24px;
+    height: 40px !important;
+    position: absolute;
+    top: 8px;
+    width: 40px !important;
+    z-index: 1;
 }
-
-.forward-panel-modal .list-item.roster-contact .account-indicator-background-exclude {
+.forward-panel-modal .list-item.roster-contact .account-indicator-background-exclude,
+.forward-panel-modal .list-item .account-indicator-background-exclude {
     left: 24px;
+    height: 40px !important;
+    position: absolute;
+    top: 8px;
+    width: 40px !important;
+    z-index: 1;
+}
+.forward-panel-modal .list-item.roster-contact .account-indicator-background-exclude .account-indicator,
+.forward-panel-modal .list-item .account-indicator-background-exclude  .account-indicator{
+    height: 40px !important;
+    width: 40px !important;
+}
+.forward-panel-modal .list-item.roster-contact .account-indicator-background-exclude .circle-avatar,
+.forward-panel-modal .list-item .account-indicator-background-exclude  .circle-avatar{
+    height: 40px !important;
+    width: 40px !important;
 }
 
 .forward-panel-modal .chat-item .chat-icon {
