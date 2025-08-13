@@ -6214,7 +6214,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
 
         let markup_body = utils.markupBodyMessage(message), $message;
         if (attrs.searched_message){
-            let myRegexp = new RegExp('(.{0,12})(' + attrs.query + ')(.{0,12})','gmius'),
+            let myRegexp = new RegExp('(.{0,12})(' + utils.escapeTextToRegexText(attrs.query) + ')(.{0,12})','gmius'),
                 matching_markup = myRegexp.exec(Strophe.xmlescape(attrs.original_message || attrs.message) || markup_body);
             if (matching_markup) {
                 if (matching_markup[1].length === 12)
@@ -9903,26 +9903,39 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
     },
 
     updateChatPositionDebounced: function (item, unread) {
-        let view = this.child(item.id),
-            active_toolbar = xabber.toolbar_view.$('.active');
-        if (item && active_toolbar.hasClass('unread') && (item.get('notifications') || !(item.get('unread') || item.get('const_unread')))) {
-            return;
-        }
-        if (view && active_toolbar.hasClass('account-item') && view.account.get('jid') !== active_toolbar.attr('data-jid')){
-            return;
-        }
-        if (active_toolbar.hasClass('unread') && unread){
-            if (item.get('pinned') !== '0' && item.get('pinned')){
-                this.$('.pinned-chat-list').prepend(item.item_view.$el);
-            } else {
-                this.$('.chat-list').prepend(item.item_view.$el);
+        let view,
+            active_toolbar = xabber.toolbar_view.$('.active'),
+            is_unread_forced = !item && xabber.toolbar_view.$('.active.unread').length;
+        if (item){
+            view = this.child(item.id);
+            if (item && active_toolbar.hasClass('unread') && (item.get('notifications') || !(item.get('unread') || item.get('const_unread')))) {
+                return;
             }
-            return;
+            if (view && active_toolbar.hasClass('account-item') && view.account.get('jid') !== active_toolbar.attr('data-jid')){
+                return;
+            }
+            if (active_toolbar.hasClass('unread') && unread){
+                if (item.get('pinned') !== '0' && item.get('pinned')){
+                    this.$('.pinned-chat-list').prepend(item.item_view.$el);
+                } else {
+                    this.$('.chat-list').prepend(item.item_view.$el);
+                }
+                return;
+            }
         }
         active_toolbar.hasClass('group-chats') && this.replaceChatItem(item, this.model.filter(chat => (!chat.get('saved') && chat.contact.get('group_chat') && (!chat.get('archived') && !chat.get('notifications'))) && (chat.get('pinned') === '0' || !chat.get('pinned'))), this.model.filter(chat => (!chat.get('saved') && chat.contact.get('group_chat') && (!chat.get('archived') && !chat.get('notifications'))) && chat.get('pinned') !== '0' && chat.get('pinned')));
         active_toolbar.hasClass('chats') && this.replaceChatItem(item, this.model.filter(chat => (!chat.get('saved') && !chat.contact.get('group_chat') && (!chat.get('archived') && !chat.get('notifications'))) && (chat.get('pinned') === '0' || !chat.get('pinned'))), this.model.filter(chat => (!chat.get('saved') && !chat.contact.get('group_chat') && (!chat.get('archived') && !chat.get('notifications'))) && chat.get('pinned') !== '0' && chat.get('pinned')));
 
-        (
+        is_unread_forced && (
+            active_toolbar.hasClass('all-chats') || !active_toolbar.length || active_toolbar.hasClass('settings-modal')
+            || (xabber.accounts.enabled.length === 1 && active_toolbar.hasClass('saved-chats'))
+        )
+        && this.replaceChatItem(item,
+            this.model.filter(chat => (!chat.get('archived') && !chat.get('notifications')) && (chat.get('unread') || chat.get('const_unread'))
+                && (chat.get('pinned') === '0' || !chat.get('pinned'))),
+            this.model.filter(chat => (!chat.get('archived') && !chat.get('notifications')) && (chat.get('unread') || chat.get('const_unread'))
+                && chat.get('pinned') !== '0' && chat.get('pinned')));
+        !is_unread_forced && (
             active_toolbar.hasClass('all-chats') || !active_toolbar.length || active_toolbar.hasClass('settings-modal')
             || (xabber.accounts.enabled.length === 1 && active_toolbar.hasClass('saved-chats'))
         )
@@ -9952,6 +9965,11 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
 
     updateChatPosition: function (item, unread) {
         this.update_debounce(item, unread);
+    },
+
+    fillIfChatsEmpty: function () {
+        if (!this.$('.chat-item').length)
+            this.update_debounce();
     },
 
     onEnterPressed: function (selection) {
@@ -15303,6 +15321,7 @@ xabber.once("start", function () {
 
     this.on("change:focused", function () {
         if (this.get('focused')) {
+            this.chats_view.fillIfChatsEmpty();
             let view = this.chats_view.active_chat;
             if (view && view.content && view.content.data.get('visible')) {
                 view.content.onScroll(null, true);
@@ -15314,6 +15333,7 @@ xabber.once("start", function () {
 
     this.on("change:idle", function () {
         if (!this.get('idle')) {
+            this.chats_view.fillIfChatsEmpty();
             let view = this.chats_view.active_chat;
             if (view && view.model.get('display')) {
                 view.content.onScroll(null, true);

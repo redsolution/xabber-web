@@ -1327,6 +1327,10 @@ var utils = {
         }
     },
 
+    escapeTextToRegexText: function (string) {
+        return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    },
+
     fromBase64toArrayBuffer: function (b64_string) {
         return Uint8Array.from(atob(b64_string), c => c.charCodeAt(0)).buffer;
     },

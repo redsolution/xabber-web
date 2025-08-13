@@ -18548,7 +18548,6 @@ input[type=range].voice-message-volume:focus {
 
 .details-panel-right .search-wrap .chat-message .chat-msg-content{
     max-height: 40px;
-    padding-right: 100px;
     overflow: hidden;
     font-size: 12px;
 }
