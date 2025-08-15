@@ -1101,9 +1101,10 @@ xabber.Account = Backbone.Model.extend({
             return this.sendPres(stanza);
         },
 
-        sendPresence: function (type, message) {
+        sendPresence: function (type, message, to) {
             type = type || this.get('status');
             let status_message = message || this.get('status_message'), stanza = $pres();
+            to && stanza.attrs({'to': to});
             if (type === 'offline') {
                 stanza.attrs({'type': 'unavailable'});
             } else {

@@ -243,43 +243,63 @@ xabber.Contact = Backbone.Model.extend({
             return;
         let jid = this.get('jid'),
             is_callback = _.isFunction(callback);
-        this.account.getConnectionForIQ().vcard.get(jid,
-             (vcard) => {
-                if (vcard.group_info) {
-                    let group_info = this.get('group_info') || {};
-                    group_info = _.extend(group_info, vcard.group_info);
-                    this.set({group_info});
-                    delete vcard.group_info;
+        let test_id = uuid();
+        if (this.get('group_chat')){
+            let iq = $iq({
+                type: 'get',
+                to: this.get('full_jid') || this.get('jid')})
+                .c('query', {xmlns: Strophe.NS.GROUP_CHAT + '#info'});
+            this.account.sendFast(iq, (res) => {
+                let $group_chat_info = $(res).find(`x[xmlns="${Strophe.NS.GROUP_CHAT}"]`);
+
+                if ($group_chat_info.length > 0 && $group_chat_info.children().length) {
+                        let group_chat_info = this.parseGroupInfoFromInfo($(res)),
+                        prev_group_info = this.get('group_info') || {};
+                    group_chat_info.jid = this.get('jid');
+                    group_chat_info.jid = this.get('jid');
+                    _.extend(prev_group_info, group_chat_info);
+                    this.set('group_info', prev_group_info);
+                    this.set('name', prev_group_info.name);
+                    this.set('vcard_updated', moment.now());
                 }
-                let attrs = {
-                    vcard: vcard,
-                    vcard_updated: moment.now(),
-                    name: this.get('roster_name')
-                };
-                if (!attrs.name) {
-                    if (this.get('group_chat'))
-                        attrs.name = vcard.nickname || this.get('name');
-                    else
-                        attrs.name = vcard.nickname || (vcard.first_name + ' ' + vcard.last_name).trim() || vcard.fullname || jid;
-                }
-                if (!this.get('avatar_priority') || this.get('avatar_priority') <= constants.AVATAR_PRIORITIES.VCARD_AVATAR) {
-                    if (vcard.photo.image) {
-                        attrs.avatar_priority = constants.AVATAR_PRIORITIES.VCARD_AVATAR;
-                        attrs.image = vcard.photo.image;
-                    }
-                    else if (this.get('forced_group_avatar') && this.get('image'))
-                        attrs.image = this.get('image');
-                    else
-                        attrs.image = Images.getDefaultAvatar(attrs.name);
-                    this.cached_image = Images.getCachedImage(attrs.image);
-                }
-                this.set(attrs);
-                is_callback && callback(vcard);
-            },
-            function () {
+
+            }, (err) => {
                 is_callback && callback(null);
-            }
-        );
+            });
+        } else {
+            this.account.getConnectionForIQ().vcard.get(jid,
+                (vcard) => {
+
+                    let attrs = {
+                        vcard: vcard,
+                        vcard_updated: moment.now(),
+                        name: this.get('roster_name')
+                    };
+                    if (!attrs.name) {
+                        if (this.get('group_chat'))
+                            attrs.name = vcard.nickname || this.get('name');
+                        else
+                            attrs.name = vcard.nickname || (vcard.first_name + ' ' + vcard.last_name).trim() || vcard.fullname || jid;
+                    }
+                    if (!this.get('avatar_priority') || this.get('avatar_priority') <= constants.AVATAR_PRIORITIES.VCARD_AVATAR) {
+                        if (vcard.photo.image) {
+                            attrs.avatar_priority = constants.AVATAR_PRIORITIES.VCARD_AVATAR;
+                            attrs.image = vcard.photo.image;
+                        }
+                        else if (this.get('forced_group_avatar') && this.get('image'))
+                            attrs.image = this.get('image');
+                        else
+                            attrs.image = Images.getDefaultAvatar(attrs.name);
+                        this.cached_image = Images.getCachedImage(attrs.image);
+                    }
+                    this.set(attrs);
+                    is_callback && callback(vcard);
+                },
+                function () {
+                    is_callback && callback(null);
+                }
+            );
+        }
     },
 
     updateCachedInfo: function () {
@@ -317,6 +337,7 @@ xabber.Contact = Backbone.Model.extend({
             this.set('full_jid', this.get('jid') + '/Group');
             this.updateCounters();
             this.participants = new xabber.Participants(null, {contact: this});
+            this.getVCard();
         }
     },
 
@@ -653,7 +674,7 @@ xabber.Contact = Backbone.Model.extend({
                 prev_group_info = this.get('group_info') || {};
             _.extend(prev_group_info, group_chat_info);
             this.set('group_info', prev_group_info);
-            if (!this.get('roster_name') && (prev_group_info.name !== this.get('name')))
+            if (!this.get('roster_name') && (prev_group_info.name !== this.get('name')) && !this.get('group_chat'))
                 this.set('name', prev_group_info.name);
             this.set({status: prev_group_info.status, status_updated: moment.now(), status_message: (prev_group_info.members_num + ' members' + xabber.getString("contact_groupchat_status_online", [prev_group_info.online_members_num || 0]))});
         }
@@ -739,6 +760,55 @@ xabber.Contact = Backbone.Model.extend({
             members_num = Number($group_chat.find('members').text()),
             $online_members_num = $group_chat.find('present'),
             info = {jid, name, status_msg, privacy, status, members_num};
+        $index.length && (info.searchable = $index.text());
+        $model.length && (info.model = $model.text());
+        $description.length && (info.description = $description.text());
+        $online_members_num.length && (info.online_members_num = Number($online_members_num.text()));
+        private_chat && this.set('private_chat', private_chat);
+        privacy === 'incognito' && this.set('incognito_chat', true);
+        let chat = this.account.chats.get(this.hash_id), pinned_msg_elem;
+        if ($group_chat.find('pinned-message').length) {
+            if (prev_pinned_message !== pinned_message) {
+                if (chat) {
+                    if (chat.item_view && !chat.item_view.content)
+                        chat.item_view.content = new xabber.ChatContentView({chat_item: chat.item_view});
+                    pinned_msg_elem = chat.item_view.content.$pinned_message;
+                }
+                if (pinned_msg_elem) {
+                    if (pinned_message) {
+                        this.getMessageByStanzaId(pinned_message, ($message) => {
+                            if ($message === 'no_messages') {
+                                this.set('pinned_message', undefined);
+                                this.parsePinnedMessage(undefined, pinned_msg_elem);
+                            } else {
+                                this.parsePinnedMessage($message, pinned_msg_elem);
+                            }
+                        });
+                    }
+                    else {
+                        this.set('pinned_message', undefined);
+                        this.parsePinnedMessage(undefined, pinned_msg_elem);
+                    }
+                }
+            }
+        }
+        return info;
+    },
+
+    parseGroupInfoFromInfo: function ($iq) {
+        let jid = this.get('jid'),
+            $group_chat = $iq.find(`x[xmlns="${Strophe.NS.GROUP_CHAT}"]`),
+            name = $group_chat.find('name').text(),
+            $model = $group_chat.find('membership'),
+            privacy = $group_chat.find('privacy').text(),
+            $index = $group_chat.find('index'),
+            $description = $group_chat.find('description'),
+            pinned_message = Number($group_chat.find('pinned-message').text()),
+            prev_pinned_message = this.get('pinned_message') ? this.get('pinned_message').get('stanza_id') : 0,
+            private_chat = $group_chat.find('parent-chat').text() || false,
+            members_num = Number($group_chat.find('members').text()),
+            $online_members_num = $group_chat.find('present'),
+            info = {jid, name, privacy, members_num};
         $index.length && (info.searchable = $index.text());
         $model.length && (info.model = $model.text());
         $description.length && (info.description = $description.text());
@@ -1054,7 +1124,7 @@ xabber.Contact = Backbone.Model.extend({
     },
 
     updateName: function () {
-        if (this.get('roster_name') && this.get('name') !== this.get('roster_name'))
+        if (this.get('roster_name') && this.get('name') !== this.get('roster_name') && !this.get('group_chat'))
             this.set('name', this.get('roster_name'));
     },
 
@@ -9835,7 +9905,7 @@ xabber.Roster = xabber.ContactsBase.extend({
         contact.set(attrs);
         contact.updateCachedInfo();
         if (to_send_available){
-            this.account.sendPresence();
+            this.account.sendPresence(null, null, jid);
         }
     }
 });
