@@ -261,6 +261,52 @@ xabber.Contact = Backbone.Model.extend({
                     this.set('group_info', prev_group_info);
                     this.set('name', prev_group_info.name);
                     this.set('vcard_updated', moment.now());
+
+                    let $metadata = $(res).find(`metadata[xmlns="${Strophe.NS.PUBSUB_AVATAR_METADATA}"]`);
+                    if ($metadata.length) {
+                        let photo_id = $metadata.find('info').attr('id'),
+                            photo_url = $metadata.find('info').attr('url');
+                        if (!photo_id) {
+                            let image = Images.getDefaultAvatar(this.get('name'));
+                            this.cached_image = Images.getCachedImage(image);
+                            this.set('avatar_priority', constants.AVATAR_PRIORITIES.PUBSUB_AVATAR);
+                            this.set('photo_hash', null);
+                            this.set('image', image);
+                            this.updateCachedInfo();
+                            return;
+                        }
+                        if ((photo_id !== "") && (this.get('photo_hash') === photo_id)) {
+                            return;
+                        } else if (photo_url) {
+                            this.cached_image = photo_url;
+                            this.set({
+                                photo_hash: photo_id,
+                                image: photo_url,
+                                avatar_priority: constants.AVATAR_PRIORITIES.PUBSUB_AVATAR
+                            });
+                            this.updateCachedInfo();
+                            return;
+                        }
+                        this.getAvatar(photo_id, Strophe.NS.PUBSUB_AVATAR_DATA, (data_avatar) => {
+                            try {
+                                this.cached_image = Images.getCachedImage(data_avatar);
+                                this.set('avatar_priority', constants.AVATAR_PRIORITIES.PUBSUB_AVATAR);
+                                this.set('photo_hash', photo_id);
+                                this.set('image', data_avatar);
+                                this.updateCachedInfo();
+                            } catch (e) {
+                                console.error(e);
+                            }
+                        });
+                    } else {
+                        let image = Images.getDefaultAvatar(this.get('name'));
+                        this.cached_image = Images.getCachedImage(image);
+                        this.set('avatar_priority', constants.AVATAR_PRIORITIES.PUBSUB_AVATAR);
+                        this.set('photo_hash', null);
+                        this.set('image', image);
+                        this.updateCachedInfo();
+
+                    }
                 }
 
             }, (err) => {
@@ -4274,7 +4320,7 @@ xabber.ParticipantsViewRight = xabber.BasicView.extend({
     _initialize: function () {
         this.account = this.model.account;
         this.participants = this.model.participants;
-        this.listenTo(this.participants, 'change', this.onParticipantsChanged);
+        // this.listenTo(this.participants, 'change', this.onParticipantsChanged);
         this.listenTo(this.participants, 'participants_updated', this.onParticipantsUpdated);
         this.listenTo(this.model, 'change:status_updated', this.updateParticipantsList);
         this.participant_properties_panel = this.addChild('participant_properties_panel', xabber.ParticipantPropertiesViewRight, {model: this.model, el: this.parent.$('.participant-view-wrap')[0], parent: this.parent});
@@ -4316,9 +4362,9 @@ xabber.ParticipantsViewRight = xabber.BasicView.extend({
         this.renderParticipants();
     },
 
-    onParticipantsChanged: function () {
-        this.updateParticipants();
-    },
+    // onParticipantsChanged: function () {
+    //     this.updateParticipants();
+    // },
 
     renderParticipants: function () {
         this.participants.each((participant) => {
@@ -6737,7 +6783,7 @@ xabber.GroupchatInvitationView = xabber.BasicView.extend({
         this.$('.msg-text').text(options.message && options.message.get('message') ? options.message.get('message') : xabber.getString("groupchat__public_group__text_invitation", [this.account.get('jid')]));
         this.message = options.message;
         this.listenTo(this.model, 'change', this.update);
-        this.getInviteAvatar();
+        // this.getInviteAvatar();
         this.getGroupMembers();
     },
 
@@ -11581,6 +11627,8 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
         let $invite_item,
             contact_jid = $item.attr('data-jid'),
             update_avatar, account_jid;
+        if (!contact_jid)
+            return;
         if ($item.closest('.contacts-invitations-item').length){
             $invite_item = $item.closest('.contacts-invitations-item');
 
@@ -11729,7 +11777,11 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
                     }
                     // let inviter_image = inviter_contact.cached_image;
                     // $template.find('.circle-avatar.inviter-avatar').setAvatar(inviter_image, 24, account);
-                    $template.find('.contacts-invitations-item-inviter-details-wrap').attr('data-jid', contact.invitation.message.get('inviter_jid'));
+                    if (!contact.get('incognito_chat') && !contact.get('incognito_chat')) {
+                        $template.find('.contacts-invitations-item-inviter-details-wrap').attr('data-jid', contact.invitation.message.get('inviter_jid'));
+                    } else {
+                        $template.find('.contacts-invitations-item-inviter-details-wrap').addClass('no-click');
+                    }
 
                     let group_image = contact.cached_image;
                     $template.find('.circle-avatar.group-avatar').setAvatar(group_image, 48, account);
