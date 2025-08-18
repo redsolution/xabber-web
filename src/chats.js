@@ -5326,10 +5326,10 @@ xabber.ChatContentView = xabber.BasicView.extend({
                         contact = this.account.contacts.get(message.get('groupchat_jid'));
                     }
 
-                    if (id && contact.my_info) {
+                    if (id && contact && contact.my_info) {
                         mention_target = id[0].slice(4);
                         (mention_target === contact.my_info.get('id')) && (mention.me = true);
-                    } else if (id && contact.participants && contact.participants.length){
+                    } else if (id && contact && contact.participants && contact.participants.length){
                         let own_info = contact.participants.find(item => item.get('jid') === this.account.get('jid'));
                         if (own_info){
                             mention_target = id[0].slice(4);

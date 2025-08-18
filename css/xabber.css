@@ -6838,7 +6838,7 @@ input[type=text].simple-input-field:hover {
     position: relative;
     top: -11px;
     flex-shrink: unset;
-    height: 64px;
+    height: 53px;
     float: right;
     width: fit-content;
     margin: 0;
