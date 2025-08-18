@@ -313,6 +313,12 @@ xabber.Contact = Backbone.Model.extend({
                 is_callback && callback(null);
             });
         } else {
+            if (this._vcard_request_sent && !callback)
+                return;
+            this._vcard_request_sent = true;
+            let _sent_vcard_timeout = setTimeout(() => {
+                this._vcard_request_sent = false;
+            }, 3000);
             this.account.getConnectionForIQ().vcard.get(jid,
                 (vcard) => {
 
@@ -339,9 +345,13 @@ xabber.Contact = Backbone.Model.extend({
                         this.cached_image = Images.getCachedImage(attrs.image);
                     }
                     this.set(attrs);
+                    clearTimeout(_sent_vcard_timeout);
+                    this._vcard_request_sent = false;
                     is_callback && callback(vcard);
                 },
                 function () {
+                    clearTimeout(_sent_vcard_timeout);
+                    this._vcard_request_sent = false;
                     is_callback && callback(null);
                 }
             );
@@ -1175,6 +1185,23 @@ xabber.Contact = Backbone.Model.extend({
     },
 
     showDetailsRight: function (screen, options) {
+        if (this.get('private_chat') && typeof(this.get('private_chat')) === 'string'){
+            let not_me_participant = this.participants.find(item => item.get('jid') !== this.account.get('jid'));
+            if (not_me_participant){
+                let contact = this.account.contacts.get(this.get('private_chat'));
+                if (contact){
+                    let chat = this.account.chats.getChat(contact);
+                    if (chat){
+                        if (!chat.item_view.content)
+                            chat.item_view.content = new xabber.ChatContentView({chat_item: chat.item_view});
+                        let member_id = not_me_participant.id;
+                        member_id && chat.item_view.content && chat.item_view.content.showParticipantProperties(member_id);
+                        return;
+                    }
+
+                }
+            }
+        }
         let chat = this.account.chats.getChat(this),
              scrolled_top_chats_view, scrolled_top_chat;
         if (chat.get('notifications'))
@@ -1448,11 +1475,28 @@ xabber.ContactItemView = xabber.BasicView.extend({
     },
 
     updateIcon: function () {
-        let ic_name = this.model.getIcon();
-        this.$('.chat-icon').addClass('hidden');
-        if (this.model.get('invitation'))
+        if (!this.model)
             return;
-        ic_name && this.$('.chat-icon').removeClass('hidden').switchClass(ic_name, ic_name === 'server' || ic_name === 'blocked').html(env.templates.svg[ic_name]());
+        if (this.model.get('private_chat') && typeof(this.model.get('private_chat')) === 'string'){ //34
+            this.$('.chat-icon').removeClass('hidden');
+            let contact = this.account.contacts.get(this.model.get('private_chat'));
+            if (contact){
+                this.$('.chat-icon').html('');
+                let image = contact.cached_image;
+                this.$('.chat-icon').addClass('private-chat-status');
+                this.$('.chat-icon').setAvatar(image, 24, this.account);
+            } else {
+                this.$('.chat-icon').removeClass('private-chat-status');
+            }
+
+        } else {
+            this.$('.chat-icon').removeClass('private-chat-status');
+            let ic_name = this.model.getIcon();
+            this.$('.chat-icon').addClass('hidden');
+            if (this.model.get('invitation'))
+                return;
+            ic_name && this.$('.chat-icon').removeClass('hidden').switchClass(ic_name, ic_name === 'server' || ic_name === 'blocked').html(env.templates.svg[ic_name]());
+        }
     },
 
     updateStatusMsg: function() {
@@ -5407,9 +5451,10 @@ xabber.ParticipantPropertiesViewRight = xabber.BasicView.extend({
         let chat = this.account.chats.getChat(this.contact);
         chat.messages_view = new xabber.ParticipantMessagesView({ model: chat, contact: this.contact, participant: this.participant.attributes });
         chat.messages_view.messagesRequest(options, () => {
+            this.openChat();
+            xabber.chats_view.openChat(chat.item_view, {clear_search: true, screen: 'all-chats'});
             xabber.body.setScreen('all-chats', {right: 'participant_messages', model: chat});
             this.open(this.participant, this.data_form);
-            this.openChat();
         });
     },
 
@@ -10425,6 +10470,7 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
     events: {
         "click .roster-contact-item-wrap .account-indicator-background-exclude .circle-avatar": "onClickItem",
         "click .roster-contact-item-wrap .contact-name": "onClickItem",
+        "click .roster-contact-item-wrap .groupchat-item-description": "onClickItem",
         "click .roster-contact-item-wrap .groupchat-item-type": "onClickItem",
         "click .contact-item-list .roster-contact-item-wrap .contact-jid": "onClickItem",
         "click .contact-item-list .roster-contact-item-wrap .contact-group-details": "onClickItem",
@@ -12164,21 +12210,21 @@ xabber.AddContactView = xabber.BasicView.extend({
                 this.addContact()
             }, 4000);
 
-            this.account.getConnectionForIQ().vcard.get(jid, (vcard) => {
+            // this.account.getConnectionForIQ().vcard.get(jid, (vcard) => {
                     clearTimeout(timeout);
-                    let username = vcard.username ? vcard.username : vcard.fullname ? vcard.fullname : '';
-                    username && this.$('input[name=contact_name]').val(username);
+                    // let username = vcard.username ? vcard.username : vcard.fullname ? vcard.fullname : '';
+                    // username && this.$('input[name=contact_name]').val(username);
                     this.$('.preloader-wrapper').remove();
                     this.$('.btn-add').removeClass('hidden-disabled');
                     this.addContact()
-                },
-                (err) => {
-                    clearTimeout(timeout);
-                    this.$('.preloader-wrapper').remove();
-                    this.$('.btn-add').removeClass('hidden-disabled');
-                    this.$('input[name=username]').addClass('invalid')
-                        .siblings('.errors').text($(err).find('error text').text());
-                });
+                // },
+                // (err) => {
+                //     clearTimeout(timeout);
+                //     this.$('.preloader-wrapper').remove();
+                //     this.$('.btn-add').removeClass('hidden-disabled');
+                //     this.$('input[name=username]').addClass('invalid')
+                //         .siblings('.errors').text($(err).find('error text').text());
+                // });
         } else {
             this.$('.preloader-wrapper').remove();
             this.$('.btn-add').removeClass('hidden-disabled');
