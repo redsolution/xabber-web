@@ -3439,6 +3439,7 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
         this.listenTo(this.model, 'update_omemo_devices', this.updateOmemoDevices);
         this.listenTo(this.model, 'trusting_updated', this.updateOmemoDevices);
         this.listenTo(this.model, 'trusting_updated', this.updateXTokens);
+        this.listenTo(this.model, 'new_device_notification', this.updateXTokens);
         this.listenTo(this.model, 'xabber_trust_items_updated', this.updateTrustItems);
         this.listenTo(this.model, 'change:status_updated', this.updateStatus);
         this.listenTo(this.model, 'activate deactivate', this.updateView);
@@ -4315,7 +4316,7 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
     },
 
     updateXTokens: function () {
-        if (this.data.get('removed'))
+        if (this.data.get('removed') || !this.isVisible())
             return;
         if (this.model.get('auth_type') !== 'x-token') {
             this.$('.tokens').addClass('hidden');

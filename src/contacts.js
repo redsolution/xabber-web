@@ -348,8 +348,7 @@ xabber.Contact = Backbone.Model.extend({
                     clearTimeout(_sent_vcard_timeout);
                     this._vcard_request_sent = false;
                     is_callback && callback(vcard);
-                },
-                function () {
+                }, (err) => {
                     clearTimeout(_sent_vcard_timeout);
                     this._vcard_request_sent = false;
                     is_callback && callback(null);
@@ -1477,26 +1476,23 @@ xabber.ContactItemView = xabber.BasicView.extend({
     updateIcon: function () {
         if (!this.model)
             return;
-        if (this.model.get('private_chat') && typeof(this.model.get('private_chat')) === 'string'){ //34
+        if (this.model.get('private_chat') && typeof(this.model.get('private_chat')) === 'string') {
             this.$('.chat-icon').removeClass('hidden');
             let contact = this.account.contacts.get(this.model.get('private_chat'));
-            if (contact){
+            if (contact) {
                 this.$('.chat-icon').html('');
                 let image = contact.cached_image;
                 this.$('.chat-icon').addClass('private-chat-status');
                 this.$('.chat-icon').setAvatar(image, 24, this.account);
-            } else {
-                this.$('.chat-icon').removeClass('private-chat-status');
-            }
-
-        } else {
-            this.$('.chat-icon').removeClass('private-chat-status');
-            let ic_name = this.model.getIcon();
-            this.$('.chat-icon').addClass('hidden');
-            if (this.model.get('invitation'))
                 return;
-            ic_name && this.$('.chat-icon').removeClass('hidden').switchClass(ic_name, ic_name === 'server' || ic_name === 'blocked').html(env.templates.svg[ic_name]());
+            }
         }
+        this.$('.chat-icon').removeClass('private-chat-status');
+        let ic_name = this.model.getIcon();
+        this.$('.chat-icon').addClass('hidden');
+        if (this.model.get('invitation'))
+            return;
+        ic_name && this.$('.chat-icon').removeClass('hidden').switchClass(ic_name, ic_name === 'server' || ic_name === 'blocked').html(env.templates.svg[ic_name]());
     },
 
     updateStatusMsg: function() {
@@ -5183,8 +5179,12 @@ xabber.ParticipantPropertiesViewRight = xabber.BasicView.extend({
         else
             $member_info_view = $(templates.group_chats.participant_details_item_right(attrs));
         this.$('.participant-details-info-wrap').html($member_info_view);
-        this.$('.buttons-wrap .button-wrap:not(.btn-chat-wrap):not(.btn-participant-messages-wrap)').switchClass('non-active', attrs.subscription === null);
         this.$('.btn-chat-wrap').switchClass('non-active', this.participant.get('jid') === this.account.get('jid'));
+        if (this.contact.get('private_chat')){
+            this.$('.buttons-wrap .button-wrap:not(.btn-participant-messages-wrap)').switchClass('non-active', attrs.subscription === null);
+        } else {
+            this.$('.buttons-wrap .button-wrap:not(.btn-chat-wrap):not(.btn-participant-messages-wrap)').switchClass('non-active', attrs.subscription === null);
+        }
         this.updateMemberAvatar(this.participant);
         this.participant_messages = [];
         this.actual_rights = [];
@@ -5711,6 +5711,8 @@ xabber.ParticipantPropertiesViewRight = xabber.BasicView.extend({
     },
 
     getPrivateChat: function (ev) {
+        if (!this.participant.get('subscription') && this.contact.get('incognito_chat'))
+            return;
         if ($(ev.target).closest('.button-wrap').hasClass('non-active'))
             return;
         let participant_jid = this.participant.get('jid'),

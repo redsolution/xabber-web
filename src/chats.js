@@ -412,6 +412,7 @@ xabber.MessagesBase = Backbone.Collection.extend({
             if (from_jid === account.domain){
                 attrs.ntf_new_device_msg = true;
                 attrs.security_notification = true;
+                !options.is_archived && account.trigger('new_device_notification')
             }
             let $keyExchange = $notification_msg.children(`authenticated-key-exchange[xmlns="${Strophe.NS.XABBER_TRUST}"]`);
             if ($keyExchange.length){
@@ -2584,16 +2585,13 @@ xabber.ChatItemView = xabber.BasicView.extend({
                 let image = contact.cached_image;
                 this.$('.chat-icon').addClass('private-chat-status');
                 this.$('.chat-icon').setAvatar(image, 24, this.account);
-            } else {
-                this.$('.chat-icon').removeClass('private-chat-status');
+                return;
             }
-
-        } else {
-            this.$('.chat-icon').removeClass('private-chat-status')
-            this.$('.chat-icon').addClass('hidden');
-            let ic_name = this.contact.getIcon();
-            ic_name && this.$('.chat-icon').removeClass('hidden group-invite blocked').switchClass(ic_name, (ic_name === 'group-invite' || ic_name === 'server' || ic_name === 'blocked')).html(env.templates.svg[ic_name]());
         }
+        this.$('.chat-icon').removeClass('private-chat-status')
+        this.$('.chat-icon').addClass('hidden');
+        let ic_name = this.contact.getIcon();
+        ic_name && this.$('.chat-icon').removeClass('hidden group-invite blocked').switchClass(ic_name, (ic_name === 'group-invite' || ic_name === 'server' || ic_name === 'blocked')).html(env.templates.svg[ic_name]());
     },
 
     updateMutedState: function () {
@@ -8538,7 +8536,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
         this.contact.participants.participantsRequest({id: participant_id}, (response) => {
             let data_form = this.account.parseDataForm($(response).find(`x[xmlns="${Strophe.NS.DATAFORM}"]`));
             this.contact.showDetailsRight('all-chats', {type: 'participant'});
-            this.contact.details_view_right.participants.participant_properties_panel.open(participant, data_form);
+            this.contact.details_view_right && this.contact.details_view_right.participants.participant_properties_panel.open(participant, data_form);
         });
     },
 
@@ -10407,16 +10405,13 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
                   let image = contact.cached_image;
                   this.$('.chat-icon').addClass('private-chat-status');
                   this.$('.chat-icon').setAvatar(image, 24, this.account);
-              } else {
-                  this.$('.chat-icon').removeClass('private-chat-status');
+                  return;
               }
-
-          } else {
-              this.$('.chat-icon').removeClass('private-chat-status')
-              this.$('.chat-icon').addClass('hidden');
-              let ic_name = this.contact.getIcon();
-              ic_name && this.$('.chat-icon').removeClass('hidden').switchClass(ic_name, (ic_name === 'group-invite' || ic_name === 'server' || ic_name === 'blocked')).html(env.templates.svg[ic_name]());
           }
+          this.$('.chat-icon').removeClass('private-chat-status')
+          this.$('.chat-icon').addClass('hidden');
+          let ic_name = this.contact.getIcon();
+          ic_name && this.$('.chat-icon').removeClass('hidden').switchClass(ic_name, (ic_name === 'group-invite' || ic_name === 'server' || ic_name === 'blocked')).html(env.templates.svg[ic_name]());
       },
 
       updateColorScheme: function () {
@@ -11654,16 +11649,13 @@ xabber.InvitationPanelView = xabber.SearchView.extend({
                 let image = contact.cached_image;
                 this.$('.chat-icon').addClass('private-chat-status');
                 this.$('.chat-icon').setAvatar(image, 24, this.account);
-            } else {
-                this.$('.chat-icon').removeClass('private-chat-status');
+                return;
             }
-
-        } else {
-            this.$('.chat-icon').removeClass('private-chat-status')
-            this.$('.chat-icon').addClass('hidden');
-            let ic_name = this.contact.getIcon();
-            ic_name && this.$('.chat-icon').removeClass('hidden group-invite blocked').switchClass(ic_name, (ic_name === 'group-invite' || ic_name === 'server' || ic_name === 'blocked')).html(env.templates.svg[ic_name]());
         }
+        this.$('.chat-icon').removeClass('private-chat-status')
+        this.$('.chat-icon').addClass('hidden');
+        let ic_name = this.contact.getIcon();
+        ic_name && this.$('.chat-icon').removeClass('hidden group-invite blocked').switchClass(ic_name, (ic_name === 'group-invite' || ic_name === 'server' || ic_name === 'blocked')).html(env.templates.svg[ic_name]());
     },
 
     inviteUsers: function () {
