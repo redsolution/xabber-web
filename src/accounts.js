@@ -3470,7 +3470,6 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
         this.updateEnabledOmemo();
         this.updateEncryptedChatstates();
         this.updateEnabled();
-        this.updateXTokens();
         this.updateGroupsLabel();
         this.updateTrustItems();
         this.updateView();
@@ -3513,6 +3512,8 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
         }
         if (this.model.omemo)
             this.renderActiveTrustSession();
+        this.data.set('visible', true);
+        this.updateXTokens();
         return this;
     },
 
@@ -4676,7 +4677,6 @@ xabber.AccountSettingsSingleModalView = xabber.AccountSettingsModalView.extend({
         this.updateEnabledOmemo();
         this.updateEncryptedChatstates();
         this.updateEnabled();
-        this.updateXTokens();
         this.updateGroupsLabel();
         this.updateView();
         this.showQRCode();
@@ -4717,6 +4717,8 @@ xabber.AccountSettingsSingleModalView = xabber.AccountSettingsModalView.extend({
         if (this.model.omemo)
             this.renderActiveTrustSession();
         this.parent.single_account_has_rendered = true;
+        this.data.set('visible', true);
+        this.updateXTokens();
         return this;
     },
 
