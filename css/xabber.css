@@ -12191,7 +12191,7 @@ img.fwd-img-preview {
     pointer-events: none;
 }
 .chat-content-wrap[data-trust=true] .chat-message.not-verified-previously .not-decrypted-icon svg path,
-.chat-content-wrap[data-trust=true] .chat-message.not-existing-device .not-decrypted-icon svg path,
+/*.chat-content-wrap[data-trust=true] .chat-message.not-existing-device .not-decrypted-icon svg path,*/
 .chat-content-wrap[data-trust=true] .chat-message.not-decrypted .not-decrypted-icon svg path{
     fill: #388E3C !important;
 }
@@ -12237,7 +12237,9 @@ img.fwd-img-preview {
     padding: 0.5rem 1.5rem;
     text-align: left;
     top: unset !important;
-    bottom: -10px !important;
+    bottom: calc(100% - 16px) !important;
+    left: unset !important;
+    right: calc(100% - 8px);
     width: 350px !important;
     z-index: 2;
 }
@@ -14465,6 +14467,9 @@ input[type=range].voice-message-volume:focus {
 .settings-panel-wrap .settings-panel .settings-column .settings-tab[data-block-name="debug"] .setting-icon-background{
     background: #009688;
 }
+.settings-panel-wrap .settings-panel .settings-column .settings-tab[data-block-name="about"] .setting-icon-background{
+    background: #9D27B0;
+}
 .settings-panel-wrap .settings-panel .settings-column .settings-tab[data-block-name="interface_language"] .setting-icon-background{
     background: #795548;
 }
@@ -15802,6 +15807,9 @@ input[type=range].voice-message-volume:focus {
     width: 100%;
     padding: 16px 24px 0;
     margin-bottom: 16px;
+}
+.settings-panel .about-panel .block-header {
+    padding-left: 48px;
 }
 
 .settings-panel .block-header .block-name{

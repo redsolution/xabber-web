@@ -471,6 +471,7 @@ var constants = {
     TOOLBAR_LOGO: 'assets/images/xabber-logo.png',
     ENABLE_XABBER_ACCOUNT: false,
     SCREEN_ABOUT: true,
+    CLIENT_URL: 'https://www.xabber.com',
     BACKGROUND_IMAGES_XML_URL: 'https://raw.githubusercontent.com/redsolution/xabber-backgrounds/master/background-images.xml',
     BACKGROUND_PATTERNS_XML_URL: 'https://raw.githubusercontent.com/redsolution/xabber-backgrounds/master/background-patterns.xml',
     DEVELOPER_URL: 'https://redsolution.com',

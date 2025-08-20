@@ -63,6 +63,13 @@
                     <div class="settings-block-name one-line">{[print(xabber.getString("settings__menu_item__debug"))]}</div>
                     <div class="settings-block-label one-line">{[print(xabber.getString("settings__menu_item__debug_label"))]}</div>
                 </div>
+                <div class="settings-tab" data-block-name="about">
+                    <div class="setting-icon-background">
+                        <svg class="mdi mdi-24px mdi-svg-template" data-svgname="id"></svg>
+                    </div>
+                    <div class="settings-block-name one-line">{[print(xabber.getString("category_about"))]}</div>
+                    <div class="settings-block-label one-line">{[print(xabber.getString("settings__menu_item__about_label"))]}</div>
+                </div>
                 <div class="settings-tab settings-deletion-button delete-all-accounts">
                     <div class="setting-icon-background">
                         <i class="mdi mdi-24px mdi-logout-variant"></i>
@@ -660,6 +667,42 @@
                                 <input type="checkbox" class="filled-in" id="debug-mode"/>
                                 <label for="debug-mode">{[print(xabber.getString("settings__section_debug__debug_mode"))]}</label>
                             </div>
+                        </div>
+                    </div>
+                    <div data-header='{[print(xabber.getString("category_about"))]}'  class="settings-block-wrap about about-panel hidden">
+                        <div class="settings-block-wrap about selectable-text">
+                            <div class="block-content">{[print(xabber.getString("web_client__screen_about__preamble_1"))]}</div>
+                            <div class="block-content">{[print(xabber.getString("web_client__screen_about__preamble_2", [`<a href="${constants.CLIENT_URL}" target="_blank">${constants.CLIENT_URL}</a>`]))]}</div>
+                            <div class="block-header">
+                                <span class="block-name">{[print(xabber.getString("web_client__screen_about__block_1__header"))]}</span>
+                            </div>
+                            <div class="block-content">{[print(xabber.getString("web_client__screen_about__block_1__text"))]}</div>
+
+                            <div class="block-header">
+                                <span class="block-name">{[print(xabber.getString("web_client__screen_about__block_2__header"))]}</span>
+                            </div>
+                            <div class="block-content">{[print(xabber.getString("web_client__screen_about__block_2__text"))]}</div>
+
+                            <div class="block-header">
+                                <span class="block-name">{[print(xabber.getString("web_client__screen_about__block_3__header"))]}</span>
+                            </div>
+                            <div class="block-content">{[print(xabber.getString("web_client__screen_about__block_3__text_1", [`<a href="${constants.DEVELOPER_URL}" target="_blank">${xabber.getString("client_developer_company_name")}</a>`]))]}</div>
+                            <div class="block-content">{[print(xabber.getString("web_client__screen_about__block_3__text_2"))]}</div>
+                            <div class="block-content">{[print(xabber.getString("web_client__screen_about__block_3__text_3"))]}</div>
+                            <div class="block-content flex-content">
+                                <img class="logo" src="assets/images/logo-Redsolution@2x.svg"/>
+                                <a href="https://twitter.com/Xabber_XMPP" target="_blank"><div class="btn-social twitter-color">
+                                    <i class="mdi mdi-28px mdi-twitter"></i>
+                                </div></a>
+                                <a href="{[print(constants.CLIENT_GITHUB_URL)]}" target="_blank"><img class="btn-social github-logo" src="assets/images/ic_github.png"/></a>
+                            </div>
+
+                            <div class="block-header">
+                                <span class="block-name">{[print(xabber.getString("web_client__screen_about__block_4__header"))]}</span>
+                            </div>
+                            <div class="block-content">{[print(xabber.getString("web_client__screen_about__block_4__text_1"))]}</div>
+                            <div class="block-content">{[print(xabber.getString("web_client__screen_about__block_4__text_2", [`<a href="${constants.PROJECT_CROWDIN_URL}" target="_blank">${xabber.getString("web_client__screen_about__block_4__text_2__link__text")}</a>`]))]}</div>
+
                         </div>
                     </div>
                 </div>

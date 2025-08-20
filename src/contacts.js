@@ -5711,7 +5711,7 @@ xabber.ParticipantPropertiesViewRight = xabber.BasicView.extend({
     },
 
     getPrivateChat: function (ev) {
-        if (!this.participant.get('subscription') && this.contact.get('incognito_chat'))
+        if (this.participant.get('subscription') === null && this.contact.get('incognito_chat'))
             return;
         if ($(ev.target).closest('.button-wrap').hasClass('non-active'))
             return;

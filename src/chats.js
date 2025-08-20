@@ -2447,6 +2447,10 @@ xabber.ChatItemView = xabber.BasicView.extend({
         if (this.content) {
             let $message = this.content.$(`.chat-message[data-uniqueid="${message.get('unique_id')}"]`),
                 $elem = $message.find('.msg-delivering-state');
+            if (message.getState() == 'error'){
+                console.error(message);
+                console.error(message.getState());
+            }
             $elem.attr({
                 'data-state': message.getState(),
                 'title': message.getVerboseState()
@@ -2877,6 +2881,10 @@ xabber.ChatItemView = xabber.BasicView.extend({
         }
         this.$el.emojify('.last-msg', {emoji_size: 16});
         this.$('.last-msg-date').text(utils.pretty_short_datetime_recent_chat(msg_time));
+        if (msg.getState() == 'error'){
+            console.error(msg);
+            console.error(msg.getState());
+        }
         this.$('.msg-delivering-state').showIf(msg.get('type') !== 'system' && msg.isSenderMe() && (msg.get('state') !== constants.MSG_ARCHIVED) && !msg.get('notification_msg'))
             .attr('data-state', msg.getState());
     },
@@ -10466,6 +10474,10 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
           this.$el.emojify('.last-msg', {emoji_size: 16});
           this.$('.last-msg-date').text(utils.pretty_short_datetime_recent_chat(msg_time))
               .attr('title', pretty_datetime(msg_time));
+          if (msg.getState() == 'error'){
+              console.error(msg);
+              console.error(msg.getState());
+          }
           this.$('.msg-delivering-state').showIf(msg.isSenderMe() && (msg.get('state') !== constants.MSG_ARCHIVED) && !msg.get('notification_msg'))
               .attr('data-state', msg.getState());
       },
