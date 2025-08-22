@@ -38,11 +38,12 @@
             <svg class="mdi mdi-14px mdi-svg-template not-verified-icon-svg" data-svgname="alert-circle"></svg>
             <svg class="mdi mdi-14px mdi-svg-template not-decrypted-icon-svg" data-svgname="information"></svg>
         </div>
-        <div id="not-verified-tooltip-{{msgid}}" class="dropdown-content not-decrypted-tooltip noselect">
+        <div id="not-verified-tooltip-{{msgid}}" class="dropdown-content not-decrypted-tooltip selectable-text">
+            <div class="msg-device-info"></div>
             <div class="not-existing-device-tooltip-text">{[print(xabber.getString("omemo__not_existing_device_message_tooltip"))]}</div>
             <div class="not-decrypted-tooltip-text">{[print(xabber.getString("omemo__not_decrypted_message_tooltip"))]}</div>
             <div class="not-verified-tooltip-text">{[print(xabber.getString("omemo__not_verified_message_tooltip"))]}</div>
-            <button class="btn-manage-devices btn-flat btn-main text-color-700">{[print(xabber.getString("omemo__alert_new_device__button_manage_devices"))]}</button>
+            <!--<button class="btn-manage-devices btn-flat btn-main text-color-700">{[print(xabber.getString("omemo__alert_new_device__button_manage_devices"))]}</button>-->
             <div class="not-verified-previously-tooltip-text">{[print(xabber.getString("omemo__not_verified_previously_message_tooltip"))]}</div>
         </div>
         {[ if (ephemeral_timer_text) { ]}

@@ -587,10 +587,12 @@ if ($) {
         top: origin.position().top + verticalOffset + scrollOffset,
         left: leftPosition
       });
+    if (activates.closest('.chat-content').length)
+        activates.closest('.chat-content').addClass('active-dropdown-chat-content');
 
         // custom invisible overlay for dropdowns
         if (!activates.find('.lean-overlay').length && !options.hover){
-            $overlay = $('<div class="lean-overlay"></div>');
+            let $overlay = $('<div class="lean-overlay"></div>');
             $overlay.css('z-index', '-1');
             $overlay.css('display', 'block');
             $overlay.css('position', 'fixed');
@@ -677,6 +679,8 @@ if ($) {
           // If menu open, add click close handler to document
           if (activates.hasClass('active')) {
             $(document).bind('click.'+ activates.attr('id') + ' touchstart.' + activates.attr('id'), function (e) {
+                if (!options.closeOnClick && $(e.target).closest('.dropdown-content').length)
+                    return;
               if (!activates.is(e.target) && !origin.is(e.target) && (!origin.find(e.target).length) ) {
                 hideDropdown();
                 $(document).unbind('click.'+ activates.attr('id') + ' touchstart.' + activates.attr('id'));
@@ -737,9 +741,9 @@ if ($) {
         return;
       }
 
-      overlayID = _generateID();
-      $overlay = $('<div class="lean-overlay"></div>');
-      lStack = (++_stack);
+      var overlayID = _generateID(),
+        $overlay = $('<div class="lean-overlay"></div>'),
+        lStack = (++_stack);
 
       // Store a reference of the overlay
       $overlay.attr('id', overlayID).css('z-index', 1000 + lStack * 2);

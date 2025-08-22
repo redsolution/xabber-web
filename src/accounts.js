@@ -1752,10 +1752,12 @@ xabber.Account = Backbone.Model.extend({
             let is_proxy_enabled = this && this.get('proxy_viewer_url') && this.get('proxy_viewer_token');
             if (is_proxy_enabled){
                 xabber.cached_proxy_urls.getFromCachedProxyUrls(original_url, (res) => {
-                   if (res){
+                   if (res && !(res.error === 0)){
                        if (res.proxy_url){
                            callback && callback({url: res.proxy_url})
                        } else {
+                           console.error(original_url);
+                           console.error(res);
                            errback && errback({status: res.error})
                        }
                    } else {
@@ -1778,12 +1780,13 @@ xabber.Account = Backbone.Model.extend({
                                },
                                error: (response) => {
                                    console.error(response);
-                                   xabber.cached_proxy_urls.putInCachedProxyUrls({
-                                       original_url: original_url,
-                                       error: response.status,
-                                   }, () => {
-                                       errback && errback(response)
-                                   });
+                                   if (response.status === 404)
+                                       xabber.cached_proxy_urls.putInCachedProxyUrls({
+                                           original_url: original_url,
+                                           error: response.status,
+                                       }, () => {
+                                           errback && errback(response)
+                                       });
                                }
                            });
                        }, (err) => {

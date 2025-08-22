@@ -12223,10 +12223,27 @@ img.fwd-img-preview {
     fill: #388e3c;
 }
 
-.chat-message.not-verified-previously .not-decrypted-tooltip,
-.chat-message.not-existing-device .not-decrypted-tooltip,
-.chat-message.not-verified .not-decrypted-tooltip,
-.chat-message.not-decrypted .not-decrypted-tooltip {
+/*.chat-message.not-verified-previously .not-decrypted-tooltip,*/
+/*.chat-message.not-existing-device .not-decrypted-tooltip,*/
+/*.chat-message.not-verified .not-decrypted-tooltip,*/
+/*.chat-message.not-decrypted .not-decrypted-tooltip {*/
+    /*background-clip: padding-box;*/
+    /*background-color: #fff;*/
+    /*border: 1px solid rgba(0, 0, 0, .15);*/
+    /*border-radius: 0.25rem;*/
+    /*color: #212529;*/
+    /*font-size: 1rem;*/
+    /*list-style: none;*/
+    /*padding: 0.5rem 1.5rem;*/
+    /*text-align: left;*/
+    /*top: unset !important;*/
+    /*bottom: calc(100% - 16px) !important;*/
+    /*left: unset !important;*/
+    /*right: calc(100% - 8px);*/
+    /*width: 350px !important;*/
+    /*z-index: 2;*/
+/*}*/
+.chat-message .not-decrypted-tooltip {
     background-clip: padding-box;
     background-color: #fff;
     border: 1px solid rgba(0, 0, 0, .15);
@@ -12242,6 +12259,9 @@ img.fwd-img-preview {
     right: calc(100% - 8px);
     width: 350px !important;
     z-index: 2;
+    cursor: auto;
+}
+.chat-message .not-decrypted-tooltip .msg-device-info{
 }
 .chat-message.not-verified .not-verified-tooltip-text{
     margin-bottom: 56px;

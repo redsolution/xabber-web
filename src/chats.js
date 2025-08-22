@@ -8529,13 +8529,17 @@ xabber.ChatContentView = xabber.BasicView.extend({
             this.contact.getBlockedParticipants((response) => {
                 _.extend(options, {present: null, subscription: null});
                 options.blocked = !!$(response).find(`query user:contains(${participant_id})`).length;
-                participant = new xabber.Participant(options, {contact: this.contact});
                 this.contact.showDetailsRight('all-chats', {type: 'participant'});
+                if (!options.id || !options.role || !options.jid)
+                    return;
+                participant = new xabber.Participant(options, {contact: this.contact});
                 this.contact.details_view_right.participants.participant_properties_panel.open(participant, {});
             }, () => {
                 _.extend(options, {present: null, subscription: null});
-                participant = new xabber.Participant(options, {contact: this.contact});
                 this.contact.showDetailsRight('all-chats', {type: 'participant'});
+                if (!options.id || !options.role || !options.jid)
+                    return;
+                participant = new xabber.Participant(options, {contact: this.contact});
                 this.contact.details_view_right.participants.participant_properties_panel.open(participant, {});
             });
             return;
@@ -8595,24 +8599,92 @@ xabber.ChatContentView = xabber.BasicView.extend({
         }, null);
     },
 
+    updateDropdownDeviceInfo: function ($msg) {
+
+        let msg = this.model.messages.get($msg.data('uniqueid'));
+
+        if (!msg)
+            return;
+
+        if(msg.get('submitted_here') && this.account && this.account.omemo)
+            msg.set('device_id', `${this.account.omemo.get('device_id')}`);
+
+        let attrs = msg.attributes,
+            is_sender = attrs.from_jid === this.account.get('jid');
+
+
+
+        if (attrs.encrypted && (attrs.device_id || attrs.submitted_here)){
+            let device_info = {},
+                device_info_text;
+
+            if (this.account && this.account.omemo){
+                let peer, device;
+                if (is_sender){
+                    device = this.account.omemo.own_devices[attrs.device_id];
+                } else{
+                    peer = this.account.omemo.getPeer(attrs.from_jid);
+                    device = peer.devices && peer.devices[attrs.device_id];
+                }
+                device && (device_info.label = device.get('label'));
+
+                if (this.account.omemo.xabber_trust && this.account.omemo.xabber_trust.get('trusted_devices')){
+                    let trusted_devices = this.account.omemo.xabber_trust.get('trusted_devices');
+
+                    if (trusted_devices[attrs.from_jid] && trusted_devices[attrs.from_jid].length){
+                        let peers_trusted_devices = trusted_devices[attrs.from_jid],
+                            trusted_device = peers_trusted_devices.filter(item => item.device_id === attrs.device_id);
+                        if (trusted_device.length){
+                            trusted_device = trusted_device[0];
+                            if (trusted_device.is_me){
+                                device_info.trust_type = xabber.getString(`omemo__dialog_fingerprints__text_this_device`);
+                            } else {
+                                let trust_type = trusted_device.after_trust ? 'direct' : trusted_device.fingerprint_trust ? 'fingerprint_trust' :  'indirect';
+                                device_info.trust_type = xabber.getString(`fingerprint_trust_type_${trust_type}`);
+                            }
+                        }
+                    }
+                }
+            }
+            device_info_text = `
+            ${attrs.device_id && (xabber.getString('omemo__dialog_fingerprints__label_device_id') + ': ' + attrs.device_id + '<br>')}
+            ${device_info.label && (xabber.getString('omemo__dialog_fingerprints__label') + ': ' + device_info.label + '<br>')}
+            ${device_info.trust_type ? device_info.trust_type + '<br>' : ''}
+            `
+            $msg.find('.msg-device-info').html(device_info_text);
+            attrs.device_info = device_info;
+        }
+    },
+
     onClickMessage: function (ev) {
         let $elem = $(ev.target);
+        if ($elem.closest('.active-dropdown-chat-content').length && !$elem.closest('.not-decrypted-icon').length && !$elem.closest('.not-decrypted-tooltip').length) {
+            $elem.closest('.active-dropdown-chat-content').removeClass('active-dropdown-chat-content');
+            return;
+        }
         if (this.model.get('notifications')){
             this.onClickNotification(ev);
             return;
         }
         if ($elem.hasClass('not-decrypted-icon') || $elem.closest('.not-decrypted-icon').length){
+            this.updateDropdownDeviceInfo($elem.closest('.chat-message'))
             if ($elem.closest('.not-decrypted-icon').length && !$elem.closest('.not-decrypted-icon').hasClass('not-decrypted-dropdown-active')) {
                 $elem.closest('.not-decrypted-icon').dropdown({//34
                     inDuration: 100,
                     outDuration: 100,
                     constrainWidth: false,
                     hover: false,
-                    alignment: 'right'
+                    alignment: 'right',
+                    closeOnClick: false,
                 });
                 $elem.closest('.not-decrypted-icon').addClass('not-decrypted-dropdown-active');
                 $elem.closest('.not-decrypted-icon').click();
             }
+            return;
+        }
+        if ($elem.closest('.right-side').length && $elem.closest('.encrypted').length && !$elem.closest('.dropdown-content').length){
+            ev.preventDefault();
+            setTimeout(() => {$elem.closest('.encrypted').find('.not-decrypted-icon').click()}, 10);
             return;
         }
         if ($elem.closest('.dropdown-content').length)
