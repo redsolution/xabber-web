@@ -4254,6 +4254,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
         }
         if (this.isVisible()) {
             this.model.set({display: true, active: true});
+            this.onScroll();
         } else {
             this.model.set({display: false});
         }

@@ -532,6 +532,7 @@ let Xabber = Backbone.Model.extend({
                     bc = new BroadcastChannel("xabber-web");
                 } catch (e) {
                     console.error(e);
+                    broadcast_dfd.resolve();
                 }
                 if (bc){
                     let bc_message_timeout = setTimeout(() => {
