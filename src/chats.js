@@ -3876,7 +3876,6 @@ xabber.ChatContentView = xabber.BasicView.extend({
         "click .back-to-mentions": "openUnreadMention",
         "click .btn-retry-send-message": "retrySendMessage",
         "click .btn-delete-message": "removeFileErrorMessage",
-        "click .not-decrypted-tooltip .btn-manage-devices": "openDevicesWindow",
         "click .encryption-warning": "openDevicesWindow",
         "click .hide-session": "hideActiveTrustSession",
         'click .accept-request': "acceptRequest",
@@ -8615,8 +8614,15 @@ xabber.ChatContentView = xabber.BasicView.extend({
 
 
         if (attrs.encrypted && (attrs.device_id || attrs.submitted_here)){
-            let device_info = {},
-                device_info_text;
+            let device_info = {
+                    label: null,
+                    device_id: null,
+                    from_jid: null,
+                    to_jid: null,
+                    trust_type: null,
+                    timestamp: null,
+                    additional_text: null,
+                };
 
             if (this.account && this.account.omemo){
                 let peer, device;
@@ -8627,6 +8633,14 @@ xabber.ChatContentView = xabber.BasicView.extend({
                     device = peer.devices && peer.devices[attrs.device_id];
                 }
                 device && (device_info.label = device.get('label'));
+                attrs.device_id && (device_info.device_id = attrs.device_id);
+                attrs.from_jid && (device_info.from_jid = attrs.from_jid);
+                attrs.time && (device_info.timestamp = attrs.time);
+                try{
+                    attrs.xml && (device_info.to_jid = Strophe.getBareJidFromJid($(attrs.xml).attr('to')));
+                } catch (e) {
+                    console.error(e);
+                }
 
                 if (this.account.omemo.xabber_trust && this.account.omemo.xabber_trust.get('trusted_devices')){
                     let trusted_devices = this.account.omemo.xabber_trust.get('trusted_devices');
@@ -8646,40 +8660,29 @@ xabber.ChatContentView = xabber.BasicView.extend({
                     }
                 }
             }
-            device_info_text = `
-            ${attrs.device_id && (xabber.getString('omemo__dialog_fingerprints__label_device_id') + ': ' + attrs.device_id + '<br>')}
-            ${device_info.label && (xabber.getString('omemo__dialog_fingerprints__label') + ': ' + device_info.label + '<br>')}
-            ${device_info.trust_type ? device_info.trust_type + '<br>' : ''}
-            `
-            $msg.find('.msg-device-info').html(device_info_text);
-            attrs.device_info = device_info;
+            let additional_text = '';
+            if ($msg.hasClass('not-verified-previously')){
+                additional_text = xabber.getString("omemo__not_verified_previously_message_tooltip");
+            } else if ($msg.hasClass('not-existing-device')) {
+                additional_text = xabber.getString("omemo__not_existing_device_message_tooltip");
+            } else if ($msg.hasClass('not-decrypted')) {
+                additional_text = xabber.getString("omemo__not_decrypted_message_tooltip");
+            } else if ($msg.hasClass('not-verified')) {
+                additional_text = xabber.getString("omemo__not_verified_message_tooltip");
+            }
+            device_info.additional_text = additional_text;
+            utils.dialogs.common('', templates.messages.msg_device_information(device_info), null, null, null, 'msg-device-info-modal');
         }
     },
 
     onClickMessage: function (ev) {
         let $elem = $(ev.target);
-        if ($elem.closest('.active-dropdown-chat-content').length && !$elem.closest('.not-decrypted-icon').length && !$elem.closest('.not-decrypted-tooltip').length) {
-            $elem.closest('.active-dropdown-chat-content').removeClass('active-dropdown-chat-content');
-            return;
-        }
         if (this.model.get('notifications')){
             this.onClickNotification(ev);
             return;
         }
         if ($elem.hasClass('not-decrypted-icon') || $elem.closest('.not-decrypted-icon').length){
             this.updateDropdownDeviceInfo($elem.closest('.chat-message'))
-            if ($elem.closest('.not-decrypted-icon').length && !$elem.closest('.not-decrypted-icon').hasClass('not-decrypted-dropdown-active')) {
-                $elem.closest('.not-decrypted-icon').dropdown({//34
-                    inDuration: 100,
-                    outDuration: 100,
-                    constrainWidth: false,
-                    hover: false,
-                    alignment: 'right',
-                    closeOnClick: false,
-                });
-                $elem.closest('.not-decrypted-icon').addClass('not-decrypted-dropdown-active');
-                $elem.closest('.not-decrypted-icon').click();
-            }
             return;
         }
         if ($elem.closest('.right-side').length && $elem.closest('.encrypted').length && !$elem.closest('.dropdown-content').length){

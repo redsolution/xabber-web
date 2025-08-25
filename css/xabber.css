@@ -11606,6 +11606,7 @@ input[type=text].simple-input-field:hover {
     transition: opacity .2s;
     padding: 4px 96px 4px 64px !important;
     z-index: 3;
+    pointer-events: none;
 }
 
 .chat-content-wrap.encrypted .fixed-day-indicator-wrap {
@@ -12157,17 +12158,31 @@ img.fwd-img-preview {
 .chat-message .dropdown-content .btn-manage-devices{
     display: none;
 }
+.chat-message .dropdown-content .msg-device-info-error-reason{
+    display: none !important;
+}
 
 .chat-message.not-decrypted .not-decrypted-icon .mdi.not-decrypted-icon-svg,
 .chat-message.not-verified .not-decrypted-icon .mdi.not-verified-icon-svg,
 .chat-message.not-existing-device .not-decrypted-icon .mdi.not-verified-icon-svg,
-.chat-message.not-verified-previously .not-decrypted-icon .mdi.not-verified-icon-svg,
+.chat-message.not-verified-previously .not-decrypted-icon .mdi.not-verified-icon-svg{
+    display: block;
+}
 .chat-message.not-verified-previously .dropdown-content .not-verified-previously-tooltip-text,
 .chat-message.not-existing-device .dropdown-content .not-existing-device-tooltip-text,
 .chat-message.not-decrypted .dropdown-content .not-decrypted-tooltip-text,
 .chat-message.not-verified .dropdown-content .not-verified-tooltip-text,
 .chat-message.not-verified .dropdown-content .btn-manage-devices{
+    color: #757575;
     display: block;
+    margin-left: 35%;
+    user-select: text;
+}
+.chat-message.not-decrypted .msg-device-info-error-reason,
+.chat-message.not-verified .msg-device-info-error-reason,
+.chat-message.not-existing-device .msg-device-info-error-reason,
+.chat-message.not-verified-previously .msg-device-info-error-reason{
+    display: block !important;
 }
 
 .chat-message.not-existing-device .not-decrypted-icon ,
@@ -12190,11 +12205,11 @@ img.fwd-img-preview {
 .chat-message.not-decrypted .not-decrypted-icon svg{
     pointer-events: none;
 }
-.chat-content-wrap[data-trust=true] .chat-message.not-verified-previously .not-decrypted-icon svg path,
-/*.chat-content-wrap[data-trust=true] .chat-message.not-existing-device .not-decrypted-icon svg path,*/
-.chat-content-wrap[data-trust=true] .chat-message.not-decrypted .not-decrypted-icon svg path{
-    fill: #388E3C !important;
-}
+/*.chat-content-wrap[data-trust=true] .chat-message.not-verified-previously .not-decrypted-icon svg path,*/
+/*!*.chat-content-wrap[data-trust=true] .chat-message.not-existing-device .not-decrypted-icon svg path,*!*/
+/*.chat-content-wrap[data-trust=true] .chat-message.not-decrypted .not-decrypted-icon svg path{*/
+    /*fill: #388E3C !important;*/
+/*}*/
 
 .chat-content-wrap .chat-message.not-verified[data-trust=true] .not-decrypted-icon{
     display: none !important;
@@ -12219,9 +12234,9 @@ img.fwd-img-preview {
 .chat-message.not-decrypted .not-decrypted-icon svg path{
     fill: #FFA000;
 }
-.chat-message.not-verified-previously .not-decrypted-icon svg path{
-    fill: #388e3c;
-}
+/*.chat-message.not-verified-previously .not-decrypted-icon svg path{*/
+    /*fill: #388e3c;*/
+/*}*/
 
 /*.chat-message.not-verified-previously .not-decrypted-tooltip,*/
 /*.chat-message.not-existing-device .not-decrypted-tooltip,*/
@@ -12261,7 +12276,50 @@ img.fwd-img-preview {
     z-index: 2;
     cursor: auto;
 }
-.chat-message .not-decrypted-tooltip .msg-device-info{
+.msg-device-info-modal{
+    opacity:0.9;
+}
+.msg-device-info-modal .modal-header,
+.msg-device-info-modal .modal-footer{
+    display:none;
+}
+.dialog-modal.msg-device-info-modal .modal-content{
+    padding: .5rem 1.5rem;
+}
+.dialog-modal.msg-device-info-modal .modal-content .dialog-text{
+    white-space: unset;
+}
+.msg-device-info-modal .modal-content .dialog-text{
+}
+.msg-device-info-modal .msg-device-info{
+    margin: 64px 0 0;
+}
+.msg-device-info-modal .msg-device-info-header{
+    font-size: 22px;
+    line-height: 22px;
+    height: 64px;
+    padding-top: 20px;
+    padding-left: 24px;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+.msg-device-info-modal .msg-device-info-row{
+    align-items: baseline;
+    display: flex;
+    margin-bottom: 6px;
+    min-height: 36px;
+}
+.msg-device-info-modal .msg-device-info-label{
+    width: 35%;
+    min-width: 35%;
+    padding: 6px 0px;
+    text-transform: capitalize;
+}
+.msg-device-info-modal .msg-device-info-value{
+    color: rgb(117, 117, 117);
+    user-select: text;
+    word-break: break-word;
 }
 .chat-message.not-verified .not-verified-tooltip-text{
     margin-bottom: 56px;

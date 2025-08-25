@@ -1,0 +1,43 @@
+<div class="msg-device-info">
+    <div class="msg-device-info-header">{[print(xabber.getString("omemo__encrypted_message_tooltip_header"))]}</div>
+    <div class="msg-device-info-row">
+        <div class="msg-device-info-label">{[print(xabber.getString("from"))]}</div>
+        <div class="msg-device-info-value">{{from_jid}}</div>
+    </div>
+    {[if (to_jid){]}
+    <div class="msg-device-info-row">
+        <div class="msg-device-info-label">{[print(xabber.getString("to"))]}</div>
+        <div class="msg-device-info-value">{{to_jid}}</div>
+    </div>
+    {[}]}
+    {[if (timestamp){]}
+    <div class="msg-device-info-row">
+        <div class="msg-device-info-label">{[print(xabber.getString("time"))]}</div>
+        <div class="msg-device-info-value">{{timestamp}}</div>
+    </div>
+    {[}]}
+    <div class="msg-device-info-row">
+        <div class="msg-device-info-label">{[print(xabber.getString("settings_account__device_information_device_id"))]}</div>
+        <div class="msg-device-info-value">{{device_id}}</div>
+    </div>
+    {[if (label){]}
+    <div class="msg-device-info-row">
+        <div class="msg-device-info-label">{[print(xabber.getString("omemo__encrypted_message_tooltip_device_label"))]}</div>
+        <div class="msg-device-info-value">{{label}}</div>
+    </div>
+    {[}]}
+    <div class="msg-device-info-row">
+        <div class="msg-device-info-label">{[print(xabber.getString("omemo__encrypted_message_tooltip_trust_status"))]}</div>
+        {[if (trust_type){]}
+        <div class="msg-device-info-value">{{trust_type}}</div>
+        {[} else {]}
+        <div class="msg-device-info-value">{[print(xabber.getString("unverified"))]}</div>
+        {[}]}
+    </div>
+    {[if (additional_text){]}
+    <div class="msg-device-info-row msg-device-info-additional-text">
+        <div class="msg-device-info-label"></div>
+        <div class="msg-device-info-value">{{additional_text}}</div>
+    </div>
+    {[}]}
+</div>

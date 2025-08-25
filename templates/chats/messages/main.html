@@ -34,17 +34,9 @@
                 <div class="msg-retry-dropdown-btn active-ground-color-600 btn-retry-send-message">{[print(xabber.getString("chat_screen__message__button_retry_send"))]}</div>
             </div>
         {[ } ]}
-        <div class="not-decrypted-icon mdi-14px" title="{[print(xabber.getString('omemo__not_verified_message_title'))]}" {[ if (not_verified_device) { ]}data-device-id="{{not_verified_device}}" {[ } ]} data-activates="not-verified-tooltip-{{msgid}}">
+        <div class="not-decrypted-icon mdi-14px" title="{[print(xabber.getString('omemo__not_verified_message_title'))]}">
             <svg class="mdi mdi-14px mdi-svg-template not-verified-icon-svg" data-svgname="alert-circle"></svg>
             <svg class="mdi mdi-14px mdi-svg-template not-decrypted-icon-svg" data-svgname="information"></svg>
-        </div>
-        <div id="not-verified-tooltip-{{msgid}}" class="dropdown-content not-decrypted-tooltip selectable-text">
-            <div class="msg-device-info"></div>
-            <div class="not-existing-device-tooltip-text">{[print(xabber.getString("omemo__not_existing_device_message_tooltip"))]}</div>
-            <div class="not-decrypted-tooltip-text">{[print(xabber.getString("omemo__not_decrypted_message_tooltip"))]}</div>
-            <div class="not-verified-tooltip-text">{[print(xabber.getString("omemo__not_verified_message_tooltip"))]}</div>
-            <!--<button class="btn-manage-devices btn-flat btn-main text-color-700">{[print(xabber.getString("omemo__alert_new_device__button_manage_devices"))]}</button>-->
-            <div class="not-verified-previously-tooltip-text">{[print(xabber.getString("omemo__not_verified_previously_message_tooltip"))]}</div>
         </div>
         {[ if (ephemeral_timer_text) { ]}
         <div class="ephemeral-timer-msg-time text-color-700{[ if (is_sender) { ]} ephemeral-timer-own-msg-time{[ } ]}">{{ephemeral_timer_text}}</div>

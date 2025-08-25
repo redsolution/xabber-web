@@ -10977,25 +10977,25 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
                     custom_count_value = group.contacts.filter(item => item.get('group_chat')).length;
                 }
                 if (this.current_filter.type === 'groupchats-public' && group.contacts.some(item => item.get('group_chat') && !item.get('incognito_chat'))) {
-                    custom_count_value = group.contacts.filter(item => item.get('group_chat') && !item.get('incognito_chat')).length;
+                    custom_count_value = group.contacts.filter(item => item.get('group_chat')).length;
                 }
                 if (this.current_filter.type === 'groupchats-private' && group.contacts.some(item => item.get('group_chat') && item.get('private_chat'))) {
-                    custom_count_value = group.contacts.filter(item => item.get('group_chat') && item.get('private_chat')).length;
+                    custom_count_value = group.contacts.filter(item => item.get('group_chat')).length;
                 }
                 if (this.current_filter.type === 'groupchats-incognito' && group.contacts.some(item => item.get('group_chat') && item.get('incognito_chat') && !item.get('private_chat'))){
-                    custom_count_value = group.contacts.filter(item => item.get('group_chat') && item.get('incognito_chat') && !item.get('private_chat')).length;
+                    custom_count_value = group.contacts.filter(item => item.get('group_chat')).length;
                 }
                 if (this.current_filter.type === 'contacts' && group.contacts.some(item => !item.get('group_chat'))){
                     custom_count_value = group.contacts.filter(item => !item.get('group_chat')).length;
                 }
                 if (this.current_filter.type === 'contacts-online' && group.contacts.some(item => !item.get('group_chat') && !(constants.STATUS_WEIGHTS[item.get('status')] >= 6))){
-                    custom_count_value = group.contacts.filter(item => !item.get('group_chat') && !(constants.STATUS_WEIGHTS[item.get('status')] >= 6)).length;
+                    custom_count_value = group.contacts.filter(item => !item.get('group_chat')).length;
                 }
                 if (this.current_filter.type && this.current_filter.type !== 'subscription' && !custom_count_value){
                     custom_count_value = 0
                 }
-                if (!custom_count_value && !(this.current_filter.type === 'groupchat' || this.current_filter.type === 'groupchats-public' || this.current_filter.type === 'groupchats-incognito' || this.current_filter.type === 'groupchats-private' || this.current_filter.type === 'invitations'))
-                    return;
+                // if (!custom_count_value && !(this.current_filter.type === 'groupchat' || this.current_filter.type === 'groupchats-public' || this.current_filter.type === 'groupchats-incognito' || this.current_filter.type === 'groupchats-private' || this.current_filter.type === 'invitations'))
+                //     return;
                 this.$('.contacts-group-filter-content').append(this.renderGroupFilterItem(group, custom_count_value));
             });
         } else {
@@ -11012,19 +11012,19 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
                             custom_count_value = group.contacts.filter(item => item.get('group_chat')).length;
                         }
                         if (this.current_filter.type === 'groupchats-public' && group.contacts.some(item => item.get('group_chat') && !item.get('incognito_chat'))) {
-                            custom_count_value = group.contacts.filter(item => item.get('group_chat') && !item.get('incognito_chat')).length;
+                            custom_count_value = group.contacts.filter(item => item.get('group_chat')).length;
                         }
                         if (this.current_filter.type === 'groupchats-private' && group.contacts.some(item => item.get('group_chat') && item.get('private_chat'))) {
-                            custom_count_value = group.contacts.filter(item => item.get('group_chat') && item.get('private_chat')).length;
+                            custom_count_value = group.contacts.filter(item => item.get('group_chat')).length;
                         }
                         if (this.current_filter.type === 'groupchats-incognito' && group.contacts.some(item => item.get('group_chat') && item.get('incognito_chat') && !item.get('private_chat'))){
-                            custom_count_value = group.contacts.filter(item => item.get('group_chat') && item.get('incognito_chat') && !item.get('private_chat')).length;
+                            custom_count_value = group.contacts.filter(item => item.get('group_chat')).length;
                         }
                         if (this.current_filter.type === 'contacts' && group.contacts.some(item => !item.get('group_chat'))){
                             custom_count_value = group.contacts.filter(item => !item.get('group_chat')).length;
                         }
                         if (this.current_filter.type === 'contacts-online' && group.contacts.some(item => !item.get('group_chat') && !(constants.STATUS_WEIGHTS[item.get('status')] >= 6))){
-                            custom_count_value = group.contacts.filter(item => !item.get('group_chat') && !(constants.STATUS_WEIGHTS[item.get('status')] >= 6)).length;
+                            custom_count_value = group.contacts.filter(item => !item.get('group_chat')).length;
                         }
                         if (this.current_filter.type && (this.current_filter.type !== 'subscription' || this.current_filter.type !== 'invitations') && !custom_count_value){
                             custom_count_value = 0
@@ -11039,8 +11039,8 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
                                     $group.find('span').text(initial_count + group.get('counter').all);
                             }
                         } else {
-                            if (!custom_count_value && !(this.current_filter.type === 'groupchats-public' || this.current_filter.type === 'groupchats-incognito' || this.current_filter.type === 'groupchats-private' || this.current_filter.type === 'invitations'))
-                                return;
+                            // if (!custom_count_value && !(this.current_filter.type === 'groupchats-public' || this.current_filter.type === 'groupchats-incognito' || this.current_filter.type === 'groupchats-private' || this.current_filter.type === 'invitations'))
+                            //     return;
                             this.$('.contacts-group-filter-content').append(this.renderGroupFilterItem(group, custom_count_value));
                         }
                     });
@@ -11066,9 +11066,9 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
 
     renderGroupFilterItem: function (group, custom_count_value) {
         let counter = group.get('counter').all;
-        if (!_.isUndefined(custom_count_value)){
-            counter = custom_count_value;
-        }
+        // if (!_.isUndefined(custom_count_value)){
+        //     counter = custom_count_value;
+        // }
         return $(templates.group_filter_item({id: group.get('id'), name: group.get('name'), counter: counter }));
     },
 

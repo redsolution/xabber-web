@@ -587,8 +587,6 @@ if ($) {
         top: origin.position().top + verticalOffset + scrollOffset,
         left: leftPosition
       });
-    if (activates.closest('.chat-content').length)
-        activates.closest('.chat-content').addClass('active-dropdown-chat-content');
 
         // custom invisible overlay for dropdowns
         if (!activates.find('.lean-overlay').length && !options.hover){

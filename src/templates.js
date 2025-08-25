@@ -215,6 +215,7 @@ import $ from "jquery";
     addTemplate('chats.messages.system');
     addTemplate('chats.messages.file_upload');
     addTemplate('chats.messages.loading_circle');
+    addTemplate('chats.messages.msg_device_information');
     addTemplate('chats.messages.file');
     addTemplate('chats.messages.file_loading');
     addTemplate('chats.messages.link_reference');
