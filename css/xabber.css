@@ -1798,7 +1798,7 @@ body {
 [data-main-color=red] .web-address input.url:focus,
 [data-main-color=red] .login-panel-form .input-field input:not(.invalid):focus{
     border-color: #F44336 !important;
-    box-shadow: 0px 0px 0px 0.175rem #FFCDD2 !important;
+    box-shadow: 0px 0px 0px 0.2rem #FFCDD2 !important;
 }
 [data-main-color=red] .login-panel-form .login-form-skip,
 [data-main-color=red] .login-buttons .btn-main{
@@ -1914,7 +1914,7 @@ body {
 [data-main-color=pink] .web-address input.url:focus,
 [data-main-color=pink] .login-panel-form .input-field input:not(.invalid):focus{
     border-color: #E91E63 !important;
-    box-shadow: 0px 0px 0px 0.175rem #F8BBD0 !important;
+    box-shadow: 0px 0px 0px 0.2rem #F8BBD0 !important;
 }
 [data-main-color=pink] .login-panel-form .login-form-skip,
 [data-main-color=pink] .login-buttons .btn-main{
@@ -2030,7 +2030,7 @@ body {
 [data-main-color=purple] .web-address input.url:focus,
 [data-main-color=purple] .login-panel-form .input-field input:not(.invalid):focus{
     border-color: #9C27B0 !important;
-    box-shadow: 0px 0px 0px 0.175rem #E1BEE7 !important;
+    box-shadow: 0px 0px 0px 0.2rem #E1BEE7 !important;
 }
 [data-main-color=purple] .login-panel-form .login-form-skip,
 [data-main-color=purple] .login-buttons .btn-main{
@@ -2145,7 +2145,7 @@ body {
 [data-main-color=deep-purple] .web-address input.url:focus,
 [data-main-color=deep-purple] .login-panel-form .input-field input:not(.invalid):focus{
     border-color: #673AB7 !important;
-    box-shadow: 0px 0px 0px 0.175rem #D1C4E9 !important;
+    box-shadow: 0px 0px 0px 0.2rem #D1C4E9 !important;
 }
 [data-main-color=deep-purple] .login-panel-form .login-form-skip,
 [data-main-color=deep-purple] .login-buttons .btn-main{
@@ -2261,7 +2261,7 @@ body {
 [data-main-color=indigo] .web-address input.url:focus,
 [data-main-color=indigo] .login-panel-form .input-field input:not(.invalid):focus{
     border-color: #3F51B5 !important;
-    box-shadow: 0px 0px 0px 0.175rem #C5CAE9 !important;
+    box-shadow: 0px 0px 0px 0.2rem #C5CAE9 !important;
 }
 [data-main-color=indigo] .login-panel-form .login-form-skip,
 [data-main-color=indigo] .login-buttons .btn-main{
@@ -2377,7 +2377,7 @@ body {
 [data-main-color=blue] .web-address input.url:focus,
 [data-main-color=blue] .login-panel-form .input-field input:not(.invalid):focus{
     border-color: #2196F3 !important;
-    box-shadow: 0px 0px 0px 0.175rem #BBDEFB !important;
+    box-shadow: 0px 0px 0px 0.2rem #BBDEFB !important;
 }
 [data-main-color=blue] .login-panel-form .login-form-skip,
 [data-main-color=blue] .login-buttons .btn-main{
@@ -2493,7 +2493,7 @@ body {
 [data-main-color=light-blue] .web-address input.url:focus,
 [data-main-color=light-blue] .login-panel-form .input-field input:not(.invalid):focus{
     border-color: #03A9F4 !important;
-    box-shadow: 0px 0px 0px 0.175rem #B3E5FC !important;
+    box-shadow: 0px 0px 0px 0.2rem #B3E5FC !important;
 }
 [data-main-color=light-blue] .login-panel-form .login-form-skip,
 [data-main-color=light-blue] .login-buttons .btn-main{
@@ -2609,7 +2609,7 @@ body {
 [data-main-color=cyan] .web-address input.url:focus,
 [data-main-color=cyan] .login-panel-form .input-field input:not(.invalid):focus{
     border-color: #00BCD4 !important;
-    box-shadow: 0px 0px 0px 0.175rem #B2EBF2 !important;
+    box-shadow: 0px 0px 0px 0.2rem #B2EBF2 !important;
 }
 [data-main-color=cyan] .login-panel-form .login-form-skip,
 [data-main-color=cyan] .login-buttons .btn-main{
@@ -2725,7 +2725,7 @@ body {
 [data-main-color=teal] .web-address input.url:focus,
 [data-main-color=teal] .login-panel-form .input-field input:not(.invalid):focus{
     border-color: #009688 !important;
-    box-shadow: 0px 0px 0px 0.175rem #B2DFDB !important;
+    box-shadow: 0px 0px 0px 0.2rem #B2DFDB !important;
 }
 [data-main-color=teal] .login-panel-form .login-form-skip,
 [data-main-color=teal] .login-buttons .btn-main{
@@ -2841,7 +2841,7 @@ body {
 [data-main-color=green] .web-address input.url:focus,
 [data-main-color=green] .login-panel-form .input-field input:not(.invalid):focus{
     border-color: #4CAF50 !important;
-    box-shadow: 0px 0px 0px 0.175rem #C8E6C9 !important;
+    box-shadow: 0px 0px 0px 0.2rem #C8E6C9 !important;
 }
 [data-main-color=green] .login-panel-form .login-form-skip,
 [data-main-color=green] .login-buttons .btn-main{
@@ -2957,7 +2957,7 @@ body {
 [data-main-color=light-green] .web-address input.url:focus,
 [data-main-color=light-green] .login-panel-form .input-field input:not(.invalid):focus{
     border-color: #8BC34A !important;
-    box-shadow: 0px 0px 0px 0.175rem #DCEDC8 !important;
+    box-shadow: 0px 0px 0px 0.2rem #DCEDC8 !important;
 }
 [data-main-color=light-green] .login-panel-form .login-form-skip,
 [data-main-color=light-green] .login-buttons .btn-main{
@@ -3073,7 +3073,7 @@ body {
 [data-main-color=lime] .web-address input.url:focus,
 [data-main-color=lime] .login-panel-form .input-field input:not(.invalid):focus{
     border-color: #CDDC39 !important;
-    box-shadow: 0px 0px 0px 0.175rem #F0F4C3 !important;
+    box-shadow: 0px 0px 0px 0.2rem #F0F4C3 !important;
 }
 [data-main-color=lime] .login-panel-form .login-form-skip,
 [data-main-color=lime] .login-buttons .btn-main{
@@ -3189,7 +3189,7 @@ body {
 [data-main-color=amber] .web-address input.url:focus,
 [data-main-color=amber] .login-panel-form .input-field input:not(.invalid):focus{
     border-color: #FFC107 !important;
-    box-shadow: 0px 0px 0px 0.175rem #FFECB3 !important;
+    box-shadow: 0px 0px 0px 0.2rem #FFECB3 !important;
 }
 [data-main-color=amber] .login-panel-form .login-form-skip,
 [data-main-color=amber] .login-buttons .btn-main{
@@ -3305,7 +3305,7 @@ body {
 [data-main-color=orange] .web-address input.url:focus,
 [data-main-color=orange] .login-panel-form .input-field input:not(.invalid):focus{
     border-color: #FF9800 !important;
-    box-shadow: 0px 0px 0px 0.175rem #FFE0B2 !important;
+    box-shadow: 0px 0px 0px 0.2rem #FFE0B2 !important;
 }
 [data-main-color=orange] .login-panel-form .login-form-skip,
 [data-main-color=orange] .login-buttons .btn-main{
@@ -3421,7 +3421,7 @@ body {
 [data-main-color=deep-orange] .web-address input.url:focus,
 [data-main-color=deep-orange] .login-panel-form .input-field input:not(.invalid):focus{
     border-color: #FF5722 !important;
-    box-shadow: 0px 0px 0px 0.175rem #FFCCBC !important;
+    box-shadow: 0px 0px 0px 0.2rem #FFCCBC !important;
 }
 [data-main-color=deep-orange] .login-panel-form .login-form-skip,
 [data-main-color=deep-orange] .login-buttons .btn-main{
@@ -3537,7 +3537,7 @@ body {
 [data-main-color=brown] .web-address input.url:focus,
 [data-main-color=brown] .login-panel-form .input-field input:not(.invalid):focus{
     border-color: #795548 !important;
-    box-shadow: 0px 0px 0px 0.175rem #D7CCC8 !important;
+    box-shadow: 0px 0px 0px 0.2rem #D7CCC8 !important;
 }
 [data-main-color=brown] .login-panel-form .login-form-skip,
 [data-main-color=brown] .login-buttons .btn-main{
@@ -3654,7 +3654,7 @@ body {
 [data-main-color=blue-grey] .web-address input.url:focus,
 [data-main-color=blue-grey] .login-panel-form .input-field input:not(.invalid):focus{
     border-color: #607D8B !important;
-    box-shadow: 0px 0px 0px 0.175rem #CFD8DC !important;
+    box-shadow: 0px 0px 0px 0.2rem #CFD8DC !important;
 }
 [data-main-color=blue-grey] .login-panel-form .login-form-skip,
 [data-main-color=blue-grey] .login-buttons .btn-main{
@@ -5142,7 +5142,7 @@ input[type=text].simple-input-field:hover {
 .input-glow.invalid:focus,
 .add-contact-modal .input-field input.invalid:focus,
 .login-panel-form .input-field input.invalid:focus{
-    box-shadow: 0 0 0 0.175rem #FFCDD2 !important;
+    box-shadow: 0 0 0 0.2rem #FFCDD2 !important;
 }
 .login-panel-form .buttons-wrap{
     display: block;

@@ -865,6 +865,8 @@ xabber.JingleMessage = Backbone.Model.extend({
       },
 
       initialize: function (attrs, options) {
+          console.error(attrs);
+          console.error(options);
           attrs = attrs || {};
           attrs.video_live = attrs.video_live || false;
           attrs.video = attrs.video_live;
@@ -884,6 +886,7 @@ xabber.JingleMessage = Backbone.Model.extend({
               ].concat(constants.TURN_SERVERS_LIST),
               sdpSemantics: 'unified-plan'
           });
+          console.error(this);
           this.$remote_video_el = $('<video autoplay class="webrtc-remote-video"/>');
           this.$remote_audio_el = $('<audio autoplay class="webrtc-remote-audio hidden"/>');
           this.$local_video = this.modal_view.$el.find('.webrtc-local-video');
@@ -940,6 +943,7 @@ xabber.JingleMessage = Backbone.Model.extend({
       },
 
       onConnected: function () {
+          console.error('onConnected');
           this.get('video_live') && this.onChangedVideoValue();
           xabber.stopAudio(this.audio_notifiation);
           setTimeout(() => {
@@ -982,14 +986,19 @@ xabber.JingleMessage = Backbone.Model.extend({
       },
 
       onIceCandidate: function (ice) {
+
+          console.error(ice);
           if (!ice || !ice.candidate || !ice.candidate.candidate)
               return;
+          console.error(ice.candidate);
           this.sendCandidate(ice.candidate);
       },
 
       onChangeIceConnectionState: function (ev) {
           let peer_conn = ev.target,
               conn_state = peer_conn.iceConnectionState;
+          console.error('onChangeIceConnectionState');
+          console.error(conn_state);
           if (conn_state === "failed") {
               clearTimeout(this._timeout_failed);
               this._timeout_failed = setTimeout(() => {
@@ -1002,6 +1011,7 @@ xabber.JingleMessage = Backbone.Model.extend({
                       xabber.current_voip_call = null;
                   }
               }, 40000);
+              console.error(peer_conn)
               peer_conn.restartIce();
           }
           if (conn_state === "connected")
@@ -1167,7 +1177,9 @@ xabber.JingleMessage = Backbone.Model.extend({
 
       createAudioStream: function () {
           try {
+              console.error('createAudioStream');
               navigator.mediaDevices.getUserMedia({audio: true}).then((media_stream) => {
+                  console.error(media_stream);
                   this.local_stream = media_stream;
                   this.$local_video[0].srcObject = media_stream;
                   let video_track = this.initVideoTrack();
@@ -1177,6 +1189,7 @@ xabber.JingleMessage = Backbone.Model.extend({
               });
           } catch (e) {
               utils.dialogs.error(e);
+              console.error(e);
           }
       },
 
@@ -1307,7 +1320,9 @@ xabber.JingleMessage = Backbone.Model.extend({
       },
 
       initSession: function () {
+          console.error('initSession');
           navigator.mediaDevices.getUserMedia({audio: true}).then((media_stream) => {
+              console.error(media_stream);
               this.local_stream = media_stream;
               this.$local_video[0].srcObject = media_stream;
               let video_track = this.initVideoTrack();
@@ -1316,6 +1331,7 @@ xabber.JingleMessage = Backbone.Model.extend({
               media_stream.getAudioTracks().forEach(track => this.conn.addTrack(track, this.local_stream));
               return this.conn.createOffer({offerToReceiveAudio:true, offerToReceiveVideo: true});
           }).then((offer) => {
+              console.error(offer);
                   this.set('session_initiator', this.account.get('jid'));
                   this.conn.setLocalDescription(offer).then(() => {
                       let offer_sdp = offer.sdp,
@@ -1325,6 +1341,8 @@ xabber.JingleMessage = Backbone.Model.extend({
                           .c('description', {xmlns: Strophe.NS.JINGLE_RTP, media: 'audio'})
                           .c('sdp').t(offer_sdp).up().up()
                           .c('security', {xmlns: Strophe.NS.JINGLE_SECURITY_STUB});
+                      console.error($iq_offer_sdp);
+                      console.error($iq_offer_sdp.tree());
                       this.account.sendIQFast($iq_offer_sdp);
                   });
           });
@@ -1337,6 +1355,8 @@ xabber.JingleMessage = Backbone.Model.extend({
               .c('description', {xmlns: Strophe.NS.JINGLE_RTP, media: 'audio'}).up()
               .c('transport', {xmlns: Strophe.NS.JINGLE_TRANSPORTS_ICE})
               .c('candidate', {sdpMLineIndex: candidate.sdpMLineIndex, sdpMid: candidate.sdpMid }).t(candidate.candidate);
+          console.error($iq_candidate);
+          console.error($iq_candidate.tree());
           this.account.sendIQFast($iq_candidate);
       },
 

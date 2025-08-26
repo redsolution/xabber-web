@@ -612,7 +612,7 @@ xabber.Contact = Backbone.Model.extend({
         !this.account.server_features.get(Strophe.NS.SUBSCRIPTION_PREAPPROVAL) && this.set('subscription_preapproved', false)
     },
 
-    deleteWithDialog: function () {
+    deleteWithDialog: function (callback) {
         let is_group = this.get('group_chat'),
             header = is_group ? xabber.getString("group_remove") : xabber.getString("remove_contact"),
             msg_text = is_group ? xabber.getString("group_remove_confirm", [this.get('name').bold()]) : xabber.getString("contact_delete_confirm_short", [this.get('name').bold()]),
@@ -634,9 +634,13 @@ xabber.Contact = Backbone.Model.extend({
                 } else {
                     let chat = this.account.chats.getChat(this);
                     this.removeFromRoster();
-                    if (result.delete_history) {
+                    if (result.delete_history){
                         chat.retractAllMessages(false);
                         chat.deleteFromSynchronization();
+                    }
+                    if (callback) {
+                        callback();
+                    } else {
                         xabber.body.setScreen('all-chats', {right_contact: '', right: undefined});
                     }
                     xabber.trigger("clear_search");
@@ -2168,7 +2172,9 @@ xabber.ContactDetailsViewRight = xabber.BasicView.extend({
     },
 
     deleteContact: function () {
-        this.model.deleteWithDialog();
+        this.model.deleteWithDialog(() => {
+            this.isVisible() && this.closeDetails();
+        });
     },
 
     blockContact: function () {
@@ -2727,11 +2733,9 @@ xabber.GroupChatDetailsViewRight = xabber.BasicView.extend({
                 let chat = this.account.chats.getChat(contact);
                 contact.removeFromRoster();
                 chat.deleteFromSynchronization(() => {
-                    chat.trigger("close_chat");
-                    xabber.body.setScreen('all-chats', {right: undefined, right_contact: null});
+                    this.isVisible() && this.closeDetails();
                 }, () => {
-                    chat.trigger("close_chat");
-                    xabber.body.setScreen('all-chats', {right: undefined, right_contact: null});
+                    this.isVisible() && this.closeDetails();
                 });
             }
         });
