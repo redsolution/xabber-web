@@ -81,6 +81,7 @@ import $ from "jquery";
     addTemplate('base.setting_language_radio_input');
     addTemplate('base.about');
     addTemplate('base.omemo_enable');
+    addTemplate('base.omemo_new_device');
     addTemplate('base.client_notification_item');
     addTemplate('base.backgrounds_gallery');
     addTemplate('base.color_picker');

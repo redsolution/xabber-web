@@ -12506,8 +12506,14 @@ xabber.CachedNotifications = Backbone.ModelWithDataBase.extend({
                 previous_month_first_day_date = moment(Date.now()).subtract(1, 'months').startOf('month').format();
             if (notification_date && notification_date >= previous_month_first_day_date) {
                 value.notification_date = notification_date;
-                this.database.put('notification_items', value, function (response_value) {
-                    callback && callback(response_value);
+                this.getFromCachedNotifications(value.stanza_id, (res) => {
+                   if (res && res.is_click_readen){
+                       return;
+                   } else{
+                       this.database.put('notification_items', value, function (response_value) {
+                           callback && callback(response_value);
+                       });
+                   }
                 });
             } else {
                 callback && callback(false);

@@ -5009,6 +5009,8 @@ xabber.once("start", function () {
     this.wide_panel = this.main_panel.addChild(
         'wide', this.NodeView, {classlist: 'panel-wrap wide-panel-wrap'});
 
+    this.bottom_placeholders_wrap = this.main_panel.addChild('placeholders', this.NodeView, {classlist: 'wide-placeholders-wrap'});
+
     this.placeholders_wrap = new this.ClientNotificationsContainer();
 
     this.settings_modal_view = this.main_overlay_panel.addChild(

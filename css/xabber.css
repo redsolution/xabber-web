@@ -1576,21 +1576,61 @@ body {
     max-height: calc(48px * 5);
     flex-direction: column;
 }
+.omemo-new-device-placeholder{
+    height: 48px;
+    line-height: 48px;
+    position: relative;
+    background-color: #FBC02D;
+    width: 100%;
+    border-bottom: 1px solid rgba(0, 0, 0, .1);
+}
 
-.omemo-enable-placeholder,
-.notifications-placeholder {
+.omemo-new-device-placeholder .msg-text {
+    padding: 0 0 0 24px;
+}
+
+.omemo-new-device-placeholder span.btn-enable{
+    font-weight: 500;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.omemo-new-device-placeholder .mdi-close{
+    position: absolute;
+    top: 13px;
+    color: #212121;
+    right: 12px;
+    cursor: pointer;
+}
+.omemo-new-device-placeholder .placeholder-buttons-wrap{
+    position: absolute;
+    top: 6px;
+    right: 16px;
+    cursor: pointer;
+    display:flex;
+}
+.omemo-new-device-placeholder button{
+    cursor: pointer;
+    margin-left: 8px;
+}
+.omemo-new-device-placeholder button:focus{
+    background-color: unset;
+}
+
+.client-notifications-wrap .omemo-enable-placeholder,
+.client-notifications-wrap .notifications-placeholder {
     position: relative;
     background-color: #FBC02D;
     width: 100%;
     height: 40px;
     line-height: 40px;
 }
-.desktop-notification-item{
+.client-notifications-wrap .desktop-notification-item{
     border-radius: 8px;
     margin-bottom: 8px;
     cursor: pointer;
 }
-.desktop-notification-item .msg-text{
+.client-notifications-wrap .desktop-notification-item .msg-text{
     border-radius: 8px;
     font-weight: 500;
 }
@@ -1603,14 +1643,14 @@ body {
     padding: 0 0 0 24px;
 }
 
-.omemo-enable-placeholder span.btn-enable,
+.client-notifications-wrap .omemo-enable-placeholder span.btn-enable,
 .notifications-placeholder span {
     font-weight: 500;
     text-decoration: underline;
     cursor: pointer;
 }
 
-.omemo-enable-placeholder .mdi-close,
+.client-notifications-wrap .omemo-enable-placeholder .mdi-close,
 .notifications-placeholder .mdi-close {
     position: absolute;
     top: 13px;
@@ -4407,12 +4447,22 @@ input[type=text].simple-input-field:hover {
 }
 
 .account-item .encryption-warning-icon {
-    position: absolute;
-    top: 27px;
-    right: 42px;
-    pointer-events: none;
     color: #ffa000 !important;
-    display: none;
+    height: 0;
+    left: 34px;
+    pointer-events: none;
+    position: absolute;
+    text-align: center;
+    top: 22px;
+    width: 0;
+    border-left: 13px solid transparent;
+    border-right: 13px solid transparent;
+    border-bottom: 23px solid #424242;
+}
+.account-item .encryption-warning-icon:before {
+    position: absolute;
+    left: -12px;
+    top: 1px;
 }
 
 .account-item .auth-failed {
@@ -11403,9 +11453,9 @@ input[type=text].simple-input-field:hover {
 .chat-bottom-wrap .warning-wrap .warning-message {
     text-align: center;
     color: #424242;
-    padding: 0 48px;
     font-size: 14px;
-    margin: 8px 0;
+    margin: 8px 0 4px;
+    padding: 0 24px;
     position: relative;
 }
 

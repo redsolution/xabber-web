@@ -925,6 +925,7 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
                                     stanza_id: msg_item.stanza_id,
                                     xml: msg_item.xml,
                                     is_unread: false,
+                                    is_click_readen: true,
                                 });
                             }
                         })
@@ -951,6 +952,7 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
                     stanza_id: message.get('unique_id'),
                     xml: message.get('xml').outerHTML,
                     is_unread: false,
+                    is_click_readen: true,
                 },(res) => {
 
                 })

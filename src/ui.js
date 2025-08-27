@@ -275,6 +275,7 @@ xabber.once("start", function () {
         main: {
             right: { contacts_body: null },
             right_contact: {},
+            placeholders: null
         },
         roster: null
     });
@@ -284,6 +285,7 @@ xabber.once("start", function () {
         main: {
             right: { contacts_body: null },
             right_contact: {},
+            placeholders: null
         },
         roster: null
     });
@@ -293,7 +295,7 @@ xabber.once("start", function () {
         toolbar: null,
         main: {
             wide: { discovering_main: null},
-            // placeholders: null
+            placeholders: null
         },
         roster: null
     });
@@ -317,7 +319,7 @@ xabber.once("start", function () {
             left: { chats: null },
             right: { chat_placeholder: null },
             right_contact: {},
-            // placeholders: null
+            placeholders: null
         },
         roster: null
     });
@@ -329,7 +331,7 @@ xabber.once("start", function () {
             // left: { chats: null },
             right: { notifications_body: null  },
             right_contact: {},
-            // placeholders: null
+            placeholders: null
         },
         // roster: null
     });
@@ -340,6 +342,7 @@ xabber.once("start", function () {
         main: {
             right: { calls_body: null },
             // right_contact: {},
+            placeholders: null
         },
         // roster: null
     });
