@@ -5868,11 +5868,12 @@ xabber.ChatContentView = xabber.BasicView.extend({
             duration && $elem.find('.voice-msg-total-time').text(duration);
         });
 
-        aud.on('error', () => {
+        aud.on('error', (e) => {
+            console.error(e);
             $elem.removeClass('voice-message-rendering');
             element.innerHTML = not_expanded_msg;
             aud.unAll();
-            $elem.find('.voice-message-play').get(0).remove();
+            $elem.find('.voice-message-play').length && $elem.find('.voice-message-play').get(0).remove();
             utils.callback_popup_message(xabber.getString("jingle__error__audio_not_supported"), 3000);
         });
 
@@ -12751,6 +12752,10 @@ xabber.ChatBottomView = xabber.BasicView.extend({
                 return;
             $target_emoji.length && this.typeEmoticon($target_emoji.data('emoji'));
         });
+        this.$('.input-voice-message-border').hover(
+            function() { $.data(this, 'hover', true); },
+            function() { $.data(this, 'hover', false); }
+        ).data('hover', false);
         this.renderLastEmoticons();
     },
 
@@ -13736,14 +13741,16 @@ xabber.ChatBottomView = xabber.BasicView.extend({
         this.$('.message-input-panel').removeClass('voice-message-recording-cancel');
         this.$('.chat-bottom-voice-message-rendered').html('');
 
-        navigator.getUserMedia = (navigator.mozGetUserMedia || navigator.msGetUserMedia || navigator.webkitGetUserMedia || navigator.getUserMedia);
-        if (navigator.getUserMedia) {
-            this.model.set('recording_voice_message', true)
 
-            this.chunks = [];
-            let constraints = { audio: true, channelCount: 1 },
-                $mic = this.$('.send-area .attach-voice-message'),
-                onSuccess = (stream) => {
+        try {
+            if (navigator.mediaDevices.getUserMedia) {
+                this.model.set('recording_voice_message', true)
+
+                this.chunks = [];
+                let constraints = { audio: true, channelCount: 1 },
+                    $mic = this.$('.send-area .attach-voice-message');
+
+                navigator.mediaDevices.getUserMedia(constraints).then((stream) => {
                     if (!$mic.is(":hover")) {
                         $mic.removeClass('recording ground-color-500');
                         this.model.set('recording_voice_message', false)
@@ -13784,7 +13791,7 @@ xabber.ChatBottomView = xabber.BasicView.extend({
                                     if (timer%1 === 0)
                                         $timer_elem.text(utils.pretty_duration(timer));
                                     timer = (timer*10 + 2)/10;
-                                    mic_hover = $border_elem.is(":hover");
+                                    mic_hover = $border_elem.is(":hover") || $border_elem.data('hover');
                                     if (!mic_hover) {
                                         $bottom_panel.addClass('voice-message-recording-cancel');
                                         $status_msg.css('color', '#D32F2F').text(xabber.getString("chat_bottom__placeholder__cancel_write_voice_short"));
@@ -13796,7 +13803,7 @@ xabber.ChatBottomView = xabber.BasicView.extend({
                                         $status_msg.css('color', '#9E9E9E').text(xabber.getString("chat_bottom__placeholder__cancel_write_voice"));
                                     }
                                 } else {
-                                    mic_hover = $border_elem.is(":hover");
+                                    mic_hover = $border_elem.is(":hover") || $border_elem.data('hover');
                                     this.mediaRecorder.stop();
                                     $mic.removeClass('recording ground-color-500');
                                     $bottom_panel.removeClass('locked-voice-message');
@@ -13821,12 +13828,12 @@ xabber.ChatBottomView = xabber.BasicView.extend({
 
                         let flag = false;
                         this.timerIdDot = setInterval(() => {
-                                if (flag)
-                                    $voice_visualizer.css('background-color', '#FFF');
-                                else
-                                    $voice_visualizer.css('background-color', '#D32F2F');
-                                flag = !flag;
-                            }, 500);
+                            if (flag)
+                                $voice_visualizer.css('background-color', '#FFF');
+                            else
+                                $voice_visualizer.css('background-color', '#D32F2F');
+                            flag = !flag;
+                        }, 500);
                     };
 
                     this.mediaRecorder.start();
@@ -13871,6 +13878,12 @@ xabber.ChatBottomView = xabber.BasicView.extend({
                                         audioContext.close();
                                         this.view.addFileMessage([file], true);
                                         xabber.chats_view.clearSearch();
+                                    }).catch((e) => {
+                                        console.error(e);
+                                        URL.revokeObjectURL(audio);
+                                        audioContext.close();
+                                        this.view.addFileMessage([file], true);
+                                        xabber.chats_view.clearSearch();
                                     });
                                 } catch (error) {
                                     console.error('error handling audio:', error);
@@ -13885,24 +13898,26 @@ xabber.ChatBottomView = xabber.BasicView.extend({
                     };
 
                     this.mediaRecorder.ondataavailable = (e) => {
+                        console.error(e);
                         this.chunks = e;
                     };
-                };
-
-            let onError = (error) => {
-                console.error({error});
-                if (error.name === 'NotFoundError')
-                    utils.dialogs.error(xabber.getString("audio_error_record_failed_no_device"));
-                else
-                    utils.dialogs.error(xabber.getString("file_upload__error", [error]));
-                $mic.removeClass('recording ground-color-500');
-                this.model.set('recording_voice_message', false)
-            };
-
-            window.navigator.getUserMedia(constraints, onSuccess, onError);
-        } else {
+                }).catch((error) => {
+                    console.error({error});
+                    if (error.name === 'NotFoundError')
+                        utils.dialogs.error(xabber.getString("audio_error_record_failed_no_device"));
+                    else
+                        utils.dialogs.error(xabber.getString("file_upload__error", [error]));
+                    $mic.removeClass('recording ground-color-500');
+                    this.model.set('recording_voice_message', false)
+                });
+            } else {
+                utils.dialogs.error(xabber.getString("message_manager_error_cant_record_voice"));
+                this.$('.send-area .attach-voice-message').removeClass('recording ground-color-500');
+            }
+        } catch (e) {
             utils.dialogs.error(xabber.getString("message_manager_error_cant_record_voice"));
-            $mic.removeClass('recording ground-color-500');
+            console.error(e);
+            this.$('.send-area .attach-voice-message').removeClass('recording ground-color-500');
         }
     },
 
