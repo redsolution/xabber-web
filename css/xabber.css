@@ -1586,7 +1586,13 @@ body {
 }
 
 .omemo-new-device-placeholder .msg-text {
-    padding: 0 0 0 24px;
+    height: calc(100% + 1px);
+    padding: 0 232px 0 24px;
+    display: flex;
+    align-items: center;
+}
+.omemo-new-device-placeholder .msg-text .msg-text-content {
+    line-height: 24px;
 }
 
 .omemo-new-device-placeholder span.btn-enable{

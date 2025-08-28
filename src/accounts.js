@@ -2344,6 +2344,10 @@ xabber.OMEMONewDevicePlaceholder = xabber.BasicView.extend({
     },
 
     onUpdatedScreen: function () {
+        if (!this.account.omemo) {
+            this.close();
+            return;
+        }
         if (this.data.get('shown')){
             xabber.bottom_placeholders_wrap.$el.append(this.$el);
             xabber.main_panel.$el.css('padding-bottom', xabber.bottom_placeholders_wrap.$el.height());
@@ -2365,7 +2369,7 @@ xabber.OMEMONewDevicePlaceholder = xabber.BasicView.extend({
         this.$el.attr('data-sid', '');
         this.$('.btn-verify-devices').removeClass('hidden');
         this.$('.btn-active-session').addClass('hidden');
-        this.$('.msg-text').text(xabber.getString("omemo_unverified_device_placeholder_text"));
+        this.$('.msg-text-content').text(xabber.getString("omemo_unverified_device_placeholder_text"));
         let active_sessions = this.account.omemo.xabber_trust.get('active_trust_sessions');
 
         Object.keys(active_sessions).forEach((session_id) => {
@@ -2374,15 +2378,15 @@ xabber.OMEMONewDevicePlaceholder = xabber.BasicView.extend({
                 this.$('.btn-verify-devices').addClass('hidden');
                 this.$el.attr('data-sid', session_id);
                 if (session.verification_step === '1a' && !session.verification_accepted_msg_xml) {
-                    this.$('.msg-text').text(xabber.getString("omemo_unverified_device_placeholder_text__active_session_request_sent"));
+                    this.$('.msg-text-content').text(xabber.getString("omemo_unverified_device_placeholder_text__active_session_request_sent"));
                 } else if (session.active_verification_code){
-                    this.$('.msg-text').text(xabber.getString("omemo_unverified_device_placeholder_text__active_session_show_code"));
+                    this.$('.msg-text-content').text(xabber.getString("omemo_unverified_device_placeholder_text__active_session_show_code"));
                     this.$('.btn-show-code').removeClass('hidden');
                 } else if(session.verification_step === '1a' && session.verification_accepted_msg_xml) {
-                    this.$('.msg-text').text(xabber.getString("omemo_unverified_device_placeholder_text__active_session_enter_code"));
+                    this.$('.msg-text-content').text(xabber.getString("omemo_unverified_device_placeholder_text__active_session_enter_code"));
                     this.$('.btn-enter-code').removeClass('hidden');
                 } else if(session.verification_step === '0b') {
-                    this.$('.msg-text').text(xabber.getString("omemo_unverified_device_placeholder_text__active_session_incoming_request"));
+                    this.$('.msg-text-content').text(xabber.getString("omemo_unverified_device_placeholder_text__active_session_incoming_request"));
                     this.$('.btn-accept-session').removeClass('hidden');
                     this.$('.btn-decline-session').removeClass('hidden');
                 }

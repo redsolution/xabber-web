@@ -1048,7 +1048,6 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
             xabber.toolbar_view.recountAllMessageCounter();
             this.recountFilteredCount();
 
-            // chat.sendMarker(message.get('msgid'), 'displayed', message.get('stanza_id'), message.get('contact_stanza_id'));
         }
     },
 
@@ -1732,9 +1731,9 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
 
         let scroll_read_timer = this._long_reading_timeout || is_focused ? 100 : 100;
         clearTimeout(this._onscroll_read_messages_timeout);
-        // this._onscroll_read_messages_timeout = setTimeout(() => {
-        //     this.readNotifications();
-        // }, scroll_read_timer);
+        this._onscroll_read_messages_timeout = setTimeout(() => {
+            this.readNotifications();
+        }, scroll_read_timer);
         this.handleOnScrollRendering('bottom');
         this._long_reading_timeout = false;
     },

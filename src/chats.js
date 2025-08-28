@@ -11250,7 +11250,7 @@ xabber.InvitationPanelView = xabber.SearchView.extend({
       updatePlyrPlayerPosition: function () {
           let visible_buttons_count = 0;
           _.each(this.$('.chat-tools-wrap').children('div:not(.chat-tool-player)'),(item) => {
-              if(item.checkVisibility()) visible_buttons_count++;
+              if(item && item.checkVisibility && item.checkVisibility()) visible_buttons_count++;
           });
           this.$el.switchClass('plyr-player-large-margin', visible_buttons_count === 1);
           this.$el.switchClass('plyr-player-margin', visible_buttons_count === 2);
@@ -11530,7 +11530,7 @@ xabber.InvitationPanelView = xabber.SearchView.extend({
       updatePlyrPlayerPosition: function () {
         let visible_buttons_count = 0;
         _.each(this.$('.chat-tools-wrap').children('div:not(.chat-tool-player)'),(item) => {
-            if(item.checkVisibility()) visible_buttons_count++;
+            if(item && item.checkVisibility && item.checkVisibility()) visible_buttons_count++;
         });
         this.$el.switchClass('plyr-player-large-margin', visible_buttons_count === 1);
         this.$el.switchClass('plyr-player-margin', visible_buttons_count === 2);
