@@ -111,6 +111,43 @@ $.fn.isBottomVisibleInContainer = function(container) {
         eleBottom <= containerBottom
     );
 };
+$.fn.positionToCursorPercent = function(options) {// Настройки по умолчанию
+    const settings = $.extend({
+        clientX: 0, // Координата X курсора
+        clientY: 0, // Координата Y курсора
+        offsetX: 0, // Смещение по X (в пикселях)
+        offsetY: 0  // Смещение по Y (в пикселях)
+    }, options);
+
+    return this.each(function() {
+        const $element = $(this);
+
+        // Убедимся, что элемент имеет position: fixed
+        $element.css('position', 'fixed');
+
+        const elementWidth = $element.outerWidth();
+        const elementHeight = $element.outerHeight();
+        const windowWidth = $(window).width();
+        const windowHeight = $(window).height();
+
+        // Вычисляем позицию курсора в процентах с учетом смещения
+        let leftPercent = ((settings.clientX + settings.offsetX) / windowWidth) * 100;
+        let topPercent = ((settings.clientY + settings.offsetY) / windowHeight) * 100;
+
+        // Ограничиваем позицию, чтобы элемент не выходил за границы
+        const maxLeftPercent = ((windowWidth - elementWidth) / windowWidth) * 100;
+        const maxTopPercent = ((windowHeight - elementHeight) / windowHeight) * 100;
+
+        leftPercent = Math.min(Math.max(leftPercent, 0), maxLeftPercent);
+        topPercent = Math.min(Math.max(topPercent, 0), maxTopPercent);
+
+        // Устанавливаем стили
+        $element.css({
+            left: `${leftPercent}%`,
+            top: `${topPercent}%`
+        });
+    });
+};
 
 var getHyperLink = function (url, is_url) {
     var prot = (url.indexOf('http://') === 0 ||  url.indexOf('https://') === 0) ? '' : 'http://',

@@ -794,6 +794,21 @@ if ($) {
           }
         });
       }
+      else if (options.no_top_position) {
+        $.Velocity.hook($modal, "scaleX", 0.7);
+        // $modal.css({ top: options.starting_top });
+        $modal.velocity({opacity: 1, scaleX: '1'}, {
+          duration: options.in_duration,
+          queue: false,
+          ease: "easeOutCubic",
+          // Handle modal ready callback
+          complete: function() {
+            if (typeof(options.ready) === "function") {
+              options.ready();
+            }
+          }
+        });
+      }
       else {
         $.Velocity.hook($modal, "scaleX", 0.7);
         $modal.css({ top: options.starting_top });

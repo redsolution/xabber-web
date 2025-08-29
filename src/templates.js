@@ -67,6 +67,7 @@ import $ from "jquery";
     addTemplate('base.fingerprint_devices_item');
     addTemplate('base.contact_verification_session');
     addTemplate('base.chat_content_contact_verification_session');
+    addTemplate('base.notification_context_menu');
     addTemplate('base.incoming_trust_session');
     addTemplate('base.active_session_modal');
     addTemplate('base.trust_item_device_session');

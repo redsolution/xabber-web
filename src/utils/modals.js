@@ -86,6 +86,7 @@ _.extend(Modal.prototype, {
 
         this.$modal.prop('modal', null);
         this.$modal._closeModal(modal_options);
+        this.onClosed && this.onClosed();
     },
 
     complete: function (value) {
@@ -243,6 +244,14 @@ export default {
             }
 
             return dialog.open();
+        },
+
+        context_menu: function (template, events) {
+            var dialog = new Modal(function () {
+                return template({});
+            }, {use_queue: true, no_top_position: true});
+            dialog.open();
+            return dialog;
         },
 
         warning: function (text, dialog_options) {

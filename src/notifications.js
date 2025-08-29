@@ -4,6 +4,7 @@ let env = xabber.env,
     constants = env.constants,
     templates = env.templates.notifications,
     utils = env.utils,
+    uuid = env.uuid,
     $ = env.$,
     Strophe = env.Strophe,
     _ = env._,
@@ -60,6 +61,9 @@ xabber.NotificationsView = xabber.BasicView.extend({
         "click .search-form": "focusSearch",
         "click .btn-show-search": "focusSearch",
         "click .close-search-icon": "clearSearch",
+        "click .btn-delete-selected": "deleteSelected",
+        "click .btn-copy": "copySelected",
+        "click .btn-unselect-all": "unselectAll",
 
     },
 
@@ -103,12 +107,83 @@ xabber.NotificationsView = xabber.BasicView.extend({
         this.$('.search-input').focus();
     },
 
+    unselectAll: function () {
+        if (!this.current_content)
+            return;
+        this.current_content.$('.chat-message.selected').removeClass('selected');
+        this.updateSelectedControls();
+    },
+
+    deleteSelected: function () {
+        if (!this.current_content)
+            return;
+        this.current_content.$('.chat-message.selected').each((idx, item) => {
+            let $msg = $(item),
+                unique_id = $msg.attr('data-uniqueid');
+            unique_id && this.current_content.deleteNotification(unique_id);
+        });
+        this.unselectAll()
+    },
+
+    copySelected: function () {
+        if (!this.current_content)
+            return;
+
+
+        let $msgs = this.current_content.$('.chat-message.selected'),
+            msgs = [];
+        $msgs.each((idx, item) => {
+            let msg = this.current_content.notification_messages.get(item.dataset.uniqueid);
+            msg && msgs.push(msg);
+        });
+        this.pushMessagesToClipboard(msgs);
+    },
+
+    updateSelectedControls: function () {
+        if (!this.current_content)
+            return;
+        this.$el.switchClass('select-active', this.current_content.$('.chat-message.selected').length);
+        this.$('.notifications-select-count')
+            .text(xabber.getQuantityString("chat_screen__bottom_panel__selected_messages__text", this.current_content.$('.chat-message.selected').length));
+
+    },
+
+    pushMessagesToClipboard: function (messages) {
+        let fwd_msg_indicator = "",
+            copied_messages = this.createTextMessage(messages, fwd_msg_indicator);
+        utils.copyTextToClipboard(_.unescape(copied_messages));
+        utils.callback_popup_message(xabber.getString("toast__copied_in_clipboard"), 5000);
+        this.unselectAll()
+    },
+
+    createTextMessage: function (messages, fwd_msg_indicator) {
+        let text_message = "";
+        for (let i = 0; i < messages.length; i++) {
+            let $msg = messages[i];
+            let current_date = moment($msg.get('timestamp')).startOf('day'),
+                prev_date = (i) ? moment(messages[i - 1].get('timestamp')).startOf('day') : moment(0),
+                msg_sender = "";
+            if (prev_date.format('x') !== current_date.format('x')) {
+                text_message += (fwd_msg_indicator.length ? fwd_msg_indicator + ' ' : "") + pretty_date(current_date) + '\n';
+            }
+            msg_sender = $msg.get('from_jid');
+            text_message += (fwd_msg_indicator.length ? fwd_msg_indicator + ' ' : "") + "[" + utils.pretty_time($msg.get('timestamp')) + "] " + msg_sender + ":\n";
+            fwd_msg_indicator.length && (text_message += fwd_msg_indicator);
+            let original_message = _.unescape(($msg.get('mutable_content') && $msg.get('mutable_content').find(ref => ref.type === 'groupchat')) ? $msg.get('original_message').slice($msg.get('mutable_content').find(ref => ref.type === 'groupchat').end) : $msg.get('original_message'));
+            fwd_msg_indicator.length && (original_message = original_message.replace(/\n/g, '\n&gt; '));
+            (fwd_msg_indicator.length && original_message.indexOf('&gt;') !== 0) && (text_message += ' ');
+            (original_message = _.unescape(original_message.replace(/\n&gt; &gt;/g, '\n&gt;&gt;')));
+            text_message += _.escape(original_message) + '\n';
+        }
+        return text_message.trim();
+    },
     keyUpSearch: function (ev) {
         let $item = $(ev.target).closest('.search-input'),
             value = $item.text();
         $item.closest('.search-form').switchClass('active', value);
         if (!value)
             $item.empty();
+        this.unselectAll()
     },
 
     clearSearch: function () {
@@ -164,6 +239,7 @@ xabber.NotificationsView = xabber.BasicView.extend({
             this.current_content.$el.removeClass('subscription-content-hidden');
         }
         $item.remove();
+        this.unselectAll();
         this.current_content.FilterMessagesInChat(true);
 
     },
@@ -247,6 +323,7 @@ xabber.NotificationsView = xabber.BasicView.extend({
                 this.current_content.$el.removeClass('subscription-content-hidden');
                 clear = true;
             }
+            this.unselectAll();
             this.current_content.filterByAccounts([], clear);
         }
     },
@@ -401,6 +478,7 @@ xabber.NotificationsView = xabber.BasicView.extend({
             this.$('.notifications-type-filter-content .filter-item-wrap').removeClass('selected-filter');
             this.$(`.notifications-type-filter-content .filter-item-wrap[data-filter="${filter_type}"]`).addClass('selected-filter');
         }
+        this.unselectAll();
         this.current_content.filterByProperty(filter_type);
         this.updateFilterItems();
     },
@@ -455,8 +533,10 @@ xabber.NotificationsView = xabber.BasicView.extend({
 
         if (this.current_content) {
             if ($item.attr('data-jid') === 'all'){
+                this.unselectAll();
                 this.current_content.filterByAccounts([]);
             } else {
+                this.unselectAll();
                 this.current_content.filterByAccounts([$item.attr('data-jid')]);
             }
             this.updateFilterItems();
@@ -507,6 +587,7 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
 
     events: {
         'click .chat-message': 'onClickNotification',
+        'contextmenu .chat-message': 'onContextMenuNotification',
         "click .back-to-bottom": "backToBottom",
         "click .back-to-unread:not(.back-to-bottom)": "scrollToUnreadWithButton",
         "click .btn-decline": "declineSubscription",
@@ -611,6 +692,64 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
         this.recountFilteredCount();
     },
 
+    onContextMenuNotification: function (ev) { //34
+        ev.preventDefault();
+        let $elem = $(ev.target).closest('.chat-message'),
+            unique_id = $elem.attr('data-uniqueid');
+
+        if ($elem.hasClass('unread-message-background')){
+            let msg = this.notification_messages.get(unique_id);
+
+            let chat;
+            if (msg && msg.collection && msg.collection.chat) {
+                chat = msg.collection.chat;
+            }
+            if (chat && chat.item_view && !chat.item_view.content)
+                chat.item_view.content = new xabber.ChatContentView({chat_item: chat.item_view});
+
+            if (!chat || !chat.item_view|| !chat.item_view.content) {
+                return;
+            }
+
+            let is_in_unread = chat.messages_unread.get(msg);
+            if (msg.get('is_unread')){}
+            msg.set('is_unread', false);
+            if (!is_in_unread && chat.get('const_unread') !== 0 && !isNaN(Number(chat.get('const_unread')))) {
+                let const_unread = chat.get('const_unread');
+                const_unread = --const_unread;
+                chat.set('const_unread', const_unread);
+            }
+            xabber.notifications_view.showReadAllBtn();
+            if (!this.$('.unread-message-background').length){
+                chat.set('const_unread', 0);
+            }
+            xabber.toolbar_view.recountAllMessageCounter();
+            this.recountFilteredCount();
+        }
+
+        let modal = utils.dialogs.context_menu(env.templates.base.notification_context_menu),
+            $modal = modal.$modal,
+            unique_modal_id = uuid(),
+            $overlay = $(`#${$modal.data('overlay-id')}`);
+        $overlay.addClass('invisible-overlay');
+        $modal.find('.btn-delete-message').one(`click.${unique_modal_id}`, () => {
+            this.deleteNotification(unique_id);
+            $overlay.click();
+        });
+        $modal.find('.btn-select-message').one(`click.${unique_modal_id}`, () => {
+            $elem.switchClass('selected', !$elem.hasClass('selected'));
+            xabber.notifications_view.updateSelectedControls();
+            $overlay.click();
+        });
+        modal.onClosed = () => {
+            $modal.find('.context-menu-btn').off(`click.${unique_modal_id}`);
+        };
+        $modal.positionToCursorPercent({
+            clientX: ev.clientX,
+            clientY: ev.clientY,
+        })
+    },
+
     onClickNotification: function (ev) {
         let $elem = $(ev.target).closest('.chat-message'),
             $clicked_elem = $(ev.target);
@@ -655,27 +794,71 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
             xabber.toolbar_view.recountAllMessageCounter();
             this.recountFilteredCount();
         }
+        if (xabber.notifications_view.$el.hasClass('select-active')){
+            let $msg = $elem;
+            let $prev_selected = $msg.hasClass('selected') ? $msg.prevAll('.chat-message.selected').last() : $msg.prevAll('.chat-message.selected').first();
+            !$prev_selected.length && ($prev_selected = $msg.hasClass('selected') ? $msg.nextAll('.chat-message.selected').last() : $msg.nextAll('.chat-message.selected').first());
+            !$prev_selected.length && ($prev_selected = $msg.hasClass('selected') ? $msg.prevAll('.chat-message.selected').first() : $msg.prevAll('.chat-message.selected').last());
+
+            if ((xabber.shiftctrl_pressed || xabber.shift_pressed) && $prev_selected.length) {
+                let $all_msgs = [], is_selected = $msg.hasClass('selected');
+                if ($prev_selected.attr('data-time') > $msg.attr('data-time'))
+                    $all_msgs = $prev_selected.nextUntil($msg, '.chat-message:not(.system)');
+                else
+                    $all_msgs = $msg.nextUntil($prev_selected, '.chat-message:not(.system)');
+                xabber.shift_pressed && this.$('.chat-message').removeClass('selected');
+                $prev_selected.switchClass('selected', !is_selected);
+                $all_msgs.switchClass('selected', !is_selected);
+                $msg.switchClass('selected', !is_selected);
+                ev.preventDefault();
+                xabber.notifications_view.updateSelectedControls();
+                return false;
+            }
+            $msg.switchClass('selected', !$msg.hasClass('selected'));
+            ev.preventDefault();
+            xabber.notifications_view.updateSelectedControls();
+            return false;
+        }
         if (msg.get('notification_mention') && msg.get('groupchat_jid') && msg.get('mention_msg_uniqueid')){
             let groupchat_contact = msg.collection.account.contacts.get(msg.get('groupchat_jid')),
                 groupchat = msg.collection.account.chats.getChat(groupchat_contact),
                 account  = msg.collection.account;
 
             groupchat.getMessageContext(msg.get('mention_msg_uniqueid'), {open_mention_notification: true }, () => {
-
-                let remove_list = this.notification_messages.filter(item => item.get('unique_id') === msg.get('unique_id')),
-                    new_list = this.notification_messages.filter(item => item.get('unique_id') !== msg.get('unique_id'));
-
-                _.each(remove_list, (item) => {
-                    this.removeMessageFromDOM(item);
-                });
-                remove_list.length && this.notification_messages.reset(new_list);
-
-                account.cached_notifications.removeFromCachedNotifications(msg.get('stanza_id'));
-                account.retractMessageById(msg.get('stanza_id'), account.get('jid'), chat.get('jid'), chat.get('sync_type'));
-
+                this.deleteNotification(msg.get('unique_id'));
             });
 
         }
+    },
+
+    deleteNotification: function (unique_id) {
+        let msg = this.notification_messages.get(unique_id),
+            account  = msg.collection.account;
+
+        let chat;
+        if (msg && msg.collection && msg.collection.chat) {
+            chat = msg.collection.chat;
+        }
+        if (chat && chat.item_view && !chat.item_view.content)
+            chat.item_view.content = new xabber.ChatContentView({chat_item: chat.item_view});
+
+        if (!chat || !chat.item_view|| !chat.item_view.content) {
+            return;
+        }
+
+        let remove_list = this.notification_messages.filter(item => item.get('unique_id') === msg.get('unique_id')
+            && msg.collection.account && item.collection.account && msg.collection.account.get('jid') === item.collection.account.get('jid')),
+            new_list = this.notification_messages.filter(item => msg.collection.account && item.collection.account
+                && !(item.get('unique_id') === msg.get('unique_id') && msg.collection.account.get('jid') === item.collection.account.get('jid')));
+
+        _.each(remove_list, (item) => {
+            this.removeMessageFromDOM(item);
+        });
+        remove_list.length && this.notification_messages.reset(new_list);
+        this.rendered_messages = this.rendered_messages.filter(item => msg.collection.account && item.collection.account
+            && !(item.get('unique_id') === msg.get('unique_id') && msg.collection.account.get('jid') === item.collection.account.get('jid')));
+        account.cached_notifications.removeFromCachedNotifications(msg.get('stanza_id'));
+        account.retractMessageById(msg.get('stanza_id'), account.get('jid'), chat.get('jid'), chat.get('sync_type'));
     },
 
     recountFilteredCount: function () {
