@@ -24996,34 +24996,64 @@ ul.restrictions-list-content>li {
     color: #9E9E9E;
 }
 /* notification context menu */
-.notification-context-menu{
-    background: #F5F5F5;
-    border-radius: 0.75rem;
+.context-menu-container{
+    background: #fff;
+    border-radius: 4px;
     height: fit-content;
-    padding: 4px;
     width: fit-content;
     display: flex !important;
     flex-direction: column;
     box-shadow: 0 2px 5px 0 rgba(0,0,0,.16),0 2px 10px 0 rgba(0,0,0,.12);
 }
-.notification-context-menu .context-menu-btn{
+.context-menu-container .context-menu-btn{
     cursor: pointer;
-    font-size: 18px;
-    padding: 4px 16px;
-    padding-left: 40px;
-    border-radius: 0.75rem;
-    margin: .125rem .25rem;
+    font-size: 16px;
+    padding: 4px 20px 4px 44px;
     position: relative;
     text-transform: capitalize;
     min-width: 150px;
 }
-.notification-context-menu .context-menu-btn:hover{
+.context-menu-container .context-menu-btn:first-child{
+    border-radius: 4px 4px 0 0;
+}
+.context-menu-container .context-menu-btn:last-child{
+    border-radius: 0 0 4px 4px;
+}
+.context-menu-container .context-menu-btn:hover{
     background: #E0E0E0;
 }
-.notification-context-menu .context-menu-btn .mdi{
+.context-menu-container .context-menu-btn .mdi{
     position: absolute;
-    left: 5px;
+    left: 12px;
     top: 7px;
+}
+.context-menu-container .contact-mute-dropdown{
+    left: 100.1% !important;
+    min-width: 200px !important;
+    overflow: hidden;
+    right: auto !important;
+    width: fit-content !important;
+    background: #fff;
+    border-radius: 4px;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 2px 5px 0 rgba(0, 0, 0, .16), 0 2px 10px 0 rgba(0, 0, 0, .12);
+
+}
+.context-menu-container .contact-mute-dropdown .btn-mute-dropdown{
+    cursor: pointer;
+    font-size: 18px;
+    padding: 4px 20px 4px 20px;
+    position: relative;
+    text-transform: capitalize;
+    min-width: 150px;
+    line-height: 1.5;
+    min-height: unset;
+
+}
+.context-menu-container .contact-mute-dropdown .btn-mute-dropdown span{
+    line-height: 1.5;
+    padding: 0;
 }
 /* chat bottom active session */
 .chat-incoming-session-notification:not(.hidden) {

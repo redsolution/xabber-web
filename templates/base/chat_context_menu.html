@@ -1,0 +1,39 @@
+<div class="context-menu-container">
+    <div class="context-menu-btn btn-pin">
+        <svg class="mdi mdi-20px mdi-svg-template fill-color-grey-500" data-svgname="pin"></svg>
+        <div class="context-menu-btn-text"></div>
+    </div>
+    <div class="context-menu-btn btn-archive">
+        <svg class="mdi mdi-20px mdi-svg-template fill-color-grey-500" data-svgname="archive"></svg>
+        <div class="context-menu-btn-text"></div>
+    </div>
+    <div class="context-menu-btn btn-read">
+        <svg class="mdi mdi-20px mdi-svg-template fill-color-grey-500" data-svgname="check-all"></svg>
+        <div class="context-menu-btn-text">{[print(xabber.getString("mark_all_as_read_button"))]}</div>
+    </div>
+    <div class="context-menu-btn btn-notifications" data-activates="">
+        <svg class="mdi mdi-20px mdi-svg-template fill-color-grey-500" data-svgname="bell"></svg>
+        <div class="context-menu-btn-text"></div>
+    </div>
+    <ul id="" class="contact-mute-dropdown dropdown-content noselect">
+        <li class="btn-mute-dropdown" data-mute="minutes15">
+            <span class="one-line">{[print(xabber.getString("mute_15_min"))]}</span>
+        </li>
+        <li class="btn-mute-dropdown" data-mute="hours1">
+            <span class="one-line">{[print(xabber.getString("mute_1_hour"))]}</span>
+        </li>
+        <li class="btn-mute-dropdown" data-mute="hours2">
+            <span class="one-line">{[print(xabber.getString("mute_2_hours"))]}</span>
+        </li>
+        <li class="btn-mute-dropdown" data-mute="day">
+            <span class="one-line">{[print(xabber.getString("mute_1_day"))]}</span>
+        </li>
+        <li class="btn-mute-dropdown" data-mute="forever">
+            <span class="one-line">{[print(xabber.getString("mute_forever"))]}</span>
+        </li>
+    </ul>
+    <div class="context-menu-btn btn-delete-chat">
+        <svg class="mdi mdi-20px mdi-svg-template fill-color-red-500" data-svgname="trash"></svg>
+        <div class="context-menu-btn-text text-color-red-700">{[print(xabber.getString("delete_chat"))]}</div>
+    </div>
+</div>

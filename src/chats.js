@@ -2360,7 +2360,8 @@ xabber.ChatItemView = xabber.BasicView.extend({
     avatar_size: constants.AVATAR_SIZES.CHAT_ITEM,
 
     events: {
-        'click': 'openByClick'
+        'click': 'openByClick',
+        'contextmenu': 'onItemContextMenu',
     },
 
     _initialize: function () {
@@ -2907,6 +2908,112 @@ xabber.ChatItemView = xabber.BasicView.extend({
         }
         this.$('.msg-delivering-state').showIf(msg.get('type') !== 'system' && msg.isSenderMe() && (msg.get('state') !== constants.MSG_ARCHIVED) && !msg.get('notification_msg'))
             .attr('data-state', msg.getState());
+    },
+
+    onItemContextMenu: function (ev) {
+        ev.preventDefault();
+
+        let chat = this.model;
+
+        if (chat && chat.item_view && !chat.item_view.content)
+            chat.item_view.content = new xabber.ChatContentView({chat_item: chat.item_view});
+
+        if (!chat.item_view.content.head)
+            return;
+
+        let modal = utils.dialogs.context_menu(env.templates.base.chat_context_menu),
+            $modal = modal.$modal,
+            unique_modal_id = uuid(),
+            $overlay = $(`#${$modal.data('overlay-id')}`);
+        $overlay.addClass('invisible-overlay');
+
+
+        let pinned = this.model.get('pinned'),
+            is_pinned = !!(pinned && pinned !== '0');
+        if (is_pinned)
+            $modal.find('.btn-pin .context-menu-btn-text').text(xabber.getString("chat_action_unpin"));
+        else
+            $modal.find('.btn-pin .context-menu-btn-text').text(xabber.getString("chat_action_pin"));
+
+        if (this.model.get('saved')){
+            $modal.find('.btn-archive').addClass('hidden');
+            $modal.find('.btn-notifications').addClass('hidden');
+            $modal.find('.btn-read').addClass('hidden');
+            $modal.find('.btn-delete-chat').addClass('hidden');
+        } else {
+
+            let archived = !this.model.get('archived'),
+                is_archived = archived;
+            if (!is_archived)
+                $modal.find('.btn-archive .context-menu-btn-text').text(xabber.getString("chat_action_unarchive"));
+            else
+                $modal.find('.btn-archive .context-menu-btn-text').text(xabber.getString("chat_action_archive"));
+
+            $modal.find('.btn-notifications').attr('data-activates', `${unique_modal_id}-mute-more`)
+            $modal.find('.contact-mute-dropdown').attr('id', `${unique_modal_id}-mute-more`)
+            $modal.find('.btn-notifications').dropdown({
+                inDuration: 100,
+                outDuration: 100,
+                hover: true, // Activate on hover
+                // belowOrigin: true, // Displays dropdown below the button
+                alignment: 'right'
+            });
+            if (this.model.isMuted()) {
+                $modal.find('.btn-notifications .context-menu-btn-text').text(xabber.getString("unmute_chat"));
+                $modal.find('.btn-notifications').addClass('muted');
+                $modal.find('.btn-notifications').addClass('active');
+            }
+            else {
+                $modal.find('.btn-notifications .context-menu-btn-text').text(xabber.getString("mute_chat"));
+                $modal.find('.btn-notifications').removeClass('muted');
+                $modal.find('.btn-notifications').removeClass('active');
+            }
+            $modal.find('.btn-mute-dropdown').hideIf(this.model.isMuted());
+        }
+
+        $modal.find('.btn-pin').one(`click.${unique_modal_id}`, () => {
+            if (this.model.get('saved'))
+                this.content.head.pinSavedChat();
+            else
+                this.content.head.pinChat();
+            $overlay.click();
+        });
+        $modal.find('.btn-archive').one(`click.${unique_modal_id}`, () => {
+            if (!this.model.get('saved'))
+                this.content.head.archiveChat();
+            $overlay.click();
+        });
+        $modal.find('.btn-notifications.muted').one(`click.${unique_modal_id}`, () => {
+            if (!this.model.get('saved'))
+                this.content.head.unmuteChat();
+            $overlay.click();
+        });
+        $modal.find('.btn-mute-dropdown').one(`click.${unique_modal_id}`, (ev) => {
+            if (!this.model.get('saved'))
+                this.content.head.muteChat(ev);
+            $overlay.click();
+        });
+        $modal.find('.btn-read').one(`click.${unique_modal_id}`, () => { //34
+            if (!this.model.get('saved')) {
+                this.content.readMessages();
+                this.model.resetUnread();
+            }
+            $overlay.click();
+        });
+        $modal.find('.btn-delete-chat').one(`click.${unique_modal_id}`, () => { //34
+            if (!this.model.get('saved'))
+                this.content.head.deleteChat();
+            $overlay.click();
+        });
+
+        modal.onClosed = () => {
+            $modal.find('.context-menu-btn').off(`click.${unique_modal_id}`);
+            $modal.find('.btn-mute-dropdown').off(`click.${unique_modal_id}`);
+        };
+        $modal.positionToCursorPercent({
+            clientX: ev.clientX,
+            clientY: ev.clientY,
+        })
     },
 
     openByClick: function () {
@@ -4510,7 +4617,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
         let unread_messages = _.clone(this.model.messages_unread.models);
         if (unread_messages.length) {
             let msg = unread_messages[unread_messages.length - 1];
-            (!this.model.get('notifications') || force_read_notifications) && this.model.sendMarker(msg.get('msgid'), 'displayed', msg.get('stanza_id'), msg.get('contact_stanza_id'), msg.get('encrypted') && msg.get('ephemeral_timer')); //34
+            (!this.model.get('notifications') || force_read_notifications) && this.model.sendMarker(msg.get('msgid'), 'displayed', msg.get('stanza_id'), msg.get('contact_stanza_id'), msg.get('encrypted') && msg.get('ephemeral_timer'));
             this.model.set('last_read_msg', msg.get('stanza_id'));
             this.model.set('prev_last_read_msg', msg.get('stanza_id'));
         }

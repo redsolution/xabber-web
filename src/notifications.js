@@ -692,7 +692,7 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
         this.recountFilteredCount();
     },
 
-    onContextMenuNotification: function (ev) { //34
+    onContextMenuNotification: function (ev) {
         ev.preventDefault();
         let $elem = $(ev.target).closest('.chat-message'),
             unique_id = $elem.attr('data-uniqueid');
