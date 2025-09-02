@@ -484,6 +484,7 @@ xabber.NotificationsView = xabber.BasicView.extend({
     },
 
     showDay: function (ev) {
+        this.unselectAll();
         this.current_content && this.current_content.showDay(ev);
     },
 
@@ -847,7 +848,7 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
         }
 
         let remove_list = this.notification_messages.filter(item => item.get('unique_id') === msg.get('unique_id')
-            && msg.collection.account && item.collection.account && msg.collection.account.get('jid') === item.collection.account.get('jid')),
+            && msg.collection && msg.collection.account && item.collection.account && msg.collection.account.get('jid') === item.collection.account.get('jid')),
             new_list = this.notification_messages.filter(item => msg.collection.account && item.collection.account
                 && !(item.get('unique_id') === msg.get('unique_id') && msg.collection.account.get('jid') === item.collection.account.get('jid')));
 
@@ -855,10 +856,16 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
             this.removeMessageFromDOM(item);
         });
         remove_list.length && this.notification_messages.reset(new_list);
-        this.rendered_messages = this.rendered_messages.filter(item => msg.collection.account && item.collection.account
+        this.rendered_messages = this.rendered_messages.filter(item => msg.collection && msg.collection.account && item.collection && item.collection.account
             && !(item.get('unique_id') === msg.get('unique_id') && msg.collection.account.get('jid') === item.collection.account.get('jid')));
         account.cached_notifications.removeFromCachedNotifications(msg.get('stanza_id'));
         account.retractMessageById(msg.get('stanza_id'), account.get('jid'), chat.get('jid'), chat.get('sync_type'));
+
+        if (this.filtered_messages && this.filtered_messages.length) {
+            this.updateCalendarCellsActivity(this.filtered_messages);
+        } else {
+            this.updateCalendarCellsActivity(this.notification_messages.filter(msg => !msg.get('ignored')));
+        }
     },
 
     recountFilteredCount: function () {
@@ -890,6 +897,12 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
         xabber.notifications_view.$('.filter-item-wrap[data-filter="mentions"] span').text(mention_counter || '');
         xabber.notifications_view.$('.filter-item-wrap[data-filter="subscription"] span').text(subscription_counter || '');
         xabber.notifications_view.$('.filter-item-wrap[data-filter="invitations"] span').text(invitations_counter || '');
+
+        if (this.filtered_messages && this.filtered_messages.length) {
+            this.updateCalendarCellsActivity(this.filtered_messages);
+        } else {
+            this.updateCalendarCellsActivity(this.notification_messages.filter(msg => !msg.get('ignored')));
+        }
     },
 
     defineMouseWheelEvent: function () {
@@ -1149,8 +1162,10 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
 
     updateUnreadMentions: function (message, is_unread) {
         if (message.get('notification_mention') && message.get('groupchat_jid') && message.get('mention_msg_uniqueid')){
-            let groupchat_contact = message.collection.account.contacts.get(message.get('groupchat_jid')),
-                groupchat = message.collection.account.chats.getChat(groupchat_contact);
+            let groupchat_contact = message.collection.account.contacts.get(message.get('groupchat_jid'));
+            if (!groupchat_contact)
+                return;
+            let groupchat = message.collection.account.chats.getChat(groupchat_contact);
 
             let mention_messages = message.collection.filter(item => item.get('notification_mention')
                 && item.get('groupchat_jid')

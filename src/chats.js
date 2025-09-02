@@ -1809,6 +1809,9 @@ xabber.JingleMessage = Backbone.Model.extend({
 
       receiveMessage: function (msg_object) {
           let $message = msg_object.$message;
+          if (msg_object.type === 'headline' && !$message.children('body').length){
+              return;
+          }
 
           let from_bare_jid = Strophe.getBareJidFromJid($message.attr('from')),
               $receipt_request = $message.children(`request[xmlns="${Strophe.NS.RECEIPTS}"]`),
@@ -2931,9 +2934,9 @@ xabber.ChatItemView = xabber.BasicView.extend({
         let pinned = this.model.get('pinned'),
             is_pinned = !!(pinned && pinned !== '0');
         if (is_pinned)
-            $modal.find('.btn-pin .context-menu-btn-text').text(xabber.getString("chat_action_unpin"));
+            $modal.find('.btn-pin .context-menu-btn-text').text(xabber.getString("unpin"));
         else
-            $modal.find('.btn-pin .context-menu-btn-text').text(xabber.getString("chat_action_pin"));
+            $modal.find('.btn-pin .context-menu-btn-text').text(xabber.getString("pin"));
 
         if (this.model.get('saved')){
             $modal.find('.btn-archive').addClass('hidden');
@@ -2945,12 +2948,12 @@ xabber.ChatItemView = xabber.BasicView.extend({
             let archived = !this.model.get('archived'),
                 is_archived = archived;
             if (!is_archived)
-                $modal.find('.btn-archive .context-menu-btn-text').text(xabber.getString("chat_action_unarchive"));
+                $modal.find('.btn-archive .context-menu-btn-text').text(xabber.getString("unarchive"));
             else
-                $modal.find('.btn-archive .context-menu-btn-text').text(xabber.getString("chat_action_archive"));
+                $modal.find('.btn-archive .context-menu-btn-text').text(xabber.getString("archive"));
 
-            $modal.find('.btn-notifications').attr('data-activates', `${unique_modal_id}-mute-more`)
-            $modal.find('.contact-mute-dropdown').attr('id', `${unique_modal_id}-mute-more`)
+            $modal.find('.btn-notifications').attr('data-activates', `${unique_modal_id}-mute-more`);
+            $modal.find('.contact-mute-dropdown').attr('id', `${unique_modal_id}-mute-more`);
             $modal.find('.btn-notifications').dropdown({
                 inDuration: 100,
                 outDuration: 100,
@@ -2959,12 +2962,12 @@ xabber.ChatItemView = xabber.BasicView.extend({
                 alignment: 'right'
             });
             if (this.model.isMuted()) {
-                $modal.find('.btn-notifications .context-menu-btn-text').text(xabber.getString("unmute_chat"));
+                $modal.find('.btn-notifications .context-menu-btn-text').text(xabber.getString("unmute"));
                 $modal.find('.btn-notifications').addClass('muted');
                 $modal.find('.btn-notifications').addClass('active');
             }
             else {
-                $modal.find('.btn-notifications .context-menu-btn-text').text(xabber.getString("mute_chat"));
+                $modal.find('.btn-notifications .context-menu-btn-text').text(xabber.getString("mute"));
                 $modal.find('.btn-notifications').removeClass('muted');
                 $modal.find('.btn-notifications').removeClass('active');
             }
@@ -3013,7 +3016,7 @@ xabber.ChatItemView = xabber.BasicView.extend({
         $modal.positionToCursorPercent({
             clientX: ev.clientX,
             clientY: ev.clientY,
-        })
+        });
     },
 
     openByClick: function () {

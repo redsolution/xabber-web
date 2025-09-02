@@ -2226,6 +2226,7 @@ xabber.AccountToolbarItemView = xabber.BasicView.extend({
         this.listenTo(this.model.session, 'change:connected', this.updateConnected);
         this.listenTo(this.model, 'change:status', this.updateStatus);
         this.listenTo(this.model, 'change:image', this.updateAvatar);
+        this.listenTo(this.model, 'change:enabled', this.updateEncryptionWarning);
         this.listenTo(this.model, 'trusting_updated', this.updateEncryptionWarning);
         this.listenTo(this.model.settings, 'change:color', this.updateColorScheme);
         this.listenTo(this.model.resources, 'change', this.updateEncryptionWarning);
@@ -2239,13 +2240,22 @@ xabber.AccountToolbarItemView = xabber.BasicView.extend({
     },
 
     updateEncryptionWarning: function () {
-        if (this.model.get('status') !== 'online'){
+        if (this.model.get('status') !== 'online') {
             this.$('.encryption-warning-icon').addClass('hidden');
             this.$('.status').removeClass('hidden');
             return;
         }
-        if (!this.model || !this.model.omemo)
+        if (!this.model.get('enabled')) {
+            this.$('.encryption-warning-icon').addClass('hidden');
+            this.$('.status').removeClass('hidden');
+            this.omemo_new_device_placeholder && this.omemo_new_device_placeholder.close();
             return;
+        }
+        this.model && console.error(this.model.omemo);
+        if (!this.model || !this.model.omemo){
+            this.omemo_new_device_placeholder && this.omemo_new_device_placeholder.close();
+            return;
+        }
         this.model.omemo.checkOwnFingerprints().then((is_trusted) => {
             if (is_trusted === 'none' || is_trusted === 'error') {
                 this.$('.encryption-warning-icon').removeClass('hidden');

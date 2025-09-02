@@ -24118,10 +24118,12 @@ ul.restrictions-list-content>li {
 .notifications-content-wrap.select-active .notifications-select-controls .btn-unselect-all{
     cursor: pointer;
     margin: 0 12px;
+    display: flex;
 }
 .notifications-content-wrap.select-active .notifications-select-controls .btn-delete-selected{
     cursor: pointer;
     margin: 0 16px 0 14px;
+    display: flex;
 }
 .notifications-content-wrap.select-active .notifications-select-controls .btn-copy{
     margin: 0 14px;
@@ -25006,12 +25008,12 @@ ul.restrictions-list-content>li {
     box-shadow: 0 2px 5px 0 rgba(0,0,0,.16),0 2px 10px 0 rgba(0,0,0,.12);
 }
 .context-menu-container .context-menu-btn{
+    color: #000;
     cursor: pointer;
     font-size: 16px;
-    padding: 4px 20px 4px 44px;
+    padding: 8px 40px 8px 48px;
     position: relative;
     text-transform: capitalize;
-    min-width: 150px;
 }
 .context-menu-container .context-menu-btn:first-child{
     border-radius: 4px 4px 0 0;
@@ -25020,12 +25022,12 @@ ul.restrictions-list-content>li {
     border-radius: 0 0 4px 4px;
 }
 .context-menu-container .context-menu-btn:hover{
-    background: #E0E0E0;
+    background: #eee;
 }
 .context-menu-container .context-menu-btn .mdi{
+    left: 8px;
     position: absolute;
-    left: 12px;
-    top: 7px;
+    top: 8px;
 }
 .context-menu-container .contact-mute-dropdown{
     left: 100.1% !important;
@@ -25042,17 +25044,14 @@ ul.restrictions-list-content>li {
 }
 .context-menu-container .contact-mute-dropdown .btn-mute-dropdown{
     cursor: pointer;
-    font-size: 18px;
-    padding: 4px 20px 4px 20px;
+    font-size: 16px;
+    min-height: unset;
+    padding: 8px 8px 8px 8px;
     position: relative;
     text-transform: capitalize;
-    min-width: 150px;
-    line-height: 1.5;
-    min-height: unset;
-
 }
 .context-menu-container .contact-mute-dropdown .btn-mute-dropdown span{
-    line-height: 1.5;
+    line-height: 24px;
     padding: 0;
 }
 /* chat bottom active session */

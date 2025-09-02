@@ -94,9 +94,13 @@
 
     </div>
     <div class="notifications-select-controls">
-        <svg class="btn-unselect-all mdi mdi-32px mdi-svg-template" data-svgname="close"></svg>
+        <div class="btn-unselect-all" title='{[print(xabber.getString("cancel"))]}'>
+            <svg class="mdi mdi-32px mdi-svg-template" data-svgname="close"></svg>
+        </div>
         <div class="notifications-select-count"></div>
-        <i class="btn-copy mdi mdi-24px mdi-content-copy"></i>
-        <svg class="btn-delete-selected mdi mdi-24px mdi-svg-template" data-svgname="trash"></svg>
+        <i class="btn-copy mdi mdi-24px mdi-content-copy" title='{[print(xabber.getString("message_copy"))]}'></i>
+        <div class="btn-delete-selected" title='{[print(xabber.getString("delete"))]}'>
+            <svg class="mdi mdi-24px mdi-svg-template" data-svgname="trash"></svg>
+        </div>
     </div>
 </div>
