@@ -3008,10 +3008,30 @@ xabber.ChatItemView = xabber.BasicView.extend({
                 this.content.head.deleteChat();
             $overlay.click();
         });
+        $overlay.one(`contextmenu.${unique_modal_id}`, (e) => {
+            $overlay.click();
+            e.preventDefault();
+            setTimeout(() => {
+                let rightClickEvent = new MouseEvent('contextmenu', {
+                    bubbles: true,
+                    cancelable: true,
+                    view: window,
+                    button: 2, // 2 для правой кнопки мыши
+                    clientX: e.clientX,
+                    clientY: e.clientY,
+                });
+                $overlay.css('display', 'none');
+                let element = document.elementFromPoint(e.clientX, e.clientY);
+                if (element) {
+                    element.dispatchEvent(rightClickEvent);
+                }
+            }, 50);
+        });
 
         modal.onClosed = () => {
             $modal.find('.context-menu-btn').off(`click.${unique_modal_id}`);
             $modal.find('.btn-mute-dropdown').off(`click.${unique_modal_id}`);
+            $overlay.off(`contextmenu.${unique_modal_id}`);
         };
         $modal.positionToCursorPercent({
             clientX: ev.clientX,
