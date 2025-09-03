@@ -3235,7 +3235,7 @@ xabber.ChatItemView = xabber.BasicView.extend({
           this.encrypted = options.encrypted;
           this.mention_context = options.mention_context;
           if (!this.model.item_view.content)
-              this.chat_content = new xabber.ChatContentView({chat_item: this.model.item_view});
+               this.chat_content = this.model.item_view.chat_content = new xabber.ChatContentView({chat_item: this.model.item_view});
           this.$history_feedback = this.$('.load-history-feedback');
           this.account.context_messages = new xabber.Messages(null, {account: this.account});
           this.listenTo(this.account.context_messages, 'change:last_replace_time', this.chat_content.updateMessage);
@@ -3402,7 +3402,14 @@ xabber.ChatItemView = xabber.BasicView.extend({
                   }
                   $(messages).each((idx, message) => {
                       let $message = $(message);
-                      this.account.chats.makeMessageObject($message, {context_message: true}).then(() => {
+                      this.account.chats.makeMessageObject($message, {context_message: true}).then((msg_item) => {
+                          let last_read_msg = this.model.messages.find(m =>
+                              this.model.get('last_read_msg')
+                              && (m.get('stanza_id') === this.model.get('last_read_msg') || m.get('contact_stanza_id') === this.model.get('last_read_msg')));
+                          if (last_read_msg){
+                              if (msg_item.get('timestamp') && last_read_msg.get('timestamp') && msg_item.get('timestamp') > last_read_msg.get('timestamp'))
+                                  msg_item.set('is_unread', true);
+                          }
                           count++;
                           if (count === messages.length) {
                               callback && callback();
@@ -4531,13 +4538,18 @@ xabber.ChatContentView = xabber.BasicView.extend({
                 }
             }
             if (last_visible_unread_msg && this.model.messages.get($(last_visible_unread_msg).data('uniqueid'))){
-                this.readMessage(this.model.messages.get($(last_visible_unread_msg).data('uniqueid')), $(last_visible_unread_msg), is_context);
+                this.readMessage(this.model.messages.get($(last_visible_unread_msg).data('uniqueid')), $(last_visible_unread_msg), is_context); //34
+            } else if (is_context && last_visible_unread_msg && this.account.context_messages && this.account.context_messages.get($(last_visible_unread_msg).data('uniqueid'))) {
+                this.readMessage(this.account.context_messages.get($(last_visible_unread_msg).data('uniqueid')), $(last_visible_unread_msg), is_context); //34
             } else {
                 console.error('MESSAGE WASNT READ')
+                console.log(is_context);
                 console.log(last_visible_unread_msg);
                 console.log($(last_visible_unread_msg).data('uniqueid'));
                 console.log(this.model.messages.get($(last_visible_unread_msg).data('uniqueid')));
                 console.log(this.model.messages);
+                console.log(this.account.context_messages);
+                this.account.context_messages && console.log(this.account.context_messages.get($(last_visible_unread_msg)));
             }
         }
     },
