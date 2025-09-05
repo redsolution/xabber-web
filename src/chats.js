@@ -1809,7 +1809,7 @@ xabber.JingleMessage = Backbone.Model.extend({
 
       receiveMessage: function (msg_object) {
           let $message = msg_object.$message;
-          if (msg_object.type === 'headline' && !$message.children('body').length){
+          if (msg_object.type === 'headline' && !$message.children('body').length && !msg_object.replaced){
               return;
           }
 

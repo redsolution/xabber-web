@@ -143,6 +143,8 @@ xabber.Account.addInitPlugin(function () {
                             chat.item_view.content.removeMessage(item);
                         });
                     chat.item_view.updateLastMessage(chat.last_message);
+                    msg_object.ignore = 'xep-rewrite';
+                    return msg_object;
                 }
 
 
