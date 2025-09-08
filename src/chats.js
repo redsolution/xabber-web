@@ -382,6 +382,7 @@ xabber.MessagesBase = Backbone.Collection.extend({
                 not_verified_device_no_device: options.not_verified_device_no_device || null,
                 device_id: options.device_id || null,
                 ignored: options.ignored || null,
+                high_priority: options.high_priority || null,
             },
             mentions = [], blockquotes = [], markups = [], mutable_content = [], files = [], images = [], videos = [], locations = [], link_references = [];
 
@@ -406,6 +407,17 @@ xabber.MessagesBase = Backbone.Collection.extend({
         if (options.jingle_call_type) {
             attrs.jingle_call_type = options.jingle_call_type;
         }
+        if (options.high_priority){
+            let $keyExchange = $message.children(`authenticated-key-exchange[xmlns="${Strophe.NS.XABBER_TRUST}"]`);
+            if ($keyExchange.length){
+                attrs.silent = true;
+                if ($keyExchange.children('verification-start').length){
+                    attrs.trust_sid = $keyExchange.attr('sid');
+                    attrs.trust_device_id = $keyExchange.children('verification-start').attr('device-id');
+                }
+            }
+            attrs.$original_stanza = $message;
+        }
         if (options.notification_msg && $notification_msg.length){
             attrs.notification_msg_content = $notification_msg[0];
             attrs.not_verified_device = null;
@@ -414,29 +426,10 @@ xabber.MessagesBase = Backbone.Collection.extend({
                 attrs.security_notification = true;
                 !options.is_archived && account.trigger('new_device_notification')
             }
-            let $keyExchange = $notification_msg.children(`authenticated-key-exchange[xmlns="${Strophe.NS.XABBER_TRUST}"]`);
-            if ($keyExchange.length){
-                if ($keyExchange.children('verification-start').length){
-                    attrs.trust_sid = $keyExchange.attr('sid');
-                    attrs.trust_device_id = $keyExchange.children('verification-start').attr('device-id');
-                }
-            }
             if ($notification_msg.children(`envelope`).length && ($notification_msg.find(`content share[xmlns="${Strophe.NS.PUBSUB_TRUST_SHARING}"]`).length || $notification_msg.find(`content update[xmlns="${Strophe.NS.PUBSUB_TRUST_SHARING}"]`).length)){
                 let msg_text = `${account.jid} updated their devices`;
                 attrs.original_message = body = msg_text;
                 attrs.notification_trust_msg = true;
-            }
-
-            if (attrs.notification_trust_msg || $notification_msg.children(`authenticated-key-exchange[xmlns="${Strophe.NS.XABBER_TRUST}"]`).length) {
-                // if (!$notification_msg.find('verification-successful').length && !$notification_msg.find('verification-failed').length && !$notification_msg.find('verification-rejected').length){
-                //     attrs.ignored = true;
-                // }
-                // if ($notification_msg.find('verification-failed').length || $notification_msg.find('verification-rejected').length){
-                //     attrs.ignored = true;
-                // }
-                if ($notification_msg.find('verification-successful').length){
-                    attrs.security_notification = true;
-                }
             }
         }
         options.encrypted && _.extend(attrs, {encrypted: true});
@@ -1809,7 +1802,10 @@ xabber.JingleMessage = Backbone.Model.extend({
 
       receiveMessage: function (msg_object) {
           let $message = msg_object.$message;
-          if (msg_object.type === 'headline' && !$message.children('body').length && !msg_object.replaced){
+          if (msg_object.type === 'headline' && !$message.children('body').length
+              && !msg_object.replaced
+              && !msg_object.high_priority
+          ){
               return;
           }
 
@@ -2411,7 +2407,7 @@ xabber.ChatItemView = xabber.BasicView.extend({
             this.listenTo(this.contact, 'change:subscription_request_in', this.updateIncomingSubscription);
             this.listenTo(this.contact, 'change:subscription_request_out', this.updateIncomingSubscription);
             this.listenTo(this.contact, 'change:status', this.updateStatus);
-            this.listenTo(this.contact, 'change:private_chat', this.updateIcon); //34
+            this.listenTo(this.contact, 'change:private_chat', this.updateIcon);
             this.listenTo(this.contact, 'change:invitation', this.updateIcon);
             this.listenTo(this.contact, 'change:invitation', this.triggerUpdateInvitation);
             this.listenTo(this.contact, 'change:incognito_chat', this.updateIcon);
@@ -2605,7 +2601,7 @@ xabber.ChatItemView = xabber.BasicView.extend({
     updateIcon: function () {
         if (!this.contact)
             return;
-        if (this.contact.get('private_chat') && typeof(this.contact.get('private_chat')) === 'string'){ //34
+        if (this.contact.get('private_chat') && typeof(this.contact.get('private_chat')) === 'string'){
             this.$('.chat-icon').removeClass('hidden');
             let contact = this.account.contacts.get(this.contact.get('private_chat'));
             if (contact){
@@ -2742,6 +2738,10 @@ xabber.ChatItemView = xabber.BasicView.extend({
     },
 
     updateLastMessage: function (msg) {
+        if (this.model.get('jid') === this.account.get('jid')){
+            this.$el.addClass('hidden2');
+            return;
+        }
         if (this.model.get('saved')){
             if (xabber.accounts.enabled.length > 1){
                 if (this.account.get('name') === this.account.get('jid')){
@@ -2996,14 +2996,14 @@ xabber.ChatItemView = xabber.BasicView.extend({
                 this.content.head.muteChat(ev);
             $overlay.click();
         });
-        $modal.find('.btn-read').one(`click.${unique_modal_id}`, () => { //34
+        $modal.find('.btn-read').one(`click.${unique_modal_id}`, () => {
             if (!this.model.get('saved')) {
                 this.content.readMessages();
                 this.model.resetUnread();
             }
             $overlay.click();
         });
-        $modal.find('.btn-delete-chat').one(`click.${unique_modal_id}`, () => { //34
+        $modal.find('.btn-delete-chat').one(`click.${unique_modal_id}`, () => {
             if (!this.model.get('saved'))
                 this.content.head.deleteChat();
             $overlay.click();
@@ -4236,31 +4236,25 @@ xabber.ChatContentView = xabber.BasicView.extend({
 
         let msg_id = uuid(),
             to = this.contact.get('jid'),
-            stanza = $iq({
-                type: 'set',
+            stanza = $msg({
+                type: 'chat',
                 to: to,
+                from: this.account.get('jid'),
                 id: msg_id
             });
-        stanza.c('notify', {xmlns: Strophe.NS.XABBER_NOTIFY});
-        stanza.c('notification', {xmlns: Strophe.NS.XABBER_NOTIFY, type: 'system'});
-        stanza.c('forwarded', {xmlns: Strophe.NS.FORWARD});
-        stanza.c('message', {
-            to: to,
-            from: this.account.get('jid'),
-            type: 'chat',
-            id: uuid(),
-        });
+        stanza.c('high-priority', {
+            xmlns: Strophe.NS.PRIORITY_MESSAGES,
+        }).up();
+
         stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: sid, timestamp: Math.floor(Date.now() / 1000)});
         stanza.c('verification-rejected', {reason: 'Session cancelled'}).up().up();
-
-        stanza.up().up().up();
-        stanza.c('addresses', {xmlns: Strophe.NS.ADDRESS}).c('address',{type: 'to', jid: to}).up().up();
+        stanza.c('store', {
+            xmlns: 'urn:xmpp:hints'
+        }).up();
 
         this.account.sendFast(stanza, () => {
             let $stanza = $(stanza.tree());
             $stanza.attr('to',this.account.get('jid'));
-            $stanza.find('notification forwarded message').attr('to',this.account.get('jid'));
-            $stanza.find(`addresses[xmlns="${Strophe.NS.ADDRESS}"] address[type="to"]`).attr('jid',this.account.get('jid'));
             this.contact && this.account.omemo.xabber_trust.createFailedSessionMsg(this.contact.get('jid'), 'Session cancelled');
             stanza = stanza.tree().cloneNode(true);
             this.account.sendFast(stanza, () => {
@@ -4538,9 +4532,9 @@ xabber.ChatContentView = xabber.BasicView.extend({
                 }
             }
             if (last_visible_unread_msg && this.model.messages.get($(last_visible_unread_msg).data('uniqueid'))){
-                this.readMessage(this.model.messages.get($(last_visible_unread_msg).data('uniqueid')), $(last_visible_unread_msg), is_context); //34
+                this.readMessage(this.model.messages.get($(last_visible_unread_msg).data('uniqueid')), $(last_visible_unread_msg), is_context);
             } else if (is_context && last_visible_unread_msg && this.account.context_messages && this.account.context_messages.get($(last_visible_unread_msg).data('uniqueid'))) {
-                this.readMessage(this.account.context_messages.get($(last_visible_unread_msg).data('uniqueid')), $(last_visible_unread_msg), is_context); //34
+                this.readMessage(this.account.context_messages.get($(last_visible_unread_msg).data('uniqueid')), $(last_visible_unread_msg), is_context);
             } else {
                 console.error('MESSAGE WASNT READ')
                 console.log(is_context);
@@ -5678,6 +5672,46 @@ xabber.ChatContentView = xabber.BasicView.extend({
             this.account.context_messages.add(message);
 
 
+
+        if (message.get('high_priority')){
+            let $original_stanza = message.get('$original_stanza')
+            if (message.get('notification_msg')){
+                if (message.get('notification_trust_msg')) {
+                    if ($original_stanza.find('verification-successful').length){
+                        message.set('message', xabber.getString("notifications_successful_verification_msg"));
+                    }
+                }
+            }
+            if (message.get('notification_trust_msg') || $original_stanza.children(`authenticated-key-exchange[xmlns="${Strophe.NS.XABBER_TRUST}"]`).length) {
+                if (this.account.omemo && this.account.omemo.xabber_trust){
+                    if (message.get('device_id')){
+                        this.account.omemo.xabber_trust.addToSequentialProcessingList($original_stanza[0], {
+                            automated: true,
+                            notification_trust_msg: message.get('notification_trust_msg'),
+                            device_id: message.get('device_id'),
+                            msg_item: message,
+                            archive_id: message.get('archive_id') || message.get('stanza_id')
+                        });
+                    } else {
+                        this.account.omemo.xabber_trust.receiveTrustVerificationMessage($original_stanza[0], {
+                            automated: true,
+                            notification_trust_msg: message.get('notification_trust_msg'),
+                            device_id: message.get('device_id'),
+                            msg_item: message,
+                            archive_id: message.get('archive_id') || message.get('stanza_id')
+                        });
+                    }
+                } else {
+                    this.account.answerPriorityMessage(message.get('archive_id') || message.get('stanza_id'));
+                }
+                message.set('is_unread', false);
+                this.removeMessage(message);
+                return;
+            } else {
+                this.account.answerPriorityMessage(message.get('archive_id') || message.get('stanza_id'));
+            }
+
+        }
 
         if (message.get('notification_msg') && message.get('notification_msg_content')){
 
@@ -10644,7 +10678,7 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
       updateIcon: function () {
           if (!this.contact)
               return;
-          if (this.contact.get('private_chat') && typeof(this.contact.get('private_chat')) === 'string'){ //34
+          if (this.contact.get('private_chat') && typeof(this.contact.get('private_chat')) === 'string'){
               this.$('.chat-icon').removeClass('hidden');
               let contact = this.account.contacts.get(this.contact.get('private_chat'));
               if (contact){
@@ -11546,25 +11580,20 @@ xabber.InvitationPanelView = xabber.SearchView.extend({
               return;
           let msg_id = uuid(),
               sid = uuid(),
-              stanza = $iq({
-                  type: 'set',
+              stanza = $msg({
+                  type: 'chat',
                   to: this.contact.get('jid'),
+                  from: this.account.get('jid'),
                   id: msg_id
               });
-          stanza.c('notify', {xmlns: Strophe.NS.XABBER_NOTIFY});
-          stanza.c('notification', {xmlns: Strophe.NS.XABBER_NOTIFY, type: 'system'});
-          stanza.c('forwarded', {xmlns: Strophe.NS.FORWARD});
-          stanza.c('message', {
-              to: this.contact.get('jid'),
-              from: this.account.get('jid'),
-              type: 'chat',
-              id: uuid()
-          });
+
+          stanza.c('high-priority', {
+              xmlns: Strophe.NS.PRIORITY_MESSAGES,
+          }).up();
           stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: sid, timestamp: Math.floor(Date.now() / 1000) }).c('verification-start', {'device-id': this.account.omemo.get('device_id'), 'ttl': 86400 }).up().up();
-          stanza.c('body').t(``).up();
-          stanza.up().up().up();
-          stanza.c('fallback',{xmlns: Strophe.NS.XABBER_NOTIFY}).t(`device verification fallback text`).up();
-          stanza.c('addresses', {xmlns: Strophe.NS.ADDRESS}).c('address',{type: 'to', jid: this.contact.get('jid')}).up().up();
+          stanza.c('store', {
+              xmlns: 'urn:xmpp:hints'
+          }).up();
           this.account.sendFast(stanza, () => {
               let peer = this.account.omemo.getPeer(this.contact.get('jid'));
               peer.updateDevicesKeys();
@@ -11892,7 +11921,7 @@ xabber.InvitationPanelView = xabber.SearchView.extend({
     updateIcon: function () {
         if (!this.contact)
             return;
-        if (this.contact.get('private_chat') && typeof(this.contact.get('private_chat')) === 'string'){ //34
+        if (this.contact.get('private_chat') && typeof(this.contact.get('private_chat')) === 'string'){
             this.$('.chat-icon').removeClass('hidden');
             let contact = this.account.contacts.get(this.contact.get('private_chat'));
             if (contact){

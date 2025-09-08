@@ -65,36 +65,27 @@ xabber.IncomingTrustSessionView = xabber.BasicView.extend({
 
             let iq_id = uuid(),
                 to = this.contact ? this.contact.get('jid') : this.account.get('jid'),
-                stanza = $iq({
-                    type: 'set',
+                stanza = $msg({
+                    type: 'chat',
+                    from: this.account.get('jid'),
                     to: to,
                     id: iq_id
                 });
-            stanza.c('notify', {xmlns: Strophe.NS.XABBER_NOTIFY});
-            stanza.c('notification', {xmlns: Strophe.NS.XABBER_NOTIFY, type: 'system'});
-            stanza.c('forwarded', {xmlns: Strophe.NS.FORWARD});
-            stanza.c('message', {
-                to: to,
-                from: this.account.get('jid'),
-                type: 'chat',
-                id: uuid()
-            });
+            stanza.c('high-priority', {
+                xmlns: Strophe.NS.PRIORITY_MESSAGES,
+            }).up();
             stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: this.sid, timestamp: Math.floor(Date.now() / 1000)});
             stanza.c('verification-rejected', {reason: 'Session cancelled'}).up().up();
-
-            stanza.up().up().up();
-            stanza.c('addresses', {xmlns: Strophe.NS.ADDRESS}).c('address',{type: 'to', jid: to}).up().up();
+            stanza.c('store', {
+                xmlns: 'urn:xmpp:hints'
+            }).up();
 
             this.account.sendFast(stanza, () => {
                 if (this.contact){
                     let $stanza = $(stanza.tree());
                     $stanza.attr('to',this.account.get('jid'));
-                    let new_iq_id = uuid();
-                    $stanza.attr('id', new_iq_id);
                     let new_msg_id = uuid();
-                    $stanza.find('notification forwarded message').attr('id',new_msg_id);
-                    $stanza.find('notification forwarded message').attr('to',this.account.get('jid'));
-                    $stanza.find(`addresses[xmlns="${Strophe.NS.ADDRESS}"] address[type="to"]`).attr('jid',this.account.get('jid'));
+                    $stanza.attr('id', new_msg_id);
                     this.contact && this.trust.createFailedSessionMsg(this.contact.get('jid'), 'Session cancelled');
                     stanza = stanza.tree().cloneNode(true);
                     this.account.sendFast(stanza, () => {
@@ -322,32 +313,27 @@ xabber.ActiveSessionModalView = xabber.BasicView.extend({
 
         let iq_id = uuid(),
             to = this.contact ? this.contact.get('jid') : this.account.get('jid'),
-            stanza = $iq({
-                type: 'set',
+            stanza = $msg({
+                type: 'chat',
                 to: to,
+                from: this.account.get('jid'),
                 id: iq_id
             });
-        stanza.c('notify', {xmlns: Strophe.NS.XABBER_NOTIFY});
-        stanza.c('notification', {xmlns: Strophe.NS.XABBER_NOTIFY, type: 'system'});
-        stanza.c('forwarded', {xmlns: Strophe.NS.FORWARD});
-        stanza.c('message', {
-            to: to,
-            from: this.account.get('jid'),
-            type: 'chat',
-            id: uuid()
-        });
+        stanza.c('high-priority', {
+            xmlns: Strophe.NS.PRIORITY_MESSAGES,
+        }).up();
         stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: this.sid, timestamp: Math.floor(Date.now() / 1000)});
         stanza.c('verification-rejected', {reason: 'Session cancelled'}).up().up();
-
-        stanza.up().up().up();
-        stanza.c('addresses', {xmlns: Strophe.NS.ADDRESS}).c('address',{type: 'to', jid: to}).up().up();
+        stanza.c('store', {
+            xmlns: 'urn:xmpp:hints'
+        }).up();
 
         this.account.sendFast(stanza, () => {
             if (this.contact){
                 let $stanza = $(stanza.tree());
                 $stanza.attr('to',this.account.get('jid'));
-                $stanza.find('notification forwarded message').attr('to',this.account.get('jid'));
-                $stanza.find(`addresses[xmlns="${Strophe.NS.ADDRESS}"] address[type="to"]`).attr('jid',this.account.get('jid'));
+                let new_msg_id = uuid();
+                $stanza.attr('id', new_msg_id);
                 this.trust.createFailedSessionMsg(this.contact.get('jid'), 'Session cancelled');
                 stanza = stanza.tree().cloneNode(true);
                 this.account.sendFast(stanza, () => {
@@ -541,32 +527,27 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
 
         if (to){
             let msg_id = uuid(),
-                stanza = $iq({
-                    type: 'set',
+                stanza = $msg({
+                    type: 'chat',
                     to: to,
+                    from: this.account.get('jid'),
                     id: msg_id
                 });
-            stanza.c('notify', {xmlns: Strophe.NS.XABBER_NOTIFY});
-            stanza.c('notification', {xmlns: Strophe.NS.XABBER_NOTIFY, type: 'system'});
-            stanza.c('forwarded', {xmlns: Strophe.NS.FORWARD});
-            stanza.c('message', {
-                to: to,
-                from: this.account.get('jid'),
-                type: 'chat',
-                id: uuid()
-            });
+            stanza.c('high-priority', {
+                xmlns: Strophe.NS.PRIORITY_MESSAGES,
+            }).up();
             stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: sid, timestamp: Math.floor(Date.now() / 1000)});
             stanza.c('verification-failed', {reason: 'Session cancelled'}).up().up();
-
-            stanza.up().up().up();
-            stanza.c('addresses', {xmlns: Strophe.NS.ADDRESS}).c('address',{type: 'to', jid: to}).up().up();
+            stanza.c('store', {
+                xmlns: 'urn:xmpp:hints'
+            }).up();
 
             this.account.sendFast(stanza, () => {
                 if (to !== this.account.get('jid')){
                     let $stanza = $(stanza.tree());
                     $stanza.attr('to',this.account.get('jid'));
-                    $stanza.find('notification forwarded message').attr('to',this.account.get('jid'));
-                    $stanza.find(`addresses[xmlns="${Strophe.NS.ADDRESS}"] address[type="to"]`).attr('jid',this.account.get('jid'));
+                    let new_msg_id = uuid();
+                    $stanza.attr('id', new_msg_id);
                     this.createFailedSessionMsg(to, 'Session cancelled');
                     stanza = stanza.tree().cloneNode(true);
                     this.account.sendFast(stanza, () => {
@@ -1132,8 +1113,15 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
         return difference;
     },
 
-    clearData: function (sid) {
-        let active_sessions = this.get('active_trust_sessions');
+    clearData: function (sid, no_answer) {
+        let active_sessions = this.get('active_trust_sessions'),
+            session;
+
+        session = active_sessions[sid];
+        if (session && session.incoming_request_data && !no_answer){
+            let message_options = session.incoming_request_data.message_options;
+            message_options && message_options.archive_id && this.account.answerPriorityMessage(message_options.archive_id);
+        }
 
         delete(active_sessions[sid]);
 
@@ -1872,14 +1860,21 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
 
     },
 
-    receiveTrustVerificationHeadline: function (message) {
+    receiveTrustVerificationHeadline: function (message, options) {
         let $message = $(message),
             sid = $message.find('authenticated-key-exchange').attr('sid');
         if (this.active_sessions_data[sid]){
             if (!this.active_sessions_data[sid].verification_step){
                 this.clearData(sid);
             } else if ($message.find(`verification-accepted`).length && $message.find(`verification-accepted`).attr('device-id') != this.omemo.get('device_id')) {
-                this.clearData(sid);
+                options.archive_id && this.account.answerPriorityMessage(options.archive_id);
+                this.clearData(sid, true);
+            } else {
+                options.archive_id && this.account.answerPriorityMessage(options.archive_id);
+            }
+        } else {
+            if ($message.find(`verification-accepted`).length) {
+                options.archive_id && this.account.answerPriorityMessage(options.archive_id);
             }
         }
     },
@@ -1905,6 +1900,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
     addToSequentialProcessingList: function (message, options) {
         console.log(message);
         let $whole_notification_msg = $(message).parent().closest('message');
+
 
         if (!$whole_notification_msg.length)
             return;
@@ -1944,13 +1940,16 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
     },
 
     receiveTrustVerificationMessage: function (message, options) {
-        if (!this.account.server_features.get(Strophe.NS.XABBER_NOTIFY))
+        if (!this.account.server_features.get(Strophe.NS.XABBER_NOTIFY)){
+            options.archive_id && this.account.answerPriorityMessage(options.archive_id);
             return;
+        }
         let $message = $(message),
             sid = $message.find('authenticated-key-exchange').attr('sid'),
             type = $message.attr('type');
+
         if (type === 'headline')
-            return this.receiveTrustVerificationHeadline(message);
+            return this.receiveTrustVerificationHeadline(message, options);
         let contact = this.account.contacts.get(Strophe.getBareJidFromJid($message.attr('from')));
 
         if (Strophe.getBareJidFromJid($message.attr('from')) === this.account.get('jid'))
@@ -1966,6 +1965,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
         if (this.active_sessions_data[sid]){
             if ($message.find('verification-successful').length){
                 if (this.active_sessions_data[sid].can_handle_trust){
+                    options.archive_id && this.account.answerPriorityMessage(options.archive_id);
                     this.handleVerificationSuccess($message, contact, sid);
                 } else {
                     this.clearData(sid);
@@ -1973,12 +1973,14 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                 return;
             }
             if ($message.find('verification-failed').length || $message.find('verification-rejected').length){
+                options.archive_id && this.account.answerPriorityMessage(options.archive_id);
                 this.clearData(sid);
                 contact && this.createFailedSessionMsg(contact.get('jid'), $message.find('verification-failed').attr('reason') || $message.find('verification-rejected').attr('reason'));
                 return;
             }
         } else {
             if ($message.find('verification-failed').length || $message.find('verification-rejected').length || $message.find('verification-successful').length){
+                options.archive_id && this.account.answerPriorityMessage(options.archive_id);
                 this.clearData(sid);
                 return;
             }
@@ -1988,6 +1990,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
         if (this.active_sessions_data[sid]
             && (this.active_sessions_data[sid].session_check_jid === Strophe.getBareJidFromJid($message.attr('to'))) && !this.active_sessions_data[sid].verification_started){
             if ($message.find(`verification-accepted`).length && $message.find(`verification-accepted`).attr('device-id') != this.omemo.get('device_id')) {
+                options.archive_id && this.account.answerPriorityMessage(options.archive_id);
                 this.clearData(sid);
             }
         }
@@ -2007,12 +2010,15 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
 
                 let ended_sessions = this.get('ended_sessions');
                 if (ended_sessions.includes(sid)){
+                    options.archive_id && this.account.answerPriorityMessage(options.archive_id);
                     options.msg_item && this.removeAfterHandle(options.msg_item);
                     return;
                 }
                 let is_active_session_jid = this.isActiveSessionWithJid(contact.get('jid'), sid);
-                if (is_active_session_jid)
+                if (is_active_session_jid) {
+                    options.archive_id && this.account.answerPriorityMessage(options.archive_id);
                     return;
+                }
                 let peer = this.omemo.getPeer(contact.get('jid')),
                     device = peer.devices[$message.find('verification-start').attr('device-id')];
                 if (!device){
@@ -2039,8 +2045,11 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                     msg_ttl: ttl,
                     message_timestamp: msg_timestamp,
                 });
+                return;
             }
             if ($message.find('verification-start').length && $message.find('verification-start').attr('device-id') && this.omemo.get('device_id') && !options.automated){
+
+                options.archive_id && this.account.answerPriorityMessage(options.archive_id);
                 this.account.omemo.xabber_trust.addVerificationSessionData(sid, {
                     current_a_jid: contact.get('jid'),
                     active_verification_device: {
@@ -2053,6 +2062,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
             if ($message.find(`verification-accepted`).length && $message.find(`verification-accepted`).attr('device-id')
                 && $message.find(`salt`).length && this.active_sessions_data[sid] && this.active_sessions_data[sid].verification_started){
 
+                options.archive_id && this.account.answerPriorityMessage(options.archive_id);
                 this.account.omemo.xabber_trust.addVerificationSessionData(sid, {
                     active_verification_device: {
                         device_id: $message.find('verification-accepted').attr('device-id'),
@@ -2074,10 +2084,12 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                 let dfd = new $.Deferred();
                 dfd.done(() => {
                     if ($message.find('hash').length && $message.find('salt').length && this.active_sessions_data[sid].verification_step === '1b'){
+                        options.archive_id && this.account.answerPriorityMessage(options.archive_id);
                         this.handleTrustVerificationCodeHash($message, contact, options.msg_item);
                         return;
                     }
                     if ($message.find('hash').length && !$message.find('salt').length && this.active_sessions_data[sid].verification_step === '2a'){
+                        options.archive_id && this.account.answerPriorityMessage(options.archive_id);
                         this.handleTrustVerificationFinalHash($message, contact, options.msg_item);
                     }
                 });
@@ -2093,13 +2105,18 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                         }
                     });
                 }
+                return;
             }
         } else if (Strophe.getBareJidFromJid($message.attr('from')) === this.account.get('jid') && Strophe.getBareJidFromJid($message.attr('to')) === this.account.get('jid')) {
-            if (this.active_sessions_data[sid] && this.active_sessions_data[sid].last_sent_message_id == $message.attr('id'))
+            if (this.active_sessions_data[sid] && this.active_sessions_data[sid].last_sent_message_id == $message.attr('id')) {
+                options.archive_id && this.account.answerPriorityMessage(options.archive_id);
                 return;
+            }
             if ($message.find('verification-start').length && $message.find('verification-start').attr('device-id') && this.omemo.get('device_id') && options.automated){
-                if (this.isDeviceTrusted(this.account.get('jid'), $message.find('verification-start').attr('device-id')) && !$message.find('verification-start').attr('to-device-id'))
+                if (this.isDeviceTrusted(this.account.get('jid'), $message.find('verification-start').attr('device-id')) && !$message.find('verification-start').attr('to-device-id')) {
+                    options.archive_id && this.account.answerPriorityMessage(options.archive_id);
                     return;
+                }
 
                 let msg_timestamp = $message.find('authenticated-key-exchange').attr('timestamp'),
                     ttl;
@@ -2114,18 +2131,25 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
 
                 if (ended_sessions.includes(sid)){
                     options.msg_item && this.removeAfterHandle(options.msg_item);
+                    options.archive_id && this.account.answerPriorityMessage(options.archive_id);
                     return;
                 }
 
-                if ($message.find('verification-start').attr('to-device-id') && $message.find('verification-start').attr('to-device-id') != this.omemo.get('device_id'))
+                if ($message.find('verification-start').attr('to-device-id') && $message.find('verification-start').attr('to-device-id') != this.omemo.get('device_id')) {
+                    options.archive_id && this.account.answerPriorityMessage(options.archive_id);
                     return;
+                }
 
-                if ($message.find('verification-start').attr('device-id') == this.omemo.get('device_id'))
+                if ($message.find('verification-start').attr('device-id') == this.omemo.get('device_id')) {
+                    options.archive_id && this.account.answerPriorityMessage(options.archive_id);
                     return;
+                }
 
                 let is_active_session_jid = this.isActiveSessionWithJid(this.account.get('jid'), sid);
-                if (is_active_session_jid)
+                if (is_active_session_jid) {
+                    options.archive_id && this.account.answerPriorityMessage(options.archive_id);
                     return;
+                }
 
                 let peer = this.omemo.getPeer(this.account.get('jid')),
                     device = peer.devices[$message.find('verification-start').attr('device-id')];
@@ -2151,10 +2175,14 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                         device_id: $message.find('verification-start').attr('device-id')
                     });
                 }
+                return;
             }
             if ($message.find('verification-start').length && $message.find('verification-start').attr('device-id') && this.omemo.get('device_id') && !options.automated){
-                if ($message.find('verification-start').attr('to-device-id') && $message.find('verification-start').attr('to-device-id') != this.omemo.get('device_id'))
+                if ($message.find('verification-start').attr('to-device-id') && $message.find('verification-start').attr('to-device-id') != this.omemo.get('device_id')) {
+                    options.archive_id && this.account.answerPriorityMessage(options.archive_id);
                     return;
+                }
+                options.archive_id && this.account.answerPriorityMessage(options.archive_id);
                 let device = this.omemo.own_devices[$message.find('verification-start').attr('device-id')];
                 this.account.omemo.xabber_trust.addVerificationSessionData(sid, {
                     current_a_jid: this.account.get('jid'),
@@ -2171,11 +2199,14 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
             }
             if ($message.find(`verification-accepted`).length && $message.find(`verification-accepted`).attr('device-id')
                 && $message.find(`salt`).length && this.active_sessions_data[sid] && this.active_sessions_data[sid].verification_started){
-                if ($message.find('verification-accepted').attr('device-id') == this.omemo.get('device_id'))
+                if ($message.find('verification-accepted').attr('device-id') == this.omemo.get('device_id')) {
+                    options.archive_id && this.account.answerPriorityMessage(options.archive_id);
                     return;
+                }
 
                 let device = this.omemo.own_devices[$message.find('verification-accepted').attr('device-id')];
 
+                options.archive_id && this.account.answerPriorityMessage(options.archive_id);
                 this.account.omemo.xabber_trust.addVerificationSessionData(sid, {
                     active_verification_device: {
                         device_id: device.id,
@@ -2206,12 +2237,16 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                 let dfd = new $.Deferred();
                 dfd.done(() => {
                     if ($message.find('hash').length && $message.find('salt').length && this.active_sessions_data[sid].verification_step === '1b'){
+                        options.archive_id && this.account.answerPriorityMessage(options.archive_id);
                         this.handleTrustVerificationCodeHash($message, null, options.msg_item);
                         return;
                     }
                     if ($message.find('hash').length && !$message.find('salt').length && this.active_sessions_data[sid].verification_step === '2a'){
+                        options.archive_id && this.account.answerPriorityMessage(options.archive_id);
                         this.handleTrustVerificationFinalHash($message, null, options.msg_item);
+                        return;
                     }
+                    options.archive_id && this.account.answerPriorityMessage(options.archive_id);
                 });
                 if (this.active_sessions_data[sid].active_verification_device){
                     dfd.resolve();
@@ -2225,9 +2260,12 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                         }
                     });
                 }
+                return;
             }
         }
-
+        if (!this.active_sessions_data[sid]){
+            options.archive_id && this.account.answerPriorityMessage(options.archive_id);
+        }
     },
 
     getDevicesIKsForTrustVerification: function (device) {
@@ -2297,25 +2335,21 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
             this.generateVerificationArrayBuffer(devices_IK.device_pubkey, devices_IK.own_privkey, code).then((response) => {
                 let msg_id = uuid(),
                     to = contact ? contact.get('jid') : this.account.get('jid'),
-                    stanza = $iq({
-                        type: 'set',
+                    stanza = $msg({
+                        type: 'chat',
                         to: to,
+                        from: this.account.get('jid'),
                         id: msg_id
                     });
-                stanza.c('notify', {xmlns: Strophe.NS.XABBER_NOTIFY});
-                stanza.c('notification', {xmlns: Strophe.NS.XABBER_NOTIFY, type: 'system'});
-                stanza.c('forwarded', {xmlns: Strophe.NS.FORWARD});
-                stanza.c('message', {
-                    to: to,
-                    from: this.account.get('jid'),
-                    type: 'chat',
-                    id: uuid()
-                });
+                stanza.c('high-priority', {
+                    xmlns: Strophe.NS.PRIORITY_MESSAGES,
+                }).up();
                 stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: sid, timestamp: Math.floor(Date.now() / 1000)});
                 stanza.c('verification-accepted', {'device-id': this.account.omemo.get('device_id')}).up();
                 stanza.c('salt').c('ciphertext').t(response.data).up().c('iv').t(response.iv).up().up().up();
-                stanza.up().up().up();
-                stanza.c('addresses', {xmlns: Strophe.NS.ADDRESS}).c('address',{type: 'to', jid: to}).up().up();
+                stanza.c('store', {
+                    xmlns: 'urn:xmpp:hints'
+                }).up();
                 this.account.omemo.xabber_trust.addVerificationSessionData(sid, {
                     active_verification_device: {
                         device_id: device.id,
@@ -2332,13 +2366,12 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                     if (contact){
                         let $stanza = $(stanza.tree());
                         $stanza.attr('to',this.account.get('jid'));
-                        let $msg = $stanza.find('notification forwarded message');
-                        $msg.attr('to',this.account.get('jid'));
-                        $msg.attr('type', 'headline');
-                        $msg.children('body').remove();
-                        $msg.find('verification-accepted').attr('device-id', this.account.omemo.get('device_id'));
-                        $msg.find('salt').remove();
-                        $stanza.find(`addresses[xmlns="${Strophe.NS.ADDRESS}"] address[type="to"]`).attr('jid',this.account.get('jid'));
+                        let new_msg_id = uuid();
+                        $stanza.attr('id', new_msg_id);
+                        $stanza.attr('type', 'headline');
+                        $stanza.children('body').remove();
+                        $stanza.find('verification-accepted').attr('device-id', this.account.omemo.get('device_id'));
+                        $stanza.find('salt').remove();
                         stanza = stanza.tree().cloneNode(true);
                         this.account.sendFast(stanza, () => {
                         });
@@ -2387,27 +2420,23 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                                 this.generateVerificationEncryptedHash(trustedKeyBuffer, code, decrypted_response.decryptedBuffer, decrypted_response.encryptionKeyHash).then((hash_response) => {
                                     let msg_id = uuid(),
                                         to = contact ? contact.get('jid') : this.account.get('jid'),
-                                        stanza = $iq({
-                                            type: 'set',
+                                        stanza = $msg({
+                                            type: 'chat',
                                             to: to,
+                                            from: this.account.get('jid'),
                                             id: msg_id
                                         });
-                                    stanza.c('notify', {xmlns: Strophe.NS.XABBER_NOTIFY});
-                                    stanza.c('notification', {xmlns: Strophe.NS.XABBER_NOTIFY, type: 'system'});
-                                    stanza.c('forwarded', {xmlns: Strophe.NS.FORWARD});
-                                    stanza.c('message', {
-                                        to: to,
-                                        from: this.account.get('jid'),
-                                        type: 'chat',
-                                        id: uuid()
-                                    });
+                                    stanza.c('high-priority', {
+                                        xmlns: Strophe.NS.PRIORITY_MESSAGES,
+                                    }).up();
                                     stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: sid, timestamp: Math.floor(Date.now() / 1000)});
 
                                     stanza.c('salt').c('ciphertext').t(response.data).up().c('iv').t(response.iv).up().up();
                                     stanza.c('hash', {xmlns: Strophe.NS.HASH, algo: 'sha-256'});
                                     stanza.c('ciphertext').t(hash_response.data).up().c('iv').t(hash_response.iv).up().up().up();
-                                    stanza.up().up().up();
-                                    stanza.c('addresses', {xmlns: Strophe.NS.ADDRESS}).c('address',{type: 'to', jid: to}).up().up();
+                                    stanza.c('store', {
+                                        xmlns: 'urn:xmpp:hints'
+                                    }).up();
 
                                     this.account.omemo.xabber_trust.addVerificationSessionData(sid, {
                                         active_verification_device: {
@@ -2434,33 +2463,29 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
 
                         let msg_id = uuid(),
                             to = contact ? contact.get('jid') : this.account.get('jid'),
-                            stanza = $iq({
-                                type: 'set',
+                            stanza = $msg({
+                                type: 'chat',
                                 to: to,
+                                from: this.account.get('jid'),
                                 id: msg_id
                             });
-                        stanza.c('notify', {xmlns: Strophe.NS.XABBER_NOTIFY});
-                        stanza.c('notification', {xmlns: Strophe.NS.XABBER_NOTIFY, type: 'system'});
-                        stanza.c('forwarded', {xmlns: Strophe.NS.FORWARD});
-                        stanza.c('message', {
-                            to: to,
-                            from: this.account.get('jid'),
-                            type: 'chat',
-                            id: uuid()
-                        });
+                        stanza.c('high-priority', {
+                            xmlns: Strophe.NS.PRIORITY_MESSAGES,
+                        }).up();
                         stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: sid, timestamp: Math.floor(Date.now() / 1000)});
                         stanza.c('verification-failed', {reason: 'Data decryption failed'}).up().up();
 
-                        stanza.up().up().up();
-                        stanza.c('addresses', {xmlns: Strophe.NS.ADDRESS}).c('address',{type: 'to', jid: to}).up().up();
+                        stanza.c('store', {
+                            xmlns: 'urn:xmpp:hints'
+                        }).up();
 
                         msg_item && this.removeAfterHandle(msg_item);
                         this.account.sendFast(stanza, () => {
                             if (contact){
                                 let $stanza = $(stanza.tree());
                                 $stanza.attr('to',this.account.get('jid'));
-                                $stanza.find('notification forwarded message').attr('to',this.account.get('jid'));
-                                $stanza.find(`addresses[xmlns="${Strophe.NS.ADDRESS}"] address[type="to"]`).attr('jid',this.account.get('jid'));
+                                let new_msg_id = uuid();
+                                $stanza.attr('id', new_msg_id);
                                 contact && this.createFailedSessionMsg(contact.get('jid'), 'Data decryption failed');
                                 stanza = stanza.tree().cloneNode(true);
                                 this.account.sendFast(stanza, () => {
@@ -2492,27 +2517,23 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                                         this.generateVerificationEncryptedHash(trustedKeyBuffer, code, decrypted_response.decryptedBuffer, decrypted_response.encryptionKeyHash).then((hash_response) => {
                                             let msg_id = uuid(),
                                                 to = contact ? contact.get('jid') : this.account.get('jid'),
-                                                stanza = $iq({
-                                                    type: 'set',
+                                                stanza = $msg({
+                                                    type: 'chat',
                                                     to: to,
+                                                    from: this.account.get('jid'),
                                                     id: msg_id
                                                 });
-                                            stanza.c('notify', {xmlns: Strophe.NS.XABBER_NOTIFY});
-                                            stanza.c('notification', {xmlns: Strophe.NS.XABBER_NOTIFY, type: 'system'});
-                                            stanza.c('forwarded', {xmlns: Strophe.NS.FORWARD});
-                                            stanza.c('message', {
-                                                to: to,
-                                                from: this.account.get('jid'),
-                                                type: 'chat',
-                                                id: uuid()
-                                            });
+                                            stanza.c('high-priority', {
+                                                xmlns: Strophe.NS.PRIORITY_MESSAGES,
+                                            }).up();
                                             stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: sid, timestamp: Math.floor(Date.now() / 1000)});
 
                                             stanza.c('salt').c('ciphertext').t(response.data).up().c('iv').t(response.iv).up().up();
                                             stanza.c('hash', {xmlns: Strophe.NS.HASH, algo: 'sha-256'});
                                             stanza.c('ciphertext').t(hash_response.data).up().c('iv').t(hash_response.iv).up().up().up();
-                                            stanza.up().up().up();
-                                            stanza.c('addresses', {xmlns: Strophe.NS.ADDRESS}).c('address',{type: 'to', jid: to}).up().up();
+                                            stanza.c('store', {
+                                                xmlns: 'urn:xmpp:hints'
+                                            }).up();
 
                                             this.account.omemo.xabber_trust.addVerificationSessionData(sid, {
                                                 active_verification_device: {
@@ -2539,33 +2560,29 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
 
                                 let msg_id = uuid(),
                                     to = contact ? contact.get('jid') : this.account.get('jid'),
-                                    stanza = $iq({
-                                        type: 'set',
+                                    stanza = $msg({
+                                        type: 'chat',
                                         to: to,
+                                        from: this.account.get('jid'),
                                         id: msg_id
                                     });
-                                stanza.c('notify', {xmlns: Strophe.NS.XABBER_NOTIFY});
-                                stanza.c('notification', {xmlns: Strophe.NS.XABBER_NOTIFY, type: 'system'});
-                                stanza.c('forwarded', {xmlns: Strophe.NS.FORWARD});
-                                stanza.c('message', {
-                                    to: to,
-                                    from: this.account.get('jid'),
-                                    type: 'chat',
-                                    id: uuid()
-                                });
+                                stanza.c('high-priority', {
+                                    xmlns: Strophe.NS.PRIORITY_MESSAGES,
+                                }).up();
                                 stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: sid, timestamp: Math.floor(Date.now() / 1000)});
                                 stanza.c('verification-failed', {reason: 'Data decryption failed'}).up().up();
 
-                                stanza.up().up().up();
-                                stanza.c('addresses', {xmlns: Strophe.NS.ADDRESS}).c('address',{type: 'to', jid: to}).up().up();
+                                stanza.c('store', {
+                                    xmlns: 'urn:xmpp:hints'
+                                }).up();
 
                                 msg_item && this.removeAfterHandle(msg_item);
                                 this.account.sendFast(stanza, () => {
                                     if (contact){
                                         let $stanza = $(stanza.tree());
                                         $stanza.attr('to',this.account.get('jid'));
-                                        $stanza.find('notification forwarded message').attr('to',this.account.get('jid'));
-                                        $stanza.find(`addresses[xmlns="${Strophe.NS.ADDRESS}"] address[type="to"]`).attr('jid',this.account.get('jid'));
+                                        let new_msg_id = uuid();
+                                        $stanza.attr('id', new_msg_id);
                                         contact && this.createFailedSessionMsg(contact.get('jid'), 'Data decryption failed');
                                         stanza = stanza.tree().cloneNode(true);
                                         this.account.sendFast(stanza, () => {
@@ -2630,27 +2647,23 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
 
                                             let msg_id = uuid(),
                                                 to = contact ? contact.get('jid') : this.account.get('jid'),
-                                                stanza = $iq({
-                                                    type: 'set',
+                                                stanza = $msg({
+                                                    type: 'chat',
                                                     to: to,
+                                                    from: this.account.get('jid'),
                                                     id: msg_id
                                                 });
-                                            stanza.c('notify', {xmlns: Strophe.NS.XABBER_NOTIFY});
-                                            stanza.c('notification', {xmlns: Strophe.NS.XABBER_NOTIFY, type: 'system'});
-                                            stanza.c('forwarded', {xmlns: Strophe.NS.FORWARD});
-                                            stanza.c('message', {
-                                                to: to,
-                                                from: this.account.get('jid'),
-                                                type: 'chat',
-                                                id: uuid()
-                                            });
+                                            stanza.c('high-priority', {
+                                                xmlns: Strophe.NS.PRIORITY_MESSAGES,
+                                            }).up();
                                             stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: sid, timestamp: Math.floor(Date.now() / 1000)});
 
                                             stanza.c('hash', {xmlns: Strophe.NS.HASH, algo: 'sha-256'});
                                             stanza.c('ciphertext').t(hash_response.data).up().c('iv').t(hash_response.iv).up().up().up();
 
-                                            stanza.up().up().up();
-                                            stanza.c('addresses', {xmlns: Strophe.NS.ADDRESS}).c('address',{type: 'to', jid: to}).up().up();
+                                            stanza.c('store', {
+                                                xmlns: 'urn:xmpp:hints'
+                                            }).up();
 
                                             this.account.omemo.xabber_trust.addVerificationSessionData(sid, {
                                                 can_handle_trust: true,
@@ -2669,33 +2682,29 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
 
                                     let msg_id = uuid(),
                                         to = contact ? contact.get('jid') : this.account.get('jid'),
-                                        stanza = $iq({
-                                            type: 'set',
+                                        stanza = $msg({
+                                            type: 'chat',
                                             to: to,
+                                            from: this.account.get('jid'),
                                             id: msg_id
                                         });
-                                    stanza.c('notify', {xmlns: Strophe.NS.XABBER_NOTIFY});
-                                    stanza.c('notification', {xmlns: Strophe.NS.XABBER_NOTIFY, type: 'system'});
-                                    stanza.c('forwarded', {xmlns: Strophe.NS.FORWARD});
-                                    stanza.c('message', {
-                                        to: to,
-                                        from: this.account.get('jid'),
-                                        type: 'chat',
-                                        id: uuid()
-                                    });
+                                    stanza.c('high-priority', {
+                                        xmlns: Strophe.NS.PRIORITY_MESSAGES,
+                                    }).up();
                                     stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: sid, timestamp: Math.floor(Date.now() / 1000)});
                                     stanza.c('verification-failed', {reason: 'Hashes didn\'t match'}).up().up();
 
-                                    stanza.up().up().up();
-                                    stanza.c('addresses', {xmlns: Strophe.NS.ADDRESS}).c('address',{type: 'to', jid: to}).up().up();
+                                    stanza.c('store', {
+                                        xmlns: 'urn:xmpp:hints'
+                                    }).up();
 
                                     msg_item && this.removeAfterHandle(msg_item);
                                     this.account.sendFast(stanza, () => {
                                         if (contact){
                                             let $stanza = $(stanza.tree());
                                             $stanza.attr('to',this.account.get('jid'));
-                                            $stanza.find('notification forwarded message').attr('to',this.account.get('jid'));
-                                            $stanza.find(`addresses[xmlns="${Strophe.NS.ADDRESS}"] address[type="to"]`).attr('jid',this.account.get('jid'));
+                                            let new_msg_id = uuid();
+                                            $stanza.attr('id', new_msg_id);
                                             contact && this.createFailedSessionMsg(contact.get('jid'), 'Hashes didn\'t match');
                                             stanza = stanza.tree().cloneNode(true);
                                             this.account.sendFast(stanza, () => {
@@ -2711,33 +2720,29 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
 
                         let msg_id = uuid(),
                             to = contact ? contact.get('jid') : this.account.get('jid'),
-                            stanza = $iq({
-                                type: 'set',
+                            stanza = $msg({
+                                type: 'chat',
                                 to: to,
+                                from: this.account.get('jid'),
                                 id: msg_id
                             });
-                        stanza.c('notify', {xmlns: Strophe.NS.XABBER_NOTIFY});
-                        stanza.c('notification', {xmlns: Strophe.NS.XABBER_NOTIFY, type: 'system'});
-                        stanza.c('forwarded', {xmlns: Strophe.NS.FORWARD});
-                        stanza.c('message', {
-                            to: to,
-                            from: this.account.get('jid'),
-                            type: 'chat',
-                            id: uuid()
-                        });
+                        stanza.c('high-priority', {
+                            xmlns: Strophe.NS.PRIORITY_MESSAGES,
+                        }).up();
                         stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: sid, timestamp: Math.floor(Date.now() / 1000)});
                         stanza.c('verification-failed', {reason: 'Data decryption failed'}).up().up();
 
-                        stanza.up().up().up();
-                        stanza.c('addresses', {xmlns: Strophe.NS.ADDRESS}).c('address',{type: 'to', jid: to}).up().up();
+                        stanza.c('store', {
+                            xmlns: 'urn:xmpp:hints'
+                        }).up();
 
                         msg_item && this.removeAfterHandle(msg_item);
                         this.account.sendFast(stanza, () => {
                             if (contact){
                                 let $stanza = $(stanza.tree());
                                 $stanza.attr('to',this.account.get('jid'));
-                                $stanza.find('notification forwarded message').attr('to',this.account.get('jid'));
-                                $stanza.find(`addresses[xmlns="${Strophe.NS.ADDRESS}"] address[type="to"]`).attr('jid',this.account.get('jid'));
+                                let new_msg_id = uuid();
+                                $stanza.attr('id', new_msg_id);
                                 contact && this.createFailedSessionMsg(contact.get('jid'), 'Data decryption failed');
                                 stanza = stanza.tree().cloneNode(true);
                                 this.account.sendFast(stanza, () => {
@@ -2751,33 +2756,29 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
 
                     let msg_id = uuid(),
                         to = contact ? contact.get('jid') : this.account.get('jid'),
-                        stanza = $iq({
-                            type: 'set',
+                        stanza = $msg({
+                            type: 'chat',
                             to: to,
+                            from: this.account.get('jid'),
                             id: msg_id
                         });
-                    stanza.c('notify', {xmlns: Strophe.NS.XABBER_NOTIFY});
-                    stanza.c('notification', {xmlns: Strophe.NS.XABBER_NOTIFY, type: 'system'});
-                    stanza.c('forwarded', {xmlns: Strophe.NS.FORWARD});
-                    stanza.c('message', {
-                        to: to,
-                        from: this.account.get('jid'),
-                        type: 'chat',
-                        id: uuid()
-                    });
+                    stanza.c('high-priority', {
+                        xmlns: Strophe.NS.PRIORITY_MESSAGES,
+                    }).up();
                     stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: sid, timestamp: Math.floor(Date.now() / 1000)});
                     stanza.c('verification-failed', {reason: 'Data decryption failed with error'}).up().up();
 
-                    stanza.up().up().up();
-                    stanza.c('addresses', {xmlns: Strophe.NS.ADDRESS}).c('address',{type: 'to', jid: to}).up().up();
+                    stanza.c('store', {
+                        xmlns: 'urn:xmpp:hints'
+                    }).up();
 
                     msg_item && this.removeAfterHandle(msg_item);
                     this.account.sendFast(stanza, () => {
                         if (contact){
                             let $stanza = $(stanza.tree());
                             $stanza.attr('to',this.account.get('jid'));
-                            $stanza.find('notification forwarded message').attr('to',this.account.get('jid'));
-                            $stanza.find(`addresses[xmlns="${Strophe.NS.ADDRESS}"] address[type="to"]`).attr('jid',this.account.get('jid'));
+                            let new_msg_id = uuid();
+                            $stanza.attr('id', new_msg_id);
                             contact && this.createFailedSessionMsg(contact.get('jid'), 'Data decryption failed with error');
                             stanza = stanza.tree().cloneNode(true);
                             this.account.sendFast(stanza, () => {
@@ -2836,33 +2837,29 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                                 // if hashes dont match
                                 let msg_id = uuid(),
                                     to = contact ? contact.get('jid') : this.account.get('jid'),
-                                    stanza = $iq({
-                                        type: 'set',
+                                    stanza = $msg({
+                                        type: 'chat',
                                         to: to,
+                                        from: this.account.get('jid'),
                                         id: msg_id
                                     });
-                                stanza.c('notify', {xmlns: Strophe.NS.XABBER_NOTIFY});
-                                stanza.c('notification', {xmlns: Strophe.NS.XABBER_NOTIFY, type: 'system'});
-                                stanza.c('forwarded', {xmlns: Strophe.NS.FORWARD});
-                                stanza.c('message', {
-                                    to: to,
-                                    from: this.account.get('jid'),
-                                    type: 'chat',
-                                    id: uuid()
-                                });
+                                stanza.c('high-priority', {
+                                    xmlns: Strophe.NS.PRIORITY_MESSAGES,
+                                }).up();
                                 stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: sid, timestamp: Math.floor(Date.now() / 1000)});
                                 stanza.c('verification-failed', {reason: 'Hashes didn\'t match in final stanza'}).up().up();
 
-                                stanza.up().up().up();
-                                stanza.c('addresses', {xmlns: Strophe.NS.ADDRESS}).c('address',{type: 'to', jid: to}).up().up();
+                                stanza.c('store', {
+                                    xmlns: 'urn:xmpp:hints'
+                                }).up();
 
                                 msg_item && this.removeAfterHandle(msg_item);
                                 this.account.sendFast(stanza, () => {
                                     if (contact){
                                         let $stanza = $(stanza.tree());
                                         $stanza.attr('to',this.account.get('jid'));
-                                        $stanza.find('notification forwarded message').attr('to',this.account.get('jid'));
-                                        $stanza.find(`addresses[xmlns="${Strophe.NS.ADDRESS}"] address[type="to"]`).attr('jid',this.account.get('jid'));
+                                        let new_msg_id = uuid();
+                                        $stanza.attr('id', new_msg_id);
                                         contact && this.createFailedSessionMsg(contact.get('jid'), 'Hashes didn\'t match in final stanza');
                                         stanza = stanza.tree().cloneNode(true);
                                         this.account.sendFast(stanza, () => {
@@ -2947,33 +2944,29 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
     sendVerificationSuccess: async function (to, sid) {
 
         let msg_id = uuid(),
-            stanza = $iq({
-                type: 'set',
+            stanza = $msg({
+                type: 'chat',
                 to: to,
+                from: this.account.get('jid'),
                 id: msg_id
             });
-        stanza.c('notify', {xmlns: Strophe.NS.XABBER_NOTIFY});
-        stanza.c('notification', {xmlns: Strophe.NS.XABBER_NOTIFY, category: 'security'});
-        stanza.c('forwarded', {xmlns: Strophe.NS.FORWARD});
-        stanza.c('message', {
-            to: to,
-            from: this.account.get('jid'),
-            type: 'chat',
-            id: uuid()
-        });
+        stanza.c('high-priority', {
+            xmlns: Strophe.NS.PRIORITY_MESSAGES,
+        }).up();
         stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: sid, timestamp: Math.floor(Date.now() / 1000)});
         stanza.c('verification-successful').up().up();
 
-        stanza.up().up().up();
-        stanza.c('addresses', {xmlns: Strophe.NS.ADDRESS}).c('address',{type: 'to', jid: to}).up().up();
+        stanza.c('store', {
+            xmlns: 'urn:xmpp:hints'
+        }).up();
 
         this.account.sendFast(stanza, () => {
             console.error(to);
             if (to !== this.account.get('jid')){
                 let $stanza = $(stanza.tree());
                 $stanza.attr('to',this.account.get('jid'));
-                $stanza.find('notification forwarded message').attr('to',this.account.get('jid'));
-                $stanza.find(`addresses[xmlns="${Strophe.NS.ADDRESS}"] address[type="to"]`).attr('jid',this.account.get('jid'));
+                let new_msg_id = uuid();
+                $stanza.attr('id', new_msg_id);
                 stanza = stanza.tree().cloneNode(true);
                 this.account.sendFast(stanza, () => {
                 });

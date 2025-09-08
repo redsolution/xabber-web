@@ -70,6 +70,7 @@ require.config({
         // xep modules
         "xabber-xep0280":           "src/xep_modules/xep0280",
         "xabber-xep-rewrite":       "src/xep_modules/xep-rewrite",
+        "xabber-xep-priority-messages": "src/xep_modules/xep-priority-messages",
         "xabber-xep-delivery":      "src/xep_modules/xep-delivery",
         "xabber-xep-devices":       "src/xep_modules/xep-devices",
         "xabber-xep0060":           "src/xep_modules/xep0060",
