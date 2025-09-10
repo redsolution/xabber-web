@@ -688,6 +688,9 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
             });
 
         stanza.c('origin-id', {id: uuid(), xmlns: 'urn:xmpp:sid:0'}).up();
+        stanza.c('high-priority', {
+            xmlns: Strophe.NS.PRIORITY_MESSAGES,
+        }).up();
         stanza.c('envelope', {xmlns: Strophe.NS.SCE}).c('content');
 
         let share_type = difference ? 'update' : 'share';
@@ -765,22 +768,8 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                     stanza = msg.message;
                 }
 
-                let final_stanza = $iq({
-                    type: 'set',
-                    to: to,
-                    id: msg_id
-                });
-                final_stanza.c('notify', {xmlns: Strophe.NS.XABBER_NOTIFY});
-                final_stanza.c('notification', {xmlns: Strophe.NS.XABBER_NOTIFY, type: 'system'});
-                final_stanza.c('forwarded', {xmlns: Strophe.NS.FORWARD});
 
-                final_stanza.cnode(stanza.tree()).up();
-
-                final_stanza.up().up();
-                final_stanza.c('addresses', {xmlns: Strophe.NS.ADDRESS}).c('address',{type: 'to', jid: to}).up().up();
-
-                this.account.sendFast(final_stanza, () => {
-
+                this.account.sendFast(stanza, () => {
                 });
             })
         });
@@ -1267,7 +1256,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
         if (my_trusted_devices.some(e => e.device_id == received_device_id && e.fingerprint == device_fingerprint && !e.is_me)){
 
             let this_trusted_device = my_trusted_devices.find(e => e.device_id == received_device_id && e.fingerprint == device_fingerprint),
-                $whole_notification_msg = $message.parent().closest('message');
+                $whole_notification_msg = $message.prop("tagName") === 'message' ? $message : $message.parent().closest('message');
 
             if (!$whole_notification_msg.length){
                 callback && callback();
@@ -1899,20 +1888,13 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
 
     addToSequentialProcessingList: function (message, options) {
         console.log(message);
-        let $whole_notification_msg = $(message).parent().closest('message');
+        let $whole_notification_msg = $(message).prop("tagName") === 'message' ? $(message) : $(message).parent().closest('message');
 
 
         if (!$whole_notification_msg.length)
             return;
-        let msg_timestamp = $whole_notification_msg.children('time').attr('stamp');
-        if (!msg_timestamp)
-            return;
-        msg_timestamp = Date.parse(msg_timestamp);
-        if (!msg_timestamp)
-            return;
 
         this.processing_messages.create({
-            timestamp: msg_timestamp,
             message: message,
             options: options
 
@@ -1933,7 +1915,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
 
         this.parseContactsTrustedDevices(msg_item.get('message'), msg_item.get('options'), () => {
             this.is_processing = false;
-            console.log('processs neht');
+            msg_item.get('options') && msg_item.get('options').archive_id && this.account.answerPriorityMessage(msg_item.get('options').archive_id);
             this.sequentialTrustVerificationMessageProcessing();
         });
 
@@ -1956,9 +1938,13 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
             contact = undefined;
 
         if (options.notification_trust_msg && options.device_id){
-            if (options.device_id == this.omemo.get('device_id'))
+            if (options.device_id == this.omemo.get('device_id')) {
+                options.archive_id && this.account.answerPriorityMessage(options.archive_id);
                 return;
-            this.parseContactsTrustedDevices(message, options);
+            }
+            this.parseContactsTrustedDevices(message, options, () => {
+                options.archive_id && this.account.answerPriorityMessage(options.archive_id);
+            });
             return;
         }
 

@@ -416,6 +416,15 @@ xabber.MessagesBase = Backbone.Collection.extend({
                     attrs.trust_device_id = $keyExchange.children('verification-start').attr('device-id');
                 }
             }
+            if ($message.children(`envelope`).length
+                && (
+                    $message.find(`content share[xmlns="${Strophe.NS.PUBSUB_TRUST_SHARING}"]`).length
+                    || $message.find(`content update[xmlns="${Strophe.NS.PUBSUB_TRUST_SHARING}"]`).length
+                )){
+                let msg_text = `${account.jid} updated their devices`;
+                attrs.original_message = body = msg_text;
+                attrs.notification_trust_msg = true;
+            }
             attrs.$original_stanza = $message;
         }
         if (options.notification_msg && $notification_msg.length){
@@ -5109,6 +5118,8 @@ xabber.ChatContentView = xabber.BasicView.extend({
                         max: xabber.settings.mam_messages_limit,
                         before: this.model.get('first_archive_id') || ''
                     }), {previous_history: true});
+                } else if ((counter === 0) && options.previous_history && !this.model.get('history_loaded')) {
+                    this.loadPreviousHistory();
                 }
                 if (options.unread_history_before){
                     if (this.model.get('encrypted')){
@@ -5175,6 +5186,8 @@ xabber.ChatContentView = xabber.BasicView.extend({
     },
 
     requestMissedMessages: function (timestamp) {
+        if (this.model.get('jid') === this.account.get('jid'))
+            return;
         if (!timestamp)
             return;
         let query = {};
@@ -5673,7 +5686,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
 
 
 
-        if (message.get('high_priority')){
+        if (message.get('high_priority') && !message.get('synced_from_server')){
             let $original_stanza = message.get('$original_stanza')
             if (message.get('notification_msg')){
                 if (message.get('notification_trust_msg')) {
@@ -5690,7 +5703,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
                             notification_trust_msg: message.get('notification_trust_msg'),
                             device_id: message.get('device_id'),
                             msg_item: message,
-                            archive_id: message.get('archive_id') || message.get('stanza_id')
+                            archive_id: message.get('archive_id') || message.get('stanza_id'),
                         });
                     } else {
                         this.account.omemo.xabber_trust.receiveTrustVerificationMessage($original_stanza[0], {
@@ -5698,7 +5711,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
                             notification_trust_msg: message.get('notification_trust_msg'),
                             device_id: message.get('device_id'),
                             msg_item: message,
-                            archive_id: message.get('archive_id') || message.get('stanza_id')
+                            archive_id: message.get('archive_id') || message.get('stanza_id'),
                         });
                     }
                 } else {
@@ -15557,7 +15570,7 @@ xabber.Account.addInitPlugin(function () {
 
                 let contact = this.contacts.mergeContact(contact_jid);
 
-                msg_object.chat = this.chats.getChat(contact, (msg_object.encrypted || msg_object.not_encrypted) && 'encrypted');
+                msg_object.chat = this.chats.getChat(contact, !msg_object.high_priority && (msg_object.encrypted || msg_object.not_encrypted) && 'encrypted');
             }
 
             return msg_object;

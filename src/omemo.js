@@ -2417,7 +2417,6 @@ xabber.Omemo = Backbone.ModelWithStorage.extend({
         let spk = this.bundle.preKeys.find(pk => pk.signature),
             ik = await this.store.getIdentityKeyPair(),
             pks = this.bundle.preKeys;
-        xabber.error(pks);
         if (!spk || !ik) {
             this.set('resend_bundle', true);
             this.set('device_attrs', device_attrs);
@@ -2868,7 +2867,7 @@ xabber.Account.addInitPlugin(function () {
                     }
                 }
 
-                if (msg_object.type === 'chat') {
+                if (msg_object.type === 'chat' || msg_object.high_priority) {
 
                     if ($message.find(`encrypted[xmlns="${Strophe.NS.OMEMO}"]`).length) {
                         if (!this.omemo) {

@@ -1669,7 +1669,6 @@ xabber.Account = Backbone.Model.extend({
                     contentType: "application/json",
                     data: JSON.stringify({jid: this.id, code: confirm_code}),
                     success: (response) => {
-                        console.error(response);
                         if (response.token)
                             this.set('proxy_viewer_token', response.token);
                         if (response.expires) {
@@ -2271,7 +2270,6 @@ xabber.AccountToolbarItemView = xabber.BasicView.extend({
             this.omemo_new_device_placeholder && this.omemo_new_device_placeholder.close();
             return;
         }
-        this.model && console.error(this.model.omemo);
         if (!this.model || !this.model.omemo){
             this.omemo_new_device_placeholder && this.omemo_new_device_placeholder.close();
             return;
