@@ -1897,7 +1897,6 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
         this.processing_messages.create({
             message: message,
             options: options
-
         });
 
         this.processing_debounce();

@@ -383,6 +383,7 @@ xabber.MessagesBase = Backbone.Collection.extend({
                 device_id: options.device_id || null,
                 ignored: options.ignored || null,
                 high_priority: options.high_priority || null,
+                high_priority_received: options.high_priority_received || null,
             },
             mentions = [], blockquotes = [], markups = [], mutable_content = [], files = [], images = [], videos = [], locations = [], link_references = [];
 
@@ -2380,6 +2381,8 @@ xabber.ChatItemView = xabber.BasicView.extend({
         if (!this.model.sync_created)
             this.content = new xabber.ChatContentView({chat_item: this});
         this.content_placeholder = new xabber.ChatContentPlaceholderView();
+        if (this.model.get('jid') === this.account.get('jid'))
+            this.$el.addClass('hidden3');
         this.updateName();
         this.updateStatus();
         this.updateCounter();
@@ -2682,6 +2685,8 @@ xabber.ChatItemView = xabber.BasicView.extend({
             this.model.last_message = last_message;
             if (this.model.get('notifications') && last_message && last_message.get('stanza_id'))
                 this.account.trigger('notification_last_msg_updated', last_message.get('stanza_id'));
+            if (this.contact && this.contact.get('jid') === this.account.get('jid') && last_message && !last_message.get('high_priority_received') && last_message.get('stanza_id'))
+                this.account.trigger('own_last_msg_updated', last_message.get('stanza_id'), this.model.get('encrypted'));
             this.updateLastMessage();
         }
         this.deletePlayersFromMessage(msg);
@@ -5264,6 +5269,33 @@ xabber.ChatContentView = xabber.BasicView.extend({
 
     },
 
+    loadOwnHistoryToPreviousLastMsg: function () { //34
+        console.error('loadOwnHistoryToPreviousLastMsg !@@@#@@@@@@@@@@@@@@@@@@@@@@@@@@@');
+        console.error(this);
+        if (!xabber.settings.load_history) {
+            return;
+        }
+        let previous_last_msg = this.account.chat_settings.getOwnLastMsgId(this.model.get('encrypted'));
+
+        console.error(this.model.get('encrypted'));
+        console.error(previous_last_msg);
+
+        if (previous_last_msg){
+            this.getMessageArchive({
+                    fast: true,
+                    max: xabber.settings.mam_messages_limit,
+                    var: [
+                        {var: 'after-id', value: previous_last_msg},
+                    ]
+                },
+                {
+                    notifications_last_msg: previous_last_msg
+                });
+        } else {
+        }
+
+    },
+
     loadUnreadHistory: function () {
         if (this.contact) {
             if (!xabber.settings.load_history || (!this.contact.get('subscription') || this.contact.get('subscription') !== 'both') && this.contact.get('group_chat')) {
@@ -5676,6 +5708,8 @@ xabber.ChatContentView = xabber.BasicView.extend({
             this.model.last_message = message;
             if (this.model.get('notifications'))
                 this.account.trigger('notification_last_msg_updated', message.get('stanza_id'));
+            if (this.model.contact && this.model.contact.get('jid') === this.account.get('jid') && message && !message.get('high_priority_received')  && message.get('stanza_id'))
+                this.account.trigger('own_last_msg_updated', message.get('stanza_id'), this.model.get('encrypted'));
             this.chat_item.updateLastMessage();
         }
         if (message.get('mentions')) {
@@ -8578,6 +8612,8 @@ xabber.ChatContentView = xabber.BasicView.extend({
             this.model.last_message = message;
             if (this.model.get('notifications'))
                 this.account.trigger('notification_last_msg_updated', message.get('stanza_id'));
+            if (this.contact && this.contact.get('jid') === this.account.get('jid') && message && !message.get('high_priority_received')  && message.get('stanza_id'))
+                this.account.trigger('own_last_msg_updated', message.get('stanza_id'), this.model.get('encrypted'));
             this.chat_item.updateLastMessage();
         }
     },
@@ -15211,21 +15247,43 @@ xabber.ChatSettings = Backbone.ModelWithStorage.extend({
             group_chat: [],
             cached_avatars: [],
             group_chat_members_lists: [],
-            notifications_last_msg_id: null
+            notifications_last_msg_id: null,
+            own_encrypted_last_msg_id: null,
+            own_last_msg_id: null
         }
     },
 
     _initialize: function (attrs, options) {
         this.account = options.account;
-        this.account.on('notification_last_msg_updated', this.updateNotificationsLastMsgId, this)
+        this.account.on('notification_last_msg_updated', this.updateNotificationsLastMsgId, this) //34
+        this.account.on('own_last_msg_updated', this.updateOwnLastMsgId, this)
     },
 
     getNotificationsLastMsgId: function () {
         return _.clone(this.get('notifications_last_msg_id'));
     },
 
+    getOwnLastMsgId: function (is_encrypted) { //34
+        if (is_encrypted)
+            return _.clone(this.get('own_encrypted_last_msg_id'));
+        eles
+            return _.clone(this.get('own_last_msg_id'));
+    },
+
     updateNotificationsLastMsgId: function (msg_id) {
         this.save('notifications_last_msg_id', msg_id);
+    },
+
+    updateOwnLastMsgId: function (msg_id, is_encrypted) {
+        console.error('updateOwnLastMsgId !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1');
+        console.error(msg_id);
+        console.error(is_encrypted);
+        if (is_encrypted) {
+            this.save('own_encrypted_last_msg_id', msg_id);
+            return;
+        } else {
+            this.save('own_last_msg_id', msg_id);
+        }
     },
 
     getLastEmoji: function () {
@@ -15570,7 +15628,12 @@ xabber.Account.addInitPlugin(function () {
 
                 let contact = this.contacts.mergeContact(contact_jid);
 
-                msg_object.chat = this.chats.getChat(contact, !msg_object.high_priority && (msg_object.encrypted || msg_object.not_encrypted) && 'encrypted');
+                msg_object.chat = this.chats.getChat(contact, (msg_object.encrypted || msg_object.not_encrypted) && 'encrypted');
+            }
+
+            if (msg_object.is_mam && msg_object.is_archived
+                && $message.children(`high-priority[xmlns="${Strophe.NS.PRIORITY_MESSAGES}"]`).length) {
+                msg_object.high_priority = true;
             }
 
             return msg_object;

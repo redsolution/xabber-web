@@ -2885,6 +2885,17 @@ xabber.Account.addInitPlugin(function () {
                             jid = (Strophe.getBareJidFromJid($msg.attr('from')) === this.get('jid') ? Strophe.getBareJidFromJid($msg.attr('to')) : Strophe.getBareJidFromJid($msg.attr('from'))) || msg_object.from_jid,
                             contact = this.contacts.get(msg_object.conversation ? msg_object.conversation : jid),
                             stanza_id = $msg.children(`stanza-id[by="${this.get('jid')}"]`).attr('id');
+
+                        console.error(stanza_id);
+                        console.error(contact);
+                        console.error(msg_object.synced_msg);
+                        console.error(contact.get('jid') === this.get('jid'));
+                        if (msg_object.synced_msg && contact.get('jid') === this.get('jid')){
+                            msg_object.ignore = 'omemo_own_synced_msg';
+                            return resolve(msg_object);
+                        }
+                        console.error(jid);
+                        console.error($message[0]);
                         let cached_msg;
                         if (!msg_object.notification_msg && contact) {
                             cached_msg = stanza_id && this.omemo.cached_messages && this.omemo.cached_messages.getMessage(contact, stanza_id);
@@ -2898,6 +2909,11 @@ xabber.Account.addInitPlugin(function () {
                                     cached_msg = this.omemo.cached_messages && this.omemo.cached_messages.getMessage(true_contact, origin_id);
                             }
                         }
+                        if (msg_object.high_priority && !cached_msg) {
+                                let origin_id = $msg.children('origin-id').attr('id');
+                                if (origin_id)
+                                    cached_msg = this.omemo.cached_messages && this.omemo.cached_messages.getMessage(contact, origin_id);
+                        }
 
                         if (Strophe.getBareJidFromJid($msg.attr('from')) !== this.get('jid') && msg_object.carbon_copied && msg_object.carbon_direction && msg_object.carbon_direction === 'sent') {
                             msg_object.ignore = 'omemo';
@@ -2910,6 +2926,8 @@ xabber.Account.addInitPlugin(function () {
                             msg_object.ignore = 'omemo';
                             return resolve(msg_object);
                         }
+                        console.error(cached_msg);
+                        console.error(msg_object);
 
                         if (cached_msg && cached_msg.envelope) {
                             if (!msg_object.replaced) {
@@ -3034,6 +3052,10 @@ xabber.Account.addInitPlugin(function () {
                                 }
                                 return resolve(msg_object);
                             }).catch((e) => {
+                                console.error(stanza_id);
+                                console.error(contact);
+                                console.error(jid);
+                                console.error($message[0]);
                                 console.error(e);
                                 if (e.name === 'MessageCounterError') {//for capturing double decryption of same message
                                     msg_object.ignore = 'omemo';

@@ -305,6 +305,10 @@ input[type=checkbox].filled-in:checked + label:after {
     display: none !important;
 }
 
+.hidden3 {
+    display: none !important;
+}
+
 .visible {
     display: block !important;
 }
