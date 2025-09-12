@@ -14155,20 +14155,29 @@ input[type=range].voice-message-volume:focus {
 }
 
 .message-actions-panel .button-wrap {
-    display: inline-block;
-    margin: 0 8px;
-    position: relative;
+    cursor: pointer;
+    display: flex;
+    margin: 0 12px;
 }
 
-.message-actions-panel .button-wrap .action-button {
-    cursor: pointer;
-    margin: 0 auto;
-    padding: 12px;
-    display: block;
-    color: #FFF;
-    height: 48px;
-    width: 48px;
-    border-radius: 50%;
+.message-actions-panel .messages-select-count {
+    flex: 1;
+    font-size: 18px;
+    text-wrap-mode: nowrap;
+}
+.message-actions-panel .button-wrap .action-button:hover {
+    background: #e0e0e0;
+    border-radius: 25%;
+    outline: 8px solid #e0e0e0;
+    outline-offset: -1px;
+}
+.message-actions-panel .button-wrap .action-button svg polygon,
+.message-actions-panel .button-wrap .action-button svg path{
+    fill: #757575;
+}
+.message-actions-panel .button-wrap .action-button.delete-message svg polygon,
+.message-actions-panel .button-wrap .action-button.delete-message svg path{
+    fill: #f44336;
 }
 
 .details-panel-right .button-wrap.non-active i,
@@ -14191,10 +14200,6 @@ input[type=range].voice-message-volume:focus {
     color: #F44336 !important;
 }
 
-.message-actions-panel .button-wrap .close-message-panel {
-    background-color: #E0E0E0;
-    color: #9E9E9E;
-}
 
 .message-actions-panel .button-wrap .button-name {
     display: block;
@@ -24145,6 +24150,7 @@ ul.restrictions-list-content>li {
 .notifications-content-wrap.select-active .selected-messages-controls-container .notifications-select-count{
     font-size: 18px;
     flex: 1;
+    text-wrap-mode: nowrap;
 }
 .notifications-content-wrap .notifications-utility .btn-show-search,
 .notifications-content-wrap .notifications-utility .btn-read-all{

@@ -8970,7 +8970,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
             $overlay.click();
         });
         $modal.find('.btn-copy-message').one(`click.${unique_modal_id}`, () => {
-            this.bottom.copyMessages(null, msg);
+            this.bottom.copyMessages(null, msg, true);
             utils.callback_popup_message(xabber.getString("toast__copied_in_clipboard"), 5000);
             $overlay.click();
         });
@@ -14824,11 +14824,10 @@ xabber.ChatBottomView = xabber.BasicView.extend({
                 if ($selected_msgs.first().find('.mdi-play').length)
                     my_msg = false;
             }
-            $message_actions.find('.pin-message-wrap').showIf(this.model.get('group_chat')).switchClass('non-active', ((length !== 1) && this.model.get('group_chat')));
+            $message_actions.find('.messages-select-count')
+                .text(xabber.getQuantityString("chat_screen__bottom_panel__selected_messages__text", length));
             $message_actions.find('.reply-message-wrap').switchClass('non-active', this.model.get('blocked'));
             $message_actions.find('.forward-message-wrap').switchClass('non-active', this.model.get('encrypted'));
-            $message_actions.find('.edit-message-wrap').switchClass('non-active', !((length === 1) && my_msg) || this.content_view.$('.chat-message.saved-main.selected').length || this.model.get('blocked'));
-            // !this.view.$('.chat-notification').hasClass('encryption-warning') && this.view.$('.chat-notification').removeClass('hidden').addClass('msgs-counter').text(xabber.getQuantityString("chat_screen__bottom_panel__selected_messages__text", length));
         } else {
             // !this.view.$('.chat-notification').hasClass('encryption-warning') && this.view.$('.chat-notification').addClass('hidden').removeClass('msgs-counter').text("");
             this.focusOnInput();
@@ -14854,7 +14853,7 @@ xabber.ChatBottomView = xabber.BasicView.extend({
             });
     },
 
-    copyMessages: function (ev, forced_message) {
+    copyMessages: function (ev, forced_message, only_text) {
         if (!this.model.get('active'))
             return;
         let $msgs = this.content_view.$('.chat-message.selected'),
@@ -14865,7 +14864,7 @@ xabber.ChatBottomView = xabber.BasicView.extend({
         });
         forced_message && (msgs = [forced_message]);
         !forced_message && this.resetSelectedMessages();
-        this.pushMessagesToClipboard(msgs);
+        this.pushMessagesToClipboard(msgs, only_text);
     },
 
     editMessage: function (text, text_markups) {
@@ -15161,13 +15160,13 @@ xabber.ChatBottomView = xabber.BasicView.extend({
         });
     },
 
-    pushMessagesToClipboard: function (messages) {
+    pushMessagesToClipboard: function (messages, only_text) {
         let fwd_msg_indicator = "",
-            copied_messages = this.createTextMessage(messages, fwd_msg_indicator);
+            copied_messages = this.createTextMessage(messages, fwd_msg_indicator, only_text);
         utils.copyTextToClipboard(_.unescape(copied_messages));
     },
 
-    createTextMessage: function (messages, fwd_msg_indicator) {
+    createTextMessage: function (messages, fwd_msg_indicator, only_text) {
         let text_message = "";
         for (let i = 0; i < messages.length; i++) {
             let $msg = messages[i];
@@ -15176,17 +15175,21 @@ xabber.ChatBottomView = xabber.BasicView.extend({
             let current_date = moment($msg.get('timestamp')).startOf('day'),
                 prev_date = (i) ? moment(messages[i - 1].get('timestamp')).startOf('day') : moment(0),
                 msg_sender = "";
-                if (prev_date.format('x') !== current_date.format('x')) {
-                    text_message += (fwd_msg_indicator.length ? fwd_msg_indicator + ' ' : "") + pretty_date(current_date) + '\n';
-                }
-                msg_sender = $msg.isSenderMe() ? this.account.get('name') : ($msg.get('user_info') && $msg.get('user_info').nickname || (this.account.contacts.get($msg.get('from_jid')) ? this.account.contacts.get($msg.get('from_jid')).get('name') : $msg.get('from_jid')));
-                text_message += (fwd_msg_indicator.length ? fwd_msg_indicator + ' ' : "") + "[" + utils.pretty_time($msg.get('timestamp')) + "] " + msg_sender + ":\n";
-                fwd_msg_indicator.length && (text_message += fwd_msg_indicator);
-                let original_message = _.unescape(($msg.get('mutable_content') && $msg.get('mutable_content').find(ref => ref.type === 'groupchat')) ? $msg.get('original_message').slice($msg.get('mutable_content').find(ref => ref.type === 'groupchat').end) : $msg.get('original_message'));
-                fwd_msg_indicator.length && (original_message = original_message.replace(/\n/g, '\n&gt; '));
-                (fwd_msg_indicator.length && original_message.indexOf('&gt;') !== 0) && (text_message += ' ');
-                (original_message = _.unescape(original_message.replace(/\n&gt; &gt;/g, '\n&gt;&gt;')));
-                text_message += _.escape(original_message) + '\n';
+            if (prev_date.format('x') !== current_date.format('x')) {
+                current_date = only_text ? '' : pretty_date(current_date)
+                text_message += (fwd_msg_indicator.length ? fwd_msg_indicator + ' ' : "") + current_date + '\n';
+            }
+            msg_sender = $msg.isSenderMe() ? this.account.get('name') : ($msg.get('user_info') && $msg.get('user_info').nickname || (this.account.contacts.get($msg.get('from_jid')) ? this.account.contacts.get($msg.get('from_jid')).get('name') : $msg.get('from_jid')));
+            only_text && (msg_sender = '');
+            let pretty_time = "[" + utils.pretty_time($msg.get('timestamp')) + "] " + msg_sender + ":\n";
+            only_text && (pretty_time = '');
+            text_message += (fwd_msg_indicator.length ? fwd_msg_indicator + ' ' : "") + pretty_time;
+            fwd_msg_indicator.length && (text_message += fwd_msg_indicator);
+            let original_message = _.unescape(($msg.get('mutable_content') && $msg.get('mutable_content').find(ref => ref.type === 'groupchat')) ? $msg.get('original_message').slice($msg.get('mutable_content').find(ref => ref.type === 'groupchat').end) : $msg.get('original_message'));
+            fwd_msg_indicator.length && (original_message = original_message.replace(/\n/g, '\n&gt; '));
+            (fwd_msg_indicator.length && original_message.indexOf('&gt;') !== 0) && (text_message += ' ');
+            (original_message = _.unescape(original_message.replace(/\n&gt; &gt;/g, '\n&gt;&gt;')));
+            text_message += _.escape(original_message) + '\n';
         }
         return text_message.trim();
     },
