@@ -4035,6 +4035,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
     events: {
         'mousedown .chat-message': 'onTouchMessage',
         'click .chat-message': 'onClickMessage',
+        'contextmenu .chat-message': 'onContextMenuMessage',
         'click .chat-msg-location-content': 'onClickLocation',
         'mouseover .chat-msg-location-content.no-title': 'onHoverLocation',
         'click .mdi-link-variant' : 'onClickLink',
@@ -5269,7 +5270,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
 
     },
 
-    loadOwnHistoryToPreviousLastMsg: function () { //34
+    loadOwnHistoryToPreviousLastMsg: function () {
         console.error('loadOwnHistoryToPreviousLastMsg !@@@#@@@@@@@@@@@@@@@@@@@@@@@@@@@');
         console.error(this);
         if (!xabber.settings.load_history) {
@@ -8920,6 +8921,99 @@ xabber.ChatContentView = xabber.BasicView.extend({
             device_info.additional_text = additional_text;
             utils.dialogs.common('', templates.messages.msg_device_information(device_info), null, null, null, 'msg-device-info-modal');
         }
+    },
+
+    onContextMenuMessage: function (ev) {
+        ev.preventDefault();
+        let $elem = $(ev.target).closest('.chat-message'),
+            unique_id = $elem.attr('data-uniqueid');
+
+
+        let messages_arr = this.$el.hasClass('participant-messages-wrap') && this.account.participant_messages
+            || this.$el.hasClass('messages-context-wrap') && this.account.context_messages
+            || this.model.messages;
+
+        let msg = messages_arr.get(unique_id);
+        if (!msg)
+            return;
+
+        let modal = utils.dialogs.context_menu(env.templates.base.message_context_menu),
+            $modal = modal.$modal,
+            unique_modal_id = uuid(),
+            $overlay = $(`#${$modal.data('overlay-id')}`);
+
+        let my_msg = false;
+        if ($elem.attr('data-from') === this.account.get('jid'))
+            my_msg = true;
+        if (this.contact && this.contact.my_info)
+            if ($elem.attr('data-from') === this.contact.my_info.get('id'))
+                my_msg = true;
+        if ($elem.find('.mdi-play').length)
+            my_msg = false;
+
+        $modal.find('.btn-pin').showIf(this.model.get('group_chat'));
+        $modal.find('.btn-reply-message').hideIf(this.model.get('blocked'));
+        $modal.find('.btn-forward-message').hideIf(this.model.get('encrypted'));
+        $modal.find('.btn-edit-message').hideIf(!(my_msg) || this.$('.chat-message.saved-main.selected').length || this.model.get('blocked'));
+
+        this.model.get('encrypted') && $modal.find('.btn-edit-message').addClass('hidden');
+
+        $overlay.addClass('invisible-overlay');
+        $modal.find('.btn-reply-message').one(`click.${unique_modal_id}`, () => {
+            $overlay.click();
+            this.bottom.focusOnInput();
+            this.bottom.replyMessages(null, msg);
+        });
+        $modal.find('.btn-forward-message').one(`click.${unique_modal_id}`, () => {
+            this.bottom.forwardMessages(null, msg);
+            $overlay.click();
+        });
+        $modal.find('.btn-copy-message').one(`click.${unique_modal_id}`, () => {
+            this.bottom.copyMessages(null, msg);
+            utils.callback_popup_message(xabber.getString("toast__copied_in_clipboard"), 5000);
+            $overlay.click();
+        });
+        $modal.find('.btn-edit-message').one(`click.${unique_modal_id}`, () => {
+            $overlay.click();
+            this.bottom.focusOnInput();
+            this.bottom.showEditPanel(null, msg);
+        });
+        $modal.find('.btn-delete-message').one(`click.${unique_modal_id}`, () => {
+            this.bottom.deleteMessages(null, [msg]);
+            $overlay.click();
+        });
+        $modal.find('.btn-select-message').one(`click.${unique_modal_id}`, () => {
+            $elem.switchClass('selected', !$elem.hasClass('selected'));
+            this.bottom.manageSelectedMessages();
+            $overlay.click();
+        });
+        $overlay.one(`contextmenu.${unique_modal_id}`, (e) => {
+            $overlay.click();
+            e.preventDefault();
+            setTimeout(() => {
+                let rightClickEvent = new MouseEvent('contextmenu', {
+                    bubbles: true,
+                    cancelable: true,
+                    view: window,
+                    button: 2, // 2 для правой кнопки мыши
+                    clientX: e.clientX,
+                    clientY: e.clientY,
+                });
+                $overlay.css('display', 'none');
+                let element = document.elementFromPoint(e.clientX, e.clientY);
+                if (element) {
+                    element.dispatchEvent(rightClickEvent);
+                }
+            }, 50);
+        });
+        modal.onClosed = () => {
+            $modal.find('.context-menu-btn').off(`click.${unique_modal_id}`);
+            $overlay.off(`contextmenu.${unique_modal_id}`);
+        };
+        $modal.positionToCursorPercent({
+            clientX: ev.clientX,
+            clientY: ev.clientY,
+        })
     },
 
     onClickMessage: function (ev) {
@@ -14693,7 +14787,7 @@ xabber.ChatBottomView = xabber.BasicView.extend({
     manageSelectedMessages: function () {
         let $selected_msgs = this.content_view.$('.chat-message.selected'),
             $input_panel = this.$('.message-input-panel'),
-            $message_actions = this.$('.message-actions-panel');
+            $message_actions = this.$('.message-actions-panel'),
             length = $selected_msgs.length;
         $input_panel.hideIf(this.model.get('blocked') || length);
         $message_actions.showIf(length);
@@ -14740,7 +14834,7 @@ xabber.ChatBottomView = xabber.BasicView.extend({
             });
     },
 
-    copyMessages: function () {
+    copyMessages: function (ev, forced_message) {
         if (!this.model.get('active'))
             return;
         let $msgs = this.content_view.$('.chat-message.selected'),
@@ -14749,7 +14843,8 @@ xabber.ChatBottomView = xabber.BasicView.extend({
             let msg = this.messages_arr.get(item.dataset.uniqueid);
             msg && msgs.push(msg);
         });
-        this.resetSelectedMessages();
+        forced_message && (msgs = [forced_message]);
+        !forced_message && this.resetSelectedMessages();
         this.pushMessagesToClipboard(msgs);
     },
 
@@ -14924,13 +15019,14 @@ xabber.ChatBottomView = xabber.BasicView.extend({
         }
     },
 
-    showEditPanel: function () {
+    showEditPanel: function (ev, forced_msg) {
         if (!this.model.get('active') || this.model.get('encrypted'))
             return;
         if (this.$('.edit-message-wrap').hasClass('non-active'))
             return;
         let $msg = this.content_view.$('.chat-message.selected').first(),
             edit_msg = this.messages_arr.get($msg.data('uniqueid'));
+        forced_msg && (edit_msg = forced_msg);
         this.edit_message = edit_msg;
         this.resetSelectedMessages();
         this.setEditedMessageAttachments(edit_msg);
@@ -14971,7 +15067,7 @@ xabber.ChatBottomView = xabber.BasicView.extend({
                     messages && messages.length && this.unsetForwardedMessages();
                 });
             });
-            if (!this.model.get('group_chat') && !this.model.get('saved') && ((my_msgs === $msgs.length) || on_rewrite) && this.contact && this.contact.domain){
+            if (!this.model.get('group_chat') && !this.model.get('saved') && ((my_msgs === msgs.length) || on_rewrite) && this.contact && this.contact.domain){
                 if (this.contact.get('server_has_rewrite')){
                     dialog_options = [{
                         name: 'symmetric_deletion',
@@ -15075,7 +15171,7 @@ xabber.ChatBottomView = xabber.BasicView.extend({
         return text_message.trim();
     },
 
-    replyMessages: function () {
+    replyMessages: function (ev, forced_message) {
         if (!this.model.get('active'))
             return;
         let $msgs = this.content_view.$('.chat-message.selected'),
@@ -15089,11 +15185,12 @@ xabber.ChatBottomView = xabber.BasicView.extend({
                     msgs.push(msg);
             }
         });
-        this.resetSelectedMessages();
+        forced_message && (msgs = [forced_message]);
+        !forced_message && this.resetSelectedMessages();
         this.setForwardedMessages(msgs);
     },
 
-    forwardMessages: function () {
+    forwardMessages: function (ev, forced_message) {
         if (!this.model.get('active') || this.model.get('encrypted'))
             return;
         if (this.$('.forward-message-wrap').hasClass('non-active'))
@@ -15109,6 +15206,8 @@ xabber.ChatBottomView = xabber.BasicView.extend({
                     msgs.push(msg);
             }
         });
+        forced_message && (msgs = [forced_message]);
+        !forced_message && this.resetSelectedMessages();
         this.resetSelectedMessages();
         if (!xabber.forward_panel)
             xabber.forward_panel = new xabber.ForwardPanelView({ model: xabber.opened_chats });
@@ -15255,18 +15354,18 @@ xabber.ChatSettings = Backbone.ModelWithStorage.extend({
 
     _initialize: function (attrs, options) {
         this.account = options.account;
-        this.account.on('notification_last_msg_updated', this.updateNotificationsLastMsgId, this) //34
-        this.account.on('own_last_msg_updated', this.updateOwnLastMsgId, this)
+        this.account.on('notification_last_msg_updated', this.updateNotificationsLastMsgId, this);
+        this.account.on('own_last_msg_updated', this.updateOwnLastMsgId, this);
     },
 
     getNotificationsLastMsgId: function () {
         return _.clone(this.get('notifications_last_msg_id'));
     },
 
-    getOwnLastMsgId: function (is_encrypted) { //34
+    getOwnLastMsgId: function (is_encrypted) {
         if (is_encrypted)
             return _.clone(this.get('own_encrypted_last_msg_id'));
-        eles
+        else
             return _.clone(this.get('own_last_msg_id'));
     },
 

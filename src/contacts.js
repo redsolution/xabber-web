@@ -9482,6 +9482,9 @@ xabber.Roster = xabber.ContactsBase.extend({
         console.warn(contact.get('jid') === this.account.get('jid'));
         console.warn(chat);
         if (contact.get('jid') === this.account.get('jid')){
+            if (!chat.item_view.content) {
+                chat.item_view.content = new xabber.ChatContentView({chat_item: chat.item_view});
+            }
             chat.item_view.content.loadOwnHistoryToPreviousLastMsg();
         }
         unread_msgs_count && (options.is_unread = true);
