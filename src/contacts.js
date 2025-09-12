@@ -9479,9 +9479,9 @@ xabber.Roster = xabber.ContactsBase.extend({
                 chat.trigger('get_missed_history', request_with_stamp/1000);
             }
         }
-        console.warn(contact.get('jid') === this.account.get('jid'));
+        contact && this.account && console.warn(contact.get('jid') === this.account.get('jid'));
         console.warn(chat);
-        if (contact.get('jid') === this.account.get('jid')){
+        if (contact && this.account && contact.get('jid') === this.account.get('jid')){
             if (!chat.item_view.content) {
                 chat.item_view.content = new xabber.ChatContentView({chat_item: chat.item_view});
             }

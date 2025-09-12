@@ -4917,6 +4917,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
     },
 
     backToBottom: function (ev) {
+        this.bottom.resetSelectedMessages();
         this.model.set('last_sync_unread_id', undefined);
         this.hideMessagesAfterSkipping();
         this._no_scrolling_event = true;
@@ -14789,8 +14790,27 @@ xabber.ChatBottomView = xabber.BasicView.extend({
             $input_panel = this.$('.message-input-panel'),
             $message_actions = this.$('.message-actions-panel'),
             length = $selected_msgs.length;
+        console.error(this.$el);
+        this.$el.removeClass('select-active');
+        console.error(this.$el.height());
+        this.$el.height() && (this.bottom_height = this.$el.height());
+        console.error(this.bottom_height);
         $input_panel.hideIf(this.model.get('blocked') || length);
         $message_actions.showIf(length);
+        if (length){
+            this.content_view.$('.back-to-unread').css('bottom', `${this.bottom_height + 12}px`);
+            this.content_view.$('.back-to-mentions').css('bottom', `${this.bottom_height + 12}px`);
+            this.content_view.$('.back-to-bottom').css('bottom', `${this.bottom_height + 12}px`);
+            this.content_view.$('.chat-content').css('padding-bottom', `${this.bottom_height}px`);
+            this.content_view.updateScrollBar();
+        } else {
+            this.content_view.$('.back-to-unread').css('bottom', `12px`);
+            this.content_view.$('.back-to-mentions').css('bottom', `12px`);
+            this.content_view.$('.back-to-bottom').css('bottom', `12px`);
+            this.content_view.$('.chat-content').css('padding-bottom', `0px`);
+            this.content_view.updateScrollBar();
+        }
+        this.$el.switchClass('select-active', length);
         this.model.get('blocked') && this.$('.blocked-msg').hideIf(length);
         if (length) {
             this.setButtonsWidth();
@@ -14808,9 +14828,9 @@ xabber.ChatBottomView = xabber.BasicView.extend({
             $message_actions.find('.reply-message-wrap').switchClass('non-active', this.model.get('blocked'));
             $message_actions.find('.forward-message-wrap').switchClass('non-active', this.model.get('encrypted'));
             $message_actions.find('.edit-message-wrap').switchClass('non-active', !((length === 1) && my_msg) || this.content_view.$('.chat-message.saved-main.selected').length || this.model.get('blocked'));
-            !this.view.$('.chat-notification').hasClass('encryption-warning') && this.view.$('.chat-notification').removeClass('hidden').addClass('msgs-counter').text(xabber.getQuantityString("chat_screen__bottom_panel__selected_messages__text", length));
+            // !this.view.$('.chat-notification').hasClass('encryption-warning') && this.view.$('.chat-notification').removeClass('hidden').addClass('msgs-counter').text(xabber.getQuantityString("chat_screen__bottom_panel__selected_messages__text", length));
         } else {
-            !this.view.$('.chat-notification').hasClass('encryption-warning') && this.view.$('.chat-notification').addClass('hidden').removeClass('msgs-counter').text("");
+            // !this.view.$('.chat-notification').hasClass('encryption-warning') && this.view.$('.chat-notification').addClass('hidden').removeClass('msgs-counter').text("");
             this.focusOnInput();
         }
     },

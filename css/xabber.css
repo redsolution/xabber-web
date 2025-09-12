@@ -14115,7 +14115,6 @@ input[type=range].voice-message-volume:focus {
     float: right;
 }
 
-.message-actions-panel,
 .non-authorized-panel {
     position: relative;
     height: 112px;
@@ -14126,14 +14125,23 @@ input[type=range].voice-message-volume:focus {
     text-transform: none;
 }
 
+.chat-bottom-wrap.select-active {
+    height: 0;
+
+}
 .message-actions-panel {
-    padding: 0;
-    flex-direction: row;
-    height: 120px;
-    display: flex;
     align-items: center;
-    flex-wrap: nowrap;
-    justify-content: center;
+    background: #fff;
+    border-radius: 8px;
+    bottom: 32px;
+    box-shadow: 0 1px 2px 1px rgba(0, 0, 0, .22), 0 2px 8px 1px rgba(0, 0, 0, .21);
+    display: flex;
+    height: 56px;
+    justify-content: space-between;
+    left: 50%;
+    position: absolute;
+    transform: translate(-50%);
+    width: fit-content;
 }
 
 .chat-bottom-wrap[data-contact-trust]:not([data-contact-trust=""]) .message-actions-panel {
@@ -24093,10 +24101,10 @@ ul.restrictions-list-content>li {
     z-index: 1;
     pointer-events: none;
 }
-.notifications-content-wrap .notifications-select-controls{
+.notifications-content-wrap .selected-messages-controls-container{
     display:none;
 }
-.notifications-content-wrap.select-active .notifications-select-controls{
+.notifications-content-wrap.select-active .selected-messages-controls-container{
     align-items: center;
     background: #fff;
     border-radius: 8px;
@@ -24110,31 +24118,31 @@ ul.restrictions-list-content>li {
     justify-content: space-between;
     box-shadow: 0px 1px 2px 1px rgba(0,0,0,.22),0 2px 8px 1px rgba(0,0,0,.21);
 }
-.notifications-content-wrap.select-active .notifications-select-controls .mdi:hover{
+.notifications-content-wrap.select-active .selected-messages-controls-container .mdi:hover{
     background: #E0E0E0;
     outline: 8px solid #E0E0E0;
     outline-offset: -1px;
     border-radius: 25%;
 }
-.notifications-content-wrap.select-active .notifications-select-controls .mdi.mdi-24px:hover{
+.notifications-content-wrap.select-active .selected-messages-controls-container .mdi.mdi-24px:hover{
     outline: 12px solid #E0E0E0;
 }
-.notifications-content-wrap.select-active .notifications-select-controls .btn-unselect-all{
+.notifications-content-wrap.select-active .selected-messages-controls-container .btn-unselect-all{
     cursor: pointer;
     margin: 0 12px;
     display: flex;
 }
-.notifications-content-wrap.select-active .notifications-select-controls .btn-delete-selected{
+.notifications-content-wrap.select-active .selected-messages-controls-container .btn-delete-selected{
     cursor: pointer;
     margin: 0 16px 0 14px;
     display: flex;
 }
-.notifications-content-wrap.select-active .notifications-select-controls .btn-copy{
+.notifications-content-wrap.select-active .selected-messages-controls-container .btn-copy{
     margin: 0 14px;
     cursor: pointer;
     color: #9E9E9E;
 }
-.notifications-content-wrap.select-active .notifications-select-controls .notifications-select-count{
+.notifications-content-wrap.select-active .selected-messages-controls-container .notifications-select-count{
     font-size: 18px;
     flex: 1;
 }
