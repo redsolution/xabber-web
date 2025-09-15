@@ -5125,7 +5125,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
                         max: xabber.settings.mam_messages_limit,
                         before: this.model.get('first_archive_id') || ''
                     }), {previous_history: true});
-                } else if ((counter === 0) && options.previous_history && !this.model.get('history_loaded')) {
+                } else if ((counter < (query.max/2)) && options.previous_history && !this.model.get('history_loaded')) {
                     this.loadPreviousHistory();
                 }
                 if (options.unread_history_before){
@@ -5151,7 +5151,8 @@ xabber.ChatContentView = xabber.BasicView.extend({
                     }, options)
                 ).then((loaded_message) => {
                     if (loaded_message) {
-                        counter++;
+                        if (!(loaded_message.get('silent') && !loaded_message.get('message')))
+                            counter++;
                         if (this.model.get('notifications') && this.model.get('last_read_msg')){
                             let last_read_msg_item = this.model.messages.get(this.model.get('last_read_msg'));
                             if (last_read_msg_item) {
@@ -8967,6 +8968,10 @@ xabber.ChatContentView = xabber.BasicView.extend({
         });
         $modal.find('.btn-forward-message').one(`click.${unique_modal_id}`, () => {
             this.bottom.forwardMessages(null, msg);
+            $overlay.click();
+        });
+        $modal.find('.btn-pin').one(`click.${unique_modal_id}`, () => {
+            this.bottom.pinMessage(null, msg);
             $overlay.click();
         });
         $modal.find('.btn-copy-message').one(`click.${unique_modal_id}`, () => {
@@ -14790,11 +14795,8 @@ xabber.ChatBottomView = xabber.BasicView.extend({
             $input_panel = this.$('.message-input-panel'),
             $message_actions = this.$('.message-actions-panel'),
             length = $selected_msgs.length;
-        console.error(this.$el);
         this.$el.removeClass('select-active');
-        console.error(this.$el.height());
         this.$el.height() && (this.bottom_height = this.$el.height());
-        console.error(this.bottom_height);
         $input_panel.hideIf(this.model.get('blocked') || length);
         $message_actions.showIf(length);
         if (length){
@@ -14834,15 +14836,18 @@ xabber.ChatBottomView = xabber.BasicView.extend({
         }
     },
 
-    pinMessage: function () {
+    pinMessage: function (ev, forced_message) {
         if (!this.model.get('active'))
             return;
-        if (this.$('.pin-message-wrap').hasClass('non-active'))
-            return;
-        let $msg = this.content_view.$('.chat-message.selected').first(),
-            pinned_msg = this.messages_arr.get($msg.data('uniqueid')),
+        let $msg, pinned_msg, msg_id;
+        if (forced_message){
+            msg_id = forced_message.get('stanza_id')
+        } else{
+            $msg = this.content_view.$('.chat-message.selected').first();
+            pinned_msg = this.messages_arr.get($msg.data('uniqueid'));
             msg_id = pinned_msg.get('stanza_id');
-        this.resetSelectedMessages();
+            this.resetSelectedMessages();
+        }
         let iq = $iq({type: 'set', to: this.contact.get('full_jid') || this.contact.get('jid')})
             .c('update', {xmlns: Strophe.NS.GROUP_CHAT})
             .c('pinned-message').t(msg_id);

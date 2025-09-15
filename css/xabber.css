@@ -14164,6 +14164,7 @@ input[type=range].voice-message-volume:focus {
     flex: 1;
     font-size: 18px;
     text-wrap-mode: nowrap;
+    width: 220px;
 }
 .message-actions-panel .button-wrap .action-button:hover {
     background: #e0e0e0;
@@ -24384,7 +24385,7 @@ ul.restrictions-list-content>li {
     display: none;
 }
 .notifications-content .chat-content{
-    padding: 15px 10px 0 4px;
+    padding: 0 10px 0 4px;
     height: 100%;
     top: unset;
     transform: none;
@@ -25029,7 +25030,7 @@ ul.restrictions-list-content>li {
     color: #000;
     cursor: pointer;
     font-size: 16px;
-    padding: 8px 40px 8px 48px;
+    padding: 8px 40px 8px 56px;
     position: relative;
     text-transform: capitalize;
 }
@@ -25043,7 +25044,7 @@ ul.restrictions-list-content>li {
     background: #eee;
 }
 .context-menu-container .context-menu-btn .mdi{
-    left: 8px;
+    left: 16px;
     position: absolute;
     top: 8px;
 }

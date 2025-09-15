@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.4.207","version_description":"changed selected messages controls design, changed copying msg on right click"}'
+'{"version_number":"2.4.208","version_description":"added empty silent messages handling in previous msgs loading, fixed btn-pin in message context menu"}'
 )});
