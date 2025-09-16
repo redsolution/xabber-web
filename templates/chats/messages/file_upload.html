@@ -22,10 +22,10 @@
         <div class="edited-info one-line hidden"></div>
         {[ if (is_sender) { ]}
         <i class="msg-delivering-state mdi mdi-14px" data-state="{{state}}" title="{{verbose_state}}" data-activates="retry-send-msg-{{msgid}}"></i>
-        <div id="retry-send-msg-{{msgid}}" class="dropdown-content retry-send-message noselect">
-            <div class="msg-retry-dropdown-btn active-ground-color-600 repeat-upload">{[print(xabber.getString("resend"))]}</div>
-            <div class="msg-retry-dropdown-btn active-ground-color-600 edit-upload{[ if (encrypted) { ]} hidden{[ } ]}">{[print(xabber.getString("edit"))]}</div>
-            <div class="msg-retry-dropdown-btn active-ground-color-600 btn-delete-message">{[print(xabber.getString("delete"))]}</div>
+        <div id="retry-send-msg-{{msgid}}" class="unified-dropdown-style dropdown-content retry-send-message noselect">
+            <div class="unified-dropdown-style-item msg-retry-dropdown-btn repeat-upload">{[print(xabber.getString("resend"))]}</div>
+            <div class="unified-dropdown-style-item msg-retry-dropdown-btn edit-upload{[ if (encrypted) { ]} hidden{[ } ]}">{[print(xabber.getString("edit"))]}</div>
+            <div class="unified-dropdown-style-item msg-retry-dropdown-btn btn-delete-message">{[print(xabber.getString("delete"))]}</div>
         </div>
         {[ } ]}
         {[ if (ephemeral_timer_text) { ]}

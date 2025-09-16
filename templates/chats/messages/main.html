@@ -30,8 +30,8 @@
         {[ if (is_sender) { ]}
 
             <i class="msg-delivering-state mdi mdi-14px" data-state="{{state}}" title="{{verbose_state}}" data-activates="retry-send-msg-{{msgid}}"></i>
-            <div id="retry-send-msg-{{msgid}}" class="dropdown-content retry-send-message noselect">
-                <div class="msg-retry-dropdown-btn active-ground-color-600 btn-retry-send-message">{[print(xabber.getString("chat_screen__message__button_retry_send"))]}</div>
+            <div id="retry-send-msg-{{msgid}}" class="dropdown-content unified-dropdown-style retry-send-message noselect">
+                <div class="unified-dropdown-style-item msg-retry-dropdown-btn btn-retry-send-message">{[print(xabber.getString("chat_screen__message__button_retry_send"))]}</div>
             </div>
         {[ } ]}
         <div class="not-decrypted-icon mdi-14px" title="{[print(xabber.getString('omemo__not_verified_message_title'))]}">

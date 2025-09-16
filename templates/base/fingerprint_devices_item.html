@@ -39,7 +39,7 @@
             <div data-value="{{trust}}">{[print(xabber.getString(`omemo__dialog_fingerprints__button_verify_device`))]}</div>
         </div>
     </div>
-    <div id="select-status-{{id}}" class="dropdown-content bootstrap-dropdown noselect fingerprint-dropdown">
+    <div id="select-status-{{id}}" class="dropdown-content unified-dropdown-style noselect fingerprint-dropdown">
         <!--<div data-value="ignore" class="property-variant btn-ignore">{[print(xabber.getString("omemo__dialog_fingerprints__button_ignore"))]}</div>-->
         {[if (!edit_setting) {]}
         <div data-value="trust" class="property-variant btn-start-trust-session">{[print(xabber.getString("trust_session__start_verification"))]}</div>

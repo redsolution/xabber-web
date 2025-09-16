@@ -154,7 +154,7 @@ input[type=checkbox].filled-in:checked + label:after {
     overflow: hidden;
 }
 
-.dropdown-content li > a, .dropdown-content li > span {
+.dropdown-content:not(.unified-dropdown-style) li > a, .dropdown-content:not(.unified-dropdown-style) li > span {
     color: #212121;
 }
 
@@ -1857,12 +1857,12 @@ body {
 [data-main-color=red] .login-buttons .btn-main{
     color: #E53935;
 }
-[data-main-color=red] .details-panel .gallery-wrap .dropdown-content .property-variant:active,
-[data-main-color=red] .settings-panel-head .dropdown-content .property-variant:active,
-[data-main-color=red] .dropdown-content.bootstrap-dropdown .property-variant:active,
-[data-main-color=red] .register-form.login-panel-form .register-form-picture .dropdown-content .property-variant:active,
-[data-main-color=red] .add-contact-modal .dropdown-content .property-variant:active,
-[data-main-color=red] .login-panel-form .xmpp-server-dropdown-wrap .dropdown-content .property-variant:active,
+[data-main-color=red] .details-panel .gallery-wrap .dropdown-content:not(.unified-dropdown-style) .property-variant:active,
+[data-main-color=red] .settings-panel-head .dropdown-content:not(.unified-dropdown-style) .property-variant:active,
+[data-main-color=red] .dropdown-content:not(.unified-dropdown-style).bootstrap-dropdown .property-variant:active,
+[data-main-color=red] .register-form.login-panel-form .register-form-picture .dropdown-content:not(.unified-dropdown-style) .property-variant:active,
+[data-main-color=red] .add-contact-modal .dropdown-content:not(.unified-dropdown-style) .property-variant:active,
+[data-main-color=red] .login-panel-form .xmpp-server-dropdown-wrap .dropdown-content:not(.unified-dropdown-style) .property-variant:active,
 [data-main-color=red] .register-form.login-panel-form .register-form-step-wrap .circle-icon{
     background-color: #E53935 !important;
 }
@@ -1973,12 +1973,12 @@ body {
 [data-main-color=pink] .login-buttons .btn-main{
     color: #D81B60;
 }
-[data-main-color=pink] .details-panel .gallery-wrap .dropdown-content .property-variant:active,
-[data-main-color=pink] .settings-panel-head .dropdown-content .property-variant:active,
-[data-main-color=pink] .dropdown-content.bootstrap-dropdown .property-variant:active,
-[data-main-color=pink] .register-form.login-panel-form .register-form-picture .dropdown-content .property-variant:active,
-[data-main-color=pink] .add-contact-modal .dropdown-content .property-variant:active,
-[data-main-color=pink] .login-panel-form .xmpp-server-dropdown-wrap .dropdown-content .property-variant:active,
+[data-main-color=pink] .details-panel .gallery-wrap .dropdown-content:not(.unified-dropdown-style) .property-variant:active,
+[data-main-color=pink] .settings-panel-head .dropdown-content:not(.unified-dropdown-style) .property-variant:active,
+[data-main-color=pink] .dropdown-content:not(.unified-dropdown-style).bootstrap-dropdown .property-variant:active,
+[data-main-color=pink] .register-form.login-panel-form .register-form-picture .dropdown-content:not(.unified-dropdown-style) .property-variant:active,
+[data-main-color=pink] .add-contact-modal .dropdown-content:not(.unified-dropdown-style) .property-variant:active,
+[data-main-color=pink] .login-panel-form .xmpp-server-dropdown-wrap .dropdown-content:not(.unified-dropdown-style) .property-variant:active,
 [data-main-color=pink] .register-form.login-panel-form .register-form-step-wrap .circle-icon{
     background-color: #D81B60 !important;
 }
@@ -2089,12 +2089,12 @@ body {
 [data-main-color=purple] .login-buttons .btn-main{
     color: #8E24AA;
 }
-[data-main-color=purple] .details-panel .gallery-wrap .dropdown-content .property-variant:active,
-[data-main-color=purple] .settings-panel-head .dropdown-content .property-variant:active,
-[data-main-color=purple] .dropdown-content.bootstrap-dropdown .property-variant:active,
-[data-main-color=purple] .register-form.login-panel-form .register-form-picture .dropdown-content .property-variant:active,
-[data-main-color=purple] .add-contact-modal .dropdown-content .property-variant:active,
-[data-main-color=purple] .login-panel-form .xmpp-server-dropdown-wrap .dropdown-content .property-variant:active,
+[data-main-color=purple] .details-panel .gallery-wrap .dropdown-content:not(.unified-dropdown-style) .property-variant:active,
+[data-main-color=purple] .settings-panel-head .dropdown-content:not(.unified-dropdown-style) .property-variant:active,
+[data-main-color=purple] .dropdown-content:not(.unified-dropdown-style).bootstrap-dropdown .property-variant:active,
+[data-main-color=purple] .register-form.login-panel-form .register-form-picture .dropdown-content:not(.unified-dropdown-style) .property-variant:active,
+[data-main-color=purple] .add-contact-modal .dropdown-content:not(.unified-dropdown-style) .property-variant:active,
+[data-main-color=purple] .login-panel-form .xmpp-server-dropdown-wrap .dropdown-content:not(.unified-dropdown-style) .property-variant:active,
 [data-main-color=purple] .register-form.login-panel-form .register-form-step-wrap .circle-icon{
     background-color: #8E24AA !important;
 }
@@ -2204,12 +2204,12 @@ body {
 [data-main-color=deep-purple] .login-buttons .btn-main{
     color: #5E35B1;
 }
-[data-main-color=deep-purple] .details-panel .gallery-wrap .dropdown-content .property-variant:active,
-[data-main-color=deep-purple] .settings-panel-head .dropdown-content .property-variant:active,
-[data-main-color=deep-purple] .dropdown-content.bootstrap-dropdown .property-variant:active,
-[data-main-color=deep-purple] .register-form.login-panel-form .register-form-picture .dropdown-content .property-variant:active,
-[data-main-color=deep-purple] .add-contact-modal .dropdown-content .property-variant:active,
-[data-main-color=deep-purple] .login-panel-form .xmpp-server-dropdown-wrap .dropdown-content .property-variant:active,
+[data-main-color=deep-purple] .details-panel .gallery-wrap .dropdown-content:not(.unified-dropdown-style) .property-variant:active,
+[data-main-color=deep-purple] .settings-panel-head .dropdown-content:not(.unified-dropdown-style) .property-variant:active,
+[data-main-color=deep-purple] .dropdown-content:not(.unified-dropdown-style).bootstrap-dropdown .property-variant:active,
+[data-main-color=deep-purple] .register-form.login-panel-form .register-form-picture .dropdown-content:not(.unified-dropdown-style) .property-variant:active,
+[data-main-color=deep-purple] .add-contact-modal .dropdown-content:not(.unified-dropdown-style) .property-variant:active,
+[data-main-color=deep-purple] .login-panel-form .xmpp-server-dropdown-wrap .dropdown-content:not(.unified-dropdown-style) .property-variant:active,
 [data-main-color=deep-purple] .register-form.login-panel-form .register-form-step-wrap .circle-icon{
     background-color: #5E35B1 !important;
 }
@@ -2320,12 +2320,12 @@ body {
 [data-main-color=indigo] .login-buttons .btn-main{
     color: #3949AB;
 }
-[data-main-color=indigo] .details-panel .gallery-wrap .dropdown-content .property-variant:active,
-[data-main-color=indigo] .settings-panel-head .dropdown-content .property-variant:active,
-[data-main-color=indigo] .dropdown-content.bootstrap-dropdown .property-variant:active,
-[data-main-color=indigo] .register-form.login-panel-form .register-form-picture .dropdown-content .property-variant:active,
-[data-main-color=indigo] .add-contact-modal .dropdown-content .property-variant:active,
-[data-main-color=indigo] .login-panel-form .xmpp-server-dropdown-wrap .dropdown-content .property-variant:active,
+[data-main-color=indigo] .details-panel .gallery-wrap .dropdown-content:not(.unified-dropdown-style) .property-variant:active,
+[data-main-color=indigo] .settings-panel-head .dropdown-content:not(.unified-dropdown-style) .property-variant:active,
+[data-main-color=indigo] .dropdown-content:not(.unified-dropdown-style).bootstrap-dropdown .property-variant:active,
+[data-main-color=indigo] .register-form.login-panel-form .register-form-picture .dropdown-content:not(.unified-dropdown-style) .property-variant:active,
+[data-main-color=indigo] .add-contact-modal .dropdown-content:not(.unified-dropdown-style) .property-variant:active,
+[data-main-color=indigo] .login-panel-form .xmpp-server-dropdown-wrap .dropdown-content:not(.unified-dropdown-style) .property-variant:active,
 [data-main-color=indigo] .register-form.login-panel-form .register-form-step-wrap .circle-icon{
     background-color: #3949AB !important;
 }
@@ -2436,12 +2436,12 @@ body {
 [data-main-color=blue] .login-buttons .btn-main{
     color: #1E88E5;
 }
-[data-main-color=blue] .details-panel .gallery-wrap .dropdown-content .property-variant:active,
-[data-main-color=blue] .settings-panel-head .dropdown-content .property-variant:active,
-[data-main-color=blue] .dropdown-content.bootstrap-dropdown .property-variant:active,
-[data-main-color=blue] .register-form.login-panel-form .register-form-picture .dropdown-content .property-variant:active,
-[data-main-color=blue] .add-contact-modal .dropdown-content .property-variant:active,
-[data-main-color=blue] .login-panel-form .xmpp-server-dropdown-wrap .dropdown-content .property-variant:active,
+[data-main-color=blue] .details-panel .gallery-wrap .dropdown-content:not(.unified-dropdown-style) .property-variant:active,
+[data-main-color=blue] .settings-panel-head .dropdown-content:not(.unified-dropdown-style) .property-variant:active,
+[data-main-color=blue] .dropdown-content:not(.unified-dropdown-style).bootstrap-dropdown .property-variant:active,
+[data-main-color=blue] .register-form.login-panel-form .register-form-picture .dropdown-content:not(.unified-dropdown-style) .property-variant:active,
+[data-main-color=blue] .add-contact-modal .dropdown-content:not(.unified-dropdown-style) .property-variant:active,
+[data-main-color=blue] .login-panel-form .xmpp-server-dropdown-wrap .dropdown-content:not(.unified-dropdown-style) .property-variant:active,
 [data-main-color=blue] .register-form.login-panel-form .register-form-step-wrap .circle-icon{
     background-color: #1E88E5 !important;
 }
@@ -2552,12 +2552,12 @@ body {
 [data-main-color=light-blue] .login-buttons .btn-main{
     color: #039BE5;
 }
-[data-main-color=light-blue] .details-panel .gallery-wrap .dropdown-content .property-variant:active,
-[data-main-color=light-blue] .settings-panel-head .dropdown-content .property-variant:active,
-[data-main-color=light-blue] .dropdown-content.bootstrap-dropdown .property-variant:active,
-[data-main-color=light-blue] .register-form.login-panel-form .register-form-picture .dropdown-content .property-variant:active,
-[data-main-color=light-blue] .add-contact-modal .dropdown-content .property-variant:active,
-[data-main-color=light-blue] .login-panel-form .xmpp-server-dropdown-wrap .dropdown-content .property-variant:active,
+[data-main-color=light-blue] .details-panel .gallery-wrap .dropdown-content:not(.unified-dropdown-style) .property-variant:active,
+[data-main-color=light-blue] .settings-panel-head .dropdown-content:not(.unified-dropdown-style) .property-variant:active,
+[data-main-color=light-blue] .dropdown-content:not(.unified-dropdown-style).bootstrap-dropdown .property-variant:active,
+[data-main-color=light-blue] .register-form.login-panel-form .register-form-picture .dropdown-content:not(.unified-dropdown-style) .property-variant:active,
+[data-main-color=light-blue] .add-contact-modal .dropdown-content:not(.unified-dropdown-style) .property-variant:active,
+[data-main-color=light-blue] .login-panel-form .xmpp-server-dropdown-wrap .dropdown-content:not(.unified-dropdown-style) .property-variant:active,
 [data-main-color=light-blue] .register-form.login-panel-form .register-form-step-wrap .circle-icon{
     background-color: #039BE5 !important;
 }
@@ -2668,12 +2668,12 @@ body {
 [data-main-color=cyan] .login-buttons .btn-main{
     color: #00ACC1;
 }
-[data-main-color=cyan] .details-panel .gallery-wrap .dropdown-content .property-variant:active,
-[data-main-color=cyan] .settings-panel-head .dropdown-content .property-variant:active,
-[data-main-color=cyan] .dropdown-content.bootstrap-dropdown .property-variant:active,
-[data-main-color=cyan] .register-form.login-panel-form .register-form-picture .dropdown-content .property-variant:active,
-[data-main-color=cyan] .add-contact-modal .dropdown-content .property-variant:active,
-[data-main-color=cyan] .login-panel-form .xmpp-server-dropdown-wrap .dropdown-content .property-variant:active,
+[data-main-color=cyan] .details-panel .gallery-wrap .dropdown-content:not(.unified-dropdown-style) .property-variant:active,
+[data-main-color=cyan] .settings-panel-head .dropdown-content:not(.unified-dropdown-style) .property-variant:active,
+[data-main-color=cyan] .dropdown-content:not(.unified-dropdown-style).bootstrap-dropdown .property-variant:active,
+[data-main-color=cyan] .register-form.login-panel-form .register-form-picture .dropdown-content:not(.unified-dropdown-style) .property-variant:active,
+[data-main-color=cyan] .add-contact-modal .dropdown-content:not(.unified-dropdown-style) .property-variant:active,
+[data-main-color=cyan] .login-panel-form .xmpp-server-dropdown-wrap .dropdown-content:not(.unified-dropdown-style) .property-variant:active,
 [data-main-color=cyan] .register-form.login-panel-form .register-form-step-wrap .circle-icon{
     background-color: #00ACC1 !important;
 }
@@ -2784,12 +2784,12 @@ body {
 [data-main-color=teal] .login-buttons .btn-main{
     color: #00897B;
 }
-[data-main-color=teal] .details-panel .gallery-wrap .dropdown-content .property-variant:active,
-[data-main-color=teal] .settings-panel-head .dropdown-content .property-variant:active,
-[data-main-color=teal] .dropdown-content.bootstrap-dropdown .property-variant:active,
-[data-main-color=teal] .register-form.login-panel-form .register-form-picture .dropdown-content .property-variant:active,
-[data-main-color=teal] .add-contact-modal .dropdown-content .property-variant:active,
-[data-main-color=teal] .login-panel-form .xmpp-server-dropdown-wrap .dropdown-content .property-variant:active,
+[data-main-color=teal] .details-panel .gallery-wrap .dropdown-content:not(.unified-dropdown-style) .property-variant:active,
+[data-main-color=teal] .settings-panel-head .dropdown-content:not(.unified-dropdown-style) .property-variant:active,
+[data-main-color=teal] .dropdown-content:not(.unified-dropdown-style).bootstrap-dropdown .property-variant:active,
+[data-main-color=teal] .register-form.login-panel-form .register-form-picture .dropdown-content:not(.unified-dropdown-style) .property-variant:active,
+[data-main-color=teal] .add-contact-modal .dropdown-content:not(.unified-dropdown-style) .property-variant:active,
+[data-main-color=teal] .login-panel-form .xmpp-server-dropdown-wrap .dropdown-content:not(.unified-dropdown-style) .property-variant:active,
 [data-main-color=teal] .register-form.login-panel-form .register-form-step-wrap .circle-icon{
     background-color: #00897B !important;
 }
@@ -2900,12 +2900,12 @@ body {
 [data-main-color=green] .login-buttons .btn-main{
     color: #43A047;
 }
-[data-main-color=green] .details-panel .gallery-wrap .dropdown-content .property-variant:active,
-[data-main-color=green] .settings-panel-head .dropdown-content .property-variant:active,
-[data-main-color=green] .dropdown-content.bootstrap-dropdown .property-variant:active,
-[data-main-color=green] .register-form.login-panel-form .register-form-picture .dropdown-content .property-variant:active,
-[data-main-color=green] .add-contact-modal .dropdown-content .property-variant:active,
-[data-main-color=green] .login-panel-form .xmpp-server-dropdown-wrap .dropdown-content .property-variant:active,
+[data-main-color=green] .details-panel .gallery-wrap .dropdown-content:not(.unified-dropdown-style) .property-variant:active,
+[data-main-color=green] .settings-panel-head .dropdown-content:not(.unified-dropdown-style) .property-variant:active,
+[data-main-color=green] .dropdown-content:not(.unified-dropdown-style).bootstrap-dropdown .property-variant:active,
+[data-main-color=green] .register-form.login-panel-form .register-form-picture .dropdown-content:not(.unified-dropdown-style) .property-variant:active,
+[data-main-color=green] .add-contact-modal .dropdown-content:not(.unified-dropdown-style) .property-variant:active,
+[data-main-color=green] .login-panel-form .xmpp-server-dropdown-wrap .dropdown-content:not(.unified-dropdown-style) .property-variant:active,
 [data-main-color=green] .register-form.login-panel-form .register-form-step-wrap .circle-icon{
     background-color: #43A047 !important;
 }
@@ -3016,12 +3016,12 @@ body {
 [data-main-color=light-green] .login-buttons .btn-main{
     color: #7CB342;
 }
-[data-main-color=light-green] .details-panel .gallery-wrap .dropdown-content .property-variant:active,
-[data-main-color=light-green] .settings-panel-head .dropdown-content .property-variant:active,
-[data-main-color=light-green] .dropdown-content.bootstrap-dropdown .property-variant:active,
-[data-main-color=light-green] .register-form.login-panel-form .register-form-picture .dropdown-content .property-variant:active,
-[data-main-color=light-green] .add-contact-modal .dropdown-content .property-variant:active,
-[data-main-color=light-green] .login-panel-form .xmpp-server-dropdown-wrap .dropdown-content .property-variant:active,
+[data-main-color=light-green] .details-panel .gallery-wrap .dropdown-content:not(.unified-dropdown-style) .property-variant:active,
+[data-main-color=light-green] .settings-panel-head .dropdown-content:not(.unified-dropdown-style) .property-variant:active,
+[data-main-color=light-green] .dropdown-content:not(.unified-dropdown-style).bootstrap-dropdown .property-variant:active,
+[data-main-color=light-green] .register-form.login-panel-form .register-form-picture .dropdown-content:not(.unified-dropdown-style) .property-variant:active,
+[data-main-color=light-green] .add-contact-modal .dropdown-content:not(.unified-dropdown-style) .property-variant:active,
+[data-main-color=light-green] .login-panel-form .xmpp-server-dropdown-wrap .dropdown-content:not(.unified-dropdown-style) .property-variant:active,
 [data-main-color=light-green] .register-form.login-panel-form .register-form-step-wrap .circle-icon{
     background-color: #7CB342 !important;
 }
@@ -3132,12 +3132,12 @@ body {
 [data-main-color=lime] .login-buttons .btn-main{
     color: #C0CA33;
 }
-[data-main-color=lime] .details-panel .gallery-wrap .dropdown-content .property-variant:active,
-[data-main-color=lime] .settings-panel-head .dropdown-content .property-variant:active,
-[data-main-color=lime] .dropdown-content.bootstrap-dropdown .property-variant:active,
-[data-main-color=lime] .register-form.login-panel-form .register-form-picture .dropdown-content .property-variant:active,
-[data-main-color=lime] .add-contact-modal .dropdown-content .property-variant:active,
-[data-main-color=lime] .login-panel-form .xmpp-server-dropdown-wrap .dropdown-content .property-variant:active,
+[data-main-color=lime] .details-panel .gallery-wrap .dropdown-content:not(.unified-dropdown-style) .property-variant:active,
+[data-main-color=lime] .settings-panel-head .dropdown-content:not(.unified-dropdown-style) .property-variant:active,
+[data-main-color=lime] .dropdown-content:not(.unified-dropdown-style).bootstrap-dropdown .property-variant:active,
+[data-main-color=lime] .register-form.login-panel-form .register-form-picture .dropdown-content:not(.unified-dropdown-style) .property-variant:active,
+[data-main-color=lime] .add-contact-modal .dropdown-content:not(.unified-dropdown-style) .property-variant:active,
+[data-main-color=lime] .login-panel-form .xmpp-server-dropdown-wrap .dropdown-content:not(.unified-dropdown-style) .property-variant:active,
 [data-main-color=lime] .register-form.login-panel-form .register-form-step-wrap .circle-icon{
     background-color: #C0CA33 !important;
 }
@@ -3248,12 +3248,12 @@ body {
 [data-main-color=amber] .login-buttons .btn-main{
     color: #FFB300;
 }
-[data-main-color=amber] .details-panel .gallery-wrap .dropdown-content .property-variant:active,
-[data-main-color=amber] .settings-panel-head .dropdown-content .property-variant:active,
-[data-main-color=amber] .dropdown-content.bootstrap-dropdown .property-variant:active,
-[data-main-color=amber] .register-form.login-panel-form .register-form-picture .dropdown-content .property-variant:active,
-[data-main-color=amber] .add-contact-modal .dropdown-content .property-variant:active,
-[data-main-color=amber] .login-panel-form .xmpp-server-dropdown-wrap .dropdown-content .property-variant:active,
+[data-main-color=amber] .details-panel .gallery-wrap .dropdown-content:not(.unified-dropdown-style) .property-variant:active,
+[data-main-color=amber] .settings-panel-head .dropdown-content:not(.unified-dropdown-style) .property-variant:active,
+[data-main-color=amber] .dropdown-content:not(.unified-dropdown-style).bootstrap-dropdown .property-variant:active,
+[data-main-color=amber] .register-form.login-panel-form .register-form-picture .dropdown-content:not(.unified-dropdown-style) .property-variant:active,
+[data-main-color=amber] .add-contact-modal .dropdown-content:not(.unified-dropdown-style) .property-variant:active,
+[data-main-color=amber] .login-panel-form .xmpp-server-dropdown-wrap .dropdown-content:not(.unified-dropdown-style) .property-variant:active,
 [data-main-color=amber] .register-form.login-panel-form .register-form-step-wrap .circle-icon{
     background-color: #FFB300 !important;
 }
@@ -3364,12 +3364,12 @@ body {
 [data-main-color=orange] .login-buttons .btn-main{
     color: #FB8C00;
 }
-[data-main-color=orange] .details-panel .gallery-wrap .dropdown-content .property-variant:active,
-[data-main-color=orange] .settings-panel-head .dropdown-content .property-variant:active,
-[data-main-color=orange] .dropdown-content.bootstrap-dropdown .property-variant:active,
-[data-main-color=orange] .register-form.login-panel-form .register-form-picture .dropdown-content .property-variant:active,
-[data-main-color=orange] .add-contact-modal .dropdown-content .property-variant:active,
-[data-main-color=orange] .login-panel-form .xmpp-server-dropdown-wrap .dropdown-content .property-variant:active,
+[data-main-color=orange] .details-panel .gallery-wrap .dropdown-content:not(.unified-dropdown-style) .property-variant:active,
+[data-main-color=orange] .settings-panel-head .dropdown-content:not(.unified-dropdown-style) .property-variant:active,
+[data-main-color=orange] .dropdown-content:not(.unified-dropdown-style).bootstrap-dropdown .property-variant:active,
+[data-main-color=orange] .register-form.login-panel-form .register-form-picture .dropdown-content:not(.unified-dropdown-style) .property-variant:active,
+[data-main-color=orange] .add-contact-modal .dropdown-content:not(.unified-dropdown-style) .property-variant:active,
+[data-main-color=orange] .login-panel-form .xmpp-server-dropdown-wrap .dropdown-content:not(.unified-dropdown-style) .property-variant:active,
 [data-main-color=orange] .register-form.login-panel-form .register-form-step-wrap .circle-icon{
     background-color: #FB8C00 !important;
 }
@@ -3480,12 +3480,12 @@ body {
 [data-main-color=deep-orange] .login-buttons .btn-main{
     color: #F4511E;
 }
-[data-main-color=deep-orange] .details-panel .gallery-wrap .dropdown-content .property-variant:active,
-[data-main-color=deep-orange] .settings-panel-head .dropdown-content .property-variant:active,
-[data-main-color=deep-orange] .dropdown-content.bootstrap-dropdown .property-variant:active,
-[data-main-color=deep-orange] .register-form.login-panel-form .register-form-picture .dropdown-content .property-variant:active,
-[data-main-color=deep-orange] .add-contact-modal .dropdown-content .property-variant:active,
-[data-main-color=deep-orange] .login-panel-form .xmpp-server-dropdown-wrap .dropdown-content .property-variant:active,
+[data-main-color=deep-orange] .details-panel .gallery-wrap .dropdown-content:not(.unified-dropdown-style) .property-variant:active,
+[data-main-color=deep-orange] .settings-panel-head .dropdown-content:not(.unified-dropdown-style) .property-variant:active,
+[data-main-color=deep-orange] .dropdown-content:not(.unified-dropdown-style).bootstrap-dropdown .property-variant:active,
+[data-main-color=deep-orange] .register-form.login-panel-form .register-form-picture .dropdown-content:not(.unified-dropdown-style) .property-variant:active,
+[data-main-color=deep-orange] .add-contact-modal .dropdown-content:not(.unified-dropdown-style) .property-variant:active,
+[data-main-color=deep-orange] .login-panel-form .xmpp-server-dropdown-wrap .dropdown-content:not(.unified-dropdown-style) .property-variant:active,
 [data-main-color=deep-orange] .register-form.login-panel-form .register-form-step-wrap .circle-icon{
     background-color: #F4511E !important;
 }
@@ -3596,12 +3596,12 @@ body {
 [data-main-color=brown] .login-buttons .btn-main{
     color: #6D4C41;
 }
-[data-main-color=brown] .details-panel .gallery-wrap .dropdown-content .property-variant:active,
-[data-main-color=brown] .settings-panel-head .dropdown-content .property-variant:active,
-[data-main-color=brown] .dropdown-content.bootstrap-dropdown .property-variant:active,
-[data-main-color=brown] .register-form.login-panel-form .register-form-picture .dropdown-content .property-variant:active,
-[data-main-color=brown] .add-contact-modal .dropdown-content .property-variant:active,
-[data-main-color=brown] .login-panel-form .xmpp-server-dropdown-wrap .dropdown-content .property-variant:active,
+[data-main-color=brown] .details-panel .gallery-wrap .dropdown-content:not(.unified-dropdown-style) .property-variant:active,
+[data-main-color=brown] .settings-panel-head .dropdown-content:not(.unified-dropdown-style) .property-variant:active,
+[data-main-color=brown] .dropdown-content:not(.unified-dropdown-style).bootstrap-dropdown .property-variant:active,
+[data-main-color=brown] .register-form.login-panel-form .register-form-picture .dropdown-content:not(.unified-dropdown-style) .property-variant:active,
+[data-main-color=brown] .add-contact-modal .dropdown-content:not(.unified-dropdown-style) .property-variant:active,
+[data-main-color=brown] .login-panel-form .xmpp-server-dropdown-wrap .dropdown-content:not(.unified-dropdown-style) .property-variant:active,
 [data-main-color=brown] .register-form.login-panel-form .register-form-step-wrap .circle-icon{
     background-color: #6D4C41 !important;
 }
@@ -3713,12 +3713,12 @@ body {
 [data-main-color=blue-grey] .login-buttons .btn-main{
     color: #546E7A;
 }
-[data-main-color=blue-grey] .details-panel .gallery-wrap .dropdown-content .property-variant:active,
-[data-main-color=blue-grey] .settings-panel-head .dropdown-content .property-variant:active,
+[data-main-color=blue-grey] .details-panel .gallery-wrap .dropdown-content:not(.unified-dropdown-style) .property-variant:active,
+[data-main-color=blue-grey] .settings-panel-head .dropdown-content:not(.unified-dropdown-style) .property-variant:active,
 [data-main-color=blue-grey] .dropdown-content.bootstrap-dropdown .property-variant:active,
-[data-main-color=blue-grey] .register-form.login-panel-form .register-form-picture .dropdown-content .property-variant:active,
-[data-main-color=blue-grey] .add-contact-modal .dropdown-content .property-variant:active,
-[data-main-color=blue-grey] .login-panel-form .xmpp-server-dropdown-wrap .dropdown-content .property-variant:active,
+[data-main-color=blue-grey] .register-form.login-panel-form .register-form-picture .dropdown-content:not(.unified-dropdown-style) .property-variant:active,
+[data-main-color=blue-grey] .add-contact-modal .dropdown-content:not(.unified-dropdown-style) .property-variant:active,
+[data-main-color=blue-grey] .login-panel-form .xmpp-server-dropdown-wrap .dropdown-content:not(.unified-dropdown-style) .property-variant:active,
 [data-main-color=blue-grey] .register-form.login-panel-form .register-form-step-wrap .circle-icon{
     background-color: #546E7A !important;
 }
@@ -5083,65 +5083,24 @@ input[type=text].simple-input-field:hover {
 .login-panel-form .register-form-picture .dropdown-content,
 .login-panel-form .login-form-jid .xmpp-server-dropdown-wrap .select-auth-xmpp-server .dropdown-content,
 .login-panel-form .register-form-jid .xmpp-server-dropdown-wrap .select-xmpp-server .dropdown-content{
-    position: absolute;
     top: 100%;
     left: 0;
-    z-index: 1000;
-    display: none;
-    float: left;
-    min-width: 264px;
-    padding: 0.5rem 0;
-    margin: 0.125rem 0 0;
-    font-size: 1rem;
-    color: #212529;
-    text-align: left;
-    list-style: none;
-    background-color: #fff;
-    background-clip: padding-box;
-    border: 1px solid rgba(0,0,0,.15);
-    border-radius: 0.25rem;
 }
 .add-contact-modal .dropdown-content .property-variant,
 .login-panel-form .register-form-picture .dropdown-content .property-variant,
 .login-panel-form .login-form-jid .xmpp-server-dropdown-wrap .select-auth-xmpp-server .dropdown-content .property-variant,
 .login-panel-form .register-form-jid .xmpp-server-dropdown-wrap .select-xmpp-server .dropdown-content .property-variant{
-    display: block;
-    width: 100%;
-    padding: 0.25rem 1.5rem;
-    clear: both;
     font-weight: 400;
-    color: #212529;
-    text-align: inherit;
-    white-space: nowrap;
-    background-color: transparent;
-    border: 0;
-    margin: 0;
-    line-height: unset;
+    text-transform: none;
 }
-.add-contact-modal .dropdown-content .property-variant:focus,
-.add-contact-modal .dropdown-content .property-variant:hover,
-.login-panel-form .register-form-picture .dropdown-content .property-variant:focus,
-.login-panel-form .register-form-picture .dropdown-content .property-variant:hover,
-.login-panel-form .login-form-jid .xmpp-server-dropdown-wrap .select-auth-xmpp-server .dropdown-content .property-variant:focus,
-.login-panel-form .login-form-jid .xmpp-server-dropdown-wrap .select-auth-xmpp-server .dropdown-content .property-variant:hover,
-.login-panel-form .register-form-jid .xmpp-server-dropdown-wrap .select-xmpp-server .dropdown-content .property-variant:focus,
-.settings-panel-head .dropdown-content .property-variant:hover,
-.details-panel .gallery-wrap .dropdown-content .property-variant:hover,
-.dropdown-content.bootstrap-dropdown .property-variant:hover,
-.dropdown-content.bootstrap-dropdown .property-variant:focus,
-.login-panel-form .register-form-jid .xmpp-server-dropdown-wrap .select-xmpp-server .dropdown-content .property-variant:hover{
-    color: #16181b;
-    text-decoration: none;
-    background-color: #f8f9fa;
-}
-.add-contact-modal .dropdown-content .property-variant:active,
-.add-contact-modal .dropdown-content .property-variant:active .jid,
-.login-panel-form .register-form-picture .dropdown-content .property-variant:active,
-.login-panel-form .login-form-jid .xmpp-server-dropdown-wrap .select-auth-xmpp-server .dropdown-content .property-variant:active,
-.settings-panel-head .dropdown-content .property-variant:active,
-.details-panel .gallery-wrap .dropdown-content .property-variant:active,
+.add-contact-modal .dropdown-content:not(.unified-dropdown-style) .property-variant:active,
+.add-contact-modal .dropdown-content:not(.unified-dropdown-style) .property-variant:active .jid,
+.login-panel-form .register-form-picture .dropdown-content:not(.unified-dropdown-style) .property-variant:active,
+.login-panel-form .login-form-jid .xmpp-server-dropdown-wrap .select-auth-xmpp-server .dropdown-content:not(.unified-dropdown-style) .property-variant:active,
+.settings-panel-head .dropdown-content:not(.unified-dropdown-style) .property-variant:active,
+.details-panel .gallery-wrap .dropdown-content:not(.unified-dropdown-style) .property-variant:active,
 .dropdown-content.bootstrap-dropdown .property-variant:active,
-.login-panel-form .register-form-jid .xmpp-server-dropdown-wrap .select-xmpp-server .dropdown-content .property-variant:active{
+.login-panel-form .register-form-jid .xmpp-server-dropdown-wrap .select-xmpp-server .dropdown-content:not(.unified-dropdown-style) .property-variant:active{
     color: #fff !important;
     text-decoration: none;
 }
@@ -5985,8 +5944,8 @@ input[type=text].simple-input-field:hover {
     left: 6px !important;
 }
 
-.fingerprints-devices-wrap .fingerprints-content .contact-device-content .buttons .dropdown-content .btn-main,
-.fingerprints-devices-wrap .fingerprints-content .other-device-content .buttons .dropdown-content .btn-main{
+.fingerprints-devices-wrap .fingerprints-content .contact-device-content .buttons .dropdown-content:not(.unified-dropdown-style) .btn-main,
+.fingerprints-devices-wrap .fingerprints-content .other-device-content .buttons .dropdown-content:not(.unified-dropdown-style) .btn-main{
     width: 100%;
 }
 .fingerprints-devices-wrap .fingerprints-content .contact-own-device-content,
@@ -6148,7 +6107,7 @@ input[type=text].simple-input-field:hover {
     cursor: pointer;
 }
 
-.searching-main .account-field .dropdown-content {
+.searching-main .account-field .dropdown-content:not(.unified-dropdown-style) {
     top: 0 !important;
     width: calc(100% - 36px) !important;
     left: -8px !important;
@@ -6162,7 +6121,7 @@ input[type=text].simple-input-field:hover {
     line-height: 26px;
 }
 
-.searching-main .account-field .dropdown-content .account-item-wrap:hover {
+.searching-main .account-field .dropdown-content:not(.unified-dropdown-style) .account-item-wrap:hover {
     background-color: #EEEEEE;
 }
 
@@ -6964,7 +6923,7 @@ input[type=text].simple-input-field:hover {
     top: 8px;
     right: 10px;
 }
-.tab-active-filters-wrap .dropdown-content{
+.tab-active-filters-wrap .dropdown-content:not(.unified-dropdown-style){
     top: 32px !important;
 }
 .contacts-panel-wrap .contacts-content-wrap{
@@ -8231,13 +8190,13 @@ input[type=text].simple-input-field:hover {
     cursor: pointer;
 }
 
-.add-xabber-account-modal .account-field .dropdown-content {
+.add-xabber-account-modal .account-field .dropdown-content:not(.unified-dropdown-style) {
     top: 0 !important;
     width: calc(100% - 44px) !important;
 }
 
-.add-contact-modal .account-field .dropdown-content .account-item-wrap:hover,
-.add-xabber-account-modal .account-field .dropdown-content .account-item-wrap:hover {
+.add-contact-modal .account-field .dropdown-content:not(.unified-dropdown-style) .account-item-wrap:hover,
+.add-xabber-account-modal .account-field .dropdown-content:not(.unified-dropdown-style) .account-item-wrap:hover {
     background-color: #EEEEEE;
 }
 
@@ -8258,11 +8217,9 @@ input[type=text].simple-input-field:hover {
 }
 
 .add-contact-modal .account-item-wrap{
-    position: relative;
-    cursor: pointer;
 }
 
-.add-contact-modal .dropdown-content .account-item-wrap{
+.add-contact-modal .dropdown-content:not(.unified-dropdown-style) .account-item-wrap{
     height: 48px;
     padding: 0;
 }
@@ -8282,22 +8239,21 @@ input[type=text].simple-input-field:hover {
 .add-contact-modal .account-dropdown-wrap .dropdown-button .name-wrap{
     display: none;
 }
-.add-contact-modal .dropdown-content#select-account-for-add-contact,
-.add-contact-modal .dropdown-content#select-account-for-creating-groupchat{
-    width: fit-content !important;
+.add-contact-modal .dropdown-content{
     right: 8px !important;
     left: unset !important;
     top: calc(100% - 5px) !important;
-    min-width: unset;
 }
 
-.add-contact-modal .dropdown-content .account-item-wrap .name-wrap{
-    padding: 8px 14px 8px 48px;
+.add-contact-modal .dropdown-content:not(.unified-dropdown-style) .account-item-wrap .name-wrap{
 }
 
 .add-contact-modal .dropdown-content .account-item-wrap .name-wrap .name{
-    line-height: 19px;
+    line-height: 18px;
     font-size: 16px;
+    color: #212529;
+    text-transform: none;
+    font-weight: 400;
 }
 
 .add-contact-modal .dropdown-content .account-item-wrap .name-wrap .jid{
@@ -8306,19 +8262,15 @@ input[type=text].simple-input-field:hover {
     line-height: 12px;
     color: #616161;
     opacity: .5;
+    text-transform: none;
 }
 
 .add-contact-modal .account-item-wrap .circle-avatar,
 .add-xabber-account-modal .account-item-wrap .circle-avatar {
-    position: absolute;
-    top: 8px;
-    left: 8px;
     width: 32px;
     height: 32px;
 }
 .add-contact-modal .account-item-wrap .circle-avatar{
-    top: 8px;
-    left: 8px;
 }
 .add-contact-modal .dropdown-button .account-item-wrap .circle-avatar{
     top: 0;
@@ -8529,10 +8481,10 @@ input[type=text].simple-input-field:hover {
     background-color: transparent !important;
 }
 
-.add-group-chat-modal .property-field .property-wrap,
 .add-group-chat-modal .property-field :not(.dropdown-content) .property-variant {
-    padding: 19px 10px 19px 12px;
-    flex: 1;
+    font-size: 1rem;
+    text-transform: none;
+    color: #616161;
 }
 
 .add-group-chat-modal .field-icon {
@@ -8580,8 +8532,6 @@ input[type=text].simple-input-field:hover {
 }
 
 .add-group-chat-modal .property-field #select-xmpp-server .property-variant {
-    font-size: 1rem;
-    padding: 0.25rem 9px;
 }
 
 .add-group-chat-modal .row {
@@ -8610,21 +8560,15 @@ input[type=text].simple-input-field:hover {
 
 .add-group-chat-modal .property-field .property-value,
 .add-group-chat-modal .property-field .property-variant{
-    font-size: 14px;
-    line-height: 16px;
-    color: #616161;
 }
 
 .add-group-chat-modal .property-field .property-variant {
-    cursor: pointer;
-    color: #616161;
 }
 
 .add-group-chat-modal .property-field .property-variant:hover {
-    background-color: #EEEEEE;
 }
 
-.add-group-chat-modal .dropdown-content {
+.add-group-chat-modal .dropdown-content:not(.unified-dropdown-style) {
     width: 100% !important;
     min-width: unset !important;
     top: calc(100% - 2px) !important;
@@ -11031,10 +10975,7 @@ input[type=text].simple-input-field:hover {
 .chat-head-menu {
     top: 30px !important;
     left: initial !important;
-    right: 0 !important;
-    min-width: 200px !important;
-    width: auto !important;
-    max-width: 272px !important;
+    right: 8px !important;
     overflow-y: visible;
 }
 .right-contact-panel-wrap .details-panel-right .panel-content-wrap .buttons-wrap .btn-notifications .mdi.details-muted-icon,
@@ -11045,12 +10986,9 @@ input[type=text].simple-input-field:hover {
     display: block;
 }
 .right-contact-panel-wrap .details-panel-right .panel-content-wrap .buttons-wrap .contact-mute-dropdown {
-    min-width: 200px !important;
-    overflow: hidden;
-    width: fit-content !important;
 }
 .chat-tools-wrap .contact-mute-dropdown {
-    top: 101px !important;
+    top: 80px !important;
     left: initial !important;
     right: 100.1% !important;
     min-width: 200px !important;
@@ -11059,12 +10997,11 @@ input[type=text].simple-input-field:hover {
 }
 .chat-tools-wrap .ephemeral-timer-dropdown-content {
     left: initial !important;
-    right: 100.5% !important;
+    right: 100.1% !important;
     min-width: 200px !important;
     width: fit-content!important;
     overflow: hidden;
     top: 0px!important;
-    height: 450px !important;
     max-height: unset !important;
 }
 /* ------------------ CHAT BOX NOTIFICATIONS ---------------------- */
@@ -11300,10 +11237,6 @@ input[type=text].simple-input-field:hover {
     color: #d32f2f;
 }
 
-.chat-content-wrap .subscription-buttons-wrap .btn-decline {
-    color: #9E9E9E;
-    cursor: pointer;
-}
 
 .chat-content.with-before::before {
     content: '';
@@ -12214,14 +12147,14 @@ img.fwd-img-preview {
 }
 
 .chat-message .not-decrypted-icon .mdi,
-.chat-message .dropdown-content .not-verified-previously-tooltip-text,
-.chat-message .dropdown-content .not-decrypted-tooltip-text,
-.chat-message .dropdown-content .not-existing-device-tooltip-text,
-.chat-message .dropdown-content .not-verified-tooltip-text,
-.chat-message .dropdown-content .btn-manage-devices{
+.chat-message .dropdown-content:not(.unified-dropdown-style) .not-verified-previously-tooltip-text,
+.chat-message .dropdown-content:not(.unified-dropdown-style) .not-decrypted-tooltip-text,
+.chat-message .dropdown-content:not(.unified-dropdown-style) .not-existing-device-tooltip-text,
+.chat-message .dropdown-content:not(.unified-dropdown-style) .not-verified-tooltip-text,
+.chat-message .dropdown-content:not(.unified-dropdown-style) .btn-manage-devices{
     display: none;
 }
-.chat-message .dropdown-content .msg-device-info-error-reason{
+.chat-message .dropdown-content:not(.unified-dropdown-style) .msg-device-info-error-reason{
     display: none !important;
 }
 
@@ -12231,11 +12164,11 @@ img.fwd-img-preview {
 .chat-message.not-verified-previously .not-decrypted-icon .mdi.not-verified-icon-svg{
     display: block;
 }
-.chat-message.not-verified-previously .dropdown-content .not-verified-previously-tooltip-text,
-.chat-message.not-existing-device .dropdown-content .not-existing-device-tooltip-text,
-.chat-message.not-decrypted .dropdown-content .not-decrypted-tooltip-text,
-.chat-message.not-verified .dropdown-content .not-verified-tooltip-text,
-.chat-message.not-verified .dropdown-content .btn-manage-devices{
+.chat-message.not-verified-previously .dropdown-content:not(.unified-dropdown-style) .not-verified-previously-tooltip-text,
+.chat-message.not-existing-device .dropdown-content:not(.unified-dropdown-style) .not-existing-device-tooltip-text,
+.chat-message.not-decrypted .dropdown-content:not(.unified-dropdown-style) .not-decrypted-tooltip-text,
+.chat-message.not-verified .dropdown-content:not(.unified-dropdown-style) .not-verified-tooltip-text,
+.chat-message.not-verified .dropdown-content:not(.unified-dropdown-style) .btn-manage-devices{
     color: #757575;
     display: block;
     margin-left: 35%;
@@ -12396,43 +12329,18 @@ img.fwd-img-preview {
 }
 
 .chat-message .retry-send-message {
-    width: fit-content !important;
-    min-width: 64px !important;
     top: -10px !important;
-    z-index: 1;
-    padding: 0.5rem 0;
-    font-size: 1rem;
-    color: #212529;
-    text-align: left;
-    list-style: none;
-    background-color: #fff;
-    background-clip: padding-box;
-    border: 1px solid rgba(0,0,0,.15);
-    border-radius: 0.25rem;
+    right: 16px;
+    left: unset !important;
 }
 
 .chat-message .retry-send-message .msg-retry-dropdown-btn {
-    text-transform: capitalize;
-    display: block;
-    width: 100%;
-    padding: 0.25rem 1.5rem;
-    clear: both;
-    font-weight: 400;
-    color: #212529;
-    text-align: inherit;
-    white-space: nowrap;
-    background-color: transparent;
-    border: 0;
-    margin: 0;
-    line-height: unset;
 }
 
 .chat-message .retry-send-message .msg-retry-dropdown-btn:active {
-    color: #FFF;
 }
 
 .chat-message .retry-send-message div:hover {
-    background-color: #EEEEEE;
 }
 
 .msg-wrap .mdi-filmstrip,
@@ -14287,7 +14195,7 @@ input[type=range].voice-message-volume:focus {
 .settings-panel-wrap .settings-panel .settings-block-wrap.media-gallery {
     min-height: 400px;
 }
-.settings-panel-wrap .settings-panel .settings-block-wrap.media-gallery .gallery-files:not(.grid) .gallery-file .dropdown-content {
+.settings-panel-wrap .settings-panel .settings-block-wrap.media-gallery .gallery-files:not(.grid) .gallery-file .dropdown-content:not(.unified-dropdown-style) {
     z-index: 1 !important;
 }
 .settings-panel-wrap .settings-panel .settings-panel-head .description {
@@ -14805,6 +14713,10 @@ input[type=range].voice-message-volume:focus {
     left: unset !important;
     right: 74px;
     z-index: 2000;
+}
+.settings-panel-wrap .settings-panel .settings-column .color-picker-dropdown .property-variant{
+    font-size: 14px;
+    padding: 4px 8px;
 }
 
 .settings-panel-wrap .settings-panel .settings-column .btn-qr-code{
@@ -17282,24 +17194,8 @@ input[type=range].voice-message-volume:focus {
 }
 
 .account-settings-panel .main-info-wrap .avatar-wrap .dropdown-content{
-    position: absolute;
-    top: 100%;
-    left: 0;
-    z-index: 1000;
-    display: none;
-    float: left;
-    padding: 0.5rem 0;
-    margin: 0.125rem 0 0;
-    font-size: 1rem;
-    color: #212529;
-    text-align: left;
-    list-style: none;
-    background-color: #fff;
-    background-clip: padding-box;
-    border: 1px solid rgba(0,0,0,.15);
-    border-radius: 0.25rem;
 }
-.account-settings-panel .main-info-wrap .avatar-wrap .dropdown-content .property-variant{
+.account-settings-panel .main-info-wrap .avatar-wrap .dropdown-content:not(.unified-dropdown-style) .property-variant{
     display: block;
     width: 100%;
     padding: 0.25rem 1.5rem;
@@ -17311,7 +17207,7 @@ input[type=range].voice-message-volume:focus {
     background-color: transparent;
     border: 0;
 }
-.account-settings-panel .main-info-wrap .avatar-wrap .dropdown-content .property-variant:hover{
+.account-settings-panel .main-info-wrap .avatar-wrap .dropdown-content:not(.unified-dropdown-style) .property-variant:hover{
     color: #16181b;
     text-decoration: none;
     background-color: #f8f9fa;
@@ -17553,10 +17449,10 @@ input[type=range].voice-message-volume:focus {
 .account-settings-panel .token-wrap .buttons .dropdown-button .trust-item-wrap:hover{
     border: 1px solid #e0e0e0;
 }
-.account-settings-panel .token-wrap .buttons .dropdown-content{
+.account-settings-panel .token-wrap .buttons .dropdown-content:not(.unified-dropdown-style){
     top: unset !important;
 }
-.account-settings-panel .token-wrap .buttons .dropdown-content .btn-main{
+.account-settings-panel .token-wrap .buttons .dropdown-content:not(.unified-dropdown-style) .btn-main{
     display: block!important;
     line-height: 36px;
     font-size: 13px;
@@ -18522,10 +18418,10 @@ input[type=range].voice-message-volume:focus {
 .gallery-files .gallery-file:hover .btn-more{
     display: block;
 }
-.bottom-block .gallery-files .dropdown-content,
-.settings-panel-head .dropdown-content,
+.bottom-block .gallery-files .dropdown-content:not(.unified-dropdown-style),
+.settings-panel-head .dropdown-content:not(.unified-dropdown-style),
 .dropdown-content.bootstrap-dropdown,
-.details-panel .gallery-wrap .dropdown-content{
+.details-panel .gallery-wrap .dropdown-content:not(.unified-dropdown-style){
     width: fit-content !important;
     position: absolute;
     top: 100%;
@@ -18555,10 +18451,10 @@ input[type=range].voice-message-volume:focus {
     max-width: 272px!important;
     overflow: hidden;
 }
-.bottom-block .gallery-files .dropdown-content .property-variant,
+.bottom-block .gallery-files .dropdown-content:not(.unified-dropdown-style) .property-variant,
 .dropdown-content.bootstrap-dropdown .property-variant,
-.settings-panel-head .dropdown-content .property-variant,
-.details-panel .gallery-wrap .dropdown-content .property-variant{
+.settings-panel-head .dropdown-content:not(.unified-dropdown-style) .property-variant,
+.details-panel .gallery-wrap .dropdown-content:not(.unified-dropdown-style) .property-variant{
     display: block;
     width: 100%;
     padding: 0.25rem 1.5rem;
@@ -18570,11 +18466,11 @@ input[type=range].voice-message-volume:focus {
     background-color: transparent;
     border: 0;
 }
-.login-panel-form .login-form-jid .xmpp-server-dropdown-wrap .select-auth-xmpp-server .dropdown-content .property-variant:active
-.bottom-block .gallery-files .dropdown-content .property-variant:active,
-.settings-panel-head .dropdown-content .property-variant:active,
+.login-panel-form .login-form-jid .xmpp-server-dropdown-wrap .select-auth-xmpp-server .dropdown-content:not(.unified-dropdown-style) .property-variant:active
+.bottom-block .gallery-files .dropdown-content:not(.unified-dropdown-style) .property-variant:active,
+.settings-panel-head .dropdown-content:not(.unified-dropdown-style) .property-variant:active,
 .dropdown-content.bootstrap-dropdown .property-variant:active,
-.details-panel .gallery-wrap .dropdown-content .property-variant:active{
+.details-panel .gallery-wrap .dropdown-content:not(.unified-dropdown-style) .property-variant:active{
     display: block;
     width: 100%;
     padding: 0.25rem 1.5rem;
@@ -18862,8 +18758,8 @@ input[type=range].voice-message-volume:focus {
 
 }
 
-.details-panel-right .participant-details-wrap .right-item .select-timer .dropdown-content,
-.details-panel-right .restrictions-wrap .right-item .select-timer .dropdown-content{
+.details-panel-right .participant-details-wrap .right-item .select-timer .dropdown-content:not(.unified-dropdown-style),
+.details-panel-right .restrictions-wrap .right-item .select-timer .dropdown-content:not(.unified-dropdown-style){
     left: unset !important;
     right: 0px;
 }
@@ -19118,7 +19014,7 @@ input[type=range].voice-message-volume:focus {
     color: #bdbdbd
 }
 
-.details-panel-right .edit-wrap .subscription-statuses .dropdown-content{
+.details-panel-right .edit-wrap .subscription-statuses .dropdown-content:not(.unified-dropdown-style){
     margin-top: 32px !important;
     left: 72px !important;
     z-index: 1000;
@@ -19136,7 +19032,7 @@ input[type=range].voice-message-volume:focus {
     border: 1px solid rgba(0,0,0,.15);
     border-radius: 0.25rem;
 }
-.details-panel-right .edit-wrap .subscription-statuses .dropdown-content .property-variant{
+.details-panel-right .edit-wrap .subscription-statuses .dropdown-content:not(.unified-dropdown-style) .property-variant{
     display: block;
     width: 100%;
     padding: 0.25rem 1.5rem;
@@ -19148,7 +19044,7 @@ input[type=range].voice-message-volume:focus {
     background-color: transparent;
     border: 0;
 }
-.details-panel-right .edit-wrap .subscription-statuses .dropdown-content .property-variant:hover{
+.details-panel-right .edit-wrap .subscription-statuses .dropdown-content:not(.unified-dropdown-style) .property-variant:hover{
     color: #16181b;
     text-decoration: none;
     background-color: #f8f9fa;
@@ -19162,6 +19058,10 @@ input[type=range].voice-message-volume:focus {
     position: relative;
     width: 100%;
     cursor: pointer;
+}
+.details-panel-right .edit-wrap .subscription-statuses .dropdown-content{
+    left: 64px !important;
+    margin-top: 40px;
 }
 
 .details-panel-right .edit-wrap .subscription-statuses .status-description.subscription-status-wrap{
@@ -19393,12 +19293,12 @@ input[type=range].voice-message-volume:focus {
     margin-bottom: 16px;
 }
 
-.details-panel-right .edit-properties .dropdown-content{
+.details-panel-right .edit-properties .dropdown-content:not(.unified-dropdown-style){
     margin-top: 34px;
     width: unset !important;
 }
 
-.details-panel-right .edit-properties .dropdown-content span{
+.details-panel-right .edit-properties .dropdown-content:not(.unified-dropdown-style) span{
     text-align: end;
 }
 
@@ -20897,6 +20797,16 @@ input[type=range].voice-message-volume:focus {
     top: 64px;
     z-index: 1000;
 }
+.details-panel-right .button-wrap{
+}
+.details-panel-right .button-wrap.btn-notifications-wrap .dropdown-content{
+    left: 50% !important;
+    transform: translate(-50%);
+}
+.details-panel-right .button-wrap.btn-mute-wrap .dropdown-content{
+    left: unset !important;
+    right: 16px !important;
+}
 .details-panel-right .buttons-wrap.sticky-details-wrap.hidden,
 .details-panel-right .buttons-wrap.sticky-details-wrap.hidden2{
     display: flex !important;
@@ -21012,8 +20922,6 @@ input[type=range].voice-message-volume:focus {
     padding: 0 !important;
 }
 .details-panel-right .buttons-wrap.sticky-details-wrap .contact-mute-dropdown {
-    width: 176px !important;
-    margin-top: 69px;
 }
 
 .edit-rights .participant-details-item .buttons-wrap .btn-block-participant,
@@ -23264,19 +23172,19 @@ ul.restrictions-list-content>li {
     margin: 8px 2px 8px 4px;
 }
 
-.edit-rights .right-item .dropdown-content,
-.edit-default-restrictions .dropdown-content {
+.edit-rights .right-item .dropdown-content:not(.unified-dropdown-style),
+.edit-default-restrictions .dropdown-content:not(.unified-dropdown-style) {
     left: -48px !important;
 }
 
-.details-panel-right .participant-details-wrap .dropdown-content .property-variant:hover,
-.edit-default-restrictions .dropdown-content .property-variant:hover,
-.edit-rights .dropdown-content .property-variant:hover {
+.details-panel-right .participant-details-wrap .dropdown-content:not(.unified-dropdown-style) .property-variant:hover,
+.edit-default-restrictions .dropdown-content:not(.unified-dropdown-style) .property-variant:hover,
+.edit-rights .dropdown-content:not(.unified-dropdown-style) .property-variant:hover {
     background-color: #EEEEEE;
 }
-.details-panel-right .participant-details-wrap .dropdown-content .property-variant,
-.edit-rights .dropdown-content .property-variant,
-.edit-default-restrictions .dropdown-content .property-variant {
+.details-panel-right .participant-details-wrap .dropdown-content:not(.unified-dropdown-style) .property-variant,
+.edit-rights .dropdown-content:not(.unified-dropdown-style) .property-variant,
+.edit-default-restrictions .dropdown-content:not(.unified-dropdown-style) .property-variant {
     padding: 8px;
 }
 
@@ -25016,6 +24924,71 @@ ul.restrictions-list-content>li {
     font-size: 13px;
     color: #9E9E9E;
 }
+/* unified dropdown style */
+.unified-dropdown-style:not(.unified-fixed-width-dropdown-style){
+    width: fit-content !important;
+}
+.unified-dropdown-style{
+    background: #fff;
+    border-radius: 4px;
+    height: fit-content;
+    box-shadow: 0 2px 5px 0 rgba(0,0,0,.16),0 2px 10px 0 rgba(0,0,0,.12);
+    display: none;
+    position: absolute;
+    z-index: 2000;
+    margin: 0;
+    will-change: width, height;
+    pointer-events: auto;
+}
+.unified-dropdown-style.unified-twoline-dropdown-style{
+    padding: 0;
+}
+.unified-dropdown-style.active{
+}
+.unified-dropdown-style .property-variant,
+.unified-dropdown-style .unified-dropdown-style-item{
+    color: #000;
+    cursor: pointer;
+    font-size: 16px;
+    padding: 8px 16px 8px 16px;
+    position: relative;
+    white-space: nowrap;
+    text-align: left;
+    width:100%;
+}
+.unified-dropdown-style li>span{
+    color: unset;
+}
+.unified-dropdown-style .property-variant:first-child,
+.unified-dropdown-style .unified-dropdown-style-item:first-child{
+    border-radius: 4px 4px 0 0;
+}
+.unified-dropdown-style .property-variant:last-child,
+.unified-dropdown-style .unified-dropdown-style-item:last-child{
+    border-radius: 0 0 4px 4px;
+}
+.unified-dropdown-style .property-variant:hover,
+.unified-dropdown-style .unified-dropdown-style-item:hover{
+    background: #eee;
+}
+.unified-dropdown-style .property-variant .mdi,
+.unified-dropdown-style .unified-dropdown-style-item .mdi{
+    left: 16px;
+    position: absolute;
+    top: 8px;
+}
+.unified-dropdown-style.unified-twoline-dropdown-style .property-variant .mdi,
+.unified-dropdown-style.unified-twoline-dropdown-style .unified-dropdown-style-item .mdi{
+    left: 12px;
+    position: absolute;
+    top: 8px;
+    width: 32px;
+    height: 32px;
+}
+.unified-dropdown-style.unified-twoline-dropdown-style .property-variant,
+.unified-dropdown-style.unified-twoline-dropdown-style .unified-dropdown-style-item{
+    padding: 8px 16px 8px 56px;
+}
 /* notification context menu */
 .context-menu-container{
     background: #fff;
@@ -25059,7 +25032,6 @@ ul.restrictions-list-content>li {
     display: flex;
     flex-direction: column;
     box-shadow: 0 2px 5px 0 rgba(0, 0, 0, .16), 0 2px 10px 0 rgba(0, 0, 0, .12);
-
 }
 .context-menu-container .contact-mute-dropdown .btn-mute-dropdown{
     cursor: pointer;

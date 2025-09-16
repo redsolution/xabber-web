@@ -5,7 +5,7 @@
         <svg class="btn-add-account mdi mdi-24px mdi-svg-template" data-svgname="contact-add"></svg>
         <div class="name one-line"></div>
         <svg class="btn-color-picker dropdown-button mdi mdi-24px mdi-svg-template" data-activates="color-picker-dropdown" data-svgname="palette"></svg>
-        <ul id="color-picker-dropdown" class="dropdown-content color-picker-dropdown bootstrap-dropdown noselect">
+        <ul id="color-picker-dropdown" class="dropdown-content color-picker-dropdown unified-dropdown-style noselect">
             <div class="property-variant color-picker-button" data-color-value="red">
                 <span class="one-line text-color-red-700">{[print(xabber.getString("account_color_name_red"))]}</span>
             </div>
@@ -72,7 +72,7 @@
                 <div class="circle-avatar dropdown-button" data-activates="{{view.cid}}-profile-image">
                     <img/>
                     <input type="file"/>
-                    <ul id="{{view.cid}}-profile-image" class="profile-image-dropdown bootstrap-dropdown dropdown-content noselect">
+                    <ul id="{{view.cid}}-profile-image" class="profile-image-dropdown unified-dropdown-style dropdown-content noselect">
                         <div class="btn-emoji-panel property-variant">
                             {[print(xabber.getString("account_emoji_profile_image_button"))]}
                         </div>
@@ -143,7 +143,7 @@
         <i class="btn-back-subsettings-account mdi mdi-24px mdi-arrow-left hidden"></i>
         <span class="settings-panel-head-title one-line">{[print(xabber.getString("account_editor"))]}</span>
         <i class="btn-sorting dropdown-button mdi mdi-24px mdi-sort hidden" data-activates="storage-file-sorting"></i>
-        <ul id="storage-file-sorting" class="dropdown-content bootstrap-dropdown noselect">
+        <ul id="storage-file-sorting" class="dropdown-content unified-dropdown-style noselect">
             <div class="property-variant btn-gallery-sorting" data-value="-id">
                 <span class="one-line">{[print(xabber.getString("account_media_gallery_sorting_new"))]}</span>
             </div>
@@ -154,7 +154,7 @@
         <div class="btn-more media-gallery-button dropdown-button hidden" data-activates="storage-actions">
             <i class="mdi mdi-24px mdi-dots-vertical"></i>
         </div>
-        <ul id="storage-actions" class="dropdown-content noselect">
+        <ul id="storage-actions" class="dropdown-content unified-dropdown-style noselect">
             <div class="property-variant btn-select-files hidden">
                 <span class="one-line">{[print(xabber.getString("account_select_files"))]}</span>
             </div>
@@ -484,7 +484,7 @@
                 <div class="btn-more device-more-button dropdown-button" data-activates="device-omemo-actions">
                     <i class="mdi mdi-24px mdi-dots-vertical"></i>
                 </div>
-                <ul id="device-omemo-actions" class="dropdown-content bootstrap-dropdown noselect">
+                <ul id="device-omemo-actions" class="dropdown-content unified-dropdown-style noselect">
                     <!--<div class="property-variant btn-manage-devices">-->
                         <!--<span class="one-line">{[print(xabber.getString("omemo__settings__button_manage_devices"))]}</span>-->
                     <!--</div>-->

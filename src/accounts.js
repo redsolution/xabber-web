@@ -6671,7 +6671,7 @@ xabber.XmppLoginPanel = xabber.AuthView.extend({
     checkUserCallback: function (status, condition) {
         if (status === Strophe.Status.REGISTER || status === Strophe.Status.REGIFAIL) {
             if (!this.$('.select-xmpp-server .property-variant[data-value="' + this.auth_connection.register.domain + '"]').length && constants.REGISTRATION_CUSTOM_DOMAIN) {
-                $('<div/>', {class: 'field-jid property-variant set-default-domain'})
+                $('<div/>', {class: 'property-variant set-default-domain available-domain'})
                     .text(this.auth_connection.register.domain)
                     .attr('data-value', this.auth_connection.register.domain)
                     .insertBefore(this.$('.register-form-jid .dropdown-content .set-custom-domain'));
@@ -6907,7 +6907,7 @@ xabber.XmppLoginPanel = xabber.AuthView.extend({
                 }
             }
         }
-        this.$('.register-form-jid .field-jid.property-variant').remove();
+        this.$('.register-form-jid .available-domain.property-variant').remove();
         if (all_servers.length)
             this.$('.register-form-jid .xmpp-server-dropdown-wrap .field-jid').text(all_servers[0]);
         else
@@ -6915,7 +6915,7 @@ xabber.XmppLoginPanel = xabber.AuthView.extend({
         this.$('.register-form-jid .modal-content .jid-field .set-default-domain').remove();
 
         for (let i = 0; i < all_servers.length; i++) {
-            $('<div/>', {class: 'field-jid property-variant set-default-domain'})
+            $('<div/>', {class: 'property-variant set-default-domain available-domain'})
                 .text(all_servers[i])
                 .attr('data-value', all_servers[i])
                 .insertBefore(this.$('.register-form-jid .dropdown-content .set-custom-domain'));
@@ -6925,7 +6925,7 @@ xabber.XmppLoginPanel = xabber.AuthView.extend({
     updateAuthDomains: function () {
         let all_servers = constants.LOGIN_DOMAINS;
 
-        this.$('.login-form-jid .field-jid.property-variant').remove();
+        this.$('.login-form-jid .available-domain.property-variant').remove();
         if (all_servers.length)
             this.$('.login-form-jid .xmpp-server-dropdown-wrap .field-jid').text(all_servers[0]);
         else
@@ -6933,7 +6933,7 @@ xabber.XmppLoginPanel = xabber.AuthView.extend({
         this.$('.login-form-jid .modal-content .jid-field .set-default-domain').remove();
 
         for (let i = 0; i < all_servers.length; i++) {
-            $('<div/>', {class: 'field-jid property-variant set-default-domain'})
+            $('<div/>', {class: 'property-variant set-default-domain available-domain'})
                 .text(all_servers[i])
                 .attr('data-value', all_servers[i])
                 .insertBefore(this.$('.login-form-jid .dropdown-content .set-custom-domain'));

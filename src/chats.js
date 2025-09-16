@@ -9966,7 +9966,7 @@ xabber.AddGroupChatView = xabber.SearchView.extend({
             this.setCustomDomain(this.$('.property-field.xmpp-server-dropdown-wrap .property-value'));
         this.$('.modal-content .jid-field .set-default-domain').remove();
         for (let i = 0; i < all_servers.length; i++) {
-            $('<div/>', {class: 'field-jid property-variant set-default-domain'}).text(all_servers[i]).insertBefore(this.$('.modal-content .jid-field .set-custom-domain'));
+            $('<div/>', {class: 'property-variant set-default-domain available-domain'}).text(all_servers[i]).insertBefore(this.$('.modal-content .jid-field .set-custom-domain'));
         }
     },
 
