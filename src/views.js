@@ -701,8 +701,8 @@ xabber.SearchView = xabber.BasicView.extend({
                       if (!this.query_text)
                           return;
                       if (accounts_length === accounts_count){
-                          this.$('.messages-list-wrap').switchClass('hidden', !this.$('.messages-list').children().length);
                           this.$('.messages-list-wrap .messages-list .preloader-wrapper').remove();
+                          this.$('.messages-list-wrap').switchClass('hidden', !this.$('.messages-list').children().length);
                           this.updateScrollBar();
                           this._loading_messages = false;
                       }

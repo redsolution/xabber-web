@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.4.210","version_description":"fixed saved messages searching in chats view, hidden messages from chat with yourself in messages search in chats view, fixed preloader when searching messages in chats view"}'
+'{"version_number":"2.4.211","version_description":"fixed messages wrap hiding in chats view searching"}'
 )});
