@@ -22787,6 +22787,20 @@ input[type=range].voice-message-volume:focus {
 .messages-list-wrap .messages-list{
     min-height: 80px;
 }
+.messages-list-wrap .messages-list .message-item .saved-chat-avatar svg{
+    height: 24px;
+    left: 8px;
+    position: absolute;
+    top: 8px;
+    width: 24px;
+}
+.messages-list-wrap .messages-list .message-item .saved-chat-avatar svg path{
+    fill: #fff !important;
+}
+.messages-list-wrap .messages-list .message-item .saved-chat-avatar{
+    background-color: #d32f2f !important;
+    background-image: none;
+}
 
 .left-panel-wrap .left-panel-list-wrap .chats-title,
 .left-panel-wrap .left-panel-list-wrap .messages-title,

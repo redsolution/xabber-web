@@ -698,9 +698,15 @@ xabber.MessagesBase = Backbone.Collection.extend({
         if (options.is_searched) {
             let msg_contact = Strophe.getBareJidFromJid($message.attr('from'));
             (msg_contact === account.get('jid')) && (msg_contact = Strophe.getBareJidFromJid($message.attr('to')));
-            message = xabber.all_searched_messages.create(attrs);
-            message.contact = account.contacts.mergeContact(msg_contact);
-            message.account = account;
+            attrs.to_jid = Strophe.getBareJidFromJid($message.attr('to'));
+            message = xabber.all_searched_messages.create(attrs); //34
+            if (options.saved_chat){
+                message.saved_chat = true;
+                message.account = account;
+            } else {
+                message.contact = account.contacts.mergeContact(msg_contact);
+                message.account = account;
+            }
             return message;
         }
 
@@ -1875,7 +1881,7 @@ xabber.JingleMessage = Backbone.Model.extend({
           }
       },
 
-    getMessageContext: function (unique_id, options, errback) {
+    getMessageContext: function (unique_id, options, errback, callback) {
         options = options || {};
         let messages = options.mention && this.account.messages || options.searched_messages && !options.encrypted && this.account.searched_messages || options.message && xabber.all_searched_messages || this.account.messages,
             message = messages.get(unique_id),
@@ -1887,6 +1893,7 @@ xabber.JingleMessage = Backbone.Model.extend({
                 xabber.body.setScreen('all-chats', {
                 });
                 xabber.chats_view.openChat(this.item_view, {clear_search: true, screen: 'all-chats', force_show_placeholder: true});
+                this.get('saved') && xabber.accounts.enabled.length > 1 && xabber.toolbar_view.$('.all-chats').click();
                 // }
                 if (options.searched_messages)
                     message.set('searched_message', false);
@@ -1914,6 +1921,7 @@ xabber.JingleMessage = Backbone.Model.extend({
                             right_contact_save: true,
                         });
                         this.messages_view.onOpenAfterMessagesRequest();
+                        callback && callback()
 
                     }, () => {
                         let screen = 'all-chats';
@@ -1929,6 +1937,7 @@ xabber.JingleMessage = Backbone.Model.extend({
                             right_contact_save: true,
                         });
                         this.messages_view.onOpenAfterMessagesRequest();
+                        callback && callback()
                     });
                 }, (err) => {
                     if (err === 'no_messages' && !options.force_context){
@@ -1936,6 +1945,7 @@ xabber.JingleMessage = Backbone.Model.extend({
                             this.item_view.content = new xabber.ChatContentView({chat_item: this.item_view});
                         xabber.chats_view.openChat(this.item_view, {clear_search: true, screen: 'all-chats'});
                         this.item_view.content.backToBottom({not_ev: true, stanza_id: stanza_id});
+                        callback && callback();
                     } else if (err === 'no_messages' ){
                         this.messages_view.messagesRequest({before: stanza_id}, () => {
                             let screen = 'all-chats';
@@ -1951,6 +1961,7 @@ xabber.JingleMessage = Backbone.Model.extend({
                                 right_contact_save: true,
                             });
                             this.messages_view.onOpenAfterMessagesRequest();
+                            callback && callback()
 
                         }, () => {
                             let screen = 'all-chats';
@@ -1966,6 +1977,7 @@ xabber.JingleMessage = Backbone.Model.extend({
                                 right_contact_save: true,
                             });
                             this.messages_view.onOpenAfterMessagesRequest();
+                            callback && callback()
                         });
 
                     }
@@ -10781,9 +10793,10 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
 
       _initialize: function () {
           this.contact = this.model.contact;
+          this.saved_chat = this.model.saved_chat
           this.account = this.contact ? this.contact.account : this.model.account;
           this.$el.attr('data-id', this.model.id + '-' + this.cid);
-          this.$el.attr('data-contact-jid', this.contact.get('jid'));
+          this.contact && this.$el.attr('data-contact-jid', this.contact.get('jid'));
           this.updateName();
           this.updateLastMessage();
           this.updateAvatar();
@@ -10792,20 +10805,32 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
           this.updateIcon();
           this.updateStatus();
           this.listenTo(this.account.settings, 'change:color', this.updateColorScheme);
-          this.listenTo(this.contact, 'change:status', this.updateStatus);
-          this.listenTo(this.contact, 'change:name', this.updateName);
+          this.contact && this.listenTo(this.contact, 'change:status', this.updateStatus);
+          this.contact && this.listenTo(this.contact, 'change:name', this.updateName);
       },
 
       updateName: function () {
-          this.$('.chat-title').text(this.contact.get('name'));
+          if (this.saved_chat) {
+              this.$('.chat-title').text(xabber.getString("saved_messages__header"));
+          } else {
+              this.$('.chat-title').text(this.contact.get('name'));
+          }
       },
 
       updateAvatar: function () {
-          let image = this.contact.cached_image;
-          this.$('.circle-avatar').setAvatar(image, this.avatar_size, this.account);
+
+          if (this.saved_chat) {
+              this.$('.circle-avatar').html(env.templates.svg['saved-messages']());
+              this.$('.circle-avatar').addClass('saved-chat-avatar');
+          } else {
+              let image = this.contact.cached_image;
+              this.$('.circle-avatar').setAvatar(image, this.avatar_size, this.account);
+          }
       },
 
       updateStatus: function () {
+          if (this.saved_chat)
+              return;
           let status = this.contact.get('status'),
               status_message = this.contact.getStatusMessage();
           this.$('.contact-status').attr('data-status', status);
@@ -10814,6 +10839,8 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
       },
 
       updateGroupChats: function () {
+          if (this.saved_chat)
+              return;
           let is_group_chat = this.contact.get('group_chat');
           this.$('.status').hideIf(is_group_chat);
           this.updateIcon();
@@ -10825,6 +10852,8 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
       },
 
       updateIcon: function () {
+          if (this.saved_chat)
+              return;
           if (!this.contact)
               return;
           if (this.contact.get('private_chat') && typeof(this.contact.get('private_chat')) === 'string'){
@@ -10860,7 +10889,7 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
               msg_images = msg.get('images') || [],
               msg_locations = msg.get('locations') || [],
               msg_text = (forwarded_message) ? (msg.get('message') || xabber.getQuantityString("forwarded_messages_count", forwarded_message.length).italics()) : msg.getText(),
-              msg_user_info = msg.get('user_info') || msg.isSenderMe() && this.contact.my_info && this.contact.my_info.attributes || {}, msg_from = "";
+              msg_user_info = msg.get('user_info') || msg.isSenderMe() && this.contact && this.contact.my_info && this.contact.my_info.attributes || {}, msg_from = "";
           msg.get('videos') && msg.get('videos').length && (msg_files = msg_files.concat(msg.get('videos')));
           this.model.set({timestamp: timestamp});
           if (this.model.get('group_chat'))
@@ -10905,7 +10934,18 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
       },
 
       openByClick: function () {
-          let chat = this.account.chats.getChat(this.contact);
+          let chat;
+          if (this.saved_chat){
+              chat = this.account.chats.getSavedChat();
+              this.model.get('unique_id') && chat.getMessageContext(this.model.get('unique_id'), {message: true}, null, () => {
+                  xabber.toolbar_view.$('.saved-chats').hasClass('active')
+                  && xabber.accounts.enabled.length > 1
+                  && xabber.toolbar_view.$('.all-chats').click();
+              });
+              return;
+          } else {
+              chat = this.account.chats.getChat(this.contact);
+          }
           this.$el.closest('.left-panel-list-wrap').find('.list-item').removeClass('active');
           this.$el.addClass('active');
           xabber.chats_view.openChat(chat.item_view, {right_contact_save: true, clear_search: false});

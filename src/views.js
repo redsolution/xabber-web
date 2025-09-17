@@ -685,55 +685,64 @@ xabber.SearchView = xabber.BasicView.extend({
           !options.max && (options.max = xabber.settings.mam_messages_limit);
           !options.before && (options.before = "");
           xabber.all_searched_messages = new xabber.SearchedMessages();
-          let accounts = xabber.accounts.connected;
+          let accounts = xabber.accounts.connected,
+              accounts_length = accounts.length,
+              accounts_count = 0;
           accounts.forEach((account) => {
               account.searched_msgs_loaded = false;
               options.account = account;
               this.MAMRequest(query, options, (messages) => {
-                  this.$('.messages-list-wrap .messages-list .preloader-wrapper').remove();
                   if (!this.query_text)
                       return;
-                  _.each(messages, (message) => {
+
+                  let dfd = new $.Deferred();
+                  dfd.done(() => {
+                      accounts_count++;
                       if (!this.query_text)
                           return;
-
-                      let dfd = new $.Deferred();
-                      dfd.done(() => {
-                          if (!this.query_text)
-                              return;
+                      if (accounts_length === accounts_count){
                           this.$('.messages-list-wrap').switchClass('hidden', !this.$('.messages-list').children().length);
+                          this.$('.messages-list-wrap .messages-list .preloader-wrapper').remove();
                           this.updateScrollBar();
                           this._loading_messages = false;
-                      });
-                      let count = 0;
-                      _.each(messages, (message) => {
-                          account.chats.makeMessageObject(message,
-                              _.extend({is_searched: true}, options)
-                          ).then((message_from_stanza) => {
+                      }
+                  });
+                  let count = 0;
+                  _.each(messages, (message) => {
+                      account.chats.makeMessageObject(message,
+                          _.extend({is_searched: true}, options)
+                      ).then((message_from_stanza) => {
 
-                              let msg_idx = xabber.all_searched_messages.indexOf(message_from_stanza),
-                                  $message_item_view;
-                              if (!message_from_stanza) {
-                                  count++;
-                                  if (count === messages.length) {
-                                      dfd.resolve();
-                                  }
-                                  return;
-                              } else {
-                                  $message_item_view = new xabber.MessageItemView({model: message_from_stanza});
-                              }
-                              if (msg_idx === 0) {
-                                  $message_item_view.$el.appendTo(this.$('.messages-list-wrap .messages-list'));
-                              } else {
-                                  $message_item_view.$el.insertBefore(this.$('.messages-list-wrap .message-item').eq(-msg_idx));
-                              }
+                          let msg_idx = xabber.all_searched_messages.indexOf(message_from_stanza),
+                              $message_item_view;
+                          if (!message_from_stanza
+                              || (
+                                  message_from_stanza.get('from_jid') === message_from_stanza.get('to_jid')
+                                  && message_from_stanza.get('to_jid') === account.get('jid')
+                              )
+                          ) {
                               count++;
                               if (count === messages.length) {
                                   dfd.resolve();
                               }
-                          });
+                              return;
+                          } else {
+                              $message_item_view = new xabber.MessageItemView({model: message_from_stanza});
+                          }
+                          if (msg_idx === 0) {
+                              $message_item_view.$el.appendTo(this.$('.messages-list-wrap .messages-list'));
+                          } else {
+                              $message_item_view.$el.insertBefore(this.$('.messages-list-wrap .message-item').eq(-msg_idx));
+                          }
+                          count++;
+                          if (count === messages.length) {
+                              dfd.resolve();
+                          }
                       });
                   });
+                  if (!messages.length && count === messages.length){
+                      dfd.resolve();
+                  }
               });
           });
           (accounts.filter(account => account.searched_msgs_loaded).length === accounts.length) && (this._messages_loaded = true);
