@@ -1889,12 +1889,8 @@ xabber.JingleMessage = Backbone.Model.extend({
 
         dfd.done(() => {
             if (message) {
-                // if (options.open_mention_notification){
-                xabber.body.setScreen('all-chats', {
-                });
-                xabber.chats_view.openChat(this.item_view, {clear_search: true, screen: 'all-chats', force_show_placeholder: true});
-                this.get('saved') && xabber.accounts.enabled.length > 1 && xabber.toolbar_view.$('.all-chats').click();
-                // }
+                !options.do_not_change_screen && xabber.body.setScreen('all-chats', {});
+                xabber.chats_view.openChat(this.item_view, {clear_search: !options.do_not_change_screen, screen: 'all-chats', force_show_placeholder: true});
                 if (options.searched_messages)
                     message.set('searched_message', false);
                 let stanza_id = message.get('stanza_id');
@@ -1943,7 +1939,7 @@ xabber.JingleMessage = Backbone.Model.extend({
                     if (err === 'no_messages' && !options.force_context){
                         if (this.item_view && !this.item_view.content)
                             this.item_view.content = new xabber.ChatContentView({chat_item: this.item_view});
-                        xabber.chats_view.openChat(this.item_view, {clear_search: true, screen: 'all-chats'});
+                        xabber.chats_view.openChat(this.item_view, {clear_search: !options.do_not_change_screen, screen: 'all-chats'});
                         this.item_view.content.backToBottom({not_ev: true, stanza_id: stanza_id});
                         callback && callback();
                     } else if (err === 'no_messages' ){
@@ -3432,7 +3428,7 @@ xabber.ChatItemView = xabber.BasicView.extend({
                           let last_read_msg = this.model.messages.find(m =>
                               this.model.get('last_read_msg')
                               && (m.get('stanza_id') === this.model.get('last_read_msg') || m.get('contact_stanza_id') === this.model.get('last_read_msg')));
-                          if (last_read_msg){
+                          if (last_read_msg && msg_item){
                               if (msg_item.get('timestamp') && last_read_msg.get('timestamp') && msg_item.get('timestamp') > last_read_msg.get('timestamp'))
                                   msg_item.set('is_unread', true);
                           }
@@ -10937,10 +10933,7 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
           let chat;
           if (this.saved_chat){
               chat = this.account.chats.getSavedChat();
-              this.model.get('unique_id') && chat.getMessageContext(this.model.get('unique_id'), {message: true}, null, () => {
-                  xabber.toolbar_view.$('.saved-chats').hasClass('active')
-                  && xabber.accounts.enabled.length > 1
-                  && xabber.toolbar_view.$('.all-chats').click();
+              this.model.get('unique_id') && chat.getMessageContext(this.model.get('unique_id'), {message: true, do_not_change_screen: true}, null, () => {
               });
               return;
           } else {
@@ -10948,12 +10941,7 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
           }
           this.$el.closest('.left-panel-list-wrap').find('.list-item').removeClass('active');
           this.$el.addClass('active');
-          xabber.chats_view.openChat(chat.item_view, {right_contact_save: true, clear_search: false});
-          xabber.body.setScreen(xabber.body.screen.get('name'), {right: 'message_context', model: chat });
-          if (xabber.body.screen.get('right_contact') && xabber.body.screen.get('right') === 'message_context') {
-              chat.contact.showDetailsRight('all-chats', {right_saved: false});
-          }
-          this.model.get('unique_id') && chat.getMessageContext(this.model.get('unique_id'), {message: true});
+          this.model.get('unique_id') && chat.getMessageContext(this.model.get('unique_id'), {message: true, do_not_change_screen: true});
       }
   });
 

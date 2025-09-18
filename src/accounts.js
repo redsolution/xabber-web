@@ -2162,6 +2162,7 @@ xabber.Accounts = Backbone.CollectionWithStorage.extend({
             let no_accounts = !(this.length);
             if (no_accounts) {
                 xabber.body.setScreen('login');
+                xabber.clearSettingsStorage();
             } else if (account.show_settings_after_delete) {
                 xabber.body.setScreen('settings-modal', {account_block_name: null, block_name: null});
             } else if (account.dont_change_screen_after_delete) {

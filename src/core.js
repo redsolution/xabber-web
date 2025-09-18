@@ -330,6 +330,23 @@ let Xabber = Backbone.Model.extend({
         },
     }),
 
+    clearSettingsStorage: function () {
+        this._settings.clear();
+        this._settings.id = 'settings';
+        this._settings.save(this._settings.defaults());
+        this._settings.save('roster', this._roster_settings.attributes);
+        this._settings.save("main_color", constants.MAIN_COLOR);
+        this._settings.save("emoji_font", constants.DEFAULT_EMOJI_FONT);
+        this.body.updateBackground();
+        this.trigger('update_font_size');
+        this.trigger('update_main_color');
+        this.trigger('update_avatar_shape');
+        this.loadEmojiFont('system');
+        this.body.updateBoxShadow(this.settings.appearance.vignetting);
+        this.body.updateBlur(this.settings.appearance.blur);
+        this._settings.clearStorage();
+    },
+
     start: function () {
         this.check_config.done((result) => {
             this.cacheFavicons();
