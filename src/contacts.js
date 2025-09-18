@@ -8569,6 +8569,7 @@ xabber.GroupContacts = xabber.ContactsBase.extend({
     initialize: function (models, options) {
         this.group = options.group;
         this.on("change", this.onContactChanged, this);
+        this.on("change:subscription_request_out", this.onOutgoingSubsciptionChange, this);
     },
 
     comparator: function (contact1, contact2) {
@@ -8587,6 +8588,10 @@ xabber.GroupContacts = xabber.ContactsBase.extend({
         name1 = contact1.get('name').toLowerCase();
         name2 = contact2.get('name').toLowerCase();
         return name1 < name2 ? -1 : (name1 > name2 ? 1 : 0);
+    },
+
+    onOutgoingSubsciptionChange: function () {
+        xabber.trigger('new_outgoing_subscription')
     },
 
     onContactChanged: function (contact) {
@@ -10505,7 +10510,8 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
         "click .roster-sorting-item": "chooseSorting",
         "click .tab-filter-item": "removeFilter",
         "click .contacts-filter-main-header": "clickClearFilter",
-        "click .subscription-item-jid": "openSubscriptionChat",
+        "click .notification-subscription-item .subscription-item-jid": "openSubscriptionChat",
+        "click .notification-outgoing-subscription-item .subscription-item-jid": "openOutgoingSubscriptionChat",
         "click .close-search-icon": "clearSearch",
         "click .btn-back-to-chats": "clickBackToChats",
         "click .contact-groups-wrap .group.group-expand": "expandGroups",
@@ -10526,6 +10532,7 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
         "click .btn-add": "addContact",
         "click .btn-block": "blockContact",
         "click .btn-decline": "declineSubscription",
+        "click .btn-cancel-outgoing": "cancelOutgoingSubscription",
         "click .btn-chat": "openChat",
         "click .btn-voice-call": "voiceCall",
         "click .contacts-invitations-item-member-name": "onClickParticipant",
@@ -10560,6 +10567,7 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
         this.listenTo(xabber, 'update_layout', this.updatePlyrTitle);
         this.listenTo(xabber, 'update_client_notifications', this.updateClientNotifications);
         this.listenTo(xabber, 'new_incoming_subscription', this.updateAllIncomingSubscriptions);
+        this.listenTo(xabber, 'new_outgoing_subscription', this.updateAllOutgoingSubscriptions);
         this.listenTo(xabber, 'invitations_updated', this.updateIncomingInvitations);
         this.listenTo(xabber, 'change:video', this.updateJingleButtons);
         this.listenTo(xabber, 'change:audio', this.updateJingleButtons);
@@ -10608,6 +10616,7 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
         this.updateClientNotifications();
         this.updateSearchPlaceholder();
         this.updateAllIncomingSubscriptions();
+        this.updateAllOutgoingSubscriptions();
         this.updateIncomingInvitations();
     },
 
@@ -10629,6 +10638,7 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
         this.current_filter_domain = null;
         this.sorting_type = 'name';
         this.$el.removeClass('subscription-content');
+        this.$el.removeClass('outgoing-subscription-content');
         this.$el.removeClass('invitation-content');
         this.$(`.tab-active-filters-wrap .tab-filter-item`).remove();
         this.$('.contacts-type-filter-content .filter-item-wrap').removeClass('selected-filter');
@@ -10702,6 +10712,44 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
         account.chats.openChat(contact);
     },
 
+    openOutgoingSubscriptionChat: function (ev) {
+        if ($(ev.target).closest('.subscription-invitation-item-group-wrap').length)
+            return;
+        let $item = $(ev.target).closest('.notification-outgoing-subscription-item'),
+            account_jid = $item.attr('data-account-jid'),
+            jid = $item.attr('data-jid');
+
+        let account = xabber.accounts.find(item => item.get('jid') === account_jid);
+        if (!account)
+            return;
+
+        let contact = account.contacts.get(jid);
+        if (!contact)
+            return;
+
+        xabber.toolbar_view.showAllChats();
+        account.chats.openChat(contact);
+    },
+
+    cancelOutgoingSubscription: function (ev) {
+        if ($(ev.target).closest('.subscription-invitation-item-group-wrap').length)
+            return;
+        let $item = $(ev.target).closest('.notification-outgoing-subscription-item'),
+            account_jid = $item.attr('data-account-jid'),
+            jid = $item.attr('data-jid');
+
+        let account = xabber.accounts.find(item => item.get('jid') === account_jid);
+        if (!account)
+            return;
+
+        let contact = account.contacts.get(jid);
+        if (!contact)
+            return;
+
+
+        contact.declineSubscription();
+    },
+
     updateAllIncomingSubscriptions: function () {
         this.$('.notification-subscriptions-content-wrap').html('');
         let accounts = xabber.accounts.enabled,
@@ -10716,7 +10764,6 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
             accounts = [account]
         }
 
-        this.$('.subscription-switch-container').remove();
 
         _.each(accounts, (account) => {
             let contacts = account.contacts.filter(item => (item.get('subscription_request_in') && item.get('subscription') !== 'both'));
@@ -10766,6 +10813,57 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
         xabber.toolbar_view.recountAllMessageCounter();
         this.$('.filter-item-wrap[data-filter="subscription"] span').text(subs_counter || '');
         if (subs_counter === 0 && this.$el.hasClass('subscription-content')){
+            this.removeSubscriptionsFilter();
+        }
+    },
+
+    updateAllOutgoingSubscriptions: function () {
+        this.$('.notification-outgoing-subscriptions-content-wrap').html('');
+        let accounts = xabber.accounts.enabled,
+            subs_counter = 0;
+
+
+        let account = accounts.find(item => item.get('jid') === this.current_filter_account);
+
+        if (account){
+            accounts = [account]
+        }
+
+
+        _.each(accounts, (account) => {
+            let contacts = account.contacts.filter(item => (item.get('subscription_request_out') && item.get('subscription') !== 'both'));
+            _.each(contacts, (contact) => {
+                let $template = $(env.templates.notifications.outgoing_subscriptions_item({ //34
+                    name: contact.get('name'),
+                    jid: contact.get('jid'),
+                    account: account.get('jid'),
+                    counter: subs_counter,
+                    // group_chat: contact.get('group_chat'),
+                }));
+                this.$('.notification-outgoing-subscriptions-content-wrap').append($template);
+                let image = contact.cached_image;
+                $template.find('.circle-avatar.subscribe-avatar').setAvatar(image, 64, account);
+                $template.attr('data-color', contact.account.settings.get('color'));
+                $template.attr('data-counter', subs_counter);
+                subs_counter++;
+                $template.find('.notification-icon.subscribe-icon').html(env.templates.svg['group-invite']());
+                $template.find('.dropdown-button').dropdown({
+                    inDuration: 100,
+                    outDuration: 100,
+                    constrainWidth: false,
+                    hover: false,
+                    alignment: 'right'
+                });
+            });
+        });
+        this.$('.outgoing-subscription-item-wrap').switchClass('hidden', subs_counter === 0);
+        this.$('.notification-outgoing-subscriptions-wrap.notifications-outgoing-subscriptions').switchClass('hidden', subs_counter === 0);
+        if (this.current_filter && this.current_filter.type && this.current_filter.type !== 'outgoing-subscription'){
+            this.$('.notification-outgoing-subscriptions-wrap.notifications-outgoing-subscriptions').addClass('hidden');
+        }
+        xabber.toolbar_view.recountAllMessageCounter();
+        this.$('.filter-item-wrap[data-filter="outgoing-subscription"] span').text(subs_counter || '');
+        if (subs_counter === 0 && this.$el.hasClass('outgoing-subscription-content')){
             this.removeSubscriptionsFilter();
         }
     },
@@ -10958,6 +11056,7 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
                     !no_process && this.processUpdateContacts(true, true);
                 }
                 this.updateAllIncomingSubscriptions();
+                this.updateAllOutgoingSubscriptions();
                 this.updateIncomingInvitations();
             } catch (e) {
                 console.error(e)
@@ -11098,6 +11197,7 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
         }
 
         this.$el.removeClass('subscription-content');
+        this.$el.removeClass('outgoing-subscription-content');
         this.$el.removeClass('invitation-content');
         this.$('.contacts-type-filter-content .filter-item-wrap').removeClass('selected-filter');
         this.$('.notifications-subscriptions .notification-subscription-item').slice(2).addClass('hidden');
@@ -11121,6 +11221,7 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
         if (normal_interaction_list.includes(filter_type)) {
             this.$('.contact-list-wrap').removeClass('hidden');
             this.$('.notification-subscriptions-wrap').addClass('hidden');
+            this.$('.notification-outgoing-subscription-wrap').addClass('hidden');
             // filter_type !== 'contacts' && filter_type !== 'groupchat' && $(templates.tab_filter_item_main_color({
             //     value: filter_type,
             //     type: filter_type,
@@ -11140,11 +11241,18 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
             // this.current_type_subfilter = 'subscription';
             this.$('.notification-subscription-item').removeClass('hidden');
             this.$('.notification-subscriptions-wrap').removeClass('hidden');
+        } else if (filter_type === 'outgoing-subscription'){
+            this.current_filter = { type: filter_type };
+            this.$el.addClass('outgoing-subscription-content');
+            this.$(`.contacts-type-filter-content .filter-item-wrap[data-filter="${filter_type}"]`).addClass('selected-filter');
+            this.$('.notification-outgoing-subscription-item').removeClass('hidden');
+            this.$('.notification-outgoing-subscription-wrap').removeClass('hidden');
         } else if (filter_type === 'invitations'){
 
             this.current_filter = { type: filter_type };
             this.$el.addClass('invitation-content');
             this.$('.notification-subscriptions-wrap').addClass('hidden');
+            this.$('.notification-outgoing-subscription-wrap').addClass('hidden');
             // $(templates.tab_filter_item_main_color({
             //     value: 'invitations',
             //     type: 'invitations',
@@ -11170,6 +11278,7 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
         this.current_filter = {};
         // this.current_type_subfilter = '';
         this.$el.removeClass('subscription-content');
+        this.$el.removeClass('outgoing-subscription-content');
         this.$el.removeClass('invitation-content');
         this.$('.contacts-type-filter-content .filter-item-wrap').removeClass('selected-filter');
         this.$('.notifications-subscriptions .notification-subscription-item').slice(2).addClass('hidden');
@@ -11216,6 +11325,7 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
         this.current_filter_domain = null;
         this.sorting_type = 'name';
         this.updateAllIncomingSubscriptions();
+        this.updateAllOutgoingSubscriptions();
         this.updateIncomingInvitations();
         this.clearSearch();
         // if (!(this.current_filter.type && this.current_filter.type === 'subscription')){
@@ -12005,6 +12115,7 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
         this.$('.groupchats-preview-list').html('');
         this.$('.contacts-preview-list').html('');
         this.updateAllIncomingSubscriptions();
+        this.updateAllOutgoingSubscriptions();
         this.updateIncomingInvitations();
         if (this.contacts.length){
             this.$(`.roster-sorting-item`).removeClass('selected-sorting');

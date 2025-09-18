@@ -1427,10 +1427,12 @@ xabber.ToolbarView = xabber.BasicView.extend({
                 }
             });
             let incoming_subscriptions = account.contacts.filter(item => ((item.get('subscription_request_in') && item.get('subscription') !== 'both'))).length;
+            let outgoing_subscriptions = account.contacts.filter(item => ((item.get('subscription_request_out') && item.get('subscription') !== 'both'))).length;
             let incoming_invitations = account.contacts.filter(item => (item.get('invitation') && !item.get('removed'))).length;
 
             incoming_invitations && (invitations_counter += incoming_invitations);
             incoming_subscriptions && (contacts += incoming_subscriptions);
+            outgoing_subscriptions && (contacts += outgoing_subscriptions);
 
             if (account.omemo && account.omemo.xabber_trust){
                 let trust = account.omemo.xabber_trust,

@@ -258,6 +258,7 @@ import $ from "jquery";
     addTemplate('notifications.incoming_subscriptions_container');
     addTemplate('notifications.incoming_invitations_container');
     addTemplate('notifications.incoming_subscriptions_item');
+    addTemplate('notifications.outgoing_subscriptions_item');
     addTemplate('notifications.verification_session');
     addTemplate('notifications.notification_icon_container');
 

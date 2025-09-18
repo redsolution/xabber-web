@@ -14866,8 +14866,8 @@ xabber.ChatBottomView = xabber.BasicView.extend({
             }
             $message_actions.find('.messages-select-count')
                 .text(xabber.getQuantityString("chat_screen__bottom_panel__selected_messages__text", length));
-            $message_actions.find('.reply-message-wrap').switchClass('non-active', this.model.get('blocked'));
-            $message_actions.find('.forward-message-wrap').switchClass('non-active', this.model.get('encrypted'));
+            $message_actions.find('.reply-message-wrap').hideIf(this.model.get('blocked'));
+            $message_actions.find('.forward-message-wrap').hideIf(this.model.get('encrypted'));
         } else {
             // !this.view.$('.chat-notification').hasClass('encryption-warning') && this.view.$('.chat-notification').addClass('hidden').removeClass('msgs-counter').text("");
             this.focusOnInput();
