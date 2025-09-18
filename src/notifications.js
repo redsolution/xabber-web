@@ -698,8 +698,9 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
         let $elem = $(ev.target).closest('.chat-message'),
             unique_id = $elem.attr('data-uniqueid');
 
+        let msg = this.notification_messages.get(unique_id);
+
         if ($elem.hasClass('unread-message-background')){
-            let msg = this.notification_messages.get(unique_id);
 
             let chat;
             if (msg && msg.collection && msg.collection.chat) {
@@ -732,9 +733,30 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
             $modal = modal.$modal,
             unique_modal_id = uuid(),
             $overlay = $(`#${$modal.data('overlay-id')}`);
+
+        let selected_text = utils.getSelectedText($elem.find('.chat-text-content'));
+
+        let copy_btn_text = selected_text ? xabber.getString("message_copy_selected") : xabber.getString("message_copy");
+        if (!msg){
+
+        }
+        $modal.find('.btn-copy-message').showIf(msg);
+        $modal.find('.btn-copy-message .context-menu-btn-text').text(copy_btn_text);
+
         $overlay.addClass('invisible-overlay');
         $modal.find('.btn-delete-message').one(`click.${unique_modal_id}`, () => {
             this.deleteNotification(unique_id);
+            $overlay.click();
+        });
+        $modal.find('.btn-copy-message').one(`click.${unique_modal_id}`, () => {
+            if (selected_text) {
+                utils.copyTextToClipboard(_.unescape(selected_text));
+            } else if (msg) {
+                let fwd_msg_indicator = "",
+                    copied_messages = this.createTextMessageSingle(msg, fwd_msg_indicator);
+                utils.copyTextToClipboard(_.unescape(copied_messages));
+            }
+            utils.callback_popup_message(xabber.getString("toast__copied_in_clipboard"), 5000);
             $overlay.click();
         });
         $modal.find('.btn-select-message').one(`click.${unique_modal_id}`, () => {
@@ -769,6 +791,21 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
             clientX: ev.clientX,
             clientY: ev.clientY,
         })
+    },
+
+    createTextMessageSingle: function (message, fwd_msg_indicator) {
+        let text_message = "",
+            $msg = message,
+            current_date = moment($msg.get('timestamp')).startOf('day');
+
+        text_message += (fwd_msg_indicator.length ? fwd_msg_indicator + ' ' : "");
+        fwd_msg_indicator.length && (text_message += fwd_msg_indicator);
+        let original_message = _.unescape(($msg.get('mutable_content') && $msg.get('mutable_content').find(ref => ref.type === 'groupchat')) ? $msg.get('original_message').slice($msg.get('mutable_content').find(ref => ref.type === 'groupchat').end) : $msg.get('original_message'));
+        fwd_msg_indicator.length && (original_message = original_message.replace(/\n/g, '\n&gt; '));
+        (fwd_msg_indicator.length && original_message.indexOf('&gt;') !== 0) && (text_message += ' ');
+        (original_message = _.unescape(original_message.replace(/\n&gt; &gt;/g, '\n&gt;&gt;')));
+        text_message += _.escape(original_message) + '\n';
+        return text_message.trim();
     },
 
     onClickNotification: function (ev) {
