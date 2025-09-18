@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.4.214","version_description":"added copy selected text to notification context menu"}'
+'{"version_number":"2.4.215","version_description":"hidden notifications in chats view message searching"}'
 )});

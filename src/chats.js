@@ -329,6 +329,9 @@ xabber.MessagesBase = Backbone.Collection.extend({
             && $message.children(`notification[xmlns="${Strophe.NS.XABBER_NOTIFY}"]`).attr('type') === 'system'){
             options.ignored = true
         }
+        if (options.notification_msg && options.is_searched){
+            return;
+        }
         if (options.notification_msg){
             if ($message.children(`notification[xmlns="${Strophe.NS.XABBER_NOTIFY}"]`).children('info').length){
                 $notification_msg = $message.children(`notification[xmlns="${Strophe.NS.XABBER_NOTIFY}"]`).children('info');
