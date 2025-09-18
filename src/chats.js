@@ -8952,6 +8952,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
             unique_modal_id = uuid(),
             $overlay = $(`#${$modal.data('overlay-id')}`);
 
+        let selected_text = utils.getSelectedText($elem.find('.chat-text-content'));
         let my_msg = false;
         if ($elem.attr('data-from') === this.account.get('jid'))
             my_msg = true;
@@ -8961,6 +8962,8 @@ xabber.ChatContentView = xabber.BasicView.extend({
         if ($elem.find('.mdi-play').length)
             my_msg = false;
 
+        let copy_btn_text = selected_text ? xabber.getString("message_copy_selected") : xabber.getString("message_copy");
+        $modal.find('.btn-copy-message .context-menu-btn-text').text(copy_btn_text);
         $modal.find('.btn-pin').showIf(this.model.get('group_chat'));
         $modal.find('.btn-reply-message').hideIf(this.model.get('blocked'));
         $modal.find('.btn-forward-message').hideIf(this.model.get('encrypted'));
@@ -8983,7 +8986,11 @@ xabber.ChatContentView = xabber.BasicView.extend({
             $overlay.click();
         });
         $modal.find('.btn-copy-message').one(`click.${unique_modal_id}`, () => {
-            this.bottom.copyMessages(null, msg, true);
+            if (selected_text) {
+                utils.copyTextToClipboard(_.unescape(selected_text));
+            } else {
+                this.bottom.copyMessages(null, msg, true);
+            }
             utils.callback_popup_message(xabber.getString("toast__copied_in_clipboard"), 5000);
             $overlay.click();
         });

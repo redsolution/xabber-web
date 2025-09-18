@@ -820,6 +820,40 @@ var utils = {
         return element.scrollHeight > element.clientHeight;
     },
 
+    getSelectedText: function(element) {
+        // Получаем объект выделения
+        const selection = window.getSelection();
+
+        // Проверяем, есть ли выделенный текст
+        const selectedText = selection.toString();
+        if (selectedText.length === 0) {
+            return ''; // Нет выделенного текста
+        }
+
+        // Получаем все элементы-потомки переданного элемента через jQuery и сам контейнер
+        const $descendants = $(element).find('*').addBack(element);
+
+        // Получаем узлы, содержащие выделение
+        const selectedNodes = [];
+        for (let i = 0; i < selection.rangeCount; i++) {
+            const range = selection.getRangeAt(i);
+            const commonAncestor = range.commonAncestorContainer;
+            selectedNodes.push(commonAncestor.nodeType === 3 ? commonAncestor.parentNode : commonAncestor);
+        }
+
+        // Проверяем, пересекаются ли выделенные узлы с потомками или самим контейнером
+        let isDescendantOrSelf = false;
+        $descendants.each(function() {
+            if (selectedNodes.includes(this)) {
+                isDescendantOrSelf = true;
+                return false; // Прерываем цикл, если нашли совпадение
+            }
+        });
+
+        // Возвращаем выделенный текст, если он находится внутри контейнера или его потомков
+        return isDescendantOrSelf ? selectedText : '';
+    },
+
     render_data_form: function (data_form) {
         let $data_form = $('<div class="data-form"/>');
         data_form.fields.forEach(function (field) {
