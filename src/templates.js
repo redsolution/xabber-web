@@ -334,6 +334,7 @@ import $ from "jquery";
     addSvgTemplate('svg.xmpp');
     addSvgTemplate('svg.job');
     addSvgTemplate('svg.job-outline');
+    addSvgTemplate('svg.format-quote');
     addSvgTemplate('svg.address');
     addSvgTemplate('svg.address-outline');
     addSvgTemplate('svg.email');

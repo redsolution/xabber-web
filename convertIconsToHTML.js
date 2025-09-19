@@ -77,6 +77,7 @@ let badges_names = [
         'status-outline',
         'job',
         'job-outline',
+        'format-quote',
         'address',
         'address-outline',
         'email',

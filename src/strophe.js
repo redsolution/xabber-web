@@ -732,6 +732,12 @@ _.extend(Strophe.Connection.prototype, {
                 });
                 this.account.counter_changes_logging.updateCountersList(this.account);
             }
+            if (this.account && this.counter && this.account.get('x_token') && this._sasl_mechanism.mechname === "DEVICES-OCRA") {
+                this.account.save({
+                    auth_stanza: request_auth_exchange.tree(),
+                });
+                this.account.counter_changes_logging.updateCountersList(this.account);
+            }
             break;
         }
         return mechanism_found;
@@ -811,6 +817,8 @@ _.extend(Strophe.Connection.prototype, {
                     this.counter++;
                     this.account.save({
                         hotp_counter: this.counter,
+                        challenge_stanza: elem,
+                        response_stanza: stanza.tree(),
                     });
                     this.account.counter_changes_logging.updateCountersList(this.account);
                 }

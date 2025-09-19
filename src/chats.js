@@ -702,7 +702,7 @@ xabber.MessagesBase = Backbone.Collection.extend({
             let msg_contact = Strophe.getBareJidFromJid($message.attr('from'));
             (msg_contact === account.get('jid')) && (msg_contact = Strophe.getBareJidFromJid($message.attr('to')));
             attrs.to_jid = Strophe.getBareJidFromJid($message.attr('to'));
-            message = xabber.all_searched_messages.create(attrs); //34
+            message = xabber.all_searched_messages.create(attrs);
             if (options.saved_chat){
                 message.saved_chat = true;
                 message.account = account;
@@ -8967,6 +8967,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
 
         let copy_btn_text = selected_text ? xabber.getString("message_copy_selected") : xabber.getString("message_copy");
         $modal.find('.btn-copy-message .context-menu-btn-text').text(copy_btn_text);
+        $modal.find('.btn-quote-message').showIf(selected_text);
         $modal.find('.btn-pin').showIf(this.model.get('group_chat'));
         $modal.find('.btn-reply-message').hideIf(this.model.get('blocked'));
         $modal.find('.btn-forward-message').hideIf(this.model.get('encrypted'));
@@ -8996,6 +8997,12 @@ xabber.ChatContentView = xabber.BasicView.extend({
             }
             utils.callback_popup_message(xabber.getString("toast__copied_in_clipboard"), 5000);
             $overlay.click();
+        });
+        $modal.find('.btn-quote-message').one(`click.${unique_modal_id}`, () => {
+            $overlay.click();
+            if (selected_text) {
+                this.bottom.quillInsertTextWithQuote(selected_text);
+            }
         });
         $modal.find('.btn-edit-message').one(`click.${unique_modal_id}`, () => {
             $overlay.click();
@@ -13155,6 +13162,16 @@ xabber.ChatBottomView = xabber.BasicView.extend({
         this.manageSelectedMessages();
         this.updateLeftIndicator(xabber.accounts);
         return this;
+    },
+
+    quillInsertTextWithQuote: function (text) {
+        let index = this.quill.getLength()
+        this.quill.insertText(index, text);
+        this.quill.formatText(index, text.length+1, 'blockquote', true);
+        index = this.quill.getLength()
+        this.quill.insertText(index, "\n");
+        this.quill.focus()
+        this.quill.setSelection(this.quill.getLength(), 0)
     },
 
     setButtonsWidth: function () {

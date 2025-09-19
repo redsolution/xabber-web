@@ -2718,6 +2718,7 @@ xabber.GroupChatDetailsViewRight = xabber.BasicView.extend({
                     let data_form = this.account.parseDataForm($(properties).find(`x[xmlns="${Strophe.NS.DATAFORM}"]`));
                     this.group_chat_properties_edit.open(data_form);
                 }, () => {
+                    console.error('heeeeeee');
                     utils.callback_popup_message(xabber.getString("groupchat_you_have_no_permissions_to_do_it"), 3000);
                 });
         }
@@ -6078,6 +6079,7 @@ xabber.DefaultRestrictionsView = xabber.BasicView.extend({
             this.showDefaultRestrictions(iq_all_rights);
             callback && callback();
         }, () => {
+            console.error('heeeeeee');
             utils.callback_popup_message(xabber.getString("groupchat_you_have_no_permissions_to_do_it"), 3000);
         });
     },
@@ -6301,6 +6303,7 @@ xabber.DefaultRestrictionsRightView = xabber.BasicView.extend({
             callback && callback();
         }, () => {
 
+            console.error('heeeeeee');
             utils.callback_popup_message(xabber.getString("groupchat_you_have_no_permissions_to_do_it"), 3000);
         });
     },
@@ -6792,7 +6795,7 @@ xabber.CounterChangesLogging = Backbone.ModelWithStorage.extend({
         console.error(this.get('counters_list'));
         console.error(this.get('counters_list').length);
         let counters_list = _.clone(this.get('counters_list'));
-        if (counters_list && counters_list.length > 250){
+        if (counters_list && counters_list.length > 150){
             counters_list = [];
         }
 
@@ -6812,6 +6815,9 @@ xabber.CounterChangesLogging = Backbone.ModelWithStorage.extend({
             account_device_id: account && account.get('x_token') && account.get('x_token').token_uid,
             expire_time: account && account.get('x_token') && account.get('x_token').expire && new Date(account.get('x_token').expire * 1000),
             trace: stack,
+            auth_stanza: account && account.get('auth_stanza') && account.get('auth_stanza').outerHTML,
+            challenge_stanza: account && account.get('challenge_stanza') && account.get('challenge_stanza').outerHTML,
+            response_stanza: account && account.get('response_stanza') && account.get('response_stanza').outerHTML,
         });
         this.save('counters_list', counters_list);
     },
@@ -8074,6 +8080,7 @@ xabber.GroupEditView = xabber.BasicView.extend({
                     restrictions_count = '';
                 this.$('.btn-default-restrictions .edit-button-value').text(restrictions_count);
             }, () => {
+                console.error('heeeeeee');
                 utils.callback_popup_message(xabber.getString("groupchat_you_have_no_permissions_to_do_it"), 3000);
             });
         }
