@@ -13152,8 +13152,7 @@ xabber.ChatBottomView = xabber.BasicView.extend({
         this.$('.ql-toolbar.ql-snow').switchClass('ql-moved-left-extra', !xabber.settings.mapping_service && !(this.account.get('gallery_token') && this.account.get('gallery_url')));
         if (this.model.get('group_chat')) {
             this.updateInfoInBottom();
-        }
-        else {
+        } else {
             this.$('.account-nickname').hide();
             this.$('.account-badge').hide();
             this.$('.account-role').hide();
@@ -13166,6 +13165,8 @@ xabber.ChatBottomView = xabber.BasicView.extend({
 
     quillInsertTextWithQuote: function (text) {
         let index = this.quill.getLength()
+        if (index === 1)
+            index = 0;
         this.quill.insertText(index, text);
         this.quill.formatText(index, text.length+1, 'blockquote', true);
         index = this.quill.getLength()

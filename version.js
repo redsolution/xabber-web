@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.4.217","version_description":"added quoting btn to msg context menu, added auth stanzas logging for ocra"}'
+'{"version_number":"2.4.218","version_description":"changed quoting for empty msg input"}'
 )});
