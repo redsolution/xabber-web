@@ -10297,7 +10297,7 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
     },
 
     onChatRemoved: function (chat, options) {
-        if (this.active_chat === this.child(chat.id)) {
+        if (this.active_chat === this.child(chat.id) || (xabber.body.screen.get('chat_item') === this.child(chat.id))) {
             this.active_chat = null;
             xabber.body.showChatPlaceholder();
             xabber.body.screen.set('chat_item', false);

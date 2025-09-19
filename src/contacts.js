@@ -6816,7 +6816,9 @@ xabber.CounterChangesLogging = Backbone.ModelWithStorage.extend({
             expire_time: account && account.get('x_token') && account.get('x_token').expire && new Date(account.get('x_token').expire * 1000),
             trace: stack,
             auth_stanza: account && account.get('auth_stanza') && account.get('auth_stanza').outerHTML,
+            auth_stanza_time: account && account.get('auth_stanza_time'),
             challenge_stanza: account && account.get('challenge_stanza') && account.get('challenge_stanza').outerHTML,
+            challenge_response_stanza_time: account && account.get('challenge_response_stanza_time'),
             response_stanza: account && account.get('response_stanza') && account.get('response_stanza').outerHTML,
         });
         this.save('counters_list', counters_list);

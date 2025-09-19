@@ -735,6 +735,7 @@ _.extend(Strophe.Connection.prototype, {
             if (this.account && this.counter && this.account.get('x_token') && this._sasl_mechanism.mechname === "DEVICES-OCRA") {
                 this.account.save({
                     auth_stanza: request_auth_exchange.tree(),
+                    auth_stanza_time: new Date(),
                 });
                 this.account.counter_changes_logging.updateCountersList(this.account);
             }
@@ -818,6 +819,7 @@ _.extend(Strophe.Connection.prototype, {
                     this.account.save({
                         hotp_counter: this.counter,
                         challenge_stanza: elem,
+                        challenge_response_stanza_time: new Date(),
                         response_stanza: stanza.tree(),
                     });
                     this.account.counter_changes_logging.updateCountersList(this.account);

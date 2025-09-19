@@ -261,24 +261,31 @@ xabber.Fingerprints = xabber.BasicView.extend({
 
         if (this.account.omemo.xabber_trust.get('trusted_devices')[this.jid] && this.account.omemo.xabber_trust.get('trusted_devices')[this.jid].length){
 
-            let updated_trusted_devices = this.account.omemo.xabber_trust.get('trusted_devices'),
-                contacts_trusted_devices = this.account.omemo.xabber_trust.get('trusted_devices')[this.jid],
-                changed, changed_devices = {};
-            changed_devices[this.jid] = [];
-            contacts_trusted_devices.forEach((trusted_device, index) => {
-                if (!trusted_device.untrusted && !trusted_device.is_revoked){
-                    trusted_device.untrusted = true;
-                    updated_trusted_devices[this.jid][index] = trusted_device;
-                    changed_devices[this.jid].push(trusted_device);
-                    changed = true;
+            utils.dialogs.ask(xabber.getString("trust_session__revoke_all__modal_header"),
+                xabber.getString("trust_session__revoke_all__modal_text"),
+                {},
+                { ok_button_text: xabber.getString("trust_session__revoke_all")}).done((result) => {
+                if (result) {
+                    let updated_trusted_devices = this.account.omemo.xabber_trust.get('trusted_devices'),
+                        contacts_trusted_devices = this.account.omemo.xabber_trust.get('trusted_devices')[this.jid],
+                        changed, changed_devices = {};
+                    changed_devices[this.jid] = [];
+                    contacts_trusted_devices.forEach((trusted_device, index) => {
+                        if (!trusted_device.untrusted && !trusted_device.is_revoked){
+                            trusted_device.untrusted = true;
+                            updated_trusted_devices[this.jid][index] = trusted_device;
+                            changed_devices[this.jid].push(trusted_device);
+                            changed = true;
+                        }
+                    });
+                    this.account.omemo.xabber_trust.save('trusted_devices', updated_trusted_devices);
+                    this.account.omemo.xabber_trust.trigger('trust_updated');
+
+                    if (changed){
+                        this.account.omemo.xabber_trust.publishContactsTrustedDevices(changed_devices);// list of devices
+                    }
                 }
             });
-            this.account.omemo.xabber_trust.save('trusted_devices', updated_trusted_devices);
-            this.account.omemo.xabber_trust.trigger('trust_updated');
-
-            if (changed){
-                this.account.omemo.xabber_trust.publishContactsTrustedDevices(changed_devices);// list of devices
-            }
         }
     },
 
