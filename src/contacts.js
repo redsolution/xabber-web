@@ -3181,7 +3181,7 @@ xabber.GroupChatPropertiesViewRight = xabber.BasicView.extend({
     update: function () {
         let info = this.model.get('group_info') || {};
         this.$('.block-name').text(this.model.get('incognito_group') ? xabber.getString("incognito_group_settings__header") : xabber.getString("public_group_settings__header"));
-        this.$('.jabber-id .value').text(info.jid);
+        this.$('.jabber-id .value').text(info.jid || this.model.get('jid'));
         this.$('.name .value').text(info.name);
         this.$('.description .value').text(info.description);
         this.$('.model .value').text(utils.pretty_name(info.model));

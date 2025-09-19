@@ -22779,7 +22779,8 @@ input[type=range].voice-message-volume:focus {
     position: relative;
 }
 .messages-list-wrap .preloader-wrapper{
-    top: 20px;
+    top: 16px;
+    margin-bottom: 32px;
     left: 40%;
     width: 30px;
     height: 30px;
