@@ -467,58 +467,62 @@ xabber.SearchView = xabber.BasicView.extend({
           this.updateSearch();
       },
 
-      onScrollY: function (options) {
+      onScrollY: function () {
           if (xabber.all_searched_messages && xabber.all_searched_messages.length && this.queryid && !this._loading_messages && !this._messages_loaded && this.isScrolledToBottom()) {
-              return; //todo: сделат догрузку архива поиска
-              // this._loading_messages = true;
-              // options = options || {};
-              // this.queryid = uuid();
-              // options.query_id = this.queryid;
-              // let accounts = xabber.accounts.connected;
-              // accounts.forEach((account) => {
-              //     let first_message = xabber.all_searched_messages.find(message => (message.account.get('jid') === account.get('jid')));
-              //     if (!first_message || account.searched_msgs_loaded) {
-              //         return;
-              //     }
-              //     options.account = account;
-              //     options.before = first_message.get('archive_id');
-              //     this.MAMRequest(this.query_text, options, (messages) => {
-              //         let dfd = new $.Deferred();
-              //         dfd.done(() => {
-              //             this.$('.messages-list-wrap').switchClass('hidden', !this.$('.messages-list').children().length);
-              //             this.updateScrollBar();
-              //             this._loading_messages = false;
-              //         });
-              //         let count = 0;
-              //         _.each(messages, (message) => {
-              //             account.chats.makeMessageObject(message,
-              //                 _.extend({is_searched: true}, options)
-              //             ).then((message_from_stanza) => {
-              //
-              //                 let msg_idx = xabber.all_searched_messages.indexOf(message_from_stanza),
-              //                     $message_item_view;
-              //                 if (!message_from_stanza) {
-              //                     count++;
-              //                     if (count === messages.length) {
-              //                         dfd.resolve();
-              //                     }
-              //                     return;
-              //                 } else
-              //                     $message_item_view = new xabber.MessageItemView({model: message_from_stanza});
-              //                 if (msg_idx === 0) {
-              //                     $message_item_view.$el.appendTo(this.$('.messages-list-wrap .messages-list'));
-              //                 } else {
-              //                     $message_item_view.$el.insertBefore(this.$('.messages-list-wrap .message-item').eq(-msg_idx));
-              //                 }
-              //                 count++;
-              //                 if (count === messages.length) {
-              //                     dfd.resolve();
-              //                 }
-              //             });
-              //         });
-              //     });
-              // });
-              // (accounts.filter(account => account.searched_msgs_loaded).length === accounts.length) && (this._messages_loaded = true);
+              this._loading_messages = true;
+              let options = {};
+              this.queryid = uuid();
+              options.query_id = this.queryid;
+              let accounts = xabber.accounts.connected;
+              accounts.forEach((account) => {
+                  let first_message = xabber.all_searched_messages.find(message => (message.account.get('jid') === account.get('jid')));
+                  if (!first_message || account.searched_msgs_loaded) {
+                      return;
+                  }
+                  options.account = account;
+                  options.before = first_message.get('archive_id');
+                  this.MAMRequest(this.query_text, options, (messages) => {
+                      let dfd = new $.Deferred();
+                      dfd.done(() => {
+                          this.$('.messages-list-wrap').switchClass('hidden', !this.$('.messages-list').children().length);
+                          this.updateScrollBar();
+                          this._loading_messages = false;
+                      });
+                      let count = 0;
+                      _.each(messages, (message) => {
+                          account.chats.makeMessageObject(message,
+                              _.extend({is_searched: true}, options)
+                          ).then((message_from_stanza) => {
+
+                              let msg_idx = xabber.all_searched_messages.indexOf(message_from_stanza),
+                                  $message_item_view;
+                              if (!message_from_stanza
+                                  || (
+                                      message_from_stanza.get('from_jid') === message_from_stanza.get('to_jid')
+                                      && message_from_stanza.get('to_jid') === account.get('jid')
+                                  )
+                              ) {
+                                  count++;
+                                  if (count === messages.length) {
+                                      dfd.resolve();
+                                  }
+                                  return;
+                              } else
+                                  $message_item_view = new xabber.MessageItemView({model: message_from_stanza});
+                              if (msg_idx === 0) {
+                                  $message_item_view.$el.appendTo(this.$('.messages-list-wrap .messages-list'));
+                              } else {
+                                  $message_item_view.$el.insertBefore(this.$('.messages-list-wrap .message-item').eq(-msg_idx));
+                              }
+                              count++;
+                              if (count === messages.length) {
+                                  dfd.resolve();
+                              }
+                          });
+                      });
+                  });
+              });
+              (accounts.filter(account => account.searched_msgs_loaded).length === accounts.length) && (this._messages_loaded = true);
           }
       },
 

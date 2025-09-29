@@ -3244,6 +3244,7 @@ xabber.ChatItemView = xabber.BasicView.extend({
 
       events: {
           'click .chat-message': 'onClickMessage',
+          'contextmenu .chat-message': 'onContextMenuMessage',
           'click .chat-msg-location-content': 'onClickLocation',
           'mouseover .chat-msg-location-content.no-title': 'onHoverLocation',
           'click .mdi-link-variant': 'onClickLink',
@@ -3319,6 +3320,11 @@ xabber.ChatItemView = xabber.BasicView.extend({
 
       openUnreadMention: function () {
           this.chat_content.openUnreadMention.bind(this)();
+      },
+
+      onContextMenuMessage: function (ev) {
+          this.bottom = this.chat_content.bottom;
+          this.chat_content.onContextMenuMessage.bind(this)(ev);
       },
 
       onChangedVisibility: function () {
@@ -8971,7 +8977,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
         $modal.find('.btn-pin').showIf(this.model.get('group_chat'));
         $modal.find('.btn-reply-message').hideIf(this.model.get('blocked'));
         $modal.find('.btn-forward-message').hideIf(this.model.get('encrypted'));
-        $modal.find('.btn-edit-message').hideIf(!(my_msg) || this.$('.chat-message.saved-main.selected').length || this.model.get('blocked'));
+        $modal.find('.btn-edit-message').hideIf(!(my_msg) || this.$('.chat-message.saved-main.selected').length || this.model.get('blocked') || this.$el.hasClass('messages-context-wrap'));
 
         this.model.get('encrypted') && $modal.find('.btn-edit-message').addClass('hidden');
 
@@ -10172,6 +10178,7 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
         this.listenTo(this.model, 'change:const_unread', this.onChangedReadStatus);
         this.listenTo(this.model, 'change:timestamp', this.updateChatPosition);
         this.listenTo(xabber.accounts, 'list_changed', this.updateLeftIndicator);
+        this.listenTo(xabber.accounts, 'add destroy change:enabled update_order', this.onAccountListUpdate);
         this.listenTo(xabber.accounts, 'omemo_changed', this.updateAccountEncryptedChats);
         let wheel_ev = this.defineMouseWheelEvent();
         this.$el.on(wheel_ev, this.onMouseWheel.bind(this));
@@ -10204,6 +10211,10 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
     },
 
     showSearch: function (ev) {
+    },
+
+    onAccountListUpdate: function () {
+        this.$('.search-input').val() && this.clearSearch();
     },
 
     hideSearch: function (ev) {
@@ -10817,7 +10828,7 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
           this.updateGroupChats();
           this.updateIcon();
           this.updateStatus();
-          this.listenTo(this.account.settings, 'change:color', this.updateColorScheme);
+          this.account && this.listenTo(this.account.settings, 'change:color', this.updateColorScheme);
           this.contact && this.listenTo(this.contact, 'change:status', this.updateStatus);
           this.contact && this.listenTo(this.contact, 'change:name', this.updateName);
       },
@@ -10887,6 +10898,8 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
       },
 
       updateColorScheme: function () {
+          if (!this.account)
+              return;
           let color = this.account.settings.get('color');
           this.$el.attr('data-color', color);
       },
@@ -12161,7 +12174,7 @@ xabber.InvitationPanelView = xabber.SearchView.extend({
 
     deleteChat: function () {
         if (this.contact.get('group_chat')) {
-            utils.dialogs.ask(xabber.getString("delete_chat"), xabber.getString("dialog_group_remove__confirm"), null, { ok_button_text: xabber.getString("delete")}).done((result) => {
+            utils.dialogs.ask(xabber.getString("groupchat_leave_full"), xabber.getString("dialog_group_remove__confirm"), null, { ok_button_text: xabber.getString("groupchat_leave_full")}).done((result) => {
                 if (result) {
                     let scrolled_top = xabber.chats_view.getScrollTop() || 0;
                     (this.account.connection && this.account.connection.do_synchronization) && this.model.deleteFromSynchronization();
@@ -14915,8 +14928,6 @@ xabber.ChatBottomView = xabber.BasicView.extend({
     },
 
     copyMessages: function (ev, forced_message, only_text) {
-        if (!this.model.get('active'))
-            return;
         let $msgs = this.content_view.$('.chat-message.selected'),
             msgs = [];
         $msgs.each((idx, item) => {
@@ -15114,8 +15125,6 @@ xabber.ChatBottomView = xabber.BasicView.extend({
     },
 
     deleteMessages: function (ev, messages, on_rewrite) {
-        if (!this.model.get('active'))
-            return;
         let $msgs = this.content_view.$('.chat-message.selected'),
             msgs = [],
             my_msgs = 0,
@@ -15256,8 +15265,6 @@ xabber.ChatBottomView = xabber.BasicView.extend({
     },
 
     replyMessages: function (ev, forced_message) {
-        if (!this.model.get('active'))
-            return;
         let $msgs = this.content_view.$('.chat-message.selected'),
             msgs = [];
         $msgs.each((idx, item) => {
@@ -15275,7 +15282,7 @@ xabber.ChatBottomView = xabber.BasicView.extend({
     },
 
     forwardMessages: function (ev, forced_message) {
-        if (!this.model.get('active') || this.model.get('encrypted'))
+            if (this.model.get('encrypted'))
             return;
         if (this.$('.forward-message-wrap').hasClass('non-active'))
             return;

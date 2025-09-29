@@ -9846,7 +9846,6 @@ input[type=text].simple-input-field:hover {
     border-color: #ECEFF1;
 }
 /* ---------------------------------------------- */
-.message-item .circle-avatar,
 .mention-item .circle-avatar,
 .chat-item .circle-avatar {
     position: absolute;
@@ -9858,6 +9857,28 @@ input[type=text].simple-input-field:hover {
     background-image: url(../assets/images/loading.png);
     background-size: 50%;
 }
+
+.message-item .circle-avatar{
+    width: 40px;
+    height: 40px;
+    background-color: #E0E0E0;
+    background-image: url(../assets/images/loading.png);
+    background-size: 50%;
+}
+.message-item .account-indicator-background-exclude{
+    position: absolute;
+    left: 10px;
+    top: 8px;
+    width: 40px;
+    height: 40px;
+}
+.message-item .account-indicator{
+    display: block;
+    position: absolute;
+    width: 40px !important;
+    height: 40px !important;
+}
+
 .chat-item .circle-avatar{
     position: static !important;
 }
