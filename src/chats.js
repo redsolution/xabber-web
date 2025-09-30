@@ -1509,11 +1509,19 @@ xabber.JingleMessage = Backbone.Model.extend({
                     _.each(last_updated_devices, (last_updated_device) => {
                         if (last_updated_device.after_trust && !last_updated_device.revocation_timestamp)
                             return;
+                        let peer = this.account.omemo.getPeer(this.contact.get('jid')), label;
+                        if (peer){
+                            let device = peer.devices[last_updated_device.device_id];
+                            if (device && device.get('label')){
+                                label = device.get('label');
+                            }
+                        }
+                        let device_name_text = label ? `<b>${label}(${last_updated_device.device_id})</b>` : `<b>${last_updated_device.device_id}</b>`;
                         this.messages.createSystemMessage({
                             from_jid: jid,
                             message: last_updated_device.revocation_timestamp ?
-                                `This device trust was revoked by ${this.contact.get('name')} : <b>${last_updated_device.device_id}</b>`
-                                : `New trusted device was added by ${this.contact.get('name')} : <b>${last_updated_device.device_id}</b>`
+                                xabber.getString("verification_session__device_revoked", [this.contact.get('name'), device_name_text])
+                                : xabber.getString("verification_session__new_trusted_device", [this.contact.get('name'), device_name_text])
                         });
                     });
 
@@ -4808,15 +4816,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
         this.updateUnreadMentions();
     },
 
-    onScroll: function (ev, is_focused) {
-        if (!this.isVisible() || this._no_scrolling_event)
-            return;
-        if (this.model.last_message && !this.isMessageAdded(this.model.last_message)){
-            this.addMessage(this.model.last_message);
-        }
-        this.$('.back-to-bottom:not(.back-to-unread)').hideIf(this.isScrolledToBottom() || this.$(`.chat-message.unread-message`).length);
-        this.$('.back-to-unread').showIf(!this.isScrolledToBottom() && this.$(`.chat-message.unread-message`).length);
-        this.$('.back-to-unread').removeClass('back-to-bottom');
+    updateIndicator: function () {
         let $chatday_indicator = this.$('.chat-day-indicator'),
             $messages = this.$('.chat-message'),
             indicator_idx = undefined,
@@ -4828,55 +4828,27 @@ xabber.ChatContentView = xabber.BasicView.extend({
         }
         $chatday_indicator.each((idx, indicator) => {
             if (this.$('.subscription-buttons-wrap').hasClass('hidden')) {
-                if (this._scrolltop < this._prev_scrolltop) {
-                    if ((indicator.offsetTop <= this._scrolltop) && (indicator.offsetTop >= this._scrolltop - 30)) {
-                        indicator_idx = idx;
-                        opacity_value = 0;
-                        return false;
-                    }
-                    if ((indicator.offsetTop >= this._scrolltop) && (indicator.offsetTop <= this._scrolltop - 30)) {
-                        indicator_idx = idx && (idx - 1);
-                        opacity_value = 1;
-                        return false;
-                    }
+                if ((indicator.offsetTop <= this._scrolltop + 30) && (indicator.offsetTop + 15 >= this._scrolltop)) {
+                    indicator_idx = idx;
+                    opacity_value = 0;
+                    return false;
                 }
-                else {
-                    if ((indicator.offsetTop <= this._scrolltop + 30) && (indicator.offsetTop >= this._scrolltop)) {
-                        indicator_idx = idx && (idx - 1);
-                        opacity_value = 0;
-                        return false;
-                    }
-                    if ((indicator.offsetTop >= this._scrolltop - 30) && (indicator.offsetTop <= this._scrolltop)) {
-                        indicator_idx = idx;
-                        opacity_value = 1;
-                        return false;
-                    }
+                if ((indicator.offsetTop >= this._scrolltop - 30) && (indicator.offsetTop <= this._scrolltop)) {
+                    indicator_idx = idx;
+                    opacity_value = 1;
+                    return false;
                 }
             }
             else if (!$(indicator).hasClass('fixed-day-indicator-wrap')) {
-                if (this._scrolltop < this._prev_scrolltop) {
-                    if ((indicator.offsetTop >= this._scrolltop + 30) && (indicator.offsetTop <= this._scrolltop + 62)) {
-                        indicator_idx = idx;
-                        opacity_value = 0;
-                        return false;
-                    }
-                    if ((indicator.offsetTop >= this._scrolltop) && (indicator.offsetTop <= this._scrolltop + 62)) {
-                        indicator_idx = idx;
-                        opacity_value = 1;
-                        return false;
-                    }
+                if ((indicator.offsetTop <= this._scrolltop + 62) && (indicator.offsetTop >= this._scrolltop + 15)) {
+                    indicator_idx = idx;
+                    opacity_value = 0;
+                    return false;
                 }
-                else {
-                    if ((indicator.offsetTop <= this._scrolltop + 62) && (indicator.offsetTop >= this._scrolltop + 30)) {
-                        indicator_idx = idx && (idx - 1);
-                        opacity_value = 0;
-                        return false;
-                    }
-                    if ((indicator.offsetTop >= this._scrolltop - 62) && (indicator.offsetTop <= this._scrolltop + 30)) {
-                        indicator_idx = idx;
-                        opacity_value = 1;
-                        return false;
-                    }
+                if ((indicator.offsetTop >= this._scrolltop - 62) && (indicator.offsetTop <= this._scrolltop + 30)) {
+                    indicator_idx = idx;
+                    opacity_value = 1;
+                    return false;
                 }
             }
         });
@@ -4904,6 +4876,20 @@ xabber.ChatContentView = xabber.BasicView.extend({
         if (this.current_day_indicator !== null) {
             this.showDayIndicator(this.current_day_indicator);
         }
+    },
+
+    onScroll: function (ev, is_focused) {
+        if (!this.isVisible() || this._no_scrolling_event)
+            return;
+        if (this.model.last_message && !this.isMessageAdded(this.model.last_message)){
+            this.addMessage(this.model.last_message);
+        }
+        this.$('.back-to-bottom:not(.back-to-unread)').hideIf(this.isScrolledToBottom() || this.$(`.chat-message.unread-message`).length);
+        this.$('.back-to-unread').showIf(!this.isScrolledToBottom() && this.$(`.chat-message.unread-message`).length);
+        this.$('.back-to-unread').removeClass('back-to-bottom');
+        setTimeout(() => {
+            this.updateIndicator();
+        }, 10);
         let scroll_read_timer = this._long_reading_timeout || is_focused ? 100 : 100;
         clearTimeout(this._onscroll_read_messages_timeout);
         this._onscroll_read_messages_timeout = setTimeout(() => {

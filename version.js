@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.4.221","version_description":"fixed contextmenu in context messages, fixed selected msgs buttons in context messages view, changed leave groupchat dialog text, fixed message item view account indicator, fixed msgs loading in searched messages in chats view, "}'
+'{"version_number":"2.4.222","version_description":"fixed date indicator appearing on scrolling, changed new contacts trusted device msg text, fixed firefox indexeddb error after quiting all accounts,"}'
 )});

@@ -64,7 +64,13 @@
                 }.bind(this);
             } catch (e) {
                 console.error(e);
-                window.location.reload(true);
+                if (e.name === "NotFoundError"){
+                    this.delete_database(objStoreName, () => {
+                        window.location.reload(true);
+                    })
+                } else {
+                    window.location.reload(true);
+                }
             }
         },
 
@@ -90,7 +96,13 @@
                 }.bind(this);
             } catch (e) {
                 console.error(e);
-                window.location.reload(true);
+                if (e.name === "NotFoundError"){
+                    this.delete_database(objStoreName, () => {
+                        window.location.reload(true);
+                    })
+                } else {
+                    window.location.reload(true);
+                }
             }
         },
 
@@ -112,7 +124,13 @@
                 }.bind(this);
             } catch (e) {
                 console.error(e);
-                window.location.reload(true);
+                if (e.name === "NotFoundError"){
+                    this.delete_database(objStoreName, () => {
+                        window.location.reload(true);
+                    })
+                } else {
+                    window.location.reload(true);
+                }
             }
         },
 
@@ -132,7 +150,13 @@
                 }.bind(this);
             } catch (e) {
                 console.error(e);
-                window.location.reload(true);
+                if (e.name === "NotFoundError"){
+                    this.delete_database(objStoreName, () => {
+                        window.location.reload(true);
+                    })
+                } else {
+                    window.location.reload(true);
+                }
             }
         },
 
@@ -168,7 +192,8 @@
                 db_deleter.onsuccess = function () {
                     callback && callback(true);
                 }.bind(this);
-                db_deleter.onerror = function () {
+                db_deleter.onerror = function (e) {
+                    console.error(e);
                     callback && callback(false);
                 }.bind(this);
             } catch (e) {
