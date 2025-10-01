@@ -21,13 +21,33 @@
             <div class="chats-list-wrap hidden">
                 <div class="chats-title">{[print(xabber.getString("search__header_chats"))]}</div>
                 <div class="chats-list roster-left-container"></div>
+                <div class="chats-show-more hidden"></div>
             </div>
             <div class="contacts-list-wrap hidden">
                 <div class="contacts-title">{[print(xabber.getString("category_title_contacts"))]}</div>
                 <div class="contacts-list roster-left-container"></div>
+                <div class="contacts-show-more hidden"></div>
             </div>
             <div class="messages-list-wrap hidden">
-                <div class="messages-title">{[print(xabber.getString("search__header_messages"))]}</div>
+                <div class="messages-title">
+                    {[print(xabber.getString("search__header_messages"))]}
+                    <div class="messages-preloader-wrap hidden">
+                        <div class="preloader-wrapper preloader-17px active visible">
+                            <div class="spinner-layer">
+                                <div class="circle-clipper left">
+                                    <div class="circle"></div>
+                                </div>
+                                <div class="gap-patch">
+                                    <div class="circle"></div>
+                                </div>
+                                <div class="circle-clipper right">
+                                    <div class="circle"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="messages-list roster-left-container"></div>
             </div>
         </div>

@@ -10150,6 +10150,8 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
         "click .list-item": "onClickItem",
         "click .btn-search-messages": "updateSearchWithMessages",
         "click .btn-unread": "clickUnread",
+        "click .chats-show-more": "showSearchedChats",
+        "click .contacts-show-more": "showSearchedContacts",
         "click .recent-chats-main-header": "clickScrollToTop",
     },
 
@@ -10197,6 +10199,16 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
     },
 
     showSearch: function (ev) {
+    },
+
+    showSearchedChats: function () {
+        this.$('.chats-list').children('.list-item:not(.hidden2):not(.hidden3)').removeClass('hidden');
+        this.$('.chats-show-more').addClass('hidden');
+    },
+
+    showSearchedContacts: function () {
+        this.$('.contacts-list').children().removeClass('hidden');
+        this.$('.contacts-show-more').addClass('hidden');
     },
 
     onAccountListUpdate: function () {
@@ -10670,16 +10682,31 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
     showArchiveChats: function (no_unread) {
         this.$('.chat-item').detach();
         let chats = this.model,
-            archive_chats = chats.filter(chat => !chat.get('saved') && (chat.get('archived') && !chat.get('notifications')));
+            archive_chats = chats.filter(chat => !chat.get('saved') && (chat.get('archived') && !chat.get('notifications')) && (chat.get('pinned') === '0' || !chat.get('pinned'))),
+            archive_chats__pinned = chats.filter(chat => !chat.get('saved') && (chat.get('archived') && !chat.get('notifications')) && chat.get('pinned') !== '0' && chat.get('pinned'));
         if (xabber.toolbar_view.data.get('account_filtering') && !no_unread){
             xabber.toolbar_view.data.set('account_filtering', null);
             xabber.toolbar_view.$('.toolbar-item.account-item').removeClass('active');
         }
-        if (xabber.toolbar_view.data.get('account_filtering'))
+        if (xabber.toolbar_view.data.get('account_filtering')){
             archive_chats = archive_chats.filter(chat => (chat.account.get('jid') === xabber.toolbar_view.data.get('account_filtering')));
+            archive_chats__pinned = archive_chats__pinned.filter(chat => (chat.account.get('jid') === xabber.toolbar_view.data.get('account_filtering')));
+        }
+
         archive_chats.forEach((chat) => {
             this.$('.chat-list').append(chat.item_view.$el);
         });
+        if (archive_chats__pinned) {
+            archive_chats__pinned = archive_chats__pinned.sort((a, b) => (a.get('pinned') > b.get('pinned')) ? 1 : -1);
+            archive_chats__pinned.forEach((chat) => {
+                let index = archive_chats__pinned.indexOf(chat);
+                if (index === 0) {
+                    this.$('.pinned-chat-list').prepend(chat.item_view.$el);
+                } else {
+                    this.$('.pinned-chat-list .chat-item').eq(index - 1).after(chat.item_view.$el);
+                }
+            });
+        }
     },
 
     showSavedChats: function (no_unread) {

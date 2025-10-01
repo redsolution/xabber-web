@@ -473,6 +473,7 @@ xabber.SearchView = xabber.BasicView.extend({
               let options = {};
               this.queryid = uuid();
               options.query_id = this.queryid;
+              this.$('.messages-preloader-wrap').removeClass('hidden');
               let accounts = xabber.accounts.connected;
               accounts.forEach((account) => {
                   let first_message = xabber.all_searched_messages.find(message => (message.account.get('jid') === account.get('jid')));
@@ -484,6 +485,7 @@ xabber.SearchView = xabber.BasicView.extend({
                   this.MAMRequest(this.query_text, options, (messages) => {
                       let dfd = new $.Deferred();
                       dfd.done(() => {
+                          this.$('.messages-preloader-wrap').addClass('hidden');
                           this.$('.messages-list-wrap').switchClass('hidden', !this.$('.messages-list').children().length);
                           this.updateScrollBar();
                           this._loading_messages = false;
@@ -666,9 +668,15 @@ xabber.SearchView = xabber.BasicView.extend({
                       }
               });
           });
-          this.$('.chats-list-wrap').switchClass('hidden', !this.$('.chats-list').children().length);
+          this.$('.chats-list-wrap').switchClass('hidden', !this.$('.chats-list').children('.list-item:not(.hidden2):not(.hidden3)').length);
           this.$('.pinned-chat-list').switchClass('hidden', query);
+          this.$('.chats-list').children('.list-item:not(.hidden2):not(.hidden3)').length && this.$('.chats-list').children('.list-item:not(.hidden2):not(.hidden3)').slice(4).addClass('hidden');
+          this.$('.chats-show-more').showIf(this.$('.chats-list').children('.list-item:not(.hidden2):not(.hidden3)').length > 4);
+          this.$('.chats-show-more').text(xabber.getString("search__chats_show_more", [this.$('.chats-list').children('.list-item:not(.hidden2):not(.hidden3)').length]));
           this.$('.contacts-list-wrap').switchClass('hidden', !this.$('.contacts-list').children().length);
+          this.$('.contacts-list').children().length && this.$('.contacts-list').children().slice(4).addClass('hidden');
+          this.$('.contacts-show-more').showIf(this.$('.contacts-list').children().length > 4);
+          this.$('.contacts-show-more').text(xabber.getString("search__contacts_show_more", [this.$('.contacts-list').children().length]));
           this.$('.messages-list-wrap').addClass('hidden').find('.messages-list').html("");
           if (query.length >= 2 && this.search_messages) {
               this.search_messages = false;
@@ -685,7 +693,8 @@ xabber.SearchView = xabber.BasicView.extend({
           this._messages_loaded = false;
           this.$('.messages-list-wrap').showIf(query);
           this.$('.btn-search-messages').hideIf(query);
-          this.$('.messages-list-wrap .messages-list').html(env.templates.contacts.preloader());
+          this.scrollToBottom();
+          this.$('.messages-preloader-wrap').removeClass('hidden');
           options = options || {};
           !options.max && (options.max = xabber.settings.mam_messages_limit);
           !options.before && (options.before = "");
@@ -706,7 +715,7 @@ xabber.SearchView = xabber.BasicView.extend({
                       if (!this.query_text)
                           return;
                       if (accounts_length === accounts_count){
-                          this.$('.messages-list-wrap .messages-list .preloader-wrapper').remove();
+                          this.$('.messages-preloader-wrap').addClass('hidden');
                           this.$('.messages-list-wrap').switchClass('hidden', !this.$('.messages-list').children().length);
                           this.updateScrollBar();
                           this._loading_messages = false;

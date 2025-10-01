@@ -22799,12 +22799,19 @@ input[type=range].voice-message-volume:focus {
 .messages-list-wrap {
     position: relative;
 }
-.messages-list-wrap .preloader-wrapper{
+.messages-list-wrap .messages-preloader-wrap{
+    position: absolute;
     top: 16px;
-    margin-bottom: 32px;
-    left: 40%;
-    width: 30px;
+    right: 0;
     height: 30px;
+    width: 30px;
+}
+.messages-list-wrap .preloader-wrapper{
+    height: 30px;
+    left: 0;
+    position: absolute;
+    top: 0;
+    width: 30px;
 }
 .messages-list-wrap .messages-list{
     min-height: 80px;
@@ -22833,6 +22840,22 @@ input[type=range].voice-message-volume:focus {
     font-size: 16px;
     FONT-WEIGHT: 500;
     color: rgba(0, 0, 0, .54);
+}
+.left-panel-wrap .left-panel-list-wrap .chats-show-more,
+.left-panel-wrap .left-panel-list-wrap .contacts-show-more{
+    color: #9e9e9e;
+    cursor: pointer;
+    font-size: 14px;
+    padding: 12px 8px;
+    text-decoration-line: underline;
+    text-decoration-style: dotted;
+    text-underline-offset: 2px;
+}
+.left-panel-wrap .left-panel-list-wrap .messages-title{
+    position: sticky;
+    top: -16px;
+    background: #FFF;
+    z-index: 1;
 }
 .forward-panel-modal .forward-panel-list-title{
     padding: 12px 24px;
