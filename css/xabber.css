@@ -15447,6 +15447,9 @@ input[type=range].voice-message-volume:focus {
     top: 50% !important;
     transform: translateY(-50%);
 }
+.settings-panel-wrap .settings-panel .settings-trust-wrap .trusted-peer-dropdown-content{
+    margin-top: -32px;
+}
 .settings-panel-wrap .settings-panel .settings-trust-wrap .trust-item-device-icon-wrap{
     background: #e0e0e0;
     border-radius: 50%;

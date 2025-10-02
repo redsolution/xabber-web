@@ -4592,6 +4592,7 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
                 this.$('.settings-trust-items-wrap').append($trust_peer);
                 let peers_trusted_devices = trusted_devices[item],
                     contact = this.model.contacts.mergeContact(item);
+                peers_trusted_devices = peers_trusted_devices.filter(item => !item.untrusted && !item.is_revoked);
 
                 let image = contact.cached_image;
                 $trust_peer.find('.circle-avatar').setAvatar(image, 40, this.model);
@@ -4605,6 +4606,7 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
                     hover: false,
                     alignment: 'right'
                 });
+                !peers_trusted_devices.length && $trust_peer.addClass('hidden');
 
                 count = count + peers_trusted_devices.length;
             });
@@ -4628,7 +4630,7 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
             return a.after_trust ? -1 : 1;
         });
         peers_trusted_devices.forEach((device_item) => {
-            if (device_item.is_me)
+            if (device_item.is_me || device_item.untrusted || device_item.is_revoked)
                 return;
 
             let label = '',
