@@ -1,6 +1,15 @@
-<div class="trust-item-peer" data-jid="{{jid}}">
+<div class="trust-item-peer settings-tab" data-jid="{{jid}}" data-subblock-parent-name="trust" data-block-name="trust-item">
+    <div class="circle-avatar"></div>
+    <div class="trust-item-peer-name"></div>
     <div class="trust-item-peer-jid">{{jid}}</div>
-    <div class="trust-item-devices-wrap">
-
-    </div>
+    <div class="trust-item-peer-devices-count"></div>
+    <i class="btn-more trusted-peer-dropdown-button dropdown-button mdi mdi-24px mdi-dots-vertical" data-activates="trusted-contact-actions-{{uuid}}"></i>
+    <ul id="trusted-contact-actions-{{uuid}}" class="dropdown-content trusted-peer-dropdown-content unified-dropdown-style noselect">
+        <div class="property-variant btn-open">
+            <span class="one-line">{[print(xabber.getString("groupchat_status_open"))]}</span>
+        </div>
+        <div class="property-variant btn-revoke-trust text-color-red-700">
+            <span class="one-line">{[print(xabber.getString("trust_session__revoke_all"))]}</span>
+        </div>
+    </ul>
 </div>

@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.4.223","version_description":"added pinned chats support in archived chats, added hiding to chats and contacts in chats view search, changed preloader design in chats view messages search, "}'
+'{"version_number":"2.4.224","version_description":"trusted devices tab redesign in account settings"}'
 )});

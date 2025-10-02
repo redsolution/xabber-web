@@ -15403,22 +15403,75 @@ input[type=range].voice-message-volume:focus {
 }
 .settings-panel-wrap .settings-panel .settings-trust-wrap .settings-trust-items-wrap{
 }
+.settings-panel-wrap .settings-panel .settings-trust-wrap .trust-item-device,
 .settings-panel-wrap .settings-panel .settings-trust-wrap .trust-item-peer{
-    margin: 32px 32px;
+    margin-bottom: 4px;
+    height: unset !important;
+    padding: 4px 16px 4px 72px !important;
+    position: relative;
+    cursor: pointer;
+}
+.settings-panel-wrap .settings-panel .settings-trust-wrap .trust-item-device:hover,
+.settings-panel-wrap .settings-panel .settings-trust-wrap .trust-item-peer:hover{
+    background: #F5F5F5;
+}
+.settings-panel-wrap .settings-panel .settings-trust-wrap .circle-avatar{
+    position: absolute;
+    left: 16px;
+    width: 40px;
+    height: 40px;
+    top: 50%;
+    transform: translate(0, -50%);
 }
 .settings-panel-wrap .settings-panel .settings-trust-wrap .trust-item-peer-jid{
+    color: #9e9e9e;
+    font-size: 13px;
+    font-weight: 400;
+}
+.settings-panel-wrap .settings-panel .settings-trust-wrap .trust-item-peer-name{
     font-size: 16px;
     font-weight: 500;
 }
-.settings-panel-wrap .settings-panel .settings-trust-wrap .trust-item-device{
-    margin: 16px 16px;
-    margin-bottom: 48px;
+.settings-panel-wrap .settings-panel .settings-trust-wrap .trust-item-peer-devices-count{
+    position: absolute;
+    right: 56px;
+    font-size: 18px;
+    top: 50%;
+    transform: translate(0, -50%);
 }
-.settings-panel-wrap .settings-panel .settings-trust-wrap .trust-item-device-row{
-    display: flex;
-    min-height: 36px;
-    align-items: baseline;
-    margin-bottom: 6px;
+.settings-panel-wrap .settings-panel .settings-trust-wrap .btn-more{
+    color: #757575 !important;
+    left: unset !important;
+    position: absolute !important;
+    right: 24px;
+    top: 50% !important;
+    transform: translateY(-50%);
+}
+.settings-panel-wrap .settings-panel .settings-trust-wrap .trust-item-device-icon-wrap{
+    background: #e0e0e0;
+    border-radius: 50%;
+    color: #616161;
+    height: 36px;
+    left: 22px;
+    padding: 6px;
+    position: absolute;
+    top: 50%;
+    transform: translate(0, -50%);
+    width: 36px;
+    z-index: 1;
+}
+.settings-panel-wrap .settings-panel .settings-trust-wrap .trust-item-device-icon-wrap .mdi{
+    color: #616161;
+}
+.settings-panel-wrap .settings-panel .settings-trust-wrap .trust-item-device-name{
+    font-weight: 500;
+}
+.settings-panel-wrap .settings-panel .settings-trust-wrap .trust-item-device-short-info{
+    color: #9e9e9e;
+    font-size: 13px;
+}
+.settings-panel-wrap .settings-panel .settings-trust-wrap .trust-item-device-info{
+    margin: 16px 16px;
 }
 .settings-panel-wrap .settings-panel .settings-trust-wrap .trust-item-device-row{
     display: flex;

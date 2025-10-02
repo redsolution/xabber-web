@@ -1,26 +1,11 @@
-<div class="trust-item-device" data-device-id="{{device.device_id}}">
-    <div class="trust-item-device-row">
-        <div class="trust-item-device-label">{[print(xabber.getString("settings_account__device_information_device_id"))]}</div>
-        <div class="trust-item-device-value">{{device.device_id}}</div>
+<div class="trust-item-device settings-tab" data-header="{[if (label) {]}{{label}}{[} else {]}{{device.device_id}}{[}]}" data-device-id="{{device.device_id}}" data-jid="{{jid}}" data-subblock-parent-name="trust-item" data-block-name="trust-item-info">
+    <div class="trust-item-device-icon-wrap">
+        <i class="mdi mdi-24px mdi-help"></i>
     </div>
-    {[if (fingerprint){]}
-    <div class="trust-item-device-row">
-        <div class="trust-item-device-label">{[print(xabber.getString("omemo__dialog_fingerprints__fingerprint_label"))]}</div>
-        <div class="trust-item-device-value device-information-fingerprint-text">{{fingerprint}}</div>
+    <div class="trust-item-device-name">
+        {[if (label) {]}{{label}}{[} else {]}{{device.device_id}}{[}]}
     </div>
-    {[}]}
-    <div class="trust-item-device-row">
-        <div class="trust-item-device-label">{[print(xabber.getString("settings_account__trust__time_label"))]}</div>
-        <div class="trust-item-device-value">{{time}}</div>
+    <div class="trust-item-device-short-info">
+        <span class="device-id">{{device.device_id}}</span>{[if (trust_type) {]} • <span class="trusted-type">{{trust_type}}</span>{[}]}{[if (time) {]} • <span class="trusted-type">{{time}}</span>{[}]}
     </div>
-    <div class="trust-item-device-row">
-        <div class="trust-item-device-label">{[print(xabber.getString("settings_account__trust__trust_reason_label"))]}</div>
-        <div class="trust-item-device-value">{{trust_type}}</div>
-    </div>
-    {[if (device.from_device_id && device.trust_reason_jid){]}
-    <div class="trust-item-device-under-row">
-        <div class="trust-item-device-value">{{device.trust_reason_jid}}</div>
-        <div class="trust-item-device-value">{{device.from_device_id}}</div>
-    </div>
-    {[}]}
 </div>

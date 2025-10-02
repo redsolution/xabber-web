@@ -2467,7 +2467,7 @@ xabber.SettingsModalView = xabber.BasicView.extend({
         $elem.removeClass('hidden');
         this.$('.settings-panel-head span').text($elem.attr('data-header'));
         $tab.addClass('active').siblings().removeClass('active');
-        if ($tab.closest('.right-column') && $tab.attr('data-subblock-parent-name')) {
+        if ($tab.closest('.right-column').length && $tab.attr('data-subblock-parent-name')) {
             this.$('.btn-back').addClass('hidden');
             this.$('.btn-back-subsettings').removeClass('hidden');
             this.$('.btn-back-subsettings').attr('data-subblock-parent-name', $tab.attr('data-subblock-parent-name'));

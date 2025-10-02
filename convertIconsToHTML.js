@@ -75,6 +75,7 @@ let badges_names = [
         'birthday-outline',
         'status',
         'status-outline',
+        'account-check',
         'job',
         'job-outline',
         'format-quote',
