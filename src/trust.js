@@ -251,10 +251,8 @@ xabber.ActiveSessionModalView = xabber.BasicView.extend({
                 if ((device_item.trust_reason_jid && (device_item.trust_reason_jid === this.device_jid)
                     && device_item.from_device_id && (device_item.from_device_id == this.device_id))
                     || item === this.device_jid && device_item.device_id == this.device_id && device_item.after_trust){
-                    let trust_type = device_item.after_trust ? 'direct' : 'indirect',
-                        trust_attrs = {
+                    let trust_attrs = {
                             device: device_item,
-                            trust_type: xabber.getString(`settings_account__trust__trust_type_${trust_type}`),
                         };
                     let peer = this.account.omemo.getPeer(item);
                     if (!peer)

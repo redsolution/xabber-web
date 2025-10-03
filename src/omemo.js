@@ -9,6 +9,7 @@ let env = xabber.env,
     Backbone = env.Backbone,
     libsignal = env.libsignal,
     _ = env._,
+    pretty_datetime = (timestamp) => { return utils.pretty_datetime(timestamp, (xabber.settings.language === 'ru-RU' || xabber.settings.language === 'default' && xabber.get("default_language") === 'ru-RU') && 'D MMMM YYYY HH:mm:ss')},
     KeyHelper = env.libsignal.KeyHelper,
     SignalProtocolAddress = env.libsignal.SignalProtocolAddress,
     SessionBuilder = env.libsignal.SessionBuilder,
@@ -173,6 +174,7 @@ xabber.Fingerprints = xabber.BasicView.extend({
         'click .btn-fingerprint-details': "showFingerprintDetails",
         'click .btn-back': "backToList",
         'click .btn-cancel': "close",
+        'click .btn-back-settings': "close",
         "click .cancel-session": "cancelTrustSession",
         "click .enter-code": "showCode",
         "click .show-code": "showCode",
@@ -195,7 +197,7 @@ xabber.Fingerprints = xabber.BasicView.extend({
         }
     },
 
-    open: function () {
+    open: function (options) {
         this.omemo = this.account.omemo;
         let name = "";
         if (this.is_own_devices)
@@ -204,7 +206,9 @@ xabber.Fingerprints = xabber.BasicView.extend({
             let contact = this.account.contacts.get(this.jid);
             name = contact ? contact.get('name') : this.jid;
         }
-        this.$('.header').text(xabber.getString('omemo__dialog_fingerprints__header', [name]));
+        this.$el.switchClass('from-settings', options && options.is_settings);
+        this.$('.fingerprints-header').switchClass('no-select', options && options.is_settings);
+        this.$('.header').text(xabber.getString('omemo__dialog_fingerprints__header'));
         this.data.set('visible', true);
         this.backToList();
         this.updateColorScheme();
@@ -732,8 +736,11 @@ xabber.Fingerprints = xabber.BasicView.extend({
                         trusted_device = peers_trusted_devices.filter(item => item.device_id === device_id);
                     if (trusted_device.length){
                         trusted_device = trusted_device[0];
-                        let trust_type = trusted_device.after_trust ? 'direct' : trusted_device.fingerprint_trust ? 'fingerprint_trust' :  'indirect';
-                        trust_type = xabber.getString(`fingerprint_trust_type_${trust_type}`);
+                        let trust_type = trusted_device.after_trust
+                                ? xabber.getString(`settings_account__trust__trust_type_direct`, [pretty_datetime(trusted_device.timestamp * 1000)])
+                                : trusted_device.fingerprint_trust
+                                    ? xabber.getString(`fingerprint_trust_type_fingerprint_trust`)
+                                    : xabber.getString(`settings_account__trust__trust_type_indirect`, [trusted_device.device_id, pretty_datetime(trusted_device.timestamp * 1000)]);
                         return trust_type;
                     }
                 }

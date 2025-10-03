@@ -3626,8 +3626,8 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
         "click .btn-delete-settings": "deleteSettings",
         "click .color-picker-button": "changeColor",
         "click .btn-qr-code": "jumpToBlock",
-        "click .trust-item-peer": "jumpToBlock",
-        "click .trust-item-device": "jumpToBlock",
+        "click .trust-item-peer": "openFingerprints",
+        // "click .trust-item-device": "jumpToBlock",
         "click .btn-open": "openChat",
         "click .btn-open-encrypted": "openEncryptedChat",
         "click .btn-revoke-trust": "revokeTrust",
@@ -4109,15 +4109,6 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
             this.$('.btn-back-settings').addClass('hidden');
             this.$('.btn-back-subsettings-account').removeClass('hidden');
             this.$('.btn-back-subsettings-account').attr('data-subblock-parent-name', $tab.attr('data-subblock-parent-name'));
-            if ($tab.closest('.trust-item-peer').length && $tab.attr('data-jid')){
-                this.$('.btn-back-subsettings-account').attr('data-jid', $tab.attr('data-jid'));
-                this.$('.settings-panel-head span.settings-panel-head-title').text($tab.find('.trust-item-peer-name').text() || $tab.find('.trust-item-peer-jid').text());
-                this.openPeerTrustedDevices($tab.attr('data-jid'));
-            }
-            if ($tab.closest('.trust-item-device').length && $tab.attr('data-jid') && $tab.attr('data-device-id')){
-                this.$('.settings-panel-head span.settings-panel-head-title').text($tab.attr('data-header'));
-                this.openPeerTrustedDeviceInfo($tab.attr('data-jid'), $tab.attr('data-device-id'));
-            }
         }
         this.scrollToTop();
         this.updateHeight();
@@ -4620,73 +4611,13 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
         }
     },
 
-    openPeerTrustedDevices: function (jid) {
-        this.$('.settings-trust-peer-devices-wrap').html('');
-        let trusted_devices = this.model.omemo.xabber_trust.get('trusted_devices');
-        let peers_trusted_devices = trusted_devices[jid];
-
-        peers_trusted_devices.sort((a,b) => {
-            if(a.after_trust === b.after_trust)
-                return a.timestamp-b.timestamp;
-            return a.after_trust ? -1 : 1;
-        });
-        peers_trusted_devices.forEach((device_item) => {
-            if (device_item.is_me || device_item.untrusted || device_item.is_revoked)
-                return;
-
-            let label = '',
-                peer = this.model.omemo.getPeer(jid);
-            if (peer){
-                let device = peer.devices[device_item.device_id];
-                if (device) {
-                    label = device.get('label');
-                }
-            }
-            let trust_type = device_item.after_trust ? 'direct' : 'indirect',
-                trust_attrs = {
-                    device: device_item,
-                    label: label,
-                    jid: jid,
-                    time: pretty_datetime(device_item.timestamp * 1000),
-                    trust_type: xabber.getString(`settings_account__trust__trust_type_${trust_type}`),
-                };
-            let $trust_device = $(templates.trust_item_device(trust_attrs));
-
-            this.$('.settings-trust-peer-devices-wrap').append($trust_device);
-
-        });
-    },
-
-    openPeerTrustedDeviceInfo: function (jid, device_id) {
-        this.$('.settings-trust-peer-device-info-wrap').html('');
-        let trusted_devices = this.model.omemo.xabber_trust.get('trusted_devices'),
-            peers_trusted_devices = trusted_devices[jid],
-            device_item = peers_trusted_devices.find(item => item.device_id === device_id);
-        if (!device_item){
-            let $trust_item_tab = this.$(`.trust-item-peer[data-jid="${jid}"`);
-            $trust_item_tab.length && $trust_item_tab.click()
-            return;
+    openFingerprints: function (ev) {
+        let $item = $(ev.target).closest('.trust-item-peer'),
+            jid = $item.attr('data-jid');
+        if (jid){
+            let peer = this.model.omemo.getPeer(jid);
+            peer.fingerprints.open({is_settings: this});
         }
-        let label = '',
-            peer = this.model.omemo.getPeer(jid);
-        if (peer){
-            let device = peer.devices[device_id];
-            if (device){
-                label = device.get('label')
-            }
-        }
-        let trust_type = device_item.after_trust ? 'direct' : 'indirect',
-            trust_attrs = {
-                device: device_item,
-                label: label,
-                fingerprint: device_item.fingerprint ? device_item.fingerprint.match(/.{1,8}/g).join(" ") : null,
-                time: pretty_datetime(device_item.timestamp * 1000),
-                trust_type: xabber.getString(`settings_account__trust__trust_type_${trust_type}`),
-            };
-        let $trust_device_info = $(templates.trust_item_device_info(trust_attrs));
-
-        this.$('.settings-trust-peer-device-info-wrap').html($trust_device_info);
-
     },
 
     openChat: function (ev) {

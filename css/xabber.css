@@ -5566,7 +5566,15 @@ input[type=text].simple-input-field:hover {
     max-height: 80%;
     height: 80%;
     min-height: 460px;
-    width: 640px !important;
+    width: 85% !important;
+    max-width: 650px;
+    min-width: 550px;
+}
+.fingerprints-wrap.from-settings.modal {
+    top: 15% !important;
+    transform: unset !important;
+    top: 15% !important;
+    transform: unset !important;
 }
 
 
@@ -5601,6 +5609,28 @@ input[type=text].simple-input-field:hover {
     text-transform: capitalize;
 }
 
+.fingerprints-wrap .fingerprints-header .btn-back-settings{
+    display:none;
+    color: #9e9e9e;
+    cursor: pointer;
+    left: 20px;
+    position: absolute;
+    top: 20px;
+}
+
+.fingerprints-wrap.from-settings .fingerprints-header .btn-back-settings{
+    display:block;
+}
+
+.fingerprints-wrap.from-settings .fingerprints-header .header{
+    font-size: 22px;
+    height: 24px;
+    line-height: 24px;
+    max-width: 65%;
+    padding-left: 48px;
+    color: #212121;
+    font-weight: 400;
+}
 .fingerprints-wrap .fingerprints-header {
     display: flex;
     flex-direction: row;
@@ -15403,9 +15433,6 @@ input[type=range].voice-message-volume:focus {
 }
 .settings-panel-wrap .settings-panel .settings-trust-wrap .settings-trust-items-wrap{
 }
-.settings-panel-wrap .settings-panel .settings-trust-wrap .settings-trust-items-wrap{
-    margin-bottom: 40px;
-}
 .settings-panel-wrap .settings-panel .settings-trust-wrap .trust-item-device,
 .settings-panel-wrap .settings-panel .settings-trust-wrap .trust-item-peer{
     margin-bottom: 4px;
@@ -15451,7 +15478,7 @@ input[type=range].voice-message-volume:focus {
     transform: translateY(-50%);
 }
 .settings-panel-wrap .settings-panel .settings-trust-wrap .trusted-peer-dropdown-content{
-    margin-top: -32px;
+    margin-top: -72px;
 }
 .settings-panel-wrap .settings-panel .settings-trust-wrap .trust-item-device-icon-wrap{
     background: #e0e0e0;

@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.4.227","version_description":"changed settings strings, added open secure chat btn in verified contacts tab, fixed participant admin buttons appearance and added check that account has right to show them, changed verified contacts styles"}'
+'{"version_number":"2.4.228","version_description":"changed verified devices text, changed devices list opening to fingerprints view, changed fingerprints design, fixed trusted peer dropdown position"}'
 )});
