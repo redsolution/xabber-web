@@ -15403,6 +15403,9 @@ input[type=range].voice-message-volume:focus {
 }
 .settings-panel-wrap .settings-panel .settings-trust-wrap .settings-trust-items-wrap{
 }
+.settings-panel-wrap .settings-panel .settings-trust-wrap .settings-trust-items-wrap{
+    margin-bottom: 40px;
+}
 .settings-panel-wrap .settings-panel .settings-trust-wrap .trust-item-device,
 .settings-panel-wrap .settings-panel .settings-trust-wrap .trust-item-peer{
     margin-bottom: 4px;
@@ -15434,7 +15437,7 @@ input[type=range].voice-message-volume:focus {
 }
 .settings-panel-wrap .settings-panel .settings-trust-wrap .trust-item-peer-devices-count{
     position: absolute;
-    right: 56px;
+    right: 64px;
     font-size: 18px;
     top: 50%;
     transform: translate(0, -50%);

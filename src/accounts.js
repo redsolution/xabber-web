@@ -3629,6 +3629,7 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
         "click .trust-item-peer": "jumpToBlock",
         "click .trust-item-device": "jumpToBlock",
         "click .btn-open": "openChat",
+        "click .btn-open-encrypted": "openEncryptedChat",
         "click .btn-revoke-trust": "revokeTrust",
         "click .btn-revoke-token": "revokeXToken",
         "click .devices-wrap .btn-revoke-all-tokens": "revokeAllXTokens",
@@ -4697,6 +4698,17 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
             return;
         let contact = this.model.contacts.mergeContact(jid);
         this.model.chats.openChat(contact);
+    },
+
+    openEncryptedChat: function (ev) {
+        let $item = $(ev.target).closest('.trust-item-peer');
+        if (!$item.length)
+            return;
+        let jid = $item.attr('data-jid');
+        if (!jid)
+            return;
+        let contact = this.model.contacts.mergeContact(jid);
+        this.model.chats.openChat(contact, {encrypted: true});
     },
 
     revokeTrust: function (ev) {

@@ -2667,7 +2667,7 @@ xabber.GroupChatDetailsViewRight = xabber.BasicView.extend({
             this.$('.btn-escape i').addClass('mdi-close').removeClass('mdi-arrow-right');
         }
         if (!_.isUndefined(bottom_block_scroll) && bottom_block_scroll <= 240) {
-            this.$('.buttons-wrap').hideIf(true);
+            this.$('.buttons-wrap:not(.participant-item-buttons-wrap)').hideIf(true);
             this.$('.btn-search-messages').hideIf(true);
             this.$('.btn-qr-code').hideIf(true);
             this.$('.header-buttons .block-name:not(.second-text)').addClass('fade-out');
@@ -2675,7 +2675,7 @@ xabber.GroupChatDetailsViewRight = xabber.BasicView.extend({
             this.$('.header-buttons .block-name.second-text').text(this.$('.tabs:not(.participant-tabs) .list-variant .active').text())
         }
         else {
-            this.$('.buttons-wrap').hideIf(false);
+            this.$('.buttons-wrap:not(.participant-item-buttons-wrap)').hideIf(false);
             this.$('.btn-search-messages').hideIf(false);
             this.$('.btn-qr-code').hideIf(false);
         }
@@ -2756,7 +2756,7 @@ xabber.GroupChatDetailsViewRight = xabber.BasicView.extend({
         this.$('.btn-escape').removeClass('btn-top');
         this.$('.btn-escape').addClass('hidden');
         this.$('.btn-escape i').addClass('mdi-close').removeClass('mdi-arrow-right');
-        this.$('.buttons-wrap').hideIf(false);
+        this.$('.buttons-wrap:not(.participant-item-buttons-wrap)').hideIf(false);
         this.$('.btn-search-messages').hideIf(false);
         this.$('.btn-qr-code').hideIf(false);
         this.ps_container.animate(
@@ -3149,7 +3149,7 @@ xabber.GroupChatPropertiesViewRight = xabber.BasicView.extend({
             this.updateName();
             this.update();
         });
-        this.parent.$('.buttons-wrap.fixed-scroll').addClass('hidden2');
+        this.parent.$('.buttons-wrap.fixed-scroll:not(.participant-item-buttons-wrap)').addClass('hidden2');
         this.$('.vcard-header').css({width: xabber.right_contact_panel.$el.find('.panel-content-wrap').width()});
         this.parent.scrollToTop();
         if (this.parent.ps_container.length) {
@@ -4515,6 +4515,9 @@ xabber.ParticipantsViewRight = xabber.BasicView.extend({
                 $item_view.appendTo(this.$('.members-list-wrap tbody'));
         }
         this.updateMemberAvatar(attrs);
+        if (this.model.my_info && this.model.my_info.get('role') === 'member'){
+            $item_view.find('.buttons-wrap').addClass('hidden2');
+        }
     },
 
     updateMemberAvatar: function (member) {

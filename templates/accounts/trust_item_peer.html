@@ -6,7 +6,10 @@
     <i class="btn-more trusted-peer-dropdown-button dropdown-button mdi mdi-24px mdi-dots-vertical" data-activates="trusted-contact-actions-{{uuid}}"></i>
     <ul id="trusted-contact-actions-{{uuid}}" class="dropdown-content trusted-peer-dropdown-content unified-dropdown-style noselect">
         <div class="property-variant btn-open">
-            <span class="one-line">{[print(xabber.getString("groupchat_status_open"))]}</span>
+            <span class="one-line">{[print(xabber.getString("omemo__chat_settings__button_open_regular_chat"))]}</span>
+        </div>
+        <div class="property-variant btn-open-encrypted">
+            <span class="one-line">{[print(xabber.getString("omemo__chat_settings__button_open_encrypted_chat"))]}</span>
         </div>
         <div class="property-variant btn-revoke-trust text-color-red-700">
             <span class="one-line">{[print(xabber.getString("trust_session__revoke_all"))]}</span>
