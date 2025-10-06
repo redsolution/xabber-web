@@ -3627,6 +3627,7 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
         "click .color-picker-button": "changeColor",
         "click .btn-qr-code": "jumpToBlock",
         "click .trust-item-peer": "openFingerprints",
+        "contextmenu .trust-item-peer": "onTrustPeerContextMenu",
         // "click .trust-item-device": "jumpToBlock",
         "click .btn-open": "openChat",
         "click .btn-open-encrypted": "openEncryptedChat",
@@ -4607,10 +4608,12 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
                         if (is_contact_trusted === 'error') {
                             $trust_peer.find('.trust-item-peer-encryption-status').removeClass('hidden');
                             $trust_peer.find('.trust-item-peer-encryption-status').addClass('contact-error-icon-visible');
+                            $trust_peer.find('.trust-item-peer-devices-count').addClass('contact-error-icon-visible');
                             this.$('.contact-device-encryption').removeClass('hidden');
                             this.$('.contact-device-encryption').addClass('contact-error-icon-visible');
                         } else if (is_contact_trusted === 'none') {
                             $trust_peer.find('.trust-item-peer-encryption-status').removeClass('hidden');
+                            $trust_peer.find('.trust-item-peer-devices-count').addClass('contact-error-icon-visible');
                             this.$('.contact-device-encryption').removeClass('hidden');
 
                         }
@@ -4628,7 +4631,15 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
         }
     },
 
+    onTrustPeerContextMenu: function (ev) {
+        ev.preventDefault();
+        let $item = $(ev.target).closest('.trust-item-peer');
+        $item.find('.trusted-peer-dropdown-button').click();
+    },
+
     openFingerprints: function (ev) {
+        if ($(ev.target).closest('.trusted-peer-dropdown-button').length || $(ev.target).closest('.trusted-peer-dropdown-content').length)
+            return;
         let $item = $(ev.target).closest('.trust-item-peer'),
             jid = $item.attr('data-jid');
         if (jid){
