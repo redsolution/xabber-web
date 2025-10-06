@@ -5589,6 +5589,11 @@ input[type=text].simple-input-field:hover {
     height: 480px;
     min-height: unset;
 }
+.fingerprints-wrap.fingerprint-detail-whole-modal {
+    max-height: unset;
+    height: fit-content;
+    min-height: unset;
+}
 
 .fingerprints-wrap .fingerprints-list-wrap{
     height: 100%;
@@ -5775,6 +5780,7 @@ input[type=text].simple-input-field:hover {
     font-size: 14px;
 }
 
+.fingerprints-wrap .btn-back-to-details,
 .fingerprints-wrap .btn-back {
     cursor: pointer;
     color: #9e9e9e;
@@ -5848,6 +5854,111 @@ input[type=text].simple-input-field:hover {
 .fingerprints-wrap .fingerprints-description-wrap .link-about-encryption a{
 
     color: inherit !important;
+}
+.fingerprints-wrap .fingerprint-details-whole-wrap .fingerprint-details-whole-header{
+    font-size: 22px;
+    height: 24px;
+    left: 72px;
+    line-height: 24px;
+    max-width: 65%;
+    position: absolute;
+    top: 20px;
+}
+.fingerprints-wrap .fingerprint-details-whole-wrap .fingerprint-details-items-wrap{
+    margin-bottom: 16px;
+    padding: 0 32px 0 72px;
+}
+.fingerprints-wrap .fingerprint-details-whole-wrap .fingerprint-details-item{
+    align-items: baseline;
+    display: flex;
+    flex-wrap: wrap;
+    margin-bottom: 6px;
+    min-height: 36px;
+    position: relative;
+}
+.fingerprints-wrap .fingerprint-details-whole-wrap .fingerprint-details-icon{
+    left: -40px;
+    position: absolute;
+    top: 4px;
+}
+.fingerprints-wrap .fingerprint-details-whole-wrap .fingerprint-details-icon polygon,
+.fingerprints-wrap .fingerprint-details-whole-wrap .fingerprint-details-icon path{
+    fill: #9e9e9e;
+}
+.fingerprints-wrap .fingerprint-details-whole-wrap .fingerprint-details-label{
+    padding: 6px 0;
+    width: 30%;
+}
+.fingerprints-wrap .fingerprint-details-whole-wrap .fingerprint-details-text{
+    color: #757575;
+    user-select: text;
+}
+.fingerprints-wrap .fingerprint-details-whole-wrap .fingerprint-details-text.fingerprint-details-fingerprint-text{
+    color: #757575;
+    float: right;
+    user-select: text;
+    width: 300px;
+}
+.fingerprints-wrap .fingerprint-details-whole-wrap .fingerprint-details-btn{
+    height: 64px;
+    padding: 10px 16px 0 72px;
+    cursor: pointer;
+    position: relative;
+    width: 100%;
+    margin-bottom: 8px;
+    margin-top: 8px;
+}
+.fingerprints-wrap .fingerprint-details-whole-wrap .fingerprint-details-btn .setting-icon-background{
+    padding: 0;
+    position: absolute;
+    top: 7px;
+    width: 24px;
+    background: none !important;
+    border-radius: 0;
+    height: 24px;
+    left: 32px !important;
+}
+.fingerprints-wrap .fingerprint-details-whole-wrap .fingerprint-details-btn .setting-icon-background .mdi{
+    position: static;
+}
+.fingerprints-wrap .fingerprint-details-whole-wrap .btn-fingerprint-details-identify .mdi{
+    display:none;
+}
+.fingerprints-wrap .fingerprint-details-whole-wrap .fingerprint-details-btn .fingerprint-details-btn-name{
+    font-size: 16px;
+    font-weight: 400;
+    height: 24px;
+    line-height: 24px;
+}
+    .fingerprints-wrap .fingerprint-details-whole-wrap[data-trust="trust"] .btn-fingerprint-details-identify .lock-check,
+    .fingerprints-wrap .fingerprint-details-whole-wrap[data-trust="error"] .btn-fingerprint-details-identify .lock-alert,
+    .fingerprints-wrap .fingerprint-details-whole-wrap[data-trust="unknown"] .btn-fingerprint-details-identify .lock-question,
+    .fingerprints-wrap .fingerprint-details-whole-wrap[data-trust="ignore"] .btn-fingerprint-details-identify .lock-cross{
+    display: block;
+}
+.fingerprints-wrap .fingerprint-details-whole-wrap[data-trust="trust"] .btn-fingerprint-details-identify .setting-icon-background path{
+    fill: #388E3C;
+}
+.fingerprints-wrap .fingerprint-details-whole-wrap[data-trust="error"] .btn-fingerprint-details-identify .setting-icon-background path{
+    fill: #D32F2F;
+}
+.fingerprints-wrap .fingerprint-details-whole-wrap[data-trust="unknown"] .btn-fingerprint-details-identify .setting-icon-background path{
+    fill: #FFA000;
+}
+.fingerprints-wrap .fingerprint-details-whole-wrap[data-trust="ignore"] .btn-fingerprint-details-identify .setting-icon-background path{
+    fill: #9e9e9e;
+}
+.fingerprints-wrap .fingerprint-details-whole-wrap[data-trust="trust"] .btn-fingerprint-details-identify .fingerprint-details-btn-name{
+    color: #388E3C;
+}
+.fingerprints-wrap .fingerprint-details-whole-wrap[data-trust="error"] .btn-fingerprint-details-identify .fingerprint-details-btn-name{
+    color: #D32F2F;
+}
+.fingerprints-wrap .fingerprint-details-whole-wrap[data-trust="unknown"] .btn-fingerprint-details-identify .fingerprint-details-btn-name{
+    color: #FFA000;
+}
+.fingerprints-wrap .fingerprint-details-whole-wrap[data-trust="ignore"] .btn-fingerprint-details-identify .fingerprint-details-btn-name{
+    color: #9e9e9e;
 }
 .account-settings-panel .token-wrap .buttons[data-trust="trust"],
 .device-encryption[data-trust="trust"]{
@@ -15468,6 +15579,39 @@ input[type=range].voice-message-volume:focus {
     font-size: 18px;
     top: 50%;
     transform: translate(0, -50%);
+}
+.settings-panel-wrap .settings-panel .trust-item-peer-encryption-status{
+    pointer-events: none;
+    height: 24px;
+    position: absolute;
+    right: 160px;
+    top: 50%;
+    transform: translate(0, -50%);
+    width: 24px;
+}
+.settings-panel-wrap .settings-panel .trust-item-peer-encryption-status .mdi path{
+    fill: #ffa000;
+}
+.settings-panel-wrap .settings-panel .contact-device-encryption{
+    pointer-events: none;
+    height: 24px;
+    position: absolute;
+    right: 27px;
+    top: 21px;
+    width: 24px;
+}
+.settings-panel-wrap .settings-panel .contact-device-encryption .mdi path{
+    fill: #ffa000;
+}
+.settings-panel-wrap .settings-panel .trust-item-peer-encryption-status .peer-encryption-error-icon,
+.settings-panel-wrap .settings-panel .contact-device-encryption .contact-error-icon,
+.settings-panel-wrap .settings-panel .trust-item-peer-encryption-status.contact-error-icon-visible .mdi,
+.settings-panel-wrap .settings-panel .contact-device-encryption.contact-error-icon-visible .mdi{
+    display: none;
+}
+.settings-panel-wrap .settings-panel .trust-item-peer-encryption-status.contact-error-icon-visible .peer-encryption-error-icon,
+.settings-panel-wrap .settings-panel .contact-device-encryption.contact-error-icon-visible .contact-error-icon{
+    display: block !important;
 }
 .settings-panel-wrap .settings-panel .settings-trust-wrap .btn-more{
     color: #757575 !important;

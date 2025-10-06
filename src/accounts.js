@@ -4570,6 +4570,8 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
 
     updateTrustItems: function () {
         this.$('.settings-trust-items-wrap').html('');
+        this.$('.contact-device-encryption').addClass('hidden');
+        this.$('.contact-device-encryption').removeClass('hidden');
         if (this.model.omemo && this.model.omemo.xabber_trust){
 
             let trusted_devices = this.model.omemo.xabber_trust.get('trusted_devices'),
@@ -4599,6 +4601,21 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
                     alignment: 'right'
                 });
                 !peers_trusted_devices.length && $trust_peer.addClass('hidden');
+                if (peers_trusted_devices){
+                    this.model.omemo.checkContactFingerprints(contact).then((obj) => {
+                        let is_contact_trusted = obj.trust;
+                        if (is_contact_trusted === 'error') {
+                            $trust_peer.find('.trust-item-peer-encryption-status').removeClass('hidden');
+                            $trust_peer.find('.trust-item-peer-encryption-status').addClass('contact-error-icon-visible');
+                            this.$('.contact-device-encryption').removeClass('hidden');
+                            this.$('.contact-device-encryption').addClass('contact-error-icon-visible');
+                        } else if (is_contact_trusted === 'none') {
+                            $trust_peer.find('.trust-item-peer-encryption-status').removeClass('hidden');
+                            this.$('.contact-device-encryption').removeClass('hidden');
+
+                        }
+                    });
+                }
 
                 count = count + peers_trusted_devices.length;
             });

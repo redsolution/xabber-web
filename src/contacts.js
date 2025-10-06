@@ -2083,6 +2083,7 @@ xabber.ContactDetailsViewRight = xabber.BasicView.extend({
         this.$('.btn-start-encryption').showIf(this.account.omemo && !this.encrypted && !this.account.chats.get(`${this.model.hash_id}:encrypted`));
         this.$('.btn-open-encrypted-chat').showIf(this.account.omemo && !this.encrypted && this.account.chats.get(`${this.model.hash_id}:encrypted`));
         this.$('.btn-open-regular-chat').showIf(this.encrypted);
+        this.encrypted && this.$('.btn-chat-wrap .btn-name').text(xabber.getString("omemo__chat_settings__button_open_encrypted_chat"));
     },
 
     updateNotifications: function () {

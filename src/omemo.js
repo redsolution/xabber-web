@@ -171,8 +171,10 @@ xabber.Fingerprints = xabber.BasicView.extend({
         'click .btn-verify': "startTrustVerification",
         'click .btn-revoke-trust': "revokeAllTrust",
         'click .btn-trust': "trustDevice",
-        'click .btn-fingerprint-details': "showFingerprintDetails",
+        'click .btn-fingerprint-details': "showFingerprintWholeDetails",
+        'click .btn-fingerprint-details-identify': "showFingerprintDetails",
         'click .btn-back': "backToList",
+        'click .btn-back-to-details': "backToDetails",
         'click .btn-cancel': "close",
         'click .btn-back-settings': "close",
         "click .cancel-session": "cancelTrustSession",
@@ -446,8 +448,49 @@ xabber.Fingerprints = xabber.BasicView.extend({
 
     },
 
-    showFingerprintDetails: function (ev) {
+    showFingerprintWholeDetails: function (ev) {
         let $item = $(ev.target).closest('.row'),
+            device_id = $item.attr('data-device-id');
+
+        if (!device_id)
+            return;
+        let peer = this.account.omemo.getPeer(this.jid);
+        if (!peer)
+            return;
+
+        let device = peer.devices[device_id];
+
+        if (!device)
+            return;
+
+        this.$('.fingerprint-details-whole-wrap').attr('data-device-id', device_id);
+        this.$('.fingerprint-details-whole-wrap').attr('data-trust', $item.attr('data-trust'));
+        this.$('.fingerprint-details-whole-wrap').attr('data-fingerprint', $item.attr('data-fingerprint'));
+        this.$('.fingerprint-details-whole-wrap').attr('data-old-fingerprint', $item.attr('data-old-fingerprint'));
+        this.$('.fingerprint-details-whole-wrap').attr('data-error', $item.attr('data-error'));
+        this.$('.fingerprint-details-whole-header').text(device.get('label') || device_id);
+        this.$('.fingerprints-list-wrap').addClass('hidden');
+        this.$('.fingerprint-details-whole-wrap').removeClass('hidden');
+        this.$el.addClass('fingerprint-detail-whole-modal');
+        this.$el.removeClass('fingerprint-detail-modal');
+
+
+        this.$('.fingerprint-details-trust-reason').showIf($item.find('.trusted-type').html()).find('.fingerprint-details-text').html($item.find('.trusted-type').html());
+        this.$('.fingerprint-details-client').showIf(device.get('label')).find('.fingerprint-details-text').text(device.get('label'));
+        this.$('.fingerprint-details-device-id').showIf(device_id).find('.fingerprint-details-text').text(device_id);
+        this.$('.fingerprint-details-fingerprint').showIf(device.get('fingerprint')).find('.fingerprint-details-text').text(device.get('fingerprint').match(/.{1,8}/g).join(" "));
+    },
+
+    backToList: function () {
+        this.$('.fingerprints-list-wrap').removeClass('hidden');
+        this.$('.fingerprint-details-whole-wrap').addClass('hidden');
+        this.$('.fingerprint-details-wrap').addClass('hidden');
+        this.$el.removeClass('fingerprint-detail-modal');
+        this.$el.removeClass('fingerprint-detail-whole-modal');
+    },
+
+    showFingerprintDetails: function (ev) {
+        let $item = $(ev.target).closest('.fingerprint-details-whole-wrap'),
             device_id = $item.attr('data-device-id');
 
         if (!device_id)
@@ -490,9 +533,11 @@ xabber.Fingerprints = xabber.BasicView.extend({
         this.trust = $item.attr('data-trust');
         this.$('.contact-device-content').html($contact_row);
         this.$('.contact-own-device-content').html($own_row);
+        this.$('.fingerprint-details-whole-wrap').addClass('hidden');
         this.$('.fingerprints-list-wrap').addClass('hidden');
         this.$('.fingerprint-details-wrap').removeClass('hidden');
         this.$el.addClass('fingerprint-detail-modal');
+        this.$el.removeClass('fingerprint-detail-whole-modal');
         this.$('.dropdown-button').dropdown({
             inDuration: 100,
             outDuration: 100,
@@ -503,10 +548,11 @@ xabber.Fingerprints = xabber.BasicView.extend({
         });
     },
 
-    backToList: function () {
-        this.$('.fingerprints-list-wrap').removeClass('hidden');
+    backToDetails: function () {
+        this.$('.fingerprint-details-whole-wrap').removeClass('hidden');
         this.$('.fingerprint-details-wrap').addClass('hidden');
         this.$el.removeClass('fingerprint-detail-modal');
+        this.$el.addClass('fingerprint-detail-whole-modal');
     },
 
     render: function () {
@@ -739,7 +785,7 @@ xabber.Fingerprints = xabber.BasicView.extend({
                         let trust_type = trusted_device.after_trust
                                 ? xabber.getString(`settings_account__trust__trust_type_direct`, [pretty_datetime(trusted_device.timestamp * 1000)])
                                 : trusted_device.fingerprint_trust
-                                    ? xabber.getString(`fingerprint_trust_type_fingerprint_trust`)
+                                    ? xabber.getString(`fingerprint_trust_type_fingerprint_trust`, [pretty_datetime(trusted_device.timestamp * 1000)])
                                     : xabber.getString(`settings_account__trust__trust_type_indirect`, [trusted_device.device_id, pretty_datetime(trusted_device.timestamp * 1000)]);
                         return trust_type;
                     }

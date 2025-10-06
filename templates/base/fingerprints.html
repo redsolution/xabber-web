@@ -32,7 +32,7 @@
 </div>
 <div class="fingerprint-details-wrap fingerprints-devices-wrap hidden">
     <div class="modal-header fingerprints-header">
-        <i class="btn-back mdi mdi-24px mdi-arrow-left"></i>
+        <i class="btn-back-to-details mdi mdi-24px mdi-arrow-left"></i>
     </div>
     <div class="fingerprints-content">
         <div class="contact-device-content">
@@ -46,5 +46,42 @@
         <div class="fingerprints-help-text">
             {[print(xabber.getString("omemo__dialog_fingerprints__bottom_help_text"))]}
         </div>
+    </div>
+</div>
+<div class="fingerprint-details-whole-wrap hidden">
+    <div class="modal-header fingerprints-header">
+        <i class="btn-back mdi mdi-24px mdi-arrow-left"></i>
+        <div class="fingerprint-details-whole-header one-line"></div>
+    </div>
+    <div class="fingerprint-details-items-wrap fingerprint-details-encryption">
+        <div class="fingerprint-details-item fingerprint-details-client">
+            <svg class="mdi fingerprint-details-icon mdi-24px mdi-svg-template" data-svgname="id"></svg>
+            <div class="fingerprint-details-label">{[print(xabber.getString("device__info__client__label"))]}</div>
+            <div class="fingerprint-details-text"></div>
+        </div>
+        <div class="fingerprint-details-item fingerprint-details-device-id">
+            <svg class="mdi fingerprint-details-icon mdi-24px mdi-svg-template" data-svgname="information"></svg>
+            <div class="fingerprint-details-label">{[print(xabber.getString("settings_account__device_information_device_id"))]}</div>
+            <div class="fingerprint-details-text"></div>
+        </div>
+        <div class="fingerprint-details-item fingerprint-details-fingerprint">
+            <svg class="mdi fingerprint-details-icon mdi-24px mdi-svg-template" data-svgname="lock"></svg>
+            <div class="fingerprint-details-label">{[print(xabber.getString("omemo__dialog_fingerprints__fingerprint_label"))]}</div>
+            <div class="fingerprint-details-text fingerprint-details-fingerprint-text"></div>
+        </div>
+        <div class="fingerprint-details-item fingerprint-details-trust-reason">
+            <svg class="mdi fingerprint-details-icon mdi-24px mdi-svg-template" data-svgname="lock"></svg>
+            <div class="fingerprint-details-label">{[print(xabber.getString("settings_account__trust__trust_reason_label"))]}</div>
+            <div class="fingerprint-details-text fingerprint-details-fingerprint-text"></div>
+        </div>
+    </div>
+    <div class="btn-fingerprint-details-identify fingerprint-details-btn">
+        <div class="setting-icon-background">
+            <svg class="mdi fingerprint-details-icon mdi-24px mdi-svg-template lock-alert" data-svgname="lock-alert"></svg>
+            <svg class="mdi fingerprint-details-icon mdi-24px mdi-svg-template lock-check" data-svgname="lock-check"></svg>
+            <svg class="mdi fingerprint-details-icon mdi-24px mdi-svg-template lock-cross" data-svgname="lock-cross"></svg>
+            <svg class="mdi fingerprint-details-icon mdi-24px mdi-svg-template lock-question" data-svgname="lock-question"></svg>
+        </div>
+        <div class="fingerprint-details-btn-name">{[print(xabber.getString("settings_account__identity_verification"))]}</div>
     </div>
 </div>

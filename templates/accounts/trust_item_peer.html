@@ -2,6 +2,10 @@
     <div class="circle-avatar"></div>
     <div class="trust-item-peer-name"></div>
     <div class="trust-item-peer-jid">{{jid}}</div>
+    <div class="trust-item-peer-encryption-status hidden">
+        <svg class="mdi mdi-24px mdi-svg-template" data-svgname="alert"></svg>
+        <svg class="mdi mdi-24px mdi-svg-template fill-color-red-500 peer-encryption-error-icon" data-svgname="alert-circle"></svg>
+    </div>
     <div class="trust-item-peer-devices-count"></div>
     <i class="btn-more trusted-peer-dropdown-button dropdown-button mdi mdi-24px mdi-dots-vertical" data-activates="trusted-contact-actions-{{uuid}}"></i>
     <ul id="trusted-contact-actions-{{uuid}}" class="dropdown-content trusted-peer-dropdown-content unified-dropdown-style noselect">
