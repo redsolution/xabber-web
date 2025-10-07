@@ -3915,6 +3915,8 @@ xabber.ChatItemView = xabber.BasicView.extend({
                   if (messages.length < options.max)
                       this.history_loaded = true;
                   let count = 0;
+                  if (!messages.length)
+                      callback && callback();
                   $(messages).each((idx, message) => {
                       let $message = $(message);
                       this.account.chats.makeMessageObject($message, {participant_message: true}).then(() => {
@@ -3926,6 +3928,7 @@ xabber.ChatItemView = xabber.BasicView.extend({
                   });
               }, () => {
                   this.account.connection.deleteHandler(handler);
+                  callback && callback();
               }
           );
       },

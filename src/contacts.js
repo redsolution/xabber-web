@@ -4356,11 +4356,9 @@ xabber.ParticipantsViewRight = xabber.BasicView.extend({
 
     events: {
         "click .participant-wrap": "showParticipantProperties",
+        "contextmenu .participant-wrap": "showParticipantContextMenu",
         "keyup .participants-search-form" : "keyUpSearch",
         "click .close-search-icon": "clearSearch",
-        "click .btn-kick": "kickParticipantDialog",
-        "click .btn-edit-member": "showParticipantPropertiesEdit",
-        "click .btn-mute": "kickParticipantDialog",
     },
 
     _initialize: function () {
@@ -4378,6 +4376,80 @@ xabber.ParticipantsViewRight = xabber.BasicView.extend({
         this.$el.html(this.template()).addClass('request-waiting');
         this.updateParticipants();
         return this;
+    },
+
+    showParticipantContextMenu: function (ev) { //34
+        ev.preventDefault();
+
+        let modal = utils.dialogs.context_menu(env.templates.base.participant_context_menu),
+            $modal = modal.$modal,
+            unique_modal_id = uuid(),
+            $overlay = $(`#${$modal.data('overlay-id')}`);
+        $overlay.addClass('invisible-overlay');
+
+        if (this.model.get('incognito_group')){
+            $modal.find('.btn-chat .context-menu-btn-text').text(xabber.getString("groupchat_private_chat"));
+        } else {
+            $modal.find('.btn-chat .context-menu-btn-text').text(xabber.getString("groupchat_direct_chat"));
+        }
+
+        if ($(ev.target).closest('.self-participant-wrap').length){
+            $modal.find('.btn-chat').addClass('hidden');
+            $modal.find('.admin-btn').addClass('hidden');
+        }
+        if (this.model.my_info && this.model.my_info.get('role') === 'member'){
+            $modal.find('.admin-btn').addClass('hidden');
+        }
+
+        $modal.find('.btn-chat').one(`click.${unique_modal_id}`, () => {
+            this.showParticipantProperties(ev, () => {
+                this.participant_properties_panel.getPrivateChat();
+            });
+            $overlay.click();
+        });
+        $modal.find('.btn-participant-messages').one(`click.${unique_modal_id}`, () => {
+            this.showParticipantProperties(ev, () => {
+                this.participant_properties_panel.getMessages({});
+            });
+            $overlay.click();
+        });
+        $modal.find('.btn-edit').one(`click.${unique_modal_id}`, () => {
+            this.showParticipantPropertiesEdit(ev);
+            $overlay.click();
+        });
+        $modal.find('.btn-kick').one(`click.${unique_modal_id}`, () => {
+            this.kickParticipantDialog(ev);
+            $overlay.click();
+        });
+
+        $overlay.one(`contextmenu.${unique_modal_id}`, (e) => {
+            $overlay.click();
+            e.preventDefault();
+            setTimeout(() => {
+                let rightClickEvent = new MouseEvent('contextmenu', {
+                    bubbles: true,
+                    cancelable: true,
+                    view: window,
+                    button: 2, // 2 для правой кнопки мыши
+                    clientX: e.clientX,
+                    clientY: e.clientY,
+                });
+                $overlay.css('display', 'none');
+                let element = document.elementFromPoint(e.clientX, e.clientY);
+                if (element) {
+                    element.dispatchEvent(rightClickEvent);
+                }
+            }, 50);
+        });
+
+        modal.onClosed = () => {
+            $modal.find('.context-menu-btn').off(`click.${unique_modal_id}`);
+            $overlay.off(`contextmenu.${unique_modal_id}`);
+        };
+        $modal.positionToCursorPercent({
+            clientX: ev.clientX,
+            clientY: ev.clientY,
+        });
     },
 
     onUpdatedScreen: function () {
@@ -4553,7 +4625,7 @@ xabber.ParticipantsViewRight = xabber.BasicView.extend({
         }
     },
 
-    showParticipantProperties: function (ev) {
+    showParticipantProperties: function (ev, callback) {
         let $target = $(ev.target);
         if ($target.closest('.buttons-wrap').length)
             return;
@@ -4563,7 +4635,12 @@ xabber.ParticipantsViewRight = xabber.BasicView.extend({
         (participant_item.attr('data-jid') && participant_item.attr('data-jid') === this.account.get('jid')) && (participant_id = '');
         this.model.participants.participantsRequest({id: participant_id}, (response) => {
             let data_form = this.account.parseDataForm($(response).find(`x[xmlns="${Strophe.NS.DATAFORM}"]`));
-            this.participant_properties_panel.open(participant, data_form);
+            if (!callback){
+                this.participant_properties_panel.open(participant, data_form);
+            } else {
+                this.participant_properties_panel.enable(participant, data_form);
+            }
+            callback && callback()
         });
     },
 
@@ -5127,6 +5204,12 @@ xabber.ParticipantPropertiesViewRight = xabber.BasicView.extend({
     _initialize: function () {
         this.contact = this.model;
         this.account = this.model.account;
+    },
+
+    enable: function (participant, data_form) {
+        if (!participant) return;
+        this.participant = participant;
+        this.data_form = data_form;
     },
 
     open: function (participant, data_form) {
@@ -5722,7 +5805,7 @@ xabber.ParticipantPropertiesViewRight = xabber.BasicView.extend({
     getPrivateChat: function (ev) {
         if (this.participant.get('subscription') === null && this.contact.get('incognito_chat'))
             return;
-        if ($(ev.target).closest('.button-wrap').hasClass('non-active'))
+        if (ev && $(ev.target).closest('.button-wrap').hasClass('non-active'))
             return;
         let participant_jid = this.participant.get('jid'),
             participant_in_roster = this.account.contacts.get(participant_jid);
@@ -5773,10 +5856,9 @@ xabber.ParticipantPropertiesViewRight = xabber.BasicView.extend({
                     return;
                 }
             this.parent.closeDetails();
-            xabber.add_contact_view.show({
-                account: this.account,
-                jid: participant_jid
-            });
+
+            let contact = this.account.contacts.mergeContact(participant_jid);
+            contact.trigger("open_chat", contact);
         }
     },
 

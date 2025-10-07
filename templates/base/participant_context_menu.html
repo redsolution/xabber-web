@@ -1,0 +1,18 @@
+<div class="context-menu-container">
+    <div class="context-menu-btn btn-chat">
+        <svg class="mdi mdi-24px mdi-svg-template fill-color-grey-500" data-svgname="chat"></svg>
+        <div class="context-menu-btn-text"></div>
+    </div>
+    <div class="context-menu-btn btn-participant-messages">
+        <svg class="mdi mdi-24px mdi-svg-template fill-color-grey-500" data-svgname="messages"></svg>
+        <div class="context-menu-btn-text">{[print(xabber.getString("groupchat_member_messages"))]}</div>
+    </div>
+    <div class="context-menu-btn btn-edit admin-btn">
+        <svg class="mdi mdi-24px mdi-svg-template fill-color-grey-500" data-svgname="edit"></svg>
+        <div class="context-menu-btn-text">{[print(xabber.getString("groupchat_member_edit"))]}</div>
+    </div>
+    <div class="context-menu-btn btn-kick admin-btn">
+        <svg class="mdi mdi-24px mdi-svg-template fill-color-red-700" data-svgname="kick"></svg>
+        <div class="context-menu-btn-text text-color-red-700">{[print(xabber.getString("groupchat_kick"))]}</div>
+    </div>
+</div>
