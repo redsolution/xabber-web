@@ -1003,7 +1003,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
         let state,
             step = session.verification_step;
         if (step === '1a' && session.active_verification_device && session.active_verification_device.device_id){
-            state = xabber.getString("verification_session_state__own_request_code_needed");
+            state = xabber.getString("verification_session_state__own_request_answered");
         } else if (step === '1a'){
             state = xabber.getString("verification_session_state__own_request_send");
         } else if (step === '1b'){
@@ -1870,7 +1870,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
         if (!jid)
             return false;
         if (this.get('active_trust_sessions')[original_sid])
-            return false;
+            return true;
         let active_sessions = this.get('active_trust_sessions'),
             sessions_with_jid = Object.values(active_sessions).filter(item => item.session_check_jid && item.session_check_jid === jid);
 
