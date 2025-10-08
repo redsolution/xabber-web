@@ -11756,6 +11756,9 @@ input[type=text].simple-input-field:hover {
     white-space: pre-wrap;
 }
 
+.participant-messages-wrap .fixed-day-indicator-wrap {
+    margin-top: 40px;
+}
 .fixed-day-indicator-wrap {
     -moz-transition: opacity .2s;
     -webkit-transition: opacity .2s;

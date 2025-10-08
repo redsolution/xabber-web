@@ -3133,6 +3133,7 @@ xabber.ChatItemView = xabber.BasicView.extend({
 
       _initialize: function (options) {
           this.model = options.model;
+          this.current_day_indicator = null;
           this.contact = options.contact;
           this.account = this.model.account;
           let color = this.account.settings.get('color');
@@ -3199,6 +3200,9 @@ xabber.ChatItemView = xabber.BasicView.extend({
           this.$('.back-to-bottom').hideIf(this.isScrolledToBottom());
           this._prev_scrolltop = this._scrolltop || this._prev_scrolltop || 0;
           this._scrolltop = this.getScrollTop() || this._scrolltop || this._prev_scrolltop || 0;
+          setTimeout(() => {
+              this.chat_content.updateIndicator.bind(this)();
+          }, 10);
           if (!this.history_loaded && !this.loading_history && (this._scrolltop < this._prev_scrolltop) && (this._scrolltop < 100 || this.getPercentScrolled() < 0.1)) {
               this.loading_history = true;
               this.messagesRequest({before: this.first_msg_id}, () => {
@@ -3264,6 +3268,7 @@ xabber.ChatItemView = xabber.BasicView.extend({
 
       __initialize: function (options) {
           options = options || {};
+          this.current_day_indicator = null;
           this.stanza_id = options.stanza_id_context;
           this.scrolled_to_message = false;
           this.encrypted = options.encrypted;
@@ -3288,6 +3293,7 @@ xabber.ChatItemView = xabber.BasicView.extend({
           this.chat_content.updateUnreadMentions.bind(this)();
           this.updateCounter();
           this.encrypted && this.$el.attr('data-trust', true)
+          this.chat_content.updateIndicator.bind(this)();
       },
 
       onMouseWheel: function (ev) {
@@ -3323,6 +3329,7 @@ xabber.ChatItemView = xabber.BasicView.extend({
                   $msg.removeClass('message-from-context')
               }, 4500);
               this.updateCounter();
+              this.chat_content.updateIndicator.bind(this)();
           }
       },
 
@@ -3341,6 +3348,7 @@ xabber.ChatItemView = xabber.BasicView.extend({
                   aud._onResize();
               })
               this.chat_content._waveforms_render_list = [];
+              this.chat_content.updateIndicator.bind(this)();
           }
       },
 
@@ -3363,6 +3371,9 @@ xabber.ChatItemView = xabber.BasicView.extend({
           this._scrolltop = this.getScrollTop() || this._scrolltop || this._prev_scrolltop || 0;
           this._scrollbottom = this.getScrollBottom();
 
+          setTimeout(() => {
+              this.chat_content.updateIndicator.bind(this)();
+          }, 10);
           if (!this.loading_history)
               if (!this.first_history_loaded && (this._scrolltop < this._prev_scrolltop) && (this._scrolltop < 100 || this.getPercentScrolled() < 0.1)) {
                   this.loading_history = true;
@@ -3867,6 +3878,7 @@ xabber.ChatItemView = xabber.BasicView.extend({
           });
           this.$('.participant-messages-header .messages-by-header .participant-nickname').text(this.member_nickname);
           this.$('.participant-messages-header').removeClass('hidden');
+          this.chat_content.updateIndicator.bind(this)();
           this.scrollToBottom();
           this.$('.back-to-bottom').hideIf(this.isScrolledToBottom());
       },
@@ -4830,7 +4842,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
                 marker.remove();
         }
         $chatday_indicator.each((idx, indicator) => {
-            if (this.$('.subscription-buttons-wrap').hasClass('hidden')) {
+            if (this.$('.subscription-buttons-wrap').hasClass('hidden') && this.$('.participant-messages-header').hasClass('hidden')) {
                 if ((indicator.offsetTop <= this._scrolltop + 30) && (indicator.offsetTop + 15 >= this._scrolltop)) {
                     indicator_idx = idx;
                     opacity_value = 0;
@@ -4877,7 +4889,8 @@ xabber.ChatContentView = xabber.BasicView.extend({
             }
         }
         if (this.current_day_indicator !== null) {
-            this.showDayIndicator(this.current_day_indicator);
+            this.$('.fixed-day-indicator').text(this.current_day_indicator);
+            this.$('.fixed-day-indicator-wrap').removeClass('hidden');
         }
     },
 
@@ -7427,7 +7440,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
                 (idx === 0) && (body += '\n');
                 legacy_body = file.sources[0] + ((idx !== all_files.length - 1) ? '\n' : "");
                 let start_idx = Array.from(_.escape(body)).length,
-                    end_idx = start_idx + legacy_body.length;
+                    end_idx = start_idx + _.escape(legacy_body).length;
                 stanza.c('reference', {
                     xmlns: Strophe.NS.REFERENCE,
                     type: 'mutable',
@@ -8484,6 +8497,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
         video.pretty_size = utils.pretty_size(video.size);
         let video_attrs = {video_src: video.sources[0], thumbnail: video.thumbnail, proxy_video: video.proxy_video, video_id: idx},
             $video_wrap_template = $(templates.messages.video(video_attrs));
+        console.error(video_attrs);
         if (video.thumbnail){
             setTimeout(() => {
                 $video_wrap_template.append($(`<img class="plyr-video-poster" src="${video.thumbnail}" onerror="this.style.display='none'">`))
@@ -8849,7 +8863,10 @@ xabber.ChatContentView = xabber.BasicView.extend({
                     console.error(e);
                 });
             } else {
-                xabber.openWindow(url);
+                let download = document.createElement("a");
+                download.href = url;
+                download.download = file.name;
+                download.click();
             }
         }, null);
     },

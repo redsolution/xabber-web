@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.4.232","version_description":"changed own verification sessions text, removed active session info from new omemo device placeholder, fixed incoming session handling if this request was already accepted"}'
+'{"version_number":"2.4.233","version_description":"fixed date indicator in context messages and participant messages, fixed video downloading from plyr player, fixed reference length for file upload"}'
 )});

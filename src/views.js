@@ -1993,6 +1993,10 @@ xabber.PlyrPlayerPopupView = xabber.BasicView.extend({
                     options.player.video_src = result;
                     options.player.proxied = true;
                     options.player.video_decrypted = true;
+                    this.$('.plyr__controls__item[data-plyr="download"]').attr('href', result);
+                    setTimeout( () => {
+                        this.$el.find('.plyr__controls__item[data-plyr="download"]').attr('href', result);
+                    }, 100);
                     dfd.resolve();
                 }).catch((e) => {
                     console.error(e);
@@ -2000,6 +2004,9 @@ xabber.PlyrPlayerPopupView = xabber.BasicView.extend({
             } else {
                 options.player.video_src = url;
                 options.player.proxied = true;
+                setTimeout( () => {
+                    this.$el.find('.plyr__controls__item[data-plyr="download"]').attr('href', url);
+                }, 100);
                 dfd.resolve();
             }
         });
