@@ -1569,7 +1569,6 @@ xabber.Account = Backbone.Model.extend({
                     success: (response) => {
                         if (response.request_id){
                             this.set('gallery_auth_request_code', response.request_id);
-                            this.gallery_auth_errback = errback;
                             if (this.gallery_code_requests.length){
                                 let verifying_code = this.gallery_code_requests.find(verifying_mess => (verifying_mess.id === this.get('gallery_auth_request_code')));
                                 if (verifying_code && verifying_code.code)
@@ -1646,7 +1645,7 @@ xabber.Account = Backbone.Model.extend({
                         if (response.expires)
                             this.set('gallery_token_expires', response.expires);
                         this.trigger('gallery_token_authenticated');
-                        this.set('gallery_auth', false)
+                        this.set('gallery_auth', false);
                     },
                     error: (response) => {
                         this.set('gallery_auth', false);
@@ -1718,8 +1717,6 @@ xabber.Account = Backbone.Model.extend({
         },
 
         handleCommonGalleryErrors: function (response, errback, original_function, args, context) {
-            !errback && (errback = this.gallery_auth_errback);
-            this.gallery_auth_errback = undefined;
             let err_text;
             response && response.responseJSON && response.responseJSON.error && (err_text = response.responseJSON.error);
             if (response.status === 401){
