@@ -4386,24 +4386,6 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
             if (this.model.omemo) {
                 !this.omemo_own_devices && (this.omemo_own_devices = new xabber.FingerprintsOwnDevices({model: this.model.omemo}));
                 let omemo_device_id = token.omemo_id ? token.omemo_id : Number(pretty_token.token_uid.slice(0,8));
-                if (omemo_device_id){
-                    let trusted_devices = this.model.omemo.xabber_trust.get('trusted_devices');
-                    let jid = this.model.get('jid');
-
-                    if (trusted_devices[jid] && trusted_devices[jid].length){
-                        let peers_trusted_devices = trusted_devices[jid],
-                            trusted_device = peers_trusted_devices.filter(item => item.device_id === omemo_device_id);
-                        if (trusted_device.length){
-                            trusted_device = trusted_device[0];
-                            let trust_type = trusted_device.after_trust
-                                ? xabber.getString(`settings_account__trust__trust_type_direct`, [pretty_datetime(trusted_device.timestamp * 1000)])
-                                : trusted_device.fingerprint_trust
-                                    ? xabber.getString(`fingerprint_trust_type_fingerprint_trust`, [pretty_datetime(trusted_device.timestamp * 1000)])
-                                    : xabber.getString(`settings_account__trust__trust_type_indirect`, [trusted_device.from_device_id, pretty_datetime(trusted_device.timestamp * 1000)]);
-                            $token_html.find('.verification-status').html(trust_type);
-                        }
-                    }
-                }
                 this.omemo_own_devices.updateTrustDevice(Number(omemo_device_id), $token_html, this, () => {
                     if (this.$(`.settings-block-wrap.device-information[data-token-uid="${pretty_token.token_uid}"]`).length
                         && !this.$(`.settings-block-wrap.device-information[data-token-uid="${pretty_token.token_uid}"]`).hasClass('hidden')){
@@ -4418,6 +4400,27 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
                             }
                             this.$('.settings-tabs-wrap .settings-tab .device-encryption').switchClass('hidden', this.$('.device-encryption-warning').attr('data-not-trusted-count') === '0');
                             this.$('.btn-verify-devices').switchClass('hidden', this.$('.device-encryption-warning').attr('data-not-trusted-count') === '0');
+                        }
+                    }
+                    if (omemo_device_id){
+                        let trusted_devices = this.model.omemo.xabber_trust.get('trusted_devices');
+                        let jid = this.model.get('jid');
+                        if (trusted_devices[jid] && trusted_devices[jid].length){
+                            let peers_trusted_devices = trusted_devices[jid],
+                                trusted_device = peers_trusted_devices.filter(item => item.device_id === omemo_device_id);
+                            if (trusted_device.length){
+                                trusted_device = trusted_device[0];
+                                let trust_type = trusted_device.after_trust
+                                    ? xabber.getString(`settings_account__trust__trust_type_direct`, [pretty_datetime(trusted_device.timestamp * 1000)])
+                                    : trusted_device.fingerprint_trust
+                                        ? xabber.getString(`fingerprint_trust_type_fingerprint_trust`, [pretty_datetime(trusted_device.timestamp * 1000)])
+                                        : xabber.getString(`settings_account__trust__trust_type_indirect`, [trusted_device.from_device_id, pretty_datetime(trusted_device.timestamp * 1000)]);
+                                $token_html.find('.verification-status').html(trust_type);
+                            } else {
+                                $token_html.find('.verification-status').html(xabber.getString("fingerprint_trust_type_unknown"));
+                            }
+                        } else {
+                            $token_html.find('.verification-status').html(xabber.getString("fingerprint_trust_type_unknown"));
                         }
                     }
                 }, () => {
