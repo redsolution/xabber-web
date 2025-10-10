@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.4.233","version_description":"fixed date indicator in context messages and participant messages, fixed video downloading from plyr player, fixed reference length for file upload"}'
+'{"version_number":"2.4.234","version_description":"added encryped devices context menu for own devices and contact devices, fixed scrolling after video container rendering in msg, changed proxy caching, added unverified encryption tip in contacts devices, added verification status to own devices item in account settings"}'
 )});

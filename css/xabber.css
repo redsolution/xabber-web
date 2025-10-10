@@ -15093,6 +15093,7 @@ input[type=range].voice-message-volume:focus {
     color: rgba(0, 0, 0, 0.87);
 }
 
+.settings-panel-wrap .settings-column .devices-wrap .token-wrap .verification-status,
 .settings-panel-wrap .settings-column .devices-wrap .token-wrap .ip-address{
     font-size: 13px;
     line-height: 16px;

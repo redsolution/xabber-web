@@ -1815,7 +1815,7 @@ xabber.Account = Backbone.Model.extend({
             let is_proxy_enabled = this && this.get('proxy_viewer_url') && this.get('proxy_viewer_token');
             if (is_proxy_enabled){
                 xabber.cached_proxy_urls.getFromCachedProxyUrls(original_url, (res) => {
-                   if (res && !(res.error === 0)){
+                   if (res && !(res.error === 0) && !(res.original_url && res.original_url.includes(this.get('proxy_viewer_url')))){
                        if (res.proxy_url){
                            callback && callback({url: res.proxy_url})
                        } else {
@@ -3628,6 +3628,7 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
         "click .btn-qr-code": "jumpToBlock",
         "click .trust-item-peer": "openFingerprints",
         "contextmenu .trust-item-peer": "onTrustPeerContextMenu",
+        "contextmenu .all-sessions .token-wrap": "onOwnDevicesContextMenu",
         // "click .trust-item-device": "jumpToBlock",
         "click .btn-open": "openChat",
         "click .btn-open-encrypted": "openEncryptedChat",
@@ -4388,6 +4389,24 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
             if (this.model.omemo) {
                 !this.omemo_own_devices && (this.omemo_own_devices = new xabber.FingerprintsOwnDevices({model: this.model.omemo}));
                 let omemo_device_id = token.omemo_id ? token.omemo_id : Number(pretty_token.token_uid.slice(0,8));
+                if (omemo_device_id){
+                    let trusted_devices = this.model.omemo.xabber_trust.get('trusted_devices');
+                    let jid = this.model.get('jid');
+
+                    if (trusted_devices[jid] && trusted_devices[jid].length){
+                        let peers_trusted_devices = trusted_devices[jid],
+                            trusted_device = peers_trusted_devices.filter(item => item.device_id === omemo_device_id);
+                        if (trusted_device.length){
+                            trusted_device = trusted_device[0];
+                            let trust_type = trusted_device.after_trust
+                                ? xabber.getString(`settings_account__trust__trust_type_direct`, [pretty_datetime(trusted_device.timestamp * 1000)])
+                                : trusted_device.fingerprint_trust
+                                    ? xabber.getString(`fingerprint_trust_type_fingerprint_trust`, [pretty_datetime(trusted_device.timestamp * 1000)])
+                                    : xabber.getString(`settings_account__trust__trust_type_indirect`, [trusted_device.from_device_id, pretty_datetime(trusted_device.timestamp * 1000)]);
+                            $token_html.find('.verification-status').html(trust_type);
+                        }
+                    }
+                }
                 this.omemo_own_devices.updateTrustDevice(Number(omemo_device_id), $token_html, this, () => {
                     if (this.$(`.settings-block-wrap.device-information[data-token-uid="${pretty_token.token_uid}"]`).length
                         && !this.$(`.settings-block-wrap.device-information[data-token-uid="${pretty_token.token_uid}"]`).hasClass('hidden')){
@@ -4637,6 +4656,81 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
         $item.find('.trusted-peer-dropdown-button').click();
     },
 
+    onOwnDevicesContextMenu: function (ev) {
+        let $tab = $(ev.target).closest('.token-wrap'),
+            token_uid = $tab.attr('data-token-uid');
+        if (!token_uid )
+            return;
+
+        let token = this.model.x_tokens_list.find(item => (item.token_uid === token_uid));
+        if (!token)
+            return;
+
+        let device;
+        ev.preventDefault();
+
+        let modal = utils.dialogs.context_menu(env.templates.base.encrypted_device_context_menu),
+            $modal = modal.$modal,
+            unique_modal_id = uuid(),
+            $overlay = $(`#${$modal.data('overlay-id')}`);
+        $overlay.addClass('invisible-overlay');
+        if ($tab.attr('data-trust') && $tab.attr('data-trust') !== 'trust'){
+            device = this.model.omemo.own_devices[token.omemo_id];
+            if (!device)
+                $modal.find('.encryption-button').addClass('hidden');
+        } else {
+            $modal.find('.encryption-button').addClass('hidden');
+        }
+
+        $modal.find('.btn-verify').one(`click.${unique_modal_id}`, () => {
+            if (device){
+                this.omemo_own_devices.device_id = device.get('id');
+                this.omemo_own_devices.startTrustVerificationOwn();
+            }
+            $overlay.click();
+        });
+        $modal.find('.btn-trust').one(`click.${unique_modal_id}`, () => {
+            if (device) {
+                this.omemo_own_devices.renderOwnDevices(device.get('id'), null, () => {
+                    this.omemo_own_devices.trustDevice({target: this.omemo_own_devices.$('div.fingerprints-content')});
+                });
+            }
+            $overlay.click();
+        });
+        $modal.find('.btn-terminate-session').one(`click.${unique_modal_id}`, () => {
+            this.revokeXToken(null, token_uid);
+            $overlay.click();
+        });
+        $overlay.one(`contextmenu.${unique_modal_id}`, (e) => {
+            $overlay.click();
+            e.preventDefault();
+            setTimeout(() => {
+                let rightClickEvent = new MouseEvent('contextmenu', {
+                    bubbles: true,
+                    cancelable: true,
+                    view: window,
+                    button: 2, // 2 для правой кнопки мыши
+                    clientX: e.clientX,
+                    clientY: e.clientY,
+                });
+                $overlay.css('display', 'none');
+                let element = document.elementFromPoint(e.clientX, e.clientY);
+                if (element) {
+                    element.dispatchEvent(rightClickEvent);
+                }
+            }, 50);
+        });
+
+        modal.onClosed = () => {
+            $modal.find('.context-menu-btn').off(`click.${unique_modal_id}`);
+            $overlay.off(`contextmenu.${unique_modal_id}`);
+        };
+        $modal.positionToCursorPercent({
+            clientX: ev.clientX,
+            clientY: ev.clientY,
+        });
+    },
+
     openFingerprints: function (ev) {
         if ($(ev.target).closest('.trusted-peer-dropdown-button').length || $(ev.target).closest('.trusted-peer-dropdown-content').length)
             return;
@@ -4683,13 +4777,20 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
         }
     },
 
-    revokeXToken: function (ev) {
+    revokeXToken: function (ev, forced_token_uid) {
         utils.dialogs.ask(xabber.getString("terminate_session_title"), xabber.getString("terminate_session_text"),
             {}, { ok_button_text: xabber.getString("button_terminate")}).done((res) => {
             if (!res)
                 return;
-            let $target = $(ev.target).closest('.settings-block-wrap.device-information'),
+            let $target, token_uid;
+            if (forced_token_uid){
+                token_uid = forced_token_uid;
+            } else if (ev) {
+                $target = $(ev.target).closest('.settings-block-wrap.device-information');
                 token_uid = $target.attr('data-token-uid');
+            }
+            if (!token_uid)
+                return;
             this.model.revokeXToken([token_uid], () => {
                 if (this.model.get('x_token')){
                     if (this.model.get('x_token').token_uid === token_uid) {
@@ -4698,7 +4799,7 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
                     }
                     this.model.getAllXTokens(() => {
                         this.$('.sessions-wrap').html("");
-                        this.$('.btn-back-subsettings-account').length && this.backToSubMenu({target: this.$('.btn-back-subsettings-account')[0]});
+                        !forced_token_uid && this.$('.btn-back-subsettings-account').length && this.backToSubMenu({target: this.$('.btn-back-subsettings-account')[0]});
                         if (this.model.x_tokens_list && this.model.x_tokens_list.length) {
                             this.renderAllXTokens();
                         }

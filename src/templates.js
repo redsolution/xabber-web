@@ -71,6 +71,7 @@ import $ from "jquery";
     addTemplate('base.participant_context_menu');
     addTemplate('base.message_context_menu');
     addTemplate('base.chat_context_menu');
+    addTemplate('base.encrypted_device_context_menu');
     addTemplate('base.incoming_trust_session');
     addTemplate('base.active_session_modal');
     addTemplate('base.trust_item_device_session');

@@ -1,0 +1,14 @@
+<div class="context-menu-container">
+    <div class="context-menu-btn btn-verify encryption-button">
+        <svg class="mdi mdi-24px mdi-svg-template fill-color-grey-500" data-svgname="chat"></svg>
+        <div class="context-menu-btn-text">{[print(xabber.getString("trust_session__start_verification"))]}</div>
+    </div>
+    <div class="context-menu-btn btn-trust encryption-button">
+        <svg class="mdi mdi-24px mdi-svg-template fill-color-grey-500" data-svgname="messages"></svg>
+        <div class="context-menu-btn-text">{[print(xabber.getString("omemo__dialog_fingerprints__button_trust"))]}</div>
+    </div>
+    <div class="context-menu-btn btn-terminate-session">
+        <svg class="mdi mdi-24px mdi-svg-template fill-color-red-700" data-svgname="trash"></svg>
+        <div class="context-menu-btn-text text-color-red-700">{[print(xabber.getString("device__info__terminate_session__button"))]}</div>
+    </div>
+</div>

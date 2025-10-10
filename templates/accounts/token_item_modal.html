@@ -9,6 +9,7 @@
     <div class="token-client-wrap">
         <div class="device one-line">{{device}}</div>
         <div class="ip-address">{{ip}} • {[ if (resource_obj) {]}{[print(xabber.getString("account_state_connected"))]}{[} else {]}{{last_auth}}{[}]}</div>
+        <div class="verification-status">{{ip}} • {[ if (resource_obj) {]}{[print(xabber.getString("account_state_connected"))]}{[} else {]}{{last_auth}}{[}]}</div>
     </div>
     <div class="device-encryption one-line">
         <svg class="mdi mdi-24px mdi-svg-template device-encryption-lock" data-svgname="lock"></svg>

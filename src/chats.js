@@ -5593,6 +5593,29 @@ xabber.ChatContentView = xabber.BasicView.extend({
         }
     },
 
+    updateScrollAfterMessage: function (is_scrolled_to_bottom, scrolled_from_bottom) {
+        if (this.model.get('notifications')){
+            if (this.isScrolledToTop()){
+                this.scrollToTop();
+            }
+        } else {
+            let is_scrolling_needed;
+            if (is_scrolled_to_bottom){
+                if (this.$(`.chat-message.unread-message`).length){
+                    if (this.$(`.chat-message.unread-message`)[0].offsetTop > (this._scrolltop + 140)) {
+                        is_scrolling_needed = true;
+                    }
+                } else
+                    is_scrolling_needed = true;
+            }
+            if ((is_scrolled_to_bottom && is_scrolling_needed) || message.get('submitted_here')) {
+                this.scrollToBottom();
+            } else if (!is_scrolled_to_bottom) {
+                this.updateScrollBar();
+                this.scrollTo(this.ps_container[0].scrollHeight - this.ps_container[0].offsetHeight - scrolled_from_bottom);
+            }
+        }
+    },
     onMessage: function (message) {
         this.account.messages.add(message);
         let is_scrolled_to_bottom = this.isScrolledToBottom(),
@@ -5678,27 +5701,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
         }
 
         if (this.isVisible() && (!message.get('is_unread') || is_scrolled_to_bottom) && !message.get('is_between_anchors')) {
-            if (this.model.get('notifications')){
-                if (this.isScrolledToTop()){
-                    this.scrollToTop();
-                }
-            } else {
-                let is_scrolling_needed;
-                if (is_scrolled_to_bottom){
-                    if (this.$(`.chat-message.unread-message`).length){
-                        if (this.$(`.chat-message.unread-message`)[0].offsetTop > (this._scrolltop + 140)) {
-                            is_scrolling_needed = true;
-                        }
-                    } else
-                        is_scrolling_needed = true;
-                }
-                if ((is_scrolled_to_bottom && is_scrolling_needed) || message.get('submitted_here')) {
-                    this.scrollToBottom();
-                } else if (!is_scrolled_to_bottom) {
-                    this.updateScrollBar();
-                    this.scrollTo(this.ps_container[0].scrollHeight - this.ps_container[0].offsetHeight - scrolled_from_bottom);
-                }
-            }
+            this.updateScrollAfterMessage(is_scrolled_to_bottom, scrolled_from_bottom);
         }
 
         if (message.get('synced_from_server') && message.get('is_unread')) {
@@ -6582,6 +6585,8 @@ xabber.ChatContentView = xabber.BasicView.extend({
         }
         if (is_video) {
             let updateVideoInMessage = (copied_videos) => {
+                let is_scrolled_to_bottom = this.isScrolledToBottom(),
+                    scrolled_from_bottom = this.getScrollBottom();
                 let video_content = this.createVideoContainer();
                 $message.find('.chat-msg-media-content').append(video_content);
                 copied_videos.forEach((video, idx) => {
@@ -6590,6 +6595,9 @@ xabber.ChatContentView = xabber.BasicView.extend({
                 });
                 this.videoOnload($message, message);
                 $message.removeClass('file-upload noselect');
+                if (this.isVisible() && (!message.get('is_unread') || is_scrolled_to_bottom) && !message.get('is_between_anchors')) {
+                    this.updateScrollAfterMessage(is_scrolled_to_bottom, scrolled_from_bottom);
+                }
             }
             if (this.account.server_features.get('proxy-viewer') && this.account.get('proxy_viewer_url') && this.account.get('proxy_viewer_token') && attrs.type !== 'file_upload'){
                 this.replaceVideoThubmnailsToProxy(videos, updateVideoInMessage);
@@ -6883,6 +6891,8 @@ xabber.ChatContentView = xabber.BasicView.extend({
                 }
                 if (is_forward_video) {
                     let updateVideoInMessage = (copied_videos) => {
+                        let is_scrolled_to_bottom = this.isScrolledToBottom(),
+                            scrolled_from_bottom = this.getScrollBottom();
                             let video_content = this.createVideoContainer();
                             $f_message.find('.chat-msg-media-content').append(video_content);
                             copied_videos.forEach((video, idx) => {
@@ -6891,6 +6901,9 @@ xabber.ChatContentView = xabber.BasicView.extend({
                             });
                             this.videoOnload($message, message);
                             $f_message.removeClass('file-upload noselect');
+                        if (this.isVisible() && (!message.get('is_unread') || is_scrolled_to_bottom) && !message.get('is_between_anchors')) {
+                            this.updateScrollAfterMessage(is_scrolled_to_bottom, scrolled_from_bottom);
+                        }
                         }
                     if (this.account.server_features.get('proxy-viewer') && this.account.get('proxy_viewer_url') && this.account.get('proxy_viewer_token')){
                         this.replaceVideoThubmnailsToProxy(attrs.videos, updateVideoInMessage);
@@ -8345,6 +8358,8 @@ xabber.ChatContentView = xabber.BasicView.extend({
         }
         message.set('videos', videos);
         if (videos.length > 0) {
+            let is_scrolled_to_bottom = this.isScrolledToBottom(),
+                scrolled_from_bottom = this.getScrollBottom();
             let video_content = this.createVideoContainer();
             $message.find('.chat-msg-media-content.chat-main-upload-media').find('.chat-file-info').remove();
             $message.find('.chat-msg-media-content.chat-main-upload-media').append(video_content);
@@ -8354,6 +8369,9 @@ xabber.ChatContentView = xabber.BasicView.extend({
             });
             this.videoOnload($message, message);
             $message.removeClass('file-upload noselect');
+            if (this.isVisible()) {
+                this.updateScrollAfterMessage(is_scrolled_to_bottom, scrolled_from_bottom);
+            }
         }
         if (files_.length > 0) {
             $message.removeClass('file-upload noselect');
