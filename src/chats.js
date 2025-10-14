@@ -1443,6 +1443,7 @@ xabber.JingleMessage = Backbone.Model.extend({
         this.on("get_retractions_list", this.getAllMessageRetractions, this);
         this.on("change:timestamp", this.onChangedTimestamp, this);
         this.on("update_last_read_msg", this.onChangedLastReadMsg, this);
+        this.on("update_new_unverified_device", this.onNewUnverifiedDevice, this);
         this.account && this.account.once('change:omemo_enabled', this.onOmemoEnable, this);
         this.onTrustSessionUpdate();
         this.onOmemoEnable();
@@ -1463,6 +1464,22 @@ xabber.JingleMessage = Backbone.Model.extend({
         this.onTrustedDevicesUpdated();
     },
 
+    onNewUnverifiedDevice: function (device_id) {
+        if (!this.get('encrypted') || !this.account.omemo || !device_id)
+            return;
+        let jid = this.get('jid');
+
+        let peer = this.account.omemo.getPeer(jid);
+        let device = peer.devices[device_id];
+
+        if (device){
+            let device_name_text = device.get('label') ? `<b>${device.get('label')}(${device.get('id')})</b>` : `<b>${device.get('id')}</b>`;
+            this.messages.createSystemMessage({
+                from_jid: jid,
+                message: xabber.getString("verification_session__device_new_unverified_device", [this.contact.get('name'), device_name_text])
+            });
+        }
+    },
     onTrustedDevicesUpdated: function () {
         // console.error(!this.get('encrypted') || !this.account.omemo || !this.account.omemo.xabber_trust);
         if (!this.get('encrypted') || !this.account.omemo || !this.account.omemo.xabber_trust)
@@ -1549,7 +1566,7 @@ xabber.JingleMessage = Backbone.Model.extend({
             if ((session.active_verification_device && session.active_verification_device.peer_jid === this.get('jid')) || session.session_check_jid === this.get('jid')){
                 if (!original_value){
                     setTimeout(() => {
-                        let message_text = this.account.omemo.xabber_trust.getVerificationStateLabel(session);
+                        let message_text = this.account.omemo.xabber_trust.getVerificationStateLabelTrue(session);
                         this.messages.createSystemMessage({ //change to chat timestamp update
                             from_jid: this.contact.get('jid'),
                             auth_request: true,

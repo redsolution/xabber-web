@@ -1622,7 +1622,6 @@ xabber.Omemo = Backbone.ModelWithStorage.extend({
         });
         this.bundle = new xabber.Bundle(null, {store: this.store, model: this});
         this.connection = this.account.connection;
-        this.registerMessageHandler();
         this.addDevice();
         this.xabber_trust.onConnected();
         this.account.set("omemo_enabled", true);
@@ -1755,11 +1754,6 @@ xabber.Omemo = Backbone.ModelWithStorage.extend({
     },
 
     registerMessageHandler: function () {
-        this.account.connection.deleteHandler(this._msg_handler);
-        this._msg_handler = this.account.connection.addHandler((message) => {
-            this.receiveMessage(message);
-            return true;
-        }, null, 'message', null, null, null, {'encrypted': true});
     },
 
     encrypt: function (contact, message, is_own) {
@@ -2355,9 +2349,6 @@ xabber.Omemo = Backbone.ModelWithStorage.extend({
     receiveMessage: function (message) {
         let $message = $(message),
             type = $message.attr('type');
-        if (type === 'headline') {
-            return this.receiveHeadlineMessage(message);
-        }
     },
 
     parseEncrypted: function ($encrypted) {
@@ -2941,6 +2932,20 @@ xabber.Account.addInitPlugin(function () {
                                 peer.updateDevices(devices);
                                 if (has_changes) {
                                     this.trigger('trusting_updated');
+                                    if (Object.keys(devices) && Object.keys(devices).length){
+                                        let new_trusted_devices = this.known_peer_devices.checkKnownDevicesList(from_jid, Object.keys(devices));
+                                        if (new_trusted_devices && new_trusted_devices.length){
+                                            let contact = this.contacts.get(from_jid);
+                                            if (contact){
+                                                let chat = this.chats.getChat(contact, 'encrypted');
+                                                if (chat) {
+                                                    _.each(new_trusted_devices, (item) => {
+                                                        chat.trigger('update_new_unverified_device', item);
+                                                    });
+                                                }
+                                            }
+                                        }
+                                    }
                                 }
                             }
                             msg_object.ignore = 'omemo';

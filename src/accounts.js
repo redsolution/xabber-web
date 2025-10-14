@@ -1319,6 +1319,10 @@ xabber.Account = Backbone.Model.extend({
                 this.groupchat_settings.destroy();
                 this.groupchat_settings = undefined;
             }
+            if (this.known_peer_devices){
+                this.known_peer_devices.destroy();
+                this.known_peer_devices = undefined;
+            }
             if (this.chat_settings){
                 this.chat_settings.destroy();
                 this.chat_settings = undefined;
@@ -1501,6 +1505,12 @@ xabber.Account = Backbone.Model.extend({
                         },
                         error: (response) => {
                             console.log(response);
+                            if (response && response.responseJSON
+                                && response.responseJSON.status === '403'
+                                && response.responseJSON.error === 'Quota exceeded'){
+                                this.showSettings(null, 'media-gallery');
+
+                            }
                             callback && callback(response.responseJSON);
                         }
                     });

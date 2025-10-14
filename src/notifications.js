@@ -1159,7 +1159,7 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
         }, 1500);
     },
 
-    readNotifications: function () { //34
+    readNotifications: function () {
         if (!this.isVisible() || !xabber.get('focused'))
             return;
         _.each(this.notifications_chats, (chat_item) => {
@@ -1283,7 +1283,7 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
         }
     },
 
-    readMessage: function (msg_id) { //34
+    readMessage: function (msg_id) {
         let message = this.notification_messages.find(item => item.get('unique_id') === msg_id);
         if (message && message.collection.chat){
             let chat = message.collection.chat;
@@ -1992,7 +1992,7 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
         this.$('.back-to-bottom').hideIf(this.isScrolledToTop());
     },
 
-    handleOnScrollRendering: function (scroll_direction, force_render, msg_amount, exclude_jids) { //34
+    handleOnScrollRendering: function (scroll_direction, force_render, msg_amount, exclude_jids) {
         msg_amount = msg_amount || 5;
         if (!scroll_direction || this._scroll_rendering || !this.isVisible()) {
             return true;

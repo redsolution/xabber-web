@@ -284,7 +284,6 @@ var utils = {
     randomNumberCode: function (length) {
         let result = '',
             characters = '0123456789',
-            // characters = '0',
             charactersLength = characters.length,
             counter = 0;
         while (counter < length) {
@@ -297,19 +296,9 @@ var utils = {
     doCurve: function (priv_key, pub_key) {
         if (!priv_key || !pub_key)
             return;
-        // console.log(priv_key);
-        // console.log(pub_key);
-
-        // a_key = new Uint8Array(a_key);
-        // b_key = new Uint8Array(b_key);
 
         let secret = curve25519js.sharedKeyCurve(new Uint8Array(priv_key), new Uint8Array(pub_key));
 
-        // console.log('Secret secret:')
-        // console.log(secret)
-        // console.log('Secret:', Buffer.from(secret).toString('hex'))
-        // console.log('Secret 2:')
-        // console.log(Buffer.from(secret))
         return Buffer.from(secret);
     },
 
@@ -737,7 +726,7 @@ var utils = {
             else
                 target = target.slice(5);
             if (mention_tag === 'mention'){
-                markup_body[start_idx] = '<' + mention_tag + ' data-target="?jid=' + target + '">' + markup_body[start_idx]; //34
+                markup_body[start_idx] = '<' + mention_tag + ' data-target="?jid=' + target + '">' + markup_body[start_idx];
                 markup_body[end_idx] += '</' + mention_tag + '>';
                 return;
             }

@@ -4378,7 +4378,7 @@ xabber.ParticipantsViewRight = xabber.BasicView.extend({
         return this;
     },
 
-    showParticipantContextMenu: function (ev) { //34
+    showParticipantContextMenu: function (ev) {
         ev.preventDefault();
 
         let modal = utils.dialogs.context_menu(env.templates.base.participant_context_menu),
@@ -6908,6 +6908,44 @@ xabber.CounterChangesLogging = Backbone.ModelWithStorage.extend({
             response_stanza: account && account.get('response_stanza') && account.get('response_stanza').outerHTML,
         });
         this.save('counters_list', counters_list);
+    },
+});
+
+xabber.KnownPeerDevices = Backbone.ModelWithStorage.extend({
+
+    defaults: () => {
+        return {
+            known_peers: {}
+        }
+    },
+
+    checkKnownDevicesList: function (jid, device_ids) {
+        let known_peers = this.get('known_peers');
+
+
+        let is_initially_empty ;
+        if (!known_peers[jid] || !known_peers[jid].length){
+            is_initially_empty = true;
+            known_peers[jid] = [];
+        }
+        let unknown_devices = [];
+        _.each(device_ids, (device_id) => {
+            if (!known_peers[jid].some(item => item.device_id === device_id)){
+                known_peers[jid].push({
+                    device_id: device_id,
+                    date_added: new Date(),
+                });
+                !is_initially_empty && unknown_devices.push(device_id)
+            }
+        });
+
+        if (unknown_devices.length){
+            console.error(device_ids);
+            console.error(known_peers);
+            console.error(unknown_devices);
+        }
+        is_initially_empty || unknown_devices.length || this.save('known_peers', known_peers);
+        return unknown_devices;
     },
 });
 
@@ -10928,7 +10966,7 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
         _.each(accounts, (account) => {
             let contacts = account.contacts.filter(item => (item.get('subscription_request_out') && item.get('subscription') !== 'both'));
             _.each(contacts, (contact) => {
-                let $template = $(env.templates.notifications.outgoing_subscriptions_item({ //34
+                let $template = $(env.templates.notifications.outgoing_subscriptions_item({
                     name: contact.get('name'),
                     jid: contact.get('jid'),
                     account: account.get('jid'),
@@ -12901,6 +12939,11 @@ xabber.Account.addInitPlugin(function () {
     this.counter_changes_logging = new xabber.CounterChangesLogging({id: 'counter-changes'}, {
         account: this,
         storage_name: xabber.getStorageName() + '-counter-changes-' + this.get('jid'),
+        fetch: 'after'
+    });
+    this.known_peer_devices = new xabber.KnownPeerDevices({id: 'known-peer-devices'}, {
+        account: this,
+        storage_name: xabber.getStorageName() + '-known-peer-devices-' + this.get('jid'),
         fetch: 'after'
     });
     this.groups = new xabber.Groups(null, {account: this});
