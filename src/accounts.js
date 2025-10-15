@@ -1508,7 +1508,14 @@ xabber.Account = Backbone.Model.extend({
                             if (response && response.responseJSON
                                 && response.responseJSON.status === '403'
                                 && response.responseJSON.error === 'Quota exceeded'){
-                                this.showSettings(null, 'media-gallery');
+                                utils.dialogs.ask(
+                                    xabber.getString("media_gallery__quota_exceeded_warning_header"),
+                                    xabber.getString("media_gallery__quota_exceeded_warning_text"),
+                                    null, { ok_button_text: xabber.getString("account_open_gallery")}).done((res) => {
+                                    if (res){
+                                        this.showSettings(null, 'media-gallery');
+                                    }
+                                });
 
                             }
                             callback && callback(response.responseJSON);
