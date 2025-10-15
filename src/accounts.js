@@ -1511,7 +1511,7 @@ xabber.Account = Backbone.Model.extend({
                                 utils.dialogs.ask(
                                     xabber.getString("media_gallery__quota_exceeded_warning_header"),
                                     xabber.getString("media_gallery__quota_exceeded_warning_text"),
-                                    null, { ok_button_text: xabber.getString("account_open_gallery")}).done((res) => {
+                                    null, { ok_button_text: xabber.getString("account_manage_cloud_storage")}).done((res) => {
                                     if (res){
                                         this.showSettings(null, 'media-gallery');
                                     }

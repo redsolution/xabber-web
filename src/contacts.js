@@ -3040,7 +3040,7 @@ xabber.GroupChatPropertiesView = xabber.BasicView.extend({
     update: function () {
         let info = this.model.get('group_info') || {};
         this.$('.block-name').text(this.model.get('incognito_group') ? xabber.getString("incognito_group_settings__header") : xabber.getString("public_group_settings__header"));
-        this.$('.jabber-id .value').html(`${Strophe.getNodeFromJid(info.jid)}@<span class="jid-domain-part" title="${xabber.getString("click_to_filter_contacts_by_domain")}">${Strophe.getDomainFromJid(info.jid)}</span>`);
+        this.$('.jabber-id .value').text(info.jid);
         this.$('.name .value').text(info.name);
         this.$('.description .value').text(info.description);
         this.$('.model .value').text(utils.pretty_name(info.model));
@@ -3182,7 +3182,16 @@ xabber.GroupChatPropertiesViewRight = xabber.BasicView.extend({
     update: function () {
         let info = this.model.get('group_info') || {};
         this.$('.block-name').text(this.model.get('incognito_group') ? xabber.getString("incognito_group_settings__header") : xabber.getString("public_group_settings__header"));
-        this.$('.jabber-id .value').html(`${Strophe.getNodeFromJid(info.jid) || Strophe.getNodeFromJid(this.model.get('jid'))}@<span class="jid-domain-part" title="${xabber.getString("click_to_filter_contacts_by_domain")}">${Strophe.getDomainFromJid(info.jid) || Strophe.getDomainFromJid(this.model.get('jid'))}</span>`);
+        let jid_domain_title;
+
+        if (this.model.get('private_chat')){
+            jid_domain_title = xabber.getString("click_to_filter_private_chats_by_domain");
+        } else if (this.model.get('incognito_chat')){
+            jid_domain_title = xabber.getString("click_to_filter_incognito_groupchats_by_domain");
+        } else {
+            jid_domain_title = xabber.getString("click_to_filter_public_groupchats_by_domain");
+        }
+        this.$('.jabber-id .value').html(`${Strophe.getNodeFromJid(info.jid) || Strophe.getNodeFromJid(this.model.get('jid'))}@<span class="jid-domain-part" title="${jid_domain_title}">${Strophe.getDomainFromJid(info.jid) || Strophe.getDomainFromJid(this.model.get('jid'))}</span>`);
         this.$('.name .value').text(info.name);
         this.$('.description .value').text(info.description);
         this.$('.model .value').text(utils.pretty_name(info.model));
@@ -3199,6 +3208,13 @@ xabber.GroupChatPropertiesViewRight = xabber.BasicView.extend({
         if ($(ev.target).closest('.jid-domain-part').length){
             let domain = $(ev.target).closest('.jid-domain-part').text();
             xabber.toolbar_view.showGroupchats();
+            if (this.model.get('private_chat')){
+                xabber.groupchats_view.$('.groupchats-filter-item[data-filter="groupchats-private"]').click();
+            } else if (this.model.get('incognito_chat')) {
+                xabber.groupchats_view.$('.groupchats-filter-item[data-filter="groupchats-incognito"]').click();
+            } else {
+                xabber.groupchats_view.$('.groupchats-filter-item[data-filter="groupchats-public"]').click();
+            }
             xabber.groupchats_view.filterByDomain(null, domain);
             return;
         }
