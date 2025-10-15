@@ -77,12 +77,12 @@
         </div>
     </div>
     <div class="vcard-wrap vcard">
-        {[if (jid) {]}
+        {[if (visible_jid) {]}
         <div class="info-wrap jid-info-wrap" title='{[print(xabber.getString("group_settings__properties__tooltip_copy_by_click"))]}'>
             <div class="details-icon-wrap"><svg class="details-icon mdi mdi-24px mdi-svg-template" data-svgname="id-outline"></svg></div>
             <div class="info-hover">
                 <div class="info jabber-id">
-                    <div class="value one-line">{{jid}}</div>
+                    <div class="value one-line">{{visible_jid}}</div>
                     <div class="label">{[print(xabber.getString("vcard_jabber_id"))]}</div>
                 </div>
             </div>

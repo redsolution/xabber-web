@@ -20612,6 +20612,12 @@ input[type=range].voice-message-volume:focus {
 .details-panel-right.contact-details-panel .vcard .info-hover {
     width: 100%;
 }
+.jid-domain-part{
+    pointer-events: auto;
+}
+.jid-domain-part:hover{
+    text-decoration: underline;
+}
 .details-panel-right.contact-details-panel .vcard .show-vcard {
     padding: 6px 0 6px 72px;
     cursor: pointer;

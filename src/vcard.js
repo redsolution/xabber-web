@@ -221,7 +221,7 @@ xabber.VCardView = xabber.BasicView.extend({
         let $info, vcard = this.model.get('vcard');
 
         $info = this.$('.jid-info-wrap');
-        $info.find('.jabber-id').showIf(vcard.jabber_id).find('.value').text(vcard.jabber_id);
+        $info.find('.jabber-id').showIf(vcard.jabber_id).find('.value').html(`${Strophe.getNodeFromJid(vcard.jabber_id)}@<span class="jid-domain-part" title="${xabber.getString("click_to_filter_contacts_by_domain")}">${Strophe.getDomainFromJid(vcard.jabber_id)}</span>`);
         $info.showIf(vcard.jabber_id);
 
         $info = this.$('.personal-info-wrap');
@@ -359,7 +359,7 @@ xabber.VCardRightView = xabber.VCardView.extend({
         let $info, vcard = this.model.get('vcard');
 
         $info = this.$('.jid-info-wrap');
-        $info.find('.jabber-id').showIf(vcard.jabber_id).find('.value').text(vcard.jabber_id);
+        $info.find('.jabber-id').showIf(vcard.jabber_id).find('.value').html(`${Strophe.getNodeFromJid(vcard.jabber_id)}@<span class="jid-domain-part" title="${xabber.getString("click_to_filter_contacts_by_domain")}">${Strophe.getDomainFromJid(vcard.jabber_id)}</span>`);
         $info.showIf(vcard.jabber_id);
 
         $info = this.$('.vcard-wrap .personal-info-wrap');
@@ -456,6 +456,12 @@ xabber.VCardRightView = xabber.VCardView.extend({
     },
 
     onClickIcon: function (ev) {
+        if ($(ev.target).closest('.jid-domain-part').length){
+            let domain = $(ev.target).closest('.jid-domain-part').text();
+            xabber.toolbar_view.showContacts();
+            xabber.contacts_view.filterByDomain(null, domain);
+            return;
+        }
         let $target_info = $(ev.target),
             $target_value = $target_info.find('.value'), copied_text = "";
         $target_value.each((idx, item) => {

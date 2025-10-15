@@ -3040,7 +3040,7 @@ xabber.GroupChatPropertiesView = xabber.BasicView.extend({
     update: function () {
         let info = this.model.get('group_info') || {};
         this.$('.block-name').text(this.model.get('incognito_group') ? xabber.getString("incognito_group_settings__header") : xabber.getString("public_group_settings__header"));
-        this.$('.jabber-id .value').text(info.jid);
+        this.$('.jabber-id .value').html(`${Strophe.getNodeFromJid(info.jid)}@<span class="jid-domain-part" title="${xabber.getString("click_to_filter_contacts_by_domain")}">${Strophe.getDomainFromJid(info.jid)}</span>`);
         this.$('.name .value').text(info.name);
         this.$('.description .value').text(info.description);
         this.$('.model .value').text(utils.pretty_name(info.model));
@@ -3182,7 +3182,7 @@ xabber.GroupChatPropertiesViewRight = xabber.BasicView.extend({
     update: function () {
         let info = this.model.get('group_info') || {};
         this.$('.block-name').text(this.model.get('incognito_group') ? xabber.getString("incognito_group_settings__header") : xabber.getString("public_group_settings__header"));
-        this.$('.jabber-id .value').text(info.jid || this.model.get('jid'));
+        this.$('.jabber-id .value').html(`${Strophe.getNodeFromJid(info.jid) || Strophe.getNodeFromJid(this.model.get('jid'))}@<span class="jid-domain-part" title="${xabber.getString("click_to_filter_contacts_by_domain")}">${Strophe.getDomainFromJid(info.jid) || Strophe.getDomainFromJid(this.model.get('jid'))}</span>`);
         this.$('.name .value').text(info.name);
         this.$('.description .value').text(info.description);
         this.$('.model .value').text(utils.pretty_name(info.model));
@@ -3196,6 +3196,12 @@ xabber.GroupChatPropertiesViewRight = xabber.BasicView.extend({
     },
 
     onClickIcon: function (ev) {
+        if ($(ev.target).closest('.jid-domain-part').length){
+            let domain = $(ev.target).closest('.jid-domain-part').text();
+            xabber.toolbar_view.showGroupchats();
+            xabber.groupchats_view.filterByDomain(null, domain);
+            return;
+        }
         let $target_info = $(ev.target),
             $target_value = $target_info.find('.value'), copied_text = "";
         $target_value.each((idx, item) => {
@@ -5263,6 +5269,8 @@ xabber.ParticipantPropertiesViewRight = xabber.BasicView.extend({
         attrs.is_myself = attrs.jid === this.account.get('jid');
         attrs.is_blocked_contact = this.account.blocklist.isBlocked(attrs.jid);
         attrs.incognito_chat = !!(this.contact.get('group_info') && this.contact.get('group_info').privacy === 'incognito');
+        attrs.visible_jid = '';
+        attrs.jid && (attrs.visible_jid = `${Strophe.getNodeFromJid(attrs.jid)}@<span class="jid-domain-part" title="${xabber.getString("click_to_filter_contacts_by_domain")}">${Strophe.getDomainFromJid(attrs.jid)}</span>`);
         let $member_info_view;
         if (this.contact.get('private_chat')) {
             this.$el.addClass('edit-rights-private');
@@ -5436,6 +5444,12 @@ xabber.ParticipantPropertiesViewRight = xabber.BasicView.extend({
     },
 
     onClickIcon: function (ev) {
+        if ($(ev.target).closest('.jid-domain-part').length){
+            let domain = $(ev.target).closest('.jid-domain-part').text();
+            xabber.toolbar_view.showContacts();
+            xabber.contacts_view.filterByDomain(null, domain);
+            return;
+        }
         let $target_info = $(ev.target),
             $target_value = $target_info.find('.value'), copied_text = "";
         $target_value.each((idx, item) => {
@@ -11557,14 +11571,18 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
         this.processUpdateContacts(true, true);
     },
 
-    filterByDomain: function (ev) {
-        if ($(ev.target).closest('.contact-item-list').length)
-            return;
-        let $item = $(ev.target).closest('.contact-domain'),
+    filterByDomain: function (ev, forced_domain) {
+        let filter_domain;
+
+        if (ev && $(ev.target).closest('.contact-item-list').length){
+            let $item = $(ev.target).closest('.contact-domain');
             filter_domain = $item.attr('data-domain');
 
-
-        if (!filter_domain)
+            if (!filter_domain)
+                return;
+        } else if (forced_domain) {
+            filter_domain = forced_domain;
+        } else
             return;
 
         this.$(`.tab-active-filters-wrap .tab-filter-item[data-type="domain"]`).remove();
