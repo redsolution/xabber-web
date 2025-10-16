@@ -6971,9 +6971,6 @@ input[type=text].simple-input-field:hover {
 .notifications-content-filters .search-form .search-input,
 .contacts-panel-wrap .contacts-search-form .search-input{
 }
-.recent-chats-panel .search-form .search-input{
-    padding: 0 60px 0 82px !important;
-}
 .calls-content-filters .search-form .close-search-icon,
 .notifications-content-filters .search-form .close-search-icon,
 .contacts-panel-wrap .contacts-search-form .close-search-icon{
@@ -9502,8 +9499,45 @@ input[type=text].simple-input-field:hover {
 .chats-search-form {
      height: 64px;
 }
+.recent-chats-panel .search-form .search-input{
+    padding: 0 40px 0 56px !important;
+}
+.recent-chats-panel .chats-search-form {
+    position: sticky !important;
+    top: 0;
+    background: rgba(255, 255, 255, 0.655);
+    backdrop-filter: blur(4px);
+    box-shadow: inset 2px 2px 1px 0 rgba(255, 255, 255, 0.3), inset -2px -2px 2px 1px rgba(255, 255, 255, 0.3), 0 1px 3px 0 rgba(0, 0, 0, 0.2), 0 1px 2px 0 rgba(0, 0, 0, 0.1);
+}
+.recent-chats-search-active .btn-unread,
+.recent-chats-search-active .recent-chats-main-header,
+.recent-chats-search-active .btn-back-to-chats {
+    display: none;
+}
+.recent-chats-search-active .recent-chats-panel {
+    padding-top: 8px;
+}
+.recent-chats-panel .recent-chats-main-header {
+    position: sticky;
+    top: 0;
+    width: 100%;
+    background: rgba(255, 255, 255, 0.655);
+    backdrop-filter: blur(4px);
+    box-shadow: inset 2px 2px 1px 0 rgba(255, 255, 255, 0.3), inset -2px -2px 2px 1px rgba(255, 255, 255, 0.3), 0 1px 3px 0 rgba(0, 0, 0, 0.02), 0 1px 2px 0 rgba(0, 0, 0, 0.01);
+    z-index: 50;
+}
+.recent-chats-panel .btn-unread,
+.recent-chats-panel .btn-back-to-chats{
+    z-index:60 !important;
+}
+.recent-chats-panel .ps-scrollbar-y-rail{
+    z-index: 61 !important;
+}
+.recent-chats-panel .chat-list-wrap{
+    padding-top: 69px !important;
+}
 .recent-chats-panel .chats-search-form.search-form .search-icon {
-    left: 28px !important;
+    left: 16px !important;
     color: #9E9E9E;
     /*display: none;*/
 }
@@ -23098,10 +23132,11 @@ input[type=range].voice-message-volume:focus {
     color: #9e9e9e;
     cursor: pointer;
     font-size: 14px;
-    padding: 12px 8px;
+    padding: 4px 8px 4px;
     text-decoration-line: underline;
     text-decoration-style: dotted;
     text-underline-offset: 2px;
+    text-align: center;
 }
 .left-panel-wrap .left-panel-list-wrap .messages-title{
     position: sticky;

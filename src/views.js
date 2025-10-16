@@ -670,6 +670,7 @@ xabber.SearchView = xabber.BasicView.extend({
           });
           this.$('.chats-list-wrap').switchClass('hidden', !this.$('.chats-list').children('.list-item:not(.hidden2):not(.hidden3)').length);
           this.$('.pinned-chat-list').switchClass('hidden', query);
+          this.$el.switchClass('recent-chats-search-active', query);
           this.$('.chats-list').children('.list-item:not(.hidden2):not(.hidden3)').length && this.$('.chats-list').children('.list-item:not(.hidden2):not(.hidden3)').slice(4).addClass('hidden');
           this.$('.chats-show-more').showIf(this.$('.chats-list').children('.list-item:not(.hidden2):not(.hidden3)').length > 4);
           this.$('.chats-show-more').text(xabber.getString("search__chats_show_more", [this.$('.chats-list').children('.list-item:not(.hidden2):not(.hidden3)').length]));
@@ -825,6 +826,7 @@ xabber.SearchView = xabber.BasicView.extend({
           this.$(this.main_container).removeClass('hidden');
           this.$('.chats-list-wrap').addClass('hidden');
           this.$('.pinned-chat-list').removeClass('hidden');
+          this.$el.removeClass('recent-chats-search-active');
           this.$('.contacts-list-wrap').addClass('hidden');
           this.$('.messages-list-wrap').addClass('hidden');
       }
