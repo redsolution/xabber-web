@@ -9518,7 +9518,7 @@ input[type=text].simple-input-field:hover {
     padding-top: 8px;
 }
 .recent-chats-panel .recent-chats-main-header {
-    position: sticky;
+    position: absolute;
     top: 0;
     width: 100%;
     background: rgba(255, 255, 255, 0.655);
