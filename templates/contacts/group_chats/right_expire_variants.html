@@ -3,8 +3,13 @@
         <div class="timer-item-wrap"><div data-value="0" class="default-value property-value">{[print(xabber.getString("dialog_rights__button_set_timer"))]}</div></div>
     </div>
     <div id="select-timer-{{right_name}}" class="dropdown-content unified-dropdown-style noselect">
-        {[expire_options.forEach(function (option) {]}
-        <div data-value="{{option.value}}" class="property-variant">{{option.label}}</div>
-        {[}.bind(this));]}
+        <div data-value="300" class="property-variant">5 minutes</div>
+        <div data-value="600" class="property-variant">10 minutes</div>
+        <div data-value="900" class="property-variant">15 minutes</div>
+        <div data-value="1800" class="property-variant">30 minutes</div>
+        <div data-value="3600" class="property-variant">1 hour</div>
+        <div data-value="604800" class="property-variant">1 week</div>
+        <div data-value="2592000" class="property-variant">1 month</div>
+        <div data-value="0" class="property-variant">Forever</div>
     </div>
 </div>

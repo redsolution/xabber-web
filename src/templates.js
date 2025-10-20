@@ -175,6 +175,7 @@ import $ from "jquery";
     addTemplate('contacts.group_chats.group_chat_properties_edit');
     addTemplate('contacts.group_chats.default_restrictions');
     addTemplate('contacts.group_chats.default_restrictions_right');
+    addTemplate('contacts.group_chats.newbie_permissions_right');
     addTemplate('contacts.group_chats.group_member_item');
     addTemplate('contacts.group_chats.group_member_item_right');
     addTemplate('contacts.group_chats.description_input_widget');

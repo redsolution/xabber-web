@@ -663,6 +663,37 @@ var utils = {
         return text;
     },
 
+    pretty_duration_permission_timer_long: function (timer) {
+        let text = '';
+        switch (timer) {
+            case '300':
+                text = '5 minutes';
+                break;
+            case '600':
+                text = '10 minutes';
+                break;
+            case '900':
+                text = '15 minutes';
+                break;
+            case '1800':
+                text = '30 minutes';
+                break;
+            case '3600':
+                text = '1 hour';
+                break;
+            case '604800':
+                text = '1 week';
+                break;
+            case '2592000':
+                text = '1 month';
+                break;
+            default:
+                text = '';
+                break;
+        }
+        return text;
+    },
+
     pretty_name: function (name) {
         return name ? (name[0].toUpperCase() + name.replace(/-/,' ').substr(1).toLowerCase()) : "";
     },

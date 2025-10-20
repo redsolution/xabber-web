@@ -18984,6 +18984,7 @@ input[type=range].voice-message-volume:focus {
 
 .details-panel-right .participant-view-wrap,
 .details-panel-right .restrictions-block-wrap,
+.details-panel-right .newbie-permissions-block-wrap,
 .details-panel-right .edit-group-wrap,
 .details-panel-right .qr-code-wrap,
 .details-panel-right .edit-block-wrap {
@@ -18993,6 +18994,7 @@ input[type=range].voice-message-volume:focus {
 .details-panel-right .description-edit-wrap,
 .details-panel-right .membership-property-edit-wrap,
 .details-panel-right .index-property-edit-wrap,
+.details-panel-right .newbie-permissions-wrap,
 .details-panel-right .restrictions-wrap {
     width: inherit;
     height: 100%;
@@ -19003,6 +19005,7 @@ input[type=range].voice-message-volume:focus {
     padding: 0;
 }
 
+.details-panel-right .newbie-permissions-wrap .block-header,
 .details-panel-right .restrictions-wrap .block-header {
     display: block;
     position: fixed;
@@ -19011,6 +19014,7 @@ input[type=range].voice-message-volume:focus {
     width: inherit;
 }
 
+.details-panel-right .newbie-permissions-wrap .block-header .block-name ,
 .details-panel-right .restrictions-wrap .block-header .block-name {
     position: absolute;
     transition: opacity 0.1s ease-in;
@@ -19018,6 +19022,7 @@ input[type=range].voice-message-volume:focus {
     left: 72px;
 }
 
+.details-panel-right .newbie-permissions-wrap .block-header .details-icon,
 .details-panel-right .restrictions-wrap .block-header .details-icon {
     left: 20px;
     top: 20px !important;
@@ -19025,12 +19030,14 @@ input[type=range].voice-message-volume:focus {
 }
 
 .details-panel-right .participant-details-wrap .restrictions-content,
+.details-panel-right .newbie-permissions-wrap .restrictions-content,
 .details-panel-right .restrictions-wrap .restrictions-content {
     margin-top: 64px;
     width: 100% !important;
 }
 
 .details-panel-right .participant-details-wrap .right-item,
+.details-panel-right .newbie-permissions-wrap .right-item,
 .details-panel-right .restrictions-wrap .right-item {
     height: unset;
     padding: 6px 24px 3px 27px;
@@ -19038,6 +19045,7 @@ input[type=range].voice-message-volume:focus {
 }
 
 .details-panel-right .participant-details-wrap .right-item .clickable-field,
+.details-panel-right .newbie-permissions-wrap .right-item .clickable-field,
 .details-panel-right .restrictions-wrap .right-item .clickable-field {
     display: inline-block;
     float: left;
@@ -19045,8 +19053,12 @@ input[type=range].voice-message-volume:focus {
     width: 18px;
     margin: 0;
 }
+.details-panel-right .newbie-permissions-wrap .right-item .clickable-field.default-permission-placeholder{
+    opacity: 0.5;
+}
 
 .details-panel-right .participant-details-wrap .right-item .select-timer,
+.details-panel-right .newbie-permissions-wrap .right-item .select-timer,
 .details-panel-right .restrictions-wrap .right-item .select-timer {
     margin: 0;
     height: 20px;
@@ -19060,12 +19072,14 @@ input[type=range].voice-message-volume:focus {
 }
 
 .details-panel-right .participant-details-wrap .right-item .select-timer .dropdown-content:not(.unified-dropdown-style),
+.details-panel-right .newbie-permissions-wrap .right-item .select-timer .dropdown-content:not(.unified-dropdown-style),
 .details-panel-right .restrictions-wrap .right-item .select-timer .dropdown-content:not(.unified-dropdown-style){
     left: unset !important;
     right: 0px;
 }
 
 .details-panel-right .participant-details-wrap .right-item .right-name,
+.details-panel-right .newbie-permissions-wrap .right-item .right-name,
 .details-panel-right .restrictions-wrap .right-item .right-name {
     margin: 0 0 0 27px;
     font-size: 16px;
@@ -19082,6 +19096,7 @@ input[type=range].voice-message-volume:focus {
     color: rgba(0,0,0,0.87);
 }
 
+.details-panel-right .newbie-permissions-wrap .default-restrictions-info,
 .details-panel-right .restrictions-wrap .default-restrictions-info {
     color: rgba(0,0,0,0.54);
     font-family: Roboto;
@@ -19260,6 +19275,7 @@ input[type=range].voice-message-volume:focus {
 
 .details-panel-right .edit-wrap .edit-bottom-block .btn-remove-selected,
 .details-panel-right .edit-wrap .block-header .btn-save,
+.details-panel-right .newbie-permissions-wrap .block-header .btn-default-restrictions-save,
 .details-panel-right .restrictions-wrap .block-header .btn-default-restrictions-save {
     position: absolute;
     opacity: 0;
@@ -19269,6 +19285,7 @@ input[type=range].voice-message-volume:focus {
 }
 
 .details-panel-right .edit-wrap .edit-bottom-block .btn-remove-selected:not(.fade-out),
+.details-panel-right .newbie-permissions-wrap .block-header .btn-default-restrictions-save:not(.fade-out),
 .details-panel-right .restrictions-wrap .block-header .btn-default-restrictions-save:not(.fade-out),
 .details-panel-right .edit-wrap .block-header .btn-save:not(.fade-out) {
     opacity: 1;
