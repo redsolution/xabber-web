@@ -3484,8 +3484,9 @@ xabber.DeleteFilesFromGalleryView = xabber.BasicView.extend({
             response.items.forEach((item) => {
                 item.thumbnail && item.thumbnail.url && (item.thumbnail = item.thumbnail.url);
                 item.is_avatar = Boolean(item.context === 'avatar');
-                let duration;
+                let duration, peaks = '';
                 item.metadata && item.metadata.duration && (duration = utils.pretty_duration(item.metadata.duration));
+                item.metadata && item.metadata.meters && (peaks = item.metadata.meters);
                 let $gallery_file = $(templates.media_gallery_account_file({
                     file: item,
                     svg_icon: utils.file_type_icon_svg(item.media_type),
@@ -3493,6 +3494,7 @@ xabber.DeleteFilesFromGalleryView = xabber.BasicView.extend({
                     created_at: utils.pretty_date(item.created_at),
                     duration: duration,
                     download_only: true,
+                    peaks: peaks,
                 }));
                 if (!item.is_avatar){
                     this.has_files = true;

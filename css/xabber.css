@@ -1797,6 +1797,7 @@ body {
 [data-main-color=red] .chat-item.active .status {
     border-color: #ffebee;
 }
+[data-main-color=red] .details-panel-right .newbie-permissions-wrap .right-item .clickable-field:not(.default-permission-placeholder) .lever,
 [data-main-color=red] .switch label input[type=checkbox]:checked + .lever {
     background-color: #E57373;
 }
@@ -1806,6 +1807,7 @@ body {
 [data-main-color=red] .details-panel .buttons-wrap.sticky-details-wrap .btn-leave,
 [data-main-color=red] .details-panel .buttons-wrap.sticky-details-wrap i,
 [data-main-color=red] .settings-block-wrap input[type=range] + .thumb,
+[data-main-color=red] .details-panel-right .newbie-permissions-wrap .right-item .clickable-field:not(.default-permission-placeholder) .lever:after,
 [data-main-color=red] .switch label input[type=checkbox]:checked + .lever:after,
 [data-main-color=red] .btn-main-filled,
 [data-main-color=red] .toolbar .active .border {
@@ -1914,6 +1916,7 @@ body {
 [data-main-color=pink] .chat-item.active .status {
     border-color: #FCE4EC;
 }
+[data-main-color=pink] .details-panel-right .newbie-permissions-wrap .right-item .clickable-field:not(.default-permission-placeholder) .lever,
 [data-main-color=pink] .switch label input[type=checkbox]:checked + .lever {
     background-color: #F06292;
 }
@@ -1923,6 +1926,7 @@ body {
 [data-main-color=pink] .details-panel .buttons-wrap.sticky-details-wrap .btn-leave,
 [data-main-color=pink] .details-panel .buttons-wrap.sticky-details-wrap i,
 [data-main-color=pink] .settings-block-wrap input[type=range] + .thumb,
+[data-main-color=pink] .details-panel-right .newbie-permissions-wrap .right-item .clickable-field:not(.default-permission-placeholder) .lever:after,
 [data-main-color=pink] .switch label input[type=checkbox]:checked + .lever:after,
 [data-main-color=pink] .btn-main-filled,
 [data-main-color=pink] .toolbar .active .border {
@@ -2030,6 +2034,7 @@ body {
 [data-main-color=purple] .chat-item.active .status {
     border-color: #F3E5F5;
 }
+[data-main-color=purple] .details-panel-right .newbie-permissions-wrap .right-item .clickable-field:not(.default-permission-placeholder) .lever,
 [data-main-color=purple] .switch label input[type=checkbox]:checked + .lever {
     background-color: #BA68C8;
 }
@@ -2039,6 +2044,7 @@ body {
 [data-main-color=purple] .details-panel .buttons-wrap.sticky-details-wrap .btn-leave,
 [data-main-color=purple] .details-panel .buttons-wrap.sticky-details-wrap i,
 [data-main-color=purple] .settings-block-wrap input[type=range] + .thumb,
+[data-main-color=purple] .details-panel-right .newbie-permissions-wrap .right-item .clickable-field:not(.default-permission-placeholder) .lever:after,
 [data-main-color=purple] .switch label input[type=checkbox]:checked + .lever:after,
 [data-main-color=purple] .btn-main-filled,
 [data-main-color=purple] .toolbar .active .border {
@@ -2146,6 +2152,7 @@ body {
 [data-main-color=deep-purple] .chat-item.active .status {
     border-color: #EDE7F6;
 }
+[data-main-color=deep-purple] .details-panel-right .newbie-permissions-wrap .right-item .clickable-field:not(.default-permission-placeholder) .lever,
 [data-main-color=deep-purple] .switch label input[type=checkbox]:checked + .lever {
     background-color: #9575CD;
 }
@@ -2155,6 +2162,7 @@ body {
 [data-main-color=deep-purple] .details-panel .buttons-wrap.sticky-details-wrap .btn-leave,
 [data-main-color=deep-purple] .details-panel .buttons-wrap.sticky-details-wrap i,
 [data-main-color=deep-purple] .settings-block-wrap input[type=range] + .thumb,
+[data-main-color=deep-purple] .details-panel-right .newbie-permissions-wrap .right-item .clickable-field:not(.default-permission-placeholder) .lever:after,
 [data-main-color=deep-purple] .switch label input[type=checkbox]:checked + .lever:after,
 [data-main-color=deep-purple] .btn-main-filled,
 [data-main-color=deep-purple] .toolbar .active .border {
@@ -2261,6 +2269,7 @@ body {
 [data-main-color=indigo] .chat-item.active .status {
     border-color: #E8EAF6;
 }
+[data-main-color=indigo] .details-panel-right .newbie-permissions-wrap .right-item .clickable-field:not(.default-permission-placeholder) .lever,
 [data-main-color=indigo] .switch label input[type=checkbox]:checked + .lever {
     background-color: #7986CB;
 }
@@ -2270,6 +2279,7 @@ body {
 [data-main-color=indigo] .details-panel .buttons-wrap.sticky-details-wrap .btn-leave,
 [data-main-color=indigo] .details-panel .buttons-wrap.sticky-details-wrap i,
 [data-main-color=indigo] .settings-block-wrap input[type=range] + .thumb,
+[data-main-color=indigo] .details-panel-right .newbie-permissions-wrap .right-item .clickable-field:not(.default-permission-placeholder) .lever:after,
 [data-main-color=indigo] .switch label input[type=checkbox]:checked + .lever:after,
 [data-main-color=indigo] .btn-main-filled,
 [data-main-color=indigo] .toolbar .active .border {
@@ -2377,6 +2387,7 @@ body {
 [data-main-color=blue] .chat-item.active .status {
     border-color: #E3F2FD;
 }
+[data-main-color=blue] .details-panel-right .newbie-permissions-wrap .right-item .clickable-field:not(.default-permission-placeholder) .lever,
 [data-main-color=blue] .switch label input[type=checkbox]:checked + .lever {
     background-color: #64B5F6;
 }
@@ -2386,6 +2397,7 @@ body {
 [data-main-color=blue] .details-panel .buttons-wrap.sticky-details-wrap .btn-leave,
 [data-main-color=blue] .details-panel .buttons-wrap.sticky-details-wrap i,
 [data-main-color=blue] .settings-block-wrap input[type=range] + .thumb,
+[data-main-color=blue] .details-panel-right .newbie-permissions-wrap .right-item .clickable-field:not(.default-permission-placeholder) .lever:after,
 [data-main-color=blue] .switch label input[type=checkbox]:checked + .lever:after,
 [data-main-color=blue] .btn-main-filled,
 [data-main-color=blue] .toolbar .active .border {
@@ -2493,6 +2505,7 @@ body {
 [data-main-color=light-blue] .chat-item.active .status {
     border-color: #E1F5FE;
 }
+[data-main-color=light-blue] .details-panel-right .newbie-permissions-wrap .right-item .clickable-field:not(.default-permission-placeholder) .lever,
 [data-main-color=light-blue] .switch label input[type=checkbox]:checked + .lever {
     background-color: #4FC3F7;
 }
@@ -2502,6 +2515,7 @@ body {
 [data-main-color=light-blue] .details-panel .buttons-wrap.sticky-details-wrap .btn-leave,
 [data-main-color=light-blue] .details-panel .buttons-wrap.sticky-details-wrap i,
 [data-main-color=light-blue] .settings-block-wrap input[type=range] + .thumb,
+[data-main-color=light-blue] .details-panel-right .newbie-permissions-wrap .right-item .clickable-field:not(.default-permission-placeholder) .lever:after,
 [data-main-color=light-blue] .switch label input[type=checkbox]:checked + .lever:after,
 [data-main-color=light-blue] .btn-main-filled,
 [data-main-color=light-blue] .toolbar .active .border {
@@ -2609,6 +2623,7 @@ body {
 [data-main-color=cyan] .chat-item.active .status {
     border-color: #E0F7FA;
 }
+[data-main-color=cyan] .details-panel-right .newbie-permissions-wrap .right-item .clickable-field:not(.default-permission-placeholder) .lever,
 [data-main-color=cyan] .switch label input[type=checkbox]:checked + .lever {
     background-color: #4DD0E1;
 }
@@ -2618,6 +2633,7 @@ body {
 [data-main-color=cyan] .details-panel .buttons-wrap.sticky-details-wrap .btn-leave,
 [data-main-color=cyan] .details-panel .buttons-wrap.sticky-details-wrap i,
 [data-main-color=cyan] .settings-block-wrap input[type=range] + .thumb,
+[data-main-color=cyan] .details-panel-right .newbie-permissions-wrap .right-item .clickable-field:not(.default-permission-placeholder) .lever:after,
 [data-main-color=cyan] .switch label input[type=checkbox]:checked + .lever:after,
 [data-main-color=cyan] .btn-main-filled,
 [data-main-color=cyan] .toolbar .active .border {
@@ -2725,6 +2741,7 @@ body {
 [data-main-color=teal] .chat-item.active .status {
     border-color: #E0F2F1;
 }
+[data-main-color=teal] .details-panel-right .newbie-permissions-wrap .right-item .clickable-field:not(.default-permission-placeholder) .lever,
 [data-main-color=teal] .switch label input[type=checkbox]:checked + .lever {
     background-color: #4DB6AC;
 }
@@ -2734,6 +2751,7 @@ body {
 [data-main-color=teal] .details-panel .buttons-wrap.sticky-details-wrap .btn-leave,
 [data-main-color=teal] .details-panel .buttons-wrap.sticky-details-wrap i,
 [data-main-color=teal] .settings-block-wrap input[type=range] + .thumb,
+[data-main-color=teal] .details-panel-right .newbie-permissions-wrap .right-item .clickable-field:not(.default-permission-placeholder) .lever:after,
 [data-main-color=teal] .switch label input[type=checkbox]:checked + .lever:after,
 [data-main-color=teal] .btn-main-filled,
 [data-main-color=teal] .toolbar .active .border {
@@ -2841,6 +2859,7 @@ body {
 [data-main-color=green] .chat-item.active .status {
     border-color: #E8F5E9;
 }
+[data-main-color=green] .details-panel-right .newbie-permissions-wrap .right-item .clickable-field:not(.default-permission-placeholder) .lever,
 [data-main-color=green] .switch label input[type=checkbox]:checked + .lever {
     background-color: #81C784;
 }
@@ -2850,6 +2869,7 @@ body {
 [data-main-color=green] .details-panel .buttons-wrap.sticky-details-wrap .btn-leave,
 [data-main-color=green] .details-panel .buttons-wrap.sticky-details-wrap i,
 [data-main-color=green] .settings-block-wrap input[type=range] + .thumb,
+[data-main-color=green] .details-panel-right .newbie-permissions-wrap .right-item .clickable-field:not(.default-permission-placeholder) .lever:after,
 [data-main-color=green] .switch label input[type=checkbox]:checked + .lever:after,
 [data-main-color=green] .btn-main-filled,
 [data-main-color=green] .toolbar .active .border {
@@ -2957,6 +2977,7 @@ body {
 [data-main-color=light-green] .chat-item.active .status {
     border-color: #F1F8E9;
 }
+[data-main-color=light-green] .details-panel-right .newbie-permissions-wrap .right-item .clickable-field:not(.default-permission-placeholder) .lever,
 [data-main-color=light-green] .switch label input[type=checkbox]:checked + .lever {
     background-color: #AED581;
 }
@@ -2966,6 +2987,7 @@ body {
 [data-main-color=light-green] .details-panel .buttons-wrap.sticky-details-wrap .btn-leave,
 [data-main-color=light-green] .details-panel .buttons-wrap.sticky-details-wrap i,
 [data-main-color=light-green] .settings-block-wrap input[type=range] + .thumb,
+[data-main-color=light-green] .details-panel-right .newbie-permissions-wrap .right-item .clickable-field:not(.default-permission-placeholder) .lever:after,
 [data-main-color=light-green] .switch label input[type=checkbox]:checked + .lever:after,
 [data-main-color=light-green] .btn-main-filled,
 [data-main-color=light-green] .toolbar .active .border {
@@ -3073,6 +3095,7 @@ body {
 [data-main-color=lime] .chat-item.active .status {
     border-color: #F9FBE7;
 }
+[data-main-color=lime] .details-panel-right .newbie-permissions-wrap .right-item .clickable-field:not(.default-permission-placeholder) .lever,
 [data-main-color=lime] .switch label input[type=checkbox]:checked + .lever {
     background-color: #DCE775;
 }
@@ -3082,6 +3105,7 @@ body {
 [data-main-color=lime] .details-panel .buttons-wrap.sticky-details-wrap .btn-leave,
 [data-main-color=lime] .details-panel .buttons-wrap.sticky-details-wrap i,
 [data-main-color=lime] .settings-block-wrap input[type=range] + .thumb,
+[data-main-color=lime] .details-panel-right .newbie-permissions-wrap .right-item .clickable-field:not(.default-permission-placeholder) .lever:after,
 [data-main-color=lime] .switch label input[type=checkbox]:checked + .lever:after,
 [data-main-color=lime] .btn-main-filled,
 [data-main-color=lime] .toolbar .active .border {
@@ -3189,6 +3213,7 @@ body {
 [data-main-color=amber] .chat-item.active .status {
     border-color: #FFF8E1;
 }
+[data-main-color=amber] .details-panel-right .newbie-permissions-wrap .right-item .clickable-field:not(.default-permission-placeholder) .lever,
 [data-main-color=amber] .switch label input[type=checkbox]:checked + .lever {
     background-color: #FFD54F;
 }
@@ -3198,6 +3223,7 @@ body {
 [data-main-color=amber] .details-panel .buttons-wrap.sticky-details-wrap .btn-leave,
 [data-main-color=amber] .details-panel .buttons-wrap.sticky-details-wrap i,
 [data-main-color=amber] .settings-block-wrap input[type=range] + .thumb,
+[data-main-color=amber] .details-panel-right .newbie-permissions-wrap .right-item .clickable-field:not(.default-permission-placeholder) .lever:after,
 [data-main-color=amber] .switch label input[type=checkbox]:checked + .lever:after,
 [data-main-color=amber] .btn-main-filled,
 [data-main-color=amber] .toolbar .active .border {
@@ -3305,6 +3331,7 @@ body {
 [data-main-color=orange] .chat-item.active .status {
     border-color: #FFF3E0;
 }
+[data-main-color=orange] .details-panel-right .newbie-permissions-wrap .right-item .clickable-field:not(.default-permission-placeholder) .lever,
 [data-main-color=orange] .switch label input[type=checkbox]:checked + .lever {
     background-color: #FFB74D;
 }
@@ -3314,6 +3341,7 @@ body {
 [data-main-color=orange] .details-panel .buttons-wrap.sticky-details-wrap .btn-leave,
 [data-main-color=orange] .details-panel .buttons-wrap.sticky-details-wrap i,
 [data-main-color=orange] .settings-block-wrap input[type=range] + .thumb,
+[data-main-color=orange] .details-panel-right .newbie-permissions-wrap .right-item .clickable-field:not(.default-permission-placeholder) .lever:after,
 [data-main-color=orange] .switch label input[type=checkbox]:checked + .lever:after,
 [data-main-color=orange] .btn-main-filled,
 [data-main-color=orange] .toolbar .active .border {
@@ -3421,6 +3449,7 @@ body {
 [data-main-color=deep-orange] .chat-item.active .status {
     border-color: #FBE9E7;
 }
+[data-main-color=deep-orange] .details-panel-right .newbie-permissions-wrap .right-item .clickable-field:not(.default-permission-placeholder) .lever,
 [data-main-color=deep-orange] .switch label input[type=checkbox]:checked + .lever {
     background-color: #FF8A65;
 }
@@ -3430,6 +3459,7 @@ body {
 [data-main-color=deep-orange] .details-panel .buttons-wrap.sticky-details-wrap .btn-leave,
 [data-main-color=deep-orange] .details-panel .buttons-wrap.sticky-details-wrap i,
 [data-main-color=deep-orange] .settings-block-wrap input[type=range] + .thumb,
+[data-main-color=deep-orange] .details-panel-right .newbie-permissions-wrap .right-item .clickable-field:not(.default-permission-placeholder) .lever:after,
 [data-main-color=deep-orange] .switch label input[type=checkbox]:checked + .lever:after,
 [data-main-color=deep-orange] .btn-main-filled,
 [data-main-color=deep-orange] .toolbar .active .border {
@@ -3537,6 +3567,7 @@ body {
 [data-main-color=brown] .chat-item.active .status {
     border-color: #EFEBE9;
 }
+[data-main-color=brown] .details-panel-right .newbie-permissions-wrap .right-item .clickable-field:not(.default-permission-placeholder) .lever,
 [data-main-color=brown] .switch label input[type=checkbox]:checked + .lever {
     background-color: #A1887F;
 }
@@ -3546,6 +3577,7 @@ body {
 [data-main-color=brown] .details-panel .buttons-wrap.sticky-details-wrap .btn-leave,
 [data-main-color=brown] .details-panel .buttons-wrap.sticky-details-wrap i,
 [data-main-color=brown] .settings-block-wrap input[type=range] + .thumb,
+[data-main-color=brown] .details-panel-right .newbie-permissions-wrap .right-item .clickable-field:not(.default-permission-placeholder) .lever:after,
 [data-main-color=brown] .switch label input[type=checkbox]:checked + .lever:after,
 [data-main-color=brown] .btn-main-filled,
 [data-main-color=brown] .toolbar .active .border {
@@ -3654,6 +3686,7 @@ body {
 [data-main-color=blue-grey] .chat-item.active .status {
     border-color: #ECEFF1;
 }
+[data-main-color=blue-grey] .details-panel-right .newbie-permissions-wrap .right-item .clickable-field:not(.default-permission-placeholder) .lever,
 [data-main-color=blue-grey] .switch label input[type=checkbox]:checked + .lever {
     background-color: #90A4AE;
 }
@@ -3663,6 +3696,7 @@ body {
 [data-main-color=blue-grey] .details-panel .buttons-wrap.sticky-details-wrap .btn-leave,
 [data-main-color=blue-grey] .details-panel .buttons-wrap.sticky-details-wrap i,
 [data-main-color=blue-grey] .settings-block-wrap input[type=range] + .thumb,
+[data-main-color=blue-grey] .details-panel-right .newbie-permissions-wrap .right-item .clickable-field:not(.default-permission-placeholder) .lever:after,
 [data-main-color=blue-grey] .switch label input[type=checkbox]:checked + .lever:after,
 [data-main-color=blue-grey] .btn-main-filled,
 [data-main-color=blue-grey] .toolbar .active .border {
@@ -19047,14 +19081,23 @@ input[type=range].voice-message-volume:focus {
 .details-panel-right .participant-details-wrap .right-item .clickable-field,
 .details-panel-right .newbie-permissions-wrap .right-item .clickable-field,
 .details-panel-right .restrictions-wrap .right-item .clickable-field {
-    display: inline-block;
+    display: block;
     float: left;
-    height: 18px;
-    width: 18px;
+    height: 14px;
+    line-height: 14px;
     margin: 0;
+    width: 36px;
+    position: absolute;
+    left: 24px;
+    top: 7px;
 }
 .details-panel-right .newbie-permissions-wrap .right-item .clickable-field.default-permission-placeholder{
-    opacity: 0.5;
+}
+.details-panel-right .newbie-permissions-wrap .right-item .clickable-field.default-permission-placeholder .lever{
+    background-color: #818181 !important;
+}
+.details-panel-right .newbie-permissions-wrap .right-item .clickable-field.default-permission-placeholder .lever:after{
+    background-color: #f1f1f1 !important;
 }
 
 .details-panel-right .participant-details-wrap .right-item .select-timer,
@@ -19081,7 +19124,7 @@ input[type=range].voice-message-volume:focus {
 .details-panel-right .participant-details-wrap .right-item .right-name,
 .details-panel-right .newbie-permissions-wrap .right-item .right-name,
 .details-panel-right .restrictions-wrap .right-item .right-name {
-    margin: 0 0 0 27px;
+    margin: 0 0 0 44px;
     font-size: 16px;
     vertical-align: top;
     display: inline-block;
@@ -19107,6 +19150,18 @@ input[type=range].voice-message-volume:focus {
     margin: 16px 24px;
 }
 
+.details-panel-right .newbie-permissions-wrap .newbie-permissions-time-wrap .select-timer{
+    float: unset;
+    margin-left: auto;
+    margin-right: auto;
+    width: fit-content;
+}
+.details-panel-right .newbie-permissions-wrap .newbie-permissions-time-wrap .select-timer .dropdown-button{
+    width: fit-content;
+}
+.details-panel-right .newbie-permissions-wrap .newbie-permissions-time-wrap .default-value{
+    color: unset;
+}
 .details-panel-right .description-edit-wrap .edit-group,
 .details-panel-right .membership-property-edit-wrap .property-wrap,
 .details-panel-right .index-property-edit-wrap .property-wrap{

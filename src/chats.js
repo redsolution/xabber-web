@@ -8849,10 +8849,20 @@ xabber.ChatContentView = xabber.BasicView.extend({
             return;
         }
         (this.contact.my_info && this.contact.my_info.get('id') === participant_id) && (participant_id = '');
+
         this.contact.participants.participantsRequest({id: participant_id}, (response) => {
-            let data_form = this.account.parseDataForm($(response).find(`x[xmlns="${Strophe.NS.DATAFORM}"]`));
-            this.contact.showDetailsRight('all-chats', {type: 'participant'});
-            this.contact.details_view_right && this.contact.details_view_right.participants.participant_properties_panel.open(participant, data_form);
+            if (participant_id === ''){
+                this.contact.showDetailsRight('all-chats', {type: 'participant'});
+                this.contact.details_view_right && this.contact.details_view_right.participants.participant_properties_panel.open(participant);
+            } else {
+                this.contact.participants.participantPermissionsRequest({id: participant_id}, (response) => {
+                    this.contact.showDetailsRight('all-chats', {type: 'participant'});
+                    this.contact.details_view_right && this.contact.details_view_right.participants.participant_properties_panel.open(participant, response);
+
+                }, (err) => {
+                    console.error(err);
+                });
+            }
         });
     },
 

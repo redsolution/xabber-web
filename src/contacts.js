@@ -438,12 +438,29 @@ xabber.Contact = Backbone.Model.extend({
             $item.length && this.participants && this.participants.createFromStanza($item, {my_info: true});
             cached_avatar && (cached_avatar.avatar_hash === this.my_info.get('avatar')) && this.my_info.set('b64_avatar', cached_avatar.avatar_b64);
             this.trigger('update_my_info');
-            this.participants.participantsRequest({id: ''}, (response) => {
-                this.my_rights = this.account.parseDataForm($(response).find(`x[xmlns="${Strophe.NS.DATAFORM}"]`));
+            this.participants.participantPermissionsRequest({id: this.my_info.get('id')}, (response) => {
+                this.my_rights = this.parseOwnPermissions(response);//?
                 this.trigger('permissions_changed');
                 callback && callback();
             });
         });
+    },
+
+    parseOwnPermissions: function (response) {
+        let my_rights = {};
+
+        $(response).find('permissions permission').each((idx, permission) => {
+            let $permission = $(permission),
+                name = $permission.attr('name'),
+                status = $permission.attr('status'),
+                expires = $permission.attr('expires');
+           my_rights[name] = {
+               status: status,
+               expires: expires ,
+           }
+        });
+
+        return my_rights
     },
 
     getAvatar: function (avatar, node, callback, errback) {
@@ -2544,8 +2561,8 @@ xabber.GroupChatDetailsViewRight = xabber.BasicView.extend({
     },
 
     updateButtons: function () {
-        let is_owner = this.model.my_rights && this.model.my_rights.fields.find(permission => permission.var === 'owner' && permission.values),
-            change_group = this.model.my_rights && this.model.my_rights.fields.find(permission => permission.var === 'change-group' && permission.values),
+        let is_owner = this.model.my_rights && this.model.my_rights['owner'] && this.model.my_rights['owner'].status === 'true',
+            change_group = this.model.my_rights && this.model.my_rights['change-group-settings'] && this.model.my_rights['change-group-settings'].status === 'true',
             is_blocked = this.model.get('blocked');
         this.$('.btn-settings-wrap').switchClass('non-active', !is_owner);
         this.$('.btn-edit-settings').switchClass('hidden', !(is_owner || change_group));
@@ -4443,17 +4460,20 @@ xabber.ParticipantsViewRight = xabber.BasicView.extend({
         $modal.find('.btn-chat').one(`click.${unique_modal_id}`, () => {
             this.showParticipantProperties(ev, () => {
                 this.participant_properties_panel.getPrivateChat();
-            });
+            }, true);
             $overlay.click();
         });
         $modal.find('.btn-participant-messages').one(`click.${unique_modal_id}`, () => {
             this.showParticipantProperties(ev, () => {
                 this.participant_properties_panel.getMessages({});
-            });
+            }, true);
             $overlay.click();
         });
         $modal.find('.btn-edit').one(`click.${unique_modal_id}`, () => {
-            this.showParticipantPropertiesEdit(ev);
+            this.showParticipantProperties(ev, () => {
+                this.participant_properties_panel.showNamePanel();
+                this.participant_properties_panel.changeBackButton();
+            });
             $overlay.click();
         });
         $modal.find('.btn-kick').one(`click.${unique_modal_id}`, () => {
@@ -4664,16 +4684,16 @@ xabber.ParticipantsViewRight = xabber.BasicView.extend({
         }
     },
 
-    showParticipantProperties: function (ev, callback) {
+    showParticipantProperties: function (ev, callback, no_permissions) {
         let $target = $(ev.target);
         if ($target.closest('.buttons-wrap').length)
             return;
         let participant_item = $target.closest('.participant-wrap'),
             participant_id = participant_item.attr('data-id'),
             participant = this.model.participants.get(participant_id);
-        (participant_item.attr('data-jid') && participant_item.attr('data-jid') === this.account.get('jid')) && (participant_id = ''); //34
+        (participant_item.attr('data-jid') && participant_item.attr('data-jid') === this.account.get('jid')) && (participant_id = '');
         this.model.participants.participantsRequest({id: participant_id}, (response) => {
-            if (participant_id === ''){
+            if (participant_id === '' || no_permissions){
                 if (!callback){
                     this.participant_properties_panel.open(participant);
                 } else {
@@ -4681,32 +4701,17 @@ xabber.ParticipantsViewRight = xabber.BasicView.extend({
                 }
                 callback && callback()
             } else {
-                !callback && this.model.participants.participantPermissionsRequest({id: participant_id}, (response) => {
-                    console.error(response);
-                    if (!callback){
-                        this.participant_properties_panel.open(participant, response);
-                    } else {
-                        this.participant_properties_panel.enable(participant, response);
-                    }
+                this.model.participants.participantPermissionsRequest({id: participant_id}, (response) => {
+                    this.participant_properties_panel.open(participant, response);
+                    callback && callback()
+                }, (err) => {
+                    console.error(err);
+                    callback && callback()
                 });
-                callback && callback()
             }
         });
     },
 
-    showParticipantPropertiesEdit: function (ev) {
-        let $target = $(ev.target),
-            participant_item = $target.closest('.participant-wrap'),
-            participant_id = participant_item.attr('data-id'),
-            participant = this.model.participants.get(participant_id);
-        (participant_item.attr('data-jid') && participant_item.attr('data-jid') === this.account.get('jid')) && (participant_id = '');
-        this.model.participants.participantsRequest({id: participant_id}, (response) => {
-            let data_form = this.account.parseDataForm($(response).find(`x[xmlns="${Strophe.NS.DATAFORM}"]`));
-            this.participant_properties_panel.open(participant, data_form);
-            this.participant_properties_panel.showNamePanel();
-            this.participant_properties_panel.changeBackButton();
-        });
-    },
 
     keyUpSearch: function (ev) {
         if (ev.keyCode === constants.KEY_ESCAPE && !xabber.body.screen.get('right_contact'))
@@ -6759,6 +6764,8 @@ xabber.NewbiePermissionsRightView = xabber.BasicView.extend({
                 }
             }
         });
+        if (this.set_time && this.$('.newbie-permissions-time-wrap .select-timer .timer-item-wrap .property-value').attr('data-value') !== this.set_time)
+            has_changes = true;
         console.error(has_changes);
         this.$('.btn-default-restrictions-save').switchClass('fade-out', !has_changes);
         if (has_changes) {
@@ -6820,11 +6827,11 @@ xabber.NewbiePermissionsRightView = xabber.BasicView.extend({
                     name: name,
                 },
                 view = this.$('.default-restrictions-list-wrap .right-item.restriction-newbie-' + attrs.name),
-                $restriction_item = $(templates.group_chats.restriction_item({name: `newbie-${attrs.name}`, pretty_name: attrs.pretty_name, type: 'default_placeholder'})),
-                $restriction_expire = $(templates.group_chats.right_expire_variants({
-                    right_name: ('newbie-' + attrs.name),
-                }));
-            $restriction_item.append($restriction_expire);
+                $restriction_item = $(templates.group_chats.restriction_item({name: `newbie-${attrs.name}`, pretty_name: attrs.pretty_name, type: 'default_placeholder'}));
+            //     $restriction_expire = $(templates.group_chats.right_expire_variants({
+            //         right_name: ('newbie-' + attrs.name),
+            //     }));
+            // $restriction_item.append($restriction_expire);
 
             if (view.length)
                 view.detach();
@@ -6853,11 +6860,11 @@ xabber.NewbiePermissionsRightView = xabber.BasicView.extend({
                 name: name,
                 },
                 view = this.$('.default-restrictions-list-wrap .right-item.restriction-newbie-' + attrs.name),
-                $restriction_item = $(templates.group_chats.restriction_item({name: `newbie-${attrs.name}`, pretty_name: attrs.pretty_name, type: fixed})),
-                $restriction_expire = $(templates.group_chats.right_expire_variants({
-                    right_name: ('newbie-' + attrs.name),
-                }));
-            $restriction_item.append($restriction_expire);
+                $restriction_item = $(templates.group_chats.restriction_item({name: `newbie-${attrs.name}`, pretty_name: attrs.pretty_name, type: fixed}));
+            //     $restriction_expire = $(templates.group_chats.right_expire_variants({
+            //         right_name: ('newbie-' + attrs.name),
+            //     }));
+            // $restriction_item.append($restriction_expire);
 
             if (view.length)
                 view.replaceWith($restriction_item);
@@ -6871,15 +6878,18 @@ xabber.NewbiePermissionsRightView = xabber.BasicView.extend({
             }
 
             if (Number(seconds) && Number(seconds) !== 0) {
-                if ($restriction_item.find('.select-timer .property-value').length) {
-                    $restriction_item.find('.select-timer .property-value').attr('data-value', seconds)
-                        .removeClass('default-value')
-                        .text(utils.pretty_duration_permission_timer_long(seconds));
-                } else {
-                    $restriction_item.append($('<div class="select-timer"/>'));
-                    $restriction_item.find('.select-timer').attr('data-value', seconds)
-                        .text(utils.pretty_duration_permission_timer_long(seconds))
-                }
+                this.$('.newbie-permissions-time-wrap .select-timer .timer-item-wrap .property-value').attr('data-value', seconds).text(utils.pretty_duration_permission_timer_long(seconds))
+                this.set_time = seconds;
+                // if ($restriction_item.find('.select-timer .property-value').length) {
+                //
+                //     $restriction_item.find('.select-timer .property-value').attr('data-value', seconds)
+                //         .removeClass('default-value')
+                //         .text(utils.pretty_duration_permission_timer_long(seconds));
+                // } else {
+                //     $restriction_item.append($('<div class="select-timer"/>'));
+                //     $restriction_item.find('.select-timer').attr('data-value', seconds)
+                //         .text(utils.pretty_duration_permission_timer_long(seconds))
+                // }
             }
         });
     },
@@ -6914,6 +6924,7 @@ xabber.NewbiePermissionsRightView = xabber.BasicView.extend({
         });
 
         if (changed_default_permissions.length) {
+            let global_expire = this.$('.newbie-permissions-time-wrap .select-timer .timer-item-wrap .property-value').attr('data-value');
             let iq_change_newbie_rights = $iq({to: this.contact.get('jid'), type: 'set'})
                     .c('query', {xmlns: `${Strophe.NS.GROUP_CHAT_PERMISSIONS}#newbies`});
             iq_change_newbie_rights.c('permissions', {xmlns: Strophe.NS.GROUP_CHAT_PERMISSIONS});
@@ -6921,7 +6932,7 @@ xabber.NewbiePermissionsRightView = xabber.BasicView.extend({
                 iq_change_newbie_rights.c('permission', {
                     name: permission.name,
                     status: permission.status,
-                    seconds: permission.seconds,
+                    seconds: global_expire || 0,
                 }).up();
             });
             this.account.sendIQFast(iq_change_newbie_rights, () => {
@@ -7097,10 +7108,7 @@ xabber.Participants = Backbone.Collection.extend({
             version = options.version || 0,
             iq = $iq({to: this.contact.get('full_jid'), type: 'get'});
         if (participant_id !== undefined) {
-            if (options.properties)
-                iq.c('query', {xmlns: `${Strophe.NS.GROUP_CHAT}#members`, id: participant_id});
-            else
-                iq.c('query', {xmlns: `${Strophe.NS.GROUP_CHAT}#rights`}).c('user', {xmlns: Strophe.NS.GROUP_CHAT, id: participant_id});
+            iq.c('query', {xmlns: `${Strophe.NS.GROUP_CHAT}#members`, id: participant_id});
         }
         else
             iq.c('query', {xmlns: `${Strophe.NS.GROUP_CHAT}#members`, version: version});
@@ -8598,28 +8606,9 @@ xabber.GroupEditView = xabber.BasicView.extend({
         this.group_name_field && this.group_name_field.updateValue(true);
         this.group_description_field && this.group_description_field.updateValue(true);
         this.$('.btn-save').switchClass('fade-out', true);
-        let is_owner = this.model.my_rights && this.model.my_rights.fields.find(permission => permission.var === 'owner' && permission.values);
+        let is_owner = this.model.my_rights && this.model.my_rights['owner'] && this.model.my_rights['owner'].status === 'true';
         if (is_owner){
-            let iq_get_rights = $iq({type: 'get', to: this.model.get('full_jid') || this.model.get('jid')})
-                .c('query', {xmlns: `${Strophe.NS.GROUP_CHAT}#default-rights`});
-            this.account.sendFast(iq_get_rights, (iq_all_rights) => {
-                let data_form = this.account.parseDataForm($(iq_all_rights).find(`x[xmlns="${Strophe.NS.DATAFORM}"]`)),
-                    restrictions_count = 0;
-                data_form.fields.forEach((field) => {
-                    if (field.type === 'fixed' || field.type === 'hidden')
-                        return;
-                    let expires = field.values ? field.values[0] : undefined;
-                    if (expires) {
-                        restrictions_count++;
-                    }
-                });
-                if (restrictions_count === 0)
-                    restrictions_count = '';
-                this.$('.btn-default-restrictions .edit-button-value').text(restrictions_count);
-            }, () => {
-                console.error('heeeeeee');
-                utils.callback_popup_message(xabber.getString("groupchat_you_have_no_permissions_to_do_it"), 3000);
-            });
+
         }
         this.updateAvatar();
 
