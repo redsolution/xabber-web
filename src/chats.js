@@ -8994,6 +8994,8 @@ xabber.ChatContentView = xabber.BasicView.extend({
     },
 
     onContextMenuMessage: function (ev) {
+        if ($(ev.target).closest('.chat-message.system').length)
+            return;
         ev.preventDefault();
         let $elem = $(ev.target).closest('.chat-message'),
             unique_id = $elem.attr('data-uniqueid');

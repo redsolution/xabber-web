@@ -9537,11 +9537,18 @@ input[type=text].simple-input-field:hover {
     padding: 0 40px 0 56px !important;
 }
 .recent-chats-panel .chats-search-form {
+    backdrop-filter: blur(4px);
+    background: hsla(0, 0%, 100%, .655);
+    box-shadow: inset 2px 2px 1px 0 hsla(0, 0%, 100%, .3), inset -2px -2px 2px 1px hsla(0, 0%, 100%, .3), 0 1px 3px 0 rgba(0, 0, 0, 0), 0 1px 2px 0 rgba(0, 0, 0, 0);
     position: sticky !important;
     top: 0;
-    background: rgba(255, 255, 255, 0.655);
-    backdrop-filter: blur(4px);
-    box-shadow: inset 2px 2px 1px 0 rgba(255, 255, 255, 0.3), inset -2px -2px 2px 1px rgba(255, 255, 255, 0.3), 0 1px 3px 0 rgba(0, 0, 0, 0.2), 0 1px 2px 0 rgba(0, 0, 0, 0.1);
+    border: 1px solid #fff;
+}
+.recent-chats-panel .chats-search-form .search-input::placeholder {
+    text-shadow: 0 0 2px rgba(255, 255, 255, 1), 0 0 1px rgba(255, 255, 255, 1), 0 0 3px rgba(255, 255, 255, 1);
+}
+.recent-chats-panel .chats-search-form .search-icon {
+    text-shadow: 0 0 2px rgba(255, 255, 255, 1), 0 0 1px rgba(255, 255, 255, 1), 0 0 3px rgba(255, 255, 255, 1);
 }
 .recent-chats-search-active .btn-unread,
 .recent-chats-search-active .recent-chats-main-header,
@@ -9552,12 +9559,12 @@ input[type=text].simple-input-field:hover {
     padding-top: 8px;
 }
 .recent-chats-panel .recent-chats-main-header {
+    backdrop-filter: blur(4px);
+    background: hsla(0, 0%, 100%, .655);
+    box-shadow: inset 2px 2px 1px 0 hsla(0, 0%, 100%, .3), inset -2px -2px 2px 1px hsla(0, 0%, 100%, .3), 0 1px 3px 0 rgba(0, 0, 0, 0), 0 1px 2px 0 rgba(0, 0, 0, 0);
     position: absolute;
     top: 0;
     width: 100%;
-    background: rgba(255, 255, 255, 0.655);
-    backdrop-filter: blur(4px);
-    box-shadow: inset 2px 2px 1px 0 rgba(255, 255, 255, 0.3), inset -2px -2px 2px 1px rgba(255, 255, 255, 0.3), 0 1px 3px 0 rgba(0, 0, 0, 0.02), 0 1px 2px 0 rgba(0, 0, 0, 0.01);
     z-index: 50;
 }
 .recent-chats-panel .btn-unread,
@@ -19090,6 +19097,11 @@ input[type=range].voice-message-volume:focus {
     position: absolute;
     left: 24px;
     top: 7px;
+}
+.details-panel-right .participant-details-wrap .right-item.disabled .select-timer,
+.details-panel-right .participant-details-wrap .right-item.disabled .clickable-field{
+    pointer-events: none;
+    opacity: 0.5;
 }
 .details-panel-right .newbie-permissions-wrap .right-item .clickable-field.default-permission-placeholder{
 }
