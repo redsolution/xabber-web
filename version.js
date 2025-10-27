@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.4.246","version_description":"fixed stuck account after logging in, changed padding for avatar in participant details"}'
+'{"version_number":"2.4.247","version_description":"changed chat msgs search content saving after opening found message"}'
 )});

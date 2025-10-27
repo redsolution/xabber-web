@@ -1282,9 +1282,9 @@ xabber.Contact = Backbone.Model.extend({
                 xabber.body.setScreen(screen, attrs);
             }
             if (this.details_view_right && this.details_view_right.contact_searched_messages_view){
-                this.details_view_right.contact_searched_messages_view.hideSearch(null, true);
+                (options.type !== 'search') && this.details_view_right.contact_searched_messages_view.hideSearch(null, true);
                 if (options.type === 'search') {
-                    this.details_view_right.contact_searched_messages_view.clearSearch();
+                    // this.details_view_right.contact_searched_messages_view.clearSearch();
                     this.details_view_right.showSearchMessages(null, true);
                 }
                 if (options.type === 'members') {
