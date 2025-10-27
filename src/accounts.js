@@ -40,6 +40,7 @@ xabber.Account = Backbone.Model.extend({
             if (_attrs.is_new && !options.auth_view) {
                 this.is_invalid = true;
                 this.on("destroy", this.onDestroy, this);
+                this.destroy();
                 return;
             }
             this.last_msg_timestamp = 0;
@@ -2089,6 +2090,9 @@ xabber.Account = Backbone.Model.extend({
 xabber.Accounts = Backbone.CollectionWithStorage.extend({
     model: xabber.Account,
     comparator: function (acc1, acc2) {
+        if (!acc1.settings || acc2.settings)
+            return -1;
+
         return acc1.settings.get('order') < acc2.settings.get('order') ? -1 : 1;
     },
 
