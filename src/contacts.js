@@ -5233,6 +5233,9 @@ xabber.ParticipantPropertiesViewRight = xabber.BasicView.extend({
             }));
             $restriction_item.append($restriction_expire);
             if (role === 'owner'){
+                if (name === 'owner'){
+                    $restriction_item.find('.right-name').text(xabber.getString("participant_edit__make_owner_btn"))
+                }
                 this.$('.confirmation-rights-wrap').append($restriction_item);
             } else {
                 this.$('.normal-rights-wrap').append($restriction_item);
