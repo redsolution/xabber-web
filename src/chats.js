@@ -3868,7 +3868,7 @@ xabber.ChatItemView = xabber.BasicView.extend({
               this.hideSearch(true);
           }
           this.ps_container.perfectScrollbar('destroy');
-          this.model.getMessageContext($msg.data('uniqueid'), {searched_messages: true, do_not_change_screen_in_chat: true}); //34
+          this.model.getMessageContext($msg.data('uniqueid'), {searched_messages: true, do_not_change_screen_in_chat: true});
       }
   });
 
@@ -7794,6 +7794,13 @@ xabber.ChatContentView = xabber.BasicView.extend({
     },
 
     addFileMessage: function (files, is_voice) {
+        if (this.contact
+            && this.contact.get("group_chat")
+            && this.contact.my_rights
+            && this.contact.my_rights['send-media']
+            && this.contact.my_rights['send-media'].status === 'false'){
+            return;
+        }
         let new_files = [], file_counter = 0;
         if (this.model.messages_view)
             if (this.model.messages_view.data.get('visible'))
@@ -9042,6 +9049,13 @@ xabber.ChatContentView = xabber.BasicView.extend({
         $modal.find('.btn-forward-message').hideIf(this.model.get('encrypted'));
         $modal.find('.btn-edit-message').hideIf(!(my_msg) || this.$('.chat-message.saved-main.selected').length || this.model.get('blocked') || this.$el.hasClass('messages-context-wrap'));
 
+        if (this.contact
+            && this.contact.my_rights
+            && this.contact.my_rights['pin-messages']
+            && this.contact.my_rights['pin-messages'].status === 'false'){
+            $modal.find('.btn-pin').addClass('hidden');
+        }
+
         this.model.get('encrypted') && $modal.find('.btn-edit-message').addClass('hidden');
 
         $overlay.addClass('invisible-overlay');
@@ -9118,6 +9132,17 @@ xabber.ChatContentView = xabber.BasicView.extend({
 
     onClickMessage: function (ev) {
         let $elem = $(ev.target);
+        if ($elem.closest('.chat-message').length
+            && $elem.closest('.chat-message').find('.upload-error').length
+            && !$elem.closest('.msg-delivering-state').length
+            && !$elem.closest('.dropdown-content').length
+            && !$elem.closest('.chat-message').find('.dropdown-content.active').length
+        ){
+            ev.preventDefault();
+            setTimeout(() => {
+                $elem.closest('.chat-message').find('.msg-delivering-state').click()
+            }, 10)
+        }
         if (this.model.get('notifications')){
             this.onClickNotification(ev);
             return;
@@ -11254,6 +11279,13 @@ xabber.InvitationPanelView = xabber.SearchView.extend({
     },
 
     open: function (account, contact) {
+
+        if (contact
+            && contact.my_rights
+            && contact.my_rights['add-members']
+            && contact.my_rights['add-members'].status === 'false'){
+            return;
+        }
         this.selected_contacts = [];
         this.account = account;
         this.contact = contact;
@@ -11815,6 +11847,7 @@ xabber.InvitationPanelView = xabber.SearchView.extend({
         this.listenTo(this.contact, 'change:private_chat', this.updateIcon);
         this.listenTo(this.contact, 'change:invitation', this.updateIcon);
         this.listenTo(this.contact, 'change:incognito_chat', this.updateIcon);
+        this.listenTo(this.contact, 'permissions_changed', this.updateButtons);
         this.listenTo(xabber._settings, 'change:jingle_calls', this.updateGroupChatHead);
         this.listenTo(xabber, 'change:audio', this.updateGroupChatHead);
         this.listenTo(xabber, 'plyr_player_updated', this.updatePlyrControls);
@@ -11858,12 +11891,20 @@ xabber.InvitationPanelView = xabber.SearchView.extend({
         this.updatePlyrTime();
         this.updateJingleButton();
         this.updateIcon();
+        this.updateButtons();
         this.updateLeftIndicator(xabber.accounts);
         if (this.model.get('encrypted'))
             this.renderActiveTrustSession();
         this.updatePlyrPlayerPosition();
         return this;
     },
+
+      updateButtons: function () { //34
+          if (this.contact && this.contact.my_rights){
+              this.contact.my_rights['add-members'] && this.contact.my_rights['add-members'].status === 'false' && this.$('.btn-invite-users').addClass('hidden');
+              this.contact.my_rights['add-members'] && this.contact.my_rights['add-members'].status === 'true' && this.$('.btn-invite-users').removeClass('hidden');
+          }
+      },
 
     updateLeftIndicator: function (accounts) {
         this.$el.attr('data-indicator', accounts.connected.length > 1);
@@ -13117,6 +13158,7 @@ xabber.ChatBottomView = xabber.BasicView.extend({
         if (this.contact) {
             this.listenTo(this.contact, 'change:blocked', this.onBlockedUpdate);
             this.listenTo(this.contact, 'update_my_info', this.updateInfoInBottom);
+            this.listenTo(this.contact, 'permissions_changed', this.updateButtons);
         }
         this.listenTo(this.model, 'change:chat_ephemeral_timer', this.updateEphemeralTimer);
         this.listenTo(this.model, 'reply_selected_messages', this.replyMessages);
@@ -13255,6 +13297,8 @@ xabber.ChatBottomView = xabber.BasicView.extend({
         this.$('.ql-toolbar.ql-snow').switchClass('ql-moved-left-extra', !xabber.settings.mapping_service && !(this.account.get('gallery_token') && this.account.get('gallery_url')));
         if (this.model.get('group_chat')) {
             this.updateInfoInBottom();
+            this.updateOwnPermissions();
+            this.updateButtons();
         } else {
             this.$('.account-nickname').hide();
             this.$('.account-badge').hide();
@@ -13421,6 +13465,26 @@ xabber.ChatBottomView = xabber.BasicView.extend({
             this.$('.account-nickname').hide();
             this.$('.account-badge').hide();
             this.$('.account-role').hide();
+        }
+    },
+
+    updateOwnPermissions: function () {
+        this.contact.getMyInfo()
+    },
+
+    updateButtons: function () { //34
+        if (this.contact && this.contact.my_rights){
+            this.contact.my_rights['send-media'] && this.contact.my_rights['send-media'].status === 'false' && this.$('.attach-voice-message').addClass('disabled2');
+            this.contact.my_rights['send-media'] && this.contact.my_rights['send-media'].status === 'true' && this.$('.attach-voice-message').removeClass('disabled2');
+            this.contact.my_rights['send-media'] && this.contact.my_rights['send-media'].status === 'false' && this.$('.attach-file').addClass('disabled2');
+            this.contact.my_rights['send-media'] && this.contact.my_rights['send-media'].status === 'true' && this.$('.attach-file').removeClass('disabled2');
+            this.contact.my_rights['send-media'] && this.contact.my_rights['send-media'].status === 'false' && this.$('.attach-media').addClass('disabled2');
+            this.contact.my_rights['send-media'] && this.contact.my_rights['send-media'].status === 'true' && this.$('.attach-media').removeClass('disabled2');
+
+            this.contact.my_rights['send-messages'] && this.contact.my_rights['send-messages'].status === 'false' && this.$('.send-message').addClass('disabled2');
+            this.contact.my_rights['send-messages'] && this.contact.my_rights['send-messages'].status === 'false' && this.$('.attach-voice-message').addClass('disabled2');
+            this.contact.my_rights['send-messages'] && this.contact.my_rights['send-messages'].status === 'true' && this.$('.send-message').removeClass('disabled2');
+            this.contact.my_rights['send-messages'] && this.contact.my_rights['send-messages'].status === 'true' && this.$('.attach-voice-message').removeClass('disabled2');
         }
     },
 
@@ -13826,6 +13890,13 @@ xabber.ChatBottomView = xabber.BasicView.extend({
     },
 
     onFileInputChanged: function (ev) {
+        if (this.contact
+            && this.contact.get("group_chat")
+            && this.contact.my_rights
+            && this.contact.my_rights['send-media']
+            && this.contact.my_rights['send-media'].status === 'false'){
+            return;
+        }
         let target = ev.target,
             files = [];
         for (let i = 0; i < target.files.length; i++) {
@@ -14109,6 +14180,13 @@ xabber.ChatBottomView = xabber.BasicView.extend({
     },
 
     showMediaPopup: function () {
+        if (this.contact
+            && this.contact.get("group_chat")
+            && this.contact.my_rights
+            && this.contact.my_rights['send-media']
+            && this.contact.my_rights['send-media'].status === 'false'){
+            return;
+        }
         if (this.edit_message)
             return;
         if (this.account.get('gallery_token') && this.account.get('gallery_url')) {
@@ -14583,6 +14661,13 @@ xabber.ChatBottomView = xabber.BasicView.extend({
     },
 
     submit: function (ev, forced) {
+        if (this.contact
+            && this.contact.get("group_chat")
+            && this.contact.my_rights
+            && this.contact.my_rights['send-messages']
+            && this.contact.my_rights['send-messages'].status === 'false'){
+            return;
+        }
         if (this.$('.send-message').hasClass('disabled') || this.$('.attach-voice-message').hasClass('disabled')){
             return;
         }

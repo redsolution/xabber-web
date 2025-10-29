@@ -11723,9 +11723,9 @@ input[type=text].simple-input-field:hover {
 [data-trust=error].chat-content-wrap .load-history-feedback,
 [data-trust=error] .chat-content,
 .chat-message.encrypted[data-trust=error] {
-    background-image: linear-gradient( 45deg,#ffebee 25%, transparent 25%, transparent 74%, #ffebee 75%, #ffebee), linear-gradient( 45deg,#ffebee 25%, #FFF 25%, #FFF 74%, #ffebee 75%, #ffebee);
-    background-size: 4px 4px;
-    background-position: 0px 0, 2px 2px;
+    /*background-image: linear-gradient( 45deg,#ffebee 25%, transparent 25%, transparent 74%, #ffebee 75%, #ffebee), linear-gradient( 45deg,#ffebee 25%, #FFF 25%, #FFF 74%, #ffebee 75%, #ffebee);*/
+    /*background-size: 4px 4px;*/
+    /*background-position: 0px 0, 2px 2px;*/
 }
 
 .chat-bottom-wrap.blocked {
@@ -12051,6 +12051,17 @@ input[type=text].simple-input-field:hover {
 .chat-message .unuploaded-images .img-content-template,
 .chat-message .img-content.unuploaded-images {
     background-image: none;
+}
+.chat-message .img-content.unuploaded-images.upload-error {
+    pointer-events: none;
+}
+.chat-message .img-content.unuploaded-images.upload-error .circle-wrap{
+    pointer-events: auto;
+}
+
+.upload-error img.uploaded-img {
+    max-width: 400px;
+    max-height: 400px;
 }
 .chat-message .img-content.unuploaded-images .circle-wrap,
 .chat-message .unuploaded-images .img-content-template .circle-wrap{
@@ -13117,10 +13128,23 @@ img.fwd-img-preview {
     display: none;
 }
 
+.message-input-panel .attach-voice-message.disabled2,
+.message-input-panel .send-message.disabled2,
 .message-input-panel .attach-voice-message.disabled,
 .message-input-panel .send-message.disabled {
     opacity: 0.6;
     pointer-events: none;
+    color: #757575 !important;
+}
+.message-input-panel .attach-voice-message.disabled2 svg path,
+.message-input-panel .send-message.disabled2 svg path,
+.message-input-panel .attach-voice-message.disabled svg path,
+.message-input-panel .send-message.disabled  svg path,
+.message-input-panel .attach-voice-message.disabled2 svg polygon,
+.message-input-panel .send-message.disabled2 svg polygon,
+.message-input-panel .attach-voice-message.disabled svg polygon,
+.message-input-panel .send-message.disabled  svg polygon{
+    fill: #757575 !important;
 }
 
 .message-input-panel .message-form {
@@ -13705,6 +13729,10 @@ img.fwd-img-preview {
     width: 24px;
     height: 24px;
     margin: 0 4px;
+}
+.input-toolbar .attach-media.disabled2,
+.input-toolbar .attach-file.disabled2 {
+    pointer-events: none;
 }
 
 .locked-voice-message .send-area .attach-voice-message,

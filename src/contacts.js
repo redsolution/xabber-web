@@ -2568,7 +2568,10 @@ xabber.GroupChatDetailsViewRight = xabber.BasicView.extend({
             is_blocked = this.model.get('blocked');
         this.$('.btn-settings-wrap').switchClass('non-active', !is_owner);
         this.$('.btn-edit-settings').switchClass('hidden', !(is_owner || change_group));
-        this.$('.btn-invite-wrap').switchClass('non-active', this.model.get('private_chat') || this.model.get('subscription') !== 'both');
+        this.$('.btn-invite-wrap').switchClass('non-active',
+            this.model.get('private_chat')
+            || this.model.get('subscription') !== 'both'
+            || this.model.my_rights && this.model.my_rights['add-members'] && this.model.my_rights['add-members'].status === 'false');
         this.$('.btn-default-restrictions-wrap').switchClass('non-active', !is_owner);
         this.$('.btn-newbie-permissions').switchClass('non-active', !is_owner);
         this.$('.btn-block').hideIf(is_blocked);
@@ -4259,6 +4262,20 @@ xabber.ParticipantsViewRight = xabber.BasicView.extend({
         if (this.model.my_info && this.model.my_info.get('role') === 'member'){
             $modal.find('.admin-btn').addClass('hidden');
         }
+        $modal.find('.btn-edit').hideIf(this.model
+            && this.model.my_rights
+            && this.model.my_rights['change-user-info']
+            && this.model.my_rights['change-user-info'].status === 'false');
+
+        $modal.find('.btn-setup-permissions').hideIf(this.model
+            && this.model.my_rights
+            && this.model.my_rights['change-permissions']
+            && this.model.my_rights['change-permissions'].status === 'false');
+
+        $modal.find('.btn-promote-admin').hideIf(this.model
+            && this.model.my_rights
+            && this.model.my_rights['create-admins']
+            && this.model.my_rights['create-admins'].status === 'false');
         if (participant && participant.get('role') === 'member'){
 
         } else if (participant && participant.get('role') === 'admin'){
@@ -6361,28 +6378,26 @@ xabber.NewbiePermissionsRightView = xabber.BasicView.extend({
             }
         });
 
-        if (changed_default_permissions.length) {
-            let global_expire = this.$('.newbie-permissions-time-wrap .select-timer .timer-item-wrap .property-value').attr('data-value');
-            let iq_change_newbie_rights = $iq({to: this.contact.get('jid'), type: 'set'})
-                    .c('query', {xmlns: `${Strophe.NS.GROUP_CHAT_PERMISSIONS}#new`});
-            iq_change_newbie_rights.c('permissions', {xmlns: Strophe.NS.GROUP_CHAT_PERMISSIONS});
-            _.each(changed_default_permissions, (permission) => {
-                iq_change_newbie_rights.c('permission', {
-                    name: permission.name,
-                    status: permission.status,
-                    seconds: global_expire || 0,
-                }).up();
-            });
-            this.account.sendIQFast(iq_change_newbie_rights, () => {
-                this.$('.edit-save-preloader.preloader-wrap').removeClass('visible').find('.preloader-wrapper').removeClass('active');
-                this.hideNewbiePermissions();
-            }, (error) => {
-                let err_text = $(error).find('error text').text() || xabber.getString("groupchat_you_have_no_permissions_to_do_it");
-                utils.dialogs.error(err_text);
-                this.$('.edit-save-preloader.preloader-wrap').removeClass('visible').find('.preloader-wrapper').removeClass('active');
-                this.hideNewbiePermissions();
-            });
-        }
+        let global_expire = this.$('.newbie-permissions-time-wrap .select-timer .timer-item-wrap .property-value').attr('data-value');
+        let iq_change_newbie_rights = $iq({to: this.contact.get('jid'), type: 'set'})
+                .c('query', {xmlns: `${Strophe.NS.GROUP_CHAT_PERMISSIONS}#new`});
+        iq_change_newbie_rights.c('permissions', {xmlns: Strophe.NS.GROUP_CHAT_PERMISSIONS});
+        _.each(changed_default_permissions, (permission) => {
+            iq_change_newbie_rights.c('permission', {
+                name: permission.name,
+                status: permission.status,
+                seconds: global_expire || 0,
+            }).up();
+        });
+        this.account.sendIQFast(iq_change_newbie_rights, () => {
+            this.$('.edit-save-preloader.preloader-wrap').removeClass('visible').find('.preloader-wrapper').removeClass('active');
+            this.hideNewbiePermissions();
+        }, (error) => {
+            let err_text = $(error).find('error text').text() || xabber.getString("groupchat_you_have_no_permissions_to_do_it");
+            utils.dialogs.error(err_text);
+            this.$('.edit-save-preloader.preloader-wrap').removeClass('visible').find('.preloader-wrapper').removeClass('active');
+            this.hideNewbiePermissions();
+        });
     },
 
     changeExpiresTime: function (ev) {
@@ -8451,7 +8466,14 @@ xabber.GroupEditView = xabber.BasicView.extend({
             this.$('.circle-avatar .set-groupchat-avatar').hideIf(false);
             this.$('.btn-edit').hideIf(false);
             this.$('.edit-bottom-block').hideIf(false);
-            this.$('.btn-default-restrictions').hideIf(false);
+            this.$('.btn-default-restrictions').hideIf(this.model
+                && this.model.my_rights
+                && this.model.my_rights['change-default-permissions']
+                && this.model.my_rights['change-default-permissions'].status === 'false');
+            this.$('.btn-newbie-permissions').hideIf(this.model
+                && this.model.my_rights
+                && this.model.my_rights['change-default-permissions']
+                && this.model.my_rights['change-default-permissions'].status === 'false');
             this.$('.btn-delete-group').hideIf(false);
             this.$('.btn-clear-history-chat').hideIf(false);
             this.$('.btn-back-panel').hideIf(true);
@@ -8489,20 +8511,42 @@ xabber.GroupEditView = xabber.BasicView.extend({
                 );
             }
             this.update();
-            this.group_name_field.$input.prop('disabled', true);
-            this.group_description_field.$input.prop('disabled', true);
+            this.group_name_field.$input.prop('disabled', this.model
+                && this.model.my_rights
+                && this.model.my_rights['change-group-info']
+                && this.model.my_rights['change-group-info'].status === 'false');
+            this.group_description_field.$input.prop('disabled',this.model
+                && this.model.my_rights
+                && this.model.my_rights['change-group-info']
+                && this.model.my_rights['change-group-info'].status === 'false');
             if (!this.group_description_field.$input.val())
-                this.group_description_field.$input.hideIf(true);
-            this.$('.circle-avatar input').prop('disabled', true);
+                this.group_description_field.$input.hideIf(this.model
+                    && this.model.my_rights
+                    && this.model.my_rights['change-group-info']
+                    && this.model.my_rights['change-group-info'].status === 'false');
+            this.$('.circle-avatar input').prop('disabled',this.model
+                && this.model.my_rights
+                && this.model.my_rights['change-group-info']
+                && this.model.my_rights['change-group-info'].status === 'false');
             this.$('.set-groupchat-avatar-text').hideIf(true);
             this.$('.group-property').addClass('property-disabled');
             this.$('.membership-property .details-icon-right').hideIf(true);
             this.$('.index-property .details-icon-right').hideIf(true);
             this.$('.circle-avatar .set-groupchat-avatar').hideIf(true);
             this.$('.group-property:not(.privacy-property)').addClass('disabled');
-            this.$('.btn-edit').hideIf(true);
+            this.$('.btn-edit').hideIf(this.model
+                && this.model.my_rights
+                && this.model.my_rights['change-group-info']
+                && this.model.my_rights['change-group-info'].status === 'false');
             this.$('.edit-bottom-block').hideIf(true);
-            this.$('.btn-default-restrictions').hideIf(true);
+            this.$('.btn-default-restrictions').hideIf(this.model
+                && this.model.my_rights
+                && this.model.my_rights['change-default-permissions']
+                && this.model.my_rights['change-default-permissions'].status === 'false');
+            this.$('.btn-newbie-permissions').hideIf(this.model
+                && this.model.my_rights
+                && this.model.my_rights['change-default-permissions']
+                && this.model.my_rights['change-default-permissions'].status === 'false');
             this.$('.btn-delete-group').hideIf(true);
             this.$('.btn-clear-history-chat').hideIf(true);
             this.$('.btn-back-panel').hideIf(true);
