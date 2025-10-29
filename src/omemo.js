@@ -837,7 +837,7 @@ xabber.Fingerprints = xabber.BasicView.extend({
     getTrustType: function (trust, device_id, jid) {
         let trust_type = '';
         if (trust === 'error'){
-            trust_type = xabber.getString("fingerprint_trust_type_error")
+            trust_type = `<b>${xabber.getString("fingerprint_trust_type_error")}</b>`
         } else if (trust === 'trust') {
             if (this.omemo.xabber_trust && this.omemo.xabber_trust.get('trusted_devices')){
                 let trusted_devices = this.omemo.xabber_trust.get('trusted_devices');

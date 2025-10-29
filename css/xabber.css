@@ -5868,6 +5868,12 @@ input[type=text].simple-input-field:hover {
 }
 .fingerprints-wrap .fingerprints-list-content .row .trust-state-text{
 }
+
+.fingerprints-wrap .fingerprints-list-content .row[data-trust="error"],
+.fingerprints-wrap .fingerprints-list-content .row[data-trust="error"] .device-info-wrap{
+    color: #d32f2f !important;
+}
+
 .fingerprints-wrap .fingerprints-list-content .device-encryption{
     height: 24px;
     position: absolute;
@@ -6031,6 +6037,9 @@ input[type=text].simple-input-field:hover {
 .account-settings-panel .token-wrap .buttons[data-trust="error"],
 .device-encryption[data-trust="error"]{
     color: #f44336 !important;
+}
+.device-encryption[data-trust="error"] path{
+    fill: #f44336 !important;
 }
 .device-encryption[data-trust="error"] path{
     fill: #f44336 !important;
@@ -12057,6 +12066,11 @@ input[type=text].simple-input-field:hover {
 }
 .chat-message .img-content.unuploaded-images.upload-error .circle-wrap{
     pointer-events: auto;
+    width: 100%;
+    height: 100%;
+    left: 0;
+    top: 0;
+    border-radius: 0;
 }
 
 .upload-error img.uploaded-img {
@@ -12965,6 +12979,14 @@ img.fwd-img-preview {
 .chat-message.file-upload .upload-error .circle-wrap .circle-percent-text{
     display: none;
 }
+.chat-message.file-upload .unuploaded-images.upload-error .circle-wrap .circle-percent-text{
+    display: block;
+    color: #fff;
+    padding: 8px;
+    border-radius: 8px;
+    font-weight: 500;
+    top: calc(50% + 24px);
+}
 
 .chat-message.file-upload .upload-error .inside-circle {
     margin: 0;
@@ -12982,6 +13004,10 @@ img.fwd-img-preview {
 
 .chat-message.file-upload .upload-error .mdi-alert-circle {
     color: #D32F2F;
+}
+
+.chat-message.file-upload .upload-error.unuploaded-images .mdi-alert-circle {
+    color: #F44336;
 }
 
 /* color animation */
