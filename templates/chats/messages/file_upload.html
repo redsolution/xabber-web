@@ -23,6 +23,7 @@
         {[ if (is_sender) { ]}
         <i class="msg-delivering-state mdi mdi-14px" data-state="{{state}}" title="{{verbose_state}}" data-activates="retry-send-msg-{{msgid}}"></i>
         <div id="retry-send-msg-{{msgid}}" class="unified-dropdown-style dropdown-content retry-send-message noselect">
+            <div class="unified-dropdown-style-item msg-retry-dropdown-btn btn-retry-send-message hidden">{[print(xabber.getString("chat_screen__message__button_retry_send"))]}</div>
             <div class="unified-dropdown-style-item msg-retry-dropdown-btn repeat-upload">{[print(xabber.getString("resend"))]}</div>
             <div class="unified-dropdown-style-item msg-retry-dropdown-btn edit-upload{[ if (encrypted) { ]} hidden{[ } ]}">{[print(xabber.getString("edit"))]}</div>
             <div class="unified-dropdown-style-item msg-retry-dropdown-btn btn-delete-message">{[print(xabber.getString("delete"))]}</div>

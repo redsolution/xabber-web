@@ -186,6 +186,7 @@ import $ from "jquery";
     addTemplate('contacts.group_chats.participant_details_right');
     addTemplate('contacts.group_chats.participant_rights');
     addTemplate('contacts.group_chats.restriction_item');
+    addTemplate('contacts.group_chats.restriction_timers');
     addTemplate('contacts.group_chats.right_expire_variants');
     addTemplate('contacts.group_chats.pinned_message');
     addTemplate('contacts.group_chats.participant_details_item_right');

@@ -1,0 +1,29 @@
+<div class="restrictions-timers-wrap">
+    <div class="restrictions-timers-header">
+        {[print(xabber.getString("participant_edit__restriction_timers_header"))]}
+    </div>
+    <div class="field radio-field clickable-field">
+        <form action="#">
+            <p>
+                <input class="with-gap" checked name="restriction-timer" value="0" type="radio" id="restriction-timer-forever" />
+                <label for="restriction-timer-forever">Forever</label>
+            </p>
+            <p>
+                <input class="with-gap" name="restriction-timer" value="300" type="radio" id="restriction-timer-5-minutes" />
+                <label for="restriction-timer-5-minutes">5 minutes</label>
+            </p>
+            <p>
+                <input class="with-gap" name="restriction-timer" value="3600" type="radio" id="restriction-timer-1-hour" />
+                <label for="restriction-timer-1-hour">1 hour</label>
+            </p>
+            <p>
+                <input class="with-gap" name="restriction-timer" value="604800" type="radio" id="restriction-timer-1-week" />
+                <label for="restriction-timer-1-week">1 week</label>
+            </p>
+            <p>
+                <input class="with-gap" name="restriction-timer" value="2592000" type="radio" id="restriction-timer-1-month" />
+                <label for="restriction-timer-1-month">1 month</label>
+            </p>
+        </form>
+    </div>
+</div>

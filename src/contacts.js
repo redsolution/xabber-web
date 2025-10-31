@@ -4552,8 +4552,22 @@ xabber.ParticipantsViewRight = xabber.BasicView.extend({
                 callback && callback()
             } else {
                 this.model.participants.participantPermissionsRequest({id: participant_id}, (response) => {
-                    this.participant_properties_panel.open(participant, response, options);
-                    callback && callback()
+                    if (options.setup_permissions){
+                        let iq_get_rights = $iq({type: 'get', to: this.model.get('jid')})
+                            .c('query', {xmlns: `${Strophe.NS.GROUP_CHAT_PERMISSIONS}#default`});
+                        this.account.sendFast(iq_get_rights, (iq_default_rights) => {
+                            console.warn(iq_default_rights);
+                            options.setup_permissions = iq_default_rights;
+                            this.participant_properties_panel.open(participant, response, options);
+                            callback && callback()
+                        }, (err) => {
+                            console.error(err);
+                            utils.callback_popup_message(xabber.getString("groupchat_you_have_no_permissions_to_do_it"), 3000);
+                        });
+                    } else {
+                        this.participant_properties_panel.open(participant, response, options);
+                        callback && callback()
+                    }
                 }, (err) => {
                     console.error(err);
                     this.participant_properties_panel.open(participant, null, {no_edit: true});
@@ -4651,6 +4665,8 @@ xabber.ParticipantPropertiesViewRight = xabber.BasicView.extend({
         this.listenTo(this.participant, 'change:badge', this.onBadgeUpdated);
         this.listenTo(this.participant, 'change:avatar_url', this.updateMemberAvatar);
         this.permissions = permissions;
+        if (options && options.setup_permissions)
+            this.default_permissions = options.setup_permissions;
         this.render();
         this.updateSaveButton();
         let dropdown_settings = {
@@ -4716,6 +4732,7 @@ xabber.ParticipantPropertiesViewRight = xabber.BasicView.extend({
         this.updateMemberAvatar(this.participant);
         this.participant_messages = [];
         this.actual_rights = [];
+        this.default_rights = [];
         if (!this.contact.get('private_chat'))
             this.setActualRights();
         else {
@@ -4770,6 +4787,7 @@ xabber.ParticipantPropertiesViewRight = xabber.BasicView.extend({
     updateViewState: function () {
         this.$('.btn-edit-participant').removeClass('hidden');
         this.$('.rights-wrap').addClass('hidden');
+        this.$('.additional-options-rights-wrap').html('')
         if (this.view_state_options.no_edit){
             this.$('.btn-edit-participant').addClass('hidden');
         }
@@ -4778,10 +4796,16 @@ xabber.ParticipantPropertiesViewRight = xabber.BasicView.extend({
             this.$('.main-info').addClass('hidden');
             this.$('.participant-details-edit-inputs').addClass('hidden');
             this.$('.right-item').removeClass('hidden');
-            this.view_state_options.promote_admin && this.$('.right-item[data-role="member"]').addClass('hidden');
-            this.view_state_options.setup_permissions && this.$('.right-item[data-role="admin"]').addClass('hidden');
-            this.view_state_options.setup_permissions && this.$('.right-item[data-role="owner"]').addClass('hidden');
-            this.view_state_options.setup_permissions && this.$('.confirmation-rights-header').addClass('hidden');
+            if (this.view_state_options.promote_admin){
+                this.$('.right-item[data-role="member"]').addClass('hidden');
+                this.$('.normal-rights-header').text(xabber.getString("participant_edit__promote_to_admin_header"));
+            } else if (this.view_state_options.setup_permissions) {
+                this.$('.right-item[data-role="admin"]').addClass('hidden');
+                this.$('.right-item[data-role="owner"]').addClass('hidden');
+                this.$('.confirmation-rights-header').addClass('hidden');
+                this.$('.normal-rights-header').text(xabber.getString("participant_edit__setup_permissions_header"));
+                this.$('.additional-options-rights-wrap').append(templates.group_chats.restriction_timers());
+            }
         } else {
             this.$('.main-info').removeClass('hidden');
             this.$('.participant-details-edit-inputs').removeClass('hidden');
@@ -4835,7 +4859,10 @@ xabber.ParticipantPropertiesViewRight = xabber.BasicView.extend({
     },
 
     resetPanel: function () {
-        this.actual_rights = [];
+        if (!(this.view_state_options && this.view_state_options.setup_permissions)) {
+            this.actual_rights = [];
+            this.default_rights = [];
+        }
         this.participant_name_field.updateValue(true);
         this.participant_badge_field.updateValue(true);
         this.new_avatar = "";
@@ -4843,6 +4870,16 @@ xabber.ParticipantPropertiesViewRight = xabber.BasicView.extend({
         this.setActualRights();
         this.updateSaveButton();
         this.updateViewState();
+        let dropdown_settings = {
+            inDuration: 100,
+            outDuration: 100,
+            constrainWidth: false,
+            hover: false,
+            alignment: 'left'
+        };
+        this.$('.select-timer .dropdown-button').dropdown(dropdown_settings);
+        this.$('.circle-avatar.dropdown-button').dropdown(dropdown_settings);
+        this.$('.participant-details-item .dropdown-button').dropdown(_.extend(dropdown_settings, {alignment: 'right'}));
     },
 
     changeList: function (ev) {
@@ -5071,9 +5108,28 @@ xabber.ParticipantPropertiesViewRight = xabber.BasicView.extend({
         let $property_item = $(ev.target),
             $property_value = $property_item.closest('.select-timer').find('.property-value'),
             $input_item = $property_item.closest('.right-item').find('input');
-        if ($property_item.attr('data-value') !== $property_value.attr('data-value')) {
-            $property_item.closest('.right-item').addClass('changed-timer changed');
+        console.error($property_item.attr('data-value'));
+        console.error($property_value.attr('data-value'));
+        if (this.view_state_options && this.view_state_options.setup_permissions){
+
+            let actual_permission = this.actual_rights.find(restriction => (restriction.name === $input_item.attr('id'))),
+                timer;
+            if (!actual_permission.expires){
+                timer = '0'
+            }
+            console.error(timer)
+            if (timer === '0' && $property_item.attr('data-value') === timer) {
+                $property_item.closest('.right-item').removeClass('changed-timer');
+            } else if ($property_item.attr('data-value') !== $property_value.attr('data-value')) {
+                $property_item.closest('.right-item').addClass('changed-timer');
+            }
             this.updateSaveButton();
+
+        } else {
+            if ($property_item.attr('data-value') !== $property_value.attr('data-value')) {
+                $property_item.closest('.right-item').addClass('changed-timer changed');
+                this.updateSaveButton();
+            }
         }
         $property_value.text($property_item.text());
         $property_value.attr('data-value', $property_item.attr('data-value'));
@@ -5113,11 +5169,6 @@ xabber.ParticipantPropertiesViewRight = xabber.BasicView.extend({
             this.$('.block-header .block-name:not(.second-text)').removeClass('fade-out');
             this.$('.block-header .block-name.second-text').addClass('fade-out');
         }
-    },
-
-    updateSaveButton: function () {
-        let has_changes = this.$('.changed').length;
-        this.updateButtons(has_changes);
     },
 
     updateNickname: function (nickname) {
@@ -5226,6 +5277,10 @@ xabber.ParticipantPropertiesViewRight = xabber.BasicView.extend({
     },
 
     setActualRights: function () {
+        if (this.view_state_options.setup_permissions && this.view_state_options.setup_permissions){
+            this.setActualRightsWithDefault();
+            return;
+        }
         let $permissions = $(this.permissions);
         this.$('.normal-rights-wrap').html("");
         this.$('.confirmation-rights-wrap').html("");
@@ -5278,6 +5333,214 @@ xabber.ParticipantPropertiesViewRight = xabber.BasicView.extend({
                 }
             }
         });
+    },
+
+    setActualRightsWithDefault: function () {
+        let $permissions = $(this.permissions),
+            $default_permissions = $(this.default_permissions);
+        this.$('.normal-rights-wrap').html("");
+        this.$('.confirmation-rights-wrap').html("");
+
+        _.each($default_permissions.find('permission'), (item) => {
+            let $item = $(item),
+                fixed = $item.attr('fixed'),
+                text = $item.text(),
+                name = $item.attr('name'),
+                status = $item.attr('status');
+
+            let attrs = {
+                    pretty_name: text,
+                    name: name,
+                },
+                $restriction_item = $(templates.group_chats.restriction_item({name: attrs.name, pretty_name: attrs.pretty_name, type: fixed, role: 'member'})),
+                $restriction_expire = $(templates.group_chats.right_expire_variants({
+                right_name: ('default-' + attrs.name),
+            }));
+            $restriction_item.append($restriction_expire);
+            this.$('.normal-rights-wrap').append($restriction_item);
+
+            if (fixed && fixed === 'true') {
+                $restriction_item.addClass('disabled');
+
+            }
+            this.default_rights.push({name: attrs.name, status: status});
+            if (status && status === 'true') {
+                $restriction_item.find(`#${attrs.name}`).prop('checked', true);
+            }
+        });
+
+        _.each($permissions.find('permission'), (item) => {
+            let $item = $(item),
+                fixed = $item.attr('fixed'),
+                text = $item.text(),
+                role = $item.attr('role'),
+                name = $item.attr('name'),
+                status = $item.attr('status'),
+                expires = $item.attr('expires');
+            if (role !== 'member')
+                return;
+
+            let attrs = {
+                    pretty_name: text,
+                    name: name,
+                    expires: expires
+                },
+                $restriction_item = $(templates.group_chats.restriction_item({name: attrs.name, pretty_name: attrs.pretty_name, type: fixed, role: role})),
+                $restriction_expire = $(templates.group_chats.right_expire_variants({
+                right_name: ('default-' + attrs.name),
+            }));
+            $restriction_item.append($restriction_expire);
+            let view = this.$('.normal-rights-wrap .right-item.restriction-' + attrs.name);
+
+            if (view.length)
+                view.replaceWith($restriction_item);
+
+            $restriction_item.addClass('colorable-right-item');
+
+            if (fixed && fixed === 'true') {
+                $restriction_item.addClass('disabled');
+
+            }
+            this.actual_rights.push({name: attrs.name, expires: attrs.expires, status: status});
+            if (status && status === 'true') {
+                $restriction_item.find(`#${attrs.name}`).prop('checked', true);
+            }
+            if (Number(expires) && Number(expires) !== 0) {
+                if ($restriction_item.find('.select-timer .property-value').length) {
+                    $restriction_item.find('.select-timer .property-value').attr('data-value', expires)
+                        .removeClass('default-value')
+                        .text(moment(Number(expires) * 1000).fromNow());
+                } else {
+                    $restriction_item.append($('<div class="select-timer"/>'));
+                    $restriction_item.find('.select-timer').attr('data-value', expires)
+                        .text(moment(Number(attrs.expires)*1000).fromNow())
+                }
+            }
+        });
+    },
+
+    updateSaveButton: function () {
+        if (this.view_state_options.setup_permissions && this.view_state_options.setup_permissions){
+            let has_changes = false;
+
+            console.error(this.view_state_options.setup_permissions);
+            console.error(this.permissions);
+            console.error(this.default_permissions);
+            console.error(this.actual_rights);
+            console.error(this.default_rights);
+            this.$('.normal-rights-wrap .right-item').each((idx, item) => {
+                let $item = $(item),
+                    restriction_name = $item.find('input').attr('id');
+
+                let actual_permission = this.actual_rights.find(restriction => (restriction.name === restriction_name)),
+                    actual_default_permission = this.default_rights.find(restriction => (restriction.name === restriction_name));
+
+                console.error(restriction_name);
+                console.error(actual_permission);
+                console.error(actual_permission.status);
+                console.error(actual_default_permission);
+                console.error(actual_default_permission.status);
+                console.error($item.find('input').prop('checked'));
+
+                if (actual_permission && actual_default_permission){
+                    console.error($item.find('input').prop('checked') === JSON.parse(actual_default_permission.status));
+                    if ($item.find('input').prop('checked') === JSON.parse(actual_default_permission.status)){
+                        $item.find('.field.clickable-field').addClass('default-permission-placeholder');
+                    } else {
+                        $item.find('.field.clickable-field').removeClass('default-permission-placeholder');
+                    }
+                    if ($item.find('input').prop('checked')) {
+                        if (actual_permission.status === 'false') {
+                            has_changes = true;
+                            $item.addClass('changed-permission');
+                        } else {
+                            $item.removeClass('changed-permission');
+                        }
+                    } else {
+                        if (actual_permission.status === 'true') {
+                            has_changes = true;
+                            $item.addClass('changed-permission');
+                        } else {
+                            $item.removeClass('changed-permission');
+                        }
+                    }
+                }
+            });
+            if (this.$('.changed-timer').length)
+                has_changes = true;
+            console.error(has_changes);
+            this.updateButtons(has_changes);
+            return;
+        }
+        let has_changes = this.$('.changed').length;
+        this.updateButtons(has_changes);
+    },
+
+    savePermissions: function (ev, callback) {
+        if ($(ev.target).hasClass('non-active'))
+            return;
+        let changed_rights = [],
+            $btn = $(ev.target),
+            member_id = this.participant.get('id'),
+            rights_changed = false;
+        this.$('.buttons-wrap .btn-save-user-rights').addClass('non-active');
+        this.$('.right-item').each((idx, right_item) => {
+            if ($(right_item).hasClass('changed-permission') || $(right_item).hasClass('changed-timer')) {
+                let $right_item = $(right_item),
+                    right_name = $right_item.find('.field input')[0].id,
+                    status;
+                if ($right_item.find('.field input:checked').val()) {
+                    status = 'true';
+                } else {
+                    status = 'false';
+                }
+                let right_expire = $right_item.find('.select-timer .timer-item-wrap .property-value').attr('data-value');
+                changed_rights.push({
+                    seconds: right_expire,
+                    name: right_name,
+                    status: status,
+                });
+                rights_changed = true;
+            }
+        });
+        if (rights_changed) {
+            let iq_rights_changes = $iq({type: 'set', to: this.contact.get('jid')})
+                .c('query', {xmlns: Strophe.NS.GROUP_CHAT_PERMISSIONS, id: member_id });
+            iq_rights_changes.c('permissions', {xmlns: Strophe.NS.GROUP_CHAT_PERMISSIONS});
+            let global_timer = this.$('input[name="restriction-timer"]:checked').val();
+            _.each(changed_rights, (permission) => {
+                let timer = '';
+                if (permission.seconds && permission.seconds !== '0'){
+                    timer = permission.seconds;
+                } else if (global_timer && global_timer !== '0'){
+                    timer = global_timer;
+                }
+                if (timer === ''){
+                    timer = 0;
+                }
+
+                console.error(permission.seconds);
+                console.error(global_timer);
+                console.error(timer);
+                iq_rights_changes.c('permission', {
+                    name: permission.name,
+                    status: permission.status,
+                    seconds: timer,
+                }).up();
+            });
+            console.error(changed_rights);
+            console.error(iq_rights_changes.tree());
+            this.account.sendIQFast(iq_rights_changes, (res) => {
+                    !callback && this.close();
+                    callback && callback();
+                },
+                (error) => {
+                    this.close();
+                    if ($(error).find('not-allowed').length)
+                        utils.dialogs.error(xabber.getString("groupchat_you_have_no_permissions_to_do_it"));
+                });
+        }
+        $btn.blur();
     },
 
     getPrivateChat: function (ev) {
@@ -5341,10 +5604,14 @@ xabber.ParticipantPropertiesViewRight = xabber.BasicView.extend({
     },
 
     changeRights: function (ev) {
+        if (this.view_state_options.setup_permissions && this.view_state_options.setup_permissions){
+            this.updateSaveButton();
+            return;
+        }
         let $target = $(ev.target),
             $right_item = $target.closest('.right-item'),
             right_name = $target.prop('id');
-        if ($target.closest('.confirmation-rights-wrap').length && $target.prop('checked')){ //34
+        if ($target.closest('.confirmation-rights-wrap').length && $target.prop('checked')){
             utils.dialogs.ask(xabber.getString(
                 "participant_edit__confirm_permission_header"),
                 xabber.getString("participant_edit__confirm_permission_text"),
@@ -5403,6 +5670,10 @@ xabber.ParticipantPropertiesViewRight = xabber.BasicView.extend({
     },
 
     saveRights: function (ev, callback) {
+        if(this.view_state_options.setup_permissions && this.view_state_options.setup_permissions){
+            this.savePermissions(ev, callback);
+            return;
+        }
         if ($(ev.target).hasClass('non-active'))
             return;
         let changed_rights = [],
@@ -5479,11 +5750,18 @@ xabber.ParticipantPropertiesViewRight = xabber.BasicView.extend({
             let iq_rights_changes = $iq({type: 'set', to: this.contact.get('jid')})
                 .c('query', {xmlns: Strophe.NS.GROUP_CHAT_PERMISSIONS, id: member_id });
             iq_rights_changes.c('permissions', {xmlns: Strophe.NS.GROUP_CHAT_PERMISSIONS});
+            let global_timer = this.$('input[name="restriction-timer"]:checked').val();
             _.each(changed_rights, (permission) => {
+                let timer = '';
+                if (permission.seconds && permission.seconds !== '0'){
+                    timer = permission.seconds;
+                } else if (global_timer && global_timer !== '0'){
+                    timer = global_timer;
+                }
                 iq_rights_changes.c('permission', {
                     name: permission.name,
                     status: permission.status,
-                    seconds: permission.seconds || '',
+                    seconds: timer,
                 }).up();
             });
             this.account.sendIQFast(iq_rights_changes, (res) => {
@@ -6323,6 +6601,8 @@ xabber.NewbiePermissionsRightView = xabber.BasicView.extend({
 
             if (view.length)
                 view.replaceWith($restriction_item);
+
+            $restriction_item.addClass('colorable-right-item');
 
             this.newbie_permissions.push({
                 name: attrs.name,

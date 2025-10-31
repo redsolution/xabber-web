@@ -9011,7 +9011,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
     },
 
     onContextMenuMessage: function (ev) {
-        if ($(ev.target).closest('.chat-message.system').length)
+        if ($(ev.target).closest('.chat-message.system').length || $(ev.target).closest('.chat-message').find('.msg-delivering-state[data-state="error"]').length)
             return;
         ev.preventDefault();
         let $elem = $(ev.target).closest('.chat-message'),
@@ -9133,15 +9133,24 @@ xabber.ChatContentView = xabber.BasicView.extend({
     onClickMessage: function (ev) {
         let $elem = $(ev.target);
         if ($elem.closest('.chat-message').length
-            && $elem.closest('.chat-message').find('.upload-error').length
-            && !$elem.closest('.msg-delivering-state').length
-            && !$elem.closest('.dropdown-content').length
-            && !$elem.closest('.chat-message').find('.dropdown-content.active').length
+            && ($elem.closest('.chat-message').find('.upload-error').length || $elem.closest('.chat-message').find('.msg-delivering-state[data-state="error"]').length)
         ){
-            ev.preventDefault();
-            setTimeout(() => {
-                $elem.closest('.chat-message').find('.msg-delivering-state').click()
-            }, 10)
+            if (!$elem.closest('.chat-message').find('.upload-error').length){ //34
+                let $msg = $elem.closest('.chat-message');
+
+                $msg.find('.btn-delete-message').addClass('hidden');
+                $msg.find('.repeat-upload').addClass('hidden');
+                $msg.find('.edit-upload').addClass('hidden');
+                $msg.find('.dropdown-content.retry-send-message .btn-retry-send-message').removeClass('hidden');
+            }
+            if (!$elem.closest('.msg-delivering-state').length
+                && !$elem.closest('.dropdown-content').length
+                && !$elem.closest('.chat-message').find('.dropdown-content.active').length){
+                ev.preventDefault();
+                setTimeout(() => {
+                    $elem.closest('.chat-message').find('.msg-delivering-state').click()
+                }, 10)
+            }
         }
         if (this.model.get('notifications')){
             this.onClickNotification(ev);
@@ -9158,7 +9167,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
         }
         if ($elem.closest('.dropdown-content').length)
             return;
-        if ($elem.hasClass('file-link-download')) { // сделать проверку на прокси и отдельные функции скачивания
+        if ($elem.hasClass('file-link-download')) {
             ev.preventDefault();
             let msg = this.model.messages.get($elem.closest('.chat-message').data('uniqueid')) || this.account.context_messages.get($elem.closest('.chat-message').data('uniqueid')),
                 uri = $elem.attr('href'),
@@ -15035,6 +15044,7 @@ xabber.ChatBottomView = xabber.BasicView.extend({
     },
 
     manageSelectedMessages: function () {
+        this.content_view.$('.chat-message.selected').find('.msg-delivering-state[data-state="error"]').closest('.chat-message.selected').removeClass('selected');
         let $selected_msgs = this.content_view.$('.chat-message.selected'),
             $input_panel = this.$('.message-input-panel'),
             $message_actions = this.$('.message-actions-panel'),
