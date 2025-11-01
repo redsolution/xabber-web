@@ -4409,3 +4409,97 @@
 [data-color=blue-grey] .border-color-500 {
   border-color: #607D8B !important;
 }
+/* Red */
+[data-main-color=red] .important-client-text-color-500 {
+  color: #f44336 !important;
+}
+
+/* Pink */
+[data-main-color=pink] .important-client-text-color-500 {
+  color: #e91e63 !important;
+}
+
+/* Purple */
+[data-main-color=purple] .important-client-text-color-500 {
+  color: #9c27b0 !important;
+}
+
+/* Deep Purple */
+[data-main-color=deep-purple] .important-client-text-color-500 {
+  color: #673ab7 !important;
+}
+
+/* Indigo */
+[data-main-color=indigo] .important-client-text-color-500 {
+  color: #3f51b5 !important;
+}
+
+/* Blue */
+[data-main-color=blue] .important-client-text-color-500 {
+  color: #2196f3 !important;
+}
+
+/* Light Blue */
+[data-main-color=light-blue] .important-client-text-color-500 {
+  color: #03a9f4 !important;
+}
+
+/* Cyan */
+[data-main-color=cyan] .important-client-text-color-500 {
+  color: #00bcd4 !important;
+}
+
+/* Teal */
+[data-main-color=teal] .important-client-text-color-500 {
+  color: #009688 !important;
+}
+
+/* Green */
+[data-main-color=green] .important-client-text-color-500 {
+  color: #4caf50 !important;
+}
+
+/* Light Green */
+[data-main-color=light-green] .important-client-text-color-500 {
+  color: #8bc34a !important;
+}
+
+/* Lime */
+[data-main-color=lime] .important-client-text-color-500 {
+  color: #cddc39 !important;
+}
+
+/* Yellow */
+[data-main-color=yellow] .important-client-text-color-500 {
+  color: #ffeb3b !important;
+}
+
+/* Amber */
+[data-main-color=amber] .important-client-text-color-500 {
+  color: #ffc107 !important;
+}
+
+/* Orange */
+[data-main-color=orange] .important-client-text-color-500 {
+  color: #ff9800 !important;
+}
+
+/* Deep Orange */
+[data-main-color=deep-orange] .important-client-text-color-500 {
+  color: #ff5722 !important;
+}
+
+/* Brown */
+[data-main-color=brown] .important-client-text-color-500 {
+  color: #795548 !important;
+}
+
+/* Grey */
+[data-main-color=grey] .important-client-text-color-500 {
+  color: #9e9e9e !important;
+}
+
+/* Blue Grey */
+[data-main-color=blue-grey] .important-client-text-color-500 {
+  color: #607d8b !important;
+}

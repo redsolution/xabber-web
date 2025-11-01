@@ -9130,7 +9130,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
         })
     },
 
-    onClickMessage: function (ev) {
+    onClickMessage: function (ev, is_expanded) {
         let $elem = $(ev.target);
         if ($elem.closest('.chat-message').length
             && ($elem.closest('.chat-message').find('.upload-error').length || $elem.closest('.chat-message').find('.msg-delivering-state[data-state="error"]').length)
@@ -9169,24 +9169,45 @@ xabber.ChatContentView = xabber.BasicView.extend({
             return;
         if ($elem.hasClass('file-link-download')) {
             ev.preventDefault();
-            let msg = this.model.messages.get($elem.closest('.chat-message').data('uniqueid')) || this.account.context_messages.get($elem.closest('.chat-message').data('uniqueid')),
-                uri = $elem.attr('href'),
-                file = (msg.get('files') || []).find(f => f.sources[0] === uri);
-            if (this.account.server_features.get('proxy-viewer') && this.account.get('proxy_viewer_url') && this.account.get('proxy_viewer_token')){
-                this.handleProxyFileLoad(file);
+            let msg;
+            if (is_expanded){
+                msg = this.account.forwarded_messages && this.account.forwarded_messages.get($elem.closest('.chat-message').data('uniqueid'));
             } else {
-                if (file && file.key) {
-                    this.model.messages.decryptFile(uri,file.key).then((result) => {
-                        if (result === null)
-                            return;
-                        let download = document.createElement("a");
-                        download.href = result;
-                        download.download = file.name;
-                        download.click();
-                    });
-                    return;
-                } else
-                    xabber.openWindow($elem.attr('href'));
+                msg = this.model.messages.get($elem.closest('.chat-message').data('uniqueid')) || this.account.context_messages && this.account.context_messages.get($elem.closest('.chat-message').data('uniqueid'));
+            }
+            if (msg){
+                let uri = $elem.attr('href'),
+                    file = (msg.get('files') || []).find(f => f.sources[0] === uri);
+                if (this.account.server_features.get('proxy-viewer') && this.account.get('proxy_viewer_url') && this.account.get('proxy_viewer_token')){
+                    if (!file){
+                        let fwd_msgs = msg.get('forwarded_message');
+                        fwd_msgs && _.isArray(fwd_msgs) && _.each(fwd_msgs, (fwd_msg) => {
+                            if (fwd_msg && !file) {
+                                file = (fwd_msg.get('files') || []).find(f => f.sources[0] === uri);
+                            }
+                        });
+                        if (file){
+                            this.handleProxyFileLoad(file);
+                        } else {
+                            console.error('no file');
+                        }
+                    } else {
+                        this.handleProxyFileLoad(file);
+                    }
+                } else {
+                    if (file && file.key) {
+                        this.model.messages.decryptFile(uri,file.key).then((result) => {
+                            if (result === null)
+                                return;
+                            let download = document.createElement("a");
+                            download.href = result;
+                            download.download = file.name;
+                            download.click();
+                        });
+                        return;
+                    } else
+                        xabber.openWindow($elem.attr('href'));
+                }
             }
         }
         if ($elem.hasClass('msg-delivering-state') ||  $elem.hasClass('not-decrypted-tooltip') || $elem.hasClass('audio-control-panel') || $elem.hasClass('voice-msg-current-time') || $elem.hasClass('voice-msg-total-time')) {
@@ -9610,61 +9631,7 @@ xabber.ExpandedMessagePanel = xabber.BasicView.extend({
     },
 
     onClickPinnedMessage: function (ev) {
-        let $elem = $(ev.target);
-        if ($elem.hasClass('msg-hyperlink')) {
-            ev && ev.preventDefault();
-            let link = $elem.attr('href');
-            utils.dialogs.ask(xabber.getString("open_this_link"), decodeURI(link), null, {ok_button_text: xabber.getString("open")}).done((result) => {
-                if (result)
-                    utils.openWindow(link);
-            });
-            return;
-        }
-        if ($elem.closest(".plyr-video-container").length > 0) {
-            let msg = this.chat_content.model.messages.get($elem.closest('.chat-message').data('uniqueid')),
-                $plyr = $elem.closest(".plyr-video-container");
-            !msg && (msg = this.account.forwarded_messages.get($elem.closest('.chat-message').data('uniqueid')));
-            if (msg && msg.get('msg_player_videos')){
-                if (!xabber.plyr_player_popup){
-                    xabber.plyr_player_popup = new xabber.PlyrPlayerPopupView({});
-                    xabber.plyr_player_popup.show({player: msg.get('msg_player_videos')[$plyr.attr('data-message-id')]});
-                } else
-                    xabber.plyr_player_popup.showNewVideo({player: msg.get('msg_player_videos')[$plyr.attr('data-message-id')]});
-            }
-            return;
-        }
-        if ($elem.hasClass('voice-message-play') || $elem.hasClass('no-uploaded')) {
-            let $audio_elem = $elem.closest('.link-file'),
-                f_url = $audio_elem.find('.file-link-download').attr('href');
-            $audio_elem.find('.mdi-play').removeClass('no-uploaded');
-            if ($elem.closest('.chat-message').hasClass('encrypted')) {
-                let msg = this.chat_content.model.messages.get($elem.closest('.chat-message').data('uniqueid')),
-                    uri = $elem.closest('.link-file').find('.file-link-download').attr('href'),
-                    file = (msg.get('files') || []).find(f => f.sources[0] === uri);
-                if (file && file.key) {
-                    if (this.account.server_features.get('proxy-viewer') && this.account.get('proxy_viewer_url') && this.account.get('proxy_viewer_token')){
-                        audio_player.$audio_elem.voice_message = this.renderVoiceMessage($audio_elem.find('.file-container')[0], f_url, null, file, file.key);
-                    } else {
-                        this.chat_content.model.messages.decryptFile(f_url, file.key).then((result) => {
-                            if (result === null)
-                                return;
-                            $audio_elem[0].voice_message = this.chat_content.renderVoiceMessage($audio_elem.find('.file-container')[0], result, null, file);
-                        });
-                    }
-                }
-            } else {
-                let msg = this.chat_content.model.messages.get($elem.closest('.chat-message').data('uniqueid')),
-                    uri = $elem.closest('.link-file').find('.file-link-download').attr('href'),
-                    file = (msg.get('files') || []).find(f => f.sources[0] === uri),
-                    peaks = file && file.peaks ? file.peaks : null;
-                $audio_elem[0].voice_message = this.chat_content.renderVoiceMessage($audio_elem.find('.file-container')[0], f_url, null, file);
-            }
-            return;
-        }
-        if ($elem.hasClass('mdi-play') && !($elem.closest(".video-file-wrap").length > 0)) {
-            let $audio_elem = $elem.closest('.link-file');
-            $audio_elem[0].voice_message.play();
-        }
+        this.chat_content.onClickMessage(ev, true);
     },
 
     onClickExpandedMessageLocation: function (ev) {

@@ -19204,6 +19204,19 @@ input[type=range].voice-message-volume:focus {
 .details-panel-right .right-item.colorable-right-item .clickable-field.default-permission-placeholder .lever:after{
     background-color: #f1f1f1 !important;
 }
+.details-panel-right .right-item.colorable-right-item .clickable-field.default-permission-placeholder + .select-timer{
+    display: none;
+}
+.details-panel-right .additional-options-rights-wrap .btn-set-default-permissions{
+    line-height: 36px;
+    position: absolute;
+    left: 50%;
+    transform: translate(-50%);
+    background: #F5F5F5;
+}
+.details-panel-right .additional-options-rights-wrap .btn-set-default-permissions:hover{
+    background: #E0E0E0;
+}
 
 .details-panel-right .participant-details-wrap .right-item .select-timer,
 .details-panel-right .newbie-permissions-wrap .right-item .select-timer,
@@ -19230,7 +19243,9 @@ input[type=range].voice-message-volume:focus {
 .details-panel-right .newbie-permissions-wrap .right-item .right-name,
 .details-panel-right .restrictions-wrap .right-item .right-name {
     /*margin: 0 0 0 44px;*/
-    font-size: 16px;
+    font-size: 1rem;
+    margin-left: 8px;
+    color: rgb(97, 97, 97) !important;
     vertical-align: top;
     display: inline-block;
     line-height: 20px;
@@ -19313,14 +19328,15 @@ input[type=range].voice-message-volume:focus {
 .details-panel-right .participant-details-wrap .participant-details-edit-wrap .restrictions-timers-header,
 .details-panel-right .participant-details-wrap .participant-details-edit-wrap .normal-rights-header{
     padding: 6px 24px 3px 27px;
-    font-size: 18px;
+    font-size: 1rem;
+    color: rgb(66, 66, 66);
 }
 .details-panel-right .participant-details-wrap .participant-details-edit-wrap .restrictions-timers-wrap p{
-    margin: 4px 0 4px 8px;
+    margin: 0 0 0 8px;
 }
 .details-panel-right .participant-details-wrap .participant-details-edit-wrap .restrictions-timers-wrap label{
-    color: rgba(0, 0, 0, .87) !important;
-    font-size: 16px;
+    color: rgb(97, 97, 97) !important;
+    font-size: 1rem;
 }
 
 .details-panel-right .participant-details-wrap .participant-details-edit-inputs{
