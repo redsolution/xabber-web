@@ -10,6 +10,16 @@ var $ = deps.$,
     moment = deps.moment,
     curve25519js = deps.curve25519js;
 
+
+let getString = function (id, params) {
+    if (deps.xabber_i18next.exists(id)) {
+        return deps.xabber_i18next.t(id, { postProcess: 'sprintf', sprintf: params}).replace(/\\'/g, "'").replace(/%+\d+[$]/g, "%").replace(/\\n/g, '&#10;');
+    } else if (deps.xabber_i18next.default_lang) {
+        return deps.xabber_i18next.default_lang(id, { postProcess: 'sprintf', sprintf: params}).replace(/\\'/g, "'").replace(/%+\d+[$]/g, "%").replace(/\\n/g, '&#10;');
+    } else
+        return "";
+};
+
 // jQuery extensions
 $.fn.switchClass = function (klass, condition) {
     if (arguments.length === 1) {
@@ -661,6 +671,15 @@ var utils = {
                 break;
         }
         return text;
+    },
+
+    pretty_time_text_from_seconds: function (item, value, $text_insert) {
+        let $item = $(item);
+        if (value === '0'){
+            $text_insert.text(getString("forever"))
+        } else {
+            $text_insert.text(moment.duration(Number(value), 'seconds').humanize(false));
+        }
     },
 
     pretty_duration_permission_timer_long: function (timer) {

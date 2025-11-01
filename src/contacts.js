@@ -4621,8 +4621,9 @@ xabber.ParticipantPropertiesViewRight = xabber.BasicView.extend({
         'click .btn-edit-participant': 'showNamePanel',
         'click .btn-back-name': 'hidePanel',
         "change .clickable-field input": "changeRights",
-        "click .btn-reset": "resetPanel",
+        "click .btn-reset": "close",
         "click .btn-save-user-rights": "saveRights",
+        "click .restrictions-timers-wrap p": "changeTimersOnRadioClick",
         "change .circle-avatar input": "changeAvatar",
         "click .btn-kick-participant": "kickParticipantDialog",
         "click .btn-set-visibility-wrap": "setVisibility",
@@ -4808,8 +4809,13 @@ xabber.ParticipantPropertiesViewRight = xabber.BasicView.extend({
                 this.$('.normal-rights-header').text(xabber.getString("participant_edit__setup_permissions_header"));
                 this.$('.btn-save-user-rights').text(xabber.getString("dialog_circle_settings__button_apply"));
                 this.$('.additional-options-rights-wrap').append(templates.group_chats.restriction_timers());
+
+                _.each(this.$('.restrictions-timers-wrap p'), (item) => {
+                    utils.pretty_time_text_from_seconds(item, $(item).find('input').val(), $(item).find('label'));
+                });
                 this.$('.additional-options-rights-wrap')
                     .append(`<div class="btn-set-default-permissions btn-flat btn-main">${xabber.getString("participant_edit__set_default")}</div>`);
+                this.checkTimersDifference();
             }
         } else {
             this.$('.main-info').removeClass('hidden');
@@ -5109,6 +5115,64 @@ xabber.ParticipantPropertiesViewRight = xabber.BasicView.extend({
         });
     },
 
+
+    checkTimersDifference: function () {
+        if (this.view_state_options && this.view_state_options.setup_permissions){
+            let timer, has_diff;
+
+            this.$('.normal-rights-wrap .right-item').each((idx, item) => {
+                let $item = $(item);
+                if ($item.find('.field.clickable-field:not(.default-permission-placeholder)').length){
+                    if (!timer){
+                        timer = $item.find('.property-value').attr('data-value');
+                    } else if (timer !== $item.find('.property-value').attr('data-value')){
+                        has_diff = true;
+                    }
+                }
+            });
+            if (!has_diff && timer){
+                this.$(`input[name="restriction-timer"][value="${timer}"]`).prop('checked', true);
+            } else {
+                this.$(`input[name="restriction-timer"]`).prop('checked', false);
+            }
+        }
+    },
+
+    changeTimersOnRadioClick: function (ev) {
+        let $item = $(ev.target).closest('.restrictions-timers-wrap p'),
+            val = $item.find('input').val();
+
+        this.$('.normal-rights-wrap .right-item').each((idx, item) => {
+            let $item = $(item);
+            if ($item.find('.field.clickable-field:not(.default-permission-placeholder)').length){
+                let $property_value = $item.find('.property-value');
+
+
+                let actual_permission = this.actual_rights.find(restriction => (restriction.name === $item.find('input').attr('id'))),
+                    timer;
+                if (!actual_permission.expires){
+                    timer = '0'
+                }
+                if (timer === '0' && val === timer) {
+                    $item.removeClass('changed-timer');
+                    $property_value.removeClass('important-client-text-color-500');
+                } else if (val !== $property_value.attr('data-value')) {
+                    $item.addClass('changed-timer');
+                    $property_value.addClass('important-client-text-color-500');
+                }
+
+                $property_value.text(moment.duration(Number(val), 'seconds').humanize(false));
+                $property_value.attr('data-value', val);
+                if (val === '0') {
+                    $property_value.removeClass('default-value').text(xabber.getString("forever"));
+                } else if ($property_value.hasClass('default-value'))
+                    $property_value.removeClass('default-value');
+                this.updateSaveButton();
+            }
+        });
+
+    },
+
     changeTimerValue: function (ev) {
         let $property_item = $(ev.target),
             $property_value = $property_item.closest('.select-timer').find('.property-value'),
@@ -5135,7 +5199,14 @@ xabber.ParticipantPropertiesViewRight = xabber.BasicView.extend({
                 $property_item.closest('.right-item').addClass('changed-timer');
                 $property_value.addClass('important-client-text-color-500');
             }
+            $property_value.text(moment.duration(Number($property_item.attr('data-value')), 'seconds').humanize(false));
+            $property_value.attr('data-value', $property_item.attr('data-value'));
+            if ($property_item.attr('data-value') === '0') {
+                $property_value.removeClass('default-value').text(xabber.getString("forever"));
+            } else if ($property_value.hasClass('default-value'))
+                $property_value.removeClass('default-value');
             this.updateSaveButton();
+            return;
 
         } else {
             if ($property_item.attr('data-value') !== $property_value.attr('data-value')) {
@@ -5143,10 +5214,10 @@ xabber.ParticipantPropertiesViewRight = xabber.BasicView.extend({
                 this.updateSaveButton();
             }
         }
-        $property_value.text($property_item.text());
+        $property_value.text(moment.duration(Number($property_item.attr('data-value')), 'seconds').humanize(false));
         $property_value.attr('data-value', $property_item.attr('data-value'));
         if ($property_item.attr('data-value') === '0') {
-            $property_value.addClass('default-value').text(xabber.getString("dialog_rights__button_set_timer"));
+            $property_value.removeClass('default-value').text(xabber.getString("forever"));
         } else if ($property_value.hasClass('default-value'))
             $property_value.removeClass('default-value');
     },
@@ -5315,6 +5386,9 @@ xabber.ParticipantPropertiesViewRight = xabber.BasicView.extend({
                 $restriction_expire = $(templates.group_chats.right_expire_variants({
                 right_name: ('default-' + attrs.name),
             }));
+            _.each($restriction_expire.find('.property-variant'), (item) => {
+                utils.pretty_time_text_from_seconds(item, $(item).attr('data-value'), $(item));
+            });
             $restriction_item.append($restriction_expire);
             if (role === 'owner'){
                 if (name === 'owner'){
@@ -5368,6 +5442,9 @@ xabber.ParticipantPropertiesViewRight = xabber.BasicView.extend({
                 $restriction_expire = $(templates.group_chats.right_expire_variants({
                 right_name: ('default-' + attrs.name),
             }));
+            _.each($restriction_expire.find('.property-variant'), (item) => {
+                utils.pretty_time_text_from_seconds(item, $(item).attr('data-value'), $(item));
+            });
             $restriction_item.append($restriction_expire);
             this.$('.normal-rights-wrap').append($restriction_item);
 
@@ -5401,6 +5478,10 @@ xabber.ParticipantPropertiesViewRight = xabber.BasicView.extend({
                 $restriction_expire = $(templates.group_chats.right_expire_variants({
                 right_name: ('default-' + attrs.name),
             }));
+            console.error('heeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee')
+            _.each($restriction_expire.find('.property-variant'), (item) => {
+                utils.pretty_time_text_from_seconds(item, $(item).attr('data-value'), $(item));
+            });
             $restriction_item.append($restriction_expire);
             let view = this.$('.normal-rights-wrap .right-item.restriction-' + attrs.name);
 
@@ -5429,6 +5510,7 @@ xabber.ParticipantPropertiesViewRight = xabber.BasicView.extend({
                 }
             }
         });
+        this.updateSaveButton();
     },
 
     updateSaveButton: function () {
@@ -5458,8 +5540,10 @@ xabber.ParticipantPropertiesViewRight = xabber.BasicView.extend({
                     console.error($item.find('input').prop('checked') === JSON.parse(actual_default_permission.status));
                     if ($item.find('input').prop('checked') === JSON.parse(actual_default_permission.status)){
                         $item.find('.field.clickable-field').addClass('default-permission-placeholder');
+                        $item.find('.property-value').removeClass('important-client-text-color-500');
                     } else {
                         $item.find('.field.clickable-field').removeClass('default-permission-placeholder');
+                        $item.find('.property-value').addClass('important-client-text-color-500');
                     }
                     if ($item.find('input').prop('checked')) {
                         if (actual_permission.status === 'false') {
@@ -5482,6 +5566,7 @@ xabber.ParticipantPropertiesViewRight = xabber.BasicView.extend({
                 has_changes = true;
             console.error(has_changes);
             this.updateButtons(has_changes);
+            this.checkTimersDifference();
             return;
         }
         let has_changes = this.$('.changed').length;
@@ -6089,6 +6174,9 @@ xabber.DefaultRestrictionsView = xabber.BasicView.extend({
                 view = this.$('.default-restrictions-list-wrap .right-item.restriction-default-' + attrs.name),
                 restriction_item = $(templates.group_chats.restriction_item({name: ('default-' + attrs.name), pretty_name: attrs.pretty_name, type: field.type, role: null})),
                 restriction_expire = $(templates.group_chats.right_expire_variants({right_name: ('default-' + attrs.name), expire_options: field.options}));
+            _.each(restriction_expire.find('.property-variant'), (item) => {
+                utils.pretty_time_text_from_seconds(item, $(item).attr('data-value'), $(item));
+            });
             if (view.length)
                 view.detach();
             restriction_item.append(restriction_expire);

@@ -110,6 +110,7 @@ let Xabber = Backbone.Model.extend({
         } else
             return [];
     },
+
     getString: function (id, params) {
         if (xabber_i18next.exists(id)) {
             return xabber_i18next.t(id, { postProcess: 'sprintf', sprintf: params}).replace(/\\'/g, "'").replace(/%+\d+[$]/g, "%").replace(/\\n/g, '&#10;');
