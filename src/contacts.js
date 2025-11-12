@@ -4620,10 +4620,11 @@ xabber.ParticipantPropertiesViewRight = xabber.BasicView.extend({
         "click .btn-back.btn-top": "scrollToTopSmooth",
         'click .btn-edit-participant': 'showNamePanel',
         'click .btn-back-name': 'hidePanel',
-        "change .clickable-field input": "changeRights",
+        "change .clickable-field input:not(#custom-timer-date)": "changeRights",
         "click .btn-reset": "close",
         "click .btn-save-user-rights": "saveRights",
         "click .restrictions-timers-wrap p": "changeTimersOnRadioClick",
+        "change #custom-timer-date": "onCustomTimeInputChange",
         "change .circle-avatar input": "changeAvatar",
         "click .btn-kick-participant": "kickParticipantDialog",
         "click .btn-set-visibility-wrap": "setVisibility",
@@ -4811,6 +4812,17 @@ xabber.ParticipantPropertiesViewRight = xabber.BasicView.extend({
                 this.$('.additional-options-rights-wrap').append(templates.group_chats.restriction_timers());
 
                 _.each(this.$('.restrictions-timers-wrap p'), (item) => {
+                    if ($(item).find('input').val() === 'custom'){
+                        let nextDay = new Date();
+
+                        nextDay.setDate(nextDay.getDate() + 1);
+
+                        let tzoffset = (nextDay).getTimezoneOffset() * 60000,
+                            localISOTime = (new Date(nextDay.getTime() - tzoffset)).toISOString().slice(0, 16);
+
+                        $(item).find('#custom-timer-date').val(localISOTime);
+                        return;
+                    }
                     utils.pretty_time_text_from_seconds(item, $(item).find('input').val(), $(item).find('label'));
                 });
                 this.$('.additional-options-rights-wrap')
@@ -5131,6 +5143,13 @@ xabber.ParticipantPropertiesViewRight = xabber.BasicView.extend({
                 }
             });
             if (!has_diff && timer){
+                if (!this.$(`input[name="restriction-timer"][value="${timer}"]`).length){
+                    if(this.$(`input[name="restriction-timer"][value="custom"]`).attr('data-custom-value') === timer){
+                        this.$(`input[name="restriction-timer"]:not([value='custom'])`).prop('checked', false);
+                        this.$(`input[name="restriction-timer"][value='custom']`).prop('checked', true);
+                    }
+                    return;
+                }
                 this.$(`input[name="restriction-timer"][value="${timer}"]`).prop('checked', true);
             } else {
                 this.$(`input[name="restriction-timer"]`).prop('checked', false);
@@ -5138,9 +5157,28 @@ xabber.ParticipantPropertiesViewRight = xabber.BasicView.extend({
         }
     },
 
+    onCustomTimeInputChange: function () {
+        this.$(`input[name="restriction-timer"]:not([value='custom'])`).prop('checked', false);
+        this.$(`input[name="restriction-timer"][value='custom']`).prop('checked', true);
+        this.$('#restriction-timer-custom').closest('p').length && this.changeTimersOnRadioClick({target: this.$('#restriction-timer-custom').closest('p')[0]});
+
+    },
     changeTimersOnRadioClick: function (ev) {
+        if ($(ev.target).closest('#custom-timer-date').length)
+            return;
+
         let $item = $(ev.target).closest('.restrictions-timers-wrap p'),
             val = $item.find('input').val();
+
+        if (val === 'custom'){
+            let $custom_date = $item.find('#custom-timer-date');
+            let startDate = new Date(),
+                endDate   = new Date($custom_date.val());
+            val = `${Math.round((endDate.getTime() - startDate.getTime()) / 1000)}`;
+            if (!Number(val) || Number(val) < 1)
+                return;
+            $item.find('input[name="restriction-timer"]').attr('data-custom-value', val);
+        }
 
         this.$('.normal-rights-wrap .right-item').each((idx, item) => {
             let $item = $(item);
@@ -5537,13 +5575,10 @@ xabber.ParticipantPropertiesViewRight = xabber.BasicView.extend({
                 console.error($item.find('input').prop('checked'));
 
                 if (actual_permission && actual_default_permission){
-                    console.error($item.find('input').prop('checked') === JSON.parse(actual_default_permission.status));
                     if ($item.find('input').prop('checked') === JSON.parse(actual_default_permission.status)){
                         $item.find('.field.clickable-field').addClass('default-permission-placeholder');
-                        $item.find('.property-value').removeClass('important-client-text-color-500');
                     } else {
                         $item.find('.field.clickable-field').removeClass('default-permission-placeholder');
-                        $item.find('.property-value').addClass('important-client-text-color-500');
                     }
                     if ($item.find('input').prop('checked')) {
                         if (actual_permission.status === 'false') {
@@ -5622,7 +5657,7 @@ xabber.ParticipantPropertiesViewRight = xabber.BasicView.extend({
                     timer = global_timer;
                 }
                 if (timer === ''){
-                    timer = 0;
+                    timer = '0';
                 }
 
                 console.error(permission.seconds);
@@ -5667,7 +5702,7 @@ xabber.ParticipantPropertiesViewRight = xabber.BasicView.extend({
             iq_rights_changes.c('permission', {
                 name: name,
                 status: status,
-                seconds: 0,
+                seconds: '0',
             }).up();
         });
         console.error(iq_rights_changes.tree());
@@ -5896,6 +5931,9 @@ xabber.ParticipantPropertiesViewRight = xabber.BasicView.extend({
                     timer = permission.seconds;
                 } else if (global_timer && global_timer !== '0'){
                     timer = global_timer;
+                }
+                if (timer === ''){
+                    timer = '0';
                 }
                 iq_rights_changes.c('permission', {
                     name: permission.name,
@@ -6708,6 +6746,8 @@ xabber.NewbiePermissionsRightView = xabber.BasicView.extend({
             //     }));
             // $restriction_item.append($restriction_expire);
 
+            $restriction_item.addClass('colorable-right-item');
+
             if (view.length)
                 view.detach();
 
@@ -6804,6 +6844,9 @@ xabber.NewbiePermissionsRightView = xabber.BasicView.extend({
         let iq_change_newbie_rights = $iq({to: this.contact.get('jid'), type: 'set'})
                 .c('query', {xmlns: `${Strophe.NS.GROUP_CHAT_PERMISSIONS}#new`});
         iq_change_newbie_rights.c('permissions', {xmlns: Strophe.NS.GROUP_CHAT_PERMISSIONS});
+        if (global_expire === ''){
+            global_expire = '0';
+        }
         _.each(changed_default_permissions, (permission) => {
             iq_change_newbie_rights.c('permission', {
                 name: permission.name,

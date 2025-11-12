@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.4.253","version_description":"changed setting restriction timers on radio button click, changed timer setting text forming, "}'
+'{"version_number":"2.4.254","version_description":"added custom date time setting in user permissions, fixed empty seconds attribute on setting permissions, fixed newbie permissions coloring"}'
 )});
