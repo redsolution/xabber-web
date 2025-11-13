@@ -8865,7 +8865,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
             });
             return;
         }
-        (this.contact.my_info && this.contact.my_info.get('id') === participant_id) && (participant_id = '');
+        (this.contact.my_info && this.contact.my_info.get('id') === participant_id) && (participant_id = '0');
 
         this.contact.participants.participantsRequest({id: participant_id}, (response) => {
             if (participant_id === ''){

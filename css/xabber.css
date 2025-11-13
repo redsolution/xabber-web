@@ -19135,7 +19135,7 @@ input[type=range].voice-message-volume:focus {
 .details-panel-right .newbie-permissions-wrap .right-item,
 .details-panel-right .restrictions-wrap .right-item {
     height: unset;
-    padding: 6px 24px 3px 27px;
+    padding: 6px 24px 3px 20px;
     position: relative;
 }
 .details-panel-right .participant-details-wrap .confirmation-rights-wrap {
@@ -19213,6 +19213,7 @@ input[type=range].voice-message-volume:focus {
     left: 50%;
     transform: translate(-50%);
     background: #F5F5F5;
+    margin-top: 8px;
 }
 .details-panel-right .additional-options-rights-wrap .btn-set-default-permissions:hover{
     background: #E0E0E0;
@@ -19242,13 +19243,11 @@ input[type=range].voice-message-volume:focus {
 .details-panel-right .participant-details-wrap .right-item .right-name,
 .details-panel-right .newbie-permissions-wrap .right-item .right-name,
 .details-panel-right .restrictions-wrap .right-item .right-name {
-    /*margin: 0 0 0 44px;*/
-    font-size: 1rem;
-    margin-left: 8px;
-    color: rgb(97, 97, 97) !important;
-    vertical-align: top;
-    display: inline-block;
-    line-height: 20px;
+    font-size: 16px;
+    height: 24px;
+    line-height: 24px;
+    color: #000000de !important;
+    margin-left: 14px;
 }
 
 .details-panel-right .participant-details-wrap .rights-header{
@@ -19326,24 +19325,31 @@ input[type=range].voice-message-volume:focus {
     padding-top: 64px;
 }
 .details-panel-right .participant-details-wrap .participant-details-edit-wrap .restrictions-timers-header,
+.details-panel-right .participant-details-wrap .participant-details-edit-wrap .confirmation-rights-header,
 .details-panel-right .participant-details-wrap .participant-details-edit-wrap .normal-rights-header{
-    padding: 6px 24px 3px 27px;
-    font-size: 1rem;
-    color: rgb(66, 66, 66);
+    padding: 0 24px 0 20px;
+    FONT-WEIGHT: 500;
+    color: rgba(0, 0, 0, .54);
+    font-size: 16px;
+    line-height: 32px;
+    text-transform: capitalize;
 }
 .details-panel-right .participant-details-wrap .participant-details-edit-wrap .restrictions-timers-wrap p{
-    margin: 0 0 0 8px;
+    margin: 0;
     position: relative;
 }
 .details-panel-right .participant-details-wrap .participant-details-edit-wrap .restrictions-timers-wrap label{
-    color: rgb(97, 97, 97) !important;
-    font-size: 1rem;
+    font-size: 16px;
+    height: 24px;
+    line-height: 24px;
+    color: #000000de !important;
+    margin-left: 14px;
 }
 .details-panel-right .participant-details-wrap .participant-details-edit-wrap .restrictions-timers-wrap #custom-timer-date{
     position: absolute;
-    left: 44px;
+    left: 56px;
     width: 160px;
-    color: #616161 !important;
+    color: #000000de !important;
     height: 24px;
     top: 0;
 }
@@ -23688,11 +23694,6 @@ ul.restrictions-list-content>li {
 
 .edit-default-restrictions .right-name,
 .edit-rights .right-name {
-    font-size: 14px;
-    display: inline-block;
-    line-height: 20px;
-    margin: 10px 8px 10px 14px;
-    vertical-align: middle;
 }
 
 .edit-rights .right-name {
