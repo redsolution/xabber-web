@@ -19142,22 +19142,25 @@ input[type=range].voice-message-volume:focus {
     position: relative;
 }
 .details-panel-right .participant-details-wrap .right-item.restriction-owner {
-    padding: 0 10px;
     height: 36px;
-    width: fit-content;
-    margin: 0;
+    padding: 0 10px;
+    line-height: 36px;
     position: absolute;
-    top: 8px;
     left: 50%;
-    transform: translate(-50%, 0);
+    transform: translate(-50%);
+    background: #F5F5F5;
+    margin-top: 8px;
+    width: fit-content;
 }
 .details-panel-right .participant-details-wrap .right-item.restriction-owner.disabled {
     opacity: 0.5;
 }
 .details-panel-right .participant-details-wrap .right-item.restriction-owner .right-name{
-    margin: 0;
-    line-height: 36px;
     font-size: 24px;
+    line-height: 36px;
+    margin: 0;
+    width: fit-content !important;
+    white-space: nowrap;
 }
 .details-panel-right .participant-details-wrap .right-item.restriction-owner .restriction-owner-state{
     position: absolute;
@@ -19215,6 +19218,7 @@ input[type=range].voice-message-volume:focus {
     background: #F5F5F5;
     margin-top: 8px;
 }
+.details-panel-right .participant-details-wrap .right-item.restriction-owner:hover,
 .details-panel-right .additional-options-rights-wrap .btn-set-default-permissions:hover{
     background: #E0E0E0;
 }
@@ -19247,7 +19251,6 @@ input[type=range].voice-message-volume:focus {
     height: 24px;
     line-height: 24px;
     color: #000000de !important;
-    margin-left: 14px;
 }
 
 .details-panel-right .participant-details-wrap .rights-header{
@@ -19324,7 +19327,7 @@ input[type=range].voice-message-volume:focus {
 .details-panel-right .participant-details-wrap .participant-details-edit-wrap{
     padding-top: 64px;
 }
-.details-panel-right .participant-details-wrap .participant-details-edit-wrap .restrictions-timers-header,
+.details-panel-right .restrictions-timers-header,
 .details-panel-right .participant-details-wrap .participant-details-edit-wrap .confirmation-rights-header,
 .details-panel-right .participant-details-wrap .participant-details-edit-wrap .normal-rights-header{
     padding: 0 24px 0 20px;
@@ -19334,20 +19337,30 @@ input[type=range].voice-message-volume:focus {
     line-height: 32px;
     text-transform: capitalize;
 }
-.details-panel-right .participant-details-wrap .participant-details-edit-wrap .restrictions-timers-wrap p{
+.details-panel-right .restrictions-timers-header{
+    margin-top: 16px;
+}
+.details-panel-right .restrictions-timers-wrap .clickable-field{
+    display: block;
+    float: unset;
+    height: unset;
+    margin: unset;
+    width: unset;
+}
+.details-panel-right .restrictions-timers-wrap p{
     margin: 0;
     position: relative;
 }
-.details-panel-right .participant-details-wrap .participant-details-edit-wrap .restrictions-timers-wrap label{
+.details-panel-right .restrictions-timers-wrap label{
     font-size: 16px;
     height: 24px;
     line-height: 24px;
     color: #000000de !important;
-    margin-left: 14px;
+    margin-left: 22px;
 }
-.details-panel-right .participant-details-wrap .participant-details-edit-wrap .restrictions-timers-wrap #custom-timer-date{
+.details-panel-right .restrictions-timers-wrap #custom-timer-date{
     position: absolute;
-    left: 56px;
+    left: 64px;
     width: 160px;
     color: #000000de !important;
     height: 24px;

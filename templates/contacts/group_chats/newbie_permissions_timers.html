@@ -1,15 +1,11 @@
 <div class="restrictions-timers-wrap">
     <div class="restrictions-timers-header">
-        {[print(xabber.getString("participant_edit__restriction_timers_header"))]}
+        {[print(xabber.getString("groupchat_newbie__permissions_timers_header"))]}
     </div>
     <div class="field radio-field">
         <form action="#">
             <p>
-                <input class="with-gap" name="restriction-timer" checked value="0" type="radio" id="restriction-timer-forever" />
-                <label for="restriction-timer-forever">Forever</label>
-            </p>
-            <p>
-                <input class="with-gap" name="restriction-timer" value="300" type="radio" id="restriction-timer-5-minutes" />
+                <input class="with-gap" checked name="restriction-timer" value="300" type="radio" id="restriction-timer-5-minutes" />
                 <label for="restriction-timer-5-minutes">5 minutes</label>
             </p>
             <p>
@@ -27,7 +23,7 @@
             <p>
                 <input class="with-gap" name="restriction-timer" value="custom" type="radio" id="restriction-timer-custom" />
                 <label for="restriction-timer-custom"></label>
-                <input type="datetime-local" id="custom-timer-date" name="custom-timer-date">
+                <input type="text" id="custom-timer-date" name="custom-timer-date">
             </p>
         </form>
     </div>

@@ -59,13 +59,16 @@
             <div class="normal-rights-wrap">
 
             </div>
-            <div class="confirmation-rights-header">
-                {[print(xabber.getString("participant_edit__confirmation_permissions_header"))]}
-            </div>
-            <div class="confirmation-rights-wrap">
+            <div class="additional-options-rights-wrap">
 
             </div>
-            <div class="additional-options-rights-wrap">
+            <div class="confirmation-rights-header hidden">
+                {[print(xabber.getString("participant_edit__confirmation_permissions_header"))]}
+            </div>
+            <div class="confirmation-rights-wrap hidden">
+                <div class="right-item restriction-owner btn-main btn-flat">
+                    <div class="right-name">{[print(xabber.getString("participant_edit__make_owner_btn"))]}</div>
+                </div>
 
             </div>
         </div>
