@@ -4262,6 +4262,11 @@ xabber.ParticipantsViewRight = xabber.BasicView.extend({
         } else {
             $modal.find('.btn-chat .context-menu-btn-text').text(xabber.getString("groupchat_direct_chat"));
         }
+        if (participant && participant.get('role') === 'admin'){
+            $modal.find('.btn-promote-admin .context-menu-btn-text').text(xabber.getString("groupchat_member_edit_priveleges"));
+        } else {
+            $modal.find('.btn-promote-admin .context-menu-btn-text').text(xabber.getString("groupchat_member_promote_to_admin"));
+        }
         if (this.model.my_info && this.model.my_info.get('role') === 'member'){
             $modal.find('.admin-btn').addClass('hidden');
         }
@@ -4806,6 +4811,8 @@ xabber.ParticipantPropertiesViewRight = xabber.BasicView.extend({
             this.$('.right-item').removeClass('hidden');
             this.$('.additional-options-rights-wrap').append(templates.group_chats.restriction_timers());
             if (this.view_state_options.promote_admin){
+                this.$('.block-name.second-text').text('');
+                this.$('.block-name:not(.second-text)').text(xabber.getString("participant_edit__promote_to_admin_head_header"));
                 this.$('.right-item[data-role="member"]').addClass('hidden');
                 this.$('.normal-rights-header').text(xabber.getString("participant_edit__promote_to_admin_header"));
                 this.$('.restrictions-timers-header').text(xabber.getString("participant_edit__promote_admin_timers_header"));
@@ -4818,12 +4825,18 @@ xabber.ParticipantPropertiesViewRight = xabber.BasicView.extend({
                     && this.model.my_info.get('role')
                     && this.model.my_info.get('role') === 'owner');
             } else if (this.view_state_options.setup_permissions) { //34
+                this.$('.block-name.second-text').text('');
+                this.$('.block-name:not(.second-text)').text(xabber.getString("participant_edit__restrict_head_header"));
                 this.$('.right-item[data-role="admin"]').addClass('hidden');
                 this.$('.right-item[data-role="owner"]').addClass('hidden');
                 this.$('.normal-rights-header').text(xabber.getString("participant_edit__setup_permissions_header"));
                 this.$('.confirmation-rights-header').addClass('hidden');
                 this.$('.additional-options-rights-wrap')
+                    .append(`<div class="restrict-set-default-header">${xabber.getString("participant_edit__set_default_header")}</div>`);
+                this.$('.additional-options-rights-wrap')
                     .append(`<div class="btn-set-default-permissions btn-flat btn-main">${xabber.getString("participant_edit__set_default")}</div>`);
+                this.$('.additional-options-rights-wrap')
+                    .append(`<div class="restrict-set-default-text">${xabber.getString("participant_edit__set_default_text")}</div>`);
             }
             this.$('.btn-save-user-rights').text(xabber.getString("dialog_circle_settings__button_apply"));
 
@@ -4855,8 +4868,10 @@ xabber.ParticipantPropertiesViewRight = xabber.BasicView.extend({
         this.$('.parent-btn').hideIf(true);
         this.$('.child-btn').hideIf(false);
         this.$('.block-header').attr('style', 'background-color: rgba(255,255,255,0) !important;');
-        this.$('.block-name.second-text').text('');
-        this.$('.block-name:not(.second-text)').text(xabber.getString("groupchat_member_edit"));
+        if (!this.view_state_options){
+            this.$('.block-name.second-text').text('');
+            this.$('.block-name:not(.second-text)').text(xabber.getString("groupchat_member_edit"));
+        }
         this.$('.block-name:not(.second-text)').hideIf(false);
         if (this.ps_container && this.ps_container.length) {
             this.ps_container.perfectScrollbar('destroy')

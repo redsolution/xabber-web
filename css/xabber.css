@@ -14301,11 +14301,11 @@ input[type=range].voice-message-volume:focus {
 }
 
 .input-toolbar .account-role {
-    color: white;
-    line-height: 14px;
-    font-size: 10px;
     border-radius: 3px;
-    padding: 2px 4px 0px 4px;
+    color: #fff;
+    font-size: 10px;
+    line-height: 18px;
+    padding: 0 4px 0;
 }
 
 .input-toolbar .account-nickname {
@@ -19142,21 +19142,18 @@ input[type=range].voice-message-volume:focus {
     position: relative;
 }
 .details-panel-right .participant-details-wrap .right-item.restriction-owner {
+    background: #f5f5f5;
     height: 36px;
-    padding: 0 10px;
     line-height: 36px;
-    position: absolute;
-    left: 50%;
-    transform: translate(-50%);
-    background: #F5F5F5;
-    margin-top: 8px;
+    padding: 0 10px;
     width: fit-content;
+    margin: 6px 24px 3px 20px;
 }
 .details-panel-right .participant-details-wrap .right-item.restriction-owner.disabled {
     opacity: 0.5;
 }
 .details-panel-right .participant-details-wrap .right-item.restriction-owner .right-name{
-    font-size: 24px;
+    font-size: 14px;
     line-height: 36px;
     margin: 0;
     width: fit-content !important;
@@ -19211,12 +19208,9 @@ input[type=range].voice-message-volume:focus {
     display: none;
 }
 .details-panel-right .additional-options-rights-wrap .btn-set-default-permissions{
+    background: #f5f5f5;
     line-height: 36px;
-    position: absolute;
-    left: 50%;
-    transform: translate(-50%);
-    background: #F5F5F5;
-    margin-top: 8px;
+    margin: 6px 24px 3px 20px;
 }
 .details-panel-right .participant-details-wrap .right-item.restriction-owner:hover,
 .details-panel-right .additional-options-rights-wrap .btn-set-default-permissions:hover{
@@ -19246,7 +19240,7 @@ input[type=range].voice-message-volume:focus {
 
 .details-panel-right .participant-details-wrap .right-item .right-name,
 .details-panel-right .newbie-permissions-wrap .right-item .right-name,
-.details-panel-right .restrictions-wrap .right-item .right-name {
+.details-panel-right .restrictions-wrap .right-item .right-name:not(.restriction-owner) {
     font-size: 16px;
     height: 24px;
     line-height: 24px;
@@ -19328,6 +19322,7 @@ input[type=range].voice-message-volume:focus {
     padding-top: 64px;
 }
 .details-panel-right .restrictions-timers-header,
+.details-panel-right .restrict-set-default-header,
 .details-panel-right .participant-details-wrap .participant-details-edit-wrap .confirmation-rights-header,
 .details-panel-right .participant-details-wrap .participant-details-edit-wrap .normal-rights-header{
     padding: 0 24px 0 20px;
@@ -19335,10 +19330,20 @@ input[type=range].voice-message-volume:focus {
     color: rgba(0, 0, 0, .54);
     font-size: 16px;
     line-height: 32px;
-    text-transform: capitalize;
 }
 .details-panel-right .restrictions-timers-header{
     margin-top: 16px;
+    margin-bottom: 8px;
+}
+.details-panel-right .rights-wrap{
+    padding-bottom: 56px;
+}
+.details-panel-right .restrict-set-default-text,
+.details-panel-right .grant-ownership-text{
+    padding: 6px 24px 3px 20px;
+    color: #000000de !important;
+    font-size: 16px;
+    line-height: 24px;
 }
 .details-panel-right .restrictions-timers-wrap .clickable-field{
     display: block;
