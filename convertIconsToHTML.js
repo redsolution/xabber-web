@@ -181,6 +181,10 @@ let badges_names = [
         'player-mini-variant',
         'player-mini',
         'message-bookmark-outline',
+        'account-edit',
+        'account-key',
+        'account-star',
+        'account-key-outline',
     ],
     circle_icons = [,
         'task'

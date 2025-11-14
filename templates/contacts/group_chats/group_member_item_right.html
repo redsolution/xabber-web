@@ -13,13 +13,15 @@
                     {[}else if (!present) {]}<span class="online-status text-color-green-700">{[print(xabber.getString("group_settings__members__status_online"))]}</span>{[} else {]}<span title="{{present}}">{{pretty_present}}</span>{[}]}
                 </div>
             </div>
-            {[if (role === 'owner' || role === 'admin') {]}
+            {[if (role === 'owner' || role === 'admin' || role === 'custom') {]}
             <div class="participant-buttons-wrap">
                 <div class="participant-role">
                     {[if (role === 'owner') {]}
                         <i class="mdi participant-role-image mdi-24px mdi-star"></i>
                     {[}else if (role === 'admin') {]}
                         <i class="mdi participant-role-image mdi-24px mdi-star-outline"></i>
+                    {[}else if (role === 'custom') {]}
+                        <svg class="mdi participant-role-image mdi-24px mdi-svg-template fill-color-grey-500" data-svgname="account-key-outline"></svg>
                     {[}]}
                 </div>
             </div>

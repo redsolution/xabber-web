@@ -19350,6 +19350,7 @@ input[type=range].voice-message-volume:focus {
 .details-panel-right .restrictions-timers-wrap p{
     margin: 0;
     position: relative;
+    height: 36px;
 }
 .details-panel-right .restrictions-timers-wrap label{
     font-size: 16px;
