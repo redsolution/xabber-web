@@ -11755,8 +11755,7 @@ xabber.InvitationPanelView = xabber.SearchView.extend({
         "click .chat-head-details": "showContactDetailsRight",
         "click .contact-name": "showContactDetailsRight",
         "click .circle-avatar": "showContactDetailsRight",
-        "click .contact-status-message.resource-hover": "showContactResources",
-        "click .contact-status-message.members-hover": "showMembersDetails",
+        "click .contact-status-message": "showMembersDetails",
         "click .btn-clear-history": "clearHistory",
         "click .btn-invite-users": "inviteUsers",
         "click .btn-delete-chat": "deleteChat",
@@ -12030,12 +12029,12 @@ xabber.InvitationPanelView = xabber.SearchView.extend({
         this.contact.showDetailsRight('all-chats', {encrypted: this.model.get('encrypted')});
     },
 
-    showContactResources: function () {
-        this.resources_view.open();
-    },
-
     showMembersDetails: function () {
-        this.contact.showDetailsRight('all-chats', {type: 'members'});
+        if (this.contact.get('group_chat')){
+            this.contact.showDetailsRight('all-chats', {type: 'members'});
+        } else {
+            this.resources_view.open();
+        }
     },
 
     updatePinned: function () {

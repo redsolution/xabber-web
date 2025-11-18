@@ -4,6 +4,7 @@ let env = xabber.env,
     constants = env.constants,
     templates = env.templates.contacts,
     utils = env.utils,
+    flatpickr = env.flatpickr,
     $ = env.$,
     $iq = env.$iq,
     $pres = env.$pres,
@@ -4562,7 +4563,7 @@ xabber.ParticipantsViewRight = xabber.BasicView.extend({
                 this.model.participants.participantPermissionsRequest({id: participant_id}, (response) => {
                     if (options.setup_permissions){
                         let iq_get_rights = $iq({type: 'get', to: this.model.get('jid')})
-                            .c('query', {xmlns: `${Strophe.NS.GROUP_CHAT_PERMISSIONS}#default`});
+                            .c('defaults', {xmlns: `${Strophe.NS.GROUP_CHAT_PERMISSIONS}`});
                         this.account.sendFast(iq_get_rights, (iq_default_rights) => {
                             console.warn(iq_default_rights);
                             options.setup_permissions = iq_default_rights;
@@ -4849,7 +4850,13 @@ xabber.ParticipantPropertiesViewRight = xabber.BasicView.extend({
                     let tzoffset = (nextDay).getTimezoneOffset() * 60000,
                         localISOTime = (new Date(nextDay.getTime() - tzoffset)).toISOString().slice(0, 16);
 
-                    $(item).find('#custom-timer-date').val(localISOTime);
+
+                    flatpickr("#custom-timer-date", {
+                        defaultDate: localISOTime,
+                        minDate: new Date().toISOString().slice(0, 16),
+                        time_24hr: true,
+                        enableTime: true,
+                    });
                     return;
                 }
                 utils.pretty_time_text_from_seconds(item, $(item).find('input').val(), $(item).find('label'));
@@ -5205,8 +5212,8 @@ xabber.ParticipantPropertiesViewRight = xabber.BasicView.extend({
             val = $item.find('input').val();
 
         if (val === 'custom'){
-            let $custom_date = $item.find('#custom-timer-date');
-            let startDate = new Date(),
+            let $custom_date = $item.find('#custom-timer-date'),
+                startDate = new Date(),
                 endDate   = new Date($custom_date.val());
             val = `${Math.round((endDate.getTime() - startDate.getTime()) / 1000)}`;
             if (!Number(val) || Number(val) < 1)
@@ -5447,7 +5454,7 @@ xabber.ParticipantPropertiesViewRight = xabber.BasicView.extend({
         _.each($permissions.find('permission'), (item) => {
             let $item = $(item),
                 fixed = $item.attr('fixed'),
-                text = $item.text(),
+                text = $item.attr('display'),
                 role = $item.attr('level'),
                 name = $item.attr('name'),
                 status = $item.attr('status'),
@@ -5505,7 +5512,7 @@ xabber.ParticipantPropertiesViewRight = xabber.BasicView.extend({
         _.each($default_permissions.find('permission'), (item) => {
             let $item = $(item),
                 fixed = $item.attr('fixed'),
-                text = $item.text(),
+                text = $item.attr('display'),
                 name = $item.attr('name'),
                 status = $item.attr('status');
 
@@ -5536,7 +5543,7 @@ xabber.ParticipantPropertiesViewRight = xabber.BasicView.extend({
         _.each($permissions.find('permission'), (item) => {
             let $item = $(item),
                 fixed = $item.attr('fixed'),
-                text = $item.text(),
+                text = $item.attr('display'),
                 role = $item.attr('level'),
                 name = $item.attr('name'),
                 status = $item.attr('status'),
@@ -5730,8 +5737,7 @@ xabber.ParticipantPropertiesViewRight = xabber.BasicView.extend({
         });
         if (rights_changed) {
             let iq_rights_changes = $iq({type: 'set', to: this.contact.get('jid')})
-                .c('query', {xmlns: Strophe.NS.GROUP_CHAT_PERMISSIONS, id: member_id });
-            iq_rights_changes.c('permissions', {xmlns: Strophe.NS.GROUP_CHAT_PERMISSIONS});
+                .c('permissions', {xmlns: Strophe.NS.GROUP_CHAT_PERMISSIONS, target: member_id });
             let global_timer = this.$('input[name="restriction-timer"]:checked').val();
             _.each(changed_rights, (permission) => {
                 let timer = '';
@@ -5771,26 +5777,13 @@ xabber.ParticipantPropertiesViewRight = xabber.BasicView.extend({
     },
 
     setDefaultPermissions: function () {
-        if (!this.default_permissions)
-            return;
 
         let member_id = this.participant.get('id');
 
         let iq_rights_changes = $iq({type: 'set', to: this.contact.get('jid')})
-            .c('query', {xmlns: Strophe.NS.GROUP_CHAT_PERMISSIONS, id: member_id });
-        iq_rights_changes.c('permissions', {xmlns: Strophe.NS.GROUP_CHAT_PERMISSIONS});
+            .c('delete', {xmlns: Strophe.NS.GROUP_CHAT_PERMISSIONS});
+        iq_rights_changes.c('permissions', {xmlns: Strophe.NS.GROUP_CHAT_PERMISSIONS, target: member_id });
 
-        _.each($(this.default_permissions).find('permission'), (item) => {
-            let $item = $(item),
-                name = $item.attr('name'),
-                status = $item.attr('status');
-
-            iq_rights_changes.c('permission', {
-                name: name,
-                status: status,
-                seconds: '0',
-            }).up();
-        });
         console.error(iq_rights_changes.tree());
         this.account.sendIQFast(iq_rights_changes, (res) => {
                 console.warn(res);
@@ -5874,10 +5867,10 @@ xabber.ParticipantPropertiesViewRight = xabber.BasicView.extend({
             "participant_edit__confirm_permission_header"),
             xabber.getString("participant_edit__confirm_permission_text"),
             null,
-            { ok_button_text: xabber.getString("participant_edit__confirm_permission_apply")}).done((result) => {
+            { ok_button_text: xabber.getString("participant_edit__confirm_permission_apply")}).done( (result) => {
                 if (result) {
                     let iq = $iq({type: 'set', to: this.contact.get('jid')})
-                        .c('owner', {xmlns: Strophe.NS.GROUP_CHAT_PERMISSIONS, id: this.participant.get('id')});
+                        .c('owner', {xmlns: Strophe.NS.GROUP_CHAT, id: this.participant.get('id')});
                     this.account.sendIQFast(iq,
                         () => {
                             this.close();
@@ -5892,7 +5885,7 @@ xabber.ParticipantPropertiesViewRight = xabber.BasicView.extend({
     },
 
     saveRights: function (ev, callback) {
-        if(this.view_state_options && (this.view_state_options.promote_admin || this.view_state_options.setup_permissions)){
+        if (this.view_state_options && (this.view_state_options.promote_admin || this.view_state_options.setup_permissions)) {
             this.savePermissions(ev, callback);
             return;
         }
@@ -6357,7 +6350,7 @@ xabber.DefaultRestrictionsRightView = xabber.BasicView.extend({
         this.actual_default_permissions = [];
         this.$('button').blur();
         let iq_get_rights = $iq({type: 'get', to: this.contact.get('jid')})
-            .c('query', {xmlns: `${Strophe.NS.GROUP_CHAT_PERMISSIONS}#default`});
+            .c('defaults', {xmlns: `${Strophe.NS.GROUP_CHAT_PERMISSIONS}`});
         this.account.sendFast(iq_get_rights, (iq_all_rights) => {
             this.showDefaultRestrictions(iq_all_rights);
             callback && callback();
@@ -6444,7 +6437,7 @@ xabber.DefaultRestrictionsRightView = xabber.BasicView.extend({
         _.each($permissions.find('permission'), (item) => {
             let $item = $(item),
                 fixed = $item.attr('fixed'),
-                text = $item.text(),
+                text = $item.attr('display'),
                 name = $item.attr('name'),
                 status = $item.attr('status');
 
@@ -6506,7 +6499,7 @@ xabber.DefaultRestrictionsRightView = xabber.BasicView.extend({
 
         if (has_changes) {
             let iq_change_default_rights = $iq({to: this.contact.get('jid'), type: 'set'})
-                    .c('query', {xmlns: `${Strophe.NS.GROUP_CHAT_PERMISSIONS}#default`});
+                    .c('defaults', {xmlns: `${Strophe.NS.GROUP_CHAT_PERMISSIONS}`});
             iq_change_default_rights.c('permissions', {xmlns: Strophe.NS.GROUP_CHAT_PERMISSIONS});
             _.each(changed_default_permissions, (permission) => {
                 iq_change_default_rights.c('permission', {
@@ -6611,10 +6604,10 @@ xabber.NewbiePermissionsRightView = xabber.BasicView.extend({
         this.actual_default_permissions = [];
         this.$('button').blur();
         let iq_get_rights = $iq({type: 'get', to: this.contact.get('jid')})
-            .c('query', {xmlns: `${Strophe.NS.GROUP_CHAT_PERMISSIONS}#default`});
+            .c('defaults', {xmlns: `${Strophe.NS.GROUP_CHAT_PERMISSIONS}`});
         this.account.sendFast(iq_get_rights, (iq_all_rights) => {
             let iq_get_newbie_rights = $iq({type: 'get', to: this.contact.get('jid')})
-                .c('query', {xmlns: `${Strophe.NS.GROUP_CHAT_PERMISSIONS}#new`});
+                .c('newbies', {xmlns: `${Strophe.NS.GROUP_CHAT_PERMISSIONS}`});
                 this.account.sendFast(iq_get_newbie_rights, (iq_all_newbie_rights) => {
                     console.warn(iq_all_rights);
                     console.warn(iq_all_newbie_rights);
@@ -6726,7 +6719,7 @@ xabber.NewbiePermissionsRightView = xabber.BasicView.extend({
 
         _.each($permissions.find('permission'), (item) => {
             let $item = $(item),
-                text = $item.text(),
+                text = $item.attr('display'),
                 name = $item.attr('name'),
                 status = $item.attr('status');
 
@@ -6760,7 +6753,7 @@ xabber.NewbiePermissionsRightView = xabber.BasicView.extend({
         _.each($newbie_permissions.find('permission'), (item) => {
             let $item = $(item),
                 fixed = $item.attr('fixed'),
-                text = $item.text(),
+                text = $item.attr('display'),
                 name = $item.attr('name'),
                 status = $item.attr('status'),
                 seconds = $item.attr('seconds');
@@ -6844,22 +6837,27 @@ xabber.NewbiePermissionsRightView = xabber.BasicView.extend({
         });
 
         let global_expire = this.$(`input[name="restriction-timer"]:checked`).val();
-        let iq_change_newbie_rights = $iq({to: this.contact.get('jid'), type: 'set'})
-                .c('query', {xmlns: `${Strophe.NS.GROUP_CHAT_PERMISSIONS}#new`});
-        iq_change_newbie_rights.c('permissions', {xmlns: Strophe.NS.GROUP_CHAT_PERMISSIONS});
-        if (global_expire === ''){
-            global_expire = '0';
+        let iq_change_newbie_rights = $iq({to: this.contact.get('jid'), type: 'set'});
+        if (!changed_default_permissions.length){
+            iq_change_newbie_rights.c('delete', {xmlns: `${Strophe.NS.GROUP_CHAT_PERMISSIONS}`})
+            .c('newbies', {xmlns: `${Strophe.NS.GROUP_CHAT_PERMISSIONS}`});
+        } else {
+            iq_change_newbie_rights.c('newbies', {xmlns: `${Strophe.NS.GROUP_CHAT_PERMISSIONS}`})
+            .c('permissions', {xmlns: Strophe.NS.GROUP_CHAT_PERMISSIONS});
+            if (global_expire === ''){
+                global_expire = '0';
+            }
+            if (global_expire === 'custom'){
+                global_expire = this.$('#custom-timer-date').val(); // сделать парсинг //35
+            }
+            _.each(changed_default_permissions, (permission) => {
+                iq_change_newbie_rights.c('permission', {
+                    name: permission.name,
+                    status: permission.status,
+                    seconds: global_expire || 0,
+                }).up();
+            });
         }
-        if (global_expire === 'custom'){
-            global_expire = this.$('#custom-timer-date').val(); // сделать парсинг //35
-        }
-        _.each(changed_default_permissions, (permission) => {
-            iq_change_newbie_rights.c('permission', {
-                name: permission.name,
-                status: permission.status,
-                seconds: global_expire || 0,
-            }).up();
-        });
         this.account.sendIQFast(iq_change_newbie_rights, () => {
             this.$('.edit-save-preloader.preloader-wrap').removeClass('visible').find('.preloader-wrapper').removeClass('active');
             this.hideNewbiePermissions();
@@ -7051,7 +7049,7 @@ xabber.Participants = Backbone.Collection.extend({
         options = options || {};
         let participant_id = options.id,
             iq = $iq({to: this.contact.get('jid'), type: 'get'});
-            iq.c('query', {xmlns: `${Strophe.NS.GROUP_CHAT_PERMISSIONS}` , id: participant_id});
+            iq.c('permissions', {xmlns: `${Strophe.NS.GROUP_CHAT_PERMISSIONS}` , target: participant_id});
         this.account.sendFast(iq, (response) => {
             console.warn(response);
             callback && callback(response);

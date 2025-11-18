@@ -1142,7 +1142,13 @@ body {
     overflow: hidden;
     position: relative;
 }
-
+.flatpickr-monthDropdown-months{
+    display:block
+}
+.flatpickr-current-month{
+    display: flex;
+    justify-content: center;
+}
 #xabber-container {
     min-width: 814px;
     min-height: 450px;
@@ -19331,12 +19337,17 @@ input[type=range].voice-message-volume:focus {
     font-size: 16px;
     line-height: 32px;
 }
+
+.details-panel-right .confirmation-rights-header,
+.details-panel-right .restrict-set-default-header{
+    margin-top: 16px;
+}
 .details-panel-right .restrictions-timers-header{
     margin-top: 16px;
-    margin-bottom: 8px;
+    margin-bottom: 2px;
 }
 .details-panel-right .rights-wrap{
-    padding-bottom: 56px;
+    padding-bottom: 24px;
 }
 .details-panel-right .restrict-set-default-text,
 .details-panel-right .grant-ownership-text{
@@ -19356,6 +19367,7 @@ input[type=range].voice-message-volume:focus {
     margin: 0;
     position: relative;
     height: 36px;
+    padding-top: 6px;
 }
 .details-panel-right .restrictions-timers-wrap label{
     font-size: 16px;
@@ -19367,10 +19379,12 @@ input[type=range].voice-message-volume:focus {
 .details-panel-right .restrictions-timers-wrap #custom-timer-date{
     position: absolute;
     left: 64px;
-    width: 160px;
+    width: 128px;
     color: #000000de !important;
     height: 24px;
-    top: 0;
+    top: 3px;
+    font-size: 16px;
+    border-bottom: 1px solid #616161;
 }
 
 .details-panel-right .participant-details-wrap .participant-details-edit-inputs{
