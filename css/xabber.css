@@ -9568,10 +9568,19 @@ input[type=text].simple-input-field:hover {
 .recent-chats-search-active .btn-unread,
 .recent-chats-search-active .recent-chats-main-header,
 .recent-chats-search-active .btn-back-to-chats {
-    display: none;
+    opacity: 0;
+    pointer-events: none;
+}
+.btn-unread,
+.recent-chats-main-header,
+.btn-back-to-chats {
+    transition: opacity 0.9s linear;
 }
 .recent-chats-search-active .recent-chats-panel {
-    padding-top: 8px;
+    /*padding-top: 8px;*/
+}
+.recent-chats-search-active .recent-chats-panel .chat-list-wrap{
+    padding-top: 12px !important;
 }
 .recent-chats-panel .recent-chats-main-header {
     backdrop-filter: blur(4px);
@@ -9634,6 +9643,7 @@ input[type=text].simple-input-field:hover {
 }
 .chat-list-wrap.left-panel-list-wrap {
     padding: 5px 16px 0;
+    transition: padding 0.6s ease-in-out;
 }
 
 .mention-item {
@@ -19096,7 +19106,9 @@ input[type=range].voice-message-volume:focus {
 .details-panel-right .membership-property-edit-wrap,
 .details-panel-right .index-property-edit-wrap,
 .details-panel-right .newbie-permissions-wrap,
-.details-panel-right .restrictions-wrap {
+.details-panel-right .restrictions-wrap,
+.details-panel-right .newbie-permissions-content-wrap,
+.details-panel-right .restrictions-content-wrap {
     width: inherit;
     height: 100%;
     position: absolute;
@@ -19104,6 +19116,9 @@ input[type=range].voice-message-volume:focus {
     background: white;
     z-index: 1000;
     padding: 0;
+}
+.details-panel-right .restrictions-content-wrap{
+    padding-top: 64px
 }
 
 .details-panel-right .newbie-permissions-wrap .block-header,
@@ -19113,6 +19128,11 @@ input[type=range].voice-message-volume:focus {
     background: #ffffff;
     height: 64px;
     width: inherit;
+    z-index: 1;
+}
+.details-panel-right .restrictions-wrap .block-header{
+    position: absolute;
+    top: 0;
 }
 
 .details-panel-right .newbie-permissions-wrap .block-header .block-name ,
@@ -19135,6 +19155,9 @@ input[type=range].voice-message-volume:focus {
 .details-panel-right .restrictions-wrap .restrictions-content {
     margin-top: 64px;
     width: 100% !important;
+}
+.details-panel-right .restrictions-wrap .restrictions-content{
+    margin-top: 0;
 }
 
 .details-panel-right .participant-details-wrap .right-item,
@@ -19905,6 +19928,26 @@ input[type=range].voice-message-volume:focus {
     margin-bottom: 16px;
     height: 48px;
 }
+.details-panel-right .btn-newbie-permissions{
+    position: absolute;
+    top: 20px;
+    z-index: 1;
+    right: 20px;
+    width: 24px;
+    height: 24px;
+}
+.details-panel-right .btn-newbie-permissions .edit-button-text{
+    display: none;
+}
+.details-panel-right .btn-newbie-permissions .details-icon-wrap{
+    width: 24px;
+    height: 24px;
+    position: relative;
+}
+.details-panel-right .btn-newbie-permissions .details-icon-wrap .details-icon{
+    top: 0 !important;
+    left: 0;
+}
 
 .details-panel-right .edit-button:hover .edit-button-text{
     color: #616161;
@@ -20306,6 +20349,13 @@ input[type=range].voice-message-volume:focus {
 .details-panel-right.groupchat-details-panel .members-list-wrap tr {
     border-bottom: none !important;
 }
+.details-panel-right.groupchat-details-panel .members-list-wrap .custom-permissions-members-header {
+    FONT-WEIGHT: 500;
+    color: rgba(0, 0, 0, .54);
+    font-size: 16px;
+    line-height: 32px;
+    padding: 0 24px 0 20px;
+}
 
 .details-panel-right.groupchat-details-panel .members-list-wrap tr th {
     padding: 0 !important;
@@ -20373,6 +20423,17 @@ input[type=range].voice-message-volume:focus {
 .details-panel-right.groupchat-details-panel .members-list-wrap .group-chat-participant .member-item .participant-buttons-wrap .participant-role,
 .details-panel-right.groupchat-details-panel .members-list-wrap .group-chat-participant .member-item .buttons-wrap .btn-edit-member{
     margin-left: 16px;
+}
+.details-panel-right.groupchat-details-panel .members-list-wrap .group-chat-participant .member-item .participant-custom-permissions-count{
+    position: absolute;
+    right: 16px;
+    font-size: 20px;
+    top: 16px;
+    color: #9e9e9e;
+    width: 24px;
+    height: 24px;
+    line-height: 24px;
+    text-align: center;
 }
 
 .details-panel-right.groupchat-details-panel .members-list-wrap .group-chat-participant .member-item .buttons-wrap svg{

@@ -1,27 +1,39 @@
 <div class="restrictions-wrap">
-    <div class="restrictions-header block-header">
-        <i class="details-icon btn-back mdi mdi-24px mdi-arrow-right"></i>
-        <span class="block-name">{[print(xabber.getString("groupchat_default_permissions"))]}</span>
-        <span class="block-name second-text fade-out"></span>
-        <button class="btn-default-restrictions-save text-color-500 btn-flat btn-main fade-out">{[print(xabber.getString("save"))]}</button>
-        <div class="edit-save-preloader preloader-wrap">
-            <div class="preloader-wrapper preloader-17px visible">
-                <div class="spinner-layer">
-                    <div class="circle-clipper left">
-                        <div class="circle"></div>
-                    </div>
-                    <div class="gap-patch">
-                        <div class="circle"></div>
-                    </div>
-                    <div class="circle-clipper right">
-                        <div class="circle"></div>
+    <div class="restrictions-content-wrap">
+        <div class="restrictions-header block-header">
+            <i class="details-icon btn-back mdi mdi-24px mdi-arrow-right"></i>
+            <span class="block-name">{[print(xabber.getString("groupchat_member_permissions"))]}</span>
+            <span class="block-name second-text fade-out"></span>
+            <button class="btn-default-restrictions-save text-color-500 btn-flat btn-main fade-out">{[print(xabber.getString("save"))]}</button>
+            <div class="edit-save-preloader preloader-wrap">
+                <div class="preloader-wrapper preloader-17px visible">
+                    <div class="spinner-layer">
+                        <div class="circle-clipper left">
+                            <div class="circle"></div>
+                        </div>
+                        <div class="gap-patch">
+                            <div class="circle"></div>
+                        </div>
+                        <div class="circle-clipper right">
+                            <div class="circle"></div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-    <div class="restrictions-content edit-default-restrictions">
-        <div class="default-restrictions-list-wrap"></div>
-        <p class="default-restrictions-info">{[print(xabber.getString("dialog_default_permissions_right__placeholder"))]}</p>
+        <div class="restrictions-content edit-default-restrictions">
+            <div class="default-restrictions-list-wrap"></div>
+            <p class="default-restrictions-info">{[print(xabber.getString("dialog_default_permissions_right__placeholder"))]}</p>
+        </div>
+        <div class="edit-button btn-newbie-permissions">
+            <!--<div class="details-icon-wrap"><svg class="details-icon mdi mdi-24px mdi-svg-template" data-svgname="restrictions-outline"></svg></div>-->
+            <div class="details-icon-wrap"><i class="details-icon mdi mdi-24px mdi-baby-buggy"></i></div>
+            <div class="edit-button-text">
+                <span class="one-line dotted-underline">{[print(xabber.getString("groupchat_newbie_permissions"))]}</span>
+                <span class="edit-button-value"></span>
+            </div>
+        </div>
+        <div class="block-wrap custom-participants-wrap">
+        </div>
     </div>
 </div>

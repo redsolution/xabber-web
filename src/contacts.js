@@ -460,6 +460,9 @@ xabber.Contact = Backbone.Model.extend({
                expires: expires ,
            }
         });
+        my_rights['member_role'] = {
+            role: $(response).find('permissions').attr('label')
+        };
 
         return my_rights
     },
@@ -2425,6 +2428,9 @@ xabber.GroupChatDetailsViewRight = xabber.BasicView.extend({
     },
 
     render: function (options) {
+        if (this.participants && this.participants.participant_properties_panel) {
+            this.participants.participant_properties_panel.default_rights_context = false;
+        }
         this.updateName();
         this.updateButtons();
         if (!this.model.my_rights)
@@ -2512,18 +2518,18 @@ xabber.GroupChatDetailsViewRight = xabber.BasicView.extend({
         this.contact_edit_view.showEdit();
     },
 
-    showRestrictions: function () {
-        this.default_restrictions_edit_right.showRestrictions();
+    showRestrictions: function (ev, callback) {
+        this.default_restrictions_edit_right.showRestrictions(ev, callback);
     },
 
     showNewbiePermissions: function () {
         this.newbie_permissions_edit_right.openNewbiePermissions();
     },
 
-    hideRestrictions: function () {
+    hideRestrictions: function (no_show) {
         this.model.set('restrictions_hidden', true);
         this.$('.restrictions-wrap').hideIf(this.model.get('restrictions_hidden'));
-        this.showEdit();
+        !no_show && this.showEdit();
     },
 
     hideNewbiePermissions: function () {
@@ -2569,15 +2575,19 @@ xabber.GroupChatDetailsViewRight = xabber.BasicView.extend({
             && this.model.my_info.get('role')
             && this.model.my_info.get('role') === 'owner',
             change_group = this.model.my_rights && this.model.my_rights['change-group-settings'] && this.model.my_rights['change-group-settings'].status === 'true',
-            is_blocked = this.model.get('blocked');
+            is_blocked = this.model.get('blocked'),
+            role = this.model.my_rights && this.model.my_rights['member_role'];
         this.$('.btn-settings-wrap').switchClass('non-active', !is_owner);
         this.$('.btn-edit-settings').switchClass('hidden', !(is_owner || change_group));
         this.$('.btn-invite-wrap').switchClass('non-active',
             this.model.get('private_chat')
             || this.model.get('subscription') !== 'both'
             || this.model.my_rights && this.model.my_rights['add-members'] && this.model.my_rights['add-members'].status === 'false');
-        this.$('.btn-default-restrictions-wrap').switchClass('non-active', !is_owner);
-        this.$('.btn-newbie-permissions').switchClass('non-active', !is_owner);
+        if (role && role.role === 'member'){
+            this.$('.chat-head-menu .btn-edit').text(xabber.getString("groupchat_bar_group_info"));
+        } else {
+            this.$('.chat-head-menu .btn-edit').text(xabber.getString("groupchat_bar_manage_group"));
+        }
         this.$('.btn-block').hideIf(is_blocked);
         this.$('.btn-unblock').showIf(is_blocked);
     },
@@ -4229,6 +4239,7 @@ xabber.ParticipantsViewRight = xabber.BasicView.extend({
     },
 
     _initialize: function () {
+        console.error(this);
         this.account = this.model.account;
         this.participants = this.model.participants;
         // this.listenTo(this.participants, 'change', this.onParticipantsChanged);
@@ -4239,12 +4250,29 @@ xabber.ParticipantsViewRight = xabber.BasicView.extend({
         this.listenTo(xabber, 'update_layout', this.onUpdatedScreen);
     },
 
-    _render: function () {
+    _render: function (options) {
+        if (options && options.is_custom_permissions){
+            this.is_custom_permissions = options.is_custom_permissions;
+            if (!this.parent_context_updated) {
+                this.parent = this.parent.parent;
+                this.parent_context_updated = true;
+            }
+        }
         this.$el.html(this.template()).addClass('request-waiting');
+        if (this.is_custom_permissions){
+            this.$('.custom-permissions-members-header').removeClass('hidden');
+            this.$('.participants-search-form').addClass('hidden');
+        }
         this.updateParticipants();
         return this;
     },
 
+    closeParentWindows: function () {
+        if (this.parent.hideRestrictions){
+            this.parent.hideRestrictions(true);
+            this.parent.contact_edit_view.hideEdit();
+        }
+    },
     showParticipantContextMenu: function (ev) {
         ev.preventDefault();
         let $target = $(ev.target).closest('.participant-wrap'),
@@ -4302,35 +4330,35 @@ xabber.ParticipantsViewRight = xabber.BasicView.extend({
         }
 
         $modal.find('.btn-chat').one(`click.${unique_modal_id}`, () => {
-            this.showParticipantProperties(ev, () => {
-                this.participant_properties_panel.getPrivateChat();
+            this.showParticipantProperties(ev, (self) => {
+                self.participant_properties_panel.getPrivateChat();
             }, true);
             $overlay.click();
         });
         $modal.find('.btn-participant-messages').one(`click.${unique_modal_id}`, () => {
-            this.showParticipantProperties(ev, () => {
-                this.participant_properties_panel.getMessages({});
+            this.showParticipantProperties(ev, (self) => {
+                self.participant_properties_panel.getMessages({});
             }, true);
             $overlay.click();
         });
         $modal.find('.btn-edit').one(`click.${unique_modal_id}`, () => {
-            this.showParticipantProperties(ev, () => {
-                this.participant_properties_panel.showNamePanel();
-                this.participant_properties_panel.changeBackButton();
+            this.showParticipantProperties(ev, (self) => {
+                self.participant_properties_panel.showNamePanel();
+                self.participant_properties_panel.changeBackButton();
             }, null , {is_own: is_own});
             $overlay.click();
         });
         $modal.find('.btn-promote-admin').one(`click.${unique_modal_id}`, () => {
-            this.showParticipantProperties(ev, () => {
-                this.participant_properties_panel.showNamePanel();
-                this.participant_properties_panel.changeBackButton();
+            this.showParticipantProperties(ev, (self) => {
+                self.participant_properties_panel.showNamePanel();
+                self.participant_properties_panel.changeBackButton();
             }, null, {promote_admin: true});
             $overlay.click();
         });
         $modal.find('.btn-setup-permissions').one(`click.${unique_modal_id}`, () => {
-            this.showParticipantProperties(ev, () => {
-                this.participant_properties_panel.showNamePanel();
-                this.participant_properties_panel.changeBackButton();
+            this.showParticipantProperties(ev, (self) => {
+                self.participant_properties_panel.showNamePanel();
+                self.participant_properties_panel.changeBackButton();
             }, null, {setup_permissions: true});
             $overlay.click();
         });
@@ -4382,7 +4410,18 @@ xabber.ParticipantsViewRight = xabber.BasicView.extend({
                 return;
             version && this.account.groupchat_settings.setParticipantsListVersion(this.model.get('jid'), version);
             (this.participants.version < version) && this.participants.updateVersion();
-            this.renderParticipants();
+            if (this.is_custom_permissions){
+                let iq = $iq({to: this.model.get('jid'), type: 'get'});
+                iq.c('permissions', {xmlns: `${Strophe.NS.GROUP_CHAT_PERMISSIONS}`});
+                this.account.sendFast(iq, (response) => {
+                    console.warn(response);
+                    this.renderParticipants(response);
+                }, (error) => {
+                    console.warn(error);
+                });
+            } else {
+                this.renderParticipants();
+            }
         }, () => {
             this.$el.removeClass('request-waiting');
         });
@@ -4401,15 +4440,39 @@ xabber.ParticipantsViewRight = xabber.BasicView.extend({
     //     this.updateParticipants();
     // },
 
-    renderParticipants: function () {
+    renderParticipants: function (custom_permissions_response) {
         this.participants.each((participant) => {
-            this.renderMemberItem(participant);
+            if (custom_permissions_response){
+                let $participant_permissions = $(custom_permissions_response).find(`permissions[label='member'][target='${participant.get('id')}']`);
+                if ($participant_permissions.length){
+                    this.checkDefaultRightsAndRender(participant, $participant_permissions);
+                }
+            } else {
+                this.renderMemberItem(participant);
+            }
         });
+        if (custom_permissions_response && this.$('.participant-wrap').length > 5){
+            this.$('.participants-search-form').removeClass('hidden');
+        }
         if (this.$('.participants-search-form input').val())
             this.searchParticipant();
         this.$el.removeClass('request-waiting');
     },
 
+    checkDefaultRightsAndRender: function (participant, custom_permissions) {
+        let custom_perms_count = 0;
+        _.each($(this.is_custom_permissions).find('permission'), (item) => {
+           let $item = $(item),
+               name = $item.attr('name'),
+               status = $item.attr('status');
+           if (custom_permissions.find(`permission[name='${name}']:not([status='${status}'])`).length){
+               custom_perms_count++;
+           }
+        });
+
+        let actor = custom_permissions.attr('actor');
+        this.renderMemberItem(participant, custom_perms_count, actor);
+    },
     blockParticipant: function (ev) {
         let $target = $(ev.target).closest('.participant-wrap');
         utils.dialogs.ask(xabber.getString("groupchat__dialog_block_member__header"), xabber.getString("groupchat__dialog_block_member__confirm", [$target.find('.participant-info .nickname').text()]),
@@ -4479,7 +4542,7 @@ xabber.ParticipantsViewRight = xabber.BasicView.extend({
         });
     },
 
-    renderMemberItem: function (participant) {
+    renderMemberItem: function (participant, custom_perms_count, actor) {
         if (!participant || !participant.attributes || !participant.attributes.id){
             participant && participant.destroy();
             participant && participant.attributes && this.account.groupchat_settings.removeParticipantFromList(this.model.get('jid'), participant.attributes.id);
@@ -4507,6 +4570,13 @@ xabber.ParticipantsViewRight = xabber.BasicView.extend({
         this.updateMemberAvatar(attrs);
         if (this.model.my_info && this.model.my_info.get('role') === 'member'){
             $item_view.find('.buttons-wrap').addClass('hidden2');
+        }
+        if (custom_perms_count){
+            $item_view.find('.participant-custom-permissions-count').text(custom_perms_count);
+        }
+        if (actor){
+            let participant = this.model.participants.get(actor);
+            participant && $item_view.find('.permission-actor').html(`<span class="permission-actor">${participant.get('nickname') || participant.get('jid')}</span>`);
         }
     },
 
@@ -4544,6 +4614,12 @@ xabber.ParticipantsViewRight = xabber.BasicView.extend({
 
     showParticipantProperties: function (ev, callback, no_permissions, options) {
         options = options || {};
+        if (this.is_custom_permissions){
+            options.close_on_response = true;
+            this.parent.participants.showParticipantProperties(ev, callback, no_permissions, options);
+            this.parent.participants.participant_properties_panel.default_rights_context = true;
+            return;
+        }
         let $target = $(ev.target);
         if ($target.closest('.buttons-wrap').length)
             return;
@@ -4553,12 +4629,13 @@ xabber.ParticipantsViewRight = xabber.BasicView.extend({
         (participant_item.attr('data-jid') && participant_item.attr('data-jid') === this.account.get('jid')) && (participant_id = '0');
         this.model.participants.participantsRequest({id: participant_id}, (response) => {
             if (participant_id === '' || no_permissions){
+                options.close_on_response && this.closeParentWindows();
                 if (!callback || options.is_own){
                     this.participant_properties_panel.open(participant);
                 } else {
                     this.participant_properties_panel.enable(participant);
                 }
-                callback && callback()
+                callback && callback(this)
             } else {
                 this.model.participants.participantPermissionsRequest({id: participant_id}, (response) => {
                     if (options.setup_permissions){
@@ -4566,21 +4643,24 @@ xabber.ParticipantsViewRight = xabber.BasicView.extend({
                             .c('defaults', {xmlns: `${Strophe.NS.GROUP_CHAT_PERMISSIONS}`});
                         this.account.sendFast(iq_get_rights, (iq_default_rights) => {
                             console.warn(iq_default_rights);
+                            options.close_on_response && this.closeParentWindows();
                             options.setup_permissions = iq_default_rights;
                             this.participant_properties_panel.open(participant, response, options);
-                            callback && callback()
+                            callback && callback(this)
                         }, (err) => {
                             console.error(err);
                             utils.callback_popup_message(xabber.getString("groupchat_you_have_no_permissions_to_do_it"), 3000);
                         });
                     } else {
+                        options.close_on_response && this.closeParentWindows();
                         this.participant_properties_panel.open(participant, response, options);
-                        callback && callback()
+                        callback && callback(this)
                     }
                 }, (err) => {
                     console.error(err);
+                    options.close_on_response && this.closeParentWindows();
                     this.participant_properties_panel.open(participant, null, {no_edit: true});
-                    callback && callback()
+                    callback && callback(this)
                 });
             }
         });
@@ -4695,6 +4775,24 @@ xabber.ParticipantPropertiesViewRight = xabber.BasicView.extend({
     },
 
     close: function () {
+        this.$('.participant-details-wrap').hideIf(this.model.get('participant_hidden'));
+        if (this.default_rights_context){
+            this.default_rights_context = false;
+            this.parent.showEdit();
+            this.parent.showRestrictions(null, () => {
+                this.closeParticipantProperties();
+                this.parent.scrollToTop();
+                if (this.parent.ps_container.length) {
+                    this.parent.ps_container.perfectScrollbar('destroy')
+                }
+
+            });
+        } else {
+            this.closeParticipantProperties();
+        }
+    },
+
+    closeParticipantProperties: function () {
         this.model.set('participant_hidden', true);
         if (this.parent.ps_container.length) {
             this.parent.ps_container.perfectScrollbar(
@@ -6302,10 +6400,17 @@ xabber.DefaultRestrictionsRightView = xabber.BasicView.extend({
 
     render: function () {
         this.$el.html(this.template(_.extend({view: this}, constants)));
+        !this.participants && (this.participants = this.addChild('participants', xabber.ParticipantsViewRight, {model: this.model, el: this.$('.custom-participants-wrap')[0]}));
         this.$('.restrictions-wrap').hideIf(this.model.get('restrictions_hidden'))
     },
 
-    showRestrictions: function () {
+    showRestrictions: function (ev, callback) {
+        this.change_default_permissions = this.model.my_rights
+            && this.model.my_rights['change-default-permissions']
+            && this.model.my_rights['change-default-permissions'].status === 'true';
+        this.change_user_permissions = this.model.my_rights
+            && this.model.my_rights['change-permissions']
+            && this.model.my_rights['change-permissions'].status === 'true';
         this.model.set('restrictions_hidden', false);
         this.update(() => {
             this.$('.select-timer .dropdown-button').dropdown({
@@ -6315,13 +6420,34 @@ xabber.DefaultRestrictionsRightView = xabber.BasicView.extend({
                 hover: false,
                 alignment: 'left'
             });
+            this.$('.restrictions-header').switchClass('hidden', !this.change_default_permissions);
+            this.$('.restrictions-content').switchClass('hidden',!this.change_default_permissions);
+            this.$('.edit-button').switchClass('hidden',!this.change_default_permissions);
+            this.$('.custom-participants-wrap').switchClass('hidden', !this.change_user_permissions);
             this.$('.restrictions-wrap').hideIf(this.model.get('restrictions_hidden'));
-            this.updateSaveButton()
+            this.updateSaveButton();
+            this.ps_container = this.$('.restrictions-content-wrap');
+            if (this.ps_container && this.ps_container.length) {
+                this.ps_container.perfectScrollbar(
+                    _.extend(this.ps_settings || {}, xabber.ps_settings)
+                );
+            }
+            if (this.change_user_permissions){
+                if (!this.change_default_permissions){
+                    this.$('.restrictions-header').removeClass('hidden');
+                } else {
+
+                }
+                this.participants.setElement(this.$('.custom-participants-wrap')[0]);
+                this.participants._render({is_custom_permissions: this.iq_all_rights});
+            }
+            this.scrollToTop();
+            callback && callback();
         });
     },
 
-    hideRestrictions: function () {
-        this.parent.hideRestrictions();
+    hideRestrictions: function (no_show) {
+        this.parent.hideRestrictions(no_show);
     },
 
     open: function () {
@@ -6352,7 +6478,9 @@ xabber.DefaultRestrictionsRightView = xabber.BasicView.extend({
         let iq_get_rights = $iq({type: 'get', to: this.contact.get('jid')})
             .c('defaults', {xmlns: `${Strophe.NS.GROUP_CHAT_PERMISSIONS}`});
         this.account.sendFast(iq_get_rights, (iq_all_rights) => {
-            this.showDefaultRestrictions(iq_all_rights);
+            this.iq_all_rights = iq_all_rights;
+            this.change_default_permissions && this.showDefaultRestrictions(iq_all_rights);
+
             callback && callback();
         }, () => {
 
@@ -6570,6 +6698,12 @@ xabber.NewbiePermissionsRightView = xabber.BasicView.extend({
                 alignment: 'left'
             });
             this.$('.newbie-permissions-wrap').hideIf(this.model.get('newbie_permissions_hidden'));
+            this.ps_container = this.$('.newbie-permissions-content-wrap');
+            if (this.ps_container && this.ps_container.length) {
+                this.ps_container.perfectScrollbar(
+                    _.extend(this.ps_settings || {}, xabber.ps_settings)
+                );
+            }
             this.updateSaveButton()
         });
     },
@@ -8927,10 +9061,12 @@ xabber.GroupEditView = xabber.BasicView.extend({
             this.$('.circle-avatar .set-groupchat-avatar').hideIf(false);
             this.$('.btn-edit').hideIf(false);
             this.$('.edit-bottom-block').hideIf(false);
-            this.$('.btn-default-restrictions').hideIf(this.model
-                && this.model.my_rights
-                && this.model.my_rights['change-default-permissions']
-                && this.model.my_rights['change-default-permissions'].status === 'false');
+            this.$('.btn-default-restrictions').switchClass('hidden',
+                this.model.my_rights
+                && (this.model.my_rights['change-default-permissions']
+                && this.model.my_rights['change-default-permissions'].status === 'false')
+                && (this.model.my_rights['change-permissions']
+                && this.model.my_rights['change-permissions'].status === 'false'));
             this.$('.btn-newbie-permissions').hideIf(this.model
                 && this.model.my_rights
                 && this.model.my_rights['change-default-permissions']
@@ -9000,10 +9136,12 @@ xabber.GroupEditView = xabber.BasicView.extend({
                 && this.model.my_rights['change-group-info']
                 && this.model.my_rights['change-group-info'].status === 'false');
             this.$('.edit-bottom-block').hideIf(true);
-            this.$('.btn-default-restrictions').hideIf(this.model
-                && this.model.my_rights
-                && this.model.my_rights['change-default-permissions']
-                && this.model.my_rights['change-default-permissions'].status === 'false');
+            this.$('.btn-default-restrictions').switchClass('hidden',
+                this.model.my_rights
+                && (this.model.my_rights['change-default-permissions']
+                && this.model.my_rights['change-default-permissions'].status === 'false')
+                && (this.model.my_rights['change-permissions']
+                && this.model.my_rights['change-permissions'].status === 'false'));
             this.$('.btn-newbie-permissions').hideIf(this.model
                 && this.model.my_rights
                 && this.model.my_rights['change-default-permissions']
