@@ -120,6 +120,7 @@ let badges_names = [
         'cancel',
         'edit',
         'edit-outline',
+        'tune',
         'arrow-collapse',
         'arrow-left',
         'check-circle',

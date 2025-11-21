@@ -51,14 +51,14 @@
         <div class="edit-properties">
             <div class="group-property membership-property">
                 <div class="details-icon-wrap" ><svg class="details-icon mdi mdi-24px mdi-svg-template" data-svgname="membership-outline"></svg></div>
-                <div class="group-property-text dotted-underline">
+                <div class="group-property-text ">
                     {[print(xabber.getString("groupchat_membership"))]}
                     <span></span>
                 </div>
             </div>
             <div class="group-property index-property hidden2">
                 <div class="details-icon-wrap"><svg class="details-icon mdi mdi-24px mdi-svg-template" data-svgname="index"></svg></div>
-                <div class="group-property-text dotted-underline">
+                <div class="group-property-text ">
                     {[print(xabber.getString("groupchat_index"))]}
                     <span></span>
                 </div>
@@ -66,7 +66,7 @@
             <div class="edit-button btn-default-restrictions">
                 <div class="details-icon-wrap"><svg class="details-icon mdi mdi-24px mdi-svg-template" data-svgname="restrictions-outline"></svg></div>
                 <div class="edit-button-text">
-                    <span class="one-line dotted-underline">{[print(xabber.getString("groupchat_member_permissions"))]}</span>
+                    <span class="one-line ">{[print(xabber.getString("groupchat_member_permissions"))]}</span>
                     <span class="edit-button-value"></span>
                 </div>
             </div>
@@ -117,11 +117,11 @@
             <div class="edit-pictured-buttons">
                 <div data-value="invitations" class="list-variant invitations-variant">
                     <div class="details-icon-wrap"><svg class="details-icon mdi mdi-24px mdi-svg-template" data-svgname="invite-outline"></svg></div>
-                    <div class="variant-text dotted-underline">{[print(xabber.getString("groupchat_invitations"))]}<span class="counted"></span></div>
+                    <div class="variant-text ">{[print(xabber.getString("groupchat_invitations"))]}<span class="counted"></span></div>
                 </div>
                 <div data-value="blocked" class="list-variant blocked-variant">
                     <div class="details-icon-wrap"><svg class="details-icon mdi mdi-24px mdi-svg-template" data-svgname="cancel"></svg></div>
-                    <div class="variant-text dotted-underline">{[print(xabber.getString("group_settings__block_list__header"))]}<span class="counted"></span></div>
+                    <div class="variant-text ">{[print(xabber.getString("group_settings__block_list__header"))]}<span class="counted"></span></div>
                 </div>
             </div>
             <i class="details-icon participants-edit-back btn-back-panel mdi mdi-24px mdi-arrow-right"></i>
@@ -138,13 +138,13 @@
             <div class="edit-button btn-clear-history-chat">
                 <div class="details-icon-wrap"><svg class="details-icon mdi mdi-24px mdi-svg-template" data-svgname="history"></svg></div>
                 <div class="edit-button-text">
-                    <span class="one-line dotted-underline">{[print(xabber.getString("clear_history"))]}</span>
+                    <span class="one-line ">{[print(xabber.getString("clear_history"))]}</span>
                 </div>
             </div>
             <div class="edit-button btn-delete-group">
                 <div class="details-icon-wrap"><i class="details-icon mdi mdi-24px mdi-delete text-color-500"></i></div>
                 <div class="edit-button-text">
-                    <span class="text-color-500 one-line text-decoration-color-300 dotted-underline">{[print(xabber.getString("group_settings__button_delete_group"))]}</span>
+                    <span class="text-color-500 one-line text-decoration-color-300 ">{[print(xabber.getString("group_settings__button_delete_group"))]}</span>
                 </div>
             </div>
         </div>
@@ -153,7 +153,7 @@
         <div class="status-out subscription-status-wrap dropdown-button" data-activates="{{view.cid}}-status-out">
             <div class="details-icon-wrap"><svg class="details-icon mdi mdi-24px mdi-svg-template" data-svgname="subscription-to"></svg></div>
             <div class="info">
-                <div class="value dotted-underline one-line"></div>
+                <div class="value  one-line"></div>
             </div>
         </div>
         <div id="{{view.cid}}-status-out" class="unified-dropdown-style status-out-dropdown dropdown-content noselect">
@@ -170,7 +170,7 @@
         <div class="status-in subscription-status-wrap dropdown-button" data-activates="{{view.cid}}-status-in">
             <div class="details-icon-wrap"><svg class="details-icon mdi mdi-24px mdi-svg-template" data-svgname="subscription-from"></svg></div>
             <div class="info">
-                <div class="value dotted-underline one-line"></div>
+                <div class="value  one-line"></div>
             </div>
         </div>
         <div id="{{view.cid}}-status-in" class="unified-dropdown-style status-in-dropdown dropdown-content noselect">

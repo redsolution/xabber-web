@@ -26,13 +26,16 @@
             <div class="default-restrictions-list-wrap"></div>
             <p class="default-restrictions-info">{[print(xabber.getString("dialog_default_permissions_right__placeholder"))]}</p>
         </div>
-        <div class="edit-button btn-newbie-permissions">
-            <!--<div class="details-icon-wrap"><svg class="details-icon mdi mdi-24px mdi-svg-template" data-svgname="restrictions-outline"></svg></div>-->
-            <div class="details-icon-wrap"><i class="details-icon mdi mdi-24px mdi-baby-buggy"></i></div>
-            <div class="edit-button-text">
-                <span class="one-line dotted-underline">{[print(xabber.getString("groupchat_newbie_permissions"))]}</span>
-                <span class="edit-button-value"></span>
+        <div class="btn-newbie-permissions-wrap">
+            <div class="default-restrictions-list-header">{[print(xabber.getString("groupchat_newbie_permissions_btn_header"))]}</div>
+            <div class="edit-button btn-newbie-permissions">
+                <div class="details-icon-wrap"><i class="details-icon mdi mdi-24px mdi-baby-buggy"></i></div>
+                <div class="edit-button-text">
+                    <span class="one-line">{[print(xabber.getString("groupchat_newbie_permissions"))]}</span>
+                    <span class="edit-button-value"></span>
+                </div>
             </div>
+            <p class="default-restrictions-info">{[print(xabber.getString("groupchat_newbie_permissions_btn_info_text"))]}</p>
         </div>
         <div class="block-wrap custom-participants-wrap">
         </div>

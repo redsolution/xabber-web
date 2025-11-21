@@ -403,6 +403,7 @@ import $ from "jquery";
     addSvgTemplate('svg.security-outline');
     addSvgTemplate('svg.edit');
     addSvgTemplate('svg.edit-outline');
+    addSvgTemplate('svg.tune');
     addSvgTemplate('svg.arrow-collapse');
     addSvgTemplate('svg.arrow-left');
     addSvgTemplate('svg.check-circle');

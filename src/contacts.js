@@ -6436,7 +6436,7 @@ xabber.DefaultRestrictionsRightView = xabber.BasicView.extend({
                 alignment: 'left'
             });
             this.$('.restrictions-content').switchClass('hidden',!this.change_default_permissions);
-            this.$('.btn-newbie-permissions').switchClass('hidden',!this.change_default_permissions);
+            this.$('.btn-newbie-permissions-wrap').switchClass('hidden',!this.change_default_permissions);
             this.$('.custom-participants-wrap').switchClass('hidden', !this.change_user_permissions);
             this.$('.restrictions-wrap').hideIf(this.model.get('restrictions_hidden'));
             this.updateSaveButton();
@@ -9070,7 +9070,7 @@ xabber.GroupEditView = xabber.BasicView.extend({
                 && this.model.my_rights['change-default-permissions'].status === 'false')
                 && (this.model.my_rights['change-permissions']
                 && this.model.my_rights['change-permissions'].status === 'false'));
-            this.$('.btn-newbie-permissions').hideIf(this.model
+            this.$('.btn-newbie-permissions-wrap').hideIf(this.model
                 && this.model.my_rights
                 && this.model.my_rights['change-default-permissions']
                 && this.model.my_rights['change-default-permissions'].status === 'false');
@@ -9145,7 +9145,7 @@ xabber.GroupEditView = xabber.BasicView.extend({
                 && this.model.my_rights['change-default-permissions'].status === 'false')
                 && (this.model.my_rights['change-permissions']
                 && this.model.my_rights['change-permissions'].status === 'false'));
-            this.$('.btn-newbie-permissions').hideIf(this.model
+            this.$('.btn-newbie-permissions-wrap').hideIf(this.model
                 && this.model.my_rights
                 && this.model.my_rights['change-default-permissions']
                 && this.model.my_rights['change-default-permissions'].status === 'false');
