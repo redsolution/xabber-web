@@ -1049,10 +1049,10 @@ input[type=file] {
 }
 
 .details-panel-right .participant-details-item .btn-edit-participant,
-.details-panel-right .btn-qr-code,
 .details-panel-right .edit-bottom-block .btn-add-block,
 .details-panel-right .edit-bottom-block .btn-invite,
 .details-panel-right .edit-header .btn-edit,
+.details-panel-right .btn-edit-group-properties,
 .details-panel-right .btn-search-messages {
     position: absolute;
     z-index: 1;
@@ -1060,7 +1060,14 @@ input[type=file] {
     right: 20px;
     cursor: pointer;
 }
-.details-panel-right .btn-search-messages{
+.details-panel-right .info-wrap.jid-info-wrap .btn-qr-code{
+    position: absolute;
+    z-index: 1;
+    top: 20px;
+    right: 20px;
+    cursor: pointer;
+}
+.details-panel-right .btn-search-messages:not(.moved-btn-search){
     right: 68px;
 }
 
@@ -1099,6 +1106,8 @@ input[type=file] {
 .details-panel-right .participant-details-item .btn-edit-participant svg path,
 .details-panel-right .btn-qr-code svg,
 .details-panel-right .btn-qr-code svg path,
+.details-panel-right .btn-edit-group-properties svg,
+.details-panel-right .btn-edit-group-properties svg path,
 .details-panel-right .edit-bottom-block .btn-add-block svg,
 .details-panel-right .edit-bottom-block .btn-add-block svg path,
 .details-panel-right .btn-edit svg,
@@ -9574,7 +9583,7 @@ input[type=text].simple-input-field:hover {
 .btn-unread,
 .recent-chats-main-header,
 .btn-back-to-chats {
-    transition: opacity 0.9s linear;
+    transition: opacity .3s linear;
 }
 .recent-chats-search-active .recent-chats-panel {
     /*padding-top: 8px;*/
@@ -9643,7 +9652,7 @@ input[type=text].simple-input-field:hover {
 }
 .chat-list-wrap.left-panel-list-wrap {
     padding: 5px 16px 0;
-    transition: padding 0.6s ease-in-out;
+    transition: padding .2s ease-in-out;
 }
 
 .mention-item {
@@ -17259,7 +17268,7 @@ input[type=range].voice-message-volume:focus {
 .main-modal.webcam-panel  .circle-icon.disabled {
     pointer-events: none;
 }
-.main-modal.webcam-panel  .circle-icon svg {
+.main-modal.webcam-panel  .circle-icon .mdi {
     width: 24px;
     height: 24px;
     left: 50%;
@@ -19102,7 +19111,6 @@ input[type=range].voice-message-volume:focus {
     width: inherit;
 }
 
-.details-panel-right .description-edit-wrap,
 .details-panel-right .membership-property-edit-wrap,
 .details-panel-right .index-property-edit-wrap,
 .details-panel-right .newbie-permissions-wrap,
@@ -19116,6 +19124,11 @@ input[type=range].voice-message-volume:focus {
     background: white;
     z-index: 1000;
     padding: 0;
+}
+.details-panel-right .description-edit-wrap{
+    width: inherit;
+    padding: 0;
+
 }
 .details-panel-right .restrictions-content-wrap{
     padding-top: 64px
@@ -19352,6 +19365,7 @@ input[type=range].voice-message-volume:focus {
 }
 .details-panel-right .restrictions-timers-header,
 .details-panel-right .restrict-set-default-header,
+.details-panel-right .default-restrictions-list-header,
 .details-panel-right .participant-details-wrap .participant-details-edit-wrap .confirmation-rights-header,
 .details-panel-right .participant-details-wrap .participant-details-edit-wrap .normal-rights-header{
     padding: 0 24px 0 20px;
@@ -19445,7 +19459,7 @@ input[type=range].voice-message-volume:focus {
 }
 
 .details-panel-right .description-edit-wrap .main-info {
-    margin-top: 48px;
+    margin-top: 64px;
 }
 
 .details-panel-right .edit-wrap .main-info .avatar-wrap{
@@ -19456,6 +19470,11 @@ input[type=range].voice-message-volume:focus {
 
     width: 192px;
     height: 192px;
+}
+
+.details-panel-right .edit-wrap .description-edit-wrap .main-info .circle-avatar{
+    height: 146px;
+    width: 146px;
 }
 
 .details-panel-right .edit-wrap .main-info .set-groupchat-avatar-text{
@@ -19927,26 +19946,6 @@ input[type=range].voice-message-volume:focus {
     position: relative;
     margin-bottom: 16px;
     height: 48px;
-}
-.details-panel-right .btn-newbie-permissions{
-    position: absolute;
-    top: 20px;
-    z-index: 1;
-    right: 20px;
-    width: 24px;
-    height: 24px;
-}
-.details-panel-right .btn-newbie-permissions .edit-button-text{
-    display: none;
-}
-.details-panel-right .btn-newbie-permissions .details-icon-wrap{
-    width: 24px;
-    height: 24px;
-    position: relative;
-}
-.details-panel-right .btn-newbie-permissions .details-icon-wrap .details-icon{
-    top: 0 !important;
-    left: 0;
 }
 
 .details-panel-right .edit-button:hover .edit-button-text{

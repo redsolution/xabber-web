@@ -1990,7 +1990,6 @@ xabber.ContactDetailsViewRight = xabber.BasicView.extend({
         this.$('.btn-escape i').addClass('mdi-close').removeClass('mdi-arrow-right');
         this.$('.buttons-wrap').hideIf(false);
         this.$('.btn-search-messages').hideIf(false);
-        this.$('.btn-qr-code').hideIf(false);
         this.ps_container.animate(
             {scrollTop: 0},
             400,
@@ -2065,7 +2064,6 @@ xabber.ContactDetailsViewRight = xabber.BasicView.extend({
         if (!_.isUndefined(bottom_block_scroll) && bottom_block_scroll <= 240){
             this.$('.buttons-wrap').hideIf(true);
             this.$('.btn-search-messages').hideIf(true);
-            this.$('.btn-qr-code').hideIf(true);
             this.$('.header-buttons .block-name:not(.second-text)').addClass('fade-out');
             this.$('.header-buttons .block-name.second-text').removeClass('fade-out');
             this.$('.header-buttons .block-name.second-text').text(this.$('.list-variant .active').text())
@@ -2073,7 +2071,6 @@ xabber.ContactDetailsViewRight = xabber.BasicView.extend({
         else {
             this.$('.buttons-wrap').hideIf(false);
             this.$('.btn-search-messages').hideIf(false);
-            this.$('.btn-qr-code').hideIf(false);
         }
     },
 
@@ -2366,7 +2363,7 @@ xabber.GroupChatDetailsViewRight = xabber.BasicView.extend({
     events: {
         "click .btn-mute-dropdown": "muteChat",
         "click .btn-notifications.muted": "unmuteChat",
-        "click .btn-edit": "showEdit",
+        "click .btn-edit-group-properties": "showEdit",
         "click .btn-search": "showSearchMessages",
         "click .btn-clear-history-chat": "clearHistory",
         "click .btn-qr-code": "showQRCode",
@@ -2507,7 +2504,7 @@ xabber.GroupChatDetailsViewRight = xabber.BasicView.extend({
         if (!this.model.get('edit_hidden'))
             this.contact_edit_view.hideEdit();
         if (!this.model.get('restrictions_hidden'))
-            this.default_restrictions_edit_right.hideRestrictions();
+            this.default_restrictions_edit_right.hideRestrictions(true);
         if (!this.model.get('newbie_permissions_hidden'))
             this.newbie_permissions_edit_right.hideNewbiePermissions();
         this.model.set('participant_hidden', true);
@@ -2584,9 +2581,11 @@ xabber.GroupChatDetailsViewRight = xabber.BasicView.extend({
             || this.model.get('subscription') !== 'both'
             || this.model.my_rights && this.model.my_rights['add-members'] && this.model.my_rights['add-members'].status === 'false');
         if (role && role.role === 'member'){
-            this.$('.chat-head-menu .btn-edit').text(xabber.getString("groupchat_bar_group_info"));
+            this.$('.btn-edit-group-properties').addClass('hidden');
+            this.$('.btn-search-messages').addClass('moved-btn-search');
         } else {
-            this.$('.chat-head-menu .btn-edit').text(xabber.getString("groupchat_bar_manage_group"));
+            this.$('.btn-edit-group-properties').removeClass('hidden');
+            this.$('.btn-search-messages').removeClass('moved-btn-search');
         }
         this.$('.btn-block').hideIf(is_blocked);
         this.$('.btn-unblock').showIf(is_blocked);
@@ -2723,7 +2722,7 @@ xabber.GroupChatDetailsViewRight = xabber.BasicView.extend({
         if (!_.isUndefined(bottom_block_scroll) && bottom_block_scroll <= 240) {
             this.$('.buttons-wrap:not(.participant-item-buttons-wrap)').hideIf(true);
             this.$('.btn-search-messages').hideIf(true);
-            this.$('.btn-qr-code').hideIf(true);
+            this.$('.btn-edit-group-properties').hideIf(true);
             this.$('.header-buttons .block-name:not(.second-text)').addClass('fade-out');
             this.$('.header-buttons .block-name.second-text').removeClass('fade-out');
             this.$('.header-buttons .block-name.second-text').text(this.$('.tabs:not(.participant-tabs) .list-variant .active').text())
@@ -2731,7 +2730,7 @@ xabber.GroupChatDetailsViewRight = xabber.BasicView.extend({
         else {
             this.$('.buttons-wrap:not(.participant-item-buttons-wrap)').hideIf(false);
             this.$('.btn-search-messages').hideIf(false);
-            this.$('.btn-qr-code').hideIf(false);
+            this.$('.btn-edit-group-properties').hideIf(false);
         }
     },
 
@@ -2741,14 +2740,19 @@ xabber.GroupChatDetailsViewRight = xabber.BasicView.extend({
         }
     },
 
-    showQRCode: function () {
+    showQRCode: function (ev, options) {
+        if (ev && ev.target && $(ev.target).closest('.participant-details-item').length)
+            return;
+        options = options || {};
+        let jid = options.jid || this.model.get('jid'),
+            name = options.name || this.model.get('name');
         let qrcode = new VanillaQR({
-            url: 'xmpp:' + this.model.get('jid'),
+            url: 'xmpp:' + jid,
             noBorder: true
         });
         this.$('.qr-code-canvas').html("")[0].appendChild(qrcode.domElement);
-        this.$('.qr-code-name').text(this.model.get('name'));
-        this.$('.qr-code-jid').text(this.model.get('jid'));
+        this.$('.qr-code-name').text(name);
+        this.$('.qr-code-jid').text(jid);
         this.$('.qr-code-content-wrap').removeClass('hidden');
         this.scrollToTop();
         this.ps_container.perfectScrollbar('destroy');
@@ -2812,7 +2816,7 @@ xabber.GroupChatDetailsViewRight = xabber.BasicView.extend({
         this.$('.btn-escape i').addClass('mdi-close').removeClass('mdi-arrow-right');
         this.$('.buttons-wrap:not(.participant-item-buttons-wrap)').hideIf(false);
         this.$('.btn-search-messages').hideIf(false);
-        this.$('.btn-qr-code').hideIf(false);
+        this.$('.btn-edit-group-properties').hideIf(false);
         this.ps_container.animate(
             {scrollTop: 0},
             400,
@@ -4576,7 +4580,8 @@ xabber.ParticipantsViewRight = xabber.BasicView.extend({
         }
         if (actor){
             let participant = this.model.participants.get(actor);
-            participant && $item_view.find('.permission-actor').html(`<span class="permission-actor">${participant.get('nickname') || participant.get('jid')}</span>`);
+            participant && $item_view.find('.bottom-line')
+                .html(`<span class="permission-actor">${xabber.getString("groupchat_edit__custom_permissions_members_set_by", [participant.get('nickname') || participant.get('jid')])}</span>`);
         }
     },
 
@@ -4708,6 +4713,7 @@ xabber.ParticipantPropertiesViewRight = xabber.BasicView.extend({
         "click .btn-back:not(.btn-top)": "close",
         "click .btn-back.btn-top": "scrollToTopSmooth",
         'click .btn-edit-participant': 'showNamePanel',
+        "click .btn-qr-code": "showQRCode",
         'click .btn-back-name': 'hidePanel',
         "change .clickable-field input:not(#custom-timer-date)": "changeRights",
         "click .restriction-owner": "makeOwner",
@@ -4772,6 +4778,15 @@ xabber.ParticipantPropertiesViewRight = xabber.BasicView.extend({
         this.$('.select-timer .dropdown-button').dropdown(dropdown_settings);
         this.$('.circle-avatar.dropdown-button').dropdown(dropdown_settings);
         this.$('.participant-details-item .dropdown-button').dropdown(_.extend(dropdown_settings, {alignment: 'right'}));
+    },
+
+    showQRCode: function () {
+        if (this.participant && this.participant.get('jid') && this.parent && this.parent.showQRCode){
+            this.parent.showQRCode(null, {
+                jid: this.participant.get('jid'),
+                name: this.participant.get('nickname') || this.participant.get('jid')
+            });
+        }
     },
 
     close: function () {
@@ -6382,14 +6397,14 @@ xabber.DefaultRestrictionsRightView = xabber.BasicView.extend({
     events: {
         "click .restrictions-wrap .btn-default-restrictions-save": "saveChanges",
         "click .restrictions-wrap .btn-default-restrictions-cancel": "hideRestrictions",
-        "click .restrictions-wrap .btn-back": "hideRestrictions",
+        "click .restrictions-wrap .btn-back:not('.back-to-permissions-menu')": "hideRestrictions",
         "click .restrictions-wrap .btn-reset": "showRestrictions",
         "change .restrictions-wrap #default_restriction_expires": "changeExpiresTime",
         "click .restrictions-wrap.group-info-editor .property-variant": "changePropertyValue",
         "click .restrictions-wrap.select-timer .property-variant": "changeTimerValue",
         "click .restrictions-wrap .clickable-field input": "changeRestriction",
         "keyup .restrictions-wrap .clickable-field input": "keyUpInput",
-        "change .restrictions-wrap .clickable-field input": "updateSaveButton"
+        "change .restrictions-wrap .clickable-field input": "updateSaveButton",
     },
 
     _initialize: function () {
@@ -6420,29 +6435,23 @@ xabber.DefaultRestrictionsRightView = xabber.BasicView.extend({
                 hover: false,
                 alignment: 'left'
             });
-            this.$('.restrictions-header').switchClass('hidden', !this.change_default_permissions);
             this.$('.restrictions-content').switchClass('hidden',!this.change_default_permissions);
-            this.$('.edit-button').switchClass('hidden',!this.change_default_permissions);
+            this.$('.btn-newbie-permissions').switchClass('hidden',!this.change_default_permissions);
             this.$('.custom-participants-wrap').switchClass('hidden', !this.change_user_permissions);
             this.$('.restrictions-wrap').hideIf(this.model.get('restrictions_hidden'));
             this.updateSaveButton();
-            this.ps_container = this.$('.restrictions-content-wrap');
+            this.ps_container = this.$('.restrictions-wrap');
             if (this.ps_container && this.ps_container.length) {
                 this.ps_container.perfectScrollbar(
                     _.extend(this.ps_settings || {}, xabber.ps_settings)
                 );
             }
             if (this.change_user_permissions){
-                if (!this.change_default_permissions){
-                    this.$('.restrictions-header').removeClass('hidden');
-                } else {
-
-                }
                 this.participants.setElement(this.$('.custom-participants-wrap')[0]);
                 this.participants._render({is_custom_permissions: this.iq_all_rights});
             }
             this.scrollToTop();
-            callback && callback();
+            callback && callback(this);
         });
     },
 
@@ -8531,7 +8540,6 @@ xabber.GroupEditView = xabber.BasicView.extend({
         "click .btn-save": "saveChanges",
         'click .edit-header:not(.property-header) .btn-back': 'hideEdit',
         'click .btn-reset': 'resetPanel',
-        'click .btn-edit': 'showDescriptionProperty',
         'click .btn-back-panel': 'hidePanel',
         'click .membership-field .property-radio input': 'changeMembership',
         'click .index-field .property-radio input ': 'changeIndex',
@@ -8580,7 +8588,6 @@ xabber.GroupEditView = xabber.BasicView.extend({
         this.$('.subscription-statuses').showIf(this.model.get('subscription') !== 'both');
         this.$('.index-property-edit-wrap').hideIf(true);
         this.$('.membership-property-edit-wrap').hideIf(true);
-        this.$('.description-edit-wrap').hideIf(true);
         let dropdown_settings = {
             inDuration: 100,
             outDuration: 100,
@@ -8761,7 +8768,6 @@ xabber.GroupEditView = xabber.BasicView.extend({
     },
 
     showDescriptionProperty: function () {
-        this.$('.description-edit-wrap').hideIf(false);
         this.group_description_field.$input.height(this.group_description_field.$input[0].scrollHeight - 8);
         if (this.ps_container.length) {
             this.ps_container.perfectScrollbar('destroy')
@@ -8770,7 +8776,6 @@ xabber.GroupEditView = xabber.BasicView.extend({
 
     hideProperty: function () {
         this.$('.index-property-edit-wrap').hideIf(true);
-        this.$('.description-edit-wrap').hideIf(true);
         this.$('.membership-property-edit-wrap').hideIf(true);
         if (this.ps_container.length) {
             this.ps_container.perfectScrollbar(
@@ -9015,7 +9020,6 @@ xabber.GroupEditView = xabber.BasicView.extend({
             this.model.set('group_info', group_info);
             this.group_name_field.$input.prop('disabled', false);
             this.group_description_field.$input.prop('disabled', false);
-            this.hideProperty();
             this.$('.edit-save-preloader.preloader-wrap').removeClass('visible').find('.preloader-wrapper').removeClass('active');
             this.resetPanel()
         }, (error) => {
@@ -9024,7 +9028,6 @@ xabber.GroupEditView = xabber.BasicView.extend({
             utils.dialogs.error(err_text);
             this.group_name_field.$input.prop('disabled', false);
             this.group_description_field.$input.prop('disabled', false);
-            this.hideProperty();
             this.$('.edit-save-preloader.preloader-wrap').removeClass('visible').find('.preloader-wrapper').removeClass('active');
         });
     },

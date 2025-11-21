@@ -18,31 +18,10 @@
     <div class="edit-header main-edit-header block-header">
         <i class="details-icon btn-back mdi mdi-24px mdi-arrow-right"></i>
         <span class="block-name"></span>
-        <div class="btn-edit">
-            <svg class="mdi mdi-24px mdi-svg-template" data-svgname="edit-outline"></svg>
-        </div>
+        <button class="btn-save btn-flat text-color-500 btn-main fade-out">{[print(xabber.getString("save"))]}</button>
     </div>
     <div class="edit-group-wrap">
-        <div class="edit-group vcard">
-            <div class="info-wrap description-info-wrap">
-                <div class="details-icon-wrap">
-                    <svg class="details-icon mdi mdi-24px mdi-svg-template" data-svgname="description-outline"></svg>
-                </div>
-                <div class="info-hover">
-                    <div class="info description">
-                        <div class="edit-group-name value"></div>
-                        <div class="edit-group-description value"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="description-edit-wrap hidden">
-            <div class="edit-header property-header description-header block-header">
-                <i class="details-icon btn-property-back btn-back mdi mdi-24px mdi-arrow-right"></i>
-                <span class="block-name">{[print(xabber.getString("groupchat_properties"))]}</span>
-                <span class="block-name second-text fade-out"></span>
-                <button class="btn-save btn-flat text-color-500 btn-main fade-out">{[print(xabber.getString("save"))]}</button>
-            </div>
+        <div class="description-edit-wrap">
             <div class="main-info">
                 <div class="avatar-wrap">
                     <div class="circle-avatar dropdown-button" data-activates="{{view.cid}}-group-image">
@@ -50,21 +29,6 @@
                         <svg class="set-groupchat-avatar" viewBox="0 0 24 24">
                             <path d="M4,4H7L9,2H15L17,4H20A2,2 0 0,1 22,6V18A2,2 0 0,1 20,20H4A2,2 0 0,1 2,18V6A2,2 0 0,1 4,4M12,7A5,5 0 0,0 7,12A5,5 0 0,0 12,17A5,5 0 0,0 17,12A5,5 0 0,0 12,7M12,9A3,3 0 0,1 15,12A3,3 0 0,1 12,15A3,3 0 0,1 9,12A3,3 0 0,1 12,9Z" />
                         </svg>
-                        <div class="preloader-wrap">
-                            <div class="preloader-wrapper preloader-32px visible">
-                                <div class="spinner-layer">
-                                    <div class="circle-clipper left">
-                                        <div class="circle"></div>
-                                    </div>
-                                    <div class="gap-patch">
-                                        <div class="circle"></div>
-                                    </div>
-                                    <div class="circle-clipper right">
-                                        <div class="circle"></div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
                     </div>
                     <div id="{{view.cid}}-group-image" class="profile-image-dropdown unified-dropdown-style dropdown-content noselect">
                         <div class="btn-emoji-panel property-variant">
@@ -92,7 +56,7 @@
                     <span></span>
                 </div>
             </div>
-            <div class="group-property index-property">
+            <div class="group-property index-property hidden2">
                 <div class="details-icon-wrap"><svg class="details-icon mdi mdi-24px mdi-svg-template" data-svgname="index"></svg></div>
                 <div class="group-property-text dotted-underline">
                     {[print(xabber.getString("groupchat_index"))]}
