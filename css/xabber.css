@@ -1070,6 +1070,9 @@ input[type=file] {
 .details-panel-right .btn-search-messages:not(.moved-btn-search){
     right: 68px;
 }
+.details-panel-right.contact-details-panel .btn-search-messages:not(.moved-btn-search){
+    right: 20px;
+}
 
 .details-panel-right .edit-save-preloader.preloader-wrap{
     position: absolute;
@@ -1376,8 +1379,8 @@ body {
     z-index: 498;
     height: 100%;
     cursor: pointer;
-    opacity: 0.4;
-    background: #000;
+    background: rgb(0 0 0 / 30%) !important;
+    background-color: rgb(0 0 0 / 30%) !important;
 }
 
 .right-contact-panel-wrap:not(.background-click) .details-panel-right .panel-background-clickable.temporary-fading-search-background,
@@ -1393,9 +1396,11 @@ body {
     opacity: 0.3;
 }
 .right-contact-panel-wrap:not(.background-click) .details-panel-right .panel-background-clickable.temporary-fading-search-background{
-    background: #000 !important;
-    background-color: #000 !important;
-    transition: background-color 2s linear;
+    background: rgb(0 0 0 / 30%) !important;
+    background-color: rgb(0 0 0 / 30%) !important;
+    transition: background-color 2s
+    linear;
+    opacity: 1;
 }
 .right-contact-panel-wrap.background-click .details-panel-right .panel-content-wrap{
     z-index: 499;
@@ -19446,6 +19451,13 @@ input[type=range].voice-message-volume:focus {
     height: 64px;
     width: inherit;
 }
+.details-panel-right .edit-wrap .block-header {
+    -webkit-transition: background-color .5s
+    linear;
+    -ms-transition: background-color .5s linear;
+    transition: background-color .5s
+    linear;
+}
 .details-panel-right .edit-wrap .block-header.description-header{
     background: transparent;
 }
@@ -19845,6 +19857,10 @@ input[type=range].voice-message-volume:focus {
     resize: vertical;
     overflow: hidden;
     outline: none;
+}
+.details-panel-right .edit-wrap .group-description-wrap .group-description-input{
+    height: 88px;
+    min-height: 88px;
 }
 .textarea-glow.input-glow{
     min-height: calc(3rem - 2px) !important;
@@ -20937,7 +20953,7 @@ input[type=range].voice-message-volume:focus {
 
 .details-panel-right.groupchat-details-panel .vcard .info,
 .details-panel-right.contact-details-panel .vcard .info {
-    padding: 15px 16px 14px 0;
+    padding: 15px 48px 14px 0;
     border-top: 1px solid #F5F5F5;
     margin-left: 72px;
     width: calc(100% - 72px);

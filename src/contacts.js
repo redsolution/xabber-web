@@ -2571,7 +2571,9 @@ xabber.GroupChatDetailsViewRight = xabber.BasicView.extend({
             && this.model.my_info
             && this.model.my_info.get('role')
             && this.model.my_info.get('role') === 'owner',
+            change_group_info = this.model.my_rights && this.model.my_rights['change-group-info'] && this.model.my_rights['change-group-info'].status === 'true',
             change_group = this.model.my_rights && this.model.my_rights['change-group-settings'] && this.model.my_rights['change-group-settings'].status === 'true',
+            change_group_permissions = this.model.my_rights && this.model.my_rights['change-default-permissions'] && this.model.my_rights['change-default-permissions'].status === 'true',
             is_blocked = this.model.get('blocked'),
             role = this.model.my_rights && this.model.my_rights['member_role'];
         this.$('.btn-settings-wrap').switchClass('non-active', !is_owner);
@@ -2580,12 +2582,12 @@ xabber.GroupChatDetailsViewRight = xabber.BasicView.extend({
             this.model.get('private_chat')
             || this.model.get('subscription') !== 'both'
             || this.model.my_rights && this.model.my_rights['add-members'] && this.model.my_rights['add-members'].status === 'false');
-        if (role && role.role === 'member'){
-            this.$('.btn-edit-group-properties').addClass('hidden');
-            this.$('.btn-search-messages').addClass('moved-btn-search');
-        } else {
-            this.$('.btn-edit-group-properties').removeClass('hidden');
+        if (change_group_info || change_group || change_group_permissions){
+            this.$('.btn-edit-group-properties').removeClass('hidden2');
             this.$('.btn-search-messages').removeClass('moved-btn-search');
+        } else {
+            this.$('.btn-edit-group-properties').addClass('hidden2');
+            this.$('.btn-search-messages').addClass('moved-btn-search');
         }
         this.$('.btn-block').hideIf(is_blocked);
         this.$('.btn-unblock').showIf(is_blocked);
@@ -2628,6 +2630,7 @@ xabber.GroupChatDetailsViewRight = xabber.BasicView.extend({
             this.$('.panel-background-clickable').addClass('temporary-fading-search-background');
             this.$('.panel-background-clickable').addClass('fading-search-background');
             setTimeout(() => {
+                console.error('here');
                 this.$('.panel-background-clickable').removeClass('temporary-fading-search-background');
             }, 20);
         }
@@ -8669,6 +8672,18 @@ xabber.GroupEditView = xabber.BasicView.extend({
 
     },
 
+    onScroll: function () {
+        if(this.ps_container[0].scrollTop >= 170) {
+            this.$('.main-edit-header').attr('style', 'background-color: rgba(255,255,255,1) !important; -webkit-transition: none; -ms-transition: none;transition: none;');
+        }
+        else if(this.ps_container[0].scrollTop >= 40) {
+            this.$('.main-edit-header').attr('style', 'background-color: rgba(255,255,255,0.5) !important;');
+        }
+        else{
+            this.$('.main-edit-header').attr( 'style', 'background-color: rgba(255,255,255,0) !important;');
+        }
+    },
+
     updateStatuses: function () {
         let statuses = this.model.getSubscriptionStatuses(),
             subscription_preapproved = this.model.get('subscription_preapproved');
@@ -8768,7 +8783,7 @@ xabber.GroupEditView = xabber.BasicView.extend({
     },
 
     showDescriptionProperty: function () {
-        this.group_description_field.$input.height(this.group_description_field.$input[0].scrollHeight - 8);
+        // this.group_description_field.$input.height(this.group_description_field.$input[0].scrollHeight - 8);
         if (this.ps_container.length) {
             this.ps_container.perfectScrollbar('destroy')
         }
@@ -8880,7 +8895,16 @@ xabber.GroupEditView = xabber.BasicView.extend({
         this.$('.edit-bottom-block .btn-add-block').hideIf(true);
         this.$('.edit-bottom-block .btn-invite').hideIf(true);
         this.$('.btn-remove-selected').hideIf(true);
-        this.$('.participants-edit-wrap').hideIf(true)
+        this.$('.participants-edit-wrap').hideIf(true);
+        if (this.ps_container.length) {
+            this.ps_container.perfectScrollbar('destroy');
+        }
+        this.ps_container = this.prev_ps_container;
+        if (this.ps_container.length) {
+            this.ps_container.perfectScrollbar(
+                _.extend(this.parent.ps_settings || {}, xabber.ps_settings)
+            );
+        }
     },
 
     showPanel: function () {
@@ -8889,6 +8913,7 @@ xabber.GroupEditView = xabber.BasicView.extend({
         this.$('.btn-remove-selected').hideIf(false);
         this.$('.participants-edit-wrap').hideIf(false);
         this.updateRemoveParticipantButton();
+        this.prev_ps_container = this.ps_container;
         if (this.ps_container.length) {
             this.ps_container.perfectScrollbar('destroy')
         }
@@ -9050,6 +9075,8 @@ xabber.GroupEditView = xabber.BasicView.extend({
                     _.extend(this.parent.ps_settings || {}, xabber.ps_settings)
                 );
             }
+            this.ps_container.on("ps-scroll-y", this.onScroll.bind(this));
+            this.onScroll();
             this.update();
             this.$('.group-property:not(.privacy-property)').removeClass('disabled');
             this.group_name_field.$input.hideIf(false);
@@ -9096,7 +9123,6 @@ xabber.GroupEditView = xabber.BasicView.extend({
             });
             this.$('.edit-wrap').hideIf(this.model.get('edit_hidden'));
             this.parent.$('.group-edit-preloader').html('');
-            this.group_description_field.$input.height(this.group_description_field.$input[0].scrollHeight - 8);
             this.$('.tabs .indicator').remove();
         }, () => {
             this.model.set('edit_hidden', false);
@@ -9110,6 +9136,8 @@ xabber.GroupEditView = xabber.BasicView.extend({
                     _.extend(this.parent.ps_settings || {}, xabber.ps_settings)
                 );
             }
+            this.ps_container.on("ps-scroll-y", this.onScroll.bind(this));
+            this.onScroll();
             this.update();
             this.group_name_field.$input.prop('disabled', this.model
                 && this.model.my_rights
@@ -9159,7 +9187,6 @@ xabber.GroupEditView = xabber.BasicView.extend({
             this.$('.participants-edit-wrap').hideIf(true);
             this.$('.edit-wrap').hideIf(this.model.get('edit_hidden'));
             this.parent.$('.group-edit-preloader').html('');
-            this.group_description_field.$input.height(this.group_description_field.$input[0].scrollHeight - 8);
             this.$('.tabs .indicator').remove();
         });
     },

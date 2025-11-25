@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.4.262","version_description":"changed default permissions design, changed group edit icon, removed dotted underline from group edit buttons,"}'
+'{"version_number":"2.4.263","version_description":"changed group parameters btn appearance based on own permissions, added group edit header background changing on scroll, fixed scrolling after opening invitations tab in group edit, changed description input appearance, fixed permissions timers,  fixed messages searching background after openining it in contact or groupchat details, fixed search messages btn position in contact details, fixed padding in jid field in details view"}'
 )});
