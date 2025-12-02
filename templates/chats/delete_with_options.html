@@ -1,0 +1,37 @@
+<div class="modal-content-wrap">
+    <div class="modal-header">
+        <span>{[print(xabber.getString("dialog_delete_messages__header"))]}</span>
+    </div>
+    <div class="modal-content">
+        <div class="field checkbox-field">
+            <form action="#">
+                <p>
+                    <input class="filled-in" name="delete-options" value="spam" type="checkbox" id="delete-options-spam" />
+                    <label for="delete-options-spam">{[print(xabber.getString("delete_with_options__spam_option"))]}</label>
+                </p>
+                <p>
+                    <input class="filled-in" name="delete-options" value="delete_all" type="checkbox" id="delete-options-delete-all" />
+                    <label for="delete-options-delete-all"></label>
+                </p>
+                <p>
+                    <input class="filled-in" name="delete-options" value="ban" type="checkbox" id="delete-options-ban" />
+                    <label for="delete-options-ban">{[print(xabber.getString("delete_with_options__ban_option"))]}</label>
+                </p>
+            </form>
+        </div>
+        <div class="restrict-permissions-modal-wrap">
+            <div class="restrict-permissions-modal-header">
+                {[print(xabber.getString("delete_with_options__permissions_header"))]}
+            </div>
+            <div class="restrict-permissions-modal-content"></div>
+            <div class="restrict-permissions-modal-timers-wrap"></div>
+        </div>
+        <div class="show-restrict-permissions-btn btn-partially-restrict dotted-underline client-text-color-500">
+            <i class="mdi-restrict-icon mdi mdi-24px mdi-chevron-down"></i><span>{[print(xabber.getString("delete_with_options__show_restrict_btn"))]}</span><i class="mdi-restrict-icon mdi mdi-24px mdi-chevron-down"></i>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button class="btn-flat btn-main btn-proceed">{[print(xabber.getString("proceed"))]}</button>
+        <button class="btn-flat btn-main btn-dark btn-cancel">{[print(xabber.getString("cancel"))]}</button>
+    </div>
+</div>
