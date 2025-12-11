@@ -1952,6 +1952,15 @@ var utils = {
         }
     },
 
+    toSnakeCase: function (str) {
+        return str
+            .replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`)
+            .replace(/^_/, '')
+            .replace(/\s+/g, '_')
+            .replace(/__+/g, '_')
+            .replace(/[^\w_]+/g, '');
+
+    },
     getBrowser: function () {
         // Get the user-agent string
         let userAgentString =

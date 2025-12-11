@@ -4503,3 +4503,192 @@
 [data-main-color=blue-grey] .important-client-text-color-500 {
   color: #607d8b !important;
 }
+/* Blue */
+[data-color=blue] .switch:not(.default-permission-placeholder) label input[type=checkbox]:checked+.lever,
+[data-color=blue] .right-item.colorable-right-item>.clickable-field:not(.default-permission-placeholder) .lever {
+  background-color: #64b5f6 !important; /* Blue 300 */
+}
+[data-color=blue] .switch:not(.default-permission-placeholder) label input[type=checkbox]:checked+.lever:after,
+[data-color=blue] .right-item.colorable-right-item>.clickable-field:not(.default-permission-placeholder) .lever:after {
+  background-color: #2196f3 !important; /* Blue 500 */
+}
+
+/* Red */
+[data-color=red] .switch:not(.default-permission-placeholder) label input[type=checkbox]:checked+.lever,
+[data-color=red] .right-item.colorable-right-item>.clickable-field:not(.default-permission-placeholder) .lever {
+  background-color: #e57373 !important; /* Red 300 */
+}
+[data-color=red] .switch:not(.default-permission-placeholder) label input[type=checkbox]:checked+.lever:after,
+[data-color=red] .right-item.colorable-right-item>.clickable-field:not(.default-permission-placeholder) .lever:after {
+  background-color: #f44336 !important; /* Red 500 */
+}
+
+/* Pink */
+[data-color=pink] .switch:not(.default-permission-placeholder) label input[type=checkbox]:checked+.lever,
+[data-color=pink] .right-item.colorable-right-item>.clickable-field:not(.default-permission-placeholder) .lever {
+  background-color: #f06292 !important; /* Pink 300 */
+}
+[data-color=pink] .switch:not(.default-permission-placeholder) label input[type=checkbox]:checked+.lever:after,
+[data-color=pink] .right-item.colorable-right-item>.clickable-field:not(.default-permission-placeholder) .lever:after {
+  background-color: #e91e63 !important; /* Pink 500 */
+}
+
+/* Purple */
+[data-color=purple] .switch:not(.default-permission-placeholder) label input[type=checkbox]:checked+.lever,
+[data-color=purple] .right-item.colorable-right-item>.clickable-field:not(.default-permission-placeholder) .lever {
+  background-color: #ba68c8 !important; /* Purple 300 */
+}
+[data-color=purple] .switch:not(.default-permission-placeholder) label input[type=checkbox]:checked+.lever:after,
+[data-color=purple] .right-item.colorable-right-item>.clickable-field:not(.default-permission-placeholder) .lever:after {
+  background-color: #9c27b0 !important; /* Purple 500 */
+}
+
+/* Deep Purple */
+[data-color=deep-purple] .switch:not(.default-permission-placeholder) label input[type=checkbox]:checked+.lever,
+[data-color=deep-purple] .right-item.colorable-right-item>.clickable-field:not(.default-permission-placeholder) .lever {
+  background-color: #9575cd !important; /* Deep Purple 300 */
+}
+[data-color=deep-purple] .switch:not(.default-permission-placeholder) label input[type=checkbox]:checked+.lever:after,
+[data-color=deep-purple] .right-item.colorable-right-item>.clickable-field:not(.default-permission-placeholder) .lever:after {
+  background-color: #673ab7 !important; /* Deep Purple 500 */
+}
+
+/* Indigo */
+[data-color=indigo] .switch:not(.default-permission-placeholder) label input[type=checkbox]:checked+.lever,
+[data-color=indigo] .right-item.colorable-right-item>.clickable-field:not(.default-permission-placeholder) .lever {
+  background-color: #7986cb !important; /* Indigo 300 */
+}
+[data-color=indigo] .switch:not(.default-permission-placeholder) label input[type=checkbox]:checked+.lever:after,
+[data-color=indigo] .right-item.colorable-right-item>.clickable-field:not(.default-permission-placeholder) .lever:after {
+  background-color: #3f51b5 !important; /* Indigo 500 */
+}
+
+/* Light Blue */
+[data-color=light-blue] .switch:not(.default-permission-placeholder) label input[type=checkbox]:checked+.lever,
+[data-color=light-blue] .right-item.colorable-right-item>.clickable-field:not(.default-permission-placeholder) .lever {
+  background-color: #4fc3f7 !important; /* Light Blue 300 */
+}
+[data-color=light-blue] .switch:not(.default-permission-placeholder) label input[type=checkbox]:checked+.lever:after,
+[data-color=light-blue] .right-item.colorable-right-item>.clickable-field:not(.default-permission-placeholder) .lever:after {
+  background-color: #03a9f4 !important; /* Light Blue 500 */
+}
+
+/* Cyan */
+[data-color=cyan] .switch:not(.default-permission-placeholder) label input[type=checkbox]:checked+.lever,
+[data-color=cyan] .right-item.colorable-right-item>.clickable-field:not(.default-permission-placeholder) .lever {
+  background-color: #4dd0e1 !important; /* Cyan 300 */
+}
+[data-color=cyan] .switch:not(.default-permission-placeholder) label input[type=checkbox]:checked+.lever:after,
+[data-color=cyan] .right-item.colorable-right-item>.clickable-field:not(.default-permission-placeholder) .lever:after {
+  background-color: #00bcd4 !important; /* Cyan 500 */
+}
+
+/* Teal */
+[data-color=teal] .switch:not(.default-permission-placeholder) label input[type=checkbox]:checked+.lever,
+[data-color=teal] .right-item.colorable-right-item>.clickable-field:not(.default-permission-placeholder) .lever {
+  background-color: #4db6ac !important; /* Teal 300 */
+}
+[data-color=teal] .switch:not(.default-permission-placeholder) label input[type=checkbox]:checked+.lever:after,
+[data-color=teal] .right-item.colorable-right-item>.clickable-field:not(.default-permission-placeholder) .lever:after {
+  background-color: #009688 !important; /* Teal 500 */
+}
+
+/* Green */
+[data-color=green] .switch:not(.default-permission-placeholder) label input[type=checkbox]:checked+.lever,
+[data-color=green] .right-item.colorable-right-item>.clickable-field:not(.default-permission-placeholder) .lever {
+  background-color: #81c784 !important; /* Green 300 */
+}
+[data-color=green] .switch:not(.default-permission-placeholder) label input[type=checkbox]:checked+.lever:after,
+[data-color=green] .right-item.colorable-right-item>.clickable-field:not(.default-permission-placeholder) .lever:after {
+  background-color: #4caf50 !important; /* Green 500 */
+}
+
+/* Light Green */
+[data-color=light-green] .switch:not(.default-permission-placeholder) label input[type=checkbox]:checked+.lever,
+[data-color=light-green] .right-item.colorable-right-item>.clickable-field:not(.default-permission-placeholder) .lever {
+  background-color: #aed581 !important; /* Light Green 300 */
+}
+[data-color=light-green] .switch:not(.default-permission-placeholder) label input[type=checkbox]:checked+.lever:after,
+[data-color=light-green] .right-item.colorable-right-item>.clickable-field:not(.default-permission-placeholder) .lever:after {
+  background-color: #8bc34a !important; /* Light Green 500 */
+}
+
+/* Lime */
+[data-color=lime] .switch:not(.default-permission-placeholder) label input[type=checkbox]:checked+.lever,
+[data-color=lime] .right-item.colorable-right-item>.clickable-field:not(.default-permission-placeholder) .lever {
+  background-color: #dce775 !important; /* Lime 300 */
+}
+[data-color=lime] .switch:not(.default-permission-placeholder) label input[type=checkbox]:checked+.lever:after,
+[data-color=lime] .right-item.colorable-right-item>.clickable-field:not(.default-permission-placeholder) .lever:after {
+  background-color: #cddc39 !important; /* Lime 500 */
+}
+
+/* Yellow */
+[data-color=yellow] .switch:not(.default-permission-placeholder) label input[type=checkbox]:checked+.lever,
+[data-color=yellow] .right-item.colorable-right-item>.clickable-field:not(.default-permission-placeholder) .lever {
+  background-color: #fff176 !important; /* Yellow 300 */
+}
+[data-color=yellow] .switch:not(.default-permission-placeholder) label input[type=checkbox]:checked+.lever:after,
+[data-color=yellow] .right-item.colorable-right-item>.clickable-field:not(.default-permission-placeholder) .lever:after {
+  background-color: #ffeb3b !important; /* Yellow 500 */
+}
+
+/* Amber */
+[data-color=amber] .switch:not(.default-permission-placeholder) label input[type=checkbox]:checked+.lever,
+[data-color=amber] .right-item.colorable-right-item>.clickable-field:not(.default-permission-placeholder) .lever {
+  background-color: #ffd54f !important; /* Amber 300 */
+}
+[data-color=amber] .switch:not(.default-permission-placeholder) label input[type=checkbox]:checked+.lever:after,
+[data-color=amber] .right-item.colorable-right-item>.clickable-field:not(.default-permission-placeholder) .lever:after {
+  background-color: #ffc107 !important; /* Amber 500 */
+}
+
+/* Orange */
+[data-color=orange] .switch:not(.default-permission-placeholder) label input[type=checkbox]:checked+.lever,
+[data-color=orange] .right-item.colorable-right-item>.clickable-field:not(.default-permission-placeholder) .lever {
+  background-color: #ffb74d !important; /* Orange 300 */
+}
+[data-color=orange] .switch:not(.default-permission-placeholder) label input[type=checkbox]:checked+.lever:after,
+[data-color=orange] .right-item.colorable-right-item>.clickable-field:not(.default-permission-placeholder) .lever:after {
+  background-color: #ff9800 !important; /* Orange 500 */
+}
+
+/* Deep Orange */
+[data-color=deep-orange] .switch:not(.default-permission-placeholder) label input[type=checkbox]:checked+.lever,
+[data-color=deep-orange] .right-item.colorable-right-item>.clickable-field:not(.default-permission-placeholder) .lever {
+  background-color: #ff8a65 !important; /* Deep Orange 300 */
+}
+[data-color=deep-orange] .switch:not(.default-permission-placeholder) label input[type=checkbox]:checked+.lever:after,
+[data-color=deep-orange] .right-item.colorable-right-item>.clickable-field:not(.default-permission-placeholder) .lever:after {
+  background-color: #ff5722 !important; /* Deep Orange 500 */
+}
+
+/* Brown */
+[data-color=brown] .switch:not(.default-permission-placeholder) label input[type=checkbox]:checked+.lever,
+[data-color=brown] .right-item.colorable-right-item>.clickable-field:not(.default-permission-placeholder) .lever {
+  background-color: #a1887f !important; /* Brown 300 */
+}
+[data-color=brown] .switch:not(.default-permission-placeholder) label input[type=checkbox]:checked+.lever:after,
+[data-color=brown] .right-item.colorable-right-item>.clickable-field:not(.default-permission-placeholder) .lever:after {
+  background-color: #795548 !important; /* Brown 500 */
+}
+
+/* Grey */
+[data-color=grey] .switch:not(.default-permission-placeholder) label input[type=checkbox]:checked+.lever,
+[data-color=grey] .right-item.colorable-right-item>.clickable-field:not(.default-permission-placeholder) .lever {
+  background-color: #e0e0e0 !important; /* Grey 300 */
+}
+[data-color=grey] .switch:not(.default-permission-placeholder) label input[type=checkbox]:checked+.lever:after,
+[data-color=grey] .right-item.colorable-right-item>.clickable-field:not(.default-permission-placeholder) .lever:after {
+  background-color: #9e9e9e !important; /* Grey 500 */
+}
+
+/* Blue Grey */
+[data-color=blue-grey] .switch:not(.default-permission-placeholder) label input[type=checkbox]:checked+.lever,
+[data-color=blue-grey] .right-item.colorable-right-item>.clickable-field:not(.default-permission-placeholder) .lever {
+  background-color: #90a4ae !important; /* Blue Grey 300 */
+}
+[data-color=blue-grey] .switch:not(.default-permission-placeholder) label input[type=checkbox]:checked+.lever:after,
+[data-color=blue-grey] .right-item.colorable-right-item>.clickable-field:not(.default-permission-placeholder) .lever:after {
+  background-color: #607d8b !important; /* Blue Grey 500 */
+}

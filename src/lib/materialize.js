@@ -744,8 +744,8 @@ if ($) {
         lStack = (++_stack);
 
       // Store a reference of the overlay
-      $overlay.attr('id', overlayID).css('z-index', 1000 + lStack * 2);
-      $modal.data('overlay-id', overlayID).css('z-index', 1000 + lStack * 2 + 1);
+      $overlay.attr('id', overlayID).css('z-index', 1000 + _lastID * 2);
+      $modal.data('overlay-id', overlayID).css('z-index', 1000 + _lastID * 2 + 1);
       $modal.addClass('open');
 
       $(constants.CONTAINER_ELEMENT).append($overlay);

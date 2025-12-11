@@ -42,7 +42,6 @@
     "backbone": "~1.6.0",
     "clean-css-cli": "~4.0.11",
     "css-loader": "^6.7.3",
-    "flatpickr": "^4.6.13",
     "css-minimizer-webpack-plugin": "^4.2.2",
     "cypress": "^13.6.4",
     "file-loader": "^6.2.0",

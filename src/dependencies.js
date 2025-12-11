@@ -4,7 +4,6 @@ import * as Backbone from "backbone";
 import _ from "underscore";
 import $ from "jquery";
 import moment from "moment";
-import flatpickr from "flatpickr";
 import WaveSurfer from "wavesurfer";
 import slug from "slug";
 import sha256 from "sha256";
@@ -29,7 +28,6 @@ import "~/css/materialdesignicons.css";
 import "~/css/materialize.css";
 import "~/css/plyr.css";
 import "~/css/quill.snow.css";
-import "~/css/flatpickr.min.css";
 import "~/css/xabber.css";
 import "~/node_modules/magnific-popup/dist/magnific-popup.css";
 import "~/node_modules/perfect-scrollbar/dist/css/perfect-scrollbar.css";
@@ -48,7 +46,6 @@ export default _.extend({
     $: $,
     _: _,
     moment: moment,
-    flatpickr: flatpickr,
     Backbone: Backbone,
     WaveSurfer: WaveSurfer,
     Plyr: plyr,

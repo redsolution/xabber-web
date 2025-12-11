@@ -89,6 +89,7 @@ import $ from "jquery";
     addTemplate('base.omemo_new_device');
     addTemplate('base.client_notification_item');
     addTemplate('base.backgrounds_gallery');
+    addTemplate('base.datatime_picker');
     addTemplate('base.color_picker');
     addTemplate('base.color_scheme');
 
@@ -186,6 +187,7 @@ import $ from "jquery";
     addTemplate('contacts.group_chats.participant_details_right');
     addTemplate('contacts.group_chats.participant_rights');
     addTemplate('contacts.group_chats.restriction_item');
+    addTemplate('contacts.group_chats.restriction_item_tagged_container');
     addTemplate('contacts.group_chats.restriction_timers');
     addTemplate('contacts.group_chats.newbie_permissions_timers');
     addTemplate('contacts.group_chats.right_expire_variants');

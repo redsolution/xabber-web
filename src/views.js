@@ -4548,6 +4548,674 @@ xabber.SetBackgroundView = xabber.BasicView.extend({
     }
 });
 
+xabber.DataTimePickerView = xabber.BasicView.extend({
+    className: 'modal main-modal datatime-picker-modal',
+    template: templates.datatime_picker,
+
+    events: {
+        "click .btn-prev-month": "moveBack",
+        "click .btn-next-month": "moveForward",
+        "click .day-cell:not(.disabled)": "onDayClick",
+        "mousedown .timeline-container": "timeSelectStart",
+        "mousemove": "timeSelectMove",
+        "mouseup": "timeSelectStop",
+        "click .time-input-controls i": "timeChangeClick",
+        "click .btn-cancel": "close",
+        "click .btn-today": "setToToday",
+        "click .btn-apply": "applySelection",
+    },
+
+
+    _initialize: function () {
+        this.targetInput = null;
+        this.selectedDate = new Date();
+        this.onDateUpdate = null;
+        this.position = 'top';
+        this.pickTime = true;
+        this.pickDate = true;
+        this.pickPast = false;
+        this.mondayFirst = true;
+        this.timeFormat = '24h';
+        this.compact = false;
+    },
+
+    updateOptions: function (options) {
+        this.localDate = new Date(options.selectedDate);
+        this.testMinimalDateTime();
+        this.currentViewDate = new Date(this.localDate);
+        this.account = options.account;
+        this.moving = false;
+        this.compact = options.compact || this.compact;
+        this.timeFormat = options.timeFormat || this.timeFormat;
+        this.targetInput = options.inputSelector || this.inputSelector;
+        this.onDateUpdate = options.onDateUpdate || this.onDateUpdate;
+        this.mondayFirst = options.mondayFirst || this.mondayFirst;
+        this.is24HourFormat = true;
+    },
+
+    updateColorScheme: function () {
+        this.account && this.$el.attr('data-color', this.account.settings.get('color'));
+    },
+
+    render: function () {
+
+        this.updateColorScheme();
+        this.updateTimeFromDate();
+
+        this.days = [
+            { "long": "Sunday", "short": "Sun" },
+            { "long": "Monday", "short": "Mon" },
+            { "long": "Tuesday", "short": "Tue" },
+            { "long": "Wednesday", "short": "Wed" },
+            { "long": "Thursday", "short": "Thu" },
+            { "long": "Friday", "short": "Fri" },
+            { "long": "Saturday", "short": "Sat" },
+        ];
+
+        if (this.mondayFirst) {
+            const sunday = this.days.shift();
+            this.days.push(sunday);
+        }
+
+        this.monthNames = [
+            "January", "February", "March", "April", "May", "June",
+            "July", "August", "September", "October", "November", "December"
+        ];
+
+        this.month = this.getDaysInMonth();
+
+        this.onRender();
+        this.$el.openModal({
+            ready: () => {
+            },
+            complete: this.close.bind(this)
+        });
+    },
+
+    onRender: function () {
+        this.renderTimelineHours();
+        this.initializeTimepicker();
+        this.setTimeBar(this.localDate);
+        this.renderDatePicker();
+        this.renderTimePicker();
+
+    },
+
+    onDayClick: function (ev) {
+        let index = $(ev.target).closest('.day-cell').attr('data-index');
+        if (index !== undefined) {
+            this.selectDate(index);
+        }
+    },
+
+    timeChangeClick: function (ev) {
+        let $item = $(ev.target).closest('i');
+        let hours_changed = 0, minutes_changed = 0;
+        if ($item.hasClass('btn-add-hour')){
+            hours_changed = 1;
+        } else if ($item.hasClass('btn-add-minute')){
+            minutes_changed = 1;
+        } else if ($item.hasClass('btn-minus-hour')){
+            hours_changed = -1;
+        } else if ($item.hasClass('btn-minus-minute')){
+            minutes_changed = -1;
+        }
+        this.onChangeTimeByClick(hours_changed, minutes_changed);
+    },
+
+    onChangeTimeByClick: function (hours_changed, minutes_changed) {
+        let rawHours = this.rawHours + hours_changed,
+            rawMinutes = this.rawMinutes + minutes_changed;
+        if (rawMinutes > 59){
+            rawHours = rawHours + 1;
+            rawMinutes = 0;
+        } else if (rawMinutes < 0) {
+            rawHours = rawHours - 1;
+            rawMinutes = 59;
+        }
+        let date_changed;
+        if (rawHours > 23){
+            this.day_index = this.day_index + 1;
+            rawHours = 0;
+            date_changed = true;
+        } else if (rawHours < 0){
+            this.day_index = this.day_index - 1;
+            rawHours = 23;
+            date_changed = true;
+        }
+        if (date_changed) {
+            let $item = this.$(`.day-cell[data-index="${this.day_index}"]`);
+            if ($item.length){
+                if ($item.hasClass('disabled')){
+                    rawHours = 0;
+                    rawMinutes = 0;
+                } else {
+                    this.localDate.setHours(rawHours);
+                    this.localDate.setMinutes(rawMinutes);
+                    $item.click();
+                }
+            } else if (this.$(`.day-cell.today.selected`).length) {
+                rawHours = 0;
+                rawMinutes = 0;
+            } else {
+                if (rawHours === 0){
+                    this.moveForward();
+                    this.$(`.day-cell:not(.disabled)`).first().click();
+                } else if (rawHours === 23){
+                    this.moveBack();
+                    this.$(`.day-cell:not(.disabled)`).last().click();
+                }
+                this.localDate.setHours(rawHours);
+                this.localDate.setMinutes(rawMinutes);
+            }
+        }
+        this.rawHours = rawHours;
+        this.rawMinutes = rawMinutes;
+        this.displayTime = this.rawHours + ':' + this.padZero(this.rawMinutes);
+
+        this.$('.time-input').val(this.displayTime);
+
+        this.updateDateTime();
+        this.setTimeBar(this.localDate);
+    },
+
+    timeSelectStart: function (event) {
+        event.preventDefault();
+        event.stopPropagation();
+
+        this.initializeTimepicker();
+
+        let timelineContainer = this.$('.timeline-container'),
+            containerOffset = timelineContainer.offset().left,
+            containerWidth = timelineContainer.width();
+
+        let clientX = event.type === 'mousedown' ? event.clientX :
+            event.originalEvent.touches[0].clientX;
+
+        let offsetX = clientX - containerOffset;
+        offsetX = Math.max(0, Math.min(offsetX, containerWidth));
+
+        this.moving = true;
+
+        this.currentTimeElement.css({
+            transition: 'none',
+            transform: `translateX(${offsetX}px)`,
+            cursor: 'ew-resize'
+        });
+        this.prevTimelineOffset = offsetX;
+
+        this.updateTimeFromOffset(offsetX);
+    },
+
+    timeSelectMove: function (event) {
+        if (!this.moving || !this.timelineWidth) return;
+
+        let timelineContainer = this.$('.timeline-container'),
+            containerOffset = timelineContainer.offset().left,
+            containerWidth = timelineContainer.width();
+
+        let clientX = event.type === 'mousemove' ? event.clientX :
+            event.originalEvent.touches[0].clientX;
+
+        let offsetX = clientX - containerOffset;
+        offsetX = Math.max(0, Math.min(offsetX, containerWidth));
+
+
+        this.currentTimeElement.css({
+            transform: `translateX(${offsetX}px)`
+        });
+        this.prevTimelineOffset = offsetX;
+
+        this.updateTimeFromOffset(offsetX);
+    },
+
+    timeSelectStop: function () {
+        if (this.moving) {
+            this.moving = false;
+            this.currentTimeElement.css({
+                transition: 'transform 0.3s ease',
+                cursor: 'ew-resize'
+            });
+        }
+    },
+
+    updateTimeFromOffset: function (offsetX) {
+        let totalHours = this.is24HourFormat ? 24 : 12,
+            percentTime = offsetX / this.timelineWidth,
+            hours = percentTime * totalHours;
+
+        hours = Math.floor(hours);
+
+        let minutes = Math.round(((percentTime * totalHours) - Math.floor(percentTime * totalHours)) * 60),
+            roundedMinutes = Math.round(minutes / 5) * 5;
+        if (hours === 24 && roundedMinutes === 0){
+            hours = 23;
+            roundedMinutes = 59;
+        }
+
+        this.updateTime(hours, roundedMinutes);
+    },
+
+    updateTime: function (hours, minutes) {
+        let displayHours = hours;
+        let actualHours = hours;
+
+        if (!this.is24HourFormat) {
+            if (this.timeframe === 'pm' && hours < 12) {
+                actualHours = hours + 12;
+            } else if (this.timeframe === 'am' && hours === 12) {
+                actualHours = 0;
+            }
+        } else {
+            actualHours = hours;
+            displayHours = hours;
+        }
+
+        this.rawHours = actualHours;
+        this.rawMinutes = minutes;
+        this.displayTime = displayHours + ':' + this.padZero(minutes);
+
+        this.$('.time-input').val(this.displayTime);
+
+        this.updateDateTime();
+    },
+
+    updateDateTime: function () {
+        this.localDate.setHours(this.rawHours);
+        this.localDate.setMinutes(this.rawMinutes);
+        this.localDate.setSeconds(0);
+        this.localDate.setMilliseconds(0);
+        this.testMinimalDateTime();
+    },
+
+    selectDate: function (index) {
+        if (!this.pickDate) return;
+
+        this.day_index = index;
+        const day = this.month[index];
+        if (!day.showday) return;
+
+        this.month.forEach(d => d.selected = false);
+
+        day.selected = true;
+
+        this.localDate = new Date(
+            this.currentViewDate.getFullYear(),
+            this.currentViewDate.getMonth(),
+            day.daydate,
+            this.localDate.getHours(),
+            this.localDate.getMinutes()
+        );
+
+        this.month = this.getDaysInMonth();
+        this.render();
+        this.setTimeBar(this.localDate);
+        this.testMinimalDateTime();
+    },
+
+    moveForward: function () {
+        this.currentViewDate.setMonth(this.currentViewDate.getMonth() + 1);
+        if (this.currentViewDate.getMonth() === 12) {
+            this.currentViewDate.setFullYear(this.currentViewDate.getFullYear() + 1);
+            this.currentViewDate.setMonth(0);
+        }
+        this.month = this.getDaysInMonth();
+        this.render();
+    },
+
+    moveBack: function () {
+        this.currentViewDate.setMonth(this.currentViewDate.getMonth() - 1);
+        if (this.currentViewDate.getMonth() === -1) {
+            this.currentViewDate.setFullYear(this.currentViewDate.getFullYear() - 1);
+            this.currentViewDate.setMonth(11);
+        }
+        this.month = this.getDaysInMonth();
+        this.render();
+    },
+
+    changeTimeFormat: function (format) {
+    },
+
+    changeTimePeriod: function (period) {
+    },
+
+    setToToday: function () {
+        this.localDate = new Date();
+        this.currentViewDate = new Date();
+        this.updateTimeFromDate();
+        this.month = this.getDaysInMonth();
+        this.render();
+        this.setTimeBar(this.localDate);
+        this.markDisabledTime();
+        this.updateSelectedDate()
+    },
+
+    applySelection: function () {
+        if (this.targetInput) {
+            const formattedDate = this.formatDateForInput();
+            $(this.targetInput).val(formattedDate);
+        }
+
+        if (typeof this.onDateUpdate === 'function') {
+            this.onDateUpdate(this.localDate);
+        }
+
+        this.close();
+    },
+
+    formatDateForInput: function () {
+        const date = this.localDate;
+        const day = this.padZero(date.getDate());
+        const month = this.padZero(date.getMonth() + 1);
+        const year = date.getFullYear();
+        const hours = this.padZero(date.getHours());
+        const minutes = this.padZero(date.getMinutes());
+
+        if (!this.pickTime) {
+            return `${day}.${month}.${year}`;
+        } else if (!this.pickDate) {
+            if (this.is24HourFormat) {
+                return `${hours}:${minutes}`;
+            } else {
+            }
+        } else {
+            if (this.is24HourFormat) {
+                return `${year}-${month}-${day} ${hours}:${minutes}`;
+            } else {
+            }
+        }
+    },
+
+    show: function () {
+        if (this.targetInput) {
+            let currentValue = $(this.targetInput).val();
+            if (currentValue) {
+                this.parseDateFromInput(currentValue);
+            }
+        }
+
+        this.render();
+    },
+
+    parseDateFromInput: function (value) {
+        if (!value) return;
+
+        let date = new Date(value);
+
+        if (!date.getTime())
+            return;
+
+        this.localDate = date;
+        this.currentViewDate = new Date(date);
+        this.testMinimalDateTime();
+        this.updateTimeFromDate();
+        this.month = this.getDaysInMonth();
+    },
+
+    setTimeBar: function (date) {
+
+        if (!this.timelineWidth) {
+            setTimeout(() => {
+                this.setTimeBar(this.localDate);
+            }, 100);
+        }
+
+        this.initializeTimepicker();
+
+        const currentTimeElement = this.$('.current-time');
+        if (!currentTimeElement.length || !this.timelineWidth) return;
+
+        const hours = date.getHours();
+        const minutes = date.getMinutes();
+
+        let displayHours = hours;
+        if (!this.is24HourFormat) {
+            displayHours = hours % 12;
+            displayHours = displayHours || 12;
+        }
+
+        const totalHours = this.is24HourFormat ? 24 : 12;
+        const minutesOffset = (minutes / 60) * (this.timelineWidth / totalHours);
+        const hoursOffset = (this.is24HourFormat ? hours : (displayHours - 1)) * (this.timelineWidth / totalHours);
+        const currentOffset = Math.max(0, Math.min(hoursOffset + minutesOffset, this.timelineWidth));
+
+        !this.moving && currentTimeElement.css({
+            transition: 'transform 0.3s ease',
+            transform: `translateX(${currentOffset}px)`
+        });
+        this.prevTimelineOffset = currentOffset;
+    },
+
+    initializeTimepicker: function () {
+        this.currentTimeElement = this.$('.current-time');
+        this.timelineElement = this.$('.timeline');
+
+        if (this.timelineElement.length > 0) {
+            this.timelineWidth = this.timelineElement[0].offsetWidth;
+        }
+    },
+
+    testMinimalDateTime: function () {
+        let today = new Date();
+        if (this.localDate < today) {
+            this.setToToday();
+        }
+
+        this.$('.past-time').removeClass('past-time');
+        if (this.localDate.getFullYear() === today.getFullYear() &&
+            this.localDate.getMonth() === today.getMonth() &&
+            this.localDate.getDate() === today.getDate()){
+            this.markDisabledTime();
+        }
+        this.updateSelectedDate()
+    },
+
+    updateSelectedDate: function () {
+        if (this.localDate){
+            let formatter = new Intl.DateTimeFormat('en-US', {
+                weekday: 'long',
+                month: 'long',
+                day: 'numeric',
+                year: 'numeric'
+            });
+
+            let selected_date_text = formatter.format(this.localDate);
+            this.$('.date-picker-final-date').text(xabber.getString("datepicker_modal__selected_date", [selected_date_text]));
+        } else {
+            this.$('.date-picker-final-date').text('');
+        }
+
+    },
+
+    updateTimeFromDate: function () {
+        const hours = this.localDate.getHours();
+        const minutes = this.localDate.getMinutes();
+
+
+        this.displayTime = this.padZero(hours) + ':' + this.padZero(minutes);
+
+        this.rawHours = hours;
+        this.rawMinutes = minutes;
+
+        this.$('.time-input').val(this.displayTime);
+    },
+
+    getDaysInMonth: function () {
+        const month = this.currentViewDate.getMonth();
+        const date = new Date(this.currentViewDate.getFullYear(), month, 1);
+        const days = [];
+        const today = new Date();
+
+        while (date.getMonth() === month) {
+            let showday = true;
+
+            if (!this.pickPast && date < today && !this.isSameDay(date, today)) {
+                showday = false;
+            }
+
+            const day = new Date(date);
+            let dayname = day.getDay();
+
+            if (this.mondayFirst) {
+                dayname = dayname === 0 ? 6 : dayname - 1;
+            }
+
+            const daydate = day.getDate();
+
+            const selected = this.localDate.getDate() === daydate &&
+                this.localDate.getMonth() === month &&
+                this.localDate.getFullYear() === this.currentViewDate.getFullYear();
+
+            days.push({
+                dayname,
+                daydate,
+                showday,
+                selected
+            });
+
+            date.setDate(date.getDate() + 1);
+        }
+
+        return days;
+    },
+
+    renderTimePicker: function () {
+
+        let translate = '';
+
+        if (this.timelineWidth){
+            const hours = this.localDate.getHours();
+            const minutes = this.localDate.getMinutes();
+
+            let displayHours = hours;
+            if (!this.is24HourFormat) {
+                displayHours = hours % 12;
+                displayHours = displayHours || 12;
+            }
+
+            const totalHours = this.is24HourFormat ? 24 : 12;
+            const minutesOffset = (minutes / 60) * (this.timelineWidth / totalHours);
+            const hoursOffset = (this.is24HourFormat ? hours : (displayHours - 1)) * (this.timelineWidth / totalHours);
+            const currentOffset = Math.max(0, Math.min(hoursOffset + minutesOffset, this.timelineWidth));
+
+            translate = `translateX(${currentOffset}px)`;
+            this.prevTimelineOffset = currentOffset;
+        } else if (this.prevTimelineOffset) {
+            translate = `translateX(${this.prevTimelineOffset}px)`;
+        }
+
+        translate && this.$('.current-time').css({
+            transform: `translateX(${this.prevTimelineOffset}px)`
+        });
+
+        this.updateTimeFromDate();
+    },
+
+    renderTimelineHours: function () {
+        let html = '';
+
+        for (let i = 0; i < 24; i++) {
+            html += `
+                <div class="timeline-hour">
+                    <div class="timeline-marker"></div>
+                    <div class="timeline-marker half-hour"></div>
+                </div>
+            `;
+        }
+        this.$('.timeline').html(html);
+    },
+
+    markDisabledTime: function () {
+        let now = new Date(),
+            currentHour = now.getHours(),
+            currentMinute = now.getMinutes();
+
+        this.$('.timeline-hour').each(function(index) {
+
+            if (index < currentHour) {
+                $(this).children('.timeline-marker').addClass('past-time');
+            }
+
+            if (index === currentHour && currentMinute < 30) {
+                $(this).children('.timeline-marker:not(.half-hour)').addClass('past-time');
+            } else if (index === currentHour && currentMinute >= 30) {
+                $(this).children('.timeline-marker').addClass('past-time');
+            }
+        });
+    },
+
+    renderDatePicker: function () {
+        const currentMonth = this.currentViewDate.getMonth();
+        const currentYear = this.currentViewDate.getFullYear();
+        const today = new Date();
+
+        let daysHtml = '<div class="datepicker-days-header">';
+
+        this.days.forEach(day => {
+            daysHtml += `<div class="day-header">${day.short}</div>`;
+        });
+
+        daysHtml += '</div><div class="datepicker-days">';
+
+        this.month.forEach((day, index) => {
+            const isToday = day.daydate === today.getDate() &&
+                currentMonth === today.getMonth() &&
+                currentYear === today.getFullYear();
+
+            let className = 'day-cell';
+            if (day.showday === false) className += ' disabled';
+            if (day.selected){
+                className += ' selected ground-color-500';
+                this.day_index = index;
+            }
+            if (isToday && !day.selected) className += ' today ground-color-50 text-color-500';
+
+            const style = index === 0 ?
+                `style="margin-left: ${this.calcOffset(day, index)}"` : '';
+
+            daysHtml += `
+                <div class="${className}" 
+                     data-day="${day.daydate}" 
+                     ${style}
+                     ${day.showday !== false ? 'data-index="' + index + '"' : ''}>
+                    ${day.daydate}
+                </div>
+            `;
+        });
+
+        daysHtml += '</div>';
+
+        this.$('.dates-container').html(daysHtml);
+        this.$('.datepicker-header h3').html(`${this.monthNames[currentMonth]} ${currentYear}`);
+    },
+
+    padZero: function (num) {
+        return num < 10 ? '0' + num : num;
+    },
+
+    isSameDay: function (date1, date2) {
+        return date1.getDate() === date2.getDate() &&
+            date1.getMonth() === date2.getMonth() &&
+            date1.getFullYear() === date2.getFullYear();
+    },
+
+    calcOffset: function (day, index) {
+        if (index === 0) {
+            const offset = (day.dayname * 14.2857142);
+            return offset + '%';
+        }
+        return '0';
+    },
+
+    close: function () {
+        this.$el.closeModal({ complete: () => {
+                this.$el.detach();
+                this.data.set('visible', false);
+            }
+        });
+    },
+});
+
 xabber.AboutView = xabber.BasicView.extend({
     className: 'settings-panel about-panel',
     template: templates.about,

@@ -346,6 +346,31 @@ let Xabber = Backbone.Model.extend({
         this.body.updateBoxShadow(this.settings.appearance.vignetting);
         this.body.updateBlur(this.settings.appearance.blur);
         this._settings.clearStorage();
+
+        (this._settings.get("main_color") === 'default') && this._settings.set("main_color", constants.MAIN_COLOR);
+        this.trigger("update_main_color");
+        if (this._settings.get("load_media") === 'default' && this.saved_config.PRIVACY_LOAD_MEDIA != null)
+            this._settings.set("load_media", this.saved_config.PRIVACY_LOAD_MEDIA);
+        else if (this._settings.get("load_media") === 'default')
+            this._settings.set("load_media", true);
+        if (this._settings.get("typing_notifications") === 'default' && this.saved_config.PRIVACY_TYPING_NOTIFICATIONS != null)
+            this._settings.set("typing_notifications", this.saved_config.PRIVACY_TYPING_NOTIFICATIONS);
+        else if (this._settings.get("typing_notifications") === 'default')
+            this._settings.set("typing_notifications", true);
+        if (this._settings.get("device_metadata") === 'default' && this.saved_config.PRIVACY_DEVICE_METADATA_DEFAULT != null)
+            this._settings.set("device_metadata", this.saved_config.PRIVACY_DEVICE_METADATA_DEFAULT);
+        else if (this._settings.get("device_metadata") === 'default')
+            this._settings.set("device_metadata", 'contacts');
+        if (this._settings.get("mapping_service") === 'default' && this.saved_config.PRIVACY_MAPPING_SERVICE != null)
+            this._settings.set("mapping_service", this.saved_config.PRIVACY_MAPPING_SERVICE);
+        else if (this._settings.get("mapping_service") === 'default')
+            this._settings.set("mapping_service", true);
+        if (this._settings.get("idling_time") === 'default' && this.saved_config.IDLING_DEFAULT_TIMEOUT != null)
+            this._settings.set("idling_time", this.saved_config.IDLING_DEFAULT_TIMEOUT);
+        else if (this._settings.get("idling_time") === 'default')
+            this._settings.set("idling_time", constants.IDLING_DEFAULT_TIMEOUT);
+
+        (this._settings.get("emoji_font") === 'default') && this._settings.set("emoji_font", constants.DEFAULT_EMOJI_FONT);
     },
 
     start: function () {
@@ -395,6 +420,7 @@ let Xabber = Backbone.Model.extend({
             let log_level = constants['LOG_LEVEL_'+constants.LOG_LEVEL];
             constants.LOG_LEVEL = log_level || constants.LOG_LEVEL_ERROR;
             Strophe.setLogLevel(constants.LOG_LEVEL);
+            this.saved_config = config;
             constants.MATERIAL_COLORS.includes(config.MAIN_COLOR) && (constants.MAIN_COLOR = config.MAIN_COLOR);
             (this._settings.get("main_color") === 'default') && this._settings.set("main_color", constants.MAIN_COLOR);
             this.trigger("update_main_color");

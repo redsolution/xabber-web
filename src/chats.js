@@ -7,7 +7,6 @@ let env = xabber.env,
     $ = env.$,
     $iq = env.$iq,
     $msg = env.$msg,
-    flatpickr = env.flatpickr,
     Strophe = env.Strophe,
     _ = env._,
     moment = env.moment,
@@ -9140,8 +9139,8 @@ xabber.ChatContentView = xabber.BasicView.extend({
             this.bottom.showEditPanel(null, msg);
         });
         $modal.find('.btn-delete-message').one(`click.${unique_modal_id}`, () => {
-            this.bottom.deleteMessages(null, [msg]);
             $overlay.click();
+            this.bottom.deleteMessages(null, [msg]);
         });
         $modal.find('.btn-restrict').one(`click.${unique_modal_id}`, () => {
             let $msg = $elem,
@@ -15600,6 +15599,7 @@ xabber.DeleteWithOptionsView = xabber.BasicView.extend({
         "click .btn-cancel": "close",
         "click .btn-partially-restrict": "partiallyRestrict",
         "click .restrictions-timers-wrap p": "changeTimersOnRadioClick",
+        "click #custom-timer-date": "onCustomTimeInputClick",
         "change #custom-timer-date": "onCustomTimeInputChange",
         "change input[name='delete-options']": "onOptionCheckboxChange",
         "click .property-variant": "changeTimerValue",
@@ -15619,6 +15619,10 @@ xabber.DeleteWithOptionsView = xabber.BasicView.extend({
         this.partially_restrict = false;
         this.only_permissions = false;
         this.show();
+    },
+
+    updateColorScheme: function () {
+        this.account && this.$el.attr('data-color', this.account.settings.get('color'));
     },
 
     render: function () {
@@ -15647,6 +15651,7 @@ xabber.DeleteWithOptionsView = xabber.BasicView.extend({
             this.$('#delete-options-delete-all').closest('p').find('label').text(xabber.getString("delete_with_options__delete_all_option_default"));
         this.$('.show-restrict-permissions-btn').showIf(this.has_permissions_rights && this.participant_id);
         this.updateHeight();
+        this.updateColorScheme();
         this.onPartiallyRestrict();
         if (!this.has_block_rights && this.has_permissions_rights && this.participant_id){
             this.only_permissions = true;
@@ -15689,13 +15694,21 @@ xabber.DeleteWithOptionsView = xabber.BasicView.extend({
                         let tzoffset = (nextDay).getTimezoneOffset() * 60000,
                             localISOTime = (new Date(nextDay.getTime() - tzoffset)).toISOString().slice(0, 16);
 
-
-                        flatpickr("#custom-timer-date", {
-                            defaultDate: localISOTime,
-                            minDate: new Date().toISOString().slice(0, 16),
-                            time_24hr: true,
-                            enableTime: true,
+                        this.date_picker = new xabber.DataTimePickerView({});
+                        this.date_picker.updateOptions({
+                            inputSelector: this.$("#custom-timer-date"),
+                            selectedDate: localISOTime,
+                            pickTime: true,
+                            account: this.account,
+                            pickDate: true,
+                            position: 'top',
+                            timeFormat: '24h',
+                            onDateUpdate: (date) => {
+                                console.log('Выбрана дата:', date);
+                                this.onCustomTimeInputChange()
+                            }
                         });
+                        this.$("#custom-timer-date").val(this.date_picker.formatDateForInput());
                         return;
                     }
                     utils.pretty_time_text_from_seconds(item, $(item).find('input').val(), $(item).find('label'));
@@ -15745,6 +15758,9 @@ xabber.DeleteWithOptionsView = xabber.BasicView.extend({
         this.updateHeight();
     },
 
+    onCustomTimeInputClick: function () {
+        this.date_picker.show();
+    },
     onCustomTimeInputChange: function () {
         this.$(`input[name="restriction-timer"]:not([value='custom'])`).prop('checked', false);
         this.$(`input[name="restriction-timer"][value='custom']`).prop('checked', true);
@@ -15782,10 +15798,10 @@ xabber.DeleteWithOptionsView = xabber.BasicView.extend({
                 }
                 if (timer === '0' && val === timer) {
                     $item.removeClass('changed-timer');
-                    $property_value.removeClass('important-client-text-color-500');
+                    $property_value.removeClass('text-color-500');
                 } else if (val !== $property_value.attr('data-value')) {
                     $item.addClass('changed-timer');
-                    $property_value.addClass('important-client-text-color-500');
+                    $property_value.addClass('text-color-500');
                 }
 
                 $property_value.text(moment.duration(Number(val), 'seconds').humanize(false));
@@ -15817,10 +15833,10 @@ xabber.DeleteWithOptionsView = xabber.BasicView.extend({
         }
         if (timer === '0' && $property_item.attr('data-value') === timer) {
             $property_item.closest('.right-item').removeClass('changed-timer');
-            $property_value.removeClass('important-client-text-color-500');
+            $property_value.removeClass('text-color-500');
         } else if ($property_item.attr('data-value') !== $property_value.attr('data-value')) {
             $property_item.closest('.right-item').addClass('changed-timer');
-            $property_value.addClass('important-client-text-color-500');
+            $property_value.addClass('text-color-500');
         }
         $property_value.text(moment.duration(Number($property_item.attr('data-value')), 'seconds').humanize(false));
         $property_value.attr('data-value', $property_item.attr('data-value'));
@@ -15838,7 +15854,7 @@ xabber.DeleteWithOptionsView = xabber.BasicView.extend({
             return;
 
         if (val === 'custom'){
-            let $custom_date = $item.find('#custom-timer-date');
+            let $custom_date = $item.closest('p').find('#custom-timer-date');
             let startDate = new Date(),
                 endDate   = new Date($custom_date.val());
             val = `${Math.round((endDate.getTime() - startDate.getTime()) / 1000)}`;
@@ -15884,13 +15900,14 @@ xabber.DeleteWithOptionsView = xabber.BasicView.extend({
                 fixed = $item.attr('fixed'),
                 text = $item.attr('display'),
                 name = $item.attr('name'),
-                status = $item.attr('status');
+                status = $item.attr('status'),
+                tag = $item.attr('tag');
 
             let attrs = {
                     pretty_name: text,
                     name: name,
                 },
-                $restriction_item = $(env.templates.contacts.group_chats.restriction_item({name: attrs.name, pretty_name: attrs.pretty_name, type: fixed, role: 'member'})),
+                $restriction_item = $(env.templates.contacts.group_chats.restriction_item({name: attrs.name, pretty_name: attrs.pretty_name, type: fixed, role: 'member', tag: tag ? utils.toSnakeCase(tag) : ''})),
                 $restriction_expire = $(env.templates.contacts.group_chats.right_expire_variants({
                     right_name: ('default-' + attrs.name),
                 }));
@@ -15917,7 +15934,8 @@ xabber.DeleteWithOptionsView = xabber.BasicView.extend({
                 role = $item.attr('level'),
                 name = $item.attr('name'),
                 status = $item.attr('status'),
-                expires = $item.attr('expires');
+                expires = $item.attr('expires'),
+                tag = $item.attr('tag');
             if (role !== 'member')
                 return;
 
@@ -15926,7 +15944,7 @@ xabber.DeleteWithOptionsView = xabber.BasicView.extend({
                     name: name,
                     expires: expires
                 },
-                $restriction_item = $(env.templates.contacts.group_chats.restriction_item({name: attrs.name, pretty_name: attrs.pretty_name, type: fixed, role: role})),
+                $restriction_item = $(env.templates.contacts.group_chats.restriction_item({name: attrs.name, pretty_name: attrs.pretty_name, type: fixed, role: role, tag: tag ? utils.toSnakeCase(tag) : ''})),
                 $restriction_expire = $(env.templates.contacts.group_chats.right_expire_variants({
                     right_name: ('default-' + attrs.name),
                 }));
@@ -15986,20 +16004,20 @@ xabber.DeleteWithOptionsView = xabber.BasicView.extend({
                         has_changes = true;
                         !$item.hasClass('changed-permission') && this.updateTimerValue($property_value);
                         $item.addClass('changed-permission');
-                        $property_value.addClass('important-client-text-color-500');
+                        $property_value.addClass('text-color-500');
                     } else {
                         $item.removeClass('changed-permission');
-                        !$item.hasClass('changed-timer') && $property_value.removeClass('important-client-text-color-500');
+                        !$item.hasClass('changed-timer') && $property_value.removeClass('text-color-500');
                     }
                 } else {
                     if (actual_permission.status === 'true') {
                         has_changes = true;
                         !$item.hasClass('changed-permission') && this.updateTimerValue($property_value);
                         $item.addClass('changed-permission');
-                        $property_value.addClass('important-client-text-color-500');
+                        $property_value.addClass('text-color-500');
                     } else {
                         $item.removeClass('changed-permission');
-                        !$item.hasClass('changed-timer') && $property_value.removeClass('important-client-text-color-500');
+                        !$item.hasClass('changed-timer') && $property_value.removeClass('text-color-500');
                     }
                 }
             }
