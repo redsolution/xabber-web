@@ -4957,7 +4957,7 @@ xabber.DataTimePickerView = xabber.BasicView.extend({
         if (!this.timelineWidth) {
             setTimeout(() => {
                 this.setTimeBar(this.localDate);
-            }, 100);
+            }, 10);
         }
 
         this.initializeTimepicker();
@@ -4980,9 +4980,14 @@ xabber.DataTimePickerView = xabber.BasicView.extend({
         const currentOffset = Math.max(0, Math.min(hoursOffset + minutesOffset, this.timelineWidth));
 
         !this.moving && currentTimeElement.css({
-            transition: 'transform 0.3s ease',
             transform: `translateX(${currentOffset}px)`
         });
+        setTimeout(() => {
+            !this.moving && currentTimeElement.css({
+                transition: 'transform 0.3s ease',
+            });
+            this.$('.current-time').removeClass('hidden');
+        }, 10);
         this.prevTimelineOffset = currentOffset;
     },
 
@@ -4992,6 +4997,8 @@ xabber.DataTimePickerView = xabber.BasicView.extend({
 
         if (this.timelineElement.length > 0) {
             this.timelineWidth = this.timelineElement[0].offsetWidth;
+        } else {
+            this.$('.current-time').addClass('hidden');
         }
     },
 
@@ -5020,7 +5027,7 @@ xabber.DataTimePickerView = xabber.BasicView.extend({
             });
 
             let selected_date_text = formatter.format(this.localDate);
-            this.$('.date-picker-final-date').text(xabber.getString("datepicker_modal__selected_date", [selected_date_text]));
+            this.$('.date-picker-final-date').text(`${selected_date_text}, ${this.padZero(this.localDate.getHours()) + ':' + this.padZero(this.localDate.getMinutes())}`);
         } else {
             this.$('.date-picker-final-date').text('');
         }

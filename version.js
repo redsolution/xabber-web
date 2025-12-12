@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.4.266","version_description":"added permission tags handling in default and newbie permissions, changed design, added custom datapicker modal, various fixes, fixed default settings values after destroying last account, changed modals z-index setting"}'
+'{"version_number":"2.4.267","version_description":"fixed msg state clipping in chat view update last message func, added tags handling, added permissions timer click datapicker, added timer checking for tagged permissions, design changes to datapicker"}'
 )});

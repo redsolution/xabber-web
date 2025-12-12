@@ -2962,6 +2962,7 @@ xabber.ChatItemView = xabber.BasicView.extend({
         }
         this.$('.msg-delivering-state').showIf(msg.get('type') !== 'system' && msg.isSenderMe() && (msg.get('state') !== constants.MSG_ARCHIVED) && !msg.get('notification_msg'))
             .attr('data-state', msg.getState());
+        this.updateTextClipping();
     },
 
     onItemContextMenu: function (ev) {
@@ -15603,7 +15604,10 @@ xabber.DeleteWithOptionsView = xabber.BasicView.extend({
         "change #custom-timer-date": "onCustomTimeInputChange",
         "change input[name='delete-options']": "onOptionCheckboxChange",
         "click .property-variant": "changeTimerValue",
-        "change .clickable-field input:not(#custom-timer-date)": "changeRights",
+        "change .clickable-field:not('.tag-field') input:not(#custom-timer-date)": "changeRights",
+        "change .tag-field input": "changeTagValue",
+        "click .tag-item": "switchTaggedItemsVisibility",
+        "click .select-timer-dropdown-btn": "onSelectTimerDropdownClick",
     },
     open: function (options) {
         this.account = options.account;
@@ -15806,6 +15810,7 @@ xabber.DeleteWithOptionsView = xabber.BasicView.extend({
 
                 $property_value.text(moment.duration(Number(val), 'seconds').humanize(false));
                 $property_value.attr('data-value', val);
+                $property_value.attr('data-is-seconds', 'true');
                 if (val === '0') {
                     $property_value.removeClass('default-value').text(xabber.getString("forever"));
                 } else if ($property_value.hasClass('default-value'))
@@ -15816,6 +15821,72 @@ xabber.DeleteWithOptionsView = xabber.BasicView.extend({
 
     },
 
+    onSelectTimerDropdownClick: function (ev) {
+        let $item = $(ev.target).closest('.select-timer').find('.property-value');
+
+        if ($item.attr('data-value') === '0'){
+
+        } else {
+            ev && ev.preventDefault && ev.preventDefault();
+            this.$('.lean-overlay').click();
+
+            let $input = $(ev.target).closest('.select-timer').find('.hidden-custom-date');
+
+            if (Number($item.attr('data-value'))){
+
+                let date;
+                if ($item.attr('data-is-seconds') === 'true'){
+                    date = new Date(new Date().getTime() + Number($item.attr('data-value')) * 1000);
+                } else {
+                    date = new Date(Number($item.attr('data-value')) * 1000);
+                }
+                if (!date)
+                    return;
+
+                let tzoffset = (date).getTimezoneOffset() * 60000,
+                    localISOTime = (new Date(date.getTime() - tzoffset)).toISOString().slice(0, 16);
+
+                this.dropdown_date_picker = new xabber.DataTimePickerView({});
+                this.dropdown_date_picker.updateOptions({
+                    inputSelector: $input,
+                    selectedDate: localISOTime,
+                    pickTime: true,
+                    account: this.account,
+                    pickDate: true,
+                    position: 'top',
+                    timeFormat: '24h',
+                    onDateUpdate: (date) => {
+                        console.log('Выбрана дата:', date);
+                        this.onCustomDropdownDateInputChange($input, date)
+                    }
+                });
+                $input.val(this.dropdown_date_picker.formatDateForInput());
+                this.dropdown_date_picker.show();
+            }
+        }
+    },
+
+    onCustomDropdownDateInputChange: function ($input, date) {
+
+        let startDate = new Date(),
+            endDate   = new Date($input.val()),
+            val = `${Math.round((endDate.getTime() - startDate.getTime()) / 1000)}`;
+        if (!Number(val) || Number(val) < 1)
+            return;
+
+        let $property_value = $input.closest('.select-timer').find('.property-value');
+
+        $input.closest('.right-item').addClass('changed-timer');
+        $property_value.addClass('text-color-500');
+
+        $property_value.text(moment.duration(Number(val), 'seconds').humanize(false));
+        $property_value.attr('data-value', val);
+        $property_value.attr('data-is-seconds', 'true');
+
+        $property_value.removeClass('default-value');
+        this.updateSaveButton();
+    },
+
     changeTimerValue: function (ev) {
         let $property_item = $(ev.target),
             $property_value = $property_item.closest('.select-timer').find('.property-value'),
@@ -15823,6 +15894,35 @@ xabber.DeleteWithOptionsView = xabber.BasicView.extend({
         if ($property_item.closest('.right-item').find('.default-permission-placeholder').length){
             $property_value.text(xabber.getString("dialog_rights__button_set_timer"));
             $property_value.attr('data-value', 0);
+            return;
+        }
+        if ($property_item.attr('data-value') === 'custom'){
+
+            let $input = $property_item.find('.hidden-custom-date');
+            let nextDay = new Date();
+
+            nextDay.setDate(nextDay.getDate() + 1);
+
+            let tzoffset = (nextDay).getTimezoneOffset() * 60000,
+                localISOTime = (new Date(nextDay.getTime() - tzoffset)).toISOString().slice(0, 16);
+
+            this.dropdown_date_picker = new xabber.DataTimePickerView({});
+            this.dropdown_date_picker.updateOptions({
+                inputSelector: $input,
+                selectedDate: localISOTime,
+                pickTime: true,
+                account: this.account,
+                pickDate: true,
+                position: 'top',
+                timeFormat: '24h',
+                onDateUpdate: (date) => {
+                    console.log('Выбрана дата:', date);
+                    console.log($input);
+                    this.onCustomDropdownDateInputChange($input, date)
+                }
+            });
+            $input.val(this.dropdown_date_picker.formatDateForInput());
+            this.dropdown_date_picker.show();
             return;
         }
 
@@ -15840,6 +15940,7 @@ xabber.DeleteWithOptionsView = xabber.BasicView.extend({
         }
         $property_value.text(moment.duration(Number($property_item.attr('data-value')), 'seconds').humanize(false));
         $property_value.attr('data-value', $property_item.attr('data-value'));
+        $property_value.attr('data-is-seconds', 'true');
         if ($property_item.attr('data-value') === '0') {
             $property_value.removeClass('default-value').text(xabber.getString("forever"));
         } else if ($property_value.hasClass('default-value'))
@@ -15864,6 +15965,7 @@ xabber.DeleteWithOptionsView = xabber.BasicView.extend({
         }
         $property_value.text(moment.duration(Number(val), 'seconds').humanize(false));
         $property_value.attr('data-value', val);
+        $property_value.attr('data-is-seconds', 'true');
         if (val === '0') {
             $property_value.removeClass('default-value').text(xabber.getString("forever"));
         } else if ($property_value.hasClass('default-value'))
@@ -15903,6 +16005,14 @@ xabber.DeleteWithOptionsView = xabber.BasicView.extend({
                 status = $item.attr('status'),
                 tag = $item.attr('tag');
 
+            if (tag){
+                if (!this.$(`.right-item.tag-${utils.toSnakeCase(tag)}`).length){
+                    let $restriction_tag_container = $(env.templates.contacts.group_chats.restriction_item_tagged_container({pretty_name: tag, tag: utils.toSnakeCase(tag)}));
+                    $restriction_tag_container.addClass('colorable-right-item');
+                    this.$('.restrict-permissions-modal-content').append($restriction_tag_container);
+                }
+            }
+
             let attrs = {
                     pretty_name: text,
                     name: name,
@@ -15912,10 +16022,17 @@ xabber.DeleteWithOptionsView = xabber.BasicView.extend({
                     right_name: ('default-' + attrs.name),
                 }));
             _.each($restriction_expire.find('.property-variant'), (item) => {
+                if ($(item).attr('data-value') === 'custom')
+                    return;
                 utils.pretty_time_text_from_seconds(item, $(item).attr('data-value'), $(item));
+                $(item).attr('data-is-seconds', 'false');
             });
             $restriction_item.append($restriction_expire);
-            this.$('.restrict-permissions-modal-content').append($restriction_item);
+            if (tag && this.$(`.right-item.tag-${utils.toSnakeCase(tag)}`).length){
+                this.$(`.right-item.tag-${utils.toSnakeCase(tag)}`).find('.tagged-restrictions-container').append($restriction_item);
+            } else {
+                this.$('.restrict-permissions-modal-content').append($restriction_item);
+            }
 
             if (fixed && fixed === 'true') {
                 $restriction_item.addClass('disabled');
@@ -15949,7 +16066,10 @@ xabber.DeleteWithOptionsView = xabber.BasicView.extend({
                     right_name: ('default-' + attrs.name),
                 }));
             _.each($restriction_expire.find('.property-variant'), (item) => {
+                if ($(item).attr('data-value') === 'custom')
+                    return;
                 utils.pretty_time_text_from_seconds(item, $(item).attr('data-value'), $(item));
+                $(item).attr('data-is-seconds', 'false');
             });
             $restriction_item.append($restriction_expire);
             let view = this.$('.restrict-permissions-modal-content .right-item.restriction-' + attrs.name);
@@ -15971,6 +16091,7 @@ xabber.DeleteWithOptionsView = xabber.BasicView.extend({
                     $restriction_item.find('.select-timer .property-value').attr('data-value', expires)
                         .removeClass('default-value')
                         .text(moment(Number(expires) * 1000).fromNow());
+                    $restriction_item.find('.select-timer .property-value').attr('data-is-seconds', 'false');
                 } else {
                     $restriction_item.append($('<div class="select-timer"/>'));
                     $restriction_item.find('.select-timer').attr('data-value', expires)
@@ -15979,6 +16100,80 @@ xabber.DeleteWithOptionsView = xabber.BasicView.extend({
             }
         });
         this.updateSaveButton();
+    },
+    updateTagLevers: function () {
+        if (this.$('.tag-item').length){
+            _.each(this.$('.tag-item'), (item) => {
+                let $item = $(item),
+                    children_count = $item.find('.tagged-restrictions-container').children().length;
+
+                let checked_count = 0,
+                    default_count = 0,
+                    last_value, last_is_seconds, has_diff;
+                _.each($item.find('.tagged-restrictions-container').children(), (child) => {
+                    if ($(child).find('.select-timer .property-value').length && !$(child).find('.default-permission-placeholder').length){
+                        let $value_item = $(child).find('.select-timer .property-value'),
+                            value = $value_item.attr('data-value'),
+                            is_seconds = $value_item.attr('data-is-seconds');
+                        if (!last_value){
+                            last_value = value;
+                            last_is_seconds = is_seconds;
+                        } else if (last_value !== value || last_is_seconds !== is_seconds){
+                            has_diff = true;
+                        }
+                    }
+                    if ($(child).find('.default-permission-placeholder').length)
+                        default_count++;
+                    if ($(child).find('input:checked').length)
+                        checked_count++;
+                });
+                if (!has_diff && last_value){
+                    if (last_is_seconds === 'true'){
+                        if (last_value === '0'){
+                            $item.find('.tag-item-expire-description').text(xabber.getString("forever"));
+                        } else {
+                            $item.find('.tag-item-expire-description').text(moment.duration(Number(last_value), 'seconds').humanize(false));
+                        }
+                    } else {
+                        $item.find('.tag-item-expire-description').text(moment(Number(last_value)*1000).fromNow());
+                    }
+                } else if (last_value && has_diff){
+                    $item.find('.tag-item-expire-description').text(xabber.getString("permissions_tag_timer__different_values"));
+                } else {
+                    $item.find('.tag-item-expire-description').text('');
+                }
+                $item.find('.tag-item-expire-description').switchClass('text-color-500', $item.find('.text-color-500').length);
+                if (default_count === children_count && default_count !== 0){
+                    $item.children('.switch').addClass('default-permission-placeholder');
+                } else {
+                    $item.children('.switch').removeClass('default-permission-placeholder');
+                }
+                if (checked_count === children_count){
+                    $item.children('.switch').find('input').prop('checked', true);
+                } else {
+                    $item.children('.switch').find('input').prop('checked', false);
+                }
+
+            });
+        }
+    },
+
+    changeTagValue: function (ev) {
+        let $item = $(ev.target).closest('.tag-item'),
+            $input = $item.children('.tag-field').find('input');
+        if ($input.prop('checked')){
+            $item.find('.tagged-restrictions-container').children().find('input').prop('checked', true);
+        } else {
+            $item.find('.tagged-restrictions-container').children().find('input').prop('checked', false);
+        }
+        this.updateSaveButton();
+    },
+
+    switchTaggedItemsVisibility: function (ev) {
+        if ($(ev.target).closest('.tag-field').length || $(ev.target).closest('.tagged-restrictions-container').length)
+            return;
+        let $item = $(ev.target).closest('.tag-item');
+        $item.switchClass('hidden-restrictions');
     },
 
     updateSaveButton: function () {
@@ -16025,6 +16220,7 @@ xabber.DeleteWithOptionsView = xabber.BasicView.extend({
         if (this.$('.changed-timer').length) {
             has_changes = true;
         }
+        this.updateTagLevers();
         this.checkTimersDifference();
     },
 

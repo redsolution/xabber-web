@@ -19301,26 +19301,50 @@ input[type=range].voice-message-volume:focus {
     padding: 6px 24px 3px 20px;
     position: relative;
 }
-.details-panel-right .right-item.tag-item {
+.right-item.tag-item {
     cursor: pointer;
 }
-.details-panel-right .right-item .tagged-restrictions-container {
+.right-item .tagged-restrictions-container {
+    /*padding-top: 8px;*/
 }
-.details-panel-right .right-item .tagged-restrictions-container .right-item{
+.right-item .tagged-restrictions-container .right-item{
     cursor: auto;
 }
-.details-panel-right .right-item .tagged-restrictions-container .right-item .clickable-field{
-    right: 0;
+.right-item .tagged-restrictions-container .right-item .select-timer{
+    right: 56px !important;
+}
+.delete-with-options-modal .right-item .tagged-restrictions-container .right-item .select-timer{
+    right: 80px !important;
+}
+.right-item .tag-item-expire-description{
+    color: #616161;
+    cursor: pointer;
+    height: 20px;
+    line-height: 20px;
+    margin: 0;
+    position: absolute;
+    right: 80px;
+    top: 6px;
+}
+.right-item .tagged-restrictions-container .right-item .clickable-field{
+    right: 0 !important;
     transform: scale(0.8);
 }
-.details-panel-right .right-item.hidden-restrictions .tagged-restrictions-container {
+.restrict-permissions-modal-wrap .right-item .tagged-restrictions-container .right-item{
+    padding-left: 20px;
+}
+.restrict-permissions-modal-wrap .right-item .tagged-restrictions-container .right-item .clickable-field{
+    right: 24px !important;
+}
+.right-item.hidden-restrictions .tagged-restrictions-container {
     height: 0;
+    padding-top: 0;
     overflow: hidden;
 }
-.details-panel-right .right-item .tag-icon-show:before {
+.right-item .tag-icon-show:before {
     transition: transform 0.2s,
 }
-.details-panel-right .right-item.hidden-restrictions .tag-icon-show:before {
+.right-item.hidden-restrictions .tag-icon-show:before {
     transform: rotate(180deg);
 }
 .details-panel-right .participant-details-wrap .confirmation-rights-wrap {
