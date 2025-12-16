@@ -4711,7 +4711,7 @@ xabber.DataTimePickerView = xabber.BasicView.extend({
         }
         this.rawHours = rawHours;
         this.rawMinutes = rawMinutes;
-        this.displayTime = this.rawHours + ':' + this.padZero(this.rawMinutes);
+        this.displayTime = this.padZero(this.rawHours) + ':' + this.padZero(this.rawMinutes);
 
         this.$('.time-input').val(this.displayTime);
 
@@ -4813,7 +4813,7 @@ xabber.DataTimePickerView = xabber.BasicView.extend({
 
         this.rawHours = actualHours;
         this.rawMinutes = minutes;
-        this.displayTime = displayHours + ':' + this.padZero(minutes);
+        this.displayTime = this.padZero(displayHours) + ':' + this.padZero(minutes);
 
         this.$('.time-input').val(this.displayTime);
 
@@ -5212,6 +5212,205 @@ xabber.DataTimePickerView = xabber.BasicView.extend({
             return offset + '%';
         }
         return '0';
+    },
+
+    close: function () {
+        this.$el.closeModal({ complete: () => {
+                this.$el.detach();
+                this.data.set('visible', false);
+            }
+        });
+    },
+});
+
+xabber.DurationPickerView = xabber.BasicView.extend({
+    className: 'modal main-modal duration-picker-modal',
+    template: templates.duration_picker,
+
+    events: {
+        "change .duration-input": "onInputChange",
+        "click .btn-set": "setValue",
+        "click .btn-change-duration": "onChangeDurationClick",
+        "click .btn-cancel": "close",
+    },
+
+
+    _initialize: function () {
+    },
+
+    updateColorScheme: function () {
+        this.account && this.$el.attr('data-color', this.account.settings.get('color'));
+    },
+
+    render: function (options) {
+
+        this.$input = options.$input;
+        if (Number(options.value)){
+            this.updateValue(Number(options.value))
+        }
+        this.updateColorScheme();
+        this.$el.openModal({
+            ready: () => {
+                this.onRender();
+            },
+            complete: this.close.bind(this)
+        });
+    },
+
+    onRender: function () {
+
+    },
+
+    updateValue: function (seconds) {
+        const days = Math.floor(seconds / (24 * 60 * 60));
+        const hours = Math.floor((seconds % (24 * 60 * 60)) / (60 * 60));
+        const minutes = Math.floor((seconds % (60 * 60)) / 60);
+
+        days && this.$('input[name="days_duration"]').val(days);
+        hours && this.$('input[name="hours_duration"]').val(hours);
+        minutes && this.$('input[name="minutes_duration"]').val(minutes);
+    },
+    onChangeDurationClick: function (ev) {
+        let $item = $(ev.target).closest('.btn-change-duration'),
+            $input, is_minus;
+        if ($item.hasClass('btn-add-day')){
+            $input = this.$('input[name="days_duration"]');
+        } else if ($item.hasClass('btn-add-hour')){
+            $input = this.$('input[name="hours_duration"]');
+        } else if ($item.hasClass('btn-add-minute')){
+            $input = this.$('input[name="minutes_duration"]');
+        } else if ($item.hasClass('btn-minus-day')){
+            $input = this.$('input[name="days_duration"]');
+            is_minus = true;
+        } else if ($item.hasClass('btn-minus-hour')){
+            $input = this.$('input[name="hours_duration"]');
+            is_minus = true;
+        } else if ($item.hasClass('btn-minus-minute')){
+            $input = this.$('input[name="minutes_duration"]');
+            is_minus = true;
+        }
+
+         if ($input){
+             let value = $input.val();
+             !value && (value = 0);
+             if (is_minus){
+                 $input.val(Number(value) - 1);
+             } else {
+                 $input.val(Number(value) + 1);
+             }
+             this.testTimeOverflow();
+             this.onInputChange({target: $input[0]});
+         }
+    },
+
+    testTimeOverflow: function (ev) {
+        let days = Number(this.$('input[name="days_duration"]').val()),
+            hours = Number(this.$('input[name="hours_duration"]').val()),
+            minutes = Number(this.$('input[name="minutes_duration"]').val()),
+            is_hour_increased;
+        if (minutes && minutes > 59){
+            this.$('input[name="minutes_duration"]').val(0);
+            if (hours){
+                this.$('input[name="hours_duration"]').val(hours + 1);
+                is_hour_increased = true;
+            } else {
+                this.$('input[name="hours_duration"]').val(1);
+            }
+        }
+        hours = Number(this.$('input[name="hours_duration"]').val());
+        if (hours && hours > 23){
+            this.$('input[name="hours_duration"]').val(0);
+            if (days){
+                if ((days + 1) > 999){
+                    this.$('input[name="hours_duration"]').val(23);
+                    if (is_hour_increased)
+                        this.$('input[name="minutes_duration"]').val(59);
+                } else {
+                    this.$('input[name="days_duration"]').val(days + 1);
+                }
+            } else {
+                this.$('input[name="days_duration"]').val(1);
+            }
+        }
+        if (minutes && minutes < 0){
+            console.error(hours);
+            if (hours || hours === 0){
+                this.$('input[name="minutes_duration"]').val(59);
+                this.$('input[name="hours_duration"]').val(hours - 1);
+            } else {
+                this.$('input[name="minutes_duration"]').val(0);
+            }
+        }
+        hours = Number(this.$('input[name="hours_duration"]').val());
+        if (hours && hours < 0){
+            days = Number(this.$('input[name="days_duration"]').val());
+            if (days){
+                this.$('input[name="days_duration"]').val(days - 1);
+                this.$('input[name="hours_duration"]').val(23);
+            } else {
+                this.$('input[name="minutes_duration"]').val(0);
+                this.$('input[name="hours_duration"]').val(0);
+            }
+        }
+        days = Number(this.$('input[name="days_duration"]').val());
+        if (days > 999){
+            this.$('input[name="days_duration"]').val(999);
+        }
+
+    },
+
+    onInputChange: function (ev) {
+        let $input = $(ev.target).closest('input');
+        if (!$input.val())
+            $input.val('');
+
+        if (/\D/.test($input.val())){
+            let string = $input.val();
+            string = string.replace(/\D/g, '');
+            $input.val(string)
+        }
+
+        if ($input.attr('name') === 'hours_duration'){
+            if (Number($input.val()) && Number($input.val()) > 23) {
+                $input.val(23);
+            } else if (Number($input.val())){
+                $input.val(this.padZero(Number($input.val())));
+            }
+        }
+        if ($input.attr('name') === 'minutes_duration') {
+            if (Number($input.val()) && Number($input.val()) > 59){
+                $input.val(59);
+            } else if (Number($input.val())){
+                $input.val(this.padZero(Number($input.val())));
+            }
+        }
+    },
+
+    padZero: function (num) {
+        return num < 10 ? '0' + num : num;
+    },
+
+    setValue: function () {
+        let $days_input = this.$('input[name="days_duration"]'),
+            $hours_input = this.$('input[name="hours_duration"]'),
+            $minutes_input = this.$('input[name="minutes_duration"]'),
+            final_seconds = 0;
+
+        if (Number($days_input.val())){
+            final_seconds = Number($days_input.val()) * 86400;
+        }
+        if (Number($hours_input.val())){
+            final_seconds = final_seconds + (Number($hours_input.val()) * 3600);
+        }
+        if (Number($minutes_input.val())){
+            final_seconds = final_seconds + (Number($minutes_input.val()) * 60);
+        }
+
+        if (final_seconds && this.$input){
+            this.$input.val(final_seconds);
+            this.close();
+            this.$input.closest('p').find(`input[name="restriction-timer"][value="custom"`).click();
+        }
     },
 
     close: function () {

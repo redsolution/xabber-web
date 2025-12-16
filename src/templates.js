@@ -90,6 +90,7 @@ import $ from "jquery";
     addTemplate('base.client_notification_item');
     addTemplate('base.backgrounds_gallery');
     addTemplate('base.datatime_picker');
+    addTemplate('base.duration_picker');
     addTemplate('base.color_picker');
     addTemplate('base.color_scheme');
 

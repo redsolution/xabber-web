@@ -5367,7 +5367,7 @@ xabber.ParticipantPropertiesViewRight = xabber.BasicView.extend({
 
                 let actual_permission = this.actual_rights.find(restriction => (restriction.name === $item.find('input').attr('id'))),
                     timer;
-                if (!actual_permission.expires){
+                if (actual_permission && !actual_permission.expires){
                     timer = '0'
                 }
                 if (timer === '0' && val === timer) {
@@ -5556,15 +5556,11 @@ xabber.ParticipantPropertiesViewRight = xabber.BasicView.extend({
         if (has_changes) {
             this.$('.block-name.second-text').html(xabber.getString("edit_vcard"));
             this.$('.block-header .details-icon').removeClass('mdi-arrow-right').addClass('mdi-close');
-            this.$('.block-header .details-icon.parent-btn').removeClass('btn-back').addClass('btn-reset');
-            this.$('.block-header .details-icon.child-btn').removeClass('btn-back-name').addClass('btn-reset-name');
             this.$('.block-header .block-name:not(.second-text)').addClass('fade-out');
             this.$('.block-header .block-name.second-text').removeClass('fade-out');
         }
         else{
             this.$('.block-header .details-icon').addClass('mdi-arrow-right').removeClass('mdi-close');
-            this.$('.block-header .details-icon.parent-btn').addClass('btn-back').removeClass('btn-reset');
-            this.$('.block-header .details-icon.child-btn').addClass('btn-back-name').removeClass('btn-reset-name');
             this.$('.block-header .block-name:not(.second-text)').removeClass('fade-out');
             this.$('.block-header .block-name.second-text').addClass('fade-out');
         }
@@ -5715,7 +5711,7 @@ xabber.ParticipantPropertiesViewRight = xabber.BasicView.extend({
                 if ($(item).attr('data-value') === 'custom')
                     return;
                 utils.pretty_time_text_from_seconds(item, $(item).attr('data-value'), $(item));
-                $property_value.attr('data-is-seconds', 'true');
+                $(item).attr('data-is-seconds', 'false');
             });
 
             $restriction_item.addClass('colorable-right-item');
@@ -6427,7 +6423,6 @@ xabber.DefaultRestrictionsRightView = xabber.BasicView.extend({
         "click .restrictions-wrap .btn-default-restrictions-save": "saveChanges",
         "click .restrictions-wrap .btn-default-restrictions-cancel": "hideRestrictions",
         "click .restrictions-wrap .btn-back:not('.back-to-permissions-menu')": "hideRestrictions",
-        "click .restrictions-wrap .btn-reset": "showRestrictions",
         "change .restrictions-wrap #default_restriction_expires": "changeExpiresTime",
         "click .restrictions-wrap.group-info-editor .property-variant": "changePropertyValue",
         "click .restrictions-wrap.select-timer .property-variant": "changeTimerValue",
@@ -6551,13 +6546,11 @@ xabber.DefaultRestrictionsRightView = xabber.BasicView.extend({
         if (has_changes) {
             this.$('.block-name.second-text').html(xabber.getString("edit_vcard"));
             this.$('.restrictions-header .details-icon').removeClass('mdi-arrow-right').addClass('mdi-close');
-            this.$('.restrictions-header .details-icon').removeClass('btn-back').addClass('btn-reset');
             this.$('.restrictions-header .block-name:not(.second-text)').addClass('fade-out');
             this.$('.restrictions-header .block-name.second-text').removeClass('fade-out');
         }
         else{
             this.$('.restrictions-header .details-icon').addClass('mdi-arrow-right').removeClass('mdi-close');
-            this.$('.restrictions-header .details-icon').addClass('btn-back').removeClass('btn-reset');
             this.$('.restrictions-header .block-name:not(.second-text)').removeClass('fade-out');
             this.$('.restrictions-header .block-name.second-text').addClass('fade-out');
         }
@@ -6764,14 +6757,14 @@ xabber.NewbiePermissionsRightView = xabber.BasicView.extend({
         "click .newbie-permissions-wrap .btn-default-restrictions-save": "saveChanges",
         "click .newbie-permissions-wrap .btn-default-restrictions-cancel": "hideNewbiePermissions",
         "click .newbie-permissions-wrap .btn-back": "hideNewbiePermissions",
-        "click .newbie-permissions-wrap .btn-reset": "openNewbiePermissions",
         "click .newbie-permissions-wrap .group-info-editor .property-variant": "changePropertyValue",
         "click .newbie-permissions-wrap .restrictions-timers-wrap p": "changeTimerValue",
         "click .newbie-permissions-wrap .clickable-field:not('.tag-field') input": "changeRestriction",
         "keyup .newbie-permissions-wrap .clickable-field:not('.tag-field') input": "keyUpInput",
         "change .newbie-permissions-wrap .clickable-field:not('.tag-field') input": "updateSaveButton",
         "change .tag-field input": "changeTagValue",
-        "click .tag-item": "switchTaggedItemsVisibility",//34
+        "click .tag-item": "switchTaggedItemsVisibility",
+        "click #custom-timer-date": "onClickDurationInput",
     },
 
     _initialize: function () {
@@ -6898,33 +6891,47 @@ xabber.NewbiePermissionsRightView = xabber.BasicView.extend({
                 }
             }
         });
-        if (this.set_time && this.$(`input[name="restriction-timer"]:checked`).val() !== this.set_time) {
+
+        let is_only_time_changes = !has_changes;
+        if (this.$(`input[name="restriction-timer"]:checked`).val() !== this.set_time) {
             if (this.$(`input[name="restriction-timer"]:checked`).val() === 'custom') {
-
-                // парсинг поля времени //35
-
+                if (!this.set_time) {
+                    has_changes = true;
+                }
+                else if (Number(this.set_time) !== Number(this.$('#custom-timer-date').val())){
+                    has_changes = true;
+                }
             } else {
                 has_changes = true;
             }
         }
-        console.error(has_changes);
+        if (!this.$('.field.clickable-field:not(.default-permission-placeholder)').length && is_only_time_changes)
+            has_changes = false;
         this.$('.btn-default-restrictions-save').switchClass('fade-out', !has_changes);
         if (has_changes) {
             this.$('.block-name.second-text').html(xabber.getString("edit_vcard"));
             this.$('.restrictions-header .details-icon').removeClass('mdi-arrow-right').addClass('mdi-close');
-            this.$('.restrictions-header .details-icon').removeClass('btn-back').addClass('btn-reset');
             this.$('.restrictions-header .block-name:not(.second-text)').addClass('fade-out');
             this.$('.restrictions-header .block-name.second-text').removeClass('fade-out');
         }
         else{
             this.$('.restrictions-header .details-icon').addClass('mdi-arrow-right').removeClass('mdi-close');
-            this.$('.restrictions-header .details-icon').addClass('btn-back').removeClass('btn-reset');
             this.$('.restrictions-header .block-name:not(.second-text)').removeClass('fade-out');
             this.$('.restrictions-header .block-name.second-text').addClass('fade-out');
         }
         this.updateTagLevers();
     },
 
+    onClickDurationInput: function (ev) {
+        let $item = $(ev.target).closest('#custom-timer-date');
+        let duration_modal = new xabber.DurationPickerView({}),
+            value = this.$('#custom-timer-date').val();
+
+        duration_modal.show({
+            $input: $item,
+            value: value
+        });
+    },
     changeRestriction: function (ev) {
     },
 
@@ -6941,6 +6948,9 @@ xabber.NewbiePermissionsRightView = xabber.BasicView.extend({
     },
 
     changeTimerValue: function () {
+        if (this.$(`input[name="restriction-timer"]:checked`).val() === 'custom' && !this.$('#custom-timer-date').val()){
+            this.$(`input[name="restriction-timer"]:checked`).prop('checked', false);
+        }
         this.updateSaveButton();
     },
 
@@ -7050,9 +7060,11 @@ xabber.NewbiePermissionsRightView = xabber.BasicView.extend({
         } else {
 
             if (!this.$(`input[name="restriction-timer"][value="${this.set_time}"]`).length){
-                // сделать установку времени кастомного и выделение чекбоксом //35
+                this.$(`#custom-timer-date`).val(this.set_time);
+                this.$(`input[name="restriction-timer"][value="custom"`).click();
+            } else {
+                this.$(`input[name="restriction-timer"][value="${this.set_time}"]`).prop('checked', true);
             }
-            this.$(`input[name="restriction-timer"][value="${this.set_time}"]`).prop('checked', true);
         }
         this.updateTagLevers();
     },
@@ -7112,7 +7124,7 @@ xabber.NewbiePermissionsRightView = xabber.BasicView.extend({
         this.$('.edit-save-preloader.preloader-wrap').addClass('visible').find('.preloader-wrapper').addClass('active');
         this.$('button').blur();
         let changed_default_permissions = [];
-        let $items = this.$('.default-restrictions-list-wrap .right-item .clickable-field:not(.default-permission-placeholder)').closest('.right-item');
+        let $items = this.$('.default-restrictions-list-wrap .right-item:not(.tag-item) .clickable-field:not(.default-permission-placeholder)').closest('.right-item');
         $items.each((idx, item) => {
             let $item = $(item),
                 restriction_name = $item.find('input').attr('id');
@@ -8694,7 +8706,6 @@ xabber.GroupEditView = xabber.BasicView.extend({
     events: {
         "click .btn-save": "saveChanges",
         'click .edit-header:not(.property-header) .btn-back': 'hideEdit',
-        'click .btn-reset': 'resetPanel',
         'click .btn-back-panel': 'hidePanel',
         'click .membership-field .property-radio input': 'changeMembership',
         'click .index-field .property-radio input ': 'changeIndex',
@@ -9103,13 +9114,11 @@ xabber.GroupEditView = xabber.BasicView.extend({
         if (has_changes) {
             this.$('.block-name.second-text').html(xabber.getString("edit_vcard"));
             this.$('.edit-header:not(.main-edit-header) .details-icon').removeClass('mdi-arrow-right').addClass('mdi-close');
-            this.$('.edit-header:not(.main-edit-header) .details-icon').removeClass('btn-back').addClass('btn-reset');
             this.$('.edit-header:not(.main-edit-header) .block-name:not(.second-text)').addClass('fade-out');
             this.$('.edit-header:not(.main-edit-header) .block-name.second-text').removeClass('fade-out');
         }
         else{
             this.$('.edit-header:not(.main-edit-header) .details-icon').addClass('mdi-arrow-right').removeClass('mdi-close');
-            this.$('.edit-header:not(.main-edit-header) .details-icon').addClass('btn-back').removeClass('btn-reset');
             this.$('.edit-header:not(.main-edit-header) .block-name:not(.second-text)').removeClass('fade-out');
             this.$('.edit-header:not(.main-edit-header) .block-name.second-text').addClass('fade-out');
         }

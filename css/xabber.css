@@ -26412,7 +26412,6 @@ ul.restrictions-list-content>li {
     border-color: #2196F3;
 }
 
-/* Компактный режим */
 .datatime-picker-modal .datepicker-container.compact {
     min-width: 300px;
     max-width: 320px;
@@ -26478,4 +26477,70 @@ ul.restrictions-list-content>li {
     position: absolute;
     top: 16px;
     right: 16px;
+}
+
+/* custom duration picker */
+.duration-picker-modal{
+    width: fit-content !important;
+}
+.duration-picker-modal .duration-inputs-container{
+    display: flex;
+    justify-content: space-around;
+}
+.duration-picker-modal .duration-inputs-container input{
+    -moz-appearance: textfield;
+    color: #616161 !important;
+    font-size: 40px !important;
+    height: 56px !important;
+    margin: 0 4px;
+    padding: 0 0 !important;
+    text-align: center;
+    width: 72px !important;
+}
+.duration-picker-modal .duration-inputs-container .duration-time-dots{
+    text-align: center;
+    height: 56px;
+    line-height: 56px;
+    color: #616161;
+    font-size: 40px;
+    margin: 40px 0 80px;
+}
+.duration-picker-modal .duration-inputs-container input::-webkit-outer-spin-button,
+.duration-picker-modal .duration-inputs-container input::-webkit-inner-spin-button{
+    -webkit-appearance: none;
+    margin: 0;
+}
+.duration-picker-modal .duration-inputs-container input:focus::placeholder {
+    color: transparent;
+}
+.duration-picker-modal .duration-input-container{
+    position: relative;
+    margin: 40px 0 80px;
+}
+.duration-picker-modal .duration-input-label{
+    bottom: -24px;
+    color: #9e9e9e;
+    left: 50%;
+    pointer-events: none;
+    font-size: 14px;
+    position: absolute;
+    transform: translate(-50%);
+}
+.duration-picker-modal .btn-change-duration{
+    color: #9e9e9e;
+    cursor: pointer;
+    height: 32px;
+    left: 50%;
+    transform: translate(-50%, 0);
+    padding: 4px;
+    position: absolute;
+    top: -36px;
+    width: 32px;
+}
+.duration-picker-modal .btn-change-duration:hover{
+    background-color: #e0e0e0;
+}
+.duration-picker-modal .btn-minus-duration{
+    bottom: -56px;
+    top: unset;
 }
