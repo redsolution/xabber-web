@@ -5245,9 +5245,13 @@ xabber.DurationPickerView = xabber.BasicView.extend({
     render: function (options) {
 
         this.$input = options.$input;
+        this.callback_func = options.callback_func;
         if (Number(options.value)){
             this.updateValue(Number(options.value))
         }
+        _.each(this.$('input'), (input) => {
+            this.onInputChange({target: input});
+        });
         this.updateColorScheme();
         this.$el.openModal({
             ready: () => {
@@ -5299,7 +5303,9 @@ xabber.DurationPickerView = xabber.BasicView.extend({
                  $input.val(Number(value) + 1);
              }
              this.testTimeOverflow();
-             this.onInputChange({target: $input[0]});
+             _.each(this.$('input'), (input) => {
+                 this.onInputChange({target: input});
+             });
          }
     },
 
@@ -5309,7 +5315,7 @@ xabber.DurationPickerView = xabber.BasicView.extend({
             minutes = Number(this.$('input[name="minutes_duration"]').val()),
             is_hour_increased;
         if (minutes && minutes > 59){
-            this.$('input[name="minutes_duration"]').val(0);
+            this.$('input[name="minutes_duration"]').val('00');
             if (hours){
                 this.$('input[name="hours_duration"]').val(hours + 1);
                 is_hour_increased = true;
@@ -5319,7 +5325,7 @@ xabber.DurationPickerView = xabber.BasicView.extend({
         }
         hours = Number(this.$('input[name="hours_duration"]').val());
         if (hours && hours > 23){
-            this.$('input[name="hours_duration"]').val(0);
+            this.$('input[name="hours_duration"]').val('00');
             if (days){
                 if ((days + 1) > 999){
                     this.$('input[name="hours_duration"]').val(23);
@@ -5338,7 +5344,7 @@ xabber.DurationPickerView = xabber.BasicView.extend({
                 this.$('input[name="minutes_duration"]').val(59);
                 this.$('input[name="hours_duration"]').val(hours - 1);
             } else {
-                this.$('input[name="minutes_duration"]').val(0);
+                this.$('input[name="minutes_duration"]').val('00');
             }
         }
         hours = Number(this.$('input[name="hours_duration"]').val());
@@ -5348,8 +5354,8 @@ xabber.DurationPickerView = xabber.BasicView.extend({
                 this.$('input[name="days_duration"]').val(days - 1);
                 this.$('input[name="hours_duration"]').val(23);
             } else {
-                this.$('input[name="minutes_duration"]').val(0);
-                this.$('input[name="hours_duration"]').val(0);
+                this.$('input[name="minutes_duration"]').val('00');
+                this.$('input[name="hours_duration"]').val('00');
             }
         }
         days = Number(this.$('input[name="days_duration"]').val());
@@ -5362,7 +5368,7 @@ xabber.DurationPickerView = xabber.BasicView.extend({
     onInputChange: function (ev) {
         let $input = $(ev.target).closest('input');
         if (!$input.val())
-            $input.val('');
+            $input.val('0');
 
         if (/\D/.test($input.val())){
             let string = $input.val();
@@ -5373,14 +5379,14 @@ xabber.DurationPickerView = xabber.BasicView.extend({
         if ($input.attr('name') === 'hours_duration'){
             if (Number($input.val()) && Number($input.val()) > 23) {
                 $input.val(23);
-            } else if (Number($input.val())){
+            } else if (Number($input.val()) || Number($input.val()) === 0){
                 $input.val(this.padZero(Number($input.val())));
             }
         }
         if ($input.attr('name') === 'minutes_duration') {
             if (Number($input.val()) && Number($input.val()) > 59){
                 $input.val(59);
-            } else if (Number($input.val())){
+            } else if (Number($input.val()) || Number($input.val()) === 0){
                 $input.val(this.padZero(Number($input.val())));
             }
         }
@@ -5408,6 +5414,11 @@ xabber.DurationPickerView = xabber.BasicView.extend({
 
         if (final_seconds && this.$input){
             this.$input.val(final_seconds);
+            if (this.$input.closest('p').length){
+                this.$input.attr('style', 'cursor: pointer');
+                this.$input.closest('p').find('label').text(utils.humanizeDuration(Number(final_seconds), xabber.getCurrentLanguage()));
+            }
+            this.callback_func && this.callback_func(this.$input, final_seconds);
             this.close();
             this.$input.closest('p').find(`input[name="restriction-timer"][value="custom"`).click();
         }

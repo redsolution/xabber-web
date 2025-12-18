@@ -673,12 +673,12 @@ var utils = {
         return text;
     },
 
-    pretty_time_text_from_seconds: function (item, value, $text_insert) {
+    pretty_time_text_from_seconds: function (item, value, $text_insert, locale) {
         let $item = $(item);
         if (value === '0'){
             $text_insert.text(getString("forever"))
         } else {
-            $text_insert.text(moment.duration(Number(value), 'seconds').humanize(false));
+            $text_insert.text(this.humanizeDuration(Number(value), locale));
         }
     },
 
@@ -1952,6 +1952,31 @@ var utils = {
         }
     },
 
+    humanizeDuration: function (totalSeconds, locale) {
+        locale = locale || 'en-us';
+        const days = Math.floor(totalSeconds / 86400);
+        const hours = Math.floor((totalSeconds % 86400) / 3600);
+        const minutes = Math.floor((totalSeconds % 3600) / 60);
+        const seconds = totalSeconds % 60;
+
+        let duration = {};
+
+        if (days > 0) {
+            duration = { days };
+        } else if (hours > 0) {
+            duration = { hours };
+        } else if (minutes > 0) {
+            duration = { minutes };
+        } else {
+            duration = { seconds };
+        }
+
+        const formatter = new Intl.DurationFormat(locale, {
+            style: 'long'
+        });
+
+        return formatter.format(duration);
+    },
     toSnakeCase: function (str) {
         return str
             .replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`)

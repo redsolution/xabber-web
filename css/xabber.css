@@ -67,6 +67,10 @@ input[type="radio"].with-gap:disabled:checked+label:after {
     border-radius: 50%;
 }
 
+.switch.normal.switch-middle-state label .lever:after {
+    left: 9px;
+}
+
 .switch.small label .lever:after {
     width: 14px;
     height: 14px;
@@ -19347,6 +19351,9 @@ input[type=range].voice-message-volume:focus {
 .right-item.hidden-restrictions .tag-icon-show:before {
     transform: rotate(180deg);
 }
+.right-item:not(.hidden-restrictions) .tag-item-expire-description {
+    display:none
+}
 .details-panel-right .participant-details-wrap .confirmation-rights-wrap {
     position: relative;
 }
@@ -19580,15 +19587,15 @@ input[type=range].voice-message-volume:focus {
     color: #000000de !important;
     margin-left: 22px;
 }
-.details-panel-right .restrictions-timers-wrap #custom-timer-date{
+.details-panel-right .restrictions-timers-wrap p #custom-timer-date{
     position: absolute;
     left: 64px;
     width: 128px;
-    color: #000000de !important;
+    color: transparent !important;
     height: 24px;
-    top: 3px;
+    top: 5px;
     font-size: 16px;
-    border-bottom: 1px solid #616161;
+    border-bottom: 1px solid #BDBDBD;
 }
 
 .details-panel-right .participant-details-wrap .participant-details-edit-inputs{
@@ -26496,6 +26503,7 @@ ul.restrictions-list-content>li {
     padding: 0 0 !important;
     text-align: center;
     width: 72px !important;
+    border-color: transparent !important;
 }
 .duration-picker-modal .duration-inputs-container .duration-time-dots{
     text-align: center;

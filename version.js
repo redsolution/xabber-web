@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.4.269","version_description":"fixed wrong attribute setting in admin permissions, fixed admin permissions timer setting, added duration picker, changed btn-reset in default and newbie permissions, fixed newbie permissions timer setting, fixed padzero in datetime picker time"}'
+'{"version_number":"2.4.270","version_description":"changed duration text in permissions, added middle state switch to tag permissions, added view update on saving default and newbies permissions, added default permissions reset on opening newbie permissions, added individual newbie permissions timers, added duration picker to those timers, changed zeros visuals in duration picker view, changed custom duration radio button visuals in newbie permissions"}'
 )});

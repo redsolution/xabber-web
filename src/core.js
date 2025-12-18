@@ -63,6 +63,14 @@ let Xabber = Backbone.Model.extend({
         this.set("default_language", lang);
     },
 
+    getCurrentLanguage: function () {
+        if (this.settings.language === 'default'){
+            return this.get("default_language");
+        } else {
+            return this.settings.language;
+        }
+    },
+
     loadTranslations: async function (lang) {
         return new Promise((resolve, reject) => {
             let language = {};
@@ -102,6 +110,7 @@ let Xabber = Backbone.Model.extend({
         }
         xabber_i18next.default_lang = xabber_i18next.getFixedT(default_lang);
     },
+
     getOneLiners: function () {
         if (xabber_i18next.exists("motivating_oneliner")) {
             return xabber_i18next.t("motivating_oneliner").replace(/\\'/g, "'").split('\n');

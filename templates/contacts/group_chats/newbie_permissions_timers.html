@@ -5,6 +5,10 @@
     <div class="field radio-field">
         <form action="#">
             <p>
+                <input class="with-gap" name="restriction-timer" checked value="0" type="radio" id="restriction-timer-forever" />
+                <label for="restriction-timer-forever">Forever</label>
+            </p>
+            <p>
                 <input class="with-gap" name="restriction-timer" value="3600" type="radio" id="restriction-timer-1-hour" />
                 <label for="restriction-timer-1-hour">1 hour</label>
             </p>
@@ -21,12 +25,8 @@
                 <label for="restriction-timer-1-week">1 week</label>
             </p>
             <p>
-                <input class="with-gap" name="restriction-timer" value="1209600" type="radio" id="restriction-timer-2-weeks" />
-                <label for="restriction-timer-2-weeks">2 weeks</label>
-            </p>
-            <p>
                 <input class="with-gap" name="restriction-timer" value="custom" type="radio" id="restriction-timer-custom" />
-                <label for="restriction-timer-custom"></label>
+                <label for="restriction-timer-custom">{[print(xabber.getString("permission_timer_custom_date_option"))]}</label>
                 <input type="text" id="custom-timer-date" name="custom-timer-date" readonly>
             </p>
         </form>

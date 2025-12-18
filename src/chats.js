@@ -15715,7 +15715,7 @@ xabber.DeleteWithOptionsView = xabber.BasicView.extend({
                         this.$("#custom-timer-date").val(this.date_picker.formatDateForInput());
                         return;
                     }
-                    utils.pretty_time_text_from_seconds(item, $(item).find('input').val(), $(item).find('label'));
+                    utils.pretty_time_text_from_seconds(item, $(item).find('input').val(), $(item).find('label'), xabber.getCurrentLanguage());
                 });
             })
         }
@@ -15808,7 +15808,7 @@ xabber.DeleteWithOptionsView = xabber.BasicView.extend({
                     $property_value.addClass('text-color-500');
                 }
 
-                $property_value.text(moment.duration(Number(val), 'seconds').humanize(false));
+                $property_value.text(utils.humanizeDuration(Number(val), xabber.getCurrentLanguage()));
                 $property_value.attr('data-value', val);
                 $property_value.attr('data-is-seconds', 'true');
                 if (val === '0') {
@@ -15879,7 +15879,7 @@ xabber.DeleteWithOptionsView = xabber.BasicView.extend({
         $input.closest('.right-item').addClass('changed-timer');
         $property_value.addClass('text-color-500');
 
-        $property_value.text(moment.duration(Number(val), 'seconds').humanize(false));
+        $property_value.text(utils.humanizeDuration(Number(val), xabber.getCurrentLanguage()));
         $property_value.attr('data-value', val);
         $property_value.attr('data-is-seconds', 'true');
 
@@ -15938,7 +15938,7 @@ xabber.DeleteWithOptionsView = xabber.BasicView.extend({
             $property_item.closest('.right-item').addClass('changed-timer');
             $property_value.addClass('text-color-500');
         }
-        $property_value.text(moment.duration(Number($property_item.attr('data-value')), 'seconds').humanize(false));
+        $property_value.text(utils.humanizeDuration(Number($property_item.attr('data-value')), xabber.getCurrentLanguage()));
         $property_value.attr('data-value', $property_item.attr('data-value'));
         $property_value.attr('data-is-seconds', 'true');
         if ($property_item.attr('data-value') === '0') {
@@ -15963,7 +15963,7 @@ xabber.DeleteWithOptionsView = xabber.BasicView.extend({
                 return;
             $item.find('input[name="restriction-timer"]').attr('data-custom-value', val);
         }
-        $property_value.text(moment.duration(Number(val), 'seconds').humanize(false));
+        $property_value.text(utils.humanizeDuration(Number(val), xabber.getCurrentLanguage()));
         $property_value.attr('data-value', val);
         $property_value.attr('data-is-seconds', 'true');
         if (val === '0') {
@@ -16024,7 +16024,7 @@ xabber.DeleteWithOptionsView = xabber.BasicView.extend({
             _.each($restriction_expire.find('.property-variant'), (item) => {
                 if ($(item).attr('data-value') === 'custom')
                     return;
-                utils.pretty_time_text_from_seconds(item, $(item).attr('data-value'), $(item));
+                utils.pretty_time_text_from_seconds(item, $(item).attr('data-value'), $(item), xabber.getCurrentLanguage());
                 $(item).attr('data-is-seconds', 'false');
             });
             $restriction_item.append($restriction_expire);
@@ -16068,7 +16068,7 @@ xabber.DeleteWithOptionsView = xabber.BasicView.extend({
             _.each($restriction_expire.find('.property-variant'), (item) => {
                 if ($(item).attr('data-value') === 'custom')
                     return;
-                utils.pretty_time_text_from_seconds(item, $(item).attr('data-value'), $(item));
+                utils.pretty_time_text_from_seconds(item, $(item).attr('data-value'), $(item), xabber.getCurrentLanguage());
                 $(item).attr('data-is-seconds', 'false');
             });
             $restriction_item.append($restriction_expire);
@@ -16132,7 +16132,7 @@ xabber.DeleteWithOptionsView = xabber.BasicView.extend({
                         if (last_value === '0'){
                             $item.find('.tag-item-expire-description').text(xabber.getString("forever"));
                         } else {
-                            $item.find('.tag-item-expire-description').text(moment.duration(Number(last_value), 'seconds').humanize(false));
+                            $item.find('.tag-item-expire-description').text(utils.humanizeDuration(Number(last_value), xabber.getCurrentLanguage()));
                         }
                     } else {
                         $item.find('.tag-item-expire-description').text(moment(Number(last_value)*1000).fromNow());
@@ -16150,7 +16150,13 @@ xabber.DeleteWithOptionsView = xabber.BasicView.extend({
                 }
                 if (checked_count === children_count){
                     $item.children('.switch').find('input').prop('checked', true);
+                    $item.children('.switch').removeClass('switch-middle-state');
                 } else {
+                    if (checked_count !== 0){
+                        $item.children('.switch').addClass('switch-middle-state');
+                    } else {
+                        $item.children('.switch').removeClass('switch-middle-state');
+                    }
                     $item.children('.switch').find('input').prop('checked', false);
                 }
 
