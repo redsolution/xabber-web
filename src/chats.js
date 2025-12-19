@@ -16913,6 +16913,8 @@ xabber.once("start", function () {
     this.on("change:focused", function () {
         if (this.get('focused')) {
             this.chats_view.fillIfChatsEmpty();
+            console.error('active_after_idle');
+            this.accounts.trigger('active_after_idle');
             let view = this.chats_view.active_chat;
             if (view && view.content && view.content.data.get('visible')) {
                 view.content.onScroll(null, true);
@@ -16925,6 +16927,8 @@ xabber.once("start", function () {
     this.on("change:idle", function () {
         if (!this.get('idle')) {
             this.chats_view.fillIfChatsEmpty();
+            console.error('active_after_idle');
+            this.accounts.trigger('active_after_idle');
             let view = this.chats_view.active_chat;
             if (view && view.model.get('display')) {
                 view.content.onScroll(null, true);

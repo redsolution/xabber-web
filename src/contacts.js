@@ -2505,7 +2505,7 @@ xabber.GroupChatDetailsViewRight = xabber.BasicView.extend({
         if (!this.model.get('restrictions_hidden'))
             this.default_restrictions_edit_right.hideRestrictions(true);
         if (!this.model.get('newbie_permissions_hidden'))
-            this.newbie_permissions_edit_right.hideNewbiePermissions();
+            this.newbie_permissions_edit_right.hideNewbiePermissions(true);
         this.model.set('participant_hidden', true);
         this.$('.participant-details-wrap').hideIf(this.model.get('participant_hidden'))
     },
@@ -2533,10 +2533,10 @@ xabber.GroupChatDetailsViewRight = xabber.BasicView.extend({
         !no_show && this.showEdit();
     },
 
-    hideNewbiePermissions: function () {
+    hideNewbiePermissions: function (no_show) {
         this.model.set('newbie_permissions_hidden', true);
         this.$('.newbie-permissions-wrap').hideIf(this.model.get('newbie_permissions_hidden'));
-        this.showEdit();
+        !no_show && this.showEdit();
     },
 
 
@@ -4213,6 +4213,11 @@ xabber.BlockedView = xabber.BasicView.extend({
     blockId: function () {
         utils.dialogs.ask_enter_value(xabber.getString("contact_bar_block"), xabber.getString("groupchat_dialog_block__text"), {input_placeholder_value: xabber.getString("groupchat_dialog_block__input_placeholder")}, { ok_button_text: xabber.getString("contact_bar_block")}).done((result) => {
             if (result) {
+                console.error(utils.validateXMPPIdOrDomain(result))
+                if (!utils.validateXMPPIdOrDomain(result)){
+                    utils.dialogs.error(xabber.getString("groupchat_incorrect_jid_or_domain"));
+                    return;
+                }
                 let tag = result.includes('@') ? 'jid' : 'domain',
                     iq = $iq({type: 'set', to: this.contact.get('full_jid') || this.contact.get('jid')})
                         .c('block', {xmlns: `${Strophe.NS.GROUP_CHAT}#block`})
@@ -6816,8 +6821,8 @@ xabber.NewbiePermissionsRightView = xabber.BasicView.extend({
         });
     },
 
-    hideNewbiePermissions: function () {
-        this.parent.hideNewbiePermissions();
+    hideNewbiePermissions: function (no_show) {
+        this.parent.hideNewbiePermissions(no_show);
     },
 
     open: function () {
@@ -10288,6 +10293,8 @@ xabber.Roster = xabber.ContactsBase.extend({
             request_attrs.stamp = options.stamp;
         delete(options.stamp);
         delete(options.cached_conversations_exclude);
+        if (is_first_sync)
+            this.account.set('first_sync', undefined);
         let iq = $iq({type: 'get'}).c('query', request_attrs).cnode(new Strophe.RSM(options).toXML());
         this.account.sendFast(iq, (response) => {
             this.onSyncIQ(response, request_attrs.stamp, synchronization_with_stamp, is_first_sync, options.last_version_sync, cached_conversations_exclude).then(() => {
@@ -10974,6 +10981,7 @@ xabber.Roster = xabber.ContactsBase.extend({
                     this.account.sendPresence();
                     this.account.dfd_presence.resolve();
                     this.account.get('first_sync') && this.syncFromServer({stamp: this.account.get('first_sync'), max: constants.SYNCHRONIZATION_RSM_MAX, last_version_sync: true}, true);
+                    this.account.set('first_sync', null);
                     xabber.calls_view && xabber.calls_view.updateAccountsFilter(null,null,null,true);
                 }
             });

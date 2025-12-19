@@ -673,6 +673,69 @@ var utils = {
         return text;
     },
 
+    validateXMPPIdOrDomain: function (input) {
+        const xmppIdOrDomainRegex = /^(?:[a-zA-Z0-9\.\-_\+/=]+@)?(?:(?:[a-zA-Z0-9](?:[a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?)\.)+[a-zA-Z]{2,}$/;
+        // Проверка на пустую строку
+        if (!input || typeof input !== 'string') {
+            console.error('Пустая строка или не строка')
+            return false;
+        }
+
+        // Проверка на запрещенные символы XMPP (включая / для ресурса и другие)
+        const forbiddenChars = /[ "'&<>:\/]/; // убрал @ из запрещенных, так как он нужен для JID
+        if (forbiddenChars.test(input)) {
+            console.error('Содержит запрещенные символы XMPP')
+            return false;
+        }
+
+        // Проверка на ресурс (содержит /)
+        if (input.includes('/')) {
+            console.error('Содержит ресурс (/)')
+            return false;
+        }
+
+        // Проверка по регулярному выражению
+        if (!xmppIdOrDomainRegex.test(input)) {
+            console.error('Не соответствует формату домена или XMPP ID')
+            return false;
+        }
+
+        // Определяем тип (домен или XMPP ID)
+        const hasLocalPart = input.includes('@');
+        const domain = hasLocalPart ? input.split('@')[1] : input;
+
+        // Дополнительная проверка доменной части
+        const domainParts = domain.split('.');
+        for (const part of domainParts) {
+            if (part.length > 63) {
+                console.error(`Часть домена "${part}" превышает 63 символа`)
+                return false;
+            }
+
+            if (part.startsWith('-') || part.endsWith('-')) {
+                console.error(`Часть домена "${part}" не может начинаться или заканчиваться дефисом`)
+                return false;
+            }
+        }
+
+        // Проверка локальной части (если есть)
+        if (hasLocalPart) {
+            const localPart = input.split('@')[0];
+            if (localPart.length === 0) {
+                console.error('Локальная часть (username) не может быть пустой')
+                return false;
+            }
+
+            if (localPart.length > 1023) {
+                console.error('Локальная часть превышает 1023 символа')
+                return false;
+            }
+        }
+
+        console.error('normal')
+        return true;
+    },
+
     pretty_time_text_from_seconds: function (item, value, $text_insert, locale) {
         let $item = $(item);
         if (value === '0'){

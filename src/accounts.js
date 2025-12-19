@@ -1271,12 +1271,16 @@ xabber.Account = Backbone.Model.extend({
             }
         },
 
+        reactivate: function () {
+            this.deactivate(null, true);
+        },
+
         activate: function () {
             if (!this.isConnected())
                 this.connect();
         },
 
-        deactivate: function (type) {
+        deactivate: function (type, is_reactivating) {
             type || (type = 'set_off');
             this.session.set('deactivate', type);
             if (this.isConnected()) {
@@ -1287,6 +1291,17 @@ xabber.Account = Backbone.Model.extend({
                 if (this.session.get('no_reconnect') && this.session.get('auth_failed'))
                     this.connection.disconnect();
                 this.onDisconnected();
+            }
+            if (is_reactivating && !(this.session.get('no_reconnect') || this.session.get('auth_failed'))){ //34
+                clearInterval(this.reactivate_interval);
+                this.reactivate_interval = setInterval(() => {
+                    console.error(this);
+                    console.error(this.isConnected());
+                    if (!this.isConnected()){
+                        this.activate();
+                        clearInterval(this.reactivate_interval);
+                    }
+                }, 1500)
             }
         },
 
@@ -2091,6 +2106,7 @@ xabber.Accounts = Backbone.CollectionWithStorage.extend({
         this.on("update_order", this.onUpdatedOrder, this);
         this.on("add destroy activate deactivate", this.onListChanged, this);
         this.on("destroy deactivate", this.onAccountDisconnected, this);
+        this.on("active_after_idle", this.onActiveAfterIdle, this);
         xabber.on("quit", this.onQuit, this);
         xabber.on("quit_accounts", this.onQuitAccounts, this);
         this.settings_list.on("add_settings", this.onSettingsAdded, this);
@@ -2140,8 +2156,11 @@ xabber.Accounts = Backbone.CollectionWithStorage.extend({
     },
 
     getConnectedList: function () {
+        console.error('getConnectedList');
         this.trigger('connected_list_changed');
         this.connected = this.filter(account => account.isConnected());
+        console.error(this.connected);
+        console.error(this.connected.length);
     },
 
     onListChanged: function () {
@@ -2171,6 +2190,21 @@ xabber.Accounts = Backbone.CollectionWithStorage.extend({
             } else {
             }
         }
+    },
+
+    onActiveAfterIdle: function () {
+        _.each(_.clone(this.models), function (account) {
+            console.error(account);
+            console.error(account.get('jid'));
+            console.error(account.get('first_sync'));
+            console.error(account.get('enabled'));
+            console.error(account.session.get('reconnecting'));
+            if (account.get('enabled') && !account.session.get('reconnecting') && (account.get('first_sync') || _.isUndefined(account.get('first_sync')))) {
+                console.error(account);
+                console.error('account.reactivate');
+                account.reactivate();
+            }
+        });
     },
 
     onAccountDisconnected: function () {
