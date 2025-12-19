@@ -11,7 +11,7 @@ xabber.Account.addInitPlugin(function () {
                 return msg_object;
 
             let $message = msg_object.$message;
-            if (msg_object.type === 'chat' && !msg_object.high_priority){
+            if (msg_object.type === 'chat'){
 
                 let $marker = $message.children(`[xmlns="${Strophe.NS.CHAT_MARKERS}"]`);
 

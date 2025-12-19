@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.4.270","version_description":"changed duration text in permissions, added middle state switch to tag permissions, added view update on saving default and newbies permissions, added default permissions reset on opening newbie permissions, added individual newbie permissions timers, added duration picker to those timers, changed zeros visuals in duration picker view, changed custom duration radio button visuals in newbie permissions"}'
+'{"version_number":"2.4.271","version_description":"returned trustsharing and trust sessions to use notifications"}'
 )});

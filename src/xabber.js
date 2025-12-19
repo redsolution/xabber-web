@@ -19,7 +19,6 @@ import xabber_xep_favorites from "xabber-xep-favorites";
 import xabber_xep0466 from "xabber-xep0466";
 import xabber_xep0353 from "xabber-xep0353";
 import xabber_xep0333 from "xabber-xep0333";
-import xabber_xep_priority_messages from "xabber-xep-priority-messages";
 import searching from "xabber-searching";
 import ui from "xabber-ui";
 import omemo from "xabber-omemo";
@@ -48,7 +47,6 @@ xabber.extendWith(
     xabber_xep0466,
     xabber_xep0353,
     xabber_xep0333,
-    xabber_xep_priority_messages,
     searching,
     ui,
     omemo,

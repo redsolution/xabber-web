@@ -10566,14 +10566,6 @@ xabber.Roster = xabber.ContactsBase.extend({
                 chat.trigger('get_missed_history', request_with_stamp/1000);
             }
         }
-        contact && this.account && console.warn(contact.get('jid') === this.account.get('jid'));
-        console.warn(chat);
-        if (contact && this.account && contact.get('jid') === this.account.get('jid')){
-            if (!chat.item_view.content) {
-                chat.item_view.content = new xabber.ChatContentView({chat_item: chat.item_view});
-            }
-            chat.item_view.content.loadOwnHistoryToPreviousLastMsg();
-        }
         unread_msgs_count && (options.is_unread = true);
         options.delay = message.children('time');
         (unread_msgs_count === 0) && (options.sync_timestamp = chat_timestamp);
@@ -10610,8 +10602,6 @@ xabber.Roster = xabber.ContactsBase.extend({
                         chat.last_message = msg;
                         if (chat.get('notifications'))
                             chat.account.trigger('notification_last_msg_updated', msg.get('stanza_id'));
-                        if (contact && contact.get('jid') === this.account.get('jid') && !msg.get('high_priority_received'))
-                            chat.account.trigger('own_last_msg_updated', msg.get('stanza_id'), chat.get('encrypted'));
                         chat.item_view.updateLastMessage(msg);
                         msg.get('stanza_id') && chat.set('synced_msg', msg);
                     }
@@ -10853,8 +10843,6 @@ xabber.Roster = xabber.ContactsBase.extend({
                         chat.last_message = msg;
                         if (chat.get('notifications'))
                             chat.account.trigger('notification_last_msg_updated', msg.get('stanza_id'));
-                        if (contact && contact.get('jid') === this.account.get('jid') && !msg.get('high_priority_received'))
-                            chat.account.trigger('own_last_msg_updated', msg.get('stanza_id'), chat.get('encrypted'));
                         chat.item_view.updateLastMessage(msg);
                         msg.get('stanza_id') && chat.set('synced_msg', msg);
                     }

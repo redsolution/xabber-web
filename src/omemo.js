@@ -294,20 +294,25 @@ xabber.Fingerprints = xabber.BasicView.extend({
             return;
         let msg_id = uuid(),
             sid = uuid(),
-            stanza = $msg({
+            stanza = $iq({
+                type: 'set',
                 to: this.jid,
-                from: this.account.get('jid'),
-                type: 'chat',
                 id: msg_id
             });
-        stanza.c('high-priority', {
-            xmlns: Strophe.NS.PRIORITY_MESSAGES,
-            seconds: 86400,
-        }).up();
+        stanza.c('notify', {xmlns: Strophe.NS.XABBER_NOTIFY});
+        stanza.c('notification', {xmlns: Strophe.NS.XABBER_NOTIFY, type: 'system'});
+        stanza.c('forwarded', {xmlns: Strophe.NS.FORWARD});
+        stanza.c('message', {
+            to: this.jid,
+            from: this.account.get('jid'),
+            type: 'chat',
+            id: uuid()
+        });
         stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: sid, timestamp: Math.floor(Date.now() / 1000) }).c('verification-start', {'device-id': this.account.omemo.get('device_id'), 'ttl': 86400 }).up().up();
-        stanza.c('store', {
-            xmlns: 'urn:xmpp:hints'
-        }).up();
+        stanza.c('body').t(``).up();
+        stanza.up().up().up();
+        stanza.c('fallback',{xmlns: Strophe.NS.XABBER_NOTIFY}).t(`device verification fallback text`).up();
+        stanza.c('addresses', {xmlns: Strophe.NS.ADDRESS}).c('address',{type: 'to', jid: this.jid}).up().up();
         this.account.sendFast(stanza, () => {
             let peer = this.account.omemo.getPeer(this.jid);
             peer.updateDevicesKeys();
@@ -483,27 +488,35 @@ xabber.Fingerprints = xabber.BasicView.extend({
 
         let msg_id = uuid(),
             to = this.jid,
-            stanza = $msg({
-                type: 'chat',
+            stanza = $iq({
+                type: 'set',
                 to: to,
-                id: msg_id,
-                from: this.account.get('jid'),
+                id: msg_id
             });
-        stanza.c('high-priority', {
-            xmlns: Strophe.NS.PRIORITY_MESSAGES,
-        }).up();
+        stanza.c('notify', {xmlns: Strophe.NS.XABBER_NOTIFY});
+        stanza.c('notification', {xmlns: Strophe.NS.XABBER_NOTIFY, type: 'system'});
+        stanza.c('forwarded', {xmlns: Strophe.NS.FORWARD});
+        stanza.c('message', {
+            to: to,
+            from: this.account.get('jid'),
+            type: 'chat',
+            id: uuid()
+        });
         stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: sid, timestamp: Math.floor(Date.now() / 1000)});
         stanza.c('verification-rejected', {reason: 'Session cancelled'}).up().up();
-        stanza.c('store', {
-            xmlns: 'urn:xmpp:hints'
-        }).up();
 
+        stanza.up().up().up();
+        stanza.c('addresses', {xmlns: Strophe.NS.ADDRESS}).c('address',{type: 'to', jid: to}).up().up();
 
         this.account.sendFast(stanza, () => {
             let $stanza = $(stanza.tree());
             $stanza.attr('to',this.account.get('jid'));
+            let new_iq_id = uuid();
+            $stanza.attr('id', new_iq_id);
             let new_msg_id = uuid();
-            $stanza.attr('id', new_msg_id);
+            $stanza.find('notification forwarded message').attr('id',new_msg_id);
+            $stanza.find('notification forwarded message').attr('to',this.account.get('jid'));
+            $stanza.find(`addresses[xmlns="${Strophe.NS.ADDRESS}"] address[type="to"]`).attr('jid',this.account.get('jid'));
             stanza = stanza.tree().cloneNode(true);
             this.account.sendFast(stanza, () => {
             });
@@ -895,19 +908,25 @@ xabber.FingerprintsOwnDevices = xabber.BasicView.extend({
 
         let msg_id = uuid(),
             sid = uuid(),
-            stanza = $msg({
-                type: 'chat',
+            stanza = $iq({
+                type: 'set',
                 to: this.account.get('jid'),
-                from: this.account.get('jid'),
                 id: msg_id
             });
-        stanza.c('high-priority', {
-            xmlns: Strophe.NS.PRIORITY_MESSAGES,
-        }).up();
+        stanza.c('notify', {xmlns: Strophe.NS.XABBER_NOTIFY});
+        stanza.c('notification', {xmlns: Strophe.NS.XABBER_NOTIFY, type: 'system'});
+        stanza.c('forwarded', {xmlns: Strophe.NS.FORWARD});
+        stanza.c('message', {
+            to: this.account.get('jid'),
+            from: this.account.get('jid'),
+            type: 'chat',
+            id: uuid()
+        });
         stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: sid, timestamp: Math.floor(Date.now() / 1000) }).c('verification-start', {'device-id': this.account.omemo.get('device_id'), 'to-device-id': this.device_id, 'ttl': 300 }).up().up();
-        stanza.c('store', {
-            xmlns: 'urn:xmpp:hints'
-        }).up();
+        stanza.c('body').t(``).up();
+        stanza.up().up().up();
+        stanza.c('fallback',{xmlns: Strophe.NS.XABBER_NOTIFY}).t(`device verification fallback text`).up();
+        stanza.c('addresses', {xmlns: Strophe.NS.ADDRESS}).c('address',{type: 'to', jid: this.account.get('jid')}).up().up();
         this.account.sendFast(stanza, () => {
             let peer = this.account.omemo.getPeer(this.account.get('jid'));
             peer.updateDevicesKeys();
@@ -1100,7 +1119,7 @@ xabber.FingerprintsOwnDevices = xabber.BasicView.extend({
     },
 
     trustDevice: function (ev) {
-            let $target = $(ev.target).closest('div.fingerprints-content'),
+        let $target = $(ev.target).closest('div.fingerprints-content'),
             is_trusted = $target.children('.buttons[data-trust]').attr('data-trust');
         $target.children('.buttons[data-trust]').attr('data-trust', 'trust');
         this.omemo.updateFingerprints(this.jid, this.device_id, this.fingerprint, true);
@@ -2998,7 +3017,7 @@ xabber.Account.addInitPlugin(function () {
                     }
                 }
 
-                if (msg_object.type === 'chat' || msg_object.high_priority) {
+                if (msg_object.type === 'chat') {
 
                     if ($message.find(`encrypted[xmlns="${Strophe.NS.OMEMO}"]`).length) {
                         if (!this.omemo) {

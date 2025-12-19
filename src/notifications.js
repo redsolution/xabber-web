@@ -1613,9 +1613,14 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
 
         if (message.get('notification_msg') && message.get('notification_msg_content')){
             $notification_msg = $(message.get('notification_msg_content'));
+            if (message.get('notification_trust_msg') || $notification_msg.children(`authenticated-key-exchange[xmlns="${Strophe.NS.XABBER_TRUST}"]`).length) {
+                if ($notification_msg.find('verification-successful').length){
+                    message.set('message', xabber.getString("notifications_successful_verification_msg"));
+                }
+            }
         }
         if (message.get('notification_msg') && message.get('notification_msg_content')){
-            if (message.get('notification_trust_msg')) {
+            if (message.get('notification_trust_msg') || $notification_msg.children(`authenticated-key-exchange[xmlns="${Strophe.NS.XABBER_TRUST}"]`).length) {
                 if (chat.account.omemo && chat.account.omemo.xabber_trust){
                     if (message.get('device_id')){
                         chat.account.omemo.xabber_trust.addToSequentialProcessingList($notification_msg[0], {
