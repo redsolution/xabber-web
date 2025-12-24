@@ -141,6 +141,8 @@ import $ from "jquery";
     addTemplate('contacts.roster_contact_item');
     addTemplate('contacts.roster_groupchat_item');
     addTemplate('contacts.contacts_invitation_item');
+    addTemplate('contacts.invitations_chat_notification');
+    addTemplate('contacts.subscriptions_chat_notification');
     addTemplate('contacts.tab_filter_item');
     addTemplate('contacts.tab_filter_item_main_color');
     addTemplate('contacts.roster_sorting');

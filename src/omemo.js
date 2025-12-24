@@ -2850,7 +2850,7 @@ xabber.OMEMOEnablePlaceholder = xabber.BasicView.extend({
         this.account = options.account;
         this.updateColorScheme();
         this.$el.html(templates.client_notification_item({text: xabber.getString("desktop_notifications__enable_encryption"), jid: this.account.get('jid')}));
-        xabber.placeholders_wrap.$el.append(this.$el);
+        xabber.placeholders_wrap.$el.prepend(this.$el);
         this.listenTo(xabber, 'update_screen', this.onUpdatedScreen);
         this.listenTo(this.account.session, 'change:connected', this.updateConnected);
         this.listenTo(this.account.settings, 'change:color', this.updateColorScheme);
@@ -2867,7 +2867,7 @@ xabber.OMEMOEnablePlaceholder = xabber.BasicView.extend({
         if (!this.account.omemo_enable_placeholder || this.account.omemo_enable_placeholder.cid !== this.cid)
             return;
         this.$el.detach();
-        xabber.placeholders_wrap.$el.append(this.$el);
+        xabber.placeholders_wrap.$el.prepend(this.$el);
         xabber.trigger('update_client_notifications');
     },
 

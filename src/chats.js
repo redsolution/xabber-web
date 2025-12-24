@@ -10226,6 +10226,10 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
         "click .chats-show-more": "showSearchedChats",
         "click .contacts-show-more": "showSearchedContacts",
         "click .recent-chats-main-header": "clickScrollToTop",
+        "click .subscription-notification-item": "openSubscriptions",
+        "click .invitation-notification-item": "openInvitations",
+        "click .invitation-notification-item .btn-close-notification": "closeInvitationNotification",
+        "click .subscription-notification-item .btn-close-notification": "closeSubscriptionNotification",
     },
 
     _initialize: function () {
@@ -10261,7 +10265,7 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
                 this.showAllChats();
             }
         }
-        this.updateClientNotifications();
+        this.updateClientNotifications(true);
     },
 
     clearSearch: function (ev) {
@@ -10272,6 +10276,46 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
     },
 
     showSearch: function (ev) {
+    },
+
+    openSubscriptions: function (ev) {
+        if ($(ev.target).closest('.btn-close-notification').length)
+            return;
+        let $item = $(ev.target).closest('.contacts-notifications-item');
+        xabber.toolbar_view.showContacts();
+        xabber.contacts_view.$('.subscription-item-wrap').click();
+    },
+    openInvitations: function (ev) {
+        if ($(ev.target).closest('.btn-close-notification').length)
+            return;
+        let $item = $(ev.target).closest('.contacts-notifications-item');
+        xabber.toolbar_view.showGroupchats();
+        xabber.groupchats_view.$('.invitation-filter-item-wrap').click();
+    },
+
+    closeInvitationNotification: function (ev) {
+
+        let $item = $(ev.target).closest('.contacts-notifications-item');
+        if ($item.length) {
+            xabber._cache.save('ignore_invitation_notification', {
+                timestamp: $item.attr('data-timestamp'),
+                account_jid: $item.attr('data-account-jid'),
+                contact_jid: $item.attr('data-jid'),
+            });
+            xabber.trigger('invitations_updated');
+        }
+    },
+
+    closeSubscriptionNotification: function (ev) {
+        let $item = $(ev.target).closest('.contacts-notifications-item');
+        if ($item.length){
+            xabber._cache.save('ignore_subscription_notification', {
+                timestamp: $item.attr('data-timestamp'),
+                account_jid: $item.attr('data-account-jid'),
+                contact_jid: $item.attr('data-jid'),
+            });
+            xabber.trigger('new_incoming_subscription');
+        }
     },
 
     showSearchedChats: function () {
@@ -10295,10 +10339,10 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
         xabber.toolbar_view.showAllChats(null, null, true);
     },
 
-    updateClientNotifications: function () {
+    updateClientNotifications: function (on_render) {
         this.$('.client-notifications-wrap').find('.client-notifications-container').detach();
 
-        if (xabber.placeholders_wrap && this.isVisible()){
+        if (xabber.placeholders_wrap && this.isVisible() || on_render){
             this.$('.client-notifications-wrap').append(xabber.placeholders_wrap.$el);
         }
         this.$('.client-notifications-wrap').switchClass('hidden', !xabber.placeholders_wrap.$el.children().length)
@@ -16370,10 +16414,10 @@ xabber.NotificationsPlaceholder = xabber.BasicView.extend({
     },
 
     onUpdatedScreen: function () {
-        if (!xabber.notifications_placeholder)
-            return;
         this.$el.detach();
-        xabber.placeholders_wrap.$el.append(this.$el);
+        if (xabber._cache.get('ignore_notifications_warning'))
+            return;
+        xabber.placeholders_wrap.$el.prepend(this.$el);
         xabber.trigger('update_client_notifications');
     },
 
@@ -16383,9 +16427,7 @@ xabber.NotificationsPlaceholder = xabber.BasicView.extend({
 
     close: function () {
         xabber._cache.save('ignore_notifications_warning', true);
-        this.remove();
-        xabber.placeholders_wrap.$(this.$el).detach();
-        xabber.notifications_placeholder = undefined;
+        this.$el.detach();
         xabber.trigger('update_client_notifications');
     }
 });

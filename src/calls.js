@@ -129,6 +129,7 @@ xabber.CallsView = xabber.BasicView.extend({
 
     updateClientNotifications: function () {
         this.$('.client-notifications-wrap').find('.client-notifications-container').detach();
+        return;
 
         if (xabber.placeholders_wrap && this.isVisible()){
             this.$('.client-notifications-wrap').append(xabber.placeholders_wrap.$el);

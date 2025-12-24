@@ -367,7 +367,7 @@ xabber.Contact = Backbone.Model.extend({
                 subscription: !_.isUndefined(this.get('subscription')) ? this.get('subscription') : cached_info.subscription,
                 roster_name: !_.isUndefined(this.get('roster_name')) ? this.get('roster_name') : cached_info.roster_name,
                 subscription_request_out: this.get('subscription_request_out'),
-                subscription_request_in: this.get('subscription_request_in'),
+                subscription_request_in: this.get('subscription_request_in') === true ? Date.now() : this.get('subscription_request_in'),
                 subscription_request_in_text: this.get('subscription_request_in_text'),
                 name: this.get('name'),
                 vcard_updated: this.get('vcard_updated')
@@ -762,12 +762,13 @@ xabber.Contact = Backbone.Model.extend({
             if ($status.length){
                 this.set('subscription_request_in_text', $status.text());
             }
-            this.set('subscription_request_in', true);
+            !this.get('subscription_request_in') && this.set('subscription_request_in', Date.now());
             if (this.get('subscription_preapproved')) {
                 this.pres('subscribed');
             } else {
                 this.trigger('presence', this, 'subscribe');
             }
+            this.updateCachedInfo();
         } else if (type === 'subscribed') {
             if (this.get('group_chat') && (this.get('subscription_request_out') || this.get('subscription') === 'to')) {
 
@@ -11830,7 +11831,7 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
 
     updateAllIncomingSubscriptions: function () {
         this.$('.notification-subscriptions-content-wrap').html('');
-        let accounts = xabber.accounts.enabled,
+        let all_accounts = xabber.accounts.enabled, accounts = [],
             subs_counter = 0,
             inv_counter = 0,
             subs_color_set = false;
@@ -11840,6 +11841,77 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
 
         if (account){
             accounts = [account]
+        } else {
+            accounts = all_accounts;
+        }
+
+        let all_subs_counter = 0,
+            avatars_count = 0;
+
+        let $notification_template;
+        xabber.placeholders_wrap.$el.find('.subscription-notification-item').remove();
+        _.each(all_accounts, (account) => {
+            let contacts = account.contacts.filter(item => (item.get('subscription_request_in') && Number(item.get('subscription_request_in')) && item.get('subscription') !== 'both'));
+            if (xabber._cache.get('ignore_subscription_notification') && Number(xabber._cache.get('ignore_subscription_notification').timestamp)){
+                let ignore_timestamp = Number(xabber._cache.get('ignore_subscription_notification').timestamp);
+                contacts = contacts.filter(item => Number(item.get('subscription_request_in')) > ignore_timestamp);
+            }
+            contacts = contacts.sort((a, b) => {
+                if (a.get('subscription_request_in') > b.get('subscription_request_in'))
+                    return -1;
+                if (a.get('subscription_request_in') < b.get('timestamp'))
+                    return 1;
+                return 0;
+            });
+            _.each(contacts, (contact) => {
+                if ($notification_template){
+                    $notification_template.find('.contacts-notifications-item-name').text(xabber.getString("new_subscription_requests"));
+                }
+                if (!$notification_template){
+                    $notification_template = $(templates.subscriptions_chat_notification({
+                        name: contact.get('name'),
+                        jid: contact.get('jid'),
+                        account: account.get('jid'),
+                    }));
+                    if (xabber.placeholders_wrap.$el.find('.invitation-notification-item').length){
+                        $notification_template.insertBefore(xabber.placeholders_wrap.$el.find('.invitation-notification-item'));
+                    } else if (xabber.placeholders_wrap.$el.find('.desktop-notification-item').length){
+                        $notification_template.insertAfter(xabber.placeholders_wrap.$el.find('.desktop-notification-item').last())
+                    } else {
+                        xabber.placeholders_wrap.$el.prepend($notification_template);
+                    }
+                    let $avatar = $(`<div class="avatar-outline circle-avatar"><div class="circle-avatar"></div></div>`);
+                    let image = contact.cached_image;
+                    $avatar.find('.circle-avatar').setAvatar(image, 48, account);
+                    $notification_template.find('.multiple-avatars-wrap').append($avatar);
+                    $notification_template.attr('data-color', contact.account.settings.get('color'));
+                    $notification_template.attr('data-timestamp', contact.get('subscription_request_in'));
+                    $notification_template.find('.contacts-notifications-item-text').html(xabber.getString("new_subscriptions_request_details_text", [contact.get('name') || contact.get('jid')]));
+                    xabber.trigger('update_client_notifications');
+                } else if ($notification_template && avatars_count < 2) {
+                    let $avatar = $(`<div class="avatar-outline circle-avatar"><div class="circle-avatar"></div></div>`),
+                        image = contact.cached_image;
+                    $avatar.find('.circle-avatar').setAvatar(image, 48, account);
+                    $notification_template.find('.multiple-avatars-wrap').append($avatar);
+                    avatars_count++
+                }
+                all_subs_counter++;
+            });
+        });
+        if ($notification_template && all_subs_counter && all_subs_counter > 1){
+            $notification_template.find('.contacts-notifications-item-text').html(xabber.getString("new_subscriptions_request_details_text_with_count", [all_subs_counter]));
+            $notification_template.find('.contacts-notifications-item-counter').html(all_subs_counter);
+            $notification_template.find('.contacts-notifications-item-counter').addClass('notification-multiple-counter');
+        }
+        if ($notification_template && xabber._cache.get('ignore_subscription_notification')){
+            let ignore_item = xabber._cache.get('ignore_subscription_notification');
+            if (ignore_item.timestamp && ignore_item.account_jid && ignore_item.contact_jid){
+                if (ignore_item.timestamp === $notification_template.attr('data-timestamp')
+                    && ignore_item.account_jid === $notification_template.attr('data-account-jid')
+                    && ignore_item.contact_jid === $notification_template.attr('data-jid')){
+                    $notification_template.addClass('hidden');
+                }
+            }
         }
 
 
@@ -12029,6 +12101,7 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
 
     updateClientNotifications: function () {
         this.$('.client-notifications-wrap').find('.client-notifications-container').detach();
+        return;
 
         if (xabber.placeholders_wrap && this.isVisible()){
             this.$('.client-notifications-wrap').append(xabber.placeholders_wrap.$el);
@@ -12937,14 +13010,87 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
     },
 
     updateIncomingInvitations: function () {
-        let accounts = xabber.accounts.enabled;
+        let all_accounts = xabber.accounts.enabled, accounts = []
 
         let account = accounts.find(item => item.get('jid') === this.current_filter_account);
 
         if (account){
             accounts = [account]
+        } else {
+            accounts = all_accounts;
         }
         let inv_counter = 0;
+
+        let all_inv_counter = 0,
+            avatars_count = 0;
+
+        let $notification_template;
+        xabber.placeholders_wrap.$el.find('.invitation-notification-item').remove();
+        _.each(all_accounts, (account) => {
+            let contacts = account.contacts.filter(item => item.get('invitation') && item.invitation && item.invitation.message && Number(item.invitation.message.get('timestamp')));
+            if (xabber._cache.get('ignore_invitation_notification') && Number(xabber._cache.get('ignore_invitation_notification').timestamp)){
+                let ignore_timestamp = Number(xabber._cache.get('ignore_invitation_notification').timestamp);
+                contacts = contacts.filter(item => Number(item.invitation.message.get('timestamp')) > ignore_timestamp);
+            }
+            contacts = contacts.sort((a, b) => {
+                if (a.invitation.message.get('timestamp') > b.invitation.message.get('timestamp'))
+                    return -1;
+                if (a.invitation.message.get('timestamp') < b.invitation.message.get('timestamp'))
+                    return 1;
+                return 0;
+            });
+            _.each(contacts, (contact) => {
+                if ($notification_template){
+                    $notification_template.find('.contacts-notifications-item-name').text(xabber.getString("new_invitation_requests"));
+                }
+                if (!$notification_template){
+                    $notification_template = $(templates.invitations_chat_notification({
+                        name: contact.get('name'),
+                        jid: contact.get('jid'),
+                        account: account.get('jid'),
+                    }));
+                    xabber.placeholders_wrap.$el.append($notification_template);
+                    let $avatar = $(`<div class="avatar-outline circle-avatar"><div class="circle-avatar"></div></div>`);
+                    let group_image = contact.cached_image;
+                    $avatar.find('.circle-avatar').setAvatar(group_image, 48, account);
+                    if (xabber.placeholders_wrap.$el.find('.subscription-notification-item').length){
+                        $notification_template.insertAfter(xabber.placeholders_wrap.$el.find('.subscription-notification-item'));
+                    } else if (xabber.placeholders_wrap.$el.find('.desktop-notification-item').length){
+                        $notification_template.insertAfter(xabber.placeholders_wrap.$el.find('.desktop-notification-item').last())
+                    } else {
+                        xabber.placeholders_wrap.$el.append($notification_template);
+                    }
+                    $notification_template.find('.multiple-avatars-wrap').append($avatar);
+                    $notification_template.attr('data-color', contact.account.settings.get('color'));
+                    $notification_template.attr('data-timestamp', contact.invitation.message.get('timestamp'));
+                    $notification_template.find('.notification-icon.subscribe-icon').html(env.templates.svg['group-invite']());
+                    $notification_template.find('.contacts-notifications-item-text').html(xabber.getString("new_invitation_request_details_text", [contact.get('name') || contact.get('jid')]));
+                    xabber.trigger('update_client_notifications');
+                } else if ($notification_template && avatars_count < 2) {
+                    let $avatar = $(`<div class="avatar-outline circle-avatar"><div class="circle-avatar"></div></div>`),
+                        image = contact.cached_image;
+                    $avatar.find('.circle-avatar').setAvatar(image, 48, account);
+                    $notification_template.find('.multiple-avatars-wrap').append($avatar);
+                    avatars_count++
+                }
+                all_inv_counter++;
+            });
+        });
+        if ($notification_template && all_inv_counter && all_inv_counter > 1){
+            $notification_template.find('.contacts-notifications-item-text').html(xabber.getString("new_invitation_request_details_text_with_count", [all_inv_counter]));
+            $notification_template.find('.contacts-notifications-item-counter').html(all_inv_counter);
+            $notification_template.find('.contacts-notifications-item-counter').addClass('notification-multiple-counter');
+        }
+        if ($notification_template && xabber._cache.get('ignore_invitation_notification')){
+            let ignore_item = xabber._cache.get('ignore_invitation_notification');
+            if (ignore_item.timestamp && ignore_item.account_jid && ignore_item.contact_jid){
+                if (ignore_item.timestamp === $notification_template.attr('data-timestamp')
+                && ignore_item.account_jid === $notification_template.attr('data-account-jid')
+                && ignore_item.contact_jid === $notification_template.attr('data-jid')){
+                    $notification_template.addClass('hidden');
+                }
+            }
+        }
 
         if (!(this.current_filter.type && (this.current_filter.type === 'groupchats-public' || this.current_filter.type === 'groupchats-incognito' || this.current_filter.type === 'invitations'))) {
             this.$('.contacts-invitations-wrap').addClass('hidden');

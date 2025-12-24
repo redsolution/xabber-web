@@ -5930,6 +5930,8 @@ xabber.once("start", function () {
 
     this.placeholders_wrap = new this.ClientNotificationsContainer();
 
+    this.placeholders_wrap = new this.ClientNotificationsContainer();
+
     this.settings_modal_view = this.main_overlay_panel.addChild(
         'settings_modal', this.SettingsModalView, {model: this._settings});
 }, xabber);

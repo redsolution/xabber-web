@@ -356,6 +356,11 @@ let Xabber = Backbone.Model.extend({
         this.body.updateBlur(this.settings.appearance.blur);
         this._settings.clearStorage();
 
+        this._cache.save('ignore_invitation_notification', null);
+        this._cache.save('ignore_subscription_notification', null);
+        this._cache.save('ignore_notifications_warning', null);
+        this._cache.save('notifications', null);
+
         (this._settings.get("main_color") === 'default') && this._settings.set("main_color", constants.MAIN_COLOR);
         this.trigger("update_main_color");
         if (this._settings.get("load_media") === 'default' && this.saved_config.PRIVACY_LOAD_MEDIA != null)

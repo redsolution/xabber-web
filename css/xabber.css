@@ -7355,6 +7355,134 @@ input[type=text].simple-input-field:hover {
 .roster-left-container.invitation-content .contacts-invitations-wrap{
     background: unset;
 }
+/* client notifications */
+.client-notifications-container .contacts-notifications-item{
+    border-radius: 8px;
+    cursor: pointer;
+    margin-bottom: 8px;
+    display: flex;
+    position: relative;
+    min-height: 48px;
+    background: #fafafa !important;
+}
+.client-notifications-container .contacts-notifications-item .multiple-avatars-wrap,
+.client-notifications-container .contacts-notifications-item .avatar-wrap{
+    flex-shrink: 0;
+    height: 24px;
+    margin: 12px 40px 6px 20px;
+    position: relative;
+    width: 24px;
+    z-index: 5;
+}
+
+.client-notifications-container .contacts-notifications-item .multiple-avatars-wrap{
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    left: 0;
+    margin: 0;
+    overflow: visible;
+    position: relative;
+    width: 84px;
+    height: 100%;
+    top: 12px;
+    z-index: 1;
+    padding-right: 2px;
+}
+.client-notifications-container .contacts-notifications-item .circle-avatar.avatar-outline:before{
+    opacity: 0;
+}
+
+.client-notifications-container .contacts-notifications-item .avatar-outline{
+    display: block;
+    height: 24px;
+    position: absolute;
+    width: 24px;
+}
+.client-notifications-container .contacts-notifications-item .multiple-avatars-wrap .avatar-outline:first-child{
+    margin-left: -2px;
+    z-index: 4;
+}
+.client-notifications-container .contacts-notifications-item .multiple-avatars-wrap .avatar-outline:nth-child(2){
+    z-index: 3;
+}
+.client-notifications-container .contacts-notifications-item .multiple-avatars-wrap .avatar-outline:nth-child(3){
+    z-index: 2;
+}
+.client-notifications-container .contacts-notifications-item .multiple-avatars-wrap .avatar-outline:nth-child(4){
+    z-index: 1;
+}
+.client-notifications-container .contacts-notifications-item .avatar-outline{
+    position: relative;
+    margin-top: -2px;
+    width: 28px;
+    height: 28px;
+    background: #fff;
+}
+.client-notifications-container .contacts-notifications-item .multiple-avatars-wrap .avatar-outline{
+    margin-left: -21px;
+}
+.client-notifications-container .contacts-notifications-item .avatar-outline .circle-avatar{
+    height: 24px;
+    left: 2px;
+    position: absolute;
+    top: 2px;
+    width: 24px;
+}
+.client-notifications-container .contacts-notifications-item .contacts-notifications-name-wrap{
+    display: flex;
+    flex-direction: column;
+    width: calc(100% - 88px);
+    position:relative;
+    padding-top: 6px;
+    width: calc(100% - 120px);
+}
+.client-notifications-container .contacts-notifications-item .contacts-notifications-item-name{
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 18px;
+}
+.client-notifications-container .contacts-notifications-item .contacts-notifications-item-text{
+    color: #757575;
+    font-size: 12px;
+    font-weight: 300;
+    line-height: 16px;
+    margin-top: 3px;
+    width: unset;
+}
+.client-notifications-container .contacts-notifications-item .btn-close-notification{
+    color: #757575;
+    cursor: pointer;
+    display: none;
+    position: absolute;
+    right: 1px;
+    top: 1px;
+}
+.client-notifications-container .contacts-notifications-item:hover .btn-close-notification{
+    display: block;
+}
+.client-notifications-container .contacts-notifications-item .contacts-notifications-item-counter{
+    background-color: #388e3c;
+    border-radius: 10px;
+    bottom: 11px;
+    color: #fff !important;
+    font-size: 12px;
+    height: 18px;
+    line-height: 12px;
+    min-width: 18px;
+    padding: 3px 5px;
+    position: absolute;
+    right: -26px;
+    text-align: center;
+}
+.client-notifications-container .contacts-notifications-item .contacts-notifications-item-counter:not(.notification-multiple-counter){
+    padding: 3px;
+    width: 18px;
+}
+.client-notifications-container .contacts-notifications-item .contacts-notifications-item-counter polygon{
+    fill: #fff;
+}
+/* group invitations */
 .contacts-invitations-wrap {
     margin: 0 16px;
     margin-bottom: 12px;
