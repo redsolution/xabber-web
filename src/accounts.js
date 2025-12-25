@@ -1828,6 +1828,15 @@ xabber.Account = Backbone.Model.extend({
         getProxyUrl: function (original_url, callback, errback, is_whole_url) {
             let is_proxy_enabled = this && this.get('proxy_viewer_url') && this.get('proxy_viewer_token');
             if (is_proxy_enabled){
+                if (is_whole_url){
+                    if (original_url.split('?url=').length && original_url.split('?url=')[1])
+                        original_url = original_url.split('?url=')[1];
+                    else{
+                        console.error('NO SPLIT??');
+                        console.error(original_url);
+                        return;
+                    }
+                }
                 xabber.cached_proxy_urls.getFromCachedProxyUrls(original_url, (res) => {
                    if (res && !(res.error === 0) && !(res.original_url && res.original_url.includes(this.get('proxy_viewer_url')))){
                        if (res.proxy_url){
@@ -1838,7 +1847,7 @@ xabber.Account = Backbone.Model.extend({
                            errback && errback({status: res.error})
                        }
                    } else {
-                       let url = is_whole_url ? original_url :`${this.get('proxy_viewer_url')}proxy/geturl/?url=${original_url}`;
+                       let url = `${this.get('proxy_viewer_url')}proxy/geturl/?url=${original_url}`;
                        this.testProxyViewerExpire(() => {
                            $.ajax({
                                type: 'GET',
@@ -7849,6 +7858,17 @@ xabber.once("start", function () {
         objStoreName: 'cached_proxy_urls_items',
         primKey: 'original_url'
     });
+    this.test_cached2 = () => {
+        this.cached_proxy_urls.getFromCachedProxyUrls('https://gallery.dev.xabber.com/media/tL5BbGu7j5iW/avatar.png', (res) => {
+            console.log('CACHED TEST');
+            console.log(res);
+        });
+        this.cached_proxy_urls.getAllFromCachedProxyUrls((res) => {
+            console.log('CACHED all TEST');
+            console.log(res);
+        });
+    }
+    this.test_cached2();
 
     this.trigger('accounts_ready');
 

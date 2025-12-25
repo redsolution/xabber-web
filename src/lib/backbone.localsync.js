@@ -27,39 +27,75 @@
     var IndexedDB = function (options, callback) {
         this.version = options.version || 1;
         this.name = options.name;
-        var request = indexedDB.open(this.name, this.version);
+        this.ready = false;
+        this.pendingOperations = [];
         this.closed = false;
-        request.onupgradeneeded = function() {
-            let db = request.result;
-            this.createStore(db);
+
+        var request = indexedDB.open(this.name, this.version);
+
+        request.onupgradeneeded = function(event) {
+            let db = event.target.result;
+            if (!db.objectStoreNames.contains(options.objStoreName)) {
+                db.createObjectStore(options.objStoreName, { keyPath: options.primKey });
+            }
         }.bind(this);
-        request.onsuccess = function() {
-            this.db = request.result;
+
+        request.onsuccess = function(event) {
+            this.db = event.target.result;
+            this.ready = true;
+
+            // Выполнить все ожидающие операции
+            this._processPendingOperations();
+
             callback && callback();
             options.model.trigger("database_opened");
         }.bind(this);
+
         request.onerror = function(e) {
+            console.error("IndexedDB open error:", e);
             options.model.trigger("database_open_failed");
         }.bind(this);
-
-        this.createStore = function (db) {
-            db.createObjectStore(options.objStoreName, { keyPath: options.primKey });
-        }
     };
 
     _.extend(IndexedDB.prototype, {
-        put: function(objStoreName, obj,callback) {
-            try {
-                if (!this.db || this.closed) {
-                    callback && callback(false);
-                    return;
+        _processPendingOperations: function() {
+            while (this.pendingOperations.length > 0) {
+                var operation = this.pendingOperations.shift();
+                this[operation.method].apply(this, operation.args);
+            }
+        },
+
+        _executeOrQueue: function(method, args) {
+            if (this.ready && !this.closed) {
+                this[method].apply(this, args);
+            } else if (!this.closed) {
+                // Добавить операцию в очередь
+                this.pendingOperations.push({
+                    method: method,
+                    args: args
+                });
+            } else {
+                // База закрыта, вызвать колбэк с ошибкой
+                var callback = args[args.length - 1];
+                if (typeof callback === 'function') {
+                    callback(null);
                 }
+            }
+        },
+
+        put: function(objStoreName, obj, callback) {
+            this._executeOrQueue('_put', arguments);
+        },
+
+        _put: function(objStoreName, obj, callback) {
+            try {
                 let db_writer = this.db.transaction([objStoreName], 'readwrite').objectStore(objStoreName),
                     request = db_writer.put(obj);
                 request.onsuccess = function () {
                     callback && callback(true);
                 }.bind(this);
-                request.onerror = function () {
+                request.onerror = function (e) {
+                    console.error("Put error:", e);
                     callback && callback(false);
                 }.bind(this);
             } catch (e) {
@@ -75,14 +111,14 @@
         },
 
         get_all: function (objStoreName, value, callback) {
+            this._executeOrQueue('_get_all', arguments);
+        },
+
+        _get_all: function (objStoreName, value, callback) {
             try {
-                if (!this.db || this.closed) {
-                    callback && callback(null);
-                    return;
-                }
                 let db_reader = this.db.transaction([objStoreName], 'readonly').objectStore(objStoreName),
                     request;
-                if (_.isNull(value))
+                if (_.isNull(value) || _.isUndefined(value))
                     request = db_reader.getAll();
                 else
                     request = db_reader.getAll(value);
@@ -93,6 +129,10 @@
                     } else {
                         callback && callback(null);
                     }
+                }.bind(this);
+                request.onerror = function(event) {
+                    console.error("Get all error:", event.target.error);
+                    callback && callback(null);
                 }.bind(this);
             } catch (e) {
                 console.error(e);
@@ -107,11 +147,11 @@
         },
 
         get: function (objStoreName, value, callback) {
+            this._executeOrQueue('_get', arguments);
+        },
+
+        _get: function (objStoreName, value, callback) {
             try {
-                if (!this.db || this.closed) {
-                    callback && callback(null);
-                    return;
-                }
                 let db_reader = this.db.transaction([objStoreName], 'readonly').objectStore(objStoreName),
                     request = db_reader.get(value);
                 request.onsuccess = function(event) {
@@ -121,6 +161,10 @@
                     } else {
                         callback && callback(null);
                     }
+                }.bind(this);
+                request.onerror = function(event) {
+                    console.error("Get error:", event.target.error);
+                    callback && callback(null);
                 }.bind(this);
             } catch (e) {
                 console.error(e);
@@ -135,17 +179,18 @@
         },
 
         remove: function (objStoreName, value, callback) {
+            this._executeOrQueue('_remove', arguments);
+        },
+
+        _remove: function (objStoreName, value, callback) {
             try {
-                if (!this.db || this.closed) {
-                    callback && callback(false);
-                    return;
-                }
                 let db_writer = this.db.transaction([objStoreName], 'readwrite').objectStore(objStoreName);
                 var request = db_writer.delete(value);
                 request.onsuccess = function () {
                     callback && callback(true);
                 }.bind(this);
-                request.onerror = function () {
+                request.onerror = function (e) {
+                    console.error("Remove error:", e);
                     callback && callback(false);
                 }.bind(this);
             } catch (e) {
@@ -161,17 +206,18 @@
         },
 
         clear_database: function (objStoreName, callback) {
+            this._executeOrQueue('_clear_database', arguments);
+        },
+
+        _clear_database: function (objStoreName, callback) {
             try {
-                if (!this.db || this.closed) {
-                    callback && callback(false);
-                    return;
-                }
                 let db_writer = this.db.transaction([objStoreName], 'readwrite').objectStore(objStoreName);
                 var request = db_writer.clear();
                 request.onsuccess = function () {
                     callback && callback(true);
                 }.bind(this);
-                request.onerror = function () {
+                request.onerror = function (e) {
+                    console.error("Clear error:", e);
                     callback && callback(false);
                 }.bind(this);
             } catch (e) {
@@ -182,12 +228,14 @@
 
         delete_database: function (objStoreName, callback) {
             try {
-                if (!this.db) {
-                    callback && callback(false);
-                    return;
-                }
                 this.closed = true;
-                this.db.close();
+                this.ready = false;
+                this.pendingOperations = [];
+
+                if (this.db) {
+                    this.db.close();
+                }
+
                 let db_deleter = indexedDB.deleteDatabase(this.name);
                 db_deleter.onsuccess = function () {
                     callback && callback(true);
@@ -200,7 +248,7 @@
                 console.error(e);
                 window.location.reload(true);
             }
-        }
+        },
     });
 
     _.extend(DataStorage.prototype, {

@@ -6266,7 +6266,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
         return files;
     },
 
-    loadAndReplaceImagesToProxy: function (files, $message, is_encrypted, fwd_images) {
+    loadAndReplaceImagesToProxy: function (files, $message, is_encrypted, fwd_images, is_second_try) {
         $message = $message.children('.msg-wrap').children('.chat-msg-media-content');
         let onFileLoop = (file, idx, list) => {
             if (!file.proxy_sources_list || !file.proxy_sources_list.length){
@@ -6329,6 +6329,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
                     $message.find(`div[data-upload-file-id="${file.upload_id}"] img`).attr('data-mfp-src', '');
                     $message.find(`div[data-upload-file-id="${file.upload_id}"] img`).attr('src', '');
                 }
+                !is_second_try && this.loadAndReplaceImagesToProxy(files, $message, is_encrypted, fwd_images, true);
 
             }, true);
         };
