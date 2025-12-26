@@ -9365,19 +9365,44 @@ xabber.ChatContentView = xabber.BasicView.extend({
                 ev && ev.preventDefault();
                 $elem.blur();
                 let link = $elem.attr('href');
-                utils.dialogs.ask_extended(xabber.getString("open_this_link"), decodeURI(link),
-                    {modal_class: 'modal-hyperlink'}, {
-                    ok_button_text: xabber.getString("open"),
-                    optional_button: 'copy-link',
-                    optional_button_text: xabber.getString("action_copy_link")
-                }).done((result) => {
-                    if (result === 'copy-link') {
-                        utils.copyTextToClipboard(decodeURI(link));
-                        return;
+                let dfd = new $.Deferred();
+                dfd.done(() => {
+                    utils.dialogs.ask_extended(xabber.getString("open_this_link"), decodeURI(link),
+                        {modal_class: 'modal-hyperlink'}, {
+                            ok_button_text: xabber.getString("open"),
+                            optional_button: 'copy-link',
+                            optional_button_text: xabber.getString("action_copy_link")
+                        }).done((result) => {
+                        if (result === 'copy-link') {
+                            utils.copyTextToClipboard(decodeURI(link));
+                            return;
+                        }
+                        if (result)
+                            utils.openWindow(link);
+                    });
+                })
+                if (link.includes('mailto:')){
+                    let jid = link.split('mailto:')[1];
+                    if (jid && jid !== this.account.get('jid')){
+                        let contact = this.account.contacts.get(jid);
+                        if (!contact){
+                            this.account.getConnectionForIQ().vcard.get(jid,
+                                (vcard) => {
+                                    contact = this.account.contacts.mergeContact(jid)
+                                    dfd.reject();
+                                }, (err) => {
+                                    dfd.resolve();
+                                }, 1000);
+                        } else {
+                            this.account.chats.openChat(contact);
+                            dfd.reject();
+                        }
+                    } else {
+                        dfd.resolve();
                     }
-                    if (result)
-                        utils.openWindow(link);
-                });
+                } else {
+                    dfd.resolve();
+                }
                 return;
             }
 
@@ -10283,6 +10308,14 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
         if ($(ev.target).closest('.btn-close-notification').length)
             return;
         let $item = $(ev.target).closest('.contacts-notifications-item');
+        // if ($item.length){
+        //     xabber._cache.save('ignore_subscription_notification', {
+        //         timestamp: $item.attr('data-timestamp'),
+        //         account_jid: $item.attr('data-account-jid'),
+        //         contact_jid: $item.attr('data-jid'),
+        //     });
+        //     xabber.trigger('new_incoming_subscription');
+        // }
         xabber.toolbar_view.showContacts();
         xabber.contacts_view.$('.subscription-item-wrap').click();
     },
@@ -10290,6 +10323,14 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
         if ($(ev.target).closest('.btn-close-notification').length)
             return;
         let $item = $(ev.target).closest('.contacts-notifications-item');
+        // if ($item.length) {
+        //     xabber._cache.save('ignore_invitation_notification', {
+        //         timestamp: $item.attr('data-timestamp'),
+        //         account_jid: $item.attr('data-account-jid'),
+        //         contact_jid: $item.attr('data-jid'),
+        //     });
+        //     xabber.trigger('invitations_updated');
+        // }
         xabber.toolbar_view.showGroupchats();
         xabber.groupchats_view.$('.invitation-filter-item-wrap').click();
     },

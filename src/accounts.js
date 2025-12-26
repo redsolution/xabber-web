@@ -3665,6 +3665,7 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
         "click .settings-tabs-wrap .settings-tab:not(.delete-account):not(.settings-non-tab)": "jumpToBlock",
         "click .tokens-wrap .settings-tab.token-wrap": "jumpToBlock",
         "click .btn-manage-xabber-account.settings-tab": "jumpToBlock",
+        "click .account-main-info-wrap .jid": "copyJIDToClipboard",
         "click .settings-tab.delete-account": "deleteAccount",
         "click .settings-tab.unregister-account": "unregisterAccount",
 
@@ -4333,6 +4334,11 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
     openChangeStatus: function () {
         !xabber.change_status_view && (xabber.change_status_view = new xabber.ChangeStatusView());
         xabber.change_status_view.open(this.model);
+    },
+
+    copyJIDToClipboard: function (ev) {
+        let $target_info = $(ev.target).closest('.jid');
+        utils.copyTextToClipboard($target_info.text(), xabber.getString("toast__copied_in_clipboard"), xabber.getString("toast__not_copied_in_clipboard"));
     },
 
     deleteAccount: function () {

@@ -175,14 +175,14 @@ Strophe.addConnectionPlugin('vcard', {
         return Strophe.addNamespace('VCARD', 'vcard-temp');
     },
 
-    get: function(jid, callback, errback) {
+    get: function(jid, callback, errback, timeout) {
         let iq = $iq({type: 'get', to: jid}).c('vCard', {xmlns: Strophe.NS.VCARD});
         this._connection.sendIQ(iq, function (res) {
             if (!callback) { return; }
             let vcard = xmlToObject($(res).find('vCard[xmlns='+Strophe.NS.VCARD+']'));
             vcard.jabber_id || (vcard.jabber_id = jid);
             return callback(vcard);
-        }, errback);
+        }, errback, timeout);
     },
 
     set: function(jid, vcard, callback, errback) {

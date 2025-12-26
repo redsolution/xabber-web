@@ -7464,7 +7464,8 @@ input[type=text].simple-input-field:hover {
 .client-notifications-container .contacts-notifications-item .contacts-notifications-item-counter{
     background-color: #388e3c;
     border-radius: 10px;
-    bottom: 11px;
+    top: 50%;
+    transform: translate(0, -50%);
     color: #fff !important;
     font-size: 12px;
     height: 18px;
@@ -15374,6 +15375,7 @@ input[type=range].voice-message-volume:focus {
     height: 28px;
     font-size: 16px;
     color: #9E9E9E;
+    cursor: pointer;
 }
 
 .settings-panel-wrap .settings-panel .main-info-wrap .btn-manage-xabber-account{
@@ -15771,6 +15773,7 @@ input[type=range].voice-message-volume:focus {
     line-height: 20px;
 }
 .fingerprints-wrap  .fingerprints-tips-wrap{
+    margin-top: 16px;
     color: #757575;
     font-size: 13px;
     line-height: 20px;
