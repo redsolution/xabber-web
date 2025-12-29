@@ -349,6 +349,8 @@ xabber.Fingerprints = xabber.BasicView.extend({
                     contacts_trusted_devices.forEach((trusted_device, index) => {
                         if (!trusted_device.untrusted && !trusted_device.is_revoked){
                             trusted_device.untrusted = true;
+                            trusted_device.trust_reason_jid = undefined;
+                            trusted_device.from_device_id = undefined;
                             updated_trusted_devices[this.jid][index] = trusted_device;
                             changed_devices[this.jid].push(trusted_device);
                             changed = true;
@@ -708,7 +710,7 @@ xabber.Fingerprints = xabber.BasicView.extend({
                     counter++;
                     if (devices_count === counter)
                         dfd.resolve(rows);
-                });
+                }, 10000);
             }
         }
     },
@@ -781,6 +783,7 @@ xabber.Fingerprints = xabber.BasicView.extend({
                                 let func_changed;
                                 if (trusted_device.device_id === device.get('id') && trusted_device.untrusted && !trusted_device.is_revoked) {
                                     trusted_device.untrusted = false;
+                                    trusted_device.fingerprint_trust = true;
                                     func_changed = true;
                                     changed_devices[to] = [trusted_device];
                                 }
@@ -1445,7 +1448,7 @@ xabber.Device = Backbone.Model.extend({
                     this._dfd_bundle.reject();
                     this._pending_bundle = false;
                     reject();
-                });
+                }, 10000);
             });
         } else {
             return new Promise((resolve, reject) => {
@@ -2239,16 +2242,18 @@ xabber.Omemo = Backbone.ModelWithStorage.extend({
                         !counter && dfd.resolve(is_trusted);
                     } else {
                         if (device.get('ik') === null) {
-                            counter--;
-                            console.log(counter);
-                            if (!counter) {
-                                if (Object.keys(peer.devices).length === 1){
-                                    is_trusted = 'nil';
-                                    unverified_counter++;
-                                }
-                                dfd.resolve(is_trusted);
-                            }
-                            continue;
+                        //     counter--;
+                            console.log(' NO IK device!!!!!!!1');
+                            console.log(device);
+                            console.log(device.get('ik'));
+                        //     if (!counter) {
+                        //         if (Object.keys(peer.devices).length === 1){
+                        //             is_trusted = 'nil';
+                        //             unverified_counter++;
+                        //         }
+                        //         dfd.resolve(is_trusted);
+                        //     }
+                        //     continue;
                         }
                         device.getBundle().then(({pk, spk, ik}) => {
                             device.set('ik', utils.fromBase64toArrayBuffer(ik));
@@ -2263,9 +2268,12 @@ xabber.Omemo = Backbone.ModelWithStorage.extend({
                                 unverified_counter++;
                             }
                             counter--;
+                            console.error(counter);
                             !counter && dfd.resolve(is_trusted);
-                        }).catch(() => {
+                        }).catch((e) => {
                             counter--;
+                            console.error(e);
+                            console.error(counter);
                             if (!counter) {
                                 if (Object.keys(peer.devices).length === 1){
                                     is_trusted = 'nil';

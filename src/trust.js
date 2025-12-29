@@ -1440,11 +1440,16 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                                             if (distrusted_devices_list && distrusted_devices_list.length && device.device_id &&
                                                 distrusted_devices_list.some(e => e.device_id === device.device_id && e.jid === jid) && !device.untrusted && !device.is_revoked) {
                                                 device.untrusted = true;
+                                                device.trust_reason_jid = undefined;
+                                                device.from_device_id = undefined;
                                                 func_changed = true;
                                             }
                                             if (retrusted_devices_list && retrusted_devices_list.length && device.device_id &&
                                                 retrusted_devices_list.some(e => e.device_id === device.device_id && e.jid === jid) && device.untrusted && !device.is_revoked) {
+                                                let retrusted_device = retrusted_devices_list.find(e => e.device_id === device.device_id && e.jid === jid);
                                                 device.untrusted = false;
+                                                device.trust_reason_jid = this.account.get('jid');
+                                                retrusted_device.from_device_id && (device.from_device_id = retrusted_device.from_device_id);
                                                 func_changed = true;
                                             }
                                             return {device, func_changed};
@@ -1538,7 +1543,7 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                     counter_dfd.resolve(true, null, {device_id, jid}); // add to list to update
                     return;
                 } else if (trusted_devices[jid].some(e => e.trusted_key === trusted_key && e.untrusted) && tagname === 'trust'){
-                    counter_dfd.resolve(true, null, null, {device_id, jid}); // add to list to update
+                    counter_dfd.resolve(true, null, null, {device_id, jid, from_device_id}); // add to list to update
                     return;
                 } else if (!trusted_devices[jid].some(e => e.trusted_key === trusted_key)){
                     trusted_devices[jid].push({
@@ -1798,6 +1803,8 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                         let this_device = final_trusted_devices.find(e => (e.trusted_key === $trust_item.text()) && !e.is_revoked && e.untrusted === true),
                             device_index = final_trusted_devices.indexOf(this_device);
                         this_device.untrusted = false;
+                        this_device.from_device_id = item_device_id;
+                        this_device.trust_reason_jid = peer ? peer.get('jid') : this.account.get('jid');
                         final_trusted_devices[device_index] = this_device;
                         has_changes = true;
                     }

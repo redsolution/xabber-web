@@ -141,13 +141,13 @@
             this._connection.sendIQ(stanza, callback, errback);
         };
 
-        var getBundleInfo = function (attrs, callback, errback) {
+        var getBundleInfo = function (attrs, callback, errback, timeout) {
             let iq = $iq({type: 'get', to: attrs.jid})
                 .c('pubsub', {xmlns: Strophe.NS.PUBSUB})
                 .c('items', {node: `${Strophe.NS.OMEMO}:bundles`});
             if (attrs.id)
                 iq.c('item', {id: attrs.id});
-            this._connection.sendIQ(iq, callback, errback);
+            this._connection.sendIQ(iq, callback, errback, timeout);
         };
 
         return {
