@@ -495,7 +495,6 @@ xabber.VCardEditModalView = xabber.BasicView.extend({
             selectMonths: true,
             selectYears: 100,
             autoOk: false,
-            // min = 100 years ago
             min: new Date(moment.now() - 3153600000000),
             max: new Date(moment.now() - 86400000),
             format: 'dd.mm.yyyy',

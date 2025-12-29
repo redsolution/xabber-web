@@ -950,20 +950,20 @@ _.extend(Strophe.Connection.prototype, {
         } else {
             public_label = utils.generateDeviceName();
         }
-        // if (old_token){
-        //     iq.c('device', { xmlns: Strophe.NS.AUTH_DEVICES, id: old_token})
-        //         .c('client').t(client_name).up()
-        //         .c('public-label').t(public_label).up();
-        //     if (this.server_mechanisms.includes('DEVICES-OCRA')){
-        //         iq.c('type').t('xabber-web').up()
-        //     }
-        //     if (xabber.settings.device_metadata === 'contacts' || xabber.settings.device_metadata === 'server'){
-        //         iq.c('info').t(`PC, ${utils.getOS()}, ${env.utils.getBrowser()}`);
-        //     } else {
-        //         iq.c('info').t(public_label);
-        //     }
-        //     this.account.save('old_device_token', null);
-        // } else {
+        if (old_token){
+            iq.c('device', { xmlns: Strophe.NS.AUTH_DEVICES, id: old_token})
+                .c('client').t(client_name).up()
+                .c('public-label').t(public_label).up();
+            if (this.server_mechanisms.includes('DEVICES-OCRA')){
+                iq.c('type').t('xabber-web').up()
+            }
+            if (xabber.settings.device_metadata === 'contacts' || xabber.settings.device_metadata === 'server'){
+                iq.c('info').t(`PC, ${utils.getOS()}, ${env.utils.getBrowser()}`);
+            } else {
+                iq.c('info').t(public_label);
+            }
+            this.account.save('old_device_token', null);
+        } else {
             iq.c('device', { xmlns: Strophe.NS.AUTH_DEVICES})
                 .c('client').t(client_name).up()
                 .c('public-label').t(public_label).up();
@@ -975,7 +975,7 @@ _.extend(Strophe.Connection.prototype, {
             } else {
                 iq.c('info').t(public_label);
             }
-        // }
+        }
         let handler = function (stanza) {
             let iqtype = stanza.getAttribute('type');
             if (iqtype === 'result') {

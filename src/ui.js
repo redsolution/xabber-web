@@ -239,7 +239,6 @@ xabber.once("start", function () {
         toolbar: null,
         main: {
             wide: { about: null },
-            // placeholders: null
         },
         roster: null
     });
@@ -307,7 +306,6 @@ xabber.once("start", function () {
             left: { mentions: null },
             right: { mentions_placeholder: null },
             right_contact: {},
-            // placeholders: null
         },
         roster: null
     });
@@ -328,12 +326,10 @@ xabber.once("start", function () {
         blur_overlay: null,
         toolbar: null,
         main: {
-            // left: { chats: null },
             right: { notifications_body: null  },
             right_contact: {},
             placeholders: null
         },
-        // roster: null
     });
 
     this.body.addScreen('calls', {
@@ -341,10 +337,8 @@ xabber.once("start", function () {
         toolbar: null,
         main: {
             right: { calls_body: null },
-            // right_contact: {},
             placeholders: null
         },
-        // roster: null
     });
 
 

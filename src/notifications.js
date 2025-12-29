@@ -1804,8 +1804,6 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
                     $icon.append(env.templates.svg['info']());
                 } else if (msg.get('notification_mention')){
                     $icon.append(env.templates.svg['mention']())
-                // } else if (msg.get('ntf_new_device_msg')){
-                //     $icon.append(env.templates.svg['lock']())
                 }
             }
             $msg.find('.left-side').append($icon);

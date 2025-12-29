@@ -1292,7 +1292,7 @@ xabber.Account = Backbone.Model.extend({
                     this.connection.disconnect();
                 this.onDisconnected();
             }
-            if (is_reactivating && !(this.session.get('no_reconnect') || this.session.get('auth_failed'))){ //34
+            if (is_reactivating && !(this.session.get('no_reconnect') || this.session.get('auth_failed'))){
                 clearInterval(this.reactivate_interval);
                 this.reactivate_interval = setInterval(() => {
                     console.error(this);
@@ -2203,11 +2203,6 @@ xabber.Accounts = Backbone.CollectionWithStorage.extend({
 
     onActiveAfterIdle: function () {
         _.each(_.clone(this.models), function (account) {
-            console.error(account);
-            console.error(account.get('jid'));
-            console.error(account.get('first_sync'));
-            console.error(account.get('enabled'));
-            console.error(account.session.get('reconnecting'));
             if (account.get('enabled') && !account.session.get('reconnecting') && (account.get('first_sync') || _.isUndefined(account.get('first_sync')))) {
                 console.error(account);
                 console.error('account.reactivate');
@@ -2398,16 +2393,13 @@ xabber.OMEMONewDevicePlaceholder = xabber.BasicView.extend({
     _initialize: function (options) {
         this.account = options.account;
         this.updateColorScheme();
-        // this.onActiveSessionChange();
         this.$el.html(env.templates.base.omemo_new_device({text: xabber.getString("desktop_notifications__enable_encryption"), jid: this.account.get('jid')}));
         this.listenTo(xabber, 'update_screen', this.onUpdatedScreen);
         this.listenTo(this.account.settings, 'change:color', this.updateColorScheme);
-        // this.listenTo(this.account, 'active_session_change', this.onActiveSessionChange);
     },
 
     showPlaceholder: function () {
         this.data.set('shown', true);
-        // this.onActiveSessionChange();
         xabber.bottom_placeholders_wrap.$el.append(this.$el);
         xabber.main_panel.$el.css('padding-bottom', xabber.bottom_placeholders_wrap.$el.height());
     },
@@ -2435,38 +2427,6 @@ xabber.OMEMONewDevicePlaceholder = xabber.BasicView.extend({
     openDevicesWindow: function () {
         this.account.showSettings(null, 'devices');
     },
-
-    // onActiveSessionChange: function () {
-    //     if (!this.account.omemo)
-    //         return;
-    //
-    //     this.$el.attr('data-sid', '');
-    //     // this.$('.btn-verify-devices').removeClass('hidden');
-    //     // this.$('.btn-active-session').addClass('hidden');
-    //     this.$('.msg-text-content').text(xabber.getString("omemo_unverified_device_placeholder_text"));
-    //     // let active_sessions = this.account.omemo.xabber_trust.get('active_trust_sessions');
-    //
-    //     // Object.keys(active_sessions).forEach((session_id) => {
-    //     //     let session = active_sessions[session_id];
-    //     //     if ((session.active_verification_device && session.active_verification_device.peer_jid === this.account.get('jid')) || session.session_check_jid === this.account.get('jid')){
-    //     //         this.$('.btn-verify-devices').addClass('hidden');
-    //     //         this.$el.attr('data-sid', session_id);
-    //     //         if (session.verification_step === '1a' && !session.verification_accepted_msg_xml) {
-    //     //             this.$('.msg-text-content').text(xabber.getString("omemo_unverified_device_placeholder_text__active_session_request_sent"));
-    //     //         } else if (session.active_verification_code){
-    //     //             this.$('.msg-text-content').text(xabber.getString("omemo_unverified_device_placeholder_text__active_session_show_code"));
-    //     //             this.$('.btn-show-code').removeClass('hidden');
-    //     //         } else if(session.verification_step === '1a' && session.verification_accepted_msg_xml) {
-    //     //             this.$('.msg-text-content').text(xabber.getString("omemo_unverified_device_placeholder_text__active_session_enter_code"));
-    //     //             this.$('.btn-enter-code').removeClass('hidden');
-    //     //         } else if(session.verification_step === '0b') {
-    //     //             this.$('.msg-text-content').text(xabber.getString("omemo_unverified_device_placeholder_text__active_session_incoming_request"));
-    //     //             this.$('.btn-accept-session').removeClass('hidden');
-    //     //             this.$('.btn-decline-session').removeClass('hidden');
-    //     //         }
-    //     //     }
-    //     // });
-    // },
 
     showCode: function () {
         if (!this.account || !this.account.omemo)
@@ -3682,7 +3642,6 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
         "click .trust-item-peer": "openFingerprints",
         "contextmenu .trust-item-peer": "onTrustPeerContextMenu",
         "contextmenu .all-sessions .token-wrap": "onOwnDevicesContextMenu",
-        // "click .trust-item-device": "jumpToBlock",
         "click .btn-open": "openChat",
         "click .btn-open-encrypted": "openEncryptedChat",
         "click .btn-revoke-trust": "revokeTrust",
@@ -4657,7 +4616,6 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
     updateTrustItems: function () {
         this.$('.settings-trust-items-wrap').html('');
         this.$('.contact-device-encryption').addClass('hidden');
-        this.$('.contact-device-encryption').removeClass('hidden');
         if (this.model.omemo && this.model.omemo.xabber_trust){
 
             let trusted_devices = this.model.omemo.xabber_trust.get('trusted_devices'),
@@ -4688,8 +4646,13 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
                 });
                 !peers_trusted_devices.length && $trust_peer.addClass('hidden');
                 if (peers_trusted_devices){
+                    console.error(peers_trusted_devices);
+                    console.error(contact);
                     this.model.omemo.checkContactFingerprints(contact).then((obj) => {
                         let is_contact_trusted = obj.trust;
+                        console.error(item);
+                        console.error(obj);
+                        console.error(contact);
                         if (is_contact_trusted === 'error') {
                             $trust_peer.find('.trust-item-peer-encryption-status').removeClass('hidden');
                             $trust_peer.find('.trust-item-peer-encryption-status').addClass('contact-error-icon-visible');
@@ -4775,7 +4738,7 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
                     bubbles: true,
                     cancelable: true,
                     view: window,
-                    button: 2, // 2 для правой кнопки мыши
+                    button: 2,
                     clientX: e.clientX,
                     clientY: e.clientY,
                 });

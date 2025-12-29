@@ -346,13 +346,10 @@ xabber.CallsView = xabber.BasicView.extend({
 
             let dfd = new $.Deferred();
             dfd.done(() => {
-                // remove куртилку
 
                 this.renderCalls();
                 this.updateFilterItems()
             });
-
-            // добавить крутилку
             let count = 0,
                 length = this.calls_accounts.length;
             _.each(this.calls_accounts, (account) => {

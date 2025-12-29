@@ -1074,7 +1074,6 @@ xabber.Body = xabber.NodeView.extend({
         }
         (!attrs || !attrs.notifications) && (new_attrs.notifications = false);
         (!attrs || !attrs.calls) && (new_attrs.calls = false);
-        // (name !== 'contacts' && (!attrs || !attrs.contacts)) && (new_attrs.contacts = false);
         (name !== 'contacts' && name !== 'groupchats' && (!attrs || !attrs.contacts)) && (new_attrs.contacts = false);
         this.screen.set(_.extend(new_attrs, attrs), options);
     },
@@ -1431,8 +1430,6 @@ xabber.ToolbarView = xabber.BasicView.extend({
                     if (chat.get('notifications')){
                     } else {
                         if (chat.get('unread') || chat.get('const_unread')){
-                            // console.error('chat with UNREAD!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
-                            // console.error(chat);
                         }
                         count_all_msg += chat.get('unread') + chat.get('const_unread');
                         if (chat.contact.get('group_chat'))

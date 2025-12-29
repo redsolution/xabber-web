@@ -9938,8 +9938,6 @@ xabber.AccountChats = xabber.ChatsBase.extend({
         msg_object.account = this.account;
 
         msg_object = await this.account.testMsgChildForXeps(msg_object);
-        // console.warn('msg parsed');
-        // console.warn(msg_object);
         if (msg_object.ignore && msg_object.final_msg){
             return msg_object.final_msg;
         }
@@ -10308,14 +10306,6 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
         if ($(ev.target).closest('.btn-close-notification').length)
             return;
         let $item = $(ev.target).closest('.contacts-notifications-item');
-        // if ($item.length){
-        //     xabber._cache.save('ignore_subscription_notification', {
-        //         timestamp: $item.attr('data-timestamp'),
-        //         account_jid: $item.attr('data-account-jid'),
-        //         contact_jid: $item.attr('data-jid'),
-        //     });
-        //     xabber.trigger('new_incoming_subscription');
-        // }
         xabber.toolbar_view.showContacts();
         xabber.contacts_view.$('.subscription-item-wrap').click();
     },
@@ -10323,14 +10313,6 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
         if ($(ev.target).closest('.btn-close-notification').length)
             return;
         let $item = $(ev.target).closest('.contacts-notifications-item');
-        // if ($item.length) {
-        //     xabber._cache.save('ignore_invitation_notification', {
-        //         timestamp: $item.attr('data-timestamp'),
-        //         account_jid: $item.attr('data-account-jid'),
-        //         contact_jid: $item.attr('data-jid'),
-        //     });
-        //     xabber.trigger('invitations_updated');
-        // }
         xabber.toolbar_view.showGroupchats();
         xabber.groupchats_view.$('.invitation-filter-item-wrap').click();
     },
@@ -11753,7 +11735,6 @@ xabber.InvitationPanelView = xabber.SearchView.extend({
           };
           xabber.body.setScreen('all-chats', attrs);
           if (this.model.details_view_right && this.model.details_view_right.contact_searched_messages_view){
-              // this.model.details_view_right.contact_searched_messages_view.clearSearch();
               this.model.details_view_right.showSearchMessages(null, true);
               this.model.details_view_right.onScroll()
           }
@@ -12883,7 +12864,7 @@ xabber.ChatLocationView = xabber.BasicView.extend({
                 map.addLayer(sLayer);
 
                 let search = new ol.control.SearchNominatim (
-                    {	//target: $(".options").get(0),
+                    {
                         polygon: $("#polygon").prop("checked"),
                         reverse: true,
                         position: true	// Search, with priority to geo position
@@ -14613,9 +14594,7 @@ xabber.ChatBottomView = xabber.BasicView.extend({
 
         aud.on('error', (e) => {
             console.error(e);
-            // $elem.removeClass('voice-message-rendering');
             aud.unAll();
-            // $elem.find('.voice-message-play').get(0).remove();
             utils.callback_popup_message(xabber.getString("jingle__error__audio_not_supported"), 3000);
         });
 
@@ -14650,10 +14629,6 @@ xabber.ChatBottomView = xabber.BasicView.extend({
         aud.stopTime = () => {
             aud.stop();
         };
-
-        // $elem.find('.voice-message-volume')[0].onchange = () => {
-        //     aud.setVolume($elem.find('.voice-message-volume').val()/100);
-        // };
 
         try{
             aud.load(file_url);
@@ -15137,7 +15112,6 @@ xabber.ChatBottomView = xabber.BasicView.extend({
             $message_actions.find('.reply-message-wrap').hideIf(this.model.get('blocked'));
             $message_actions.find('.forward-message-wrap').hideIf(this.model.get('encrypted'));
         } else {
-            // !this.view.$('.chat-notification').hasClass('encryption-warning') && this.view.$('.chat-notification').addClass('hidden').removeClass('msgs-counter').text("");
             this.focusOnInput();
         }
     },
