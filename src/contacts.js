@@ -2084,7 +2084,7 @@ xabber.ContactDetailsViewRight = xabber.BasicView.extend({
 
     updateAvatar: function () {
         let image = this.model.cached_image;
-        this.$('.circle-avatar').setAvatar(image, this.avatar_size, this.account);
+        this.$('.avatar-wrap .circle-avatar').setAvatar(image, this.avatar_size, this.account);
     },
 
     updateButtons: function () {
@@ -2516,6 +2516,10 @@ xabber.GroupChatDetailsViewRight = xabber.BasicView.extend({
 
     showRestrictions: function (ev, callback) {
         this.default_restrictions_edit_right.showRestrictions(ev, callback);
+    },
+
+    countRestrictions: function (callback) {
+        this.default_restrictions_edit_right.countRestrictions(callback);
     },
 
     showNewbiePermissions: function () {
@@ -6455,6 +6459,17 @@ xabber.DefaultRestrictionsRightView = xabber.BasicView.extend({
         this.$('.restrictions-wrap').hideIf(this.model.get('restrictions_hidden'))
     },
 
+    countRestrictions: function (callback) {
+        let iq_get_rights = $iq({type: 'get', to: this.contact.get('jid')})
+            .c('defaults', {xmlns: `${Strophe.NS.GROUP_CHAT_PERMISSIONS}`});
+        this.account.sendFast(iq_get_rights, (iq_all_rights) => {
+            let text = `${$(iq_all_rights).find('permission[status="true"]').length} / ${$(iq_all_rights).find('permission').length}`;
+            callback && callback(text);
+        }, (err) => {
+            console.error(err);
+        });
+    },
+
     showRestrictions: function (ev, callback) {
         this.change_default_permissions = this.model.my_rights
             && this.model.my_rights['change-default-permissions']
@@ -9079,6 +9094,15 @@ xabber.GroupEditView = xabber.BasicView.extend({
         if (is_owner){
 
         }
+
+        if (this.model
+            && this.model.my_rights
+            && this.model.my_rights['change-default-permissions']
+            && this.model.my_rights['change-default-permissions'].status === 'true'){
+            this.parent.countRestrictions((text) => {
+                this.$('.btn-default-restrictions .edit-button-value').text(text);
+            });
+        }
         this.updateAvatar();
 
     },
@@ -9181,6 +9205,8 @@ xabber.GroupEditView = xabber.BasicView.extend({
 
     showMembershipProperty: function () {
         this.$('.membership-property-edit-wrap').hideIf(false);
+        this.update();
+        this.$('.edit-header:not(.main-edit-header) .details-icon').addClass('mdi-arrow-right').removeClass('mdi-close');
         if (this.ps_container.length) {
             this.ps_container.perfectScrollbar('destroy')
         }
@@ -9188,6 +9214,8 @@ xabber.GroupEditView = xabber.BasicView.extend({
 
     showIndexProperty: function () {
         this.$('.index-property-edit-wrap').hideIf(false);
+        this.$('.edit-header:not(.main-edit-header) .details-icon').addClass('mdi-arrow-right').removeClass('mdi-close');
+        this.update();
         if (this.ps_container.length) {
             this.ps_container.perfectScrollbar('destroy')
         }
@@ -9207,6 +9235,7 @@ xabber.GroupEditView = xabber.BasicView.extend({
                 _.extend(this.parent.ps_settings || {}, xabber.ps_settings)
             );
         }
+        this.update();
     },
 
     revokeInvitation: function (ev) {
@@ -9320,6 +9349,7 @@ xabber.GroupEditView = xabber.BasicView.extend({
             this.ps_container.perfectScrollbar(
                 _.extend(this.parent.ps_settings || {}, xabber.ps_settings)
             );
+            this.onScroll();
         }
     },
 
@@ -9342,8 +9372,9 @@ xabber.GroupEditView = xabber.BasicView.extend({
     },
 
     resetPanel: function () {
-        this.updateSaveButton();
-        this.showEdit()
+        this.model.getVCard(() => {
+            this.showEdit()
+        });
     },
 
     updateSaveButton: function () {
@@ -9361,12 +9392,12 @@ xabber.GroupEditView = xabber.BasicView.extend({
         if (has_changes) {
             this.$('.block-name.second-text').html(xabber.getString("edit_vcard"));
             this.$('.edit-header:not(.main-edit-header) .details-icon').removeClass('mdi-arrow-right').addClass('mdi-close');
-            this.$('.edit-header:not(.main-edit-header) .block-name:not(.second-text)').addClass('fade-out');
-            this.$('.edit-header:not(.main-edit-header) .block-name.second-text').removeClass('fade-out');
+            // this.$('.edit-header:not(.main-edit-header) .block-name:not(.second-text)').addClass('fade-out');
+            // this.$('.edit-header:not(.main-edit-header) .block-name.second-text').removeClass('fade-out');
         }
         else{
             this.$('.edit-header:not(.main-edit-header) .details-icon').addClass('mdi-arrow-right').removeClass('mdi-close');
-            this.$('.edit-header:not(.main-edit-header) .block-name:not(.second-text)').removeClass('fade-out');
+            // this.$('.edit-header:not(.main-edit-header) .block-name:not(.second-text)').removeClass('fade-out');
             this.$('.edit-header:not(.main-edit-header) .block-name.second-text').addClass('fade-out');
         }
         let info = this.model.get('group_info') || {};

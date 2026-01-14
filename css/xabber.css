@@ -9975,6 +9975,9 @@ input[type=text].simple-input-field:hover {
 .left-column-filters-container .client-notifications-wrap{
     display: none;
 }
+.recent-chats-search-active .client-notifications-wrap{
+    display: none;
+}
 .client-notifications-wrap{
     position: relative;
     width: 100%;
@@ -13747,17 +13750,15 @@ img.fwd-img-preview {
 }
 
 .callback-popup-message {
-    padding-left: 20px;
-    padding-right: 20px;
-    padding-top: 10px;
-    padding-bottom: 10px;
-    position: absolute;
-    bottom: 8%;
-    left: 40%;
-    background-color: rgba(0, 0, 0, 0.7);
+    background-color: rgba(0, 0, 0, .7);
     border-radius: 15px;
-    color: rgb(255, 255, 255);
+    bottom: 8%;
+    color: #fff;
+    left: 50%;
+    padding: 10px 20px;
+    position: absolute;
     z-index: 1005;
+    transform: translate(-50%);
 }
 
 .message-form .input-message {
@@ -13768,7 +13769,6 @@ img.fwd-img-preview {
 .voice-message-recording .message-form .input-message {
     display: none;
 }
-
 .message-form .input-voice-message {
     display: none;
     margin: 0;

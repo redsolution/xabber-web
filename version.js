@@ -1,3 +1,3 @@
 define(function () { return JSON.parse(
-'{"version_number":"2.4.277","version_description":"added more omemo logs, added timeout to bundle request, fixed untrusted trust state text after retrusting, added text for newbie permissions"}'
+'{"version_number":"2.4.278","version_description":"changed context messages loading, fixed ui changes on contact searched messages click, fixed system messages handling in contact searched messages, changed invite sending error handling, fixed searched messages avatars image setting, added enabled default permissions count, fixed group edit membership resetting and header background, fixed chat search preloader for messages, fixed text popup position, "}'
 )});

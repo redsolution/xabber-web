@@ -478,12 +478,15 @@ xabber.SearchView = xabber.BasicView.extend({
               accounts.forEach((account) => {
                   let first_message = xabber.all_searched_messages.find(message => (message.account.get('jid') === account.get('jid')));
                   if (!first_message || account.searched_msgs_loaded) {
+                      this.$('.messages-preloader-wrap').addClass('hidden');
                       return;
                   }
                   options.account = account;
                   options.before = first_message.get('archive_id');
                   this.MAMRequest(this.query_text, options, (messages) => {
                       let dfd = new $.Deferred();
+                      if (!messages.length)
+                          this.$('.messages-preloader-wrap').addClass('hidden');
                       dfd.done(() => {
                           this.$('.messages-preloader-wrap').addClass('hidden');
                           this.$('.messages-list-wrap').switchClass('hidden', !this.$('.messages-list').children().length);
@@ -522,6 +525,9 @@ xabber.SearchView = xabber.BasicView.extend({
                               }
                           });
                       });
+                  }, (err) => {
+                      this.$('.messages-preloader-wrap').addClass('hidden');
+
                   });
               });
               (accounts.filter(account => account.searched_msgs_loaded).length === accounts.length) && (this._messages_loaded = true);
@@ -707,14 +713,18 @@ xabber.SearchView = xabber.BasicView.extend({
               account.searched_msgs_loaded = false;
               options.account = account;
               this.MAMRequest(query, options, (messages) => {
-                  if (!this.query_text)
+                  if (!this.query_text) {
+                      this.$('.messages-preloader-wrap').addClass('hidden');
                       return;
+                  }
 
                   let dfd = new $.Deferred();
                   dfd.done(() => {
                       accounts_count++;
-                      if (!this.query_text)
+                      if (!this.query_text) {
+                          this.$('.messages-preloader-wrap').addClass('hidden');
                           return;
+                      }
                       if (accounts_length === accounts_count){
                           this.$('.messages-preloader-wrap').addClass('hidden');
                           this.$('.messages-list-wrap').switchClass('hidden', !this.$('.messages-list').children().length);
@@ -758,6 +768,9 @@ xabber.SearchView = xabber.BasicView.extend({
                   if (!messages.length && count === messages.length){
                       dfd.resolve();
                   }
+              }, (err) => {
+                  this.$('.messages-preloader-wrap').addClass('hidden');
+
               });
           });
           (accounts.filter(account => account.searched_msgs_loaded).length === accounts.length) && (this._messages_loaded = true);

@@ -676,6 +676,8 @@ xabber.MessagesBase = Backbone.Collection.extend({
             return account.participant_messages.create(attrs);
 
         if (options.searched_message) {
+            if (attrs.type === 'system')
+                return;
             options.query && (attrs.query = options.query);
             options.searched_in_contact_messages && (attrs.searched_in_contact_messages = options.searched_in_contact_messages);
             return account.searched_messages.create(attrs);
@@ -1909,11 +1911,15 @@ xabber.JingleMessage = Backbone.Model.extend({
         let messages = options.mention && this.account.messages || options.searched_messages && !options.encrypted && this.account.searched_messages || options.message && xabber.all_searched_messages || this.account.messages,
             message = messages.get(unique_id),
             dfd = new $.Deferred;
+        let screen_is_set;
 
         dfd.done(() => {
             if (message) {
-                !options.do_not_change_screen && xabber.body.setScreen('all-chats', {});
-                !options.do_not_change_screen_in_chat && xabber.chats_view.openChat(this.item_view, {clear_search: !options.do_not_change_screen, screen: 'all-chats', force_show_placeholder: true});
+                if (!screen_is_set){
+                    !options.do_not_change_screen && xabber.body.setScreen('all-chats', {});
+                    xabber.chats_view.openChat(this.item_view, {clear_search: false, screen: 'all-chats', force_show_placeholder: true, save_right_content: options.save_right_content});
+                    screen_is_set = true;
+                }
                 if (options.searched_messages)
                     message.set('searched_message', false);
                 let stanza_id = message.get('stanza_id');
@@ -1962,7 +1968,7 @@ xabber.JingleMessage = Backbone.Model.extend({
                     if (err === 'no_messages' && !options.force_context){
                         if (this.item_view && !this.item_view.content)
                             this.item_view.content = new xabber.ChatContentView({chat_item: this.item_view});
-                        !options.do_not_change_screen_in_chat && xabber.chats_view.openChat(this.item_view, {clear_search: !options.do_not_change_screen, screen: 'all-chats'});
+                        !options.do_not_change_screen_in_chat && xabber.chats_view.openChat(this.item_view, {clear_search: !options.do_not_change_screen, screen: 'all-chats', save_right_content: options.save_right_content});
                         this.item_view.content.backToBottom({not_ev: true, stanza_id: stanza_id});
                         callback && callback();
                     } else if (err === 'no_messages' ){
@@ -2010,6 +2016,11 @@ xabber.JingleMessage = Backbone.Model.extend({
             });
             if (!message) {
                 let getMessageFunc = this.contact ? this.contact.getMessageByStanzaId.bind(this.contact) : this.account.getMessageByStanzaIdInSavedChat.bind(this.account);
+                if (!screen_is_set){
+                    !options.do_not_change_screen && xabber.body.setScreen('all-chats', {});
+                    xabber.chats_view.openChat(this.item_view, {clear_search: !options.do_not_change_screen, screen: 'all-chats', force_show_placeholder: true, save_right_content: options.save_right_content});
+                    screen_is_set = true;
+                }
                 getMessageFunc(unique_id, ($message) => {
                     if ($message === 'no_messages'){
                         if (options.open_mention_notification){
@@ -3766,19 +3777,20 @@ xabber.ChatItemView = xabber.BasicView.extend({
                           $(loaded_messages).each((idx, message) => {
                               let $message = $(message),
                                   $jingle_msg_propose = $message.find(`propose[xmlns="${Strophe.NS.JINGLE_MSG}"]`);
-                              if (!$jingle_msg_propose.length){
-                                  this.message_count++;
-                              }
                               this.account.chats.makeMessageObject($message, {
                                   searched_message: true,
                                   searched_in_contact_messages: true,
                                   query: query
+                              }).then((message_from_stanza) => {
+                                  if (message_from_stanza && !$jingle_msg_propose.length){
+                                      this.message_count++;
+                                  }
+                                  this.$('.messages-count').hideIf(!this.message_count);
+                                  this.$('.close-search-icon').hideIf(!this.message_count);
+                                  this.$('.search-results').hideIf(this.message_count);
+                                  this.$('.messages-count').text(xabber.getQuantityString("searched_messages_count", this.message_count));
                               });
                           });
-                          this.$('.messages-count').hideIf(!this.message_count);
-                          this.$('.close-search-icon').hideIf(!this.message_count);
-                          this.$('.search-results').hideIf(this.message_count);
-                          this.$('.messages-count').text(xabber.getQuantityString("searched_messages_count", this.message_count));
                       }
                       else {
                           this.emptyChat();
@@ -3863,7 +3875,7 @@ xabber.ChatItemView = xabber.BasicView.extend({
               this.hideSearch(true);
           }
           this.ps_container.perfectScrollbar('destroy');
-          this.model.getMessageContext($msg.data('uniqueid'), {searched_messages: true, do_not_change_screen_in_chat: true});
+          this.model.getMessageContext($msg.data('uniqueid'), {searched_messages: true, do_not_change_screen_in_chat: true, save_right_content: true});
       }
   });
 
@@ -10655,10 +10667,10 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
                 } else if (view.model.messages.length < 20)
                     view.content.loadPreviousHistory();
             }
-            if (!options.right_force_close && (
+            if (!options.right_force_close && !options.save_right_content && (
                 xabber.body.screen.get('right_contact') && (xabber.body.screen.get('right') === 'chat' || xabber.body.screen.get('right') === 'message_context' )
             )) {
-                xabber.body.setScreen((options.screen || 'all-chats'), {right_contact: ''});
+                xabber.body.setScreen((options.screen || 'all-chats'), {right_contact: ''}); //34
             }
             if (!view.model.get('loading_unread_history')){
                 let current_scrolling = view.content.getScrollTop() || view.content._scrolltop,
@@ -11369,7 +11381,8 @@ xabber.InvitationPanelView = xabber.SearchView.extend({
             return;
         }
         let selected_users_count = this.selected_contacts.length,
-            _dfd_invitations = new $.Deferred(), invitations_count = 0;
+            _dfd_invitations = new $.Deferred(), invitations_count = 0,
+            errors = [];
         _dfd_invitations.done((count) => {
             let toast_text;
             if (count === selected_users_count)
@@ -11377,14 +11390,22 @@ xabber.InvitationPanelView = xabber.SearchView.extend({
             else
                 toast_text = xabber.getQuantityString("groupchat__toast_failed_to_sent_invitations", selected_users_count);
             utils.callback_popup_message(toast_text, 2000);
-            this.contact.trigger('invitations_send')
+            if (errors.length){
+                let error_text = ''
+                _.each((errors), (error) => {
+                    error_text = error_text + error + '\n';
+                })
+                utils.dialogs.error(error_text);
+            }
+            this.contact.trigger('invitations_send');
         });
         $(this.selected_contacts).each((idx, item) => {
             this.sendInvite(item, () => {
                 invitations_count++;
                 if (idx === selected_users_count - 1)
                     _dfd_invitations.resolve(invitations_count);
-            }, () => {
+            }, (err) => {
+                err && errors.push(err);
                 if (idx === selected_users_count - 1)
                     _dfd_invitations.resolve(invitations_count);
             });
@@ -11446,13 +11467,14 @@ xabber.InvitationPanelView = xabber.SearchView.extend({
         if (reason_text) {
             iq.c('reason').t(reason_text);
         }
-        this.account.sendIQFast(iq, () => {
+        this.account.sendIQFast(iq, (res) => {
             this.sendInviteMessage(contact_jid);
             this.close();
             callback && callback();
         }, (iq) => {
+            let error_text = $(iq).find('error').find('text').text();
             this.onInviteError(iq);
-            errback && errback();
+            errback && errback(error_text && error_text);
         });
     },
 
