@@ -10317,7 +10317,7 @@ xabber.Roster = xabber.ContactsBase.extend({
             request_attrs.stamp = options.stamp;
         delete(options.stamp);
         delete(options.cached_conversations_exclude);
-        if (is_first_sync)
+        if (is_first_sync && !_.isNull(this.account.get('first_sync')))
             this.account.set('first_sync', undefined);
         let iq = $iq({type: 'get'}).c('query', request_attrs).cnode(new Strophe.RSM(options).toXML());
         this.account.sendFast(iq, (response) => {
@@ -11004,8 +11004,11 @@ xabber.Roster = xabber.ContactsBase.extend({
                     });
                     this.account.sendPresence();
                     this.account.dfd_presence.resolve();
-                    this.account.get('first_sync') && this.syncFromServer({stamp: this.account.get('first_sync'), max: constants.SYNCHRONIZATION_RSM_MAX, last_version_sync: true}, true);
-                    this.account.set('first_sync', null);
+                    if (this.account.get('first_sync')){
+                        let first_sync = this.account.get('first_sync');
+                        this.account.set('first_sync', null);
+                        this.syncFromServer({stamp: first_sync, max: constants.SYNCHRONIZATION_RSM_MAX, last_version_sync: true}, true)
+                    }
                     xabber.calls_view && xabber.calls_view.updateAccountsFilter(null,null,null,true);
                 }
             });

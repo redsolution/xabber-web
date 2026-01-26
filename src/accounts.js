@@ -2203,11 +2203,11 @@ xabber.Accounts = Backbone.CollectionWithStorage.extend({
 
     onActiveAfterIdle: function () {
         _.each(_.clone(this.models), function (account) {
-            if (account.get('enabled') && !account.session.get('reconnecting') && (account.get('first_sync') || _.isUndefined(account.get('first_sync')))) {
-                console.error(account);
-                console.error('account.reactivate');
-                account.reactivate();
-            }
+            // if (account.get('enabled') && !account.get('started_handling_sync') && !account.session.get('reconnecting') && (account.get('first_sync') || _.isUndefined(account.get('first_sync')))) {
+            //     console.error(account);
+            //     console.error('account.reactivate');
+            //     account.reactivate();
+            // }
         });
     },
 
