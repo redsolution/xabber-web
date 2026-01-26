@@ -4675,7 +4675,8 @@ xabber.ParticipantsViewRight = xabber.BasicView.extend({
                 }, (err) => {
                     console.error(err);
                     options.close_on_response && this.closeParentWindows();
-                    this.participant_properties_panel.open(participant, null, {no_edit: true});
+                    let is_own = participant_item.attr('data-jid') && participant_item.attr('data-jid') === this.account.get('jid');
+                    this.participant_properties_panel.open(participant, null, {no_edit: is_own ? false : true});
                     callback && callback(this)
                 });
             }
@@ -4870,6 +4871,7 @@ xabber.ParticipantPropertiesViewRight = xabber.BasicView.extend({
         } else {
             this.$('.buttons-wrap .button-wrap:not(.btn-chat-wrap):not(.btn-participant-messages-wrap)').switchClass('non-active', attrs.subscription === null);
         }
+        this.$('.btn-kick-participant-wrap').switchClass('non-active', this.participant.get('jid') === this.account.get('jid'));
         this.updateMemberAvatar(this.participant);
         this.participant_messages = [];
         this.actual_rights = [];
@@ -5055,6 +5057,7 @@ xabber.ParticipantPropertiesViewRight = xabber.BasicView.extend({
             );
         }
         this.onScroll();
+        this.render();
     },
 
     resetPanel: function () {
