@@ -240,6 +240,18 @@ xabber.ServerFeatures = Backbone.Collection.extend({
                     });
                 }
             }
+            if (form_type_val.length && form_type_val.text() === Strophe.NS.CONTACT_ADDRESSES && self.account.domain === from){
+                let abuse_info = $(this).find('field[var="abuse-addresses"] value');
+                if (abuse_info.length && abuse_info.text()){
+                    let abuse_info_text = abuse_info.map(function() {
+                        return $(this).text();
+                    }).get().join(',');
+                    self.create({
+                        'var': 'abuse-addresses',
+                        from: abuse_info_text
+                    });
+                }
+            }
         });
         if (this.get(Strophe.NS.XABBER_NOTIFY) && this.get(Strophe.NS.XABBER_NOTIFY).get('from')){
             let jid = this.get(Strophe.NS.XABBER_NOTIFY).get('from');
@@ -285,6 +297,16 @@ xabber.ServerFeatures = Backbone.Collection.extend({
             var: _var,
             from: feature.get('from'),
         });
+        if (_var === 'abuse-addresses'){
+            let abuse_used_jid = feature.get('from');
+            if (abuse_used_jid.split(',').length > 1){
+                _.each(abuse_used_jid.split(','), (item) => {
+                    item.includes('xmpp:') && (abuse_used_jid = item);
+                });
+            }
+            abuse_used_jid.includes('xmpp:') && (abuse_used_jid = abuse_used_jid.replace('xmpp:', ''));
+            feature.set('abuse_used_jid', abuse_used_jid);
+        }
         if (_var === 'media-gallery') {
             this.account.set('gallery_auth', false);
             if (!(this.account.get('gallery_token') && this.account.get('gallery_url')) || (this.account.get('gallery_url') !== feature.get('from')))

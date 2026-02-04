@@ -1220,6 +1220,7 @@ Strophe.addNamespace('FILES', 'https://xabber.com/protocol/files');
 Strophe.addNamespace('SUBSCRIPTION_PREAPPROVAL', 'urn:xmpp:features:pre-approval');
 Strophe.addNamespace('OGP', 'https://xabber.com/protocol/ogp');
 Strophe.addNamespace('URLDISCO', 'urn:xabber:http:url');
+Strophe.addNamespace('CONTACT_ADDRESSES', 'http://jabber.org/network/serverinfo');
 Strophe.addNamespace('MEDIAGALLERY', 'urn:xabber:http:url:mediagallery');
 Strophe.addNamespace('PROXY_VIEWER', 'urn:xabber:http:url:privacyproxy');
 Strophe.addNamespace('EPHEMERAL', 'urn:xmpp:ephemeral:0');

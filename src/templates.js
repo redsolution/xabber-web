@@ -224,6 +224,7 @@ import $ from "jquery";
     addTemplate('chats.forward_panel');
     addTemplate('chats.chat_placeholder');
     addTemplate('chats.delete_with_options');
+    addTemplate('chats.report_abuse');
     addTemplate('chats.message_item');
     addTemplate('chats.messages.main');
     addTemplate('chats.messages.searched');

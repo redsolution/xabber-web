@@ -26683,3 +26683,16 @@ ul.restrictions-list-content>li {
     bottom: -56px;
     top: unset;
 }
+
+/*report-abuse-modal*/
+
+.report-abuse-modal{
+    width: 60% !important;
+}
+
+.report-abuse-modal .text-field{
+    resize: none;
+    height: 64px;
+    margin-top: 8px !important;
+    padding: 4px 8px !important;
+}

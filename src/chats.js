@@ -2423,7 +2423,7 @@ xabber.ChatItemView = xabber.BasicView.extend({
         if (!this.model.sync_created)
             this.content = new xabber.ChatContentView({chat_item: this});
         this.content_placeholder = new xabber.ChatContentPlaceholderView();
-        if (this.model.get('jid') === this.account.get('jid'))
+        if (this.model.get('jid') === this.account.get('jid') || this.account.server_features.get('abuse-addresses') && this.account.server_features.get('abuse-addresses').get('abuse_used_jid') === this.model.get('jid'))
             this.$el.addClass('hidden3');
         this.updateName();
         this.updateStatus();
@@ -2793,7 +2793,7 @@ xabber.ChatItemView = xabber.BasicView.extend({
     },
 
     updateLastMessage: function (msg) {
-        if (this.model.get('jid') === this.account.get('jid')){
+        if (this.model.get('jid') === this.account.get('jid') || this.account.server_features.get('abuse-addresses') && this.account.server_features.get('abuse-addresses').get('abuse_used_jid') === this.model.get('jid')){
             this.$el.addClass('hidden2');
             return;
         }
@@ -5253,7 +5253,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
     },
 
     requestMissedMessages: function (timestamp) {
-        if (this.model.get('jid') === this.account.get('jid'))
+        if (this.model.get('jid') === this.account.get('jid') || this.account.server_features.get('abuse-addresses') && this.account.server_features.get('abuse-addresses').get('abuse_used_jid') === this.model.get('jid'))
             return;
         if (!timestamp)
             return;
@@ -9011,6 +9011,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
         $modal.find('.btn-quote-message').showIf(selected_text);
         $modal.find('.btn-pin').showIf(this.model.get('group_chat'));
         $modal.find('.btn-reply-message').hideIf(this.model.get('blocked'));
+        $modal.find('.btn-report-abuse').hideIf(my_msg || this.model.get('encrypted') || !(this.account.server_features.get('abuse-addresses') && this.account.server_features.get('abuse-addresses').get('from')));
         $modal.find('.btn-forward-message').hideIf(this.model.get('encrypted'));
         $modal.find('.btn-edit-message').hideIf(!(my_msg) || this.$('.chat-message.saved-main.selected').length || this.model.get('blocked') || this.$el.hasClass('messages-context-wrap'));
 
@@ -9087,6 +9088,10 @@ xabber.ChatContentView = xabber.BasicView.extend({
         $modal.find('.btn-delete-message').one(`click.${unique_modal_id}`, () => {
             $overlay.click();
             this.bottom.deleteMessages(null, [msg]);
+        });
+        $modal.find('.btn-report-abuse').one(`click.${unique_modal_id}`, () => {
+            $overlay.click();
+            this.bottom.reportMessages(null, [msg]);
         });
         $modal.find('.btn-restrict').one(`click.${unique_modal_id}`, () => {
             let $msg = $elem,
@@ -13100,6 +13105,7 @@ xabber.ChatBottomView = xabber.BasicView.extend({
         "click .forward-message": "forwardMessages",
         "click .pin-message": "pinMessage",
         "click .copy-message": "copyMessages",
+        "click .report-message": "reportMessages",
         "click .edit-message": "showEditPanel",
         "click .delete-message": "deleteMessages",
         "click .close-message-panel": "resetSelectedMessages",
@@ -14947,6 +14953,14 @@ xabber.ChatBottomView = xabber.BasicView.extend({
         }
     },
 
+    silentSubmit: function (text) {
+        text = text || '';
+        if (text || this.fwd_messages.length) {
+            this.view.onSubmit(text, this.fwd_messages, {mentions: [], markup_references: [], link_references: [], attached_files: [], blockquotes: []});
+        }
+        this.unsetForwardedMessages();
+    },
+
     setEditedMessage: function (message) {
         this.click_counter = 0;
         this.setDefaultPlaceholder();
@@ -15124,19 +15138,18 @@ xabber.ChatBottomView = xabber.BasicView.extend({
         if (length) {
             this.setButtonsWidth();
             let my_msg = false;
-            if (length === 1) {
-                if ($selected_msgs.first().data('from') === this.account.get('jid'))
+            _.each($selected_msgs, (msg) => {
+                if ($(msg).data('from') === this.account.get('jid'))
                     my_msg = true;
                 if (this.contact && this.contact.my_info)
-                    if ($selected_msgs.first().data('from') === this.contact.my_info.get('id'))
+                    if ($(msg).data('from') === this.contact.my_info.get('id'))
                         my_msg = true;
-                if ($selected_msgs.first().find('.mdi-play').length)
-                    my_msg = false;
-            }
+            })
             $message_actions.find('.messages-select-count')
                 .text(xabber.getQuantityString("chat_screen__bottom_panel__selected_messages__text", length));
             $message_actions.find('.reply-message-wrap').hideIf(this.model.get('blocked'));
             $message_actions.find('.forward-message-wrap').hideIf(this.model.get('encrypted'));
+            $message_actions.find('.report-message-wrap').hideIf(my_msg || this.model.get('encrypted') || !(this.account.server_features.get('abuse-addresses') && this.account.server_features.get('abuse-addresses').get('from')));
         } else {
             this.focusOnInput();
         }
@@ -15174,6 +15187,28 @@ xabber.ChatBottomView = xabber.BasicView.extend({
         forced_message && (msgs = [forced_message]);
         !forced_message && this.resetSelectedMessages();
         this.pushMessagesToClipboard(msgs, only_text);
+    },
+
+    reportMessages: function (ev, forced_message) {
+
+        if (!(this.account.server_features.get('abuse-addresses') && this.account.server_features.get('abuse-addresses').get('from')) || this.model.get('encrypted'))
+            return;
+        let $msgs = this.content_view.$('.chat-message.selected'),
+            msgs = [];
+        $msgs.each((idx, item) => {
+            let msg = this.messages_arr.get(item.dataset.uniqueid);
+            msg && msgs.push(msg);
+        });
+        forced_message && (msgs = forced_message);
+        this.resetSelectedMessages();
+
+        !this.report_abuse_modal && (this.report_abuse_modal = new xabber.ReportAbuseView());
+        this.report_abuse_modal.open({
+            contact: this.contact,
+            account: this.account,
+            messages: msgs,
+            parent: this,
+        });
     },
 
     editMessage: function (text, text_markups) {
@@ -16270,7 +16305,14 @@ xabber.DeleteWithOptionsView = xabber.BasicView.extend({
                 actions_total_count = 0;
 
             if (this.$('#delete-options-spam').prop('checked')){
-                // do something with spam
+                actions_total_count++;
+                this.reportAbuse(() => {
+                    actions_count++
+                    if (actions_count === actions_total_count){
+                        dfd.resolve();
+                        return;
+                    }
+                });
             }
             if (this.$('#delete-options-delete-all').prop('checked')){
                 let participant = this.model.participants.get(this.participant_id);
@@ -16321,6 +16363,33 @@ xabber.DeleteWithOptionsView = xabber.BasicView.extend({
             }
         } else {
             dfd.resolve();
+        }
+    },
+
+    reportAbuse: function (callback) {
+        if (this.account.server_features.get('abuse-addresses') && this.account.server_features.get('abuse-addresses').get('from')){
+            let abuse_from = this.account.server_features.get('abuse-addresses').get('from');
+            if (abuse_from.split(',').length > 1){
+                _.each(abuse_from.split(','), (item) => {
+                    item.includes('xmpp:') && (abuse_from = item);
+                });
+            }
+            abuse_from.includes('xmpp:') && (abuse_from = abuse_from.replace('xmpp:', ''));
+
+            let contact = this.account.contacts.get(abuse_from);
+            if (!contact)
+                contact = this.account.contacts.mergeContact(abuse_from)
+
+            let chat = this.account.chats.getChat(contact);
+
+            if (!chat.item_view.content)
+                chat.item_view.content = new xabber.ChatContentView({chat_item: chat.item_view});
+            chat.item_view.content.bottom.setForwardedMessages(this.messages);
+            chat.item_view.content.bottom.silentSubmit('report: spam');
+
+            callback && callback();
+        } else {
+            callback && callback();
         }
     },
 
@@ -16399,6 +16468,104 @@ xabber.DeleteWithOptionsView = xabber.BasicView.extend({
 
     checkTimersDifference: function () {
 
+    },
+
+    onHide: function () {
+        this.$el.detach();
+    },
+
+    close: function () {
+        this.closeModal();
+    },
+
+    closeModal: function () {
+        this.$el.closeModal({ complete: this.hide.bind(this) });
+    }
+});
+
+xabber.ReportAbuseView = xabber.BasicView.extend({
+    className: 'modal main-modal report-abuse-modal',
+    template: templates.report_abuse,
+    ps_selector: '.modal-content',
+
+    events: {
+        "click .btn-proceed": "proceed",
+        "click .btn-cancel": "close",
+        "change input[name='report-options']": "onOptionCheckboxChange",
+    },
+
+    open: function (options) {
+        this.account = options.account;
+        this.model = options.contact;
+        this.messages = options.messages;
+        this.parent = options.parent;
+        this.show();
+    },
+
+    updateColorScheme: function () {
+        this.account && this.$el.attr('data-color', this.account.settings.get('color'));
+    },
+
+    render: function () {
+        this.$el.openModal({
+            ready: this.onRender.bind(this),
+            complete: this.close.bind(this)
+        });
+    },
+
+    onRender: function () {
+        this.$('input[name="report-options"]').prop('checked', false);
+        this.$('#report-other-text').val('');
+        if (this.messages.length){
+            this.$('.modal-header span').text(xabber.getQuantityString("dialog_report_abuse__header", this.messages.length));
+            let type = this.model.get('group_chat') ? xabber.getString('group') : xabber.getString('user');
+            this.$('.report-introductory-text').html(xabber.getString("dialog_report_abuse__introductory_text", [Strophe.getDomainFromJid(this.model.get('jid')), type]));
+        }
+        this.onOptionCheckboxChange();
+    },
+
+    onOptionCheckboxChange: function () {
+        this.$('.btn-proceed').switchClass('non-active', !this.$('input[name="report-options"]:checked').length)
+        this.$('#report-other-text').switchClass('hidden', !this.$('#report-other').prop('checked'))
+    },
+
+    proceed: function (ev) {
+        if ($(ev.target).closest('.btn-proceed').hasClass('non-active'))
+            return;
+
+        let selected_reasons = [];
+        _.each(this.$('input[name="report-options"]:checked'), (item) => {
+            if ($(item).attr('id') === 'report-other'){
+                selected_reasons.push(`${$(item).val()} ${this.$('#report-other-text').val()}`);
+            } else {
+                selected_reasons.push($(item).val());
+            }
+        });
+
+        if (this.account.server_features.get('abuse-addresses') && this.account.server_features.get('abuse-addresses').get('from')){
+            let abuse_from = this.account.server_features.get('abuse-addresses').get('from');
+            if (abuse_from.split(',').length > 1){
+                _.each(abuse_from.split(','), (item) => {
+                    item.includes('xmpp:') && (abuse_from = item);
+                });
+            }
+            abuse_from.includes('xmpp:') && (abuse_from = abuse_from.replace('xmpp:', ''));
+
+            let contact = this.account.contacts.get(abuse_from);
+            if (!contact)
+                contact = this.account.contacts.mergeContact(abuse_from)
+
+            let chat = this.account.chats.getChat(contact);
+
+            if (!chat.item_view.content)
+                chat.item_view.content = new xabber.ChatContentView({chat_item: chat.item_view});
+            chat.item_view.content.bottom.setForwardedMessages(this.messages);
+            chat.item_view.content.bottom.silentSubmit(`report: ${selected_reasons.join(', ')}`);
+
+            this.close();
+        } else {
+            this.close();
+        }
     },
 
     onHide: function () {
