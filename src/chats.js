@@ -2423,7 +2423,7 @@ xabber.ChatItemView = xabber.BasicView.extend({
         if (!this.model.sync_created)
             this.content = new xabber.ChatContentView({chat_item: this});
         this.content_placeholder = new xabber.ChatContentPlaceholderView();
-        if (this.model.get('jid') === this.account.get('jid') || this.account.server_features.get('abuse-addresses') && this.account.server_features.get('abuse-addresses').get('abuse_used_jid') === this.model.get('jid'))
+        if (this.model.get('jid') === this.account.get('jid') || this.account.server_features.get('abuse-addresses') && this.account.server_features.get('abuse-addresses').get('abuse_used_jid') === this.model.get('jid') ||  (this.contact && this.contact.get('abuse_address')))
             this.$el.addClass('hidden3');
         this.updateName();
         this.updateStatus();
@@ -2793,7 +2793,7 @@ xabber.ChatItemView = xabber.BasicView.extend({
     },
 
     updateLastMessage: function (msg) {
-        if (this.model.get('jid') === this.account.get('jid') || this.account.server_features.get('abuse-addresses') && this.account.server_features.get('abuse-addresses').get('abuse_used_jid') === this.model.get('jid')){
+        if (this.model.get('jid') === this.account.get('jid') || this.account.server_features.get('abuse-addresses') && this.account.server_features.get('abuse-addresses').get('abuse_used_jid') === this.model.get('jid') ||  (this.contact && this.contact.get('abuse_address'))){
             this.$el.addClass('hidden2');
             return;
         }
@@ -5253,7 +5253,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
     },
 
     requestMissedMessages: function (timestamp) {
-        if (this.model.get('jid') === this.account.get('jid') || this.account.server_features.get('abuse-addresses') && this.account.server_features.get('abuse-addresses').get('abuse_used_jid') === this.model.get('jid'))
+        if (this.model.get('jid') === this.account.get('jid') || this.account.server_features.get('abuse-addresses') && this.account.server_features.get('abuse-addresses').get('abuse_used_jid') === this.model.get('jid') || (this.contact && this.contact.get('abuse_address')))
             return;
         if (!timestamp)
             return;
@@ -9011,7 +9011,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
         $modal.find('.btn-quote-message').showIf(selected_text);
         $modal.find('.btn-pin').showIf(this.model.get('group_chat'));
         $modal.find('.btn-reply-message').hideIf(this.model.get('blocked'));
-        $modal.find('.btn-report-abuse').hideIf(my_msg || this.model.get('encrypted') || !(this.account.server_features.get('abuse-addresses') && this.account.server_features.get('abuse-addresses').get('from')));
+        $modal.find('.btn-report-abuse').hideIf(my_msg || this.model.get('encrypted'));
         $modal.find('.btn-forward-message').hideIf(this.model.get('encrypted'));
         $modal.find('.btn-edit-message').hideIf(!(my_msg) || this.$('.chat-message.saved-main.selected').length || this.model.get('blocked') || this.$el.hasClass('messages-context-wrap'));
 
@@ -15149,7 +15149,7 @@ xabber.ChatBottomView = xabber.BasicView.extend({
                 .text(xabber.getQuantityString("chat_screen__bottom_panel__selected_messages__text", length));
             $message_actions.find('.reply-message-wrap').hideIf(this.model.get('blocked'));
             $message_actions.find('.forward-message-wrap').hideIf(this.model.get('encrypted'));
-            $message_actions.find('.report-message-wrap').hideIf(my_msg || this.model.get('encrypted') || !(this.account.server_features.get('abuse-addresses') && this.account.server_features.get('abuse-addresses').get('from')));
+            $message_actions.find('.report-message-wrap').hideIf(my_msg || this.model.get('encrypted'));
         } else {
             this.focusOnInput();
         }
@@ -15190,25 +15190,64 @@ xabber.ChatBottomView = xabber.BasicView.extend({
     },
 
     reportMessages: function (ev, forced_message) {
-
-        if (!(this.account.server_features.get('abuse-addresses') && this.account.server_features.get('abuse-addresses').get('from')) || this.model.get('encrypted'))
+        if (this.model.get('encrypted'))
             return;
-        let $msgs = this.content_view.$('.chat-message.selected'),
-            msgs = [];
-        $msgs.each((idx, item) => {
-            let msg = this.messages_arr.get(item.dataset.uniqueid);
-            msg && msgs.push(msg);
-        });
-        forced_message && (msgs = forced_message);
-        this.resetSelectedMessages();
+        let dfd = new $.Deferred();
 
-        !this.report_abuse_modal && (this.report_abuse_modal = new xabber.ReportAbuseView());
-        this.report_abuse_modal.open({
-            contact: this.contact,
-            account: this.account,
-            messages: msgs,
-            parent: this,
-        });
+        let abuse_address;
+        if (this.account.server_features.get('abuse-addresses') && this.account.server_features.get('abuse-addresses').get('from')){
+            let abuse_from = this.account.server_features.get('abuse-addresses').get('from');
+            if (abuse_from.split(',').length > 1){
+                _.each(abuse_from.split(','), (item) => {
+                    item.includes('xmpp:') && (abuse_from = item);
+                });
+            }
+            abuse_from.includes('xmpp:') && (abuse_address = abuse_from.replace('xmpp:', ''));
+        }
+
+        dfd.done(() => {
+            if (!abuse_address){
+                utils.dialogs.error(xabber.getString("report_abuse__missing_abuse_address"));
+                return;
+            }
+            let $msgs = this.content_view.$('.chat-message.selected'),
+                msgs = [];
+            $msgs.each((idx, item) => {
+                let msg = this.messages_arr.get(item.dataset.uniqueid);
+                msg && msgs.push(msg);
+            });
+            forced_message && (msgs = forced_message);
+            this.resetSelectedMessages();
+
+            !this.report_abuse_modal && (this.report_abuse_modal = new xabber.ReportAbuseView());
+            this.report_abuse_modal.open({
+                contact: this.contact,
+                account: this.account,
+                messages: msgs,
+                parent: this,
+                abuse_address: abuse_address,
+            });
+        })
+
+        if (this.contact.domain !== this.account.domain){
+            this.account.connection.disco.info(this.contact.domain, null, (iq) => {
+                let abuse_info = $(iq).find('field[var="abuse-addresses"] value');
+                if (abuse_info.length && abuse_info.text()){
+                    let abuse_from = abuse_info.text();
+                    if (abuse_from.split(',').length > 1){
+                        _.each(abuse_from.split(','), (item) => {
+                            item.includes('xmpp:') && (abuse_from = item);
+                        });
+                    }
+                    abuse_from.includes('xmpp:') && (abuse_address = abuse_from.replace('xmpp:', ''));
+                }
+                dfd.resolve();
+            }, () => {
+                dfd.resolve();
+            });
+        } else {
+            dfd.resolve();
+        }
     },
 
     editMessage: function (text, text_markups) {
@@ -16367,6 +16406,7 @@ xabber.DeleteWithOptionsView = xabber.BasicView.extend({
     },
 
     reportAbuse: function (callback) {
+        let abuse_address;
         if (this.account.server_features.get('abuse-addresses') && this.account.server_features.get('abuse-addresses').get('from')){
             let abuse_from = this.account.server_features.get('abuse-addresses').get('from');
             if (abuse_from.split(',').length > 1){
@@ -16374,11 +16414,19 @@ xabber.DeleteWithOptionsView = xabber.BasicView.extend({
                     item.includes('xmpp:') && (abuse_from = item);
                 });
             }
-            abuse_from.includes('xmpp:') && (abuse_from = abuse_from.replace('xmpp:', ''));
+            abuse_from.includes('xmpp:') && (abuse_address = abuse_from.replace('xmpp:', ''));
+        }
 
-            let contact = this.account.contacts.get(abuse_from);
+        dfd.done(() => {
+            if (!abuse_address){
+                utils.dialogs.error(xabber.getString("report_abuse__missing_abuse_address"));
+                callback && callback();
+                return;
+            }
+
+            let contact = this.account.contacts.get(abuse_address);
             if (!contact)
-                contact = this.account.contacts.mergeContact(abuse_from)
+                contact = this.account.contacts.mergeContact(abuse_address)
 
             let chat = this.account.chats.getChat(contact);
 
@@ -16388,8 +16436,27 @@ xabber.DeleteWithOptionsView = xabber.BasicView.extend({
             chat.item_view.content.bottom.silentSubmit('report: spam');
 
             callback && callback();
+
+        })
+
+        if (this.model.domain !== this.account.domain){
+            this.account.connection.disco.info(this.model.domain, null, (iq) => {
+                let abuse_info = $(iq).find('field[var="abuse-addresses"] value');
+                if (abuse_info.length && abuse_info.text()){
+                    let abuse_from = abuse_info.text();
+                    if (abuse_from.split(',').length > 1){
+                        _.each(abuse_from.split(','), (item) => {
+                            item.includes('xmpp:') && (abuse_from = item);
+                        });
+                    }
+                    abuse_from.includes('xmpp:') && (abuse_address = abuse_from.replace('xmpp:', ''));
+                }
+                dfd.resolve();
+            }, () => {
+                dfd.resolve();
+            });
         } else {
-            callback && callback();
+            dfd.resolve();
         }
     },
 
@@ -16499,6 +16566,9 @@ xabber.ReportAbuseView = xabber.BasicView.extend({
         this.model = options.contact;
         this.messages = options.messages;
         this.parent = options.parent;
+        this.abuse_address = options.abuse_address;
+        if (!this.abuse_address)
+            return;
         this.show();
     },
 
@@ -16542,18 +16612,11 @@ xabber.ReportAbuseView = xabber.BasicView.extend({
             }
         });
 
-        if (this.account.server_features.get('abuse-addresses') && this.account.server_features.get('abuse-addresses').get('from')){
-            let abuse_from = this.account.server_features.get('abuse-addresses').get('from');
-            if (abuse_from.split(',').length > 1){
-                _.each(abuse_from.split(','), (item) => {
-                    item.includes('xmpp:') && (abuse_from = item);
-                });
-            }
-            abuse_from.includes('xmpp:') && (abuse_from = abuse_from.replace('xmpp:', ''));
+        if (this.abuse_address){
 
-            let contact = this.account.contacts.get(abuse_from);
+            let contact = this.account.contacts.get(this.abuse_address);
             if (!contact)
-                contact = this.account.contacts.mergeContact(abuse_from)
+                contact = this.account.contacts.mergeContact(this.abuse_address)
 
             let chat = this.account.chats.getChat(contact);
 
