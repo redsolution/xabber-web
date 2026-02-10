@@ -2,21 +2,9 @@
     <div class="modal-header">
         <span>{[print(xabber.getString("dialog_set_status__header"))]}</span>
     </div>
-    <ul class="status-values noselect">
-        <div class="loading-status">
-            <div class="preloader-wrapper preloader-17px active">
-                <div class="spinner-layer">
-                    <div class="circle-clipper left">
-                        <div class="circle"></div>
-                    </div>
-                    <div class="gap-patch">
-                        <div class="circle"></div>
-                    </div>
-                    <div class="circle-clipper right">
-                        <div class="circle"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </ul>
+    <input class="group-status-input input-glow rich-textarea field-input" type="text">
+    <div class="modal-footer">
+        <button class="btn-flat btn-main btn-set">{[print(xabber.getString("set"))]}</button>
+        <button class="btn-flat btn-main btn-dark btn-cancel">{[print(xabber.getString("cancel"))]}</button>
+    </div>
 </div>

@@ -8452,6 +8452,12 @@ input[type=text].simple-input-field:hover {
 .change-status-modal .status-message-wrap{
     margin-top: 16px;
 }
+.change-status-modal .group-status-input{
+    width: 80% !important;
+    position: relative;
+    left: 50%;
+    transform: translate(-50%);
+}
 .change-status-modal .status-message-wrap .static-label{
     top: -18px;
 }

@@ -247,6 +247,7 @@ xabber.MessagesBase = Backbone.Collection.extend({
             let prev_group_info = contact.get('group_info') || {};
             _.extend(prev_group_info, group_info_attributes);
             contact.set('group_info', prev_group_info);
+            contact.trigger('group_info_updated');
         }
 
         return chat.messages.createSystemMessage(_.extend(attrs, {
@@ -495,6 +496,7 @@ xabber.MessagesBase = Backbone.Collection.extend({
             } else if (type === 'mutable') {
                 let $geolocation = $reference.children(`geoloc[xmlns="${Strophe.NS.GEOLOC}"]`).first(),
                     loc_attrs = {};
+                let $file_sharing = $reference.find(`file-sharing[xmlns="${Strophe.NS.FILES}"]`).first();
                 if ($geolocation.children('lat').text() && $geolocation.children('lon').text()){
                     loc_attrs = {
                         lat: $geolocation.children('lat').text(),
@@ -502,8 +504,7 @@ xabber.MessagesBase = Backbone.Collection.extend({
                     };
                     locations.push(loc_attrs);
                     mutable_content.push({ start: begin, end: end, type: 'geolocation'});
-                }
-                if ($reference.children(`ogp[xmlns="${Strophe.NS.OGP}"]`).length) {
+                } else if ($reference.children(`ogp[xmlns="${Strophe.NS.OGP}"]`).length) {
                     let $ogp = $reference.children(`ogp[xmlns="${Strophe.NS.OGP}"]`).first(),
                         link_reference_attrs = {};
                     if ($ogp.length) {
@@ -524,11 +525,9 @@ xabber.MessagesBase = Backbone.Collection.extend({
                         link_references.push(link_reference_attrs);
                         mutable_content.push({start: begin, end: end, type: 'link_reference'});
                     }
-                }
-                let $file_sharing = $reference.find(`file-sharing[xmlns="${Strophe.NS.FILES}"]`).first();
-                if ($reference.children('forwarded').length)
-                    mutable_content.push({ start: begin, end: end, type: 'forward'});
-                else if ($file_sharing.length) {
+                } else if ($reference.children('forwarded').length) {
+                    mutable_content.push({start: begin, end: end, type: 'forward'});
+                } else if ($file_sharing.length) {
                     let type = $file_sharing.parent(`voice-message[xmlns="${Strophe.NS.VOICE_MESSAGE}"]`).length ? 'voice' : 'file',
                         $file = $file_sharing.children('file'), sources = [];
                     mutable_content.push({ start: begin, end: end, type: type});
@@ -560,6 +559,10 @@ xabber.MessagesBase = Backbone.Collection.extend({
                         videos.push(file_attrs);
                     else
                         files.push(file_attrs);
+                } else if (!$reference.children().length) {
+                    mutable_content.push({start: begin, end: end, type: 'empty_mutable'});
+                } else {
+                    mutable_content.push({start: begin, end: end, type: 'unknown_mutable'});
                 }
             } else if (type === 'data') {}
         });
@@ -567,12 +570,8 @@ xabber.MessagesBase = Backbone.Collection.extend({
         let groupchat_message = options.notification_msg ? $notification_msg : $message
 
         groupchat_message.children('x[xmlns="' + Strophe.NS.GROUP_CHAT + '"]').each((idx, x_elem) => {
-            let $reference = $(x_elem).children(`reference[type="mutable"][xmlns="${Strophe.NS.REFERENCE}"]`),
-                $user = $reference.children(`user[xmlns="${Strophe.NS.GROUP_CHAT}"]`).first();
-                if ($reference.length) {
-                    let begin = parseInt($reference.attr('begin')),
-                        end = parseInt($reference.attr('end'));
-                    mutable_content.push({start: begin, end: end, type: 'groupchat'});
+            let $user = $(x_elem).children(`user`).first();
+                if ($user.length) {
                     let user_id = $user.attr('id'),
                         user_jid = $user.children('jid').text();
                     _.extend(attrs, {
@@ -581,8 +580,8 @@ xabber.MessagesBase = Backbone.Collection.extend({
                             jid: user_jid,
                             nickname: $user.children('nickname').text() || user_jid || user_id,
                             role: $user.children('role').text(),
-                            avatar: $user.children(`metadata[xmlns="${Strophe.NS.PUBSUB_AVATAR_METADATA}"]`).children('info').attr('id'),
-                            avatar_url: $user.children(`metadata[xmlns="${Strophe.NS.PUBSUB_AVATAR_METADATA}"]`).children('info').attr('url'),
+                            avatar: $user.children(`avatar`).children('info').attr('id'),
+                            avatar_url: $user.children(`avatar`).children('info').attr('url'),
                             badge: $user.children('badge').text()
                         },
                         from_jid: user_jid || user_id,
@@ -614,11 +613,6 @@ xabber.MessagesBase = Backbone.Collection.extend({
         (options.replaced || videos.length) && (attrs.videos = videos);
         (options.replaced || link_references.length) && (attrs.link_references = link_references);
 
-        if ($message.children(`x[xmlns="${Strophe.NS.GROUP_CHAT}#system-message"]`).length) {
-            attrs.type = 'system';
-            attrs.participants_version = $message.children(`x[xmlns="${Strophe.NS.GROUP_CHAT}#system-message"]`).attr('version');
-        }
-
         if ($message.children(`x[xmlns="${Strophe.NS.DATAFORM}"]`).length &&
             $message.children(`x[xmlns="${Strophe.NS.DATAFORM}"]`).find('field[var="FORM_TYPE"][type="hidden"] value').text() === Strophe.NS.WEBCHAT) {
             let addresses = [];
@@ -633,6 +627,16 @@ xabber.MessagesBase = Backbone.Collection.extend({
 
         if (!attrs.forwarded_message && body.removeEmoji() === "")
             attrs.only_emoji = Array.from(body).length;
+
+
+        if (options.groupchat_system_msg && options.groupchat_system_msg_type) {
+            attrs.type = 'system';
+            attrs.groupchat_system_msg = options.groupchat_system_msg;
+            attrs.groupchat_system_msg_type = options.groupchat_system_msg_type;
+            attrs.groupchat_system_msg_nickname = options.groupchat_system_msg_nickname;
+            if (attrs.groupchat_system_msg_type !== 'update')
+                body = xabber.getString(`group_system_message_${attrs.groupchat_system_msg_type}_text`, [attrs.groupchat_system_msg_nickname])
+        }
 
         attrs.message = body;
 
@@ -650,7 +654,7 @@ xabber.MessagesBase = Backbone.Collection.extend({
         options.synced_msg && (attrs.synced_from_server = true);
         options.missed_history && (attrs.missed_msg = true);
         options.notificications_month && (attrs.notificications_month_missed_msg = true);
-        if (options.is_unread_archived && (attrs.type !== 'system')){
+        if (options.is_unread_archived && ((attrs.type !== 'system') || attrs.groupchat_system_msg)){
             let last_read_msg = this.find(m => this.chat.get('last_read_msg') && (m.get('stanza_id') === this.chat.get('last_read_msg') || m.get('contact_stanza_id') === this.chat.get('last_read_msg')));
             if (last_read_msg){
                 if (Number(moment(attrs.time)) > last_read_msg.get('timestamp'))
@@ -1968,7 +1972,7 @@ xabber.JingleMessage = Backbone.Model.extend({
                     if (err === 'no_messages' && !options.force_context){
                         if (this.item_view && !this.item_view.content)
                             this.item_view.content = new xabber.ChatContentView({chat_item: this.item_view});
-                        !options.do_not_change_screen_in_chat && xabber.chats_view.openChat(this.item_view, {clear_search: !options.do_not_change_screen, screen: 'all-chats', save_right_content: options.save_right_content});
+                        xabber.chats_view.openChat(this.item_view, {clear_search: !options.do_not_change_screen, screen: 'all-chats', save_right_content: options.save_right_content});
                         this.item_view.content.backToBottom({not_ev: true, stanza_id: stanza_id});
                         callback && callback();
                     } else if (err === 'no_messages' ){
@@ -3695,6 +3699,7 @@ xabber.ChatItemView = xabber.BasicView.extend({
 
       clearSearch: function () {
           this.$search_form.find('input').val('');
+          this.$search_form.find('input').focusout();
           if (this.is_saved){
               if (this.model && this.model.get('saved_search_panel')) {
                   this.model.set('saved_search_panel', undefined);
@@ -4180,6 +4185,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
             this.listenTo(this.contact, 'change:group_chat', this.updateGroupChat);
             this.listenTo(this.contact, 'remove_from_blocklist', this.loadLastHistory);
             this.listenTo(this.contact, 'update_trusted', this.updateMsgsMissingDevices);
+            this.listenTo(this.contact, 'update_my_info', this.updateMyAvatar);
             this.listenTo(this.account.contacts, 'change:name', this.updateName);
             this.listenTo(this.account.contacts, 'change:image', this.updateAvatar);
         }
@@ -4197,10 +4203,6 @@ xabber.ChatContentView = xabber.BasicView.extend({
 
     render: function () {
         this.cancelSearch();
-        if (this._prev_scrolltop)
-            this.scrollTo(this._prev_scrolltop);
-        else
-            this.scrollToBottom();
         this.onScroll();
         this.updateCounter();
         this.updateContactStatus();
@@ -4214,6 +4216,12 @@ xabber.ChatContentView = xabber.BasicView.extend({
         if (this.model.get('encrypted'))
             this.renderActiveTrustSession();
         xabber.chat_body.updateBodyNotifications(this.model);
+        if (this._scrolltop) {
+            setTimeout(() => {
+                this.scrollTo(this._scrolltop);
+            }, 50);
+        } else
+            this.scrollToBottom();
     },
 
     renderActiveTrustSession: function () {
@@ -4578,16 +4586,33 @@ xabber.ChatContentView = xabber.BasicView.extend({
     },
 
     updateMyAvatar: function () {
-        let image = this.account.cached_image,
-            jid = this.account.get('jid');
-        this.$(`.chat-message.with-author[data-from="${jid}"]`).each(function () {
-            $(this).find('.left-side .circle-avatar').setAvatar(
-                image, this.avatar_size, this.account);
-        });
-        this.$(`.fwd-message.with-author[data-from="${jid}"]`).each(function () {
-            $(this).find('.fwd-left-side .circle-avatar').setAvatar(
-                image, this.avatar_size, this.account);
-        });
+        let image,
+            jid = this.account.get('jid')
+
+        if (this.model.get('group_chat')) {
+            if (this.contact.my_info) {
+                image = this.contact.my_info.get('b64_avatar');
+                if (!image) {
+                    if (this.contact.my_info.get('avatar_url'))
+                        image = this.contact.my_info.get('avatar_url');
+                    !image && (image = Images.getDefaultAvatar(this.contact.my_info.get('nickname')));
+                } else
+                    image = Images.getCachedImage(image);
+            }
+        } else {
+            image = this.account.cached_image;
+        }
+
+        if (image) {
+            this.$(`.chat-message.with-author[data-from="${jid}"]`).each(function () {
+                $(this).find('.left-side .circle-avatar').setAvatar(
+                    image, this.avatar_size, this.account);
+            });
+            this.$(`.fwd-message.with-author[data-from="${jid}"]`).each(function () {
+                $(this).find('.fwd-left-side .circle-avatar').setAvatar(
+                    image, this.avatar_size, this.account);
+            });
+        }
     },
 
     updateBlockedState: function () {
@@ -5419,9 +5444,9 @@ xabber.ChatContentView = xabber.BasicView.extend({
     },
 
     unpinMessage: function () {
+        let pinned_msg_id = this.contact.get('pinned_message').get('stanza_id');
         let iq = $iq({type: 'set', to: this.contact.get('full_jid') || this.contact.get('jid')})
-            .c('update', {xmlns: Strophe.NS.GROUP_CHAT})
-            .c('pinned-message');
+            .c('pinned-message', {xmlns: Strophe.NS.GROUP_CHAT, id: pinned_msg_id, status: 'remove'});
         this.account.sendIQFast(iq, () => {}, (error) => {
             if ($(error).find('error not-allowed').length)
                 utils.dialogs.error(xabber.getString("groupchat_you_have_no_permissions_to_do_it"));
@@ -5688,7 +5713,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
                     }
                 }
             } else {
-                if (!ignored && !(message.isSenderMe() || message.get('silent') || ((message.get('type') === 'system') && !message.get('auth_request')))) {
+                if (!ignored && (!(message.isSenderMe() || message.get('silent') || ((message.get('type') === 'system') && !message.get('auth_request'))) || message.get('groupchat_system_msg'))) {
                     message.set('is_unread', true);
                     if (message.get('is_unread') && xabber.get('focused') && !xabber.get('idle') && this.isVisible()){
                         this.readVisibleMessages();
@@ -6457,9 +6482,11 @@ xabber.ChatContentView = xabber.BasicView.extend({
         attrs.not_verified_device_no_device = attrs.not_verified_device_no_device || null;
         attrs.device_id = attrs.device_id || null;
 
-        if (attrs.type === 'system') {
+        if (attrs.type === 'system' && !attrs.groupchat_system_msg) {
             let tpl_name = attrs.invite ? 'group_request' : 'system';
-            return $(templates.messages[tpl_name](attrs));
+            return $(templates.messages[tpl_name](_.extend(attrs, {
+                classlist: ''
+            })));
         }
 
         if (is_image) {
@@ -6503,8 +6530,11 @@ xabber.ChatContentView = xabber.BasicView.extend({
                 markup_body
             ]);
         }
-
-        if (this.model.get('saved') && !markup_body.length && attrs.forwarded_message && attrs.forwarded_message.length === 1) {
+        if (attrs.type === 'system' && attrs.groupchat_system_msg){
+            $message = $(templates.messages.system(_.extend(attrs, {
+                classlist: classes.join(' ')
+            })));
+        } else if (this.model.get('saved') && !markup_body.length && attrs.forwarded_message && attrs.forwarded_message.length === 1) {
             $message = $(templates.messages.saved_main(_.extend(attrs, {
                 classlist: classes.join(' ')
             })));
@@ -6606,8 +6636,8 @@ xabber.ChatContentView = xabber.BasicView.extend({
                                 if (this.contact.my_info) {
                                     audio_player.contact_avatar = this.contact.my_info.get('b64_avatar');
                                     if (!audio_player.contact_avatar) {
-                                        if (this.account.cached_image)
-                                            audio_player.contact_avatar = this.account.cached_image;
+                                        if (this.contact.my_info.get('avatar_url'))
+                                            audio_player.contact_avatar = this.contact.my_info.get('avatar_url');
                                         !audio_player.contact_avatar && (audio_player.contact_avatar = Images.getDefaultAvatar(this.contact.my_info.get('nickname')));
                                     } else
                                         audio_player.contact_avatar = Images.getCachedImage(audio_player.contact_avatar);
@@ -6912,7 +6942,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
                                         if (this.contact.my_info) {
                                             audio_player.contact_avatar = this.contact.my_info.get('b64_avatar');
                                             if (!audio_player.contact_avatar)
-                                                audio_player.contact_avatar = this.account.cached_image || Images.getDefaultAvatar(this.contact.my_info.get('nickname'));
+                                                audio_player.contact_avatar = this.contact.my_info.get('avatar_url') || Images.getDefaultAvatar(this.contact.my_info.get('nickname'));
                                             else
                                                 audio_player.contact_avatar = Images.getCachedImage(audio_player.contact_avatar);
                                         }
@@ -7099,11 +7129,13 @@ xabber.ChatContentView = xabber.BasicView.extend({
                 if (this.contact.my_info) {
                     image = this.contact.my_info.get('b64_avatar');
                     if (!image) {
-                        if (this.account.cached_image)
-                            image = this.account.cached_image;
+                        if (this.contact.my_info.get('avatar_url'))
+                            image = this.contact.my_info.get('avatar_url');
                         !image && (image = Images.getDefaultAvatar(this.contact.my_info.get('nickname')));
                     } else
                         image = Images.getCachedImage(image);
+                } else {
+                    !image && (image = Images.getDefaultAvatar(this.account.get('name')));
                 }
             }
             if (!image)
@@ -7172,9 +7204,9 @@ xabber.ChatContentView = xabber.BasicView.extend({
             if (this.model.get('group_chat')) {
                 if (this.contact.my_info) {
                     image = this.contact.my_info.get('b64_avatar');
-                    if (!image)
-                        image = this.account.cached_image || Images.getDefaultAvatar(this.contact.my_info.get('nickname'));
-                    else
+                    if (!image) {
+                        image = this.contact.my_info.get('avatar_url') || Images.getDefaultAvatar(this.contact.my_info.get('nickname'));
+                    } else
                         image = Images.getCachedImage(image);
                 }
             }
@@ -7364,7 +7396,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
 
         if (message.get('mentions') && message.get('mentions').length) {
             let is_gc;
-            if (message.get('mentions').some(item => item.is_gc)){
+            if (message.get('mentions').some(item => item.is_gc)){ //todo: сделать меншен всех
                 stanza.c('mentions', {
                     xmlns: Strophe.NS.GROUP_CHAT,
                 });
@@ -7506,7 +7538,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
         message.set({xml: $(stanza.tree()).clone()[0]});
         if (message.get('state') === constants.MSG_ERROR) {
             if (this.model.get('group_chat')){
-                stanza.c('retry', {xmlns: Strophe.NS.DELIVERY, to: this.model.get('jid')}).up();
+                stanza.c('re-send', {xmlns: Strophe.NS.GROUP_CHAT}).up();
             } else
                 stanza.c('retry', {xmlns: Strophe.NS.DELIVERY}).up();
             message.set('state', constants.MSG_PENDING);
@@ -8386,8 +8418,8 @@ xabber.ChatContentView = xabber.BasicView.extend({
                         if (this.contact.my_info) {
                             audio_player.contact_avatar = this.contact.my_info.get('b64_avatar');
                             if (!audio_player.contact_avatar) {
-                                if (this.account.cached_image)
-                                    audio_player.contact_avatar = this.account.cached_image;
+                                if (this.contact.my_info.get('avatar_url'))
+                                    audio_player.contact_avatar = this.contact.my_info.get('avatar_url');
                                 !audio_player.contact_avatar && (audio_player.contact_avatar = Images.getDefaultAvatar(this.contact.my_info.get('nickname')));
                             } else
                                 audio_player.contact_avatar = Images.getCachedImage(audio_player.contact_avatar);
@@ -8796,7 +8828,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
         if (!participant) {
             this.contact.getBlockedParticipants((response) => {
                 _.extend(options, {present: null, subscription: null});
-                options.blocked = !!$(response).find(`query user:contains(${participant_id})`).length;
+                options.blocked = !!$(response).find(`block jid:contains(${participant.get('jid')})`).length;
                 this.contact.showDetailsRight('all-chats', {type: 'participant'});
                 if (!options.id || !options.role || !options.jid)
                     return;
@@ -9911,7 +9943,7 @@ xabber.AccountChats = xabber.ChatsBase.extend({
             from_bare_jid = options.from_bare_jid;
             $message.children('stanza-id').each((idx, stanza_id) => {
             stanza_id = $(stanza_id);
-            if ($message.children(`x[xmlns="${Strophe.NS.GROUP_CHAT}"]`).length && !($message.find(`invite[xmlns="${Strophe.NS.GROUP_CHAT_INVITE_HTTP}"]`).length || $message.find(`invite[xmlns="${Strophe.NS.GROUP_CHAT_INVITE}"]`).length)) {
+            if ($message.children(`x[xmlns="${Strophe.NS.GROUP_CHAT}"]`).length && !($message.find(`invite[xmlns="${Strophe.NS.GROUP_CHAT_INVITE}"]`).length || $message.find(`invite[xmlns="${Strophe.NS.GROUP_CHAT_INVITE}"]`).length)) {
                 if (stanza_id.attr('by') === from_bare_jid) {
                     $stanza_id = stanza_id;
                     $contact_stanza_id = stanza_id;
@@ -10173,18 +10205,39 @@ xabber.AddGroupChatView = xabber.SearchView.extend({
             domain = this.$('#new_chat_domain').val() || this.$('.xmpp-server-dropdown-wrap .property-value').text(),
             searchable = this.$('input[name="group_index"]:checked').attr('data-value'),
             description = this.$('.description-field .rich-textarea').text() || "",
-            model = this.$('input[name="group_membership"]:checked').attr('data-value'),
-            iq = $iq({type: 'set', to: domain}).c('query', {xmlns: Strophe.NS.GROUP_CHAT + '#create'})
+            model = this.$('input[name="group_membership"]:checked').attr('data-value');
+
+        let contacts = [],
+            domains = [];
+
+        let iq = $iq({type: 'set', to: domain}).c('create', {xmlns: Strophe.NS.GROUP_CHAT})
+                .c('group', {privacy: privacy})
+                .c('info')
                 .c('name').t(name).up()
-                .c('privacy').t(privacy).up()
+                .c('description').t(description).up().up()
+                .c('settings')
                 .c('index').t(searchable).up()
-                .c('description').t(description).up()
                 .c('membership').t(model).up();
-            if (chat_jid)
-                iq.c('localpart').t(chat_jid);
+        if (contacts.length){
+            iq.c('contacts')
+            _.each(contacts, (contact) =>{
+                iq.c('contact').t(contact).up();
+            });
+            iq.up();
+        }
+        if (domains.length){
+            iq.c('domains')
+            _.each(domains, (domain) =>{
+                iq.c('domain').t(domain).up();
+            });
+            iq.up();
+        }
+        iq.up();
+        if (chat_jid)
+            iq.c('localpart').t(chat_jid);
         this.account.sendIQFast(iq, (iq) => {
-            let group_jid = $(iq).find('query localpart').text().trim() + '@' + $(iq).attr('from').trim(),
-                contact = this.account.contacts.mergeContact(group_jid);
+            let group_jid = $(iq).find('group').attr('jid').trim(),
+                contact = this.account.contacts.mergeContact({jid: group_jid, group_chat: true});
             contact.set('group_chat', true);
             contact.set('subscription_preapproved', true);
             contact.pres('subscribed');
@@ -10312,6 +10365,7 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
     clearSearch: function (ev) {
         ev && ev.preventDefault();
         this.$('.search-input').val('');
+        this.$('.search-input').focusout();
         this.updateSearch();
         this.onEmptyQuery();
     },
@@ -11470,7 +11524,7 @@ xabber.InvitationPanelView = xabber.SearchView.extend({
             reason_text = this.$(`textarea[name="invitation_text"]`).val();
         }
         let iq = $iq({type: 'set', to: (this.contact.get('full_jid') || this.contact.get('jid'))})
-                .c('invite', {xmlns: `${Strophe.NS.GROUP_CHAT}#invite`})
+                .c('invite', {xmlns: `${Strophe.NS.GROUP_CHAT}`})
                 .c('jid').t(contact_jid).up()
                 .c('send').t('false').up();
         if (reason_text) {
@@ -11508,13 +11562,11 @@ xabber.InvitationPanelView = xabber.SearchView.extend({
                 to: jid_to,
                 type: 'chat',
                 id: uuid()
-            }).c('invite', {xmlns: `${Strophe.NS.GROUP_CHAT}#invite`, jid: this.contact.get('jid')}).up();
+            }).c('invite', {xmlns: `${Strophe.NS.GROUP_CHAT}`, jid: this.contact.get('jid')});
         if (reason_text) {
             stanza.c('reason').t(reason_text).up();
         }
-        stanza.c('x', {xmlns: Strophe.NS.GROUP_CHAT})
-            .c('privacy').t(this.contact.get('group_info').privacy).up().up()
-            .c('body').t(body).up();
+        stanza.up().c('body').t(body).up();
         this.account.sendMsg(stanza);
     },
 
@@ -11769,8 +11821,9 @@ xabber.InvitationPanelView = xabber.SearchView.extend({
               this.model.details_view_right.showSearchMessages(null, true);
               this.model.details_view_right.onScroll()
           }
-          if (scrolled_top_chat)
+          if (scrolled_top_chat) {
               chat.item_view.content.scrollTo(scrolled_top_chat);
+          }
           if (scrolled_top_chats_view)
               xabber.chats_view.scrollTo(scrolled_top_chats_view);
       },
@@ -13529,8 +13582,6 @@ xabber.ChatBottomView = xabber.BasicView.extend({
             this.$('.input-toolbar').emojify('.account-badge', {emoji_size: 16});
             if (!avatar && this.contact.my_info.get('avatar_url'))
                 avatar = this.contact.my_info.get('avatar_url');
-            if (!avatar && this.account.cached_image)
-                avatar = this.account.cached_image;
             !avatar && (avatar = Images.getDefaultAvatar(nickname));
             this.$('.my-avatar.circle-avatar').setAvatar(avatar, this.avatar_size, this.account);
         }
@@ -13570,8 +13621,6 @@ xabber.ChatBottomView = xabber.BasicView.extend({
                     image = this.contact.my_info.get('b64_avatar');
                 if (!image && this.contact.my_info.get('avatar_url'))
                     image = this.contact.my_info.get('avatar_url');
-                if (!image && this.account.cached_image)
-                    image = this.account.cached_image;
             }
             !image && (image = Images.getDefaultAvatar(this.contact.my_info && this.contact.my_info.nickname || this.account.get('jid')));
         }
@@ -15168,8 +15217,7 @@ xabber.ChatBottomView = xabber.BasicView.extend({
             this.resetSelectedMessages();
         }
         let iq = $iq({type: 'set', to: this.contact.get('full_jid') || this.contact.get('jid')})
-            .c('update', {xmlns: Strophe.NS.GROUP_CHAT})
-            .c('pinned-message').t(msg_id);
+            .c('pinned-message', {xmlns: Strophe.NS.GROUP_CHAT, id: msg_id, status: 'pinned'});
         this.account.sendIQFast(iq, () => {},
             (error) => {
                 if ($(error).find('not-allowed').length)
@@ -16384,11 +16432,21 @@ xabber.DeleteWithOptionsView = xabber.BasicView.extend({
                 if (participant){
                     actions_total_count++;
                     participant.block(() => {
-                        actions_count++;
-                        if (actions_count === actions_total_count){
-                            dfd.resolve();
-                            return;
-                        }
+                        participant.kick(() => {
+                            actions_count++;
+                            if (actions_count === actions_total_count){
+                                dfd.resolve();
+                                return;
+                            }
+                        }, (error) => {
+                            if ($(error).find('not-allowed').length)
+                                utils.dialogs.error(xabber.getString("groupchat_you_have_no_permissions_to_do_it"));
+                            actions_count++;
+                            if (actions_count === actions_total_count){
+                                dfd.resolve();
+                                return;
+                            }
+                        });
                     }, (error) => {
                         if ($(error).find('not-allowed').length)
                             utils.dialogs.error(xabber.getString("groupchat_you_have_no_permissions_to_do_it"));

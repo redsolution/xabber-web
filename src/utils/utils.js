@@ -796,7 +796,7 @@ var utils = {
         if (!mutable_refs || !mutable_refs.length)
             return body;
         body = body || "";
-        mutable_refs = mutable_refs.filter(m => m.type === 'groupchat' || m.type === 'forward');
+        mutable_refs = mutable_refs.filter(m => m.type === 'groupchat' || m.type === 'empty_mutable' || m.type === 'unknown_mutable' || m.type === 'forward');
         let pretty_body = Array.from(deps.Strophe.xmlescape(body));
         mutable_refs && mutable_refs.forEach(function (ref) {
             for (let idx = ref.start; idx < ref.end; idx++)

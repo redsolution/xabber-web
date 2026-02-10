@@ -120,6 +120,7 @@ xabber.CallsView = xabber.BasicView.extend({
 
     clearSearch: function () {
         this.$('.search-input').empty();
+        this.$('.search-input').focusout();
         this.$('.search-form').removeClass('active');
     },
 
@@ -953,7 +954,7 @@ xabber.CallsView = xabber.BasicView.extend({
             from_bare_jid = options.from_bare_jid;
         $message.children('stanza-id').each((idx, stanza_id) => {
             stanza_id = $(stanza_id);
-            if ($message.children(`x[xmlns="${Strophe.NS.GROUP_CHAT}"]`).length && !($message.find(`invite[xmlns="${Strophe.NS.GROUP_CHAT_INVITE_HTTP}"]`).length || $message.find(`invite[xmlns="${Strophe.NS.GROUP_CHAT_INVITE}"]`).length)) {
+            if ($message.children(`x[xmlns="${Strophe.NS.GROUP_CHAT}"]`).length && !($message.find(`invite[xmlns="${Strophe.NS.GROUP_CHAT_INVITE}"]`).length || $message.find(`invite[xmlns="${Strophe.NS.GROUP_CHAT_INVITE}"]`).length)) {
                 if (stanza_id.attr('by') === from_bare_jid) {
                     $stanza_id = stanza_id;
                     $contact_stanza_id = stanza_id;

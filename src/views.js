@@ -164,6 +164,7 @@ xabber.BasicView = Backbone.View.extend({
     },
 
     scrollTo: function (offset) {
+        this.model && this.model.get('jid') && console.error(this.model.get('jid'));
         this.ps_container[0].scrollTop = offset;
         this.ps_container.perfectScrollbar('update');
     },
@@ -376,36 +377,41 @@ xabber.SearchView = xabber.BasicView.extend({
     },
 
     updateSearch: function () {
-        if (!this._update_search_timeout) {
-            let query = this.$('.search-input').val();
-            this.$('.search-form').switchClass('active', query);
-            this.clearSearchSelection();
-            if (query)
-                this.search(query.toLowerCase());
-            else {
-                this.$('.list-item').removeClass('hidden');
-                this.onEmptyQuery();
+        !this.update_search_debounce && (this.update_search_debounce = _.debounce(() => {
+            if (!this._update_search_timeout) {
+                let query = this.$('.search-input').val();
+                this.$('.search-form').switchClass('active', query);
+                this.clearSearchSelection();
+                if (query)
+                    this.search(query.toLowerCase());
+                else {
+                    this.$('.list-item').removeClass('hidden');
+                    this.onEmptyQuery();
+                }
+                this.updateScrollBar();
+                this.query = false;
+                this._update_search_timeout = setTimeout(() => {
+                    this._update_search_timeout = null;
+                    this.query && this.updateSearch();
+                }, 150);
+            } else {
+                this.query = true;
             }
-            this.updateScrollBar();
-            this.query = false;
-            this._update_search_timeout = setTimeout(() => {
-                this._update_search_timeout = null;
-                this.query && this.updateSearch();
-            }, 150);
-        } else {
-            this.query = true;
-        }
+        }, 350, false));
+        this.update_search_debounce();
     },
 
     clearSearch: function (ev) {
         ev && ev.preventDefault();
         this.$('.search-input').val('');
+        this.$('.search-input').focusout();
         this.updateSearch();
     },
 
-    clearSearchSelection: function () {
+    clearSearchSelection: function (ev) {
         this.selection_id = null;
         this.$('.list-item.selected').removeClass('selected');
+        ev && !$(ev.target).val() && this.$el.removeClass('recent-chats-search-active');
     },
 
     searchAll: function () {
@@ -461,8 +467,10 @@ xabber.SearchView = xabber.BasicView.extend({
               ev.preventDefault();
               if ($(ev.target).val())
                   return this.clearSearch();
-              else
+              else {
+                  $(ev.target).focusout();
                   this.close();
+              }
           }
           this.updateSearch();
       },
@@ -559,8 +567,10 @@ xabber.SearchView = xabber.BasicView.extend({
               ev.preventDefault();
               if ($(ev.target).val())
                   return this.clearSearch();
-              else
+              else {
+                  $(ev.target).focusout();
                   this.close();
+              }
           }
           this.updateSearch();
       },
@@ -676,7 +686,7 @@ xabber.SearchView = xabber.BasicView.extend({
           });
           this.$('.chats-list-wrap').switchClass('hidden', !this.$('.chats-list').children('.list-item:not(.hidden2):not(.hidden3)').length);
           this.$('.pinned-chat-list').switchClass('hidden', query);
-          this.$el.switchClass('recent-chats-search-active', query);
+          query && this.$el.addClass('recent-chats-search-active');
           this.$('.chats-list').children('.list-item:not(.hidden2):not(.hidden3)').length && this.$('.chats-list').children('.list-item:not(.hidden2):not(.hidden3)').slice(4).addClass('hidden');
           this.$('.chats-show-more').showIf(this.$('.chats-list').children('.list-item:not(.hidden2):not(.hidden3)').length > 4);
           this.$('.chats-show-more').text(xabber.getString("search__chats_show_more", [this.$('.chats-list').children('.list-item:not(.hidden2):not(.hidden3)').length]));
@@ -824,6 +834,7 @@ xabber.SearchView = xabber.BasicView.extend({
       clearSearch: function (ev) {
           ev && ev.preventDefault();
           this.$('.search-input').val('');
+          this.$('.search-input').focusout();
           this.updateSearch();
           this.onEmptyQuery();
       },
@@ -839,7 +850,6 @@ xabber.SearchView = xabber.BasicView.extend({
           this.$(this.main_container).removeClass('hidden');
           this.$('.chats-list-wrap').addClass('hidden');
           this.$('.pinned-chat-list').removeClass('hidden');
-          this.$el.removeClass('recent-chats-search-active');
           this.$('.contacts-list-wrap').addClass('hidden');
           this.$('.messages-list-wrap').addClass('hidden');
       }

@@ -2,6 +2,7 @@ import xabber from "xabber-core";
 
 let env = xabber.env,
     $ = env.$,
+    moment = env.moment,
     Strophe = env.Strophe;
 
 xabber.Account.addInitPlugin(function () {
@@ -24,14 +25,19 @@ xabber.Account.addInitPlugin(function () {
                         chat.item_view.content = new xabber.ChatContentView({chat_item: chat.item_view});
                 }
 
-                if ($message.children(`x[xmlns="${Strophe.NS.GROUP_CHAT}#system-message"]`).length) {
+                if ($message.children(`group`).length) {
                     if (!contact){
                         msg_object.ignore = 'xep-groups';
                         return msg_object;
                     }
-                    let participant_version = $message.children(`x[xmlns="${Strophe.NS.GROUP_CHAT}#system-message"]`).attr('version');
-                    if (participant_version && contact.participants && contact.participants.version < participant_version)
-                        contact.trigger('update_participants');
+
+                    let group_chat_info = contact.parseGroupInfo($message),
+                        prev_group_info = contact.get('group_info') || {};
+                    _.extend(prev_group_info, group_chat_info);
+                    contact.set('group_info', prev_group_info);
+                    contact.set('name', prev_group_info.name);
+                    contact.set({status: prev_group_info.status, status_updated: moment.now(), status_message: (prev_group_info.members_num + ' members' + xabber.getString("contact_groupchat_status_online", [prev_group_info.online_members_num || 0]))});
+                    contact.trigger('group_info_updated');
                     msg_object.ignore = 'xep-groups';
                     return msg_object;
                 }
@@ -54,47 +60,20 @@ xabber.Account.addInitPlugin(function () {
                     }
                 }
 
-                if ($message.children(`x[xmlns="${Strophe.NS.GROUP_CHAT}#system-message"]`).length) {
+                if ($message.children(`x[xmlns="${Strophe.NS.GROUP_CHAT}"]`).children('system-message').length) {
+                    msg_object.groupchat_system_msg = true;
+                    msg_object.groupchat_system_msg_type = $message.children(`x[xmlns="${Strophe.NS.GROUP_CHAT}"]`).children('system-message').attr('type');
+                    msg_object.groupchat_system_msg_nickname = $message.children(`x[xmlns="${Strophe.NS.GROUP_CHAT}"]`).children('system-message').children('user').children('nickname').text() || $message.children(`x[xmlns="${Strophe.NS.GROUP_CHAT}"]`).children('system-message').children('user').children('jid').text();
 
-                    let contact = this.contacts.mergeContact(contact_jid);
+                    if ([`join`, `left`, `update`].includes(msg_object.groupchat_system_msg_type)){
+                        let contact = this.contacts.mergeContact(contact_jid);
 
-                    if (!contact){
-                        msg_object.ignore = 'xep-groups';
-                        return msg_object;
-                    }
-
-                    let chat = this.chats.getChat(contact);
-
-                    let participant_version = $message.children(`x[xmlns="${Strophe.NS.GROUP_CHAT}#system-message"]`).attr('version');
-
-                    if (participant_version && contact.participants && contact.participants.version < participant_version){
-
-                        if ($message.children(`x[xmlns="${Strophe.NS.GROUP_CHAT}#system-message"]`).children(`user[xmlns="${Strophe.NS.GROUP_CHAT}"]`).length && chat.contact.get('pinned_message')){
-
-                            $message.children('x[xmlns="' + Strophe.NS.GROUP_CHAT + '#system-message"]').each((idx, x_elem) => {
-                                let $user = $(x_elem).children(`user[xmlns="${Strophe.NS.GROUP_CHAT}"]`).first();
-                                if ($user.length) {
-                                    let user_id = $user.attr('id'),
-                                        user_jid = $user.children('jid').text();
-                                    if (chat.contact.get('pinned_message').get('from_jid') === user_jid) {
-                                        let pinned_message = chat.contact.get('pinned_message'),
-                                            user_info = {
-                                                id: user_id,
-                                                jid: user_jid,
-                                                nickname: $user.children('nickname').text() || user_jid || user_id,
-                                                role: $user.children('role').text(),
-                                                avatar: $user.children(`metadata[xmlns="${Strophe.NS.PUBSUB_AVATAR_METADATA}"]`).children('info').attr('id'),
-                                                avatar_url: $user.children(`metadata[xmlns="${Strophe.NS.PUBSUB_AVATAR_METADATA}"]`).children('info').attr('url'),
-                                                badge: $user.children('badge').text()
-                                            };
-                                        pinned_message.set('user_info', user_info);
-                                        chat.contact.set('pinned_message', pinned_message);
-                                    }
-                                }
-                            });
-
+                        if (!contact){
+                            msg_object.ignore = 'xep-groups';
+                            return msg_object;
                         }
 
+                        contact.trigger('update_participants');
                     }
                 }
             }

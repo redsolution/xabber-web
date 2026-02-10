@@ -17,7 +17,7 @@ xabber.Account.addInitPlugin(function () {
             if (msg_object.type === 'headline'){
 
                 let $stanza_received = $message.children(`received[xmlns="${Strophe.NS.DELIVERY}"]`),
-                    $echo_msg = $message.children(`x[xmlns="${Strophe.NS.DELIVERY}"]`).children('message');
+                    $echo_msg = $message.children(`x[xmlns="${Strophe.NS.GROUP_CHAT}"]`).children('forwarded').children('message');
 
                 if ($stanza_received.length) {
                     let stanza_id = $stanza_received.children('stanza-id').attr('id'),

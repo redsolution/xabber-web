@@ -919,7 +919,7 @@ xabber.Account = Backbone.Model.extend({
                 let msg = this.messages.get(item.unique_id), msg_iq;
                 msg && (msg_iq = msg.get('xml'));
                 if (msg && msg.collection && msg.collection.chat && msg.collection.chat.get('group_chat'))
-                    $(msg_iq).append("<retry to='" + msg.collection.chat.get('jid') + "' xmlns='" + Strophe.NS.DELIVERY + "'/>");
+                    $(msg_iq).append("<re-send xmlns='" + Strophe.NS.GROUP_CHAT + "'/>");
                 else
                     $(msg_iq).append("<retry xmlns='" + Strophe.NS.DELIVERY + "'/>");
                 msg_iq && this.sendMsgPending(msg_iq);
@@ -5784,19 +5784,17 @@ xabber.SetAvatarView = xabber.BasicView.extend({
     addNotOwnAvatar: function () {
         if (this.$('.btn-add').hasClass('non-active'))
             return;
-        let image, dfd = new $.Deferred(), $active_screen = this.$('.screen-wrap:not(.hidden)'),
-            participant_node = '';
-        if (this.participant && this.participant.get('id')){
-            participant_node = '#' + this.participant.get('id');
-        }
+        let image, dfd = new $.Deferred(), $active_screen = this.$('.screen-wrap:not(.hidden)');
         dfd.done((img, img_from_gallery) => {
             if (img_from_gallery){
                 image.type = image.media_type;
-                this.contact.pubAvatar(image, participant_node, () => {
+                this.contact.prepareAvatarInfo(img, (prepared_image) => {
                     this.current_items = [];
                     this.close();
                     if (this.parent && this.participant) {
-                        this.parent.updateMemberAvatar(this.participant, true);
+                        this.parent.setUrlAvatar(this.participant, prepared_image);
+                    } else if (this.parent && !this.participant) {
+                        this.parent.setUrlAvatar(prepared_image);
                     }
                 }, () => {
                     utils.dialogs.error(xabber.getString("group_settings__error__wrong_image"));
@@ -5804,10 +5802,12 @@ xabber.SetAvatarView = xabber.BasicView.extend({
             } else {
                 utils.images.getAvatarFromFile(img).done((image, hash, size) => {
                     if (image) {
-                        this.contact.pubAvatar({base64: image, hash: hash, size: size, type: img.type, file: img}, participant_node, () => {
+                        this.contact.prepareAvatarInfo({base64: image, hash: hash, size: size, type: img.type, file: img}, (prepared_image) => {
                             this.close();
                             if (this.parent && this.participant) {
-                                this.parent.updateMemberAvatar(this.participant, true);
+                                this.parent.setUrlAvatar(this.participant, prepared_image);
+                            } else if (this.parent && !this.participant) {
+                                this.parent.setUrlAvatar(prepared_image);
                             }
                         }, () => {
                             utils.dialogs.error(xabber.getString("group_settings__error__wrong_image"));
@@ -6028,20 +6028,18 @@ xabber.WebcamProfileImageView = xabber.BasicView.extend({
         let blob = Images.getBlobImage(this.canvas.toDataURL('image/png').replace(/^data:image\/(png|gif|jpg|webp|jpeg);base64,/, '')),
             file = new File([blob], "avatar.png", {
                 type: "image/png",
-            }),
-            participant_node = '';
-        if (this.participant && this.participant.get('id')){
-            participant_node = '#' + this.participant.get('id');
-        }
+            });
         file.base64 = this.canvas.toDataURL('image/png').replace(/^data:image\/(png|gif|jpg|webp|jpeg);base64,/, '');
         if (file && file.base64) {
             this.$('.modal-preloader-wrap').html(env.templates.contacts.preloader());
             this.$('.btn-save').addClass('hidden-disabled');
             this.$('.circle-icon').addClass('disabled');
-            this.contact.pubAvatar(file, participant_node, () => {
+            this.contact.prepareAvatarInfo(file, (prepared_image) => {
                 this.close();
                 if (this.parent && this.participant) {
-                    this.parent.updateMemberAvatar(this.participant, true);
+                    this.parent.setUrlAvatar(this.participant, prepared_image);
+                } else if (this.parent && !this.participant) {
+                    this.parent.setUrlAvatar(prepared_image);
                 }
             }, () => {
                 utils.dialogs.error(xabber.getString("group_settings__error__wrong_image"));
@@ -6146,20 +6144,17 @@ xabber.EmojiProfileImageView = xabber.BasicView.extend({
         let blob = Images.getBlobImage(Images.getDefaultAvatar(this.$('.chosen-emoji').data('value') ,this.$('.circle-avatar').css( "background-color" ), "96px EmojiFont", 176, 176)),
             file = new File([blob], "avatar.png", {
                 type: "image/png",
-            }),
-            participant_node = '';
-        if (this.participant && this.participant.get('id')){
-            participant_node = '#' + this.participant.get('id');
-        }
+            });
         file.base64 = blob;
         if (file && file.base64) {
             this.$('.modal-preloader-wrap').html(env.templates.contacts.preloader());
             this.$('.btn-save').addClass('hidden-disabled');
-            this.contact.pubAvatar(file, participant_node, () => {
+            this.contact.prepareAvatarInfo(file, (prepared_image) => {
                 this.close();
                 if (this.parent && this.participant) {
-                    if (this.participant.get('jid') === this.account.get('jid'))
-                        this.parent.updateMemberAvatar(this.participant, true);
+                    this.parent.setUrlAvatar(this.participant, prepared_image);
+                } else if (this.parent && !this.participant) {
+                    this.parent.setUrlAvatar(prepared_image);
                 }
             }, () => {
                 utils.dialogs.error(xabber.getString("group_settings__error__wrong_image"));

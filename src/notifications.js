@@ -188,6 +188,7 @@ xabber.NotificationsView = xabber.BasicView.extend({
 
     clearSearch: function () {
         this.$('.search-input').empty();
+        this.$('.search-input').focusout();
         this.$('.search-form').removeClass('active');
     },
 
