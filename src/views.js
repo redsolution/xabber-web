@@ -164,7 +164,6 @@ xabber.BasicView = Backbone.View.extend({
     },
 
     scrollTo: function (offset) {
-        this.model && this.model.get('jid') && console.error(this.model.get('jid'));
         this.ps_container[0].scrollTop = offset;
         this.ps_container.perfectScrollbar('update');
     },

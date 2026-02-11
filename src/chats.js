@@ -7061,7 +7061,10 @@ xabber.ChatContentView = xabber.BasicView.extend({
                 $message.find('.chat-msg-content').text(msg_text)
         }
         message.set('msg_player_audios', audio_player_list);
-        $message = $message.hyperlinkify({selector: '.chat-text-content', embed_video: true}).emojify('.chat-text-content', {tag_name: 'div', emoji_size: utils.emoji_size(emoji)}).emojify('.chat-msg-author-badge', {emoji_size: 16});
+        if ($message.hasClass('system')){
+            $message = $message.emojify('.chat-text-content', {tag_name: 'div', emoji_size: utils.emoji_size(emoji)}).emojify('.chat-msg-author-badge', {emoji_size: 16});
+        } else
+            $message = $message.hyperlinkify({selector: '.chat-text-content', embed_video: true}).emojify('.chat-text-content', {tag_name: 'div', emoji_size: utils.emoji_size(emoji)}).emojify('.chat-msg-author-badge', {emoji_size: 16});
         message.set('msg_el', $message);
         if (this.account.server_features.get('proxy-viewer') && this.account.get('proxy_viewer_url') && this.account.get('proxy_viewer_token') && attrs.type !== 'file_upload'){
             this.loadAndReplaceImagesToProxy(images, $message, attrs.encrypted || this.model.get('encrypted') || has_encrypted_files);

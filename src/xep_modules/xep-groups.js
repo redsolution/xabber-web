@@ -41,6 +41,35 @@ xabber.Account.addInitPlugin(function () {
                     msg_object.ignore = 'xep-groups';
                     return msg_object;
                 }
+
+                if ($message.children(`x[xmlns="${Strophe.NS.GROUP_CHAT}"]`).children('system-message[type="update"]').length) {
+                    let $sys_msg = $message.children(`x[xmlns="${Strophe.NS.GROUP_CHAT}"]`).children('system-message[type="update"]');
+                    if ($sys_msg.children('user')){
+                        _.each($sys_msg.children('user'),(user) => {
+                            let $user = $(user),
+                                member_id = $user.attr('id'),
+                                photo_id = $user.find('avatar info').attr('id'),
+                                photo_url = $user.find('avatar info').attr('url');
+
+                            if (member_id && photo_url) {
+                                this.chat_settings.updateCachedAvatars(member_id, photo_id, photo_url);
+                                if (contact.my_info) {
+                                    if (member_id === contact.my_info.id) {
+                                        contact.my_info.set({avatar: photo_id, avatar_url: photo_url});
+                                        contact.trigger('update_my_info');
+                                    }
+                                }
+                                let participant = contact.participants && contact.participants.get(member_id);
+                                if (participant) {
+                                    participant.set({avatar: photo_id, avatar_url: photo_url});
+                                    this.groupchat_settings.updateParticipant(contact.get('jid'), participant.attributes);
+                                }
+                            }
+                        });
+                        msg_object.ignore = 'xep-groups';
+                        return msg_object;
+                    }
+                }
             }
 
             if (msg_object.type === 'chat'){

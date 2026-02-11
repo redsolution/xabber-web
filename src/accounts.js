@@ -218,9 +218,11 @@ xabber.Account = Backbone.Model.extend({
                         }).up()
                     });
                     this.sendIQFast(iq_pub_metadata, () => {
+                            this.sendPresence();
                             callback && callback(avatar_hash);
                         },
                         function (data_error) {
+                        console.error(data_error);
                             errback && errback(data_error);
                         });
                 }
@@ -239,9 +241,11 @@ xabber.Account = Backbone.Model.extend({
                             .c('info', {bytes: image.size, id: avatar_hash, type: image.type});
                     this.sendIQFast(iq_pub_data, () => {
                             this.sendIQFast(iq_pub_metadata, () => {
+                                    this.sendPresence();
                                     callback && callback(avatar_hash);
                                 },
                                 function (data_error) {
+                                    console.error(data_error);
                                     errback && errback(data_error);
                                 });
                         },

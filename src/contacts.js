@@ -689,7 +689,13 @@ xabber.Contact = Backbone.Model.extend({
                     this.removeFromRoster();
                     if (result.delete_history){
                         chat.retractAllMessages(false);
-                        chat.deleteFromSynchronization();
+                        chat.deleteFromSynchronization((res) => {
+                            if ($(res).find('error').attr('code') === '404')
+                                this.closeChat();
+                        }, (err) => {
+                            if ($(err).find('error').attr('code') === '404')
+                                this.closeChat();
+                        });
                     }
                     if (callback) {
                         callback();
@@ -700,6 +706,13 @@ xabber.Contact = Backbone.Model.extend({
                 }
             }
         });
+    },
+
+    closeChat: function () {
+        let chat = this.account.chats.getChat(this);
+        chat.set({'opened': false, 'display': false, 'active': false, 'is_accepted': undefined});
+        xabber.body.setScreen('all-chats', { right: undefined });
+        chat.item_view.content.readMessages();
     },
 
     blockWithDialog: function () {
@@ -877,7 +890,7 @@ xabber.Contact = Backbone.Model.extend({
             info.members_num = members_num;
         status.length && (info.status = status.text());
         if (!status.length && (!this.get('group_info') || !this.get('group_info').status)){
-            info.status = ($presence.attr('type') === 'unavailable') ? 'unavailable' : 'online';
+            info.status = ($stanza.attr('type') === 'unavailable') ? 'unavailable' : 'online';
         }
         name.length && (info.name = name.text());
         status_msg.length && (info.status_msg = status_msg.text());
@@ -2997,6 +3010,8 @@ xabber.GroupChatDetailsViewRight = xabber.BasicView.extend({
             this.model.parseGroupInfo($(res))
         }, (error) => {
             console.error(error);
+            let err_text = $(error).find('text').text() ;
+            utils.dialogs.error(err_text);
         });
     },
 
@@ -5079,31 +5094,8 @@ xabber.ParticipantPropertiesViewRight = xabber.BasicView.extend({
             }
         }, (error) => {
             console.error(error);
-        });
-    },
-
-    setTestUrlAvatar: function () { //34
-        console.error(this.participant);
-        let iq = $iq({type: 'set', to: this.contact.get('full_jid') || this.contact.get('jid')})
-            .c('members', {xmlns: Strophe.NS.GROUP_CHAT, id: this.participant.get('id') })
-            .c('user', {xmlns: Strophe.NS.GROUP_CHAT})
-            .c('avatar', {xmlns: Strophe.NS.GROUP_CHAT})
-            .c('info', {
-                xmlns: Strophe.NS.PUBSUB_AVATAR_METADATA,
-                id: uuid(),
-                bytes: 20535,
-                type: `image/png`,
-                url: `https://gallery.xmpp.redsolution.com/files/6v3wNhtsf179/avatar.png`,
-                width: `100`,
-                height: `100`,
-            });
-        console.error(iq.tree());
-        this.account.sendIQFast(iq, () => {
-            if (this.participant.get('jid') === this.account.get('jid')){
-                this.updateMemberAvatar(this.participant, true);
-            }
-        }, (error) => {
-            console.error(error);
+            let err_text = $(error).find('text').text() ;
+            utils.dialogs.error(err_text);
         });
     },
 
@@ -7930,7 +7922,8 @@ xabber.GroupNameRightWidget = xabber.InputWidget.extend({
         $emoji_panel.perfectScrollbar(
             _.extend({theme: 'item-list'}, xabber.ps_settings));
         this.$('.emoji-menu .emoji').click((ev) => {
-            $emoji_panel[0].scrollTop = this.$('.emoji-list-wrap ' + ev.target.attributes.href.value)[0].offsetTop - 4;
+            let $item = $(ev.target).closest('.emoji');
+            $emoji_panel[0].scrollTop = this.$('.emoji-list-wrap ' + $item.attr('href'))[0].offsetTop - 4;
         });
         $insert_emoticon.hover((ev) => {
             if (ev && ev.preventDefault) { ev.preventDefault(); }
@@ -8062,7 +8055,8 @@ xabber.ParticipantNameRightWidget = xabber.InputWidget.extend({
         $emoji_panel.perfectScrollbar(
             _.extend({theme: 'item-list'}, xabber.ps_settings));
         this.$('.emoji-menu .emoji').click((ev) => {
-            $emoji_panel[0].scrollTop = this.$('.emoji-list-wrap ' + ev.target.attributes.href.value)[0].offsetTop - 4;
+            let $item = $(ev.target).closest('.emoji');
+            $emoji_panel[0].scrollTop = this.$('.emoji-list-wrap ' + $item.attr('href'))[0].offsetTop - 4;
         });
         $insert_emoticon.hover((ev) => {
             if (ev && ev.preventDefault) { ev.preventDefault(); }
@@ -8192,7 +8186,8 @@ xabber.ParticipantBadgeRightWidget = xabber.InputWidget.extend({
         $emoji_panel.perfectScrollbar(
             _.extend({theme: 'item-list'}, xabber.ps_settings));
         this.$('.emoji-menu .emoji').click((ev) => {
-            $emoji_panel[0].scrollTop = this.$('.emoji-list-wrap ' + ev.target.attributes.href.value)[0].offsetTop - 4;
+            let $item = $(ev.target).closest('.emoji');
+            $emoji_panel[0].scrollTop = this.$('.emoji-list-wrap ' + $item.attr('href'))[0].offsetTop - 4;
         });
         $insert_emoticon.hover((ev) => {
             if (ev && ev.preventDefault) { ev.preventDefault(); }
