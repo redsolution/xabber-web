@@ -592,7 +592,7 @@ xabber.Contact = Backbone.Model.extend({
     pres: function (type, subscribe_text) {
         let pres = $pres({to: this.get('jid'), type: type});
         if (type === 'subscribe') {
-            pres.c('nick', {xmlns: Strophe.NS.NICK}).t(this.account.getOwnNickname()).up();
+            pres.c('nick', {xmlns: Strophe.NS.NICK}).t(this.account.get('name')).up();
             subscribe_text && pres.c('status').t(subscribe_text).up();
         }
         this.account.sendPres(pres);
@@ -7350,7 +7350,7 @@ xabber.Participants = Backbone.Collection.extend({
             nickname = $item.find('nickname').text(),
             id = $item.attr('id'),
             badge = $item.find('badge').text(),
-            present = $item.find('present').text(),
+            present = $item.find('last').attr('stamp'),
             photo = $item.find(`avatar`).find('info').attr('id'),
             photo_url = $item.find(`avatar`).find('info').attr('url'),
             role = $item.find('role').text();
