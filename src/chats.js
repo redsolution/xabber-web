@@ -8183,7 +8183,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
                                 $message.find('.hidden-images').addClass('upload-error');
                                 $message.find('.hidden-images').css({ 'border-color': '#EF9A9A'});
                             }
-                            message.get('files')[idx].is_errored = true;
+                            message.get('files')[idx] && (message.get('files')[idx].is_errored = true);
                             is_error = true;
                             $(xhr_requests).each((idx, request) => {
                                 request.abort();
@@ -16494,7 +16494,7 @@ xabber.DeleteWithOptionsView = xabber.BasicView.extend({
             if (!chat.item_view.content)
                 chat.item_view.content = new xabber.ChatContentView({chat_item: chat.item_view});
             chat.item_view.content.bottom.setForwardedMessages(this.messages);
-            chat.item_view.content.bottom.silentSubmit('report: spam');
+            chat.item_view.content.bottom.silentSubmit('Abuse report:\nSpam');
 
             callback && callback();
 
@@ -16684,7 +16684,7 @@ xabber.ReportAbuseView = xabber.BasicView.extend({
             if (!chat.item_view.content)
                 chat.item_view.content = new xabber.ChatContentView({chat_item: chat.item_view});
             chat.item_view.content.bottom.setForwardedMessages(this.messages);
-            chat.item_view.content.bottom.silentSubmit(`report: ${selected_reasons.join(', ')}`);
+            chat.item_view.content.bottom.silentSubmit(`Abuse report:\n${selected_reasons.join(',\n')}`);
 
             this.close();
         } else {
