@@ -1,1 +1,1 @@
-typeof define === "function" && define(() => { return {};});
+export default {};

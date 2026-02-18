@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Xabber Web</title>
+    <link rel="shortcut icon" type="image/png" href="/assets/images/favicon.png"/>
+</head>
+<body style="height: 100%; width: 100%;">
+    <div id="xabber-container" style="height: 100%; width: 100%;">
+        <div class="login-container"></div>
+    </div>
+    <script type="module">
+        import '/src/xabber.js';
+        xabber.configure({
+            CONNECTION_URL: 'wss://xmpp.redsolution.com/wsserver',
+            LOG_LEVEL: 'INFO',
+            DEBUG: true,
+            STORAGE_NAME_ENDING: 'dev'
+        });
+        xabber.start();
+    </script>
+</body>
+</html>

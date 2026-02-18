@@ -5,6 +5,7 @@ let env = xabber.env,
     utils = env.utils,
     $ = env.$,
     Strophe = env.Strophe,
+    Backbone = env.Backbone,
     _ = env._,
     Images = utils.images,
     pretty_datetime = (timestamp) => { return utils.pretty_datetime(timestamp, (xabber.settings.language == 'ru-RU' || xabber.settings.language == 'default' && xabber.get("default_language") == 'ru-RU') && 'D MMMM YYYY HH:mm:ss')};

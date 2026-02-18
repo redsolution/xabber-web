@@ -82,8 +82,8 @@ let Xabber = Backbone.Model.extend({
                 resolve(language);
                 return;
             }
-            import(`~/translations/${language.lang.replace(/-/g, "-r")}.js`).then(translation => {
-                language.translation  = translation;
+            import(`../translations/${language.lang.replace(/-/g, "-r")}.js`).then(translation => {
+                language.translation  = translation.default || translation;
                 resolve(language)
             });
         });

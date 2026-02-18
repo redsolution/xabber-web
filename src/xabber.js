@@ -54,6 +54,6 @@ xabber.extendWith(
     notifications,
     calls
 );
-global.xabber = xabber;
+window.xabber = xabber;
 
 export default xabber;

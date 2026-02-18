@@ -1,7 +1,9 @@
 import xabber from "xabber-core";
 
 let env = xabber.env,
-    utils = env.utils;
+    utils = env.utils,
+    Backbone = env.Backbone,
+    _ = env._;
 
 
 xabber.AccountSettings = Backbone.Model.extend({

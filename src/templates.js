@@ -1,6 +1,9 @@
 import _ from "underscore";
 import $ from "jquery";
 
+const htmlModules = import.meta.glob('/templates/**/*.html', { query: '?raw', import: 'default', eager: true });
+const jsonModules = import.meta.glob('/templates/**/*.json', { eager: true });
+
     _.templateSettings = {
         evaluate : /\{\[([\s\S]+?)\]\}/g,
         interpolate : /\{\{([\s\S]+?)\}\}/g
@@ -23,7 +26,8 @@ import $ from "jquery";
     let _addTemplate = function (name, options) {
         options || (options = {});
         let path = name.split('.'),
-            tpl = _.template(require('raw-loader!~/templates/'+path.join('/')+'.html').default),
+            htmlPath = '/templates/' + path.join('/') + '.html',
+            tpl = _.template(htmlModules[htmlPath]),
             tpl_name = path.pop(),
             res = templates;
         _.each(path, function (attr) {
@@ -39,9 +43,10 @@ import $ from "jquery";
         }
     };
 
-    let addJSONTemplate = function (name, ) {
+    let addJSONTemplate = function (name) {
         let path = name.split('.'),
-            tpl = require('~/templates/'+path.join('/')+'.json'),
+            jsonPath = '/templates/' + path.join('/') + '.json',
+            tpl = jsonModules[jsonPath].default || jsonModules[jsonPath],
             tpl_name = path.pop(),
             res = templates;
         _.each(path, function (attr) {

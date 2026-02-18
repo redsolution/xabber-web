@@ -14,14 +14,16 @@ import { $build, $iq, $msg, $pres, Builder, Request, Stanza, Strophe, stx, toSta
 import plyr from "Plyr";
 import Quill from "Quill";
 import libsignal from "libsignal-protocol";
-import sha1 from "sha1_hasher";
+import * as sha1Module from "sha1_hasher";
+var sha1 = sha1Module.default || sha1Module;
 import stropheSHA1 from "strophe.sha1";
-import Recorder from 'opus-recorder';
-import encoderPath from 'opus-recorder/dist/encoderWorker.min.js';
+import * as RecorderModule from 'opus-recorder';
+var Recorder = RecorderModule.default || RecorderModule;
+import encoderPath from 'opus-recorder/dist/encoderWorker.min.js?url';
 import VanillaQR from "VanillaQR";
 import idleJs from "idle-js";
-import backgroundImagesXml from "xml-loader!~/xmls/background-images.xml";
-import backgroundPatternsXml from "xml-loader!~/xmls/background-patterns.xml";
+import bgImagesXmlRaw from "~/xmls/background-images.xml?raw";
+import bgPatternsXmlRaw from "~/xmls/background-patterns.xml?raw";
 import { sharedKey, sign, verify } from 'curve25519-js';
 import "~/css/color-scheme.css";
 import "~/css/materialdesignicons.css";
@@ -41,6 +43,32 @@ import "omemo";
 import "backbone.localsync";
 import "materialize";
 import "perfectScrollbarJQuery";
+
+// Parse XML strings at runtime (replaces webpack xml-loader which returns JS objects)
+function parseXmlToObj(xmlStr) {
+    var doc = new DOMParser().parseFromString(xmlStr, "text/xml");
+    function nodeToObj(node) {
+        var obj = {};
+        for (var i = 0; i < node.childNodes.length; i++) {
+            var child = node.childNodes[i];
+            if (child.nodeType !== 1) continue;
+            var val = child.children.length > 0 ? nodeToObj(child) : child.textContent;
+            if (obj[child.tagName]) {
+                if (!Array.isArray(obj[child.tagName])) obj[child.tagName] = [obj[child.tagName]];
+                obj[child.tagName].push(val);
+            } else {
+                obj[child.tagName] = val;
+            }
+        }
+        return obj;
+    }
+    var root = doc.documentElement;
+    var result = {};
+    result[root.tagName] = nodeToObj(root);
+    return result;
+}
+var backgroundImagesXml = parseXmlToObj(bgImagesXmlRaw);
+var backgroundPatternsXml = parseXmlToObj(bgPatternsXmlRaw);
 
 export default _.extend({
     $: $,

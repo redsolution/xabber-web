@@ -5,10 +5,13 @@
  */
 // Check for jQuery.
 
-define (['jquery', 'hammerjs', 'xabber-constants'], function (jQuery, Hammer, constants) {
+import jQuery from 'jquery';
+import './hammer.min.js';
+var Hammer = window.Hammer;
+import constants from '../constants.js';
 
-constants = constants.default ? constants.default : constants;
-
+var Materialize = {};
+var $ = jQuery;
 window.$ = window.jQuery = $ = jQuery;
 
 /*
@@ -6992,5 +6995,3 @@ Picker.extend( 'pickadate', DatePicker )
       }
     }; // Plugin end
 }( jQuery ));
-
-});

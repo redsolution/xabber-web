@@ -5,6 +5,7 @@ npm-ready
 .idea
 !example_index.html
 !example_dev.html
+!index.html
 /*.pem
 package-lock.json
 

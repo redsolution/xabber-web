@@ -7,6 +7,7 @@ let env = xabber.env,
     $ = env.$,
     $iq = env.$iq,
     Strophe = env.Strophe,
+    Backbone = env.Backbone,
     _ = env._,
     Images = utils.images;
 

@@ -1,12 +1,14 @@
+const soundJsonModules = import.meta.glob('/sounds/*/*.json', { eager: true });
+const soundMp3Modules = import.meta.glob('/sounds/**/*.mp3', { query: '?url', import: 'default', eager: true });
 
     let sounds = {};
 
-    let attention_json = require('~/sounds/attention/attention.json'),
+    let attention_json = soundJsonModules['/sounds/attention/attention.json'].default || soundJsonModules['/sounds/attention/attention.json'],
         attention = [];
 
 
     Object.keys(attention_json).forEach(item => {
-        let audio = require(`~/sounds/attention/${item}/${item}.mp3`),
+        let audio = soundMp3Modules[`/sounds/attention/${item}/${item}.mp3`],
             attention_sound = {
                 file_name: item,
                 name: attention_json[item].name,
@@ -16,12 +18,12 @@
         attention.push(attention_sound);
     });
 
-    let ringtones_json = require('~/sounds/ringtones/ringtones.json'),
+    let ringtones_json = soundJsonModules['/sounds/ringtones/ringtones.json'].default || soundJsonModules['/sounds/ringtones/ringtones.json'],
         ringtones = [];
 
 
     Object.keys(ringtones_json).forEach(item => {
-        let audio = require(`~/sounds/ringtones/${item}/${item}.mp3`),
+        let audio = soundMp3Modules[`/sounds/ringtones/${item}/${item}.mp3`],
             ringtone = {
                 file_name: item,
                 name: ringtones_json[item].name,
@@ -31,12 +33,12 @@
         ringtones.push(ringtone);
     });
 
-    let dialtones_json = require('~/sounds/dialtones/dialtones.json'),
+    let dialtones_json = soundJsonModules['/sounds/dialtones/dialtones.json'].default || soundJsonModules['/sounds/dialtones/dialtones.json'],
         dialtones = [];
 
 
     Object.keys(dialtones_json).forEach(item => {
-        let audio = require(`~/sounds/dialtones/${item}/${item}.mp3`),
+        let audio = soundMp3Modules[`/sounds/dialtones/${item}/${item}.mp3`],
             dialtone = {
                 file_name: item,
                 name: dialtones_json[item].name,
@@ -46,12 +48,12 @@
         dialtones.push(dialtone);
     });
 
-    let notifications_json = require('~/sounds/notifications/notifications.json'),
+    let notifications_json = soundJsonModules['/sounds/notifications/notifications.json'].default || soundJsonModules['/sounds/notifications/notifications.json'],
         notifications = [];
 
 
     Object.keys(notifications_json).forEach(item => {
-        let audio = require(`~/sounds/notifications/${item}/${item}.mp3`),
+        let audio = soundMp3Modules[`/sounds/notifications/${item}/${item}.mp3`],
             notification = {
                 file_name: item,
                 name: notifications_json[item].name,
@@ -61,12 +63,12 @@
         notifications.push(notification);
     });
 
-    let system_json = require('~/sounds/system/system.json'),
+    let system_json = soundJsonModules['/sounds/system/system.json'].default || soundJsonModules['/sounds/system/system.json'],
         system_sound_list = [];
 
 
     Object.keys(system_json).forEach(item => {
-        let audio = require(`~/sounds/system/${item}/${item}.mp3`),
+        let audio = soundMp3Modules[`/sounds/system/${item}/${item}.mp3`],
             system_item = {
                 file_name: item,
                 name: system_json[item].name,
