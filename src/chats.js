@@ -3,6 +3,8 @@ import { createVueBackboneView } from "./vue/mountVue.js";
 import { transliterate as query_transliterate } from 'transliteration';
 import ChatsPanelComponent from './vue/components/chats/ChatsPanel.vue';
 import ChatHeadComponent from './vue/components/chats/ChatHead.vue';
+import ForwardPanelComponent from './vue/components/chats/ForwardPanel.vue';
+import SavedChatHeadComponent from './vue/components/chats/SavedChatHead.vue';
 
 let env = xabber.env,
     constants = env.constants,
@@ -11701,17 +11703,33 @@ xabber.ChatsView = createVueBackboneView(xabber, {
   });
 
 
-  xabber.ForwardPanelView = xabber.SearchView.extend({
+  xabber.ForwardPanelView = createVueBackboneView(xabber, {
+    component: ForwardPanelComponent,
     className: 'modal dialog-modal forward-panel-modal',
-    template: templates.forward_panel,
+    props: function (view) {
+        return {};
+    },
+    extend: {
     ps_selector: '.chat-list-wrap',
     ps_settings: {theme: 'item-list'},
-      events: {
-          "keyup .search-input": "keyUpOnSearch",
-          "focusout .search-input": "clearSearchSelection",
-          "click .close-search-icon": "clearSearch",
-          "click .list-item": "onClickItem"
-      },
+
+    events: {
+        "keyup .search-input": "keyUpOnSearch",
+        "focusout .search-input": "clearSearchSelection",
+        "click .close-search-icon": "clearSearch",
+        "click .list-item": "onClickItem",
+    },
+
+    _vueInit: function () {
+        if (this.ps_selector) {
+            this.ps_container = this.$(this.ps_selector);
+            if (this.ps_container.length) {
+                this.ps_container.perfectScrollbar(
+                    _.extend(this.ps_settings || {}, xabber.ps_settings)
+                );
+            }
+        }
+    },
 
     open: function (messages, account) {
         this.messages = messages;
@@ -11875,7 +11893,109 @@ xabber.ChatsView = createVueBackboneView(xabber, {
         this.close().done(() => {
             chat_item.open({clear_search: true});
         });
-    }
+    },
+
+    // --- Inherited from SearchView ---
+
+    keyUpOnSearch: function (ev) {
+        ev.stopPropagation();
+        this.ids = this.$('.list-item:not(.hidden)').map(function () {
+            return $(this).data('id');
+        }).toArray();
+        let $selection = this.getSelectedItem();
+        if (ev.keyCode === constants.KEY_ARROW_DOWN) {
+            return this.selectNextItem();
+        }
+        if (ev.keyCode === constants.KEY_ARROW_UP) {
+            return this.selectPreviousItem();
+        }
+        if (ev.keyCode === constants.KEY_ENTER && $selection.length) {
+            ev.preventDefault();
+            return this.onEnterPressed($selection);
+        }
+        if (ev.keyCode === constants.KEY_ESCAPE && !xabber.body.screen.get('right_contact')) {
+            ev.preventDefault();
+            if ($(ev.target).val())
+                return this.clearSearch();
+            else
+                this.close();
+        }
+        this.updateSearch();
+    },
+
+    getSelectedItem: function () {
+        return this.$('.list-item[data-id="'+this.selection_id+'"]');
+    },
+
+    selectItem: function (id, arrow) {
+        if (!id)
+            return;
+        this.clearSearchSelection();
+        let $selection = this.$('.list-item[data-id="'+id+'"]');
+        if ($selection.length) {
+            this.selection_id = id;
+        } else {
+            this.ps_container[0].scrollTop = 0;
+            $selection = this.$('.list-item:visible').first();
+            this.selection_id = $selection.data('id');
+        }
+        if (arrow === 'down' && ($selection[0].clientHeight + $selection[0].offsetTop >= this.ps_container[0].clientHeight + this.ps_container[0].scrollTop || $selection[0].clientHeight + $selection[0].offsetTop < this.ps_container[0].scrollTop))
+            this.ps_container[0].scrollTop = $selection[0].offsetTop;
+        if (arrow === 'up' && ($selection[0].offsetTop <= this.ps_container[0].scrollTop || $selection[0].offsetTop > this.ps_container[0].scrollTop + this.ps_container[0].clientHeight))
+            this.ps_container[0].scrollTop = $selection[0].offsetTop;
+        $selection.addClass('selected');
+    },
+
+    selectNextItem: function () {
+        this.selectItem(this.ids[this.ids.indexOf(this.selection_id)+1], 'down');
+    },
+
+    selectPreviousItem: function () {
+        this.selectItem(this.ids[this.ids.indexOf(this.selection_id)-1], 'up');
+    },
+
+    updateSearch: function () {
+        !this.update_search_debounce && (this.update_search_debounce = _.debounce(() => {
+            if (!this._update_search_timeout) {
+                let query = this.$('.search-input').val();
+                this.$('.search-form').switchClass('active', query);
+                this.clearSearchSelection();
+                if (query)
+                    this.search(query.toLowerCase());
+                else {
+                    this.$('.list-item').removeClass('hidden');
+                    this.onEmptyQuery();
+                }
+                this.updateScrollBar();
+                this.query = false;
+                this._update_search_timeout = setTimeout(() => {
+                    this._update_search_timeout = null;
+                    this.query && this.updateSearch();
+                }, 150);
+            } else {
+                this.query = true;
+            }
+        }, 350, false));
+        this.update_search_debounce();
+    },
+
+    clearSearch: function (ev) {
+        ev && ev.preventDefault();
+        this.$('.search-input').val('');
+        this.$('.search-input').focusout();
+        this.updateSearch();
+    },
+
+    clearSearchSelection: function (ev) {
+        this.selection_id = null;
+        this.$('.list-item.selected').removeClass('selected');
+        ev && !$(ev.target).val() && this.$el.removeClass('recent-chats-search-active');
+    },
+
+    searchAll: function () {
+        this.$('.list-item').removeClass('hidden');
+    },
+}
 });
 
 xabber.InvitationPanelView = xabber.SearchView.extend({
@@ -12164,9 +12284,13 @@ xabber.InvitationPanelView = xabber.SearchView.extend({
 
 });
 
-  xabber.SavedChatHeadView = xabber.BasicView.extend({
+  xabber.SavedChatHeadView = createVueBackboneView(xabber, {
+      component: SavedChatHeadComponent,
       className: 'chat-head-wrap saved-chat',
-      template: templates.saved_chat_head,
+      props: function (view) {
+          return {};
+      },
+      extend: {
       events: {
           "click .contact-name": "showSettings",
           "click .circle-avatar": "showSettings",
@@ -12182,7 +12306,7 @@ xabber.InvitationPanelView = xabber.SearchView.extend({
           "click .btn-search-messages": "renderSearchPanel"
       },
 
-      _initialize: function (options) {
+      _vueInit: function (options) {
           this.content = options.content;
           this.contact = this.content.contact;
           this.model = this.content.model;
@@ -12199,6 +12323,7 @@ xabber.InvitationPanelView = xabber.SearchView.extend({
           this.listenTo(xabber, 'update_layout', this.updatePlyrTitle);
           this.listenTo(xabber, 'plyr_player_time_updated', this.updatePlyrTime);
           this.listenTo(xabber, 'update_jingle_button', this.updateJingleButton);
+          this.render();
       },
 
       render: function () {
@@ -12385,6 +12510,7 @@ xabber.InvitationPanelView = xabber.SearchView.extend({
               xabber.current_voip_call.modal_view.collapse();
           }
       },
+  }
   });
 
   xabber.ChatHeadView = createVueBackboneView(xabber, {
