@@ -12,6 +12,7 @@ import GroupEditComponent from './vue/components/contacts/GroupEdit.vue';
 import AddContactComponent from './vue/components/contacts/AddContact.vue';
 import GroupSettingsComponent from './vue/components/contacts/GroupSettings.vue';
 import RosterSettingsComponent from './vue/components/contacts/RosterSettings.vue';
+import SetGroupchatStatusComponent from './vue/components/contacts/SetGroupchatStatus.vue';
 
 let env = xabber.env,
     constants = env.constants,
@@ -1379,14 +1380,18 @@ xabber.Contact = Backbone.Model.extend({
     },
 });
 
-xabber.SetGroupchatStatusView = xabber.BasicView.extend({
+xabber.SetGroupchatStatusView = createVueBackboneView(xabber, {
+    component: SetGroupchatStatusComponent,
     className: 'modal main-modal change-status-modal',
-    template: templates.group_chats.set_status,
-
+    extend: {
     events: {
         "click .btn-cancel": "closeModal",
         "click .btn-set": "do_change",
         "keyup .group-status-input": "onInputChange",
+    },
+
+    onShow: function () {
+        this.render.apply(this, arguments);
     },
 
     open: function (contact) {
@@ -1448,7 +1453,7 @@ xabber.SetGroupchatStatusView = xabber.BasicView.extend({
     closeModal: function () {
         this.$el.closeModal({ complete: this.hide.bind(this) });
     }
-});
+}});
 
 xabber.ContactItemView = xabber.BasicView.extend({
     className: 'roster-contact list-item',
@@ -9405,7 +9410,12 @@ xabber.GroupSettingsView = createVueBackboneView(xabber, {
     },
 
     _vueInit: function () {
-        this.ps_container = this.$('.modal-content')[0];
+        this.ps_container = this.$(this.ps_selector);
+        if (this.ps_container.length) {
+            this.ps_container.perfectScrollbar(
+                _.extend(this.ps_settings || {}, xabber.ps_settings)
+            );
+        }
         this._settings = this.model._settings;
         if (this.model.isSpecial()) {
             this.$('.group-name input').attr('readonly', true);

@@ -9,6 +9,8 @@ import ChatContentComponent from './vue/components/chats/ChatContent.vue';
 import ChatBottomComponent from './vue/components/chats/ChatBottom.vue';
 import AddGroupChatComponent from './vue/components/chats/AddGroupChat.vue';
 import SubscriptionButtonsComponent from './vue/components/chats/SubscriptionButtons.vue';
+import EphemeralTimerSelectorComponent from './vue/components/chats/EphemeralTimerSelector.vue';
+import ReportAbuseComponent from './vue/components/chats/ReportAbuse.vue';
 
 let env = xabber.env,
     constants = env.constants,
@@ -811,16 +813,30 @@ xabber.MessagesBase = Backbone.Collection.extend({
 });
 
 
-xabber.EphemeralTimerSelector = xabber.BasicView.extend({
+xabber.EphemeralTimerSelector = createVueBackboneView(xabber, {
+    component: EphemeralTimerSelectorComponent,
     className: 'modal main-modal change-ephemeral-timer-modal',
+    extend: {
     ps_selector: '.modal-content',
     ps_settings: {
         wheelPropagation: true
     },
-    template: templates.ephemeral_timer_selector,
 
     events: {
         "click .btn-set-ephemeral-timer": "changeTimer",
+    },
+
+    _vueInit: function () {
+        this.ps_container = this.$(this.ps_selector);
+        if (this.ps_container.length) {
+            this.ps_container.perfectScrollbar(
+                _.extend(this.ps_settings || {}, xabber.ps_settings)
+            );
+        }
+    },
+
+    onShow: function () {
+        this.render.apply(this, arguments);
     },
 
     render: function (options) {
@@ -873,7 +889,7 @@ xabber.EphemeralTimerSelector = xabber.BasicView.extend({
     closeModal: function () {
         this.$el.closeModal({ complete: this.hide.bind(this) });
     }
-});
+}});
 
 xabber.JingleMessage = Backbone.Model.extend({
 
@@ -17304,15 +17320,29 @@ xabber.DeleteWithOptionsView = xabber.BasicView.extend({
     }
 });
 
-xabber.ReportAbuseView = xabber.BasicView.extend({
+xabber.ReportAbuseView = createVueBackboneView(xabber, {
+    component: ReportAbuseComponent,
     className: 'modal main-modal report-abuse-modal',
-    template: templates.report_abuse,
+    extend: {
     ps_selector: '.modal-content',
 
     events: {
         "click .btn-proceed": "proceed",
         "click .btn-cancel": "close",
         "change input[name='report-options']": "onOptionCheckboxChange",
+    },
+
+    _vueInit: function () {
+        this.ps_container = this.$(this.ps_selector);
+        if (this.ps_container.length) {
+            this.ps_container.perfectScrollbar(
+                _.extend(this.ps_settings || {}, xabber.ps_settings)
+            );
+        }
+    },
+
+    onShow: function () {
+        this.render.apply(this, arguments);
     },
 
     open: function (options) {
@@ -17396,7 +17426,7 @@ xabber.ReportAbuseView = xabber.BasicView.extend({
     closeModal: function () {
         this.$el.closeModal({ complete: this.hide.bind(this) });
     }
-});
+}});
 
 xabber.ChatHeadContainer = xabber.Container.extend({
     className: 'chat-head-container panel-head noselect'

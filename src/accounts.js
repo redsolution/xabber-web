@@ -6,6 +6,10 @@ import SettingsAccountsBlock from "./vue/components/accounts/SettingsAccountsBlo
 import AccountSettingsModal from "./vue/components/accounts/AccountSettingsModal.vue";
 import VCardPanel from "./vue/components/vcard/VCardPanel.vue";
 import ChangeStatusComponent from "./vue/components/accounts/ChangeStatus.vue";
+import ChangePasswordComponent from "./vue/components/accounts/ChangePassword.vue";
+import ResourceComponent from "./vue/components/accounts/Resource.vue";
+import ResourceRightComponent from "./vue/components/accounts/ResourceRight.vue";
+import ChangeAccountPasswordComponent from "./vue/components/accounts/ChangeAccountPassword.vue";
 
 let env = xabber.env,
     constants = env.constants,
@@ -2649,11 +2653,11 @@ xabber.Resource = Backbone.Model.extend({
     }
 });
 
-xabber.ResourceView = xabber.BasicView.extend({
+xabber.ResourceView = createVueBackboneView(xabber, {
+    component: ResourceComponent,
     className: 'resource-wrap',
-    template: templates.resource,
-
-    _initialize: function () {
+    extend: {
+    _vueInit: function () {
         this.update();
         this.listenTo(this.model, 'change', this.update);
     },
@@ -2667,13 +2671,13 @@ xabber.ResourceView = xabber.BasicView.extend({
         this.$('.priority').text(attrs.priority);
         return this;
     }
-});
+}});
 
-xabber.ResourceRightView = xabber.BasicView.extend({
+xabber.ResourceRightView = createVueBackboneView(xabber, {
+    component: ResourceRightComponent,
     className: 'resource-wrap',
-    template: templates.resource_right,
-
-    _initialize: function () {
+    extend: {
+    _vueInit: function () {
         this.update();
         this.listenTo(this.model, 'change', this.update);
     },
@@ -2687,7 +2691,7 @@ xabber.ResourceRightView = xabber.BasicView.extend({
         this.$('.priority').text(attrs.priority);
         return this;
     }
-});
+}});
 
 xabber.Resources = Backbone.Collection.extend({
     model: xabber.Resource,
@@ -6052,22 +6056,26 @@ xabber.EmojiPickerView = xabber.BasicView.extend({
     },
 });
 
-xabber.ChangePasswordView = xabber.BasicView.extend({
+xabber.ChangePasswordView = createVueBackboneView(xabber, {
+    component: ChangePasswordComponent,
     className: 'modal main-modal change-password-modal',
-    template: templates.change_password,
-
+    extend: {
     events: {
         "click .btn-change": "submit",
         "click .btn-cancel": "close",
         "keyup input[name=password]": "keyUp"
     },
 
-    _initialize: function () {
+    _vueInit: function () {
         this.$('input[name=jid]').val(this.model.get('jid'));
         this.$password_input = this.$('input[name=password]');
         this.listenTo(this.model, 'change:authentication', this.updateButtons);
         this.listenTo(xabber, 'quit', this.onQuit);
         return this;
+    },
+
+    onShow: function () {
+        this.render.apply(this, arguments);
     },
 
     render: function (options) {
@@ -6179,15 +6187,20 @@ xabber.ChangePasswordView = xabber.BasicView.extend({
         this.model.auth_view = null;
         this.$el.closeModal({ complete: this.hide.bind(this) });
     }
-});
+}});
 
-xabber.ChangeAccountPasswordView = xabber.BasicView.extend({
+xabber.ChangeAccountPasswordView = createVueBackboneView(xabber, {
+    component: ChangeAccountPasswordComponent,
     className: 'modal main-modal change-account-password-modal',
-    template: templates.change_account_password,
+    extend: {
     events: {
         "click .btn-change": "submit",
         "click .btn-cancel": "close",
         "keyup input": "keyUp",
+    },
+
+    onShow: function () {
+        this.render.apply(this, arguments);
     },
 
     render: function (options) {
@@ -6281,7 +6294,7 @@ xabber.ChangeAccountPasswordView = xabber.BasicView.extend({
     closeModal: function () {
         this.$el.closeModal({ complete: this.hide.bind(this) });
     }
-});
+}});
 
 xabber.AuthView = xabber.BasicView.extend({
     _initialize: function () {
