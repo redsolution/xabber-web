@@ -1,4 +1,10 @@
 import xabber from "xabber-core";
+import { createApp } from 'vue';
+import { createVueBackboneView, VIEW_EL_KEY } from "./vue/mountVue.js";
+import { XABBER_KEY } from "./vue/composables/useXabber.js";
+import VCardPanel from "./vue/components/vcard/VCardPanel.vue";
+import VCardEditPanel from "./vue/components/vcard/VCardEditPanel.vue";
+import VCardRightPanel from "./vue/components/vcard/VCardRightPanel.vue";
 
 let env = xabber.env,
     templates = env.templates.vcard,
@@ -200,478 +206,96 @@ utils.vcard = {
     }
 };
 
-xabber.VCardView = xabber.BasicView.extend({
-    template: templates.vcard,
-
-    _initialize: function () {
-        this.$el.html(this.template());
-        this.listenTo(this.model, 'change:vcard_updated', this.update);
-        this.listenTo(this.data, 'change:refresh', this.updateRefreshButton);
+xabber.VCardView = createVueBackboneView(xabber, {
+    component: VCardPanel,
+    props: function (view) {
+        return { model: view.model, showEditButton: false, isGroupChat: !!(view.model.get && view.model.get('group_chat')) };
     },
+    extend: {
+        render: function () {
+            this._vueInstance && this._vueInstance.render();
+        },
 
-    render: function () {
-        this.$('.block-header .block-name').text(this.model.get('group_chat') ? 'Group chat details' : xabber.getString("vcard_screen__header"));
-        this.data.set('refresh', false);
-        this.model.getVCard(() => {
-            this.update();
-        });
-    },
+        refresh: function () {
+            this._vueInstance && this._vueInstance.refresh();
+        },
 
-    update: function () {
-        let $info, vcard = this.model.get('vcard');
-
-        $info = this.$('.jid-info-wrap');
-        $info.find('.jabber-id').showIf(vcard.jabber_id).find('.value').html(`${Strophe.getNodeFromJid(vcard.jabber_id)}@<span class="jid-domain-part" title="${xabber.getString("click_to_filter_contacts_by_domain")}">${Strophe.getDomainFromJid(vcard.jabber_id)}</span>`);
-        $info.showIf(vcard.jabber_id);
-
-        $info = this.$('.personal-info-wrap');
-        $info.find('.fullname').showIf(vcard.fullname).find('.value').text(vcard.fullname);
-        $info.find('.first-name').showIf(vcard.first_name).find('.value').text(vcard.first_name);
-        $info.find('.middle-name').showIf(vcard.middle_name).find('.value').text(vcard.middle_name);
-        $info.find('.last-name').showIf(vcard.last_name).find('.value').text(vcard.last_name);
-        $info.showIf(vcard.fullname || vcard.first_name || vcard.middle_name || vcard.last_name);
-
-        $info = this.$('.nickname-info-wrap');
-        $info.find('.nickname').showIf(vcard.nickname).find('.value').text(vcard.nickname);
-        $info.showIf(vcard.nickname);
-
-        $info = this.$('.birthday-info-wrap');
-        $info.find('.birthday').showIf(vcard.birthday).find('.value').text(vcard.birthday);
-        $info.showIf(vcard.birthday);
-
-        $info = this.$('.job-info-wrap');
-        $info.find('.role').showIf(vcard.role).find('.value').text(vcard.role);
-        $info.find('.job-title').showIf(vcard.job_title).find('.value').text(vcard.job_title);
-        $info.find('.org-name').showIf(vcard.org.name).find('.value').text(vcard.org.name);
-        $info.find('.org-unit').showIf(vcard.org.unit).find('.value').text(vcard.org.unit);
-        $info.showIf(vcard.role || vcard.job_title || vcard.org.name || vcard.org.unit);
-
-        $info = this.$('.site-info-wrap');
-        $info.find('.url').showIf(vcard.url).find('.value').text(vcard.url).hyperlinkify();
-        $info.showIf(vcard.url);
-
-        $info = this.$('.description-info-wrap');
-        $info.find('.description').showIf(vcard.description).find('.value').text(vcard.description);
-        $info.showIf(vcard.description);
-
-        let $addr_info = this.$('.address-info-wrap'),
-            address = _.clone(vcard.address),
-            show_addr_block = false;
-        $addr_info.find('.info').addClass('hidden');
-        _.each(address, function (addr, type) {
-            $info = $addr_info.find('.address-'+type);
-            $info.find('.pobox').showIf(addr.pobox).text(addr.pobox);
-            $info.find('.extadd').showIf(addr.extadd).text(addr.extadd);
-            $info.find('.street').showIf(addr.street).text(addr.street);
-            $info.find('.locality').showIf(addr.locality).text(addr.locality);
-            $info.find('.region').showIf(addr.region).text(addr.region);
-            $info.find('.pcode').showIf(addr.pcode).text(addr.pcode);
-            $info.find('.country').showIf(addr.country).text(addr.country);
-            let show = (addr.pobox || addr.extadd || addr.street || addr.locality ||
-                         addr.region || addr.pcode || addr.country);
-            show && (show_addr_block = true);
-            $info.showIf(show);
-        });
-        $addr_info.showIf(show_addr_block);
-
-        $info = this.$('.phone-info-wrap');
-        let phone = vcard.phone;
-        if (phone) {
-            $info.find('.phone-work').showIf(phone.work).find('.value').text(phone.work);
-            $info.find('.phone-home').showIf(phone.home).find('.value').text(phone.home);
-            $info.find('.phone-mobile').showIf(phone.mobile).find('.value').text(phone.mobile);
-            $info.find('.phone-default').showIf(phone.default).find('.value').text(phone.default);
-        }
-        $info.showIf(phone && (phone.work || phone.home || phone.mobile || phone.default));
-
-        $info = this.$('.email-info-wrap');
-        let email = vcard.email;
-        if (email) {
-            $info.find('.email-work').showIf(email.work).find('.value').text(email.work);
-            $info.find('.email-home').showIf(email.home).find('.value').text(email.home);
-            $info.find('.email-default').showIf(email.default).find('.value').text(email.default);
-        }
-        $info.showIf(email && (email.work || email.home || email.default));
-
-        this.parent.updateScrollBar();
-    },
-
-    onClickIcon: function (ev) {
-        let $target_info = $(ev.target).closest('.info-wrap'),
-            $target_value = $target_info.find('.value'), copied_text = "";
-        $target_value.each((idx, item) => {
-            let $item = $(item),
-                value_text = $item.text();
-            value_text && (copied_text !== "") && (copied_text += '\n');
-            value_text && (copied_text += value_text);
-            copied_text && utils.copyTextToClipboard(copied_text, xabber.getString("toast__copied_in_clipboard"), xabber.getString("toast__not_copied_in_clipboard"));
-        });
-    },
-
-    updateRefreshButton: function () {
-        this.$('.btn-vcard-refresh .button').hideIf(this.data.get('refresh'));
-        this.$('.btn-vcard-refresh .preloader-wrapper').showIf(this.data.get('refresh'));
-    },
-
-    refresh: function () {
-        if (!this.data.get('refresh')) {
-            this.data.set('refresh', true);
-            this.model.getVCard(() => {
-                this.data.set('refresh', false);
-            });
+        updateScrollBar: function () {
+            this.parent && this.parent.updateScrollBar && this.parent.updateScrollBar();
         }
     }
 });
 
-xabber.VCardRightView = xabber.VCardView.extend({
-    template: templates.vcard_right,
-
-    __initialize: function () {
-        this.ps_container = this.$('.full-vcard-content');
-        if (this.ps_container.length) {
-            this.ps_container.perfectScrollbar(
-                _.extend(this.ps_settings || {}, xabber.ps_settings)
-            );
-        }
-        this.ps_container.on("ps-scroll-up ps-scroll-down", this.onScroll.bind(this));
-        this.model.set('vcard_hidden', true)
+xabber.VCardRightView = createVueBackboneView(xabber, {
+    component: VCardRightPanel,
+    props: function (view) {
+        return { model: view.model };
     },
+    extend: {
+        _vueInit: function () {
+            this._vueInstance.setBackboneView(this);
+        },
 
-    render: function () {
-        this.data.set('refresh', false);
-        this.update();
-        this.$('.full-vcard-wrap').hideIf(this.model.get('vcard_hidden'));
-        if (this.parent.ps_container.length) {
-            if(!this.model.get('vcard_hidden'))
-                this.parent.ps_container.perfectScrollbar('destroy');
-            else
-                this.parent.ps_container.perfectScrollbar(
-                    _.extend(this.parent.ps_settings || {}, xabber.ps_settings)
-                );
+        render: function () {
+            this._vueInstance && this._vueInstance.render();
+        },
+
+        refresh: function () {
+            this._vueInstance && this._vueInstance.refresh();
+        },
+
+        showVCard: function () {
+            this._vueInstance && this._vueInstance.showVCard();
+        },
+
+        hideVCard: function () {
+            this._vueInstance && this._vueInstance.hideVCard();
+        },
+
+        scrollToTop: function () {
+            this._vueInstance && this._vueInstance.scrollToTop();
+        },
+
+        onScroll: function () {
+            this._vueInstance && this._vueInstance.onScroll();
         }
-        this.model.updateName();
-        this.model.getVCard(() => {
-            this.update();
-        });
-    },
-
-    update: function () {
-        let $info, vcard = this.model.get('vcard');
-
-        $info = this.$('.jid-info-wrap');
-        $info.find('.jabber-id').showIf(vcard.jabber_id).find('.value').html(`${Strophe.getNodeFromJid(vcard.jabber_id)}@<span class="jid-domain-part" title="${xabber.getString("click_to_filter_contacts_by_domain")}">${Strophe.getDomainFromJid(vcard.jabber_id)}</span>`);
-        $info.showIf(vcard.jabber_id);
-
-        $info = this.$('.vcard-wrap .personal-info-wrap');
-        $info.find('.first-name').showIf(vcard.first_name).find('.value').text(vcard.first_name);
-        $info.find('.last-name').showIf(vcard.last_name).find('.value').text(vcard.last_name);
-        $info.showIf(vcard.first_name || vcard.last_name);
-
-        $info = this.$('.full-vcard-wrap .personal-info-wrap');
-        $info.find('.fullname').showIf(vcard.fullname).find('.value').text(vcard.fullname);
-        $info.find('.first-name').showIf(vcard.first_name).find('.value').text(vcard.first_name);
-        $info.find('.middle-name').showIf(vcard.middle_name).find('.value').text(vcard.middle_name);
-        $info.find('.last-name').showIf(vcard.last_name).find('.value').text(vcard.last_name);
-        $info.showIf(vcard.fullname || vcard.first_name || vcard.middle_name || vcard.last_name);
-
-        $info = this.$('.nickname-info-wrap');
-        $info.find('.nickname').showIf(vcard.nickname).find('.value').text(vcard.nickname);
-        $info.showIf(vcard.nickname);
-
-        $info = this.$('.birthday-info-wrap');
-        $info.find('.birthday').showIf(vcard.birthday).find('.value').text(vcard.birthday);
-        $info.showIf(vcard.birthday);
-
-        $info = this.$('.job-info-wrap');
-        $info.find('.role').showIf(vcard.role).find('.value').text(vcard.role);
-        $info.find('.job-title').showIf(vcard.job_title).find('.value').text(vcard.job_title);
-        $info.find('.org-name').showIf(vcard.org.name).find('.value').text(vcard.org.name);
-        $info.find('.org-unit').showIf(vcard.org.unit).find('.value').text(vcard.org.unit);
-        $info.showIf(vcard.role || vcard.job_title || vcard.org.name || vcard.org.unit);
-
-        $info = this.$('.site-info-wrap');
-        $info.find('.url').showIf(vcard.url).find('.value').text(vcard.url).hyperlinkify();
-        $info.showIf(vcard.url);
-
-        $info = this.$('.description-info-wrap');
-        $info.find('.description').showIf(vcard.description).find('.value').text(vcard.description);
-        $info.showIf(vcard.description);
-
-        let $addr_info = this.$('.address-info-wrap'),
-            address = _.clone(vcard.address),
-            show_addr_block = false;
-        $addr_info.find('.info').addClass('hidden');
-        _.each(address, function (addr, type) {
-            $info = $addr_info.find('.address-'+type);
-            $info.find('.pobox').showIf(addr.pobox).text(addr.pobox);
-            $info.find('.extadd').showIf(addr.extadd).text(addr.extadd);
-            $info.find('.street').showIf(addr.street).text(addr.street);
-            $info.find('.locality').showIf(addr.locality).text(addr.locality);
-            $info.find('.region').showIf(addr.region).text(addr.region);
-            $info.find('.pcode').showIf(addr.pcode).text(addr.pcode);
-            $info.find('.country').showIf(addr.country).text(addr.country);
-            let show = (addr.pobox || addr.extadd || addr.street || addr.locality ||
-                addr.region || addr.pcode || addr.country);
-            show && (show_addr_block = true);
-            $info.showIf(show);
-        });
-        $addr_info.showIf(show_addr_block);
-
-        $info = this.$('.phone-info-wrap');
-        let phone = vcard.phone;
-        if (phone) {
-            $info.find('.phone-work').showIf(phone.work).find('.value').text(phone.work);
-            $info.find('.phone-home').showIf(phone.home).find('.value').text(phone.home);
-            $info.find('.phone-mobile').showIf(phone.mobile).find('.value').text(phone.mobile);
-            $info.find('.phone-default').showIf(phone.default).find('.value').text(phone.default);
-        }
-        $info.showIf(phone && (phone.work || phone.home || phone.mobile || phone.default));
-
-        $info = this.$('.email-info-wrap');
-        let email = vcard.email;
-        if (email) {
-            $info.find('.email-work').showIf(email.work).find('.value').text(email.work);
-            $info.find('.email-home').showIf(email.home).find('.value').text(email.home);
-            $info.find('.email-default').showIf(email.default).find('.value').text(email.default);
-        }
-        $info.showIf(email && (email.work || email.home || email.default));
-
-        this.parent.updateScrollBar();
-    },
-
-    onScroll: function () {
-        if(this.ps_container[0].scrollTop >= 170) {
-            this.$('.vcard-header-title').addClass('fixed-scroll');
-            this.$('.vcard-header-title').attr('style', 'background-color: rgba(255,255,255,1) !important; -webkit-transition: none; -ms-transition: none;transition: none;');
-        }
-        else if(this.ps_container[0].scrollTop >= 40) {
-            this.$('.vcard-header-title').removeClass('fixed-scroll');
-            this.$('.vcard-header-title').attr('style', 'background-color: rgba(255,255,255,0.5) !important;');
-        }
-        else {
-            this.$('.vcard-header-title').removeClass('fixed-scroll');
-            this.$('.vcard-header-title').attr('style', 'background-color: rgba(255,255,255,0) !important;');
-        }
-
-    },
-
-    onClickIcon: function (ev) {
-        if ($(ev.target).closest('.jid-domain-part').length){
-            let domain = $(ev.target).closest('.jid-domain-part').text();
-            xabber.toolbar_view.showContacts();
-            xabber.contacts_view.filterByDomain(null, domain);
-            return;
-        }
-        let $target_info = $(ev.target),
-            $target_value = $target_info.find('.value'), copied_text = "";
-        $target_value.each((idx, item) => {
-            let $item = $(item),
-                value_text = $item.text();
-            value_text && (copied_text !== "") && (copied_text += '\n');
-            value_text && (copied_text += value_text);
-            copied_text && utils.copyTextToClipboard(copied_text, xabber.getString("toast__copied_in_clipboard"), xabber.getString("toast__not_copied_in_clipboard"));
-        });
-    },
-
+    }
 });
 
-xabber.VCardEditModalView = xabber.BasicView.extend({
+xabber.VCardEditModalView = createVueBackboneView(xabber, {
+    component: VCardEditPanel,
     className: 'account-vcard-edit-modal-wrap account-vcard-edit-wrap',
-    template: templates.vcard_edit_modal,
-    ps_selector: '.panel-content',
-
-    events: {
-        "keyup input": "keyUp",
-        "keyup textarea": "keyUp",
-        "input .first-name input": "changePlaceholder",
-        "input .middle-name input": "changePlaceholder",
-        "input .last-name input": "changePlaceholder",
-        "click .btn-vcard-save": "save",
+    props: function (view) {
+        return { model: view.model };
     },
+    extend: {
+        ps_selector: '.panel-content',
 
-    _initialize: function () {
-        let self = this,
-            $input = this.$('.datepicker').pickadate({
-            selectMonths: true,
-            selectYears: 100,
-            autoOk: false,
-            min: new Date(moment.now() - 3153600000000),
-            max: new Date(moment.now() - 86400000),
-            format: 'dd.mm.yyyy',
-            allowKeyboardControl: false,
-            today: '',
-            onClose: function(){
-                $(document.activeElement).blur();
-                self.$('.btn-vcard-back').removeClass('hidden');
-                self.$('.btn-vcard-save').removeClass('hidden');
-            },
-            klass: {
-                weekday_display: 'picker__weekday-display ground-color-700',
-                date_display: 'picker__date-display ground-color-500',
-                navPrev: 'picker__nav--prev hover-ground-color-100',
-                navNext: 'picker__nav--next hover-ground-color-100',
-                selected: 'picker__day--selected ground-color-500',
-                now: 'picker__day--today text-color-700',
-                buttonClear: 'btn-flat btn-main btn-dark',
-                buttonClose: 'btn-flat btn-main text-color-700'
+        onShow: function () {
+            this.render.apply(this, arguments);
+        },
+
+        render: function (options) {
+            if (options && options.$el) {
+                options.$el.html('');
+                options.$el.append(this.$el);
             }
-        });
-        $input.on('mousedown', function cancelEvent(evt) {
-            evt.preventDefault();
-        });
-        this.listenTo(this.data, 'change:saving', this.updateSaveButton);
-    },
+            this._vueInstance && this._vueInstance.render();
+            this.updateScrollBar();
+        },
 
-    render: function (options) {
-        options.$el.html('');
-        options.$el.append(this.$el);
-        this.data.set('saving', false);
-        this.setData();
-        Materialize && Materialize.updateTextFields && Materialize.updateTextFields();
-        this.changePlaceholder();
-        this.updateScrollBar();
-        this.$('.btn-vcard-save').addClass('hidden');
-    },
+        onHide: function () {
+            this.$el.detach();
+        },
 
-    onHide: function () {
-        this.$el.detach();
-    },
+        close: function () {
+            this.$el.closeModal({ complete: this.hide.bind(this) });
+        },
 
-    close: function () {
-        this.$el.closeModal({ complete: this.hide.bind(this) });
-    },
-
-    changePlaceholder: function () {
-        let nickname_placeholder = ((this.$('.first-name input').val() + " " + this.$('.middle-name input').val()).trim() + " " + this.$('.last-name input').val()).trim() || this.model.get('jid');
-        this.$('.nickname input').attr('placeholder', nickname_placeholder);
-    },
-
-    setData: function () {
-        let vcard = this.model.get('vcard');
-
-        this.$('.nickname input').val(vcard.nickname);
-        this.$('.fullname input').val(vcard.fullname);
-        this.$('.first-name input').val(vcard.first_name);
-        this.$('.last-name input').val(vcard.last_name);
-        this.$('.middle-name input').val(vcard.middle_name);
-
-        this.$('.birthday input').val(vcard.birthday);
-
-        this.$('.role input').val(vcard.role);
-        this.$('.job-title input').val(vcard.job_title);
-        this.$('.org-name input').val(vcard.org.name);
-        this.$('.org-unit input').val(vcard.org.unit);
-
-        this.$('.url input').val(vcard.url);
-
-        this.$('.description textarea').val(vcard.description);
-
-        this.$('.phone-work input').val(vcard.phone.work);
-        this.$('.phone-home input').val(vcard.phone.home);
-        this.$('.phone-mobile input').val(vcard.phone.mobile);
-
-        this.$('.email-work input').val(vcard.email.work);
-        this.$('.email-home input').val(vcard.email.home);
-
-        let addr = vcard.address.work || {},
-            $info = this.$('.address-work-wrap');
-        $info.find('.pobox input').val(addr.pobox);
-        $info.find('.extadd input').val(addr.extadd);
-        $info.find('.street input').val(addr.street);
-        $info.find('.locality input').val(addr.locality);
-        $info.find('.region input').val(addr.region);
-        $info.find('.pcode input').val(addr.pcode);
-        $info.find('.country input').val(addr.country);
-
-        addr = vcard.address.home || {};
-        $info = this.$('.address-home-wrap');
-        $info.find('.pobox input').val(addr.pobox);
-        $info.find('.extadd input').val(addr.extadd);
-        $info.find('.street input').val(addr.street);
-        $info.find('.locality input').val(addr.locality);
-        $info.find('.region input').val(addr.region);
-        $info.find('.pcode input').val(addr.pcode);
-        $info.find('.country input').val(addr.country);
-    },
-
-    getData: function () {
-        let vcard = utils.vcard.getBlank(this.model.get('jid'));
-
-        vcard.nickname = this.$('.nickname input').val();
-        vcard.fullname = this.$('.fullname input').val();
-        vcard.first_name = this.$('.first-name input').val();
-        vcard.last_name = this.$('.last-name input').val();
-        vcard.middle_name = this.$('.middle-name input').val();
-
-        vcard.birthday = this.$('.birthday input').val();
-
-        vcard.role = this.$('.role input').val();
-        vcard.job_title = this.$('.job-title input').val();
-        vcard.org.name = this.$('.org-name input').val();
-        vcard.org.unit = this.$('.org-unit input').val();
-
-        vcard.url = this.$('.url input').val();
-
-        vcard.description = this.$('.description textarea').val();
-
-        vcard.phone.work = this.$('.phone-work input').val();
-        vcard.phone.home = this.$('.phone-home input').val();
-        vcard.phone.mobile = this.$('.phone-mobile input').val();
-
-        vcard.email.work = this.$('.email-work input').val();
-        vcard.email.home = this.$('.email-home input').val();
-
-        vcard.address.work = {};
-        let addr = vcard.address.work,
-            $info = this.$('.address-work-wrap');
-        addr.pobox = $info.find('.pobox input').val();
-        addr.extadd = $info.find('.extadd input').val();
-        addr.street = $info.find('.street input').val();
-        addr.locality = $info.find('.locality input').val();
-        addr.region = $info.find('.region input').val();
-        addr.pcode = $info.find('.pcode input').val();
-        addr.country = $info.find('.country input').val();
-
-        vcard.address.home = {};
-        addr = vcard.address.home;
-        $info = this.$('.address-home-wrap');
-        addr.pobox = $info.find('.pobox input').val();
-        addr.extadd = $info.find('.extadd input').val();
-        addr.street = $info.find('.street input').val();
-        addr.locality = $info.find('.locality input').val();
-        addr.region = $info.find('.region input').val();
-        addr.pcode = $info.find('.pcode input').val();
-        addr.country = $info.find('.country input').val();
-        return vcard;
-    },
-
-    updateSaveButton: function () {
-        this.$('.btn-vcard-save').text(this.data.get('saving') ? xabber.getString("saving") : xabber.getString("vcard_edit__button_save"));
-    },
-
-    save: function () {
-        if (this.data.get('saving')) {
-            return;
+        save: function () {
+            this._vueInstance && this._vueInstance.save();
         }
-        this.data.set('saving', true);
-        this.model.setVCard(this.getData(),
-            () => {
-                this.model.getVCard();
-                this.data.set('saving', false);
-                this.$('.btn-vcard-back').addClass('hidden');
-                this.$('.btn-vcard-save').addClass('hidden');
-            },
-            () => {
-                utils.dialogs.error(xabber.getString("account_user_info_save_fail"));
-                this.data.set('saving', false);
-            }
-        );
-    },
-
-    keyUp: function () {
-        this.$('.btn-vcard-back').removeClass('hidden');
-        this.$('.btn-vcard-save').removeClass('hidden');
-    },
+    }
 });
 
 export default xabber;

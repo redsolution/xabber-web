@@ -1739,58 +1739,11 @@ xabber.ContactResourcesRightView = xabber.ResourcesView.extend({
     }
 });
 
-xabber.ContactVCardView = xabber.VCardView.extend({
-    events: {
-        "click .btn-vcard-refresh": "refresh",
-        "click .details-icon": "onClickIcon"
-    }
-});
+// ContactVCardView - events now handled by Vue template
+xabber.ContactVCardView = xabber.VCardView;
 
-xabber.ContactRightVCardView = xabber.VCardRightView.extend({
-    events: {
-        "click .btn-vcard-refresh": "refresh",
-        "click .info-hover": "onClickIcon",
-        "click .info-wrap.more": "showVCard",
-        "click .btn-back": "hideVCard"
-    },
-
-
-    showVCard: function () {
-        this.model.set('vcard_hidden', false);
-        this.$('.full-vcard-wrap').hideIf(this.model.get('vcard_hidden'));
-        this.model.getVCard(() => {
-            this.updateName();
-            this.update();
-        });
-        this.parent.$('.buttons-wrap.fixed-scroll').addClass('hidden2');
-        this.$('.vcard-header').css({width: xabber.right_contact_panel.$el.find('.panel-content-wrap').width()});
-        this.parent.scrollToTop();
-        if (this.parent.ps_container.length) {
-            this.parent.ps_container.perfectScrollbar('destroy')
-        }
-    },
-
-    hideVCard: function () {
-        this.model.set('vcard_hidden', true);
-        if (this.parent.ps_container.length) {
-            this.parent.ps_container.perfectScrollbar(
-                _.extend(this.parent.ps_settings || {}, xabber.ps_settings)
-            );
-        }
-        this.scrollToTop();
-        this.onScroll();
-        this.parent.onScroll();
-        this.$('.full-vcard-wrap').hideIf(this.model.get('vcard_hidden'))
-    },
-
-    updateName: function () {
-        this.$('.main-info .name-wrap').text(this.model.get('name'));
-        if (this.model.get('name') !== this.model.get('roster_name'))
-            this.$('.main-info .name-wrap').addClass('name-is-custom');
-        else
-            this.$('.main-info .name-wrap').removeClass('name-is-custom');
-    },
-});
+// ContactRightVCardView - showVCard/hideVCard/updateName now handled by VCardRightPanel.vue
+xabber.ContactRightVCardView = xabber.VCardRightView;
 
 xabber.ContactDetailsViewRight = xabber.BasicView.extend({
     className: 'details-panel-right contact-details-panel',

@@ -1,6 +1,10 @@
 import xabber from "xabber-core";
-import { createVueBackboneView } from "./vue/mountVue.js";
+import { createApp } from 'vue';
+import { createVueBackboneView, VIEW_EL_KEY } from "./vue/mountVue.js";
+import { XABBER_KEY } from "./vue/composables/useXabber.js";
 import SettingsAccountsBlock from "./vue/components/accounts/SettingsAccountsBlock.vue";
+import AccountSettingsModal from "./vue/components/accounts/AccountSettingsModal.vue";
+import VCardPanel from "./vue/components/vcard/VCardPanel.vue";
 
 let env = xabber.env,
     constants = env.constants,
@@ -2766,28 +2770,28 @@ xabber.AccountResourcesView = xabber.ResourcesView.extend({
     }
 });
 
-xabber.AccountVCardModalView = xabber.VCardView.extend({
-    template: env.templates.vcard.vcard_modal,
-    events: {
-        "click .btn-vcard-refresh": "refresh",
-        "click .btn-vcard-edit": "showEditView",
-        "click .details-icon": "onClickIcon"
+xabber.AccountVCardModalView = createVueBackboneView(xabber, {
+    component: VCardPanel,
+    props: function (view) {
+        return { model: view.model, showEditButton: true, isGroupChat: false };
     },
+    extend: {
+        _vueInit: function () {
+            this._vueInstance.setBackboneView(this);
+        },
 
-    __initialize: function () {
-        this.updateButtons();
-        this.listenTo(this.model, 'activate deactivate', this.updateButtons);
-    },
+        render: function () {
+            this._vueInstance && this._vueInstance.render();
+        },
 
-    updateButtons: function () {
-        let connected = this.model.isConnected();
-        this.$('.btn-vcard-edit').showIf(connected);
-        this.$('.btn-vcard-refresh').showIf(connected);
-    },
+        refresh: function () {
+            this._vueInstance && this._vueInstance.refresh();
+        },
 
-    showEditView: function ($el) {
-        this.vcard_edit_modal = new xabber.VCardEditModalView({model: this.model});
-        this.vcard_edit_modal.show({$el: $el});
+        showEditView: function ($el) {
+            this.vcard_edit_modal = new xabber.VCardEditModalView({model: this.model});
+            this.vcard_edit_modal.show({$el: $el});
+        }
     }
 });
 
@@ -3609,72 +3613,47 @@ xabber.DeleteFilesFromGalleryView = xabber.BasicView.extend({
     }
 });
 
-xabber.AccountSettingsModalView = xabber.BasicView.extend({
+xabber.AccountSettingsModalView = createVueBackboneView(xabber, {
+    component: AccountSettingsModal,
     className: 'settings-panel-wrap',
-    template: templates.account_settings_modal,
+    props: function (view) {
+        return { model: view.model, singleMode: false };
+    },
+    extend: {
     ps_selector: '.settings-panel',
     ps_settings: {
         wheelPropagation: true
     },
     avatar_size: constants.AVATAR_SIZES.ACCOUNT_SETTINGS_LEFT,
 
+    // Events for dynamically-created content (tokens, trust items, etc.)
     events: {
-        "click .background-overlay": "closeSettings",
-        "change .main-info-wrap .circle-avatar input": "changeAvatar",
-        "click .btn-choose-image": "chooseAvatar",
-        "click .btn-back": "showSettings",
-        "click .btn-back-settings": "backToMenu",
-        "click .btn-back-subsettings-account": "backToSubMenu",
-        "click .btn-emoji-panel": "openEmojiPanel",
-        "click .btn-selfie": "openWebcamPanel",
-        "click .settings-tab[data-block-name='status']": "openChangeStatus",
-        "click .settings-tabs-wrap .settings-tab:not(.delete-account):not(.settings-non-tab)": "jumpToBlock",
-        "click .tokens-wrap .settings-tab.token-wrap": "jumpToBlock",
-        "click .btn-manage-xabber-account.settings-tab": "jumpToBlock",
-        "click .account-main-info-wrap .jid": "copyJIDToClipboard",
-        "click .settings-tab.delete-account": "deleteAccount",
-        "click .settings-tab.unregister-account": "unregisterAccount",
-
-        "change .enabled-state input": "setEnabled",
-        "change .setting-send-chat-states input": "setTypingNotification",
-        "change .setting-use-omemo input": "setEnabledOmemo",
-        "click .btn-change-password": "showPasswordView",
-        "click .btn-reconnect": "reconnect",
         "click": "hideResources",
-        "change .sync-account": "changeSyncSetting",
-        "click .btn-delete-settings": "deleteSettings",
-        "click .color-picker-button": "changeColor",
-        "click .btn-qr-code": "jumpToBlock",
         "click .trust-item-peer": "openFingerprints",
         "contextmenu .trust-item-peer": "onTrustPeerContextMenu",
         "contextmenu .all-sessions .token-wrap": "onOwnDevicesContextMenu",
         "click .btn-open": "openChat",
         "click .btn-open-encrypted": "openEncryptedChat",
         "click .btn-revoke-trust": "revokeTrust",
-        "click .btn-revoke-token": "revokeXToken",
-        "click .devices-wrap .btn-revoke-all-tokens": "revokeAllXTokens",
-        "click .devices-wrap .btn-verify-devices": "verifyDevices",
-        "click .btn-manage-devices": "openDevicesWindow",
-        "click .btn-block": "openBlockWindow",
         "click .blocked-contact input": "selectUnblock",
-        "click .btn-unblock-selected": "unblockSelected",
-        "click .btn-deselect-blocked": "deselectBlocked",
-        "click .btn-gallery-sorting": "sortFiles",
-        "click .btn-select-files": "enableFilesSelect",
         "click .all-sessions .device-encryption.active": "openFingerprint",
-        "click .device-information-trust": "openFingerprintDevice",
-        "click .device-information-refresh-bundle-debug": "refreshBundle",
-        "click .btn-purge-keys": "purgeKeys",
         "click .cancel-session": "cancelTrustSession",
         "click .enter-code": "showCode",
         "click .show-code": "showCode",
         'click .accept-request': "acceptRequest",
         'click .decline-request': "rejectRequest",
+        "click .tokens-wrap .settings-tab.token-wrap": "jumpToBlock",
     },
 
-    _initialize: function (options) {
+    _vueInit: function (options) {
+        this._vueInstance.setBackboneView(this);
         if (options.forced_ps_container){
             this.ps_container = options.forced_ps_container;
+        } else if (this.ps_selector) {
+            this.ps_container = this.$(this.ps_selector);
+            if (this.ps_container.length) {
+                this.ps_container.perfectScrollbar(_.extend(this.ps_settings || {}, xabber.ps_settings));
+            }
         }
         this.status_field = new xabber.StatusMessageModalWidget({
             el: this.$('.status-wrap')[0],
@@ -3689,7 +3668,9 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
         this.listenTo(this.model, 'activate deactivate', this.updateBlocks);
         this.listenTo(this.model, 'destroy', this.remove);
 
-        this.ps_container.on("ps-scroll-y", this.onScrollY.bind(this));
+        if (this.ps_container && this.ps_container.length) {
+            this.ps_container.on("ps-scroll-y", this.onScrollY.bind(this));
+        }
 
         this.vcard_view = this.addChild('vcard', xabber.AccountVCardModalView,
             {model: this.model,});
@@ -3735,7 +3716,7 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
         }
     },
 
-    render: function (options) {
+    onShow: function (options) {
         this.clearFrameInfo();
         this.$('.circle-avatar.dropdown-button').dropdown({
             inDuration: 100,
@@ -3798,6 +3779,10 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
             this.renderActiveTrustSession();
         this.data.set('visible', true);
         this.updateXTokens();
+        // Render children (vcard, gallery, blocklist)
+        _.each(this.children, function (view) {
+            view.render && view.render.apply(view, arguments);
+        });
         return this;
     },
 
@@ -5086,13 +5071,22 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
         if (this.gallery_view)
             this.gallery_view.enableFilesSelect();
     },
+    }
 });
 
 xabber.AccountSettingsSingleModalView = xabber.AccountSettingsModalView.extend({
     className: 'single-account-settings-panel-wrap',
-    template: templates.single_account_settings_modal,
 
-    render: function (view, options) {
+    // Override _initialize to mount Vue with singleMode: true
+    _initialize: function (viewOptions) {
+        this._vueApp = createApp(AccountSettingsModal, { model: this.model, singleMode: true });
+        this._vueApp.provide(XABBER_KEY, xabber);
+        this._vueApp.provide(VIEW_EL_KEY, this.$el);
+        this._vueInstance = this._vueApp.mount(this.$el[0]);
+        this._vueInit && this._vueInit(viewOptions);
+    },
+
+    onShow: function (view, options) {
         if (!_.isNull(view))
             return;
         this.$el.detach();
