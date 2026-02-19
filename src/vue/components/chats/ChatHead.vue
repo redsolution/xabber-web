@@ -1,0 +1,178 @@
+<template>
+    <div class="chat-head-details vue-migrated"></div>
+    <div class="account-indicator-background-exclude">
+        <div class="account-indicator ground-color-700"></div>
+        <div class="circle-avatar"></div>
+    </div>
+    <div class="contact-status hide-offline"></div>
+    <div class="chat-icon hidden"></div>
+    <div class="chat-head-info-buttons-container">
+        <div class="contact-info">
+            <div class="contact-name-wrap">
+                <i class="mdi encrypted-icon mdi-20px mdi-lock"></i>
+                <i class="mdi encrypted-icon mdi-20px mdi-alert"></i>
+                <i class="mdi encrypted-icon mdi-20px mdi-alert-circle"></i>
+                <p class="contact-name one-line"></p>
+            </div>
+            <p class="contact-status-message one-line"></p>
+        </div>
+        <div class="chat-tools-wrap">
+            <div class="chat-tool chat-tool-player">
+                <div class="chat-tool-player-containter">
+                    <div class="chat-tool chat-tool-plyr-controls btn-previous-plyr">
+                        <i class="mdi mdi-skip-previous mdi-24px"></i>
+                    </div>
+                    <div class="chat-tool chat-tool-plyr-controls btn-play-pause-plyr">
+                        <i class="mdi mdi-play mdi-24px"></i>
+                        <i class="mdi mdi-pause mdi-24px"></i>
+                    </div>
+                    <div class="chat-tool chat-tool-plyr-controls btn-next-plyr">
+                        <i class="mdi mdi-skip-next mdi-24px"></i>
+                    </div>
+                    <div class="chat-tool chat-tool-plyr-controls btn-popup-plyr">
+                        <img class="player-poster hidden">
+                        <svg class="mdi mdi-32px mdi-player-type-icon mdi-svg-template" v-html="svgContent('video')"></svg>
+                        <div class="voice-message-player-avatar circle-avatar hidden"></div>
+                    </div>
+                    <div class="chat-tool chat-player-duration chat-tool-plyr-controls">
+                        <div class="chat-head-player-title one-line"><div class="chat-head-player-title-text">{{ xb.getString("chat_message_video") }}</div></div>
+                        <div class="chat-head-player-title-bottom-container">
+                            <span class="chat-head-player-type one-line">{{ xb.getString("chat_message_video") }}</span><span class="chat-head-player-type-dot"> &#x2022;</span>
+                            <span class="chat-head-player-current-time">0:00</span> /
+                            <span class="chat-head-player-total-time">0:00</span>
+                        </div>
+                    </div>
+                    <div class="chat-tool chat-tool-plyr-controls btn-stop-plyr">
+                        <i class="mdi mdi-close mdi-16px"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="chat-tool btn-show-session">
+                <i class="mdi mdi-lock mdi-24px"></i>
+                <i class="mdi mdi-alert mdi-24px"></i>
+                <i class="mdi mdi-alert-circle mdi-24px"></i>
+            </div>
+            <div class="chat-tool btn-jingle-message">
+                <i class="mdi mdi-phone mdi-24px"></i>
+            </div>
+            <div class="chat-tool btn-search-messages">
+                <i class="search-icon mdi mdi-24px mdi-magnify"></i>
+            </div>
+            <div class="chat-tool btn-more dropdown-button" :data-activates="uid + '-more'">
+                <i class="mdi mdi-24px mdi-dots-vertical"></i>
+            </div>
+            <ul :id="uid + '-more'" class="chat-head-menu unified-dropdown-style dropdown-content noselect">
+                <li class="unified-dropdown-style-item btn-chat-pin">
+                    <span class="one-line"></span>
+                </li>
+                <li class="unified-dropdown-style-item btn-archive-chat">
+                    <span class="one-line"></span>
+                </li>
+                <li class="unified-dropdown-style-item btn-notifications active-hover" :data-activates="uid + '-mute-more'">
+                    <span class="one-line"></span>
+                </li>
+                <li class="unified-dropdown-style-item ephemeral-timer-dropdown active-hover" :data-activates="uid + '-ephemeral-timer'">
+                    <span class="one-line">{{ xb.getString("ephemeral_timer_menu") }}</span>
+                </li>
+                <li class="unified-dropdown-style-item btn-call-attention">
+                    <span class="one-line">{{ xb.getString("call_attention") }}</span>
+                </li>
+                <li class="unified-dropdown-style-item btn-export-chat">
+                    <span class="one-line">{{ xb.getString("export_chat") }}</span>
+                </li>
+                <li class="unified-dropdown-style-item btn-show-fingerprints">
+                    <span class="one-line">{{ xb.getString("chat_head__encrypted_devices") }}</span>
+                </li>
+                <li class="unified-dropdown-style-item btn-invite-users">
+                    <span class="one-line">{{ xb.getString("groupchat_invite") }}</span>
+                </li>
+                <li class="unified-dropdown-style-item btn-start-encryption">
+                    <span class="one-line">{{ xb.getString("omemo__chat_settings__button_start_encrypted_chat") }}</span>
+                </li>
+                <li class="unified-dropdown-style-item btn-open-encrypted-chat">
+                    <span class="one-line">{{ xb.getString("omemo__chat_settings__button_open_encrypted_chat") }}</span>
+                </li>
+                <li class="unified-dropdown-style-item btn-open-regular-chat">
+                    <span class="one-line">{{ xb.getString("omemo__chat_settings__button_open_regular_chat") }}</span>
+                </li>
+                <li class="unified-dropdown-style-item btn-delete-chat">
+                    <span class="one-line text-color-500">{{ xb.getString("delete_chat") }}</span>
+                </li>
+                <li class="unified-dropdown-style-item btn-clear-history">
+                    <span class="one-line text-color-500">{{ xb.getString("clear_history") }}</span>
+                </li>
+            </ul>
+            <ul :id="uid + '-mute-more'" class="contact-mute-dropdown unified-dropdown-style dropdown-content noselect">
+                <li class="unified-dropdown-style-item btn-mute-dropdown" data-mute="minutes15">
+                    <span class="one-line">{{ xb.getString("mute_15_min") }}</span>
+                </li>
+                <li class="unified-dropdown-style-item btn-mute-dropdown" data-mute="hours1">
+                    <span class="one-line">{{ xb.getString("mute_1_hour") }}</span>
+                </li>
+                <li class="unified-dropdown-style-item btn-mute-dropdown" data-mute="hours2">
+                    <span class="one-line">{{ xb.getString("mute_2_hours") }}</span>
+                </li>
+                <li class="unified-dropdown-style-item btn-mute-dropdown" data-mute="day">
+                    <span class="one-line">{{ xb.getString("mute_1_day") }}</span>
+                </li>
+                <li class="unified-dropdown-style-item btn-mute-dropdown" data-mute="forever">
+                    <span class="one-line">{{ xb.getString("mute_forever") }}</span>
+                </li>
+            </ul>
+            <ul :id="uid + '-ephemeral-timer'" class="ephemeral-timer-dropdown-content unified-dropdown-style dropdown-content noselect">
+                <li class="unified-dropdown-style-item btn-set-ephemeral-timer" data-value="">
+                    <span class="one-line">{{ xb.getString("ephemeral_timer_none") }}</span>
+                </li>
+                <li class="unified-dropdown-style-item btn-set-ephemeral-timer" data-value="5">
+                    <span class="one-line">{{ xb.getString("ephemeral_timer_5") }}</span>
+                </li>
+                <li class="unified-dropdown-style-item btn-set-ephemeral-timer" data-value="10">
+                    <span class="one-line">{{ xb.getString("ephemeral_timer_10") }}</span>
+                </li>
+                <li class="unified-dropdown-style-item btn-set-ephemeral-timer" data-value="15">
+                    <span class="one-line">{{ xb.getString("ephemeral_timer_15") }}</span>
+                </li>
+                <li class="unified-dropdown-style-item btn-set-ephemeral-timer" data-value="30">
+                    <span class="one-line">{{ xb.getString("ephemeral_timer_30") }}</span>
+                </li>
+                <li class="unified-dropdown-style-item btn-set-ephemeral-timer" data-value="60">
+                    <span class="one-line">{{ xb.getString("ephemeral_timer_60") }}</span>
+                </li>
+                <li class="unified-dropdown-style-item btn-set-ephemeral-timer" data-value="300">
+                    <span class="one-line">{{ xb.getString("ephemeral_timer_300") }}</span>
+                </li>
+                <li class="unified-dropdown-style-item btn-set-ephemeral-timer" data-value="600">
+                    <span class="one-line">{{ xb.getString("ephemeral_timer_600") }}</span>
+                </li>
+                <li class="unified-dropdown-style-item btn-set-ephemeral-timer" data-value="900">
+                    <span class="one-line">{{ xb.getString("ephemeral_timer_900") }}</span>
+                </li>
+            </ul>
+        </div>
+    </div>
+</template>
+
+<script setup>
+import { useXabber } from '../../composables/useXabber.js';
+
+const xb = useXabber();
+
+const uid = 'ch-' + Math.random().toString(36).substr(2, 9);
+
+function svgContent(name) {
+    let tmpl = xb.env.templates.svg[name];
+    return tmpl ? tmpl() : '';
+}
+
+let backboneView = null;
+
+function setBackboneView(view) {
+    backboneView = view;
+}
+
+defineExpose({
+    setBackboneView,
+    svgContent,
+    uid,
+});
+</script>

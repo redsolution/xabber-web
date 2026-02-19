@@ -2,6 +2,7 @@ import xabber from "xabber-core";
 import { createVueBackboneView } from "./vue/mountVue.js";
 import { transliterate as query_transliterate } from 'transliteration';
 import ChatsPanelComponent from './vue/components/chats/ChatsPanel.vue';
+import ChatHeadComponent from './vue/components/chats/ChatHead.vue';
 
 let env = xabber.env,
     constants = env.constants,
@@ -12386,9 +12387,13 @@ xabber.InvitationPanelView = xabber.SearchView.extend({
       },
   });
 
-  xabber.ChatHeadView = xabber.BasicView.extend({
+  xabber.ChatHeadView = createVueBackboneView(xabber, {
+    component: ChatHeadComponent,
     className: 'chat-head-wrap',
-    template: templates.chat_head,
+    props: function (view) {
+        return {};
+    },
+    extend: {
     avatar_size: constants.AVATAR_SIZES.CHAT_HEAD,
 
     events: {
@@ -12426,7 +12431,11 @@ xabber.InvitationPanelView = xabber.SearchView.extend({
         "click .btn-set-ephemeral-timer": "setEphemeralTimer",
     },
 
-    _initialize: function (options) {
+    onShow: function () {
+        this.render.apply(this, arguments);
+    },
+
+    _vueInit: function (options) {
         this.content = options.content;
         this.contact = this.content.contact;
         this.model = this.content.model;
@@ -12486,15 +12495,15 @@ xabber.InvitationPanelView = xabber.SearchView.extend({
         this.$('.btn-notifications').dropdown({
             inDuration: 100,
             outDuration: 100,
-            hover: true, // Activate on hover
-            belowOrigin: true, // Displays dropdown below the button
+            hover: true,
+            belowOrigin: true,
         });
         this.$('.ephemeral-timer-dropdown').switchClass('hidden', !this.model.get('encrypted'));
         this.$('.ephemeral-timer-dropdown').dropdown({
             inDuration: 100,
             outDuration: 100,
-            hover: true, // Activate on hover
-            belowOrigin: true, // Displays dropdown below the button
+            hover: true,
+            belowOrigin: true,
         });
         this.$('.chat-head-menu').hide();
         this.updateStatusMsg();
@@ -12668,16 +12677,16 @@ xabber.InvitationPanelView = xabber.SearchView.extend({
     },
 
     renderSearchPanel: function () {
-        this.contact.showDetailsRight('all-chats', {type: 'search'});
+        this.contact.showDetailsRight(xabber.body.screen.get('name'), {type: 'search'});
     },
 
     showContactDetailsRight: function () {
-        this.contact.showDetailsRight('all-chats', {encrypted: this.model.get('encrypted')});
+        this.contact.showDetailsRight(xabber.body.screen.get('name'), {encrypted: this.model.get('encrypted')});
     },
 
     showMembersDetails: function () {
         if (this.contact.get('group_chat')){
-            this.contact.showDetailsRight('all-chats', {type: 'members'});
+            this.contact.showDetailsRight(xabber.body.screen.get('name'), {type: 'members'});
         } else {
             this.resources_view.open();
         }
@@ -13002,6 +13011,7 @@ xabber.InvitationPanelView = xabber.SearchView.extend({
         this.model.set('opened', true);
         this.account.chats.openChat(this.contact);
     }
+  }
 });
 
 
