@@ -1,4 +1,6 @@
 import xabber from "xabber-core";
+import { createVueBackboneView } from "./vue/mountVue.js";
+import NotificationsPanelComponent from './vue/components/notifications/NotificationsPanel.vue';
 
 let env = xabber.env,
     constants = env.constants,
@@ -37,9 +39,13 @@ xabber.NotificationsBodyContainer = xabber.Container.extend({
     className: 'notifications-body-container',
 });
 
-xabber.NotificationsView = xabber.BasicView.extend({
+xabber.NotificationsView = createVueBackboneView(xabber, {
+    component: NotificationsPanelComponent,
     className: 'notifications-content-wrap',
-    template: templates.notifications_view,
+    props: function (view) {
+        return {};
+    },
+    extend: {
     ps_selector: '.left-column-filters-container',
     avatar_size: constants.AVATAR_SIZES.SYNCHRONIZE_ACCOUNT_ITEM,
 
@@ -67,7 +73,20 @@ xabber.NotificationsView = xabber.BasicView.extend({
 
     },
 
-    _initialize: function () {
+    onShow: function () {
+        this.render.apply(this, arguments);
+    },
+
+    _vueInit: function () {
+        if (this.ps_selector) {
+            this.ps_container = this.$(this.ps_selector);
+            if (this.ps_container.length) {
+                this.ps_container.perfectScrollbar(
+                    _.extend(this.ps_settings || {}, xabber.ps_settings)
+                );
+            }
+        }
+
         this.listenTo(xabber.accounts, 'list_changed connected_list_changed notification_chat_created account_color_updated add destroy', this.updateAccountsFilter);
         this.listenTo(xabber.accounts, 'change:enabled', this.updateAccountsFilter);
         this.listenTo(xabber.accounts, 'change:connected', this.updateAccountsFilter);
@@ -577,7 +596,7 @@ xabber.NotificationsView = xabber.BasicView.extend({
             }
         }
     },
-});
+}});
 
 xabber.NotificationsChatContentView = xabber.BasicView.extend({
     className: 'chat-content-wrap',

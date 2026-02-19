@@ -1,4 +1,6 @@
 import xabber from "xabber-core";
+import { createVueBackboneView } from "./vue/mountVue.js";
+import CallsPanelComponent from './vue/components/calls/CallsPanel.vue';
 
 let env = xabber.env,
     constants = env.constants,
@@ -31,9 +33,13 @@ xabber.CallsBodyContainer = xabber.Container.extend({
     className: 'calls-body-container',
 });
 
-xabber.CallsView = xabber.BasicView.extend({
+xabber.CallsView = createVueBackboneView(xabber, {
+    component: CallsPanelComponent,
     className: 'calls-content-wrap',
-    template: templates.calls_view,
+    props: function (view) {
+        return {};
+    },
+    extend: {
     ps_selector: '.calls-right-container',
     avatar_size: constants.AVATAR_SIZES.CHAT_ITEM,
 
@@ -60,7 +66,20 @@ xabber.CallsView = xabber.BasicView.extend({
 
     },
 
-    _initialize: function () {
+    onShow: function () {
+        this.render.apply(this, arguments);
+    },
+
+    _vueInit: function () {
+        if (this.ps_selector) {
+            this.ps_container = this.$(this.ps_selector);
+            if (this.ps_container.length) {
+                this.ps_container.perfectScrollbar(
+                    _.extend(this.ps_settings || {}, xabber.ps_settings)
+                );
+            }
+        }
+
         this.listenTo(xabber.accounts, 'list_changed connected_list_changed notification_chat_created account_color_updated add destroy', this.updateAccountsFilter);
         this.listenTo(xabber.accounts, 'change:enabled', this.updateAccountsFilter);
         this.listenTo(xabber.accounts, 'change:connected', this.updateAccountsFilter);
@@ -1022,7 +1041,7 @@ xabber.CallsView = xabber.BasicView.extend({
 
         return this.calls_messages.createFromStanza($message, options, account);
     },
-});
+}});
 
 
 xabber.once("start", function () {
