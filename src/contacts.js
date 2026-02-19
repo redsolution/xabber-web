@@ -1,4 +1,7 @@
 import xabber from "xabber-core";
+import { createVueBackboneView } from "./vue/mountVue.js";
+import GroupChatPropertiesRightComponent from "./vue/components/contacts/GroupChatPropertiesRight.vue";
+import GroupChatStatusRightComponent from "./vue/components/contacts/GroupChatStatusRight.vue";
 
 let env = xabber.env,
     constants = env.constants,
@@ -3009,200 +3012,52 @@ xabber.GroupChatDetailsViewRight = xabber.BasicView.extend({
 });
 
 
-xabber.GroupChatStatusViewRight = xabber.BasicView.extend({
-    template: templates.group_chats.group_status_right,
-    events: {
-        "click .group-chat-status-wrap": "setStatus",
-        "click .btn-edit-status": "setStatus"
+xabber.GroupChatStatusViewRight = createVueBackboneView(xabber, {
+    component: GroupChatStatusRightComponent,
+    props: function (view) {
+        return { model: view.model };
     },
-
-    _initialize: function () {
-        this.$el.html(this.template());
-        this.render();
-        this.listenTo(this.model, 'change:status', this.render);
-        this.listenTo(this.model, 'group_info_updated', this.render);
-    },
-
-    render: function () {
-        let group_info = this.model.get('group_info');
-        if (!group_info)
-            return;
-        this.updateIcon();
-        this.$('.status').attr('data-status', group_info.status || this.model.get('status'));
-        this.$('.status-message').text(group_info.status_msg);
-    },
-
-    updateIcon: function () {
-        let ic_name = this.model.getIcon();
-        this.$('.status-bulb').addClass('hidden');
-        if (this.model.get('invitation'))
-            return;
-        ic_name && this.$('.status-bulb').removeClass('hidden').switchClass(ic_name, ic_name === 'server' || ic_name === 'blocked').html(env.templates.svg[ic_name]());
-    },
-
-    setStatus: function () {
-        let set_status_view = new xabber.SetGroupchatStatusView();
-        set_status_view.open(this.model);
+    extend: {
+        render: function () {
+            this._vueInstance && this._vueInstance.render();
+        }
     }
 });
 
 
-xabber.GroupChatPropertiesViewRight = xabber.BasicView.extend({
-    template: templates.group_chats.group_chat_properties_right,
-
-    events: {
-        "click .btn-vcard-refresh": "refresh",
-        "click .info-hover": "onClickIcon",
-        "click .btn-back": "hideVCard"
+xabber.GroupChatPropertiesViewRight = createVueBackboneView(xabber, {
+    component: GroupChatPropertiesRightComponent,
+    props: function (view) {
+        return { model: view.model };
     },
+    extend: {
+        _vueInit: function () {
+            this._vueInstance.setBackboneView(this);
+        },
 
-    _initialize: function () {
-        this.$el.html(this.template());
-        this.contact = this.model;
-        this.account = this.model.account;
-        this.listenTo(this.model, 'group_info_updated', this.update);
-        this.listenTo(this.model, 'change:vcard_updated', this.update);
-        this.ps_container = this.$('.full-vcard-content');
-        if (this.ps_container.length) {
-            this.ps_container.perfectScrollbar(
-                _.extend(this.ps_settings || {}, xabber.ps_settings)
-            );
+        render: function () {
+            this._vueInstance && this._vueInstance.render();
+        },
+
+        showVCard: function () {
+            this._vueInstance && this._vueInstance.showVCard();
+        },
+
+        hideVCard: function () {
+            this._vueInstance && this._vueInstance.hideVCard();
+        },
+
+        scrollToTop: function () {
+            this._vueInstance && this._vueInstance.scrollToTop();
+        },
+
+        onScroll: function () {
+            this._vueInstance && this._vueInstance.onScroll();
+        },
+
+        update: function () {
+            this._vueInstance && this._vueInstance.update();
         }
-        this.ps_container.on("ps-scroll-up ps-scroll-down", this.onScroll.bind(this));
-        this.model.set('vcard_hidden', true)
-    },
-
-    render: function () {
-        if (!this.model.get('vcard_updated'))
-            this.model.vcard && this.model.vcard.refresh();
-        this.$('.full-vcard-wrap').hideIf(this.model.get('vcard_hidden'));
-        if (this.parent.ps_container.length) {
-            if(!this.model.get('vcard_hidden'))
-                this.parent.ps_container.perfectScrollbar('destroy');
-            else
-                this.parent.ps_container.perfectScrollbar(
-                    _.extend(this.parent.ps_settings || {}, xabber.ps_settings)
-                );
-        }
-        this.model.updateName();
-        this.model.updateAvatar();
-        this.hideMoreDescription();
-        this.model.getVCard(() => {
-            this.updateName();
-            this.update();
-            if (this.parent.contact_edit_view)
-                this.parent.contact_edit_view.update();
-        });
-    },
-
-    onScroll: function () {
-        if(this.ps_container[0].scrollTop >= 170) {
-            this.$('.vcard-header-title').addClass('fixed-scroll');
-            this.$('.vcard-header-title').attr('style', 'background-color: rgba(255,255,255,1) !important; -webkit-transition: none; -ms-transition: none;transition: none;');
-        }
-        else if(this.ps_container[0].scrollTop >= 40) {
-            this.$('.vcard-header-title').removeClass('fixed-scroll');
-            this.$('.vcard-header-title').attr('style', 'background-color: rgba(255,255,255,0.5) !important;');
-        }
-        else {
-            this.$('.vcard-header-title').removeClass('fixed-scroll');
-            this.$('.vcard-header-title').attr('style', 'background-color: rgba(255,255,255,0) !important;');
-        }
-
-    },
-
-    hideMoreDescription: function () {
-        if (!this.$('.vcard-wrap .info.description').hasClass('short')) {
-            this.$('.vcard-wrap .info.description').addClass('short');
-            this.$('.show-vcard').hideIf(false);
-        }
-    },
-
-
-    showVCard: function () {
-        this.model.set('vcard_hidden', false);
-        this.$('.full-vcard-wrap').hideIf(this.model.get('vcard_hidden'));
-        this.model.getVCard(() => {
-            this.updateName();
-            this.update();
-        });
-        this.parent.$('.buttons-wrap.fixed-scroll:not(.participant-item-buttons-wrap)').addClass('hidden2');
-        this.$('.vcard-header').css({width: xabber.right_contact_panel.$el.find('.panel-content-wrap').width()});
-        this.parent.scrollToTop();
-        if (this.parent.ps_container.length) {
-            this.parent.ps_container.perfectScrollbar('destroy')
-        }
-    },
-
-    hideVCard: function () {
-        this.model.set('vcard_hidden', true);
-        if (this.parent.ps_container.length) {
-            this.parent.ps_container.perfectScrollbar(
-                _.extend(this.parent.ps_settings || {}, xabber.ps_settings)
-            );
-        }
-        this.scrollToTop();
-        this.onScroll();
-        this.parent.onScroll();
-        this.$('.full-vcard-wrap').hideIf(this.model.get('vcard_hidden'))
-    },
-
-    updateName: function () {
-        this.$('.main-info .name-wrap').text(this.model.get('name'));
-        if (this.model.get('name') !== this.model.get('roster_name'))
-            this.$('.main-info .name-wrap').addClass('name-is-custom');
-        else
-            this.$('.main-info .name-wrap').removeClass('name-is-custom');
-    },
-
-    update: function () {
-        let info = this.model.get('group_info') || {};
-        this.$('.block-name').text(this.model.get('incognito_group') ? xabber.getString("incognito_group_settings__header") : xabber.getString("public_group_settings__header"));
-        let jid_domain_title;
-
-        if (this.model.get('private_chat')){
-            jid_domain_title = xabber.getString("click_to_filter_private_chats_by_domain");
-        } else if (this.model.get('incognito_chat')){
-            jid_domain_title = xabber.getString("click_to_filter_incognito_groupchats_by_domain");
-        } else {
-            jid_domain_title = xabber.getString("click_to_filter_public_groupchats_by_domain");
-        }
-        this.$('.jabber-id .value').html(`${Strophe.getNodeFromJid(info.jid) || Strophe.getNodeFromJid(this.model.get('jid'))}@<span class="jid-domain-part" title="${jid_domain_title}">${Strophe.getDomainFromJid(info.jid) || Strophe.getDomainFromJid(this.model.get('jid'))}</span>`);
-        this.$('.name .value').text(info.name);
-        this.$('.description .value').text(info.description);
-        this.$('.model .value').text(utils.pretty_name(info.model));
-        this.$('.status .value').text(utils.pretty_name(info.status));
-        this.$('.searchable .value').text((info.searchable === 'none') ? xabber.getString("groupchat_index_type_none") : utils.pretty_name(info.searchable));
-        this.$('.name-info-wrap').switchClass('hidden', !info.name);
-        this.$('.description-info-wrap').switchClass('hidden', !info.description);
-        this.$('.model-info-wrap').switchClass('hidden', !info.model);
-        this.$('.status-info-wrap').switchClass('hidden', !info.status);
-        this.$('.searchable-info-wrap').switchClass('hidden', !info.searchable);
-    },
-
-    onClickIcon: function (ev) {
-        if ($(ev.target).closest('.jid-domain-part').length){
-            let domain = $(ev.target).closest('.jid-domain-part').text();
-            xabber.toolbar_view.showGroupchats();
-            if (this.model.get('private_chat')){
-                xabber.groupchats_view.$('.groupchats-filter-item[data-filter="groupchats-private"]').click();
-            } else if (this.model.get('incognito_chat')) {
-                xabber.groupchats_view.$('.groupchats-filter-item[data-filter="groupchats-incognito"]').click();
-            } else {
-                xabber.groupchats_view.$('.groupchats-filter-item[data-filter="groupchats-public"]').click();
-            }
-            xabber.groupchats_view.filterByDomain(null, domain);
-            return;
-        }
-        let $target_info = $(ev.target),
-            $target_value = $target_info.find('.value'), copied_text = "";
-        $target_value.each((idx, item) => {
-            let $item = $(item),
-                value_text = $item.text();
-            value_text && (copied_text !== "") && (copied_text += '\n');
-            value_text && (copied_text += value_text);
-            copied_text && utils.copyTextToClipboard(copied_text, xabber.getString("toast__copied_in_clipboard"), xabber.getString("toast__not_copied_in_clipboard"));
-        });
     }
 });
 

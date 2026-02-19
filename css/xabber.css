@@ -3,6 +3,10 @@
     outline: 2px dashed rgba(255, 0, 0, 0.5) !important;
     outline-offset: -2px;
 }
+.vue-in-progress {
+    outline: 2px dashed rgba(255, 165, 0, 0.6) !important;
+    outline-offset: -2px;
+}
 /* --- End Vue 3 migration debug --- */
 
 /* -------------- COMMON CLASSES ---------------- */

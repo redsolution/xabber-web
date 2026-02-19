@@ -25,49 +25,49 @@
 
                 <div class="settings-tabs-wrap global-settings-tabs">
                     <div class="settings-panel-label">{{ xb.getString("preferences") }}</div>
-                    <div class="settings-tab" data-block-name="background" @click="jumpToBlock">
+                    <div class="settings-tab vue-migrated" data-block-name="background" @click="jumpToBlock">
                         <div class="setting-icon-background">
                             <svg class="mdi mdi-24px" v-html="svgContent('palette')"></svg>
                         </div>
                         <div class="settings-block-name one-line">{{ xb.getString("category_interface") }}</div>
                         <div class="settings-block-label one-line">{{ xb.getString("settings__menu_item__background_label") }}</div>
                     </div>
-                    <div class="settings-tab" data-block-name="notifications" @click="jumpToBlock">
+                    <div class="settings-tab vue-migrated" data-block-name="notifications" @click="jumpToBlock">
                         <div class="setting-icon-background">
                             <svg class="mdi mdi-24px" v-html="svgContent('client')"></svg>
                         </div>
                         <div class="settings-block-name one-line">{{ xb.getString("settings__menu_item__notifications") }}</div>
                         <div class="settings-block-label one-line">{{ xb.getString("settings__menu_item__notifications_label") }}</div>
                     </div>
-                    <div class="settings-tab" data-block-name="privacy" @click="jumpToBlock">
+                    <div class="settings-tab vue-migrated" data-block-name="privacy" @click="jumpToBlock">
                         <div class="setting-icon-background">
                             <svg class="mdi mdi-24px" v-html="svgContent('group-private')"></svg>
                         </div>
                         <div class="settings-block-name one-line">{{ xb.getString("settings__menu_item__privacy") }}</div>
                         <div class="settings-block-label one-line">{{ xb.getString("settings__menu_item__privacy_label") }}</div>
                     </div>
-                    <div class="settings-tab" data-block-name="interface_language" @click="jumpToBlock">
+                    <div class="settings-tab vue-migrated" data-block-name="interface_language" @click="jumpToBlock">
                         <div class="setting-icon-background">
                             <svg class="mdi mdi-24px" v-html="svgContent('translate')"></svg>
                         </div>
                         <div class="settings-block-name one-line">{{ xb.getString("settings__menu_item__interface_language") }}</div>
                         <div class="settings-block-label one-line">{{ languageLabel }}</div>
                     </div>
-                    <div class="settings-tab" data-block-name="debug" @click="jumpToBlock">
+                    <div class="settings-tab vue-migrated" data-block-name="debug" @click="jumpToBlock">
                         <div class="setting-icon-background">
                             <svg class="mdi mdi-24px" v-html="svgContent('bug')"></svg>
                         </div>
                         <div class="settings-block-name one-line">{{ xb.getString("settings__menu_item__debug") }}</div>
                         <div class="settings-block-label one-line">{{ xb.getString("settings__menu_item__debug_label") }}</div>
                     </div>
-                    <div class="settings-tab" data-block-name="about" @click="jumpToBlock">
+                    <div class="settings-tab vue-migrated" data-block-name="about" @click="jumpToBlock">
                         <div class="setting-icon-background">
                             <svg class="mdi mdi-24px" v-html="svgContent('id')"></svg>
                         </div>
                         <div class="settings-block-name one-line">{{ xb.getString("category_about") }}</div>
                         <div class="settings-block-label one-line">{{ xb.getString("settings__menu_item__about_label") }}</div>
                     </div>
-                    <div class="settings-tab settings-deletion-button delete-all-accounts" @click="deleteAllAccounts">
+                    <div class="settings-tab settings-deletion-button delete-all-accounts vue-migrated" @click="deleteAllAccounts">
                         <div class="setting-icon-background">
                             <i class="mdi mdi-24px mdi-logout-variant"></i>
                         </div>
@@ -94,31 +94,31 @@
                     <div class="panel-content">
 
                         <!-- INTERFACE (sub-menu) -->
-                        <div data-header="" class="settings-block-wrap background"
+                        <div data-header="" class="settings-block-wrap vue-migrated background"
                              :class="{ hidden: activeBlock !== 'background' }">
                             <div class="settings-tabs-wrap global-settings-tabs">
-                                <div class="settings-tab" data-block-name="appearance" data-subblock-parent-name="background" @click="jumpToBlock">
+                                <div class="settings-tab vue-migrated" data-block-name="appearance" data-subblock-parent-name="background" @click="jumpToBlock">
                                     <div class="setting-icon-background">
                                         <svg class="mdi mdi-24px" v-html="svgContent('palette')"></svg>
                                     </div>
                                     <div class="settings-block-name one-line">{{ xb.getString("settings__menu_item__appearance") }}</div>
                                     <div class="settings-block-label one-line">{{ xb.getString("settings_account__appearance_label") }}</div>
                                 </div>
-                                <div class="settings-tab" data-block-name="chats" data-subblock-parent-name="background" @click="jumpToBlock">
+                                <div class="settings-tab vue-migrated" data-block-name="chats" data-subblock-parent-name="background" @click="jumpToBlock">
                                     <div class="setting-icon-background">
                                         <svg class="mdi mdi-24px" v-html="svgContent('chat')"></svg>
                                     </div>
                                     <div class="settings-block-name one-line">{{ xb.getString("chat_viewer") }}</div>
                                     <div class="settings-block-label one-line">{{ xb.getString("settings_account__chats_label") }}</div>
                                 </div>
-                                <div class="settings-tab" data-block-name="avatars" data-subblock-parent-name="background" @click="jumpToBlock">
+                                <div class="settings-tab vue-migrated" data-block-name="avatars" data-subblock-parent-name="background" @click="jumpToBlock">
                                     <div class="setting-icon-background">
                                         <svg class="mdi mdi-24px" v-html="svgContent('star-face')"></svg>
                                     </div>
                                     <div class="settings-block-name one-line">{{ xb.getString("avatars") }}</div>
                                     <div class="settings-block-label one-line">{{ avatarShapeLabel }}</div>
                                 </div>
-                                <div class="settings-tab" data-block-name="emoji_font" data-subblock-parent-name="background"
+                                <div class="settings-tab vue-migrated" data-block-name="emoji_font" data-subblock-parent-name="background"
                                      :class="{ hidden: !hasEmojifonts }"
                                      @click="jumpToBlock">
                                     <div class="setting-icon-background">
@@ -131,7 +131,7 @@
                         </div>
 
                         <!-- APPEARANCE -->
-                        <div :data-header="xb.getString('settings__menu_item__appearance')" class="settings-block-wrap appearance"
+                        <div :data-header="xb.getString('settings__menu_item__appearance')" class="settings-block-wrap vue-migrated appearance"
                              :class="{ hidden: activeBlock !== 'appearance' }">
                             <div class="settings-subblock-wrap">
                                 <div class="block-subheader">
@@ -269,7 +269,7 @@
                         </div>
 
                         <!-- CHATS (hotkeys + idling) -->
-                        <div :data-header="xb.getString('chat_viewer')" class="settings-block-wrap chats"
+                        <div :data-header="xb.getString('chat_viewer')" class="settings-block-wrap vue-migrated chats"
                              :class="{ hidden: activeBlock !== 'chats' }">
                             <div class="settings-subblock-wrap">
                                 <div class="block-subheader">
@@ -327,7 +327,7 @@
                         </div>
 
                         <!-- AVATARS -->
-                        <div :data-header="xb.getString('avatars')" class="settings-block-wrap avatars"
+                        <div :data-header="xb.getString('avatars')" class="settings-block-wrap vue-migrated avatars"
                              :class="{ hidden: activeBlock !== 'avatars' }">
                             <div class="settings-subblock-wrap contact-list">
                                 <div class="circle-avatar noselect"></div>
@@ -348,7 +348,7 @@
                         </div>
 
                         <!-- EMOJI FONT -->
-                        <div :data-header="xb.getString('settings__menu_item__emoji_font_header')" class="settings-block-wrap emoji_font"
+                        <div :data-header="xb.getString('settings__menu_item__emoji_font_header')" class="settings-block-wrap vue-migrated emoji_font"
                              :class="{ hidden: activeBlock !== 'emoji_font' }">
                             <div class="settings-subblock-wrap contact-list">
                                 <div class="setting emoji-font radio-button">
@@ -425,10 +425,10 @@
                         </div>
 
                         <!-- NOTIFICATIONS (sub-menu) -->
-                        <div :data-header="xb.getString('settings__menu_item__notifications')" class="settings-block-wrap notifications"
+                        <div :data-header="xb.getString('settings__menu_item__notifications')" class="settings-block-wrap vue-migrated notifications"
                              :class="{ hidden: activeBlock !== 'notifications' }">
                             <div class="settings-tabs-wrap global-settings-tabs">
-                                <div class="settings-tab" data-block-name="web-notifications" data-subblock-parent-name="notifications" @click="jumpToBlock">
+                                <div class="settings-tab vue-migrated" data-block-name="web-notifications" data-subblock-parent-name="notifications" @click="jumpToBlock">
                                     <div class="setting-icon-background">
                                         <svg class="mdi mdi-24px" v-html="svgContent('client')"></svg>
                                     </div>
@@ -441,7 +441,7 @@
                                         </label>
                                     </div>
                                 </div>
-                                <div class="settings-tab" data-block-name="chats-notifications" data-subblock-parent-name="notifications" @click="jumpToBlock">
+                                <div class="settings-tab vue-migrated" data-block-name="chats-notifications" data-subblock-parent-name="notifications" @click="jumpToBlock">
                                     <div class="setting-icon-background">
                                         <svg class="mdi mdi-24px" v-html="svgContent('chat')"></svg>
                                     </div>
@@ -467,7 +467,7 @@
                                         </label>
                                     </div>
                                 </div>
-                                <div class="settings-tab" data-block-name="calls-notifications" data-subblock-parent-name="notifications" @click="jumpToBlock">
+                                <div class="settings-tab vue-migrated" data-block-name="calls-notifications" data-subblock-parent-name="notifications" @click="jumpToBlock">
                                     <div class="setting-icon-background">
                                         <svg class="mdi mdi-24px" v-html="svgContent('call')"></svg>
                                     </div>
@@ -480,7 +480,7 @@
                                         </label>
                                     </div>
                                 </div>
-                                <div class="settings-tab" data-block-name="attention-calls" data-subblock-parent-name="notifications" @click="jumpToBlock">
+                                <div class="settings-tab vue-migrated" data-block-name="attention-calls" data-subblock-parent-name="notifications" @click="jumpToBlock">
                                     <div class="setting-icon-background">
                                         <svg class="mdi mdi-24px" v-html="svgContent('alarm-bell')"></svg>
                                     </div>
@@ -497,7 +497,7 @@
                         </div>
 
                         <!-- WEB NOTIFICATIONS -->
-                        <div :data-header="xb.getString('settings__section_notifications__web_notifications')" class="settings-block-wrap web-notifications"
+                        <div :data-header="xb.getString('settings__section_notifications__web_notifications')" class="settings-block-wrap vue-migrated web-notifications"
                              :class="{ hidden: activeBlock !== 'web-notifications' }">
                             <div class="settings-subblock-wrap">
                                 <div class="setting notifications checkbox-setting field-wrap">
@@ -524,7 +524,7 @@
                         </div>
 
                         <!-- PRIVATE CHATS NOTIFICATIONS -->
-                        <div :data-header="xb.getString('settings__section_notifications__private_chats')" class="settings-block-wrap chats-notifications"
+                        <div :data-header="xb.getString('settings__section_notifications__private_chats')" class="settings-block-wrap vue-migrated chats-notifications"
                              :class="{ hidden: activeBlock !== 'chats-notifications' }">
                             <div class="settings-subblock-wrap">
                                 <div class="setting message-preview checkbox-setting private-preview field-wrap">
@@ -567,7 +567,7 @@
                         </div>
 
                         <!-- GROUP CHATS NOTIFICATIONS -->
-                        <div :data-header="xb.getString('settings__section_notifications__group_chats')" class="settings-block-wrap groupchats-notifications"
+                        <div :data-header="xb.getString('settings__section_notifications__group_chats')" class="settings-block-wrap vue-migrated groupchats-notifications"
                              :class="{ hidden: activeBlock !== 'groupchats-notifications' }">
                             <div class="settings-subblock-wrap">
                                 <div class="setting message-preview checkbox-setting group-preview field-wrap">
@@ -610,7 +610,7 @@
                         </div>
 
                         <!-- CALLS NOTIFICATIONS -->
-                        <div :data-header="xb.getString('settings__section_notifications__calls')" class="settings-block-wrap calls-notifications"
+                        <div :data-header="xb.getString('settings__section_notifications__calls')" class="settings-block-wrap vue-migrated calls-notifications"
                              :class="{ hidden: activeBlock !== 'calls-notifications' }">
                             <div class="settings-subblock-wrap">
                                 <div class="setting-name header-setting">{{ xb.getString("settings__section_notifications__ringtone") }}</div>
@@ -647,7 +647,7 @@
                         </div>
 
                         <!-- ATTENTION CALLS -->
-                        <div :data-header="xb.getString('settings__section_notifications__attention_calls')" class="settings-block-wrap attention-calls"
+                        <div :data-header="xb.getString('settings__section_notifications__attention_calls')" class="settings-block-wrap vue-migrated attention-calls"
                              :class="{ hidden: activeBlock !== 'attention-calls' }">
                             <div class="settings-subblock-wrap">
                                 <div class="setting-name header-setting">{{ xb.getString("settings__section_notifications__ringtone") }}</div>
@@ -669,7 +669,7 @@
                         </div>
 
                         <!-- PRIVACY -->
-                        <div :data-header="xb.getString('settings__menu_item__privacy')" class="settings-block-wrap privacy"
+                        <div :data-header="xb.getString('settings__menu_item__privacy')" class="settings-block-wrap vue-migrated privacy"
                              :class="{ hidden: activeBlock !== 'privacy' }">
                             <div class="block-subheader">
                                 <span class="block-name">{{ xb.getString("settings__menu_item__device_metadata_sharing") }}</span>
@@ -740,7 +740,7 @@
                         </div>
 
                         <!-- INTERFACE LANGUAGE -->
-                        <div :data-header="xb.getString('settings__menu_item__interface_language')" class="settings-block-wrap interface_language"
+                        <div :data-header="xb.getString('settings__menu_item__interface_language')" class="settings-block-wrap vue-migrated interface_language"
                              :class="{ hidden: activeBlock !== 'interface_language' }">
                             <div class="setting radio-button interface-language-setting">
                                 <div class="languages-list field radio-field clickable-field">
@@ -759,7 +759,7 @@
                         </div>
 
                         <!-- DEBUG -->
-                        <div :data-header="xb.getString('settings__menu_item__debug')" class="settings-block-wrap debug"
+                        <div :data-header="xb.getString('settings__menu_item__debug')" class="settings-block-wrap vue-migrated debug"
                              :class="{ hidden: activeBlock !== 'debug' }">
                             <div class="setting reconnection-popup-log checkbox-setting field-wrap">
                                 <div class="input-field checkbox-field">
@@ -780,9 +780,9 @@
                         </div>
 
                         <!-- ABOUT -->
-                        <div :data-header="xb.getString('category_about')" class="settings-block-wrap about about-panel"
+                        <div :data-header="xb.getString('category_about')" class="settings-block-wrap vue-migrated about about-panel"
                              :class="{ hidden: activeBlock !== 'about' }">
-                            <div class="settings-block-wrap about selectable-text">
+                            <div class="settings-block-wrap vue-migrated about selectable-text">
                                 <div class="block-content">{{ xb.getString("web_client__screen_about__preamble_1") }}</div>
                                 <div class="block-content" v-html="xb.getString('web_client__screen_about__preamble_2', ['<a href=\'' + constants.CLIENT_URL + '\' target=\'_blank\'>' + constants.CLIENT_URL + '</a>'])"></div>
                                 <div class="block-header">
