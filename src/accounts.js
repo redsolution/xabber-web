@@ -1,4 +1,6 @@
 import xabber from "xabber-core";
+import { createVueBackboneView } from "./vue/mountVue.js";
+import SettingsAccountsBlock from "./vue/components/accounts/SettingsAccountsBlock.vue";
 
 let env = xabber.env,
     constants = env.constants,
@@ -2102,7 +2104,7 @@ xabber.Account = Backbone.Model.extend({
 xabber.Accounts = Backbone.CollectionWithStorage.extend({
     model: xabber.Account,
     comparator: function (acc1, acc2) {
-        if (!acc1.settings || acc2.settings)
+        if (!acc1.settings || !acc2.settings)
             return -1;
 
         return acc1.settings.get('order') < acc2.settings.get('order') ? -1 : 1;
@@ -5226,216 +5228,17 @@ xabber.StatusMessageModalWidget = xabber.InputWidget.extend({
     }
 });
 
-xabber.AccountSettingsItemModalView = xabber.BasicView.extend({
-    className: 'xmpp-account draggable droppable',
-    template: templates.global_settings_item_modal,
-    avatar_size: constants.AVATAR_SIZES.SETTINGS_ACCOUNT_ITEM,
-
-    events: {
-        "click .account-info-wrap": "showSettings",
-        "change .enabled-state input": "setEnabled",
+xabber.SettingsAccountsModalBlockView = createVueBackboneView(xabber, {
+    component: SettingsAccountsBlock,
+    props: function (view, options) {
+        return { accounts: options.model, parentView: view.parent };
     },
-
-    _initialize: function () {
-        this.updateEnabled();
-        this.updateNickname();
-        this.updateAvatar();
-        this.updateColorScheme();
-        this.updateSyncState();
-        this.showConnectionStatus();
-        this.listenTo(this.model, 'change:enabled', this.updateEnabled);
-        this.listenTo(this.model, 'change:vcard', this.updateNickname);
-        this.listenTo(this.model, 'change:image', this.updateAvatar);
-        this.listenTo(this.model, 'trusting_updated', this.updateEncryptionWarning);
-        this.listenTo(this.model.settings, 'change:omemo', this.updateEnabledOmemo);
-        this.listenTo(this.model.settings, 'change:color', this.updateColorScheme);
-        this.listenTo(this.model.settings, 'change:to_sync', this.updateSyncState);
-        this.listenTo(this.model.session, 'change:conn_feedback', this.showConnectionStatus);
-        this.$el.on('drag_to', this.onDragTo.bind(this));
-        this.$('.move-account-to-this')
-            .on('move_xmpp_account', this.onMoveAccount.bind(this));
-        this.listenTo(this.model.resources, 'change', this.updateEncryptionWarning);
-        this.listenTo(this.model.resources, 'add', this.updateEncryptionWarning);
-        this.listenTo(this.model.resources, 'destroy', this.updateEncryptionWarning);
-    },
-
-    updateNickname: function () {
-        let nickname;
-        if (this.model.get('vcard')) {
-            if (this.model.get('vcard').nickname)
-                nickname = this.model.get('vcard').nickname;
-            else if (this.model.get('vcard').first_name && this.model.get('vcard').last_name)
-                nickname = this.model.get('vcard').first_name + ' ' + this.model.get('vcard').last_name;
-            else if (this.model.get('vcard').fullname)
-                nickname = this.model.get('vcard').fullname;
-            else if (this.model.get('vcard').first_name || this.model.get('vcard').last_name)
-                nickname = this.model.get('vcard').first_name + ' ' + this.model.get('vcard').last_name;
+    extend: {
+        _vueInit: function () {
+            this.model.on("add", this.parent.updateAccounts, this.parent);
+            this.model.on("update_order", this.parent.updateAccounts, this.parent);
+            this.model.on("destroy", this.parent.updateAccounts, this.parent);
         }
-        if (nickname){
-            this.$('.nickname').text(nickname);
-            this.$('.jid').text(this.model.get('jid'));
-            this.$('.nickname-wrap').removeClass('single-row');
-            this.$('.jid-wrap').removeClass('hidden');
-        } else {
-            this.$('.nickname').text(this.model.get('jid'));
-            this.$('.nickname-wrap').addClass('single-row');
-            this.$('.jid-wrap').addClass('hidden');
-        }
-    },
-
-    updateEncryptionWarning: function () {
-        if (!this.model || !this.model.omemo)
-            return;
-        this.model.omemo.checkOwnFingerprints().then((is_trusted) => {
-            if (is_trusted === 'none' || is_trusted === 'error') {
-                this.$('.encryption-warning-icon').removeClass('hidden');
-                this.$('.account-info-wrap').addClass('encryption-warning');
-            } else {
-                this.$('.encryption-warning-icon').addClass('hidden');
-                this.$('.account-info-wrap').removeClass('encryption-warning');
-            }
-        });
-    },
-
-    updateAvatar: function () {
-        let image = this.model.cached_image;
-        this.$('.circle-avatar').setAvatar(image, this.avatar_size);
-    },
-
-    updateColorScheme: function () {
-        this.$el.attr('data-color', this.model.settings.get('color'));
-    },
-
-    showConnectionStatus: function () {
-    },
-
-    updateEnabled: function () {
-        let enabled = this.model.get('enabled');
-        this.$el.switchClass('disabled', !enabled);
-        this.$('.enabled-state input[type=checkbox]').prop('checked', enabled);
-    },
-
-    setEnabled: function () {
-        let enabled = this.$('.enabled-state input').prop('checked');
-        this.model.save('enabled', enabled);
-        enabled ? this.model.activate() : this.model.deactivate();
-    },
-
-    onDragTo: function (ev, drop_elem) {
-        drop_elem && $(drop_elem).trigger('move_xmpp_account', this.model);
-    },
-
-    onMoveAccount: function (ev, account) {
-        this.model.collection.moveBefore(account, this.model);
-    },
-
-    updateSyncState: function () {
-    },
-
-    showSettings: function (ev) {
-        if (ev && $(ev.target).hasClass('drag-handle'))
-            return;
-        if (this.model.get('enabled'))
-            this.model.showSettingsModal();
-        else {
-            utils.dialogs.ask_extended(xabber.getString("settings_account__enable_account_label"), xabber.getString("settings_account__enable_account_text", [this.model.get('jid')]),
-                {modal_class: 'modal-offline-account', no_dialog_options: true},
-                {
-                    ok_button_text: xabber.getString("button_enable"),
-                    optional_button: 'delete-account',
-                    optional_button_text: xabber.getString("settings_account__button_quit_account")
-                }).done((res) => {
-                    if (res){
-                        if (res === 'delete-account'){
-                            this.model._revoke_on_connect = $.Deferred();
-                            let revoke_timeout = setTimeout(() => {
-                                if (this.model.omemo)
-                                    this.model.omemo.destroy();
-                                this.model._revoke_on_connect.resolve();
-                            }, 5000);
-                            this.model._revoke_on_connect.done(() => {
-                                clearTimeout(revoke_timeout);
-                                this.model._revoke_on_connect = undefined;
-                                this.model.deleteAccount(null, true);
-                            });
-                            this.model.save('enabled', true);
-                            this.model.activate();
-                        }
-                        else {
-                            this.model.save('enabled', true);
-                            this.model.activate();
-                        }
-                    }
-            });
-        }
-    }
-});
-
-xabber.SettingsAccountsModalBlockView = xabber.BasicView.extend({
-    _initialize: function () {
-        this.updateList();
-        this.updateSyncState();
-        this.listenTo(this.model, 'add', this.updateOneInList);
-        this.listenTo(this.model, 'update_order', this.updateList);
-        this.listenTo(this.model, 'destroy', this.onAccountRemoved);
-        this.model.on("add", this.parent.updateAccounts, this.parent);
-        this.model.on("update_order", this.parent.updateAccounts, this.parent);
-        this.model.on("destroy", this.parent.updateAccounts, this.parent);
-        this.$('.move-account-to-bottom')
-            .on('move_xmpp_account', this.onMoveAccountToBottom.bind(this));
-    },
-
-    updateList: function () {
-        _.each(this.children, function (view) { view.detach(); });
-        this.model.each((account) => {
-            let jid = account.get('jid'), view = this.child(jid);
-            if (!view) {
-                view = this.addChild(jid, xabber.AccountSettingsItemModalView, {model: account});
-            }
-            this.$('.no-accounts-tip').before(view.$el);
-        });
-        this.updateHtml();
-        this.parent.updateScrollBar();
-    },
-
-    updateOneInList: function (account) {
-        let jid = account.get('jid'),
-            view = this.child(jid);
-        if (view)
-            view.$el.detach();
-        else
-            view = this.addChild(jid, xabber.AccountSettingsItemModalView, {model: account});
-        let index = this.model.indexOf(account);
-        if (index === 0)
-            this.$('.no-accounts-tip').after(view.$el);
-        else
-            this.$('.xmpp-account').eq(index - 1).after(view.$el);
-        this.updateHtml();
-        this.parent.updateScrollBar();
-    },
-
-    onAccountRemoved: function (account) {
-        this.removeChild(account.get('jid'));
-        this.updateHtml();
-        this.parent.updateScrollBar();
-    },
-
-    render: function () {
-        this.updateHtml();
-        _.each(this.children, function (view) {
-            view.updateEnabled();
-        });
-    },
-
-    updateHtml: function () {
-        this.$('.no-accounts-tip').hideIf(this.model.length);
-    },
-
-    updateSyncState: function () {
-    },
-
-    onMoveAccountToBottom: function (ev, account) {
-        this.model.moveToBottom(account);
     }
 });
 

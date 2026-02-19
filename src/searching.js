@@ -1,230 +1,21 @@
 import xabber from "xabber-core";
+import { createVueBackboneView } from "./vue/mountVue.js";
+import DiscoveringPanel from "./vue/components/searching/DiscoveringPanel.vue";
 
 let env = xabber.env,
-    constants = env.constants,
-    templates = env.templates.searching,
-    utils = env.utils,
     $ = env.$,
     $iq = env.$iq,
     Strophe = env.Strophe,
     Backbone = env.Backbone,
-    _ = env._,
-    Images = utils.images;
+    _ = env._;
 
-xabber.DiscoveringView = xabber.BasicView.extend({
+// Vue-backed view — plugs into Backbone's parent/child/screen system
+xabber.DiscoveringView = createVueBackboneView(xabber, {
+    component: DiscoveringPanel,
     className: 'searching-main noselect',
-    template: templates.searching_wide,
-    ps_selector: '.chats-list-wrap',
-    ps_settings: {
-        wheelPropagation: true,
-        theme: 'existing-chats-list'
-    },
-
-    avatar_size: constants.AVATAR_SIZES.SYNCHRONIZE_ACCOUNT_ITEM,
-
-    events: {
-        "click .account-field .dropdown-content": "selectAccount",
-        "click .btn-cancel": "close",
-        "click .btn-search": "search",
-        "click .existing-chat-wrap": "getChatProperties",
-        "keyup .search-input": "keyUp"
-    },
-
-    _initialize: function () {
-        this.listenTo(this.data, 'change:color', this.colorUpdated);
-        this.$('.searching-properties-field .dropdown-button').on('click', () => {
-            this.toggleProperties();
-        });
-    },
-
-    render: function () {
-        this.endDiscovering();
-        this.data.set('color','#9E9E9E');
-        let accounts = xabber.accounts.connected;
-        this.$('.single-acc').showIf(accounts.length === 1);
-        this.$('.multiple-acc').hideIf(accounts.length === 1);
-        this.$('.account-field .dropdown-content').empty();
-        _.each(accounts, (account) => {
-            this.$('.account-field .dropdown-content').append(
-                this.renderAccountItem(account));
-        });
-        if (accounts.length)
-            this.bindAccount(accounts[0]);
-        this.$('#select-searching-properties .account-field .dropdown-button').dropdown({
-            inDuration: 100,
-            outDuration: 100,
-            constrainWidth: false,
-            hover: false,
-            alignment: 'left'
-        });
-        return this;
-    },
-
-    toggleProperties: function () {
-        let is_visible = this.isPropertiesVisible();
-        this.$('#select-searching-properties').slideToggle("fast");
-        this.$('.arrow').switchClass('mdi-chevron-up', !is_visible);
-        this.$('.arrow').switchClass('mdi-chevron-down', is_visible);
-    },
-
-    isPropertiesVisible: function () {
-        return this.$('#select-searching-properties').css('display') !== 'none';
-    },
-
-    discover: function () {
-        let domain = _.escape(this.$('.search-input.simple-input-field').val());
-        if (domain) {
-            if (this.isPropertiesVisible())
-                this.toggleProperties();
-            this.$('.searching-more').html("");
-            this.$('.searching-result-wrap .preloader-wrapper').show();
-            this.searchExistingGroupChats(domain);
-        }
-    },
-
-    setColor: function () {
-        if (this.account) {
-            let color = this.account.settings.get('color');
-            this.data.set('color', color);
-        }
-    },
-
-    colorUpdated: function () {
-        let color = this.data.get('color');
-        this.$el.attr('data-color', color);
-    },
-
-    keyUp: function (ev) {
-        if (this.$('.search-input').val() === "")
-            this.$('.btn-search').addClass('none-active');
-        else
-            this.$('.btn-search').removeClass('none-active');
-        if (ev.keyCode === constants.KEY_ENTER)
-            this.discover();
-    },
-
-    searchExistingGroupChats: function (domain) {
-        this.account.connection.disco.items((domain), null, this.getGroupchatService.bind(this), this.onDiscoveringError.bind(this));
-    },
-
-    onDiscoveringError: function (error) {
-        this.endDiscovering();
-        this.$('.chats-list').html("");
-        this.$('.result-string').text(xabber.getString("discover__no_matches", [$(error).attr('from')]));
-    },
-
-    endDiscovering: function () {
-        this.$('.searching-result-wrap .preloader-wrapper').hide();
-    },
-
-    getGroupchatService: function (stanza) {
-        $(stanza).find('query item').each((idx, item) => {
-            if ($(item).attr('node') === Strophe.NS.GROUP_CHAT) {
-                let jid = $(item).attr('jid');
-                this.getGroupchatFeatures(jid);
-            }
-        });
-        this.endDiscovering();
-    },
-
-    getGroupchatFeatures: function (jid) {
-        let iq = $iq({type: 'get', to: jid})
-            .c('query', {xmlns: Strophe.NS.DISCO_INFO, node: Strophe.NS.GROUP_CHAT});
-        this.account.sendIQFast(iq, this.getServerInfo.bind(this), this.onDiscoveringError.bind(this));
-    },
-
-    getServerInfo: function (stanza) {
-        $(stanza).find('query identity').each((idx, item) => {
-            let $item = $(item);
-            if (($item.attr('category') === 'conference') && ($item.attr('type') === 'server')) {
-                let jid = $(stanza).attr('from');
-                this.getChatsFromServer(jid);
-            }
-        });
-    },
-
-    getChatsFromServer: function (jid) {
-        let iq = $iq({type: 'get', to: jid}).c('query', {xmlns: Strophe.NS.DISCO_ITEMS, node: Strophe.NS.GROUP_CHAT});
-        this.account.sendIQFast(iq, (stanza) => {
-            this.$('.chats-list').html("");
-            $(stanza).find('query item').each((idx, item) => {
-                let $item = $(item),
-                    name = $item.attr('name'),
-                    jid = $item.attr('jid'),
-                    $chat_item_html = $(templates.existing_groupchat_item({name: name, jid: jid, color: this.account.settings.get('color')})),
-                    avatar = Images.getDefaultAvatar(name);
-                $chat_item_html.find('.circle-avatar').setAvatar(avatar, 32);
-                $chat_item_html.appendTo(this.$('.searching-result-wrap .chats-list'));
-            });
-            this.$('.result-string').text(xabber.getString("discover__text_discovered_groups", [$(stanza).find('query item').length, this.account.get('jid')]));
-        });
-    },
-
-    bindAccount: function (account) {
-        this.account = account;
-        this.$('.account-field .dropdown-button .account-item-wrap')
-            .replaceWith(this.renderAccountItem(account));
-        this.setColor();
-    },
-
-    renderAccountItem: function (account) {
-        return $(templates.searching_account_item({jid: account.get('jid')}));
-    },
-
-    selectAccount: function (ev) {
-        let $item = $(ev.target).closest('.account-item-wrap'),
-            account = xabber.accounts.get($item.data('jid'));
-        this.bindAccount(account);
-    },
-
-    getChatProperties: function (ev) {
-        let $target = $(ev.target).closest('.existing-chat-wrap'),
-            jid = $target.data('jid'),
-            name = $target.data('name'),
-            request_iq = $iq({type: 'get', to: jid})
-                .c('query', {xmlns: Strophe.NS.DISCO_INFO});
-        this.account.sendIQFast(request_iq, (iq_response) => {
-            let $iq_response = $(iq_response),
-                description = $iq_response.find('field[var="description"] value').text(),
-                privacy = $iq_response.find('field[var="anonymous"] value').text(),
-                membership = $iq_response.find('field[var="model"] value').text(),
-                chat_properties = {jid: jid, name: name, privacy: privacy, description: description, membership: membership};
-            this.addChild('groupchat_properties', xabber.MoreInfoView,
-                {model: this, chat_properties: chat_properties, el: this.$('.searching-more')[0]})
-        });
-    }
 });
 
-xabber.MoreInfoView = xabber.BasicView.extend({
-    className: 'searching-main noselect',
-    template: templates.existing_groupchat_details_view,
-
-    events: {
-        "click .btn-join-chat": "joinChat"
-    },
-
-    _initialize: function (options) {
-        this.account = this.model.account;
-        this.chat_properties = options.chat_properties;
-        this.$el.html(this.template(this.chat_properties));
-    },
-
-    render: function (options) {
-
-    },
-
-    joinChat: function () {
-        let contact = this.account.contacts.mergeContact(this.chat_properties.jid);
-        contact.set('group_chat', true);
-        contact.acceptRequest();
-        contact.pushInRoster(null, () => {
-            contact.askRequest();
-            contact.getMyInfo();
-        });
-        contact.trigger("open_chat", contact);
-    }
-});
-
+// Backbone model stays (handles XMPP protocol)
 xabber.Searching = Backbone.Model.extend({
 
     initialize: function (options) {
@@ -243,9 +34,9 @@ xabber.Searching = Backbone.Model.extend({
     },
 });
 
+// Stubs unchanged
 xabber.LocalSearchingView = xabber.BasicView.extend({
     className: '',
-    // template:,
 
     events: {
 
@@ -265,7 +56,6 @@ xabber.LocalSearchingView = xabber.BasicView.extend({
 
 xabber.GlobalSearchingView = xabber.BasicView.extend({
     className: '',
-    // template:,
 
     events: {
 
