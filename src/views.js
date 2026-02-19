@@ -3,6 +3,7 @@ import { transliterate as query_transliterate } from 'transliteration';
 import { createVueBackboneView } from "./vue/mountVue.js";
 import SettingsModal from "./vue/components/settings/SettingsModal.vue";
 import JingleMessageComponent from "./vue/components/JingleMessage.vue";
+import ToolbarComponent from "./vue/components/Toolbar.vue";
 
 let env = xabber.env,
     constants = env.constants,
@@ -1134,10 +1135,14 @@ xabber.Body = xabber.NodeView.extend({
     }
 });
 
-xabber.ToolbarView = xabber.BasicView.extend({
+xabber.ToolbarView = createVueBackboneView(xabber, {
+    component: ToolbarComponent,
     className: "toolbar noselect",
+    props: function (view) {
+        return { uid: view.cid };
+    },
+    extend: {
     ps_selector: '.toolbar-main-wrap',
-    template: templates.toolbar,
 
     events: {
         "click .toolbar-logo":             "clickAllChats",
@@ -1157,7 +1162,14 @@ xabber.ToolbarView = xabber.BasicView.extend({
         "click .add-variant.incognito-groupchat": "showAddIncognitoGroupChatView",
     },
 
-    _initialize: function () {
+    _vueInit: function () {
+        this.ps_container = this.$(this.ps_selector);
+        if (this.ps_container.length) {
+            this.ps_container.perfectScrollbar(
+                _.extend(this.ps_settings || {}, xabber.ps_settings)
+            );
+        }
+
         this.recount_debounce = _.debounce(this.recountAllMessageCounterDebounced, 100, false);
         this.$('.add-something').on("change_state", function (ev, state) {
             $(this).switchClass('active', state).find('.mdi')
@@ -1187,6 +1199,10 @@ xabber.ToolbarView = xabber.BasicView.extend({
         this.data.set({contacts_counter: 0});
     },
 
+    onShow: function () {
+        this.render.apply(this, arguments);
+    },
+
     render: function () {
         this.$('.add-something').dropdown({
             inDuration: 50,
@@ -1196,6 +1212,7 @@ xabber.ToolbarView = xabber.BasicView.extend({
             alignment: 'left'
         });
         this.$('.add-variant.account').hideIf(!constants.LOGIN_CUSTOM_DOMAIN && !constants.LOGIN_DOMAINS.length);
+        return this;
     },
 
     updateColor: function (color) {
@@ -1536,7 +1553,7 @@ xabber.ToolbarView = xabber.BasicView.extend({
             c = '99+';
         this.$('.all-msg-indicator').switchClass('unread', c).text(c);
     },
-});
+}});
 
 xabber.JingleMessageView = createVueBackboneView(xabber, {
     component: JingleMessageComponent,

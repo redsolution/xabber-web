@@ -2780,6 +2780,10 @@ xabber.AccountVCardModalView = createVueBackboneView(xabber, {
             this._vueInstance.setBackboneView(this);
         },
 
+        onShow: function () {
+            this.render.apply(this, arguments);
+        },
+
         render: function () {
             this._vueInstance && this._vueInstance.render();
         },

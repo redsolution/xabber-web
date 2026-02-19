@@ -2945,6 +2945,9 @@ xabber.GroupChatStatusViewRight = createVueBackboneView(xabber, {
         return { model: view.model };
     },
     extend: {
+        onShow: function () {
+            this.render.apply(this, arguments);
+        },
         render: function () {
             this._vueInstance && this._vueInstance.render();
         }
@@ -2960,6 +2963,10 @@ xabber.GroupChatPropertiesViewRight = createVueBackboneView(xabber, {
     extend: {
         _vueInit: function () {
             this._vueInstance.setBackboneView(this);
+        },
+
+        onShow: function () {
+            this.render.apply(this, arguments);
         },
 
         render: function () {

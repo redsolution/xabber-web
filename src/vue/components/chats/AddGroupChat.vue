@@ -1,0 +1,118 @@
+<template>
+    <div class="modal-header vue-migrated">
+        <span>{{ xb.getString("create_groupchat") }}</span>
+        <div class="account-dropdown-wrap" data-activates="select-account-for-creating-groupchat">
+            <div class="dropdown-button">
+                <div class="account-item-wrap">
+                    <div class="circle-avatar noselect">
+                        <img>
+                    </div>
+                </div>
+            </div>
+            <div id="select-account-for-creating-groupchat" class="dropdown-content unified-dropdown-style unified-twoline-dropdown-style noselect">
+            </div>
+        </div>
+    </div>
+    <div class="modal-content vue-migrated">
+        <div class="row name-field">
+            <div class="input-field input-group-chat-name">
+                <label for="new_chat_name">{{ xb.getString("groupchat_name") }}</label>
+                <input id="new_chat_name" type="text" name="chat_name" :placeholder="xb.getString('group_is_empty')" required>
+            </div>
+        </div>
+        <div class="row jid-field">
+            <label for="new_chat_jid">{{ xb.getString("groupchat_xmpp_jid") }}</label>
+            <div class="input-field input-group-chat-jid">
+                <input id="new_chat_jid" type="text" :placeholder="xb.getString('groupchat_xmpp_jid')" name="chat_jid">
+                <div class="property-field xmpp-server-dropdown-wrap">
+                    <div class="select-xmpp-server">
+                        <div data-activates="select-xmpp-server" class="xmpp-server-item-wrap property-wrap"><div class="jid-at">@</div><div class="field-jid one-line property-value"></div></div>
+                        <div class="input-field input-group-chat-domain hidden">
+                            <input id="new_chat_domain" type="text" :placeholder="xb.getString('groupchat__hint_domain')" name="chat_domain">
+                        </div>
+                        <div data-activates="select-xmpp-server" class="caret">
+                            <i class="mdi mdi-20px mdi-menu-up"></i>
+                            <i class="mdi mdi-20px mdi-menu-down"></i>
+                        </div>
+                    </div>
+                    <div id="select-xmpp-server" class="dropdown-content unified-fixed-width-dropdown-style unified-dropdown-style noselect">
+                        <div class="property-variant set-custom-domain">{{ xb.getString("groupchat_custom_server") }}</div>
+                    </div>
+                </div>
+            </div>
+            <span class="errors"></span>
+        </div>
+        <div class="row incognito-field hidden">
+            <i class="field-icon mdi mdi-24px mdi-incognito"></i>
+            <div class="property-field incognito-dropdown-wrap">
+               <div class="public-item-wrap property-wrap"><div data-value="public" class="property-value">{{ xb.getString("groupchat_privacy_type_public") }}</div></div>
+               <div class="incognito-item-wrap property-wrap"><div data-value="incognito" class="property-value">{{ xb.getString("groupchat_privacy_type_incognito") }}</div></div>
+            </div>
+        </div>
+        <div class="row group-radio-fields">
+            <div class="property-radio-field membership-dropdown-wrap">
+                <div class="membership-item-wrap property-wrap">
+                    <div class="property-radio-label">{{ xb.getString("groupchat_membership") }}</div>
+                </div>
+                <div class="property-radio-wrap">
+                    <div class="property-radio">
+                        <input checked id="membership_open" data-value="open" name="group_membership" type="radio" class="with-gap" required="">
+                        <label class="membership-label" for="membership_open">{{ xb.getString("groupchat_membership_type_open") }}</label>
+                    </div>
+                    <div class="property-radio">
+                        <input id="membership_member_only" data-value="private" name="group_membership" type="radio" class="with-gap" required="">
+                        <label class="membership-label" for="membership_member_only">{{ xb.getString("groupchat_membership_type_members_only") }}</label>
+                    </div>
+                </div>
+            </div>
+            <div class="property-radio-field global-dropdown-wrap">
+                <div class="global-item-wrap property-wrap">
+                    <div class="property-radio-label">{{ xb.getString("groupchat_index") }}</div>
+                </div>
+                <div class="property-radio-wrap">
+                    <div class="property-radio">
+                        <input checked id="index_none" data-value="none" name="group_index" type="radio" class="with-gap" required="">
+                        <label class="index-label" for="index_none">{{ xb.getString("groupchat_index_type_none") }}</label>
+                    </div>
+                    <div class="property-radio">
+                        <input id="index_local" data-value="local" name="group_index" type="radio" class="with-gap" required="">
+                        <label class="index-label" for="index_local">{{ xb.getString("groupchat_index_type_local") }}</label>
+                    </div>
+                    <div class="property-radio">
+                        <input id="index_global" data-value="global" name="group_index" type="radio" class="with-gap" required="">
+                        <label class="index-label" for="index_global">{{ xb.getString("groupchat_index_type_global") }}</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row description-field">
+            <div class="input-field input-message">
+                <label class="description-label">{{ xb.getString("groupchat_description") }}</label>
+                <div class="rich-textarea-wrap notranslate">
+                    <div class="rich-textarea" tabindex="2" contenteditable=""></div>
+                    <div class="placeholder">{{ xb.getString("groupchat_example_description") }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer vue-migrated">
+        <button class="btn-flat btn-main text-color-700 non-active btn-add">{{ xb.getString("create") }}</button>
+        <button class="btn-flat btn-main btn-dark btn-cancel">{{ xb.getString("cancel") }}</button>
+    </div>
+</template>
+
+<script setup>
+import { useXabber } from '../../composables/useXabber.js';
+
+const xb = useXabber();
+
+let backboneView = null;
+
+function setBackboneView(view) {
+    backboneView = view;
+}
+
+defineExpose({
+    setBackboneView,
+});
+</script>

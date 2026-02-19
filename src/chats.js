@@ -6,6 +6,8 @@ import ChatHeadComponent from './vue/components/chats/ChatHead.vue';
 import ForwardPanelComponent from './vue/components/chats/ForwardPanel.vue';
 import SavedChatHeadComponent from './vue/components/chats/SavedChatHead.vue';
 import ChatContentComponent from './vue/components/chats/ChatContent.vue';
+import ChatBottomComponent from './vue/components/chats/ChatBottom.vue';
+import AddGroupChatComponent from './vue/components/chats/AddGroupChat.vue';
 
 let env = xabber.env,
     constants = env.constants,
@@ -10058,9 +10060,13 @@ xabber.AccountChats = xabber.ChatsBase.extend({
     }
 });
 
-xabber.AddGroupChatView = xabber.SearchView.extend({
+xabber.AddGroupChatView = createVueBackboneView(xabber, {
+    component: AddGroupChatComponent,
     className: 'modal main-modal add-group-chat-modal add-contact-modal',
-    template: templates.group_chats.add_group_chat,
+    props: function (view) {
+        return {};
+    },
+    extend: {
     avatar_size: constants.AVATAR_SIZES.TOOLBAR_ACCOUNT_ITEM,
     ps_selector: '.rich-textarea',
     ps_settings: {theme: 'item-list'},
@@ -10073,6 +10079,21 @@ xabber.AddGroupChatView = xabber.SearchView.extend({
         "keyup .input-group-chat-jid input": "fixJid",
         "click .btn-cancel": "close",
         "click .property-variant": "changePropertyValue"
+    },
+
+    _vueInit: function () {
+        if (this.ps_selector) {
+            this.ps_container = this.$(this.ps_selector);
+            if (this.ps_container.length) {
+                this.ps_container.perfectScrollbar(
+                    _.extend(this.ps_settings || {}, xabber.ps_settings)
+                );
+            }
+        }
+    },
+
+    onShow: function () {
+        this.render.apply(this, arguments);
     },
 
     render: function (options) {
@@ -10323,7 +10344,7 @@ xabber.AddGroupChatView = xabber.SearchView.extend({
             }
         }
     }
-});
+}});
 
 xabber.ChatsView = createVueBackboneView(xabber, {
     component: ChatsPanelComponent,
@@ -13774,10 +13795,14 @@ xabber.ChatLocationView = xabber.BasicView.extend({
     },
 });
 
-xabber.ChatBottomView = xabber.BasicView.extend({
+xabber.ChatBottomView = createVueBackboneView(xabber, {
+    component: ChatBottomComponent,
     className: 'chat-bottom-wrap',
+    props: function (view) {
+        return {};
+    },
+    extend: {
     ps_selector: '.message-reference-preview-container',
-    template: templates.chat_bottom,
     avatar_size: constants.AVATAR_SIZES.CHAT_BOTTOM,
     mention_avatar_size: constants.AVATAR_SIZES.MENTION_ITEM,
 
@@ -13822,7 +13847,15 @@ xabber.ChatBottomView = xabber.BasicView.extend({
         "click .ephemeral-timer-time": "showEphemeralTimerSelector",
     },
 
-    _initialize: function (options) {
+    _vueInit: function (options) {
+        if (this.ps_selector) {
+            this.ps_container = this.$(this.ps_selector);
+            if (this.ps_container.length) {
+                this.ps_container.perfectScrollbar(
+                    _.extend(this.ps_settings || {}, xabber.ps_settings)
+                );
+            }
+        }
         this.view = options.content;
         this.model = this.view.model;
         this.click_counter = 0;
@@ -14045,6 +14078,10 @@ xabber.ChatBottomView = xabber.BasicView.extend({
             function() { $.data(this, 'hover', false); }
         ).data('hover', false);
         this.renderLastEmoticons();
+    },
+
+    onShow: function () {
+        this.render.apply(this, arguments);
     },
 
     render: function (options) {
@@ -16384,6 +16421,7 @@ xabber.ChatBottomView = xabber.BasicView.extend({
                 .switchClass('text-color-300', is_colored);
         }
     }
+}
 });
 
 xabber.DeleteWithOptionsView = xabber.BasicView.extend({

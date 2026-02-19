@@ -1,0 +1,153 @@
+<template>
+    <div class="message-input-panel noselect vue-migrated">
+        <div class="account-indicator-background-exclude">
+            <div class="account-indicator ground-color-700"></div>
+            <div class="my-avatar circle-avatar circle-image-fix"></div>
+        </div>
+        <div class="input-voice-message-background">
+        </div>
+        <div class="input-voice-message-border border-color-700">
+            <div class="voice-message-lock-wrap">
+                <i class="mdi mdi-stop mdi-32px ground-color-500 hover-ground-color-300 stop-locked-voice-message"></i>
+                <div class="voice-message-lock-text">
+                    <svg class="voice-message-lock-border-icon mdi mdi-16px mdi-svg-template" v-html="svgContent('arrow-left')"></svg>
+                    <span>{{ xb.getString("chat_bottom__placeholder__lock_write_voice_hover") }}</span>
+                    <svg class="voice-message-lock-border-icon mdi mdi-16px mdi-svg-template" v-html="svgContent('arrow-left')"></svg>
+                </div>
+                <div class="voice-message-lock-text-hover text-color-700">
+                    <svg class="mdi voice-message-lock-border-icon-hover mdi-16px mdi-svg-template mdi-lock-voice fill-color-700" v-html="svgContent('lock')"></svg>
+                    <span>{{ xb.getString("chat_bottom__placeholder__lock_write_voice_hover") }}</span>
+                    <svg class="mdi  voice-message-lock-border-icon-hover mdi-16px mdi-svg-template mdi- fill-color-700 " v-html="svgContent('lock')"></svg>
+                </div>
+            </div>
+        </div>
+        <div class="message-form">
+            <div class="fwd-messages-preview noselect hidden">
+                <div class="msg-border ground-color-700">
+                </div>
+                <div class="msg-content">
+                    <p class="msg-author text-color-700 one-line"></p>
+                    <p class="msg-text one-line"></p>
+                </div>
+                <div class="close-forward">
+                    <i class="mdi mdi-20px mdi-close hover-text-color-500"></i>
+                </div>
+            </div>
+            <div class="message-reference-preview hidden">
+                <div class="message-reference-preview-container">
+                </div>
+                <div class="close-attachments">
+                    <i class="mdi mdi-20px mdi-close hover-text-color-500"></i>
+                </div>
+            </div>
+            <div class="input-field input-message">
+                <div class="mentions-list"></div>
+                <div class="rich-textarea-wrap notranslate">
+                </div>
+                <div class="scrollbar-cover"></div>
+                <div class="insert-emoticon">
+                    <i class="mdi mdi-24px mdi-emoticon hover-text-color-500"></i>
+                </div>
+                <div class="preview-preloader-container hidden" :title="xb.getString('chat_bottom__preview_preloader_cancel')">
+                    <svg class="preview-cancel-preloader mdi mdi-24px mdi-svg-template" v-html="svgContent('link')"></svg>
+                </div>
+                <div class="emoticons-panel-wrap">
+                    <div class="emoticons-panel"></div>
+                    <div class="emoji-menu"></div>
+                </div>
+            </div>
+            <div class="input-voice-message">
+                <div class="voice-msg-status">{{ xb.getString("chat_bottom__placeholder__cancel_write_voice") }}</div>
+                <div class="voice-visualizer"></div>
+                <div class="timer">0:00</div>
+            </div>
+            <div class="chat-bottom-voice-message-rendered ground-color-500">
+
+            </div>
+            <i class="mdi mdi-play mdi-32px ground-color-500 hover-ground-color-300"></i>
+            <i class="mdi mdi-pause mdi-32px ground-color-500 hover-ground-color-300"></i>
+            <svg class="mdi btn-clear-voice-message mdi-24px mdi-svg-template fill-color-500" v-html="svgContent('trash')"></svg>
+            <div class="input-toolbar">
+                <div class="attach attach-file">
+                    <input type="file" :title="xb.getString('chat_bottom__tooltip_send_file')" multiple>
+                    <i class="mdi mdi-24px mdi-paperclip"></i>
+                </div>
+                <div class="attach attach-media" :title="xb.getString('chat_bottom__tooltip_send_media')">
+                    <i class="mdi mdi-24px mdi-file-image"></i>
+                </div>
+                <div class="attach attach-location" :title="xb.getString('chat_bottom__tooltip_send_location')">
+                    <input type="text" hidden :title="xb.getString('chat_bottom__tooltip_send_location')">
+                    <i class="mdi mdi-24px mdi-map-marker"></i>
+                </div>
+                <div title="Format text" class="format-text">
+                    <i class="mdi mdi-24px mdi-format-text"></i>
+                </div>
+                <div class="last-emoticons">
+                </div>
+                <div class="account-info-wrap">
+                    <div class="account-jid text-color-700"></div>
+                    <div class="account-nickname text-color-700"></div>
+                    <div class="account-badge"></div>
+                    <div class="account-role ground-color-700"></div>
+                </div>
+            </div>
+        </div>
+        <div class="send-area">
+            <i class="send-message mdi mdi-32px mdi-send text-color-700 hover-text-color-500 hidden"></i>
+            <svg class="send-message send-message-encrypted mdi mdi-32px mdi-send fill-color-700 hover-fill-color-500 hidden mdi-svg-template" v-html="svgContent('send-encrypted')"></svg>
+            <i class="mdi mdi-32px mdi-microphone attach-voice-message outline-color-500 text-color-700 hover-text-color-500"></i>
+            <i class="mdi mdi-32px mdi-send attach-locked-voice-message outline-color-500 text-color-700 hover-text-color-500 ground-color-500"></i>
+            <div class="ephemeral-timer-time text-color-700"></div>
+        </div>
+    </div>
+    <div class="blocked-msg hidden vue-migrated">{{ xb.getString("chat_bottom__placeholder__blocked") }}</div>
+    <div class="message-actions-panel hidden vue-migrated">
+        <div class="button-wrap cancel-message-wrap" :title="xb.getString('cancel')">
+            <svg class="action-button close-message-panel mdi mdi-32px mdi-svg-template" v-html="svgContent('close')"></svg>
+        </div>
+        <div class="messages-select-count"></div>
+        <div class="button-wrap reply-message-wrap" :title="xb.getString('chat_reply')">
+            <svg class="action-button reply-message mdi mdi-32px mdi-svg-template" v-html="svgContent('reply')"></svg>
+        </div>
+        <div class="button-wrap forward-message-wrap" :title="xb.getString('chat_froward')">
+            <svg class="action-button forward-message mdi mdi-32px mdi-svg-template" v-html="svgContent('forward')"></svg>
+        </div>
+        <div class="button-wrap copy-message-wrap" :title="xb.getString('message_copy')">
+            <svg class="action-button copy-message mdi mdi-32px mdi-svg-template" v-html="svgContent('copy')"></svg>
+        </div>
+        <div class="button-wrap report-message-wrap" :title="xb.getString('report_abuse')">
+            <svg class="action-button report-message mdi mdi-32px mdi-svg-template" v-html="svgContent('alert-circle')"></svg>
+        </div>
+        <div class="button-wrap delete-message-wrap" :title="xb.getString('delete')">
+            <svg class="action-button delete-message mdi mdi-32px mdi-svg-template" v-html="svgContent('trash')"></svg>
+        </div>
+    </div>
+    <div class="chat-bottom-active-session-wrap hidden vue-migrated">
+        <div class="chat-bottom-active-session-container">
+
+        </div>
+
+    </div>
+</template>
+
+<script setup>
+import { useXabber } from '../../composables/useXabber.js';
+
+const xb = useXabber();
+
+function svgContent(name) {
+    let tmpl = xb.env.templates.svg[name];
+    return tmpl ? tmpl() : '';
+}
+
+let backboneView = null;
+
+function setBackboneView(view) {
+    backboneView = view;
+}
+
+defineExpose({
+    setBackboneView,
+    svgContent,
+});
+</script>

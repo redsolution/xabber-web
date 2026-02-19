@@ -212,6 +212,10 @@ xabber.VCardView = createVueBackboneView(xabber, {
         return { model: view.model, showEditButton: false, isGroupChat: !!(view.model.get && view.model.get('group_chat')) };
     },
     extend: {
+        onShow: function () {
+            this.render.apply(this, arguments);
+        },
+
         render: function () {
             this._vueInstance && this._vueInstance.render();
         },
@@ -234,6 +238,10 @@ xabber.VCardRightView = createVueBackboneView(xabber, {
     extend: {
         _vueInit: function () {
             this._vueInstance.setBackboneView(this);
+        },
+
+        onShow: function () {
+            this.render.apply(this, arguments);
         },
 
         render: function () {
