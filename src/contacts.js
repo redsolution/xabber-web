@@ -2,6 +2,8 @@ import xabber from "xabber-core";
 import { createVueBackboneView } from "./vue/mountVue.js";
 import GroupChatPropertiesRightComponent from "./vue/components/contacts/GroupChatPropertiesRight.vue";
 import GroupChatStatusRightComponent from "./vue/components/contacts/GroupChatStatusRight.vue";
+import ContactDetailsRightComponent from "./vue/components/contacts/ContactDetailsRight.vue";
+import GroupChatDetailsRightComponent from "./vue/components/contacts/GroupChatDetailsRight.vue";
 
 let env = xabber.env,
     constants = env.constants,
@@ -1748,95 +1750,628 @@ xabber.ContactVCardView = xabber.VCardView;
 // ContactRightVCardView - showVCard/hideVCard/updateName now handled by VCardRightPanel.vue
 xabber.ContactRightVCardView = xabber.VCardRightView;
 
-xabber.ContactDetailsViewRight = xabber.BasicView.extend({
+xabber.ContactDetailsViewRight = createVueBackboneView(xabber, {
+    component: ContactDetailsRightComponent,
     className: 'details-panel-right contact-details-panel',
-    template: templates.contact_details_right,
-    avatar_size: constants.AVATAR_SIZES.CONTACT_DETAILS,
-
-    events: {
-        "click .btn-escape:not(.btn-top)": "openChat",
-        "click .btn-escape.btn-top": "scrollToTopSmooth",
-        "click .btn-edit": "showEdit",
-        "click .btn-chat": "openChat",
-        "click .panel-background-clickable": "closeDetails",
-        "click .btn-search": "showSearchMessages",
-        "click .btn-voice-call": "voiceCall",
-        "click .btn-add": "addContact",
-        "click .btn-delete": "deleteContact",
-        "click .btn-block": "blockContact",
-        "click .btn-qr-code": "showQRCode",
-        "click .btn-back-qr": "hideQRCode",
-        "click .btn-unblock": "unblockContact",
-        "click .btn-mute-dropdown": "muteChat",
-        "click .btn-start-encryption": "startEncryptedChat",
-        "click .btn-open-encrypted-chat": "openEncryptedChat",
-        "click .btn-open-regular-chat": "openRegularChat",
-        "click .btn-notifications.muted": "unmuteChat",
-        "click .list-variant": "changeList",
-        "click .btn-auth-request": "requestAuthorization",
+    props: function (view, options) {
+        return {
+            model: view.model,
+            saved: !!options.saved,
+            encrypted: !!options.encrypted
+        };
     },
+    extend: {
+        avatar_size: constants.AVATAR_SIZES.CONTACT_DETAILS,
 
-    _initialize: function (options) {
-        if (options.saved) {
-            this.saved = true;
-            this.ps_container = this.$('.panel-content-wrap');
-            this.chat = options.chat;
-            this.account = this.chat.account;
-            this.contact_searched_messages_view = this.addChild('search', xabber.ContactSearchedMessagesView,
-                {model: this.chat, is_saved: true, query_text: '1', el: this.$('.search-messages-block-wrap')[0]});
-            this.updateColorScheme();
-            this.listenTo(this.account.settings, 'change:color', this.updateColorScheme);
+        onShow: function () {
+            this.render.apply(this, arguments);
+            _.each(this.children, function (view) {
+                view.render.apply(view, arguments);
+            });
+        },
 
-        } else {
-            this.encrypted = options.encrypted;
+        _vueInit: function (options) {
+            this._vueInstance.setBackboneView(this);
+            if (options.saved) {
+                this.saved = true;
+                this.ps_container = this.$('.panel-content-wrap');
+                this.chat = options.chat;
+                this.account = this.chat.account;
+                this.contact_searched_messages_view = this.addChild('search', xabber.ContactSearchedMessagesView,
+                    {model: this.chat, is_saved: true, query_text: '1', el: this.$('.search-messages-block-wrap')[0]});
+                this.updateColorScheme();
+                this.listenTo(this.account.settings, 'change:color', this.updateColorScheme);
+            } else {
+                this.encrypted = options.encrypted;
+                this.ps_container = this.$('.panel-content-wrap');
+                this.account = this.model.account;
+                this.chat = this.account.chats.getChat(this.model, options.encrypted && 'encrypted');
+                this.name_field = new xabber.ContactNameWidget({
+                    el: this.$('.name-wrap')[0],
+                    model: this.model
+                });
+                this.name_field.$('.contact-name-input').prop('disabled', true);
+                if (!this.encrypted) {
+                    this.contact_edit_view = this.addChild('edit', xabber.ContactEditView,
+                        {model: this.model, el: this.$('.edit-block-wrap')[0]});
+                }
+                this.contact_searched_messages_view = this.addChild('search', xabber.ContactSearchedMessagesView,
+                    {model: this.account.chats.getChat(this.model), query_text: '1', el: this.$('.search-messages-block-wrap')[0]});
+                this.vcard_view = this.addChild('vcard', xabber.ContactRightVCardView,
+                    {model: this.model, el: this.$('.vcard')[0]});
+                this.edit_groups_view = this.addChild('groups',
+                    xabber.ContactEditGroupsView, {el: this.$('.groups-block-wrap')[0]});
+                this.updateName();
+                this.updateStatus();
+                this.updateAvatar();
+                this.updateButtons();
+                this.updateColorScheme();
+                this.ps_container.on("ps-scroll-y", this.onScroll.bind(this));
+                this.listenTo(this.account.settings, 'change:color', this.updateColorScheme);
+                this.listenTo(this.model, 'change', this.update);
+                this.listenTo(this.chat, 'change:muted', this.updateNotifications);
+                this.listenTo(xabber, 'change:video', this.updateJingleButtons);
+                this.listenTo(xabber, 'change:audio', this.updateJingleButtons);
+                this.listenTo(xabber, 'update_layout', this.updateIndicator);
+            }
+        },
+
+        render: function (options) {
+            if (this.saved) {
+                this.$('.qr-code-content-wrap').addClass('hidden');
+            } else {
+                if (!this.model.get('vcard_updated')) {
+                    this.vcard_view.refresh();
+                }
+                if (!this.model.get('saved_search_panel')) {
+                    if (this.ps_container.length) {
+                        this.ps_container.perfectScrollbar(
+                            _.extend(this.ps_settings || {}, xabber.ps_settings)
+                        );
+                    }
+                } else {
+                    this.ps_container.perfectScrollbar('destroy');
+                }
+                this.$('.btn-mute').dropdown({
+                    inDuration: 100,
+                    outDuration: 100,
+                    hover: false
+                });
+                this.$('.btn-notifications').dropdown({
+                    inDuration: 100,
+                    outDuration: 100,
+                    hover: false,
+                });
+                this.updateChilds();
+                this.updateSubscriptions();
+                this.updateJingleButtons();
+                this.updateStatusMsg();
+                this.updateName();
+                this.updateNotifications();
+                this.updateButtons();
+                this.hideQRCode();
+                this.updateAvatar();
+                this.updateList('image');
+                if (options && options.right_contact_modal)
+                    this.makeModal();
+                this.onScroll();
+                this.model.resources.models.forEach((resource) => { this.model.resources.requestInfo(resource); });
+                $(window).bind("keydown.contact_panel", this.keydownHandler.bind(this));
+            }
+            return this;
+        },
+
+        updateChilds: function () {
+            if (this.vcard_view && !this.model.get('vcard_hidden'))
+                this.vcard_view.hideVCard();
+            if (this.contact_edit_view && !this.model.get('edit_hidden'))
+                this.contact_edit_view.hideEdit();
+        },
+
+        updateIndicator: function () {
+            this.$('.tabs .indicator').remove();
+            this.$('.tabs').tabs();
+            this.$('.indicator').addClass('ground-color-500');
+            setTimeout(() => {
+                this.$('.tabs.not-edit .indicator').remove();
+                this.$('.tabs.not-edit').tabs();
+                this.$('.tabs.not-edit .indicator').addClass('ground-color-500');
+            }, 500);
+            if (xabber.body.screen.get('right_contact_modal') && this.$('.panel-content-wrap').css('width') !== `${xabber.right_contact_panel.$el.attr('data-width')}px`) {
+                this.$('.panel-content-wrap').attr('style', function (i, s) {
+                    return (s || '') + `width: ${xabber.right_contact_panel.$el.attr('data-width')}px !important;`;
+                });
+            } else if (!xabber.body.screen.get('right_contact_modal')) {
+                this.$('.panel-content-wrap').attr('style', '');
+            }
+        },
+
+        clearTabsScrolling: function (is_contacts) {
+            if (is_contacts) {
+                if (!(_.isUndefined(xabber.contacts_view.saved_scroll) || _.isNull(xabber.contacts_view.saved_scroll)))
+                    xabber.contacts_view.saved_scroll = null;
+                if (!(_.isUndefined(xabber.groupchats_view.saved_scroll) || _.isNull(xabber.groupchats_view.saved_scroll)))
+                    xabber.groupchats_view.saved_scroll = null;
+                if (xabber.notifications_view.current_content
+                    && !(_.isUndefined(xabber.notifications_view.current_content.saved_scroll) || _.isNull(xabber.notifications_view.current_content.saved_scroll)))
+                    xabber.notifications_view.current_content.saved_scroll = null;
+            }
+        },
+
+        startEncryptedChat: function (ev, no_close) {
+            let is_contacts = xabber.body.screen.get('name') === 'contacts' || xabber.body.screen.get('name') === 'groupchats' || xabber.body.screen.get('name') === 'notifications';
+            this.account.chats.openChat(this.model, {encrypted: true});
+            let chat = this.account.chats.get(this.model.hash_id + ':encrypted');
+            chat.set('timestamp', moment.now());
+            chat.item_view.updateLastMessage();
+            is_contacts && !no_close && this.closeDetails();
+            this.clearTabsScrolling(is_contacts);
+        },
+
+        openEncryptedChat: function (ev, no_close) {
+            let is_contacts = xabber.body.screen.get('name') === 'contacts' || xabber.body.screen.get('name') === 'groupchats' || xabber.body.screen.get('name') === 'notifications';
+            this.account.chats.openChat(this.model, {encrypted: true});
+            is_contacts && !no_close && this.closeDetails();
+            this.clearTabsScrolling(is_contacts);
+        },
+
+        openRegularChat: function (ev, no_close) {
+            let is_contacts = xabber.body.screen.get('name') === 'contacts' || xabber.body.screen.get('name') === 'groupchats' || xabber.body.screen.get('name') === 'notifications';
+            this.account.chats.openChat(this.model);
+            is_contacts && !no_close && this.closeDetails();
+            this.clearTabsScrolling(is_contacts);
+        },
+
+        keydownHandler: function (ev) {
+            if (!xabber.body.$el.siblings('.mfp-ready').length && !$.magnificPopup.instance.isOpen && ev.keyCode === constants.KEY_ESCAPE && !xabber.body.$el.siblings('#modals').children('.open').length) {
+                this.closeDetails();
+                $(window).unbind("keydown.contact_panel");
+            }
+        },
+
+        openChat: function () {
+            if (this.encrypted) {
+                this.openEncryptedChat();
+            } else {
+                this.openRegularChat();
+            }
+        },
+
+        closeDetails: function () {
+            if (this.saved) {
+                this.chat.trigger('open', {clear_search: true, right_force_close: true});
+            } else
+                this.model.showDetailsRight(xabber.body.screen.get('name'));
+        },
+
+        updateColorScheme: function () {
+            this.$el.attr('data-color', this.account.settings.get('color'));
+        },
+
+        scrollToTopSmooth: function () {
+            this._vueInstance.updateScrollState({
+                isTop: false,
+                isHidden: true,
+                titleFaded: true,
+                buttonsHidden: false,
+                searchHidden: false,
+            });
+            this.$('.header-buttons').attr('style', 'background-color: rgba(255,255,255,0) !important;');
+            this.ps_container.animate(
+                {scrollTop: 0},
+                400,
+                () => {
+                    this.onScroll();
+                });
+        },
+
+        onChangedVisibility: function () {
+            this.model && this.model.set('display', this.isVisible());
+        },
+
+        updateJingleButtons: function () {
+            this._vueInstance.updateButtons();
+        },
+
+        update: function () {
+            let changed = this.model.changed;
+            if (_.has(changed, 'name')) this.updateName();
+            if (_.has(changed, 'image')) this.updateAvatar();
+            if (_.has(changed, 'status_updated')) this.updateStatus();
+            if (_.has(changed, 'subscription')) this.updateSubscriptions();
+            if (_.has(changed, 'subscription_request_in')) this.updateSubscriptions();
+            if (_.has(changed, 'blocked')) this.updateStatusMsg();
+            if (_.has(changed, 'status_message')) this.updateStatusMsg();
+            if (_.has(changed, 'in_roster') || _.has(changed, 'blocked') ||
+                _.has(changed, 'subscription')) {
+                this.updateButtons();
+            }
+        },
+
+        updateName: function () {
+            this._vueInstance.updateName();
+        },
+
+        onScroll: function () {
+            if (this.model && this.model.get('saved_search_panel') && !this.model.get('search_hidden')) {
+                this.ps_container.perfectScrollbar('destroy');
+                return true;
+            }
+            let bottom_block_scroll;
+            if (this.$('.bottom-block:not(.edit-bottom-block)'))
+                bottom_block_scroll = this.$('.bottom-block:not(.edit-bottom-block)').get(0).getBoundingClientRect().top;
+
+            if (this.ps_container[0].scrollTop >= 250) {
+                this.$('.header-buttons').attr('style', 'background-color: rgba(255,255,255,1) !important; -webkit-transition: none; -ms-transition: none;transition: none;');
+                this.$('.main-info').css({width: xabber.right_contact_panel.$el.find('.panel-content-wrap').width()});
+                this._vueInstance.updateScrollState({
+                    isTop: true,
+                    isHidden: false,
+                    titleFaded: false,
+                    secondTextFaded: true,
+                });
+            } else if (this.ps_container[0].scrollTop >= 40) {
+                this.$('.header-buttons').attr('style', 'background-color: rgba(255,255,255,0.5) !important;');
+                this._vueInstance.updateScrollState({
+                    isTop: false,
+                    isHidden: true,
+                    titleFaded: true,
+                });
+            } else {
+                this.$('.header-buttons').attr('style', 'background-color: rgba(255,255,255,0) !important;');
+                this._vueInstance.updateScrollState({
+                    isTop: false,
+                    isHidden: true,
+                    titleFaded: true,
+                });
+            }
+            if (!_.isUndefined(bottom_block_scroll) && bottom_block_scroll <= 240) {
+                this._vueInstance.updateScrollState({
+                    buttonsHidden: true,
+                    searchHidden: true,
+                    titleFaded: true,
+                    secondTextFaded: false,
+                });
+                this._vueInstance.updateSecondText(this.$('.list-variant .active').text());
+            } else {
+                this._vueInstance.updateScrollState({
+                    buttonsHidden: false,
+                    searchHidden: false,
+                });
+            }
+        },
+
+        updateStatus: function () {
+            this.$('.main-info .status').attr('data-status', this.model.get('status'));
+            this.$('.main-info .status-message').text(this.model.getStatusMessage());
+        },
+
+        updateStatusMsg: function () {
+            this.$('.main-info .status-message').text(this.model.getStatusMessage());
+        },
+
+        updateAvatar: function () {
+            let image = this.model.cached_image;
+            this.$('.avatar-wrap .circle-avatar').setAvatar(image, this.avatar_size, this.account);
+        },
+
+        updateButtons: function () {
+            this._vueInstance.updateButtons();
+        },
+
+        updateNotifications: function () {
+            this._vueInstance.updateNotifications();
+        },
+
+        showQRCode: function () {
+            let qrcode = new VanillaQR({
+                url: 'xmpp:' + this.model.get('jid'),
+                noBorder: true
+            });
+            this.$('.qr-code-canvas').html("")[0].appendChild(qrcode.domElement);
+            this.$('.qr-code-name').text(this.model.get('name'));
+            this.$('.qr-code-jid').text(this.model.get('jid'));
+            this.$('.qr-code-content-wrap').removeClass('hidden');
+            this.scrollToTop();
+            this.ps_container.perfectScrollbar('destroy');
+        },
+
+        hideQRCode: function () {
+            if (this.ps_container.length && this.model.get('search_hidden')) {
+                this.ps_container.perfectScrollbar(
+                    _.extend(this.ps_settings || {}, xabber.ps_settings)
+                );
+                this.scrollToTop();
+            }
+            this.$('.qr-code-content-wrap').addClass('hidden');
+        },
+
+        updateSubscriptions: function () {
+            let subscription = this.model.get('subscription'),
+                in_request = this.model.get('subscription_request_in'),
+                out_request = this.model.get('subscription_request_out'),
+                $label_outcoming = this.$('label[for="outcoming-subscription"]'),
+                $label_incoming = this.$('label[for="incoming-subscription"]');
+            if (subscription === 'both') {
+                $label_incoming.text(xabber.getString("contact_subscription_send")).prev('input').prop('checked', true);
+                $label_outcoming.text(xabber.getString("contact_subscription_receive")).prev('input').prop('checked', true);
+            } else if (subscription === 'from') {
+                $label_incoming.text(xabber.getString("contact_subscription_send")).prev('input').prop('checked', true);
+                $label_outcoming.text(xabber.getString("contact_subscription_ask")).prev('input').prop('checked', false);
+            } else if (subscription === 'to') {
+                $label_incoming.text(xabber.getString("contact_subscription_accept")).prev('input').prop('checked', !!this.model.get('subscription_preapproved'));
+                $label_outcoming.text(xabber.getString("contact_subscription_receive")).prev('input').prop('checked', true);
+            } else if (!subscription || subscription === 'none') {
+                $label_incoming.text(xabber.getString("contact_subscription_accept")).prev('input').prop('checked', !!this.model.get('subscription_preapproved'));
+                $label_outcoming.text(xabber.getString("contact_subscription_ask")).prev('input').prop('checked', false);
+            }
+            if (in_request && subscription !== 'both') {
+                $label_incoming.text(xabber.getString("contact_subscription_send")).prev('input').prop('checked', false);
+            }
+            if (out_request) {
+                $label_outcoming.text(xabber.getString("contact_subscription_ask")).prev('input').prop('checked', true);
+            }
+        },
+
+        showEdit: function () {
+            this.contact_edit_view.showEdit();
+        },
+
+        voiceCall: function (ev) {
+            if ($(ev.target).closest('.button-wrap').hasClass('non-active') || this.model.get('blocked'))
+                return;
+            if (xabber.get('audio'))
+                this.initCall(ev);
+        },
+
+        initCall: function () {
+            if (xabber.current_voip_call) {
+                utils.callback_popup_message(xabber.getString("jingle__error__call_in_progress"), 1000);
+                return;
+            }
+            let chat = this.account.chats.getChat(this.model);
+            if (!chat.item_view.content)
+                chat.item_view.content = new xabber.ChatContentView({chat_item: chat.item_view});
+            chat.item_view.content.initJingleMessage();
+        },
+
+        deleteContact: function () {
+            this.model.deleteWithDialog(() => {
+                this.isVisible() && this.closeDetails();
+            });
+        },
+
+        blockContact: function () {
+            this.model.blockWithDialog();
+        },
+
+        unblockContact: function () {
+            this.model.unblockWithDialog();
+        },
+
+        muteChat: function (ev) {
+            if (this.model.get('blocked'))
+                return;
+            let mute_type = $(ev.target).closest('.btn-mute-dropdown').data('mute'),
+                muted_seconds;
+            if (mute_type === 'minutes15')
+                muted_seconds = 900;
+            if (mute_type === 'hours1')
+                muted_seconds = 3600;
+            if (mute_type === 'hours2')
+                muted_seconds = 7200;
+            if (mute_type === 'day')
+                muted_seconds = 86400;
+            if (mute_type === 'forever')
+                muted_seconds = 0;
+            this.chat.muteChat(muted_seconds);
+        },
+
+        unmuteChat: function () {
+            if (this.model.get('blocked'))
+                return;
+            this.chat.muteChat('');
+        },
+
+        showSearchMessages: function (ev, is_chat_head) {
+            if (xabber.body.screen.get('name') === 'contacts' || xabber.body.screen.get('name') === 'groupchats') {
+                this.openRegularChat(null, true);
+            }
+            let is_modal = xabber.body.screen.get('right_contact_modal');
+            if (is_modal && !is_chat_head) {
+                this.$('.panel-background-clickable').addClass('temporary-fading-search-background');
+                this.$('.panel-background-clickable').addClass('fading-search-background');
+                setTimeout(() => {
+                    this.$('.panel-background-clickable').removeClass('temporary-fading-search-background');
+                }, 20);
+            }
+            this.scrollToTop();
+            if (this.ps_container.length) {
+                this.ps_container.perfectScrollbar('destroy');
+            }
+            this.model && this.model.set('search_hidden', false);
+            this.makeStatic();
+            this.$('.search-wrap').hideIf(this.model && this.model.get('search_hidden'));
+            if (is_modal && !is_chat_head && xabber.right_contact_panel.$el.css('z-index') === '0') {
+                xabber.right_contact_panel.setCustomCss({'z-index': 499});
+                this.modal_z_index_timeout = setTimeout(() => {
+                    xabber.right_contact_panel.setCustomCss({'z-index': 0});
+                }, 2000);
+            }
+            this.contact_searched_messages_view.$search_form.find('input').focus();
+        },
+
+        makeModal: function () {
+            let styles = {
+                height: '80%',
+                'box-shadow': '0 16px 28px 0 rgba(0, 0, 0, .22), 0 25px 55px 0 rgba(0, 0, 0, .21)',
+                position: 'fixed',
+                left: '50%',
+                transform: 'translate(-50%, 0)',
+                top: '10%',
+                'background': '#FFF',
+                'border-radius': '8px',
+                'z-index': '1000',
+                'overflow': 'hidden',
+            };
+            this.$('.panel-content-wrap').css(styles);
+            this.$('.panel-background-clickable').addClass('forced-background');
+            clearTimeout(this.modal_z_index_timeout);
+            xabber.trigger('update_layout');
+        },
+
+        makeStatic: function () {
+            xabber.body.screen.set('right_contact_modal', false, {silent: true});
+            let styles = {
+                height: '',
+                'box-shadow': '',
+                position: '',
+                left: '',
+                transform: '',
+                top: '',
+                'background': '',
+                'border-radius': '',
+                'z-index': '',
+                'overflow': '',
+                'width': '',
+            };
+            this.$('.panel-content-wrap').css(styles);
+            this.$('.panel-background-clickable').removeClass('forced-background');
+            clearTimeout(this.modal_z_index_timeout);
+            xabber.trigger('update_layout');
+        },
+
+        addContact: function () {
+            xabber.add_contact_view.show({account: this.account, jid: this.model.get('jid')});
+        },
+
+        changeList: function (ev) {
+            let $target = $(ev.target).closest('.list-variant'),
+                list_name = $target.data('value');
+            this.$('.tabs').animate({scrollLeft: $target.position().left}, 400);
+            this.ps_container.animate(
+                {scrollTop: this.$('.bottom-block:not(.edit-bottom-block)').position().top + this.ps_container.scrollTop() - 120},
+                200,
+                () => {
+                    this.onScroll();
+                });
+            this._vueInstance.updateSecondText($target.text());
+            this.updateList(list_name);
+        },
+
+        updateList: function (name) {
+            let view = this.child(name);
+            !view && (view = this.addList(name));
+            if (view) {
+                this.$('.tabs .list-variant a').removeClass('active');
+                this.$('.tabs .list-variant[data-value="' + name + '"] a').addClass('active');
+                view._render();
+            }
+        },
+
+        addList: function (name) {
+            let constructor_func;
+            switch (name) {
+                case 'image':
+                    constructor_func = xabber.MediaImagesView;
+                    break;
+                case 'video':
+                    constructor_func = xabber.MediaVideosView;
+                    break;
+                case 'files':
+                    constructor_func = xabber.MediaFilesView;
+                    break;
+                case 'voice':
+                    constructor_func = xabber.MediaVoiceView;
+                    break;
+            }
+            if (constructor_func)
+                return this.addChild(name, constructor_func, {model: this.model, encrypted: this.encrypted, el: this.$('.participants-wrap')[0]});
+        },
+
+        requestAuthorization: function () {
+            this.model.pres('subscribe');
+            this.model.trigger('presence', this.model, 'subscribe_from');
+            this.openChat();
+        }
+    }
+});
+
+
+xabber.GroupChatDetailsViewRight = createVueBackboneView(xabber, {
+    component: GroupChatDetailsRightComponent,
+    className: 'details-panel-right groupchat-details-panel',
+    props: function (view) {
+        return { model: view.model };
+    },
+    extend: {
+        ps_selector: '.panel-content-wrap',
+        avatar_size: constants.AVATAR_SIZES.CONTACT_DETAILS,
+        member_avatar_size: constants.AVATAR_SIZES.GROUPCHAT_MEMBER_ITEM,
+
+        onShow: function () {
+            this.render.apply(this, arguments);
+            _.each(this.children, function (view) {
+                view.render.apply(view, arguments);
+            });
+        },
+
+        _vueInit: function () {
+            this._vueInstance.setBackboneView(this);
+            // Re-initialize ps_container after Vue has rendered the DOM
             this.ps_container = this.$('.panel-content-wrap');
             this.account = this.model.account;
-            this.chat = this.account.chats.getChat(this.model, options.encrypted && 'encrypted');
+            this.chat = this.account.chats.getChat(this.model);
             this.name_field = new xabber.ContactNameWidget({
                 el: this.$('.name-wrap')[0],
                 model: this.model
             });
             this.name_field.$('.contact-name-input').prop('disabled', true);
-            if (!this.encrypted){
-                this.contact_edit_view = this.addChild('edit', xabber.ContactEditView,
-                    {model: this.model, el: this.$('.edit-block-wrap')[0]});
-            }
-            this.contact_searched_messages_view = this.addChild('search', xabber.ContactSearchedMessagesView,
-                {model: this.account.chats.getChat(this.model), query_text: '1', el: this.$('.search-messages-block-wrap')[0]});
-            this.vcard_view = this.addChild('vcard', xabber.ContactRightVCardView,
-                {model: this.model, el: this.$('.vcard')[0]});
+            this.participants = this.addChild('participants', xabber.ParticipantsViewRight, {model: this.model, el: this.$('.participants-wrap')[0]});
             this.edit_groups_view = this.addChild('groups',
                 xabber.ContactEditGroupsView, {el: this.$('.groups-block-wrap')[0]});
+            this.contact_edit_view = this.addChild('edit', xabber.GroupEditView,
+                {model: this.model, el: this.$('.edit-block-wrap')[0]});
+            this.group_chat_properties = this.addChild('properties_view', xabber.GroupChatPropertiesViewRight, {model: this.model, el: this.$('.group-chat-properties-wrap')[0]});
+            this.group_chat_status = this.addChild('status_view', xabber.GroupChatStatusViewRight, {model: this.model, el: this.$('.status-block-wrap')[0]});
+            this.contact_searched_messages_view = this.addChild('search', xabber.ContactSearchedMessagesView,
+                {model: this.account.chats.getChat(this.model), query_text: '1', el: this.$('.search-messages-block-wrap')[0]});
+            this.default_restrictions_edit_right = this.addChild('restrictions',
+                xabber.DefaultRestrictionsRightView,
+                {model: this.model, el: this.$('.restrictions-block-wrap')[0]});
+            this.newbie_permissions_edit_right = this.addChild('newbie_permissions',
+                xabber.NewbiePermissionsRightView,
+                {model: this.model, el: this.$('.newbie-permissions-block-wrap')[0]});
             this.updateName();
             this.updateStatus();
             this.updateAvatar();
-            this.updateButtons();
             this.updateColorScheme();
             this.ps_container.on("ps-scroll-y", this.onScroll.bind(this));
             this.listenTo(this.account.settings, 'change:color', this.updateColorScheme);
             this.listenTo(this.model, 'change', this.update);
             this.listenTo(this.chat, 'change:muted', this.updateNotifications);
-            this.listenTo(xabber, 'change:video', this.updateJingleButtons);
-            this.listenTo(xabber, 'change:audio', this.updateJingleButtons);
+            this.listenTo(this.model, 'permissions_changed', this.updateButtons);
+            this.listenTo(this.model, 'change:subscription', this.updateButtons);
             this.listenTo(xabber, 'update_layout', this.updateIndicator);
-        }
-    },
+        },
 
-    render: function (options) {
-        if (this.saved) {
-            this.$('.qr-code-content-wrap').addClass('hidden');
-        } else {
-            if (!this.model.get('vcard_updated')) {
-                this.vcard_view.refresh();
+        render: function (options) {
+            if (this.participants && this.participants.participant_properties_panel) {
+                this.participants.participant_properties_panel.default_rights_context = false;
             }
+            this.updateName();
+            this.updateButtons();
+            if (!this.model.my_rights)
+                this.model.getMyInfo(() => {
+                    this.updateButtons();
+                });
             if (!this.model.get('saved_search_panel')) {
                 if (this.ps_container.length) {
                     this.ps_container.perfectScrollbar(
                         _.extend(this.ps_settings || {}, xabber.ps_settings)
                     );
                 }
-            }
-            else {
+            } else {
                 this.ps_container.perfectScrollbar('destroy');
             }
             this.$('.btn-mute').dropdown({
@@ -1844,1170 +2379,558 @@ xabber.ContactDetailsViewRight = xabber.BasicView.extend({
                 outDuration: 100,
                 hover: false
             });
-            if (this.encrypted){
-                this.$('.btn-search-messages').remove();
-                this.$('.btn-edit').remove();
-                this.$('.btn-qr-code').remove()
-            }
+            this.$('.btn-delete').showIf(this.model.get('subscription') === "both");
+            this.$('.btn-join').showIf(this.model.get('subscription') !== "both");
+            let dropdown_settings = {
+                inDuration: 100,
+                outDuration: 100,
+                constrainWidth: false,
+                hover: false,
+                alignment: 'right'
+            };
+            this.$('.select-users-list-wrap .dropdown-button').dropdown(dropdown_settings);
+            this.$('.circle-avatar.dropdown-button').dropdown(dropdown_settings);
+            this.$('.dropdown-button').dropdown(dropdown_settings);
             this.$('.btn-notifications').dropdown({
                 inDuration: 100,
                 outDuration: 100,
-                hover: false, // Activate on hover
+                hover: false,
             });
+            this.onScroll();
             this.updateChilds();
-            this.updateSubscriptions();
-            this.updateJingleButtons();
-            this.updateStatusMsg();
-            this.updateName();
             this.updateNotifications();
-            this.updateButtons();
-            this.hideQRCode();
+            this.updateList('participants');
             this.updateAvatar();
-            this.updateList('image');
+            this.hideQRCode();
             if (options && options.right_contact_modal)
                 this.makeModal();
-            this.onScroll();
-            this.model.resources.models.forEach((resource) => {this.model.resources.requestInfo(resource)});
             $(window).bind("keydown.contact_panel", this.keydownHandler.bind(this));
-        }
-    },
+            return this;
+        },
 
-    updateChilds: function () {
-        if (this.vcard_view && !this.model.get('vcard_hidden'))
-            this.vcard_view.hideVCard();
-        if (this.contact_edit_view && !this.model.get('edit_hidden'))
-            this.contact_edit_view.hideEdit();
-    },
-
-    updateIndicator: function () {
-        this.$('.tabs .indicator').remove();
-        this.$('.tabs').tabs();
-        this.$('.indicator').addClass('ground-color-500');
-
-        setTimeout(() => {
+        updateIndicator: function () {
             this.$('.tabs.not-edit .indicator').remove();
             this.$('.tabs.not-edit').tabs();
             this.$('.tabs.not-edit .indicator').addClass('ground-color-500');
-        }, 500);
-        if (xabber.body.screen.get('right_contact_modal') && this.$('.panel-content-wrap').css('width') !== `${xabber.right_contact_panel.$el.attr('data-width')}px`) {
-            this.$('.panel-content-wrap').attr('style', function (i, s) {
-                return (s || '') + `width: ${xabber.right_contact_panel.$el.attr('data-width')}px !important;`
-            });
-        } else if (!xabber.body.screen.get('right_contact_modal')) {
-            this.$('.panel-content-wrap').attr('style', '');
-        }
-    },
-
-    clearTabsScrolling: function (is_contacts) {
-        if (is_contacts) {
-            if (!(_.isUndefined(xabber.contacts_view.saved_scroll) || _.isNull(xabber.contacts_view.saved_scroll)))
-                xabber.contacts_view.saved_scroll = null;
-            if (!(_.isUndefined(xabber.groupchats_view.saved_scroll) || _.isNull(xabber.groupchats_view.saved_scroll)))
-                xabber.groupchats_view.saved_scroll = null;
-            if (xabber.notifications_view.current_content
-                && !(_.isUndefined(xabber.notifications_view.current_content.saved_scroll) || _.isNull(xabber.notifications_view.current_content.saved_scroll)))
-                xabber.notifications_view.current_content.saved_scroll = null;
-        }
-
-    },
-
-    startEncryptedChat: function (ev, no_close) {
-        let is_contacts = xabber.body.screen.get('name') === 'contacts' || xabber.body.screen.get('name') === 'groupchats' || xabber.body.screen.get('name') === 'notifications';
-        this.account.chats.openChat(this.model, {encrypted: true});
-        let chat = this.account.chats.get(this.model.hash_id + ':encrypted');
-        chat.set('timestamp', moment.now());
-        chat.item_view.updateLastMessage();
-        is_contacts && !no_close && this.closeDetails();
-        this.clearTabsScrolling(is_contacts);
-    },
-
-    openEncryptedChat: function (ev, no_close) {
-        let is_contacts = xabber.body.screen.get('name') === 'contacts' || xabber.body.screen.get('name') === 'groupchats' || xabber.body.screen.get('name') === 'notifications';
-        this.account.chats.openChat(this.model, {encrypted: true});
-        is_contacts && !no_close && this.closeDetails();
-        this.clearTabsScrolling(is_contacts);
-    },
-
-    openRegularChat: function (ev, no_close) {
-        let is_contacts = xabber.body.screen.get('name') === 'contacts' || xabber.body.screen.get('name') === 'groupchats' || xabber.body.screen.get('name') === 'notifications';
-        this.account.chats.openChat(this.model);
-        is_contacts && !no_close && this.closeDetails();
-        this.clearTabsScrolling(is_contacts);
-    },
-
-    keydownHandler: function (ev) {
-        if (!xabber.body.$el.siblings('.mfp-ready').length && !$.magnificPopup.instance.isOpen && ev.keyCode === constants.KEY_ESCAPE && !xabber.body.$el.siblings('#modals').children('.open').length) {
-            this.closeDetails();
-            $(window).unbind("keydown.contact_panel");
-        }
-    },
-
-    openChat: function () {
-        if (this.encrypted){
-            this.openEncryptedChat();
-        } else {
-            this.openRegularChat();
-        }
-    },
-
-    closeDetails: function () {
-        if (this.saved){
-            this.chat.trigger('open', {clear_search: true, right_force_close: true});
-        } else
-            this.model.showDetailsRight(xabber.body.screen.get('name'));
-    },
-
-    updateColorScheme: function () {
-        this.$el.attr('data-color', this.account.settings.get('color'));
-    },
-
-    scrollToTopSmooth: function () {
-        this.$('.header-buttons').attr( 'style', 'background-color: rgba(255,255,255,0) !important;');
-        this.$('.header-buttons .block-name').addClass('fade-out');
-        this.$('.btn-escape').removeClass('btn-top');
-        this.$('.btn-escape').addClass('hidden');
-        this.$('.btn-escape i').addClass('mdi-close').removeClass('mdi-arrow-right');
-        this.$('.buttons-wrap').hideIf(false);
-        this.$('.btn-search-messages').hideIf(false);
-        this.ps_container.animate(
-            {scrollTop: 0},
-            400,
-            () => {
-                this.onScroll();
-            });
-    },
-
-    onChangedVisibility: function () {
-        this.model && this.model.set('display', this.isVisible());
-    },
-
-    updateJingleButtons: function () {
-        this.$('.btn-voice-call').switchClass('non-active', !xabber.get('audio'));
-    },
-
-    update: function () {
-        let changed = this.model.changed;
-        if (_.has(changed, 'name')) this.updateName();
-        if (_.has(changed, 'image')) this.updateAvatar();
-        if (_.has(changed, 'status_updated')) this.updateStatus();
-        if (_.has(changed, 'subscription')) this.updateSubscriptions();
-        if (_.has(changed, 'subscription_request_in')) this.updateSubscriptions();
-        if (_.has(changed, 'blocked')) this.updateStatusMsg();
-        if (_.has(changed, 'status_message')) this.updateStatusMsg();
-        if (_.has(changed, 'in_roster') || _.has(changed, 'blocked') ||
-            _.has(changed, 'subscription')) {
-            this.updateButtons();
-        }
-    },
-
-    updateName: function () {
-        this.$('.main-info .name-wrap').text(this.model.get('name'));
-        if (this.model.get('roster_name') && this.model.get('name') !== this.model.get('roster_name'))
-            this.$('.main-info .name-wrap').addClass('name-is-custom');
-        else
-            this.$('.main-info .name-wrap').removeClass('name-is-custom');
-    },
-
-    onScroll: function () {
-        if (this.model && this.model.get('saved_search_panel') && !this.model.get('search_hidden')){
-            this.ps_container.perfectScrollbar('destroy');
-            return true;
-        }
-        let bottom_block_scroll;
-        if (this.$('.bottom-block:not(.edit-bottom-block)'))
-            bottom_block_scroll = this.$('.bottom-block:not(.edit-bottom-block)').get(0).getBoundingClientRect().top;
-
-        if(this.ps_container[0].scrollTop >= 250) {
-            this.$('.header-buttons').attr('style', 'background-color: rgba(255,255,255,1) !important; -webkit-transition: none; -ms-transition: none;transition: none;');
-            this.$('.main-info').css({width: xabber.right_contact_panel.$el.find('.panel-content-wrap').width()});
-            this.$('.header-buttons .block-name:not(.second-text)').removeClass('fade-out');
-            this.$('.header-buttons .block-name.second-text').addClass('fade-out');
-            this.$('.btn-escape').addClass('btn-top');
-            this.$('.btn-escape').removeClass('hidden');
-            this.$('.btn-escape i').addClass('mdi-arrow-right').removeClass('mdi-close');
-        }
-        else if(this.ps_container[0].scrollTop >= 40) {
-            this.$('.header-buttons').attr('style', 'background-color: rgba(255,255,255,0.5) !important;');
-            this.$('.header-buttons .block-name').addClass('fade-out');
-            this.$('.btn-escape').removeClass('btn-top');
-            this.$('.btn-escape').addClass('hidden');
-            this.$('.btn-escape i').addClass('mdi-close').removeClass('mdi-arrow-right');
-        }
-        else{
-            this.$('.header-buttons').attr( 'style', 'background-color: rgba(255,255,255,0) !important;');
-            this.$('.header-buttons .block-name').addClass('fade-out');
-            this.$('.btn-escape').removeClass('btn-top');
-            this.$('.btn-escape').addClass('hidden');
-            this.$('.btn-escape i').addClass('mdi-close').removeClass('mdi-arrow-right');
-        }
-        if (!_.isUndefined(bottom_block_scroll) && bottom_block_scroll <= 240){
-            this.$('.buttons-wrap').hideIf(true);
-            this.$('.btn-search-messages').hideIf(true);
-            this.$('.header-buttons .block-name:not(.second-text)').addClass('fade-out');
-            this.$('.header-buttons .block-name.second-text').removeClass('fade-out');
-            this.$('.header-buttons .block-name.second-text').text(this.$('.list-variant .active').text())
-        }
-        else {
-            this.$('.buttons-wrap').hideIf(false);
-            this.$('.btn-search-messages').hideIf(false);
-        }
-    },
-
-    updateStatus: function () {
-        this.$('.main-info .status').attr('data-status', this.model.get('status'));
-        this.$('.main-info .status-message').text(this.model.getStatusMessage());
-    },
-
-    updateStatusMsg: function () {
-        this.$('.main-info .status-message').text(this.model.getStatusMessage());
-    },
-
-    updateAvatar: function () {
-        let image = this.model.cached_image;
-        this.$('.avatar-wrap .circle-avatar').setAvatar(image, this.avatar_size, this.account);
-    },
-
-    updateButtons: function () {
-        let in_roster = this.model.get('in_roster'),
-            is_blocked = this.model.get('blocked'),
-            is_server = this.model.get('server'),
-            subscription = this.model.get('subscription');
-        this.$('.btn-add').hideIf(in_roster);
-        this.$('.btn-block-wrap .contact-btn').switchClass('btn-block', !is_blocked).switchClass('btn-unblock', is_blocked);
-        this.$('.btn-block-wrap .btn-name').text(is_blocked ? xabber.getString("contact_bar_unblock") : xabber.getString("contact_bar_block"));
-        this.$('.buttons-wrap .button-wrap:not(.btn-block-wrap):not(.btn-search-messages)').switchClass('non-active', is_blocked);
-        this.$('.contact-mute-dropdown').hideIf(is_blocked);
-        this.$('.btn-auth-request').showIf(!is_server && in_roster && !is_blocked &&
-            subscription !== 'both' && subscription !== 'to');
-        this.$('.btn-start-encryption').showIf(this.account.omemo && !this.encrypted && !this.account.chats.get(`${this.model.hash_id}:encrypted`));
-        this.$('.btn-open-encrypted-chat').showIf(this.account.omemo && !this.encrypted && this.account.chats.get(`${this.model.hash_id}:encrypted`));
-        this.$('.btn-open-regular-chat').showIf(this.encrypted);
-        this.encrypted && this.$('.btn-chat-wrap .btn-name').text(xabber.getString("omemo__chat_settings__button_open_encrypted_chat"));
-    },
-
-    updateNotifications: function () {
-        if (this.chat.isMuted()) {
-            this.$('.btn-notifications').addClass('muted');
-            this.$('.btn-notifications').addClass('active');
-        }
-        else {
-            this.$('.btn-notifications').removeClass('muted');
-            this.$('.btn-notifications').removeClass('active');
-        }
-        this.$('.btn-mute-dropdown').hideIf(this.chat.isMuted());
-        this.$('.btn-unmute-dropdown').hideIf(!this.chat.isMuted());
-    },
-
-    showQRCode: function () {
-        let qrcode = new VanillaQR({
-            url: 'xmpp:' + this.model.get('jid'),
-            noBorder: true
-        });
-        this.$('.qr-code-canvas').html("")[0].appendChild(qrcode.domElement);
-        this.$('.qr-code-name').text(this.model.get('name'));
-        this.$('.qr-code-jid').text(this.model.get('jid'));
-        this.$('.qr-code-content-wrap').removeClass('hidden');
-        this.scrollToTop();
-        this.ps_container.perfectScrollbar('destroy');
-    },
-
-    hideQRCode: function () {
-        if (this.ps_container.length && this.model.get('search_hidden')) {
-            this.ps_container.perfectScrollbar(
-                _.extend(this.ps_settings || {}, xabber.ps_settings)
-            );
-            this.scrollToTop();
-        }
-        this.$('.qr-code-content-wrap').addClass('hidden');
-    },
-
-    updateSubscriptions: function () {
-        let subscription = this.model.get('subscription'),
-            in_request = this.model.get('subscription_request_in'),
-            out_request = this.model.get('subscription_request_out'),
-            $label_outcoming = this.$('label[for="outcoming-subscription"]'),
-            $label_incoming = this.$('label[for="incoming-subscription"]');
-        if (subscription === 'both') {
-            $label_incoming.text(xabber.getString("contact_subscription_send")).prev('input').prop('checked', true);
-            $label_outcoming.text(xabber.getString("contact_subscription_receive")).prev('input').prop('checked', true);
-        } else if (subscription === 'from') {
-            $label_incoming.text(xabber.getString("contact_subscription_send")).prev('input').prop('checked', true);
-            $label_outcoming.text(xabber.getString("contact_subscription_ask")).prev('input').prop('checked', false);
-        } else if (subscription === 'to') {
-            $label_incoming.text(xabber.getString("contact_subscription_accept")).prev('input').prop('checked', !!this.model.get('subscription_preapproved'));
-            $label_outcoming.text(xabber.getString("contact_subscription_receive")).prev('input').prop('checked', true);
-        }
-        else if (!subscription || subscription === 'none') {
-            $label_incoming.text(xabber.getString("contact_subscription_accept")).prev('input').prop('checked', !!this.model.get('subscription_preapproved'));
-            $label_outcoming.text(xabber.getString("contact_subscription_ask")).prev('input').prop('checked', false);
-        }
-        if (in_request && subscription !== 'both') {
-            $label_incoming.text(xabber.getString("contact_subscription_send")).prev('input').prop('checked', false);
-        }
-        if (out_request) {
-            $label_outcoming.text(xabber.getString("contact_subscription_ask")).prev('input').prop('checked', true);
-        }
-    },
-
-    showEdit: function () {
-        this.contact_edit_view.showEdit();
-    },
-
-    voiceCall: function (ev) {
-        if ($(ev.target).closest('.button-wrap').hasClass('non-active') || this.model.get('blocked'))
-            return;
-        if (xabber.get('audio'))
-            this.initCall(ev);
-    },
-
-    initCall: function () {
-        if (xabber.current_voip_call) {
-            utils.callback_popup_message(xabber.getString("jingle__error__call_in_progress"), 1000);
-            return;
-        }
-        let chat = this.account.chats.getChat(this.model);
-        if (!chat.item_view.content)
-            chat.item_view.content = new xabber.ChatContentView({chat_item: chat.item_view});
-        chat.item_view.content.initJingleMessage();
-    },
-
-    deleteContact: function () {
-        this.model.deleteWithDialog(() => {
-            this.isVisible() && this.closeDetails();
-        });
-    },
-
-    blockContact: function () {
-        this.model.blockWithDialog();
-    },
-
-    unblockContact: function () {
-        this.model.unblockWithDialog();
-    },
-
-    muteChat: function (ev) {
-        if (this.model.get('blocked'))
-            return;
-        let mute_type = $(ev.target).closest('.btn-mute-dropdown').data('mute'),
-            muted_seconds;
-        if (mute_type === 'minutes15')
-            muted_seconds = 900;
-        if (mute_type === 'hours1')
-            muted_seconds = 3600;
-        if (mute_type === 'hours2')
-            muted_seconds = 7200;
-        if (mute_type === 'day')
-            muted_seconds = 86400;
-        if (mute_type === 'forever')
-            muted_seconds = 0;
-        this.chat.muteChat(muted_seconds);
-    },
-
-    unmuteChat: function () {
-        if (this.model.get('blocked'))
-            return;
-        this.chat.muteChat('');
-    },
-
-    showSearchMessages: function (ev, is_chat_head) {
-        if (xabber.body.screen.get('name') === 'contacts' || xabber.body.screen.get('name') === 'groupchats'){
-            this.openRegularChat(null, true);
-        }
-        let is_modal = xabber.body.screen.get('right_contact_modal');
-        if (is_modal && !is_chat_head){
-            this.$('.panel-background-clickable').addClass('temporary-fading-search-background');
-            this.$('.panel-background-clickable').addClass('fading-search-background');
             setTimeout(() => {
-                this.$('.panel-background-clickable').removeClass('temporary-fading-search-background');
-            }, 20);
-        }
-        this.scrollToTop();
-        if (this.ps_container.length) {
-            this.ps_container.perfectScrollbar('destroy');
-        }
-        this.model && this.model.set('search_hidden', false);
-        this.makeStatic();
-        this.$('.search-wrap').hideIf(this.model && this.model.get('search_hidden'));
-        if (is_modal && !is_chat_head && xabber.right_contact_panel.$el.css('z-index') === '0'){
-            xabber.right_contact_panel.setCustomCss({'z-index' : 499});
-            this.modal_z_index_timeout = setTimeout(() => {
-                xabber.right_contact_panel.setCustomCss({'z-index' : 0});
-            }, 2000);
-        }
-        this.contact_searched_messages_view.$search_form.find('input').focus();
-    },
+                this.$('.tabs.not-edit .indicator').remove();
+                this.$('.tabs.not-edit').tabs();
+                this.$('.tabs.not-edit .indicator').addClass('ground-color-500');
+            }, 500);
+            if (xabber.body.screen.get('right_contact_modal') && this.$('.panel-content-wrap').css('width') !== `${xabber.right_contact_panel.$el.attr('data-width')}px`) {
+                this.$('.panel-content-wrap').attr('style', function (i, s) {
+                    return (s || '') + `width: ${xabber.right_contact_panel.$el.attr('data-width')}px !important;`;
+                });
+            } else if (!xabber.body.screen.get('right_contact_modal')) {
+                this.$('.panel-content-wrap').attr('style', '');
+            }
+        },
 
-    makeModal: function () {
-        let styles = {
-            height: '80%',
-            'box-shadow': '0 16px 28px 0 rgba(0, 0, 0, .22), 0 25px 55px 0 rgba(0, 0, 0, .21)',
-            position: 'fixed',
-            left: '50%',
-            transform: 'translate(-50%, 0)',
-            top: '10%',
-            'background': '#FFF',
-            'border-radius': '8px',
-            'z-index': '1000',
-            'overflow': 'hidden',
-        };
-        this.$('.panel-content-wrap').css(styles);
-        this.$('.panel-background-clickable').addClass('forced-background');
-        clearTimeout(this.modal_z_index_timeout);
-        xabber.trigger('update_layout');
-    },
+        updateChilds: function () {
+            if (!this.model.get('vcard_hidden'))
+                this.group_chat_properties.hideVCard();
+            if (!this.model.get('edit_hidden'))
+                this.contact_edit_view.hideEdit();
+            if (!this.model.get('restrictions_hidden'))
+                this.default_restrictions_edit_right.hideRestrictions(true);
+            if (!this.model.get('newbie_permissions_hidden'))
+                this.newbie_permissions_edit_right.hideNewbiePermissions(true);
+            this.model.set('participant_hidden', true);
+            this.$('.participant-details-wrap').hideIf(this.model.get('participant_hidden'));
+        },
 
-    makeStatic: function () {
-        xabber.body.screen.set('right_contact_modal', false, {silent: true});
-        let styles = {
-            height: '',
-            'box-shadow': '',
-            position: '',
-            left: '',
-            transform: '',
-            top: '',
-            'background': '',
-            'border-radius': '',
-            'z-index': '',
-            'overflow': '',
-            'width': '',
-        };
-        this.$('.panel-content-wrap').css(styles);
-        this.$('.panel-background-clickable').removeClass('forced-background');
-        clearTimeout(this.modal_z_index_timeout);
-        xabber.trigger('update_layout');
-    },
+        showEdit: function () {
+            this.contact_edit_view.showEdit();
+        },
 
-    addContact: function () {
-        xabber.add_contact_view.show({account: this.account, jid: this.model.get('jid')});
-    },
+        showRestrictions: function (ev, callback) {
+            this.default_restrictions_edit_right.showRestrictions(ev, callback);
+        },
 
-    changeList: function (ev) {
-        let $target = $(ev.target).closest('.list-variant'),
-            list_name = $target.data('value');
-        this.$('.tabs').animate({scrollLeft: $target.position().left}, 400);
-        this.ps_container.animate(
-            {scrollTop: this.$('.bottom-block:not(.edit-bottom-block)').position().top + this.ps_container.scrollTop() - 120},
-            200,
-            () => {
-                this.onScroll();
-        });
-        this.$('.header-buttons .block-name.second-text').text($target.text());
-        this.updateList(list_name);
-    },
+        countRestrictions: function (callback) {
+            this.default_restrictions_edit_right.countRestrictions(callback);
+        },
 
-    updateList: function (name) {
-        let view = this.child(name);
-        !view && (view = this.addList(name));
-        if (view) {
-            this.$('.tabs .list-variant a').removeClass('active');
-            this.$('.tabs .list-variant[data-value="' + name + '"] a').addClass('active');
-            view._render();
-        }
-    },
-
-    addList: function (name) {
-        let constructor_func;
-        switch (name) {
-            case 'image':
-                constructor_func = xabber.MediaImagesView;
-                break;
-            case 'video':
-                constructor_func = xabber.MediaVideosView;
-                break;
-            case 'files':
-                constructor_func = xabber.MediaFilesView;
-                break;
-            case 'voice':
-                constructor_func = xabber.MediaVoiceView;
-                break;
-        }
-        if (constructor_func)
-            return this.addChild(name, constructor_func, {model: this.model, encrypted: this.encrypted, el: this.$('.participants-wrap')[0]});
-    },
-
-    requestAuthorization: function () {
-        this.model.pres('subscribe');
-        this.model.trigger('presence', this.model, 'subscribe_from');
-        this.openChat();
-    }
-});
-
-xabber.GroupChatDetailsViewRight = xabber.BasicView.extend({
-    className: 'details-panel-right groupchat-details-panel',
-    template: templates.group_chats.group_chat_details_right,
-    ps_selector: '.panel-content-wrap',
-    avatar_size: constants.AVATAR_SIZES.CONTACT_DETAILS,
-    member_avatar_size: constants.AVATAR_SIZES.GROUPCHAT_MEMBER_ITEM,
-
-    events: {
-        "click .btn-mute-dropdown": "muteChat",
-        "click .btn-notifications.muted": "unmuteChat",
-        "click .btn-edit-group-properties": "showEdit",
-        "click .btn-search": "showSearchMessages",
-        "click .btn-clear-history-chat": "clearHistory",
-        "click .btn-qr-code": "showQRCode",
-        "click .btn-back-qr": "hideQRCode",
-        "click .btn-leave": "leaveGroupChat",
-        "click .btn-invite": "inviteUser",
-        "click .btn-delete-group": "deleteGroup",
-        "click .btn-default-restrictions": "showRestrictions",
-        "click .btn-newbie-permissions": "showNewbiePermissions",
-        "click .btn-chat": "openChat",
-        "click .panel-background-clickable": "closeDetails",
-        "click .btn-escape:not(.btn-top)": "openChat",
-        "click .btn-escape.btn-top": "scrollToTopSmooth",
-        "click .btn-clear-history": "retractAllMessages",
-        "change .circle-avatar input": "changeAvatar",
-        "click .description-edit-wrap .btn-choose-image": "chooseAvatar",
-        "click .description-edit-wrap .btn-selfie": "makeSelfie",
-        "click .description-edit-wrap .btn-emoji-panel": "makeEmojiAvatar",
-        "click .tabs:not(.participant-tabs) .list-variant": "changeList",
-        "click .edit-pictured-buttons .list-variant": "changeList"
-    },
-
-    _initialize: function () {
-        this.account = this.model.account;
-        this.chat = this.account.chats.getChat(this.model);
-        this.name_field = new xabber.ContactNameWidget({
-            el: this.$('.name-wrap')[0],
-            model: this.model
-        });
-        this.name_field.$('.contact-name-input').prop('disabled', true);
-        this.participants = this.addChild('participants', xabber.ParticipantsViewRight, {model: this.model, el: this.$('.participants-wrap')[0]});
-        this.edit_groups_view = this.addChild('groups',
-            xabber.ContactEditGroupsView, {el: this.$('.groups-block-wrap')[0]});
-        this.contact_edit_view = this.addChild('edit', xabber.GroupEditView,
-            {model: this.model, el: this.$('.edit-block-wrap')[0]});
-        this.group_chat_properties = this.addChild('properties_view', xabber.GroupChatPropertiesViewRight, {model:this.model, el: this.$('.group-chat-properties-wrap')[0]});
-        this.group_chat_status = this.addChild('status_view', xabber.GroupChatStatusViewRight, {model:this.model, el: this.$('.status-block-wrap')[0]});
-        this.contact_searched_messages_view = this.addChild('search', xabber.ContactSearchedMessagesView,
-            {model: this.account.chats.getChat(this.model), query_text: '1', el: this.$('.search-messages-block-wrap')[0]});
-        this.default_restrictions_edit_right = this.addChild('restrictions',
-            xabber.DefaultRestrictionsRightView,
-            {model: this.model, el: this.$('.restrictions-block-wrap')[0]});
-        this.newbie_permissions_edit_right = this.addChild('newbie_permissions',
-            xabber.NewbiePermissionsRightView,
-            {model: this.model, el: this.$('.newbie-permissions-block-wrap')[0]});
-        this.updateName();
-        this.updateStatus();
-        this.updateAvatar();
-        this.updateColorScheme();
-        this.ps_container.on("ps-scroll-y", this.onScroll.bind(this));
-        this.listenTo(this.account.settings, 'change:color', this.updateColorScheme);
-        this.listenTo(this.model, 'change', this.update);
-        this.listenTo(this.chat, 'change:muted', this.updateNotifications);
-        this.listenTo(this.model, 'permissions_changed', this.updateButtons);
-        this.listenTo(this.model, 'change:subscription', this.updateButtons);
-        this.listenTo(xabber, 'update_layout', this.updateIndicator);
-    },
-
-    render: function (options) {
-        if (this.participants && this.participants.participant_properties_panel) {
-            this.participants.participant_properties_panel.default_rights_context = false;
-        }
-        this.updateName();
-        this.updateButtons();
-        if (!this.model.my_rights)
-            this.model.getMyInfo(() => {
-                this.updateButtons();
+        showNewbiePermissions: function () {
+            this.newbie_permissions_edit_right.openNewbiePermissions(() => {
+                if (this.default_restrictions_edit_right.iq_all_rights) {
+                    this.default_restrictions_edit_right.showDefaultRestrictions(this.default_restrictions_edit_right.iq_all_rights);
+                    this.default_restrictions_edit_right.updateSaveButton();
+                }
             });
-        if (!this.model.get('saved_search_panel')) {
+        },
+
+        hideRestrictions: function (no_show) {
+            this.model.set('restrictions_hidden', true);
+            this.$('.restrictions-wrap').hideIf(this.model.get('restrictions_hidden'));
+            !no_show && this.showEdit();
+        },
+
+        hideNewbiePermissions: function (no_show) {
+            this.model.set('newbie_permissions_hidden', true);
+            this.$('.newbie-permissions-wrap').hideIf(this.model.get('newbie_permissions_hidden'));
+            !no_show && this.showEdit();
+        },
+
+        keydownHandler: function (ev) {
+            if (!xabber.body.$el.siblings('.mfp-ready').length && !$.magnificPopup.instance.isOpen && ev.keyCode === constants.KEY_ESCAPE && !xabber.body.$el.siblings('#modals').children('.open').length) {
+                this.closeDetails();
+                $(window).unbind("keydown.contact_panel");
+            }
+        },
+
+        updateNotifications: function () {
+            this._vueInstance.updateNotifications();
+        },
+
+        update: function () {
+            let changed = this.model.changed;
+            if (_.has(changed, 'name')) this.updateName();
+            if (_.has(changed, 'image')) this.updateAvatar();
+            if (_.has(changed, 'status_updated') || _.has(changed, 'status_message')) this.updateStatus();
+        },
+
+        updateColorScheme: function () {
+            this.$el.attr('data-color', this.account.settings.get('color'));
+        },
+
+        updateButtons: function () {
+            this._vueInstance.updateButtons();
+            let is_blocked = this.model.get('blocked');
+            this.$('.btn-block').hideIf(is_blocked);
+            this.$('.btn-unblock').showIf(is_blocked);
+        },
+
+        updateName: function () {
+            this.$('.main-info .contact-name').text(this.model.get('name'));
+        },
+
+        muteChat: function (ev) {
+            if (this.model.get('blocked'))
+                return;
+            let mute_type = $(ev.target).closest('.btn-mute-dropdown').data('mute'),
+                muted_seconds;
+            if (mute_type === 'minutes15')
+                muted_seconds = 900;
+            if (mute_type === 'hours1')
+                muted_seconds = 3600;
+            if (mute_type === 'hours2')
+                muted_seconds = 7200;
+            if (mute_type === 'day')
+                muted_seconds = 86400;
+            if (mute_type === 'forever')
+                muted_seconds = 0;
+            this.chat.muteChat(muted_seconds);
+        },
+
+        unmuteChat: function () {
+            if (this.model.get('blocked'))
+                return;
+            this.chat.muteChat('');
+        },
+
+        showSearchMessages: function (ev, is_chat_head) {
+            if (xabber.body.screen.get('name') === 'contacts' || xabber.body.screen.get('name') === 'groupchats') {
+                this.openRegularChat();
+            }
+            let is_modal = xabber.body.screen.get('right_contact_modal');
+            if (is_modal && !is_chat_head) {
+                this.$('.panel-background-clickable').addClass('temporary-fading-search-background');
+                this.$('.panel-background-clickable').addClass('fading-search-background');
+                setTimeout(() => {
+                    this.$('.panel-background-clickable').removeClass('temporary-fading-search-background');
+                }, 20);
+            }
+            this.scrollToTop();
             if (this.ps_container.length) {
+                this.ps_container.perfectScrollbar('destroy');
+            }
+            this.model.set('search_hidden', false);
+            this.makeStatic();
+            this.$('.search-wrap').hideIf(this.model.get('search_hidden'));
+            if (is_modal && !is_chat_head && xabber.right_contact_panel.$el.css('z-index') === '0') {
+                xabber.right_contact_panel.setCustomCss({'z-index': 499});
+                this.modal_z_index_timeout = setTimeout(() => {
+                    xabber.right_contact_panel.setCustomCss({'z-index': 0});
+                }, 2000);
+            }
+            this.contact_searched_messages_view.$search_form.find('input').focus();
+        },
+
+        makeModal: function () {
+            let styles = {
+                height: '80%',
+                'box-shadow': '0 16px 28px 0 rgba(0, 0, 0, .22), 0 25px 55px 0 rgba(0, 0, 0, .21)',
+                position: 'fixed',
+                left: '50%',
+                transform: 'translate(-50%, 0)',
+                top: '10%',
+                'background': '#FFF',
+                'border-radius': '8px',
+                'z-index': '1000',
+                'overflow': 'hidden',
+            };
+            this.$('.panel-content-wrap').css(styles);
+            this.$('.panel-background-clickable').addClass('forced-background');
+            clearTimeout(this.modal_z_index_timeout);
+            xabber.trigger('update_layout');
+        },
+
+        makeStatic: function () {
+            xabber.body.screen.set('right_contact_modal', false, {silent: true});
+            let styles = {
+                height: '',
+                'box-shadow': '',
+                position: '',
+                left: '',
+                transform: '',
+                top: '',
+                'background': '',
+                'z-index': '',
+                'border-radius': '',
+                'overflow': '',
+                'width': '',
+            };
+            this.$('.panel-content-wrap').css(styles);
+            this.$('.panel-background-clickable').removeClass('forced-background');
+            clearTimeout(this.modal_z_index_timeout);
+            xabber.trigger('update_layout');
+        },
+
+        onScroll: function () {
+            if (this.model.get('saved_search_panel') && !this.model.get('search_hidden')) {
+                this.ps_container.perfectScrollbar('destroy');
+                return true;
+            }
+            let bottom_block_scroll;
+            if (this.$('.bottom-block:not(.edit-bottom-block):not(.participant-bottom-block)'))
+                bottom_block_scroll = this.$('.bottom-block:not(.edit-bottom-block):not(.participant-bottom-block)').get(0).getBoundingClientRect().top;
+
+            if (this.ps_container[0].scrollTop >= 250) {
+                this.$('.header-buttons').attr('style', 'background-color: rgba(255,255,255,1) !important; -webkit-transition: none; -ms-transition: none;transition: none;');
+                this.$('.main-info').css({width: xabber.right_contact_panel.$el.find('.panel-content-wrap').width()});
+                this._vueInstance.updateScrollState({
+                    isTop: true,
+                    isHidden: false,
+                    titleFaded: false,
+                    secondTextFaded: true,
+                });
+            } else if (this.ps_container[0].scrollTop >= 40) {
+                this.$('.header-buttons').attr('style', 'background-color: rgba(255,255,255,0.5) !important;');
+                this._vueInstance.updateScrollState({
+                    isTop: false,
+                    isHidden: true,
+                    titleFaded: true,
+                });
+            } else {
+                this.$('.header-buttons').attr('style', 'background-color: rgba(255,255,255,0) !important;');
+                this._vueInstance.updateScrollState({
+                    isTop: false,
+                    isHidden: true,
+                    titleFaded: true,
+                });
+            }
+            if (!_.isUndefined(bottom_block_scroll) && bottom_block_scroll <= 240) {
+                this._vueInstance.updateScrollState({
+                    buttonsHidden: true,
+                    searchHidden: true,
+                    editPropertiesHidden: true,
+                    titleFaded: true,
+                    secondTextFaded: false,
+                });
+                this._vueInstance.updateSecondText(this.$('.tabs:not(.participant-tabs) .list-variant .active').text());
+            } else {
+                this._vueInstance.updateScrollState({
+                    buttonsHidden: false,
+                    searchHidden: false,
+                    editPropertiesHidden: false,
+                });
+            }
+        },
+
+        clearHistory: function () {
+            if (this.chat && this.chat.item_view && this.chat.item_view.content && this.chat.item_view.content.head) {
+                this.chat.item_view.content.head.clearHistory();
+            }
+        },
+
+        showQRCode: function (ev, options) {
+            if (ev && ev.target && $(ev.target).closest('.participant-details-item').length)
+                return;
+            options = options || {};
+            let jid = options.jid || this.model.get('jid'),
+                name = options.name || this.model.get('name');
+            let qrcode = new VanillaQR({
+                url: 'xmpp:' + jid,
+                noBorder: true
+            });
+            this.$('.qr-code-canvas').html("")[0].appendChild(qrcode.domElement);
+            this.$('.qr-code-name').text(name);
+            this.$('.qr-code-jid').text(jid);
+            this.$('.qr-code-content-wrap').removeClass('hidden');
+            this.scrollToTop();
+            this.ps_container.perfectScrollbar('destroy');
+        },
+
+        hideQRCode: function () {
+            if (this.ps_container.length && this.model.get('search_hidden')) {
                 this.ps_container.perfectScrollbar(
                     _.extend(this.ps_settings || {}, xabber.ps_settings)
                 );
+                this.scrollToTop();
             }
-        }
-        else {
-            this.ps_container.perfectScrollbar('destroy');
-        }
-        this.$('.btn-mute').dropdown({
-            inDuration: 100,
-            outDuration: 100,
-            hover: false
-        });
-        this.$('.btn-delete').showIf(this.model.get('subscription') === "both");
-        this.$('.btn-join').showIf(this.model.get('subscription') !== "both");
-        let dropdown_settings = {
-            inDuration: 100,
-            outDuration: 100,
-            constrainWidth: false,
-            hover: false,
-            alignment: 'right'
-        };
-        this.$('.select-users-list-wrap .dropdown-button').dropdown(dropdown_settings);
-        this.$('.circle-avatar.dropdown-button').dropdown(dropdown_settings);
-        this.$('.dropdown-button').dropdown(dropdown_settings);
-        this.$('.btn-notifications').dropdown({
-            inDuration: 100,
-            outDuration: 100,
-            hover: false, // Activate on hover
-        });
-        this.onScroll();
-        this.updateChilds();
-        this.updateNotifications();
-        this.updateList('participants');
-        this.updateAvatar();
-        this.hideQRCode();
-        if (options && options.right_contact_modal)
-            this.makeModal();
-        $(window).bind("keydown.contact_panel", this.keydownHandler.bind(this));
-        return this;
-    },
+            this.$('.qr-code-content-wrap').addClass('hidden');
+        },
 
-    updateIndicator: function () {
-        this.$('.tabs.not-edit .indicator').remove();
-        this.$('.tabs.not-edit').tabs();
-        this.$('.tabs.not-edit .indicator').addClass('ground-color-500');
-
-        setTimeout(() => {
-            this.$('.tabs.not-edit .indicator').remove();
-            this.$('.tabs.not-edit').tabs();
-            this.$('.tabs.not-edit .indicator').addClass('ground-color-500');
-        }, 500);
-
-        if (xabber.body.screen.get('right_contact_modal') && this.$('.panel-content-wrap').css('width') !== `${xabber.right_contact_panel.$el.attr('data-width')}px`) {
-            this.$('.panel-content-wrap').attr('style', function (i, s) {
-                return (s || '') + `width: ${xabber.right_contact_panel.$el.attr('data-width')}px !important;`
+        leaveGroupChat: function (ev) {
+            if ($(ev.target).closest('.button-wrap').hasClass('non-active'))
+                return;
+            let contact = this.model;
+            utils.dialogs.ask(xabber.getString("groupchat_leave_full"), xabber.getString("groupchat_leave_confirm", [contact.get('name')]), null, { ok_button_text: xabber.getString("groupchat_leave")}).done((result) => {
+                if (result) {
+                    contact.declineSubscription();
+                    let chat = this.account.chats.getChat(contact);
+                    contact.removeFromRoster();
+                    chat.deleteFromSynchronization(() => {
+                        this.isVisible() && this.closeDetails();
+                    }, () => {
+                        this.isVisible() && this.closeDetails();
+                    });
+                }
             });
-        } else if (!xabber.body.screen.get('right_contact_modal')) {
-            this.$('.panel-content-wrap').attr('style', '');
-        }
-    },
+        },
 
-    updateChilds: function () {
-        if (!this.model.get('vcard_hidden'))
-            this.group_chat_properties.hideVCard();
-        if (!this.model.get('edit_hidden'))
-            this.contact_edit_view.hideEdit();
-        if (!this.model.get('restrictions_hidden'))
-            this.default_restrictions_edit_right.hideRestrictions(true);
-        if (!this.model.get('newbie_permissions_hidden'))
-            this.newbie_permissions_edit_right.hideNewbiePermissions(true);
-        this.model.set('participant_hidden', true);
-        this.$('.participant-details-wrap').hideIf(this.model.get('participant_hidden'))
-    },
-
-    showEdit: function () {
-        this.contact_edit_view.showEdit();
-    },
-
-    showRestrictions: function (ev, callback) {
-        this.default_restrictions_edit_right.showRestrictions(ev, callback);
-    },
-
-    countRestrictions: function (callback) {
-        this.default_restrictions_edit_right.countRestrictions(callback);
-    },
-
-    showNewbiePermissions: function () {
-        this.newbie_permissions_edit_right.openNewbiePermissions(() => {
-            if (this.default_restrictions_edit_right.iq_all_rights) {
-                this.default_restrictions_edit_right.showDefaultRestrictions(this.default_restrictions_edit_right.iq_all_rights)
-                this.default_restrictions_edit_right.updateSaveButton();
+        inviteUser: function (ev) {
+            if (!$(ev.target).closest('.button-wrap').hasClass('non-active')) {
+                if (!xabber.invite_panel)
+                    xabber.invite_panel = new xabber.InvitationPanelView({ model: xabber.opened_chats });
+                xabber.invite_panel.open(this.account, this.model);
             }
-        });
-    },
+        },
 
-    hideRestrictions: function (no_show) {
-        this.model.set('restrictions_hidden', true);
-        this.$('.restrictions-wrap').hideIf(this.model.get('restrictions_hidden'));
-        !no_show && this.showEdit();
-    },
-
-    hideNewbiePermissions: function (no_show) {
-        this.model.set('newbie_permissions_hidden', true);
-        this.$('.newbie-permissions-wrap').hideIf(this.model.get('newbie_permissions_hidden'));
-        !no_show && this.showEdit();
-    },
-
-
-    keydownHandler: function (ev) {
-        if (!xabber.body.$el.siblings('.mfp-ready').length && !$.magnificPopup.instance.isOpen && ev.keyCode === constants.KEY_ESCAPE && !xabber.body.$el.siblings('#modals').children('.open').length) {
-            this.closeDetails();
-            $(window).unbind("keydown.contact_panel");
-        }
-    },
-
-    updateNotifications: function () {
-        if (this.chat.isMuted()) {
-            this.$('.btn-notifications').addClass('muted');
-            this.$('.btn-notifications').addClass('active');
-        }
-        else {
-            this.$('.btn-notifications').removeClass('muted');
-            this.$('.btn-notifications').removeClass('active');
-        }
-        this.$('.btn-mute-dropdown').hideIf(this.chat.isMuted());
-    },
-
-    update: function () {
-        let changed = this.model.changed;
-        if (_.has(changed, 'name')) this.updateName();
-        if (_.has(changed, 'image')) this.updateAvatar();
-        if (_.has(changed, 'status_updated') || _.has(changed, 'status_message')) this.updateStatus();
-    },
-
-    updateColorScheme: function () {
-        this.$el.attr('data-color', this.account.settings.get('color'));
-    },
-
-    updateButtons: function () {
-        let is_owner = this.model
-            && this.model.my_info
-            && this.model.my_info.get('role')
-            && this.model.my_info.get('role') === 'owner',
-            change_group_info = this.model.my_rights && this.model.my_rights['change-group-info'] && this.model.my_rights['change-group-info'].status === 'true',
-            change_group = this.model.my_rights && this.model.my_rights['change-group-settings'] && this.model.my_rights['change-group-settings'].status === 'true',
-            change_group_permissions = this.model.my_rights && this.model.my_rights['change-default-permissions'] && this.model.my_rights['change-default-permissions'].status === 'true',
-            is_blocked = this.model.get('blocked'),
-            role = this.model.my_rights && this.model.my_rights['member_role'];
-        this.$('.btn-settings-wrap').switchClass('non-active', !is_owner);
-        this.$('.btn-edit-settings').switchClass('hidden', !(is_owner || change_group));
-        this.$('.btn-invite-wrap').switchClass('non-active',
-            this.model.get('private_chat')
-            || this.model.get('subscription') !== 'both'
-            || this.model.my_rights && this.model.my_rights['add-members'] && this.model.my_rights['add-members'].status === 'false');
-        if (change_group_info || change_group || change_group_permissions){
-            this.$('.btn-edit-group-properties').removeClass('hidden2');
-            this.$('.btn-search-messages').removeClass('moved-btn-search');
-        } else {
-            this.$('.btn-edit-group-properties').addClass('hidden2');
-            this.$('.btn-search-messages').addClass('moved-btn-search');
-        }
-        this.$('.btn-block').hideIf(is_blocked);
-        this.$('.btn-unblock').showIf(is_blocked);
-    },
-
-    updateName: function () {
-        this.$('.main-info .contact-name').text(this.model.get('name'));
-    },
-
-    muteChat: function (ev) {
-        if (this.model.get('blocked'))
-            return;
-        let mute_type = $(ev.target).closest('.btn-mute-dropdown').data('mute'),
-            muted_seconds;
-        if (mute_type === 'minutes15')
-            muted_seconds = 900;
-        if (mute_type === 'hours1')
-            muted_seconds = 3600;
-        if (mute_type === 'hours2')
-            muted_seconds = 7200;
-        if (mute_type === 'day')
-            muted_seconds = 86400;
-        if (mute_type === 'forever')
-            muted_seconds = 0;
-        this.chat.muteChat(muted_seconds);
-    },
-
-    unmuteChat: function () {
-        if (this.model.get('blocked'))
-            return;
-        this.chat.muteChat('');
-    },
-
-    showSearchMessages: function (ev, is_chat_head) {
-        if (xabber.body.screen.get('name') === 'contacts' || xabber.body.screen.get('name') === 'groupchats'){
-            this.openRegularChat();
-        }
-        let is_modal = xabber.body.screen.get('right_contact_modal');
-        if (is_modal && !is_chat_head){
-            this.$('.panel-background-clickable').addClass('temporary-fading-search-background');
-            this.$('.panel-background-clickable').addClass('fading-search-background');
-            setTimeout(() => {
-                console.error('here');
-                this.$('.panel-background-clickable').removeClass('temporary-fading-search-background');
-            }, 20);
-        }
-        this.scrollToTop();
-        if (this.ps_container.length) {
-            this.ps_container.perfectScrollbar('destroy');
-        }
-        this.model.set('search_hidden', false);
-        this.makeStatic();
-        this.$('.search-wrap').hideIf(this.model.get('search_hidden'));
-        if (is_modal && !is_chat_head && xabber.right_contact_panel.$el.css('z-index') === '0'){
-            xabber.right_contact_panel.setCustomCss({'z-index' : 499});
-            setTimeout(() => {
-                xabber.right_contact_panel.setCustomCss({'z-index' : 0});
-            }, 2000);
-        }
-        this.contact_searched_messages_view.$search_form.find('input').focus();
-    },
-
-    makeModal: function () {
-        let styles = {
-            height: '80%',
-            'box-shadow': '0 16px 28px 0 rgba(0, 0, 0, .22), 0 25px 55px 0 rgba(0, 0, 0, .21)',
-            position: 'fixed',
-            left: '50%',
-            transform: 'translate(-50%, 0)',
-            top: '10%',
-            'background': '#FFF',
-            'border-radius': '8px',
-            'z-index': '1000',
-            'overflow': 'hidden',
-        };
-        this.$('.panel-content-wrap').css(styles);
-        this.$('.panel-background-clickable').addClass('forced-background');
-        clearTimeout(this.modal_z_index_timeout);
-        xabber.trigger('update_layout');
-    },
-
-    makeStatic: function () {
-        xabber.body.screen.set('right_contact_modal', false, {silent: true});
-        let styles = {
-            height: '',
-            'box-shadow': '',
-            position: '',
-            left: '',
-            transform: '',
-            top: '',
-            'background': '',
-            'z-index': '',
-            'border-radius': '',
-            'overflow': '',
-            'width': '',
-        };
-        this.$('.panel-content-wrap').css(styles);
-        this.$('.panel-background-clickable').removeClass('forced-background');
-        clearTimeout(this.modal_z_index_timeout);
-        xabber.trigger('update_layout');
-    },
-
-    onScroll: function () {
-        if (this.model.get('saved_search_panel') && !this.model.get('search_hidden')){
-            this.ps_container.perfectScrollbar('destroy');
-            return true;
-        }
-        let bottom_block_scroll;
-        if (this.$('.bottom-block:not(.edit-bottom-block):not(.participant-bottom-block)'))
-            bottom_block_scroll = this.$('.bottom-block:not(.edit-bottom-block):not(.participant-bottom-block)').get(0).getBoundingClientRect().top;
-
-        if(this.ps_container[0].scrollTop >= 250) {
-            this.$('.header-buttons').attr( 'style', 'background-color: rgba(255,255,255,1) !important; -webkit-transition: none; -ms-transition: none;transition: none;');
-            this.$('.main-info').css({width: xabber.right_contact_panel.$el.find('.panel-content-wrap').width()});
-            this.$('.header-buttons .block-name:not(.second-text)').removeClass('fade-out');
-            this.$('.header-buttons .block-name.second-text').addClass('fade-out');
-            this.$('.btn-escape').addClass('btn-top');
-            this.$('.btn-escape').removeClass('hidden');
-            this.$('.btn-escape i').addClass('mdi-arrow-right').removeClass('mdi-close');
-        }
-        else if(this.ps_container[0].scrollTop >= 40) {
-            this.$('.header-buttons').attr( 'style', 'background-color: rgba(255,255,255,0.5) !important;');
-            this.$('.header-buttons .block-name').addClass('fade-out');
-            this.$('.btn-escape').removeClass('btn-top');
-            this.$('.btn-escape').addClass('hidden');
-            this.$('.btn-escape i').addClass('mdi-close').removeClass('mdi-arrow-right');
-        }
-        else{
-            this.$('.header-buttons').attr( 'style', 'background-color: rgba(255,255,255,0) !important;');
-            this.$('.header-buttons .block-name').addClass('fade-out');
-            this.$('.btn-escape').removeClass('btn-top');
-            this.$('.btn-escape').addClass('hidden');
-            this.$('.btn-escape i').addClass('mdi-close').removeClass('mdi-arrow-right');
-        }
-        if (!_.isUndefined(bottom_block_scroll) && bottom_block_scroll <= 240) {
-            this.$('.buttons-wrap:not(.participant-item-buttons-wrap)').hideIf(true);
-            this.$('.btn-search-messages').hideIf(true);
-            this.$('.btn-edit-group-properties').hideIf(true);
-            this.$('.header-buttons .block-name:not(.second-text)').addClass('fade-out');
-            this.$('.header-buttons .block-name.second-text').removeClass('fade-out');
-            this.$('.header-buttons .block-name.second-text').text(this.$('.tabs:not(.participant-tabs) .list-variant .active').text())
-        }
-        else {
-            this.$('.buttons-wrap:not(.participant-item-buttons-wrap)').hideIf(false);
-            this.$('.btn-search-messages').hideIf(false);
-            this.$('.btn-edit-group-properties').hideIf(false);
-        }
-    },
-
-    clearHistory: function () {
-        if (this.chat && this.chat.item_view && this.chat.item_view.content && this.chat.item_view.content.head){
-            this.chat.item_view.content.head.clearHistory()
-        }
-    },
-
-    showQRCode: function (ev, options) {
-        if (ev && ev.target && $(ev.target).closest('.participant-details-item').length)
-            return;
-        options = options || {};
-        let jid = options.jid || this.model.get('jid'),
-            name = options.name || this.model.get('name');
-        let qrcode = new VanillaQR({
-            url: 'xmpp:' + jid,
-            noBorder: true
-        });
-        this.$('.qr-code-canvas').html("")[0].appendChild(qrcode.domElement);
-        this.$('.qr-code-name').text(name);
-        this.$('.qr-code-jid').text(jid);
-        this.$('.qr-code-content-wrap').removeClass('hidden');
-        this.scrollToTop();
-        this.ps_container.perfectScrollbar('destroy');
-    },
-
-    hideQRCode: function () {
-        if (this.ps_container.length && this.model.get('search_hidden')) {
-            this.ps_container.perfectScrollbar(
-                _.extend(this.ps_settings || {}, xabber.ps_settings)
-            );
-            this.scrollToTop();
-        }
-        this.$('.qr-code-content-wrap').addClass('hidden');
-    },
-
-
-    leaveGroupChat: function (ev) {
-        if ($(ev.target).closest('.button-wrap').hasClass('non-active'))
-            return;
-        let contact = this.model;
-        utils.dialogs.ask(xabber.getString("groupchat_leave_full"), xabber.getString("groupchat_leave_confirm", [contact.get('name')]), null, { ok_button_text: xabber.getString("groupchat_leave")}).done((result) => {
-            if (result) {
-                contact.declineSubscription();
-                let chat = this.account.chats.getChat(contact);
-                contact.removeFromRoster();
-                chat.deleteFromSynchronization(() => {
-                    this.isVisible() && this.closeDetails();
-                }, () => {
-                    this.isVisible() && this.closeDetails();
-                });
-            }
-        });
-    },
-
-    inviteUser: function (ev) {
-        if (!$(ev.target).closest('.button-wrap').hasClass('non-active')) {
-            if (!xabber.invite_panel)
-                xabber.invite_panel = new xabber.InvitationPanelView({ model: xabber.opened_chats });
-            xabber.invite_panel.open(this.account, this.model);
-        }
-    },
-
-    scrollToTopSmooth: function () {
-        this.$('.header-buttons').attr( 'style', 'background-color: rgba(255,255,255,0) !important;');
-        this.$('.header-buttons .block-name').addClass('fade-out');
-        this.$('.btn-escape').removeClass('btn-top');
-        this.$('.btn-escape').addClass('hidden');
-        this.$('.btn-escape i').addClass('mdi-close').removeClass('mdi-arrow-right');
-        this.$('.buttons-wrap:not(.participant-item-buttons-wrap)').hideIf(false);
-        this.$('.btn-search-messages').hideIf(false);
-        this.$('.btn-edit-group-properties').hideIf(false);
-        this.ps_container.animate(
-            {scrollTop: 0},
-            400,
-            () => {
-                this.onScroll();
+        scrollToTopSmooth: function () {
+            this._vueInstance.updateScrollState({
+                isTop: false,
+                isHidden: true,
+                titleFaded: true,
+                buttonsHidden: false,
+                searchHidden: false,
+                editPropertiesHidden: false,
             });
-    },
-
-    changeList: function (ev) {
-        let $target = $(ev.target).closest('.list-variant'),
-            list_name = $target.data('value');
-        if (list_name !== 'blocked' && list_name !== 'invitations') {
-            this.$('.tabs').animate({scrollLeft: $target.position().left - 80}, 400);
-            !this.no_list_scroll_animation && this.ps_container.animate(
-                {scrollTop: this.$('.bottom-block:not(.edit-bottom-block):not(.participant-bottom-block)').position().top + this.ps_container.scrollTop() - 120},
+            this.$('.header-buttons').attr('style', 'background-color: rgba(255,255,255,0) !important;');
+            this.ps_container.animate(
+                {scrollTop: 0},
                 400,
                 () => {
                     this.onScroll();
                 });
-            if (this.no_list_scroll_animation){
-                this.scrollTo(this.$('.bottom-block:not(.edit-bottom-block):not(.participant-bottom-block)').position().top + this.ps_container.scrollTop() - 120);
-                this.onScroll();
+        },
+
+        changeList: function (ev) {
+            let $target = $(ev.target).closest('.list-variant'),
+                list_name = $target.data('value');
+            if (list_name !== 'blocked' && list_name !== 'invitations') {
+                this.$('.tabs').animate({scrollLeft: $target.position().left - 80}, 400);
+                !this.no_list_scroll_animation && this.ps_container.animate(
+                    {scrollTop: this.$('.bottom-block:not(.edit-bottom-block):not(.participant-bottom-block)').position().top + this.ps_container.scrollTop() - 120},
+                    400,
+                    () => {
+                        this.onScroll();
+                    });
+                if (this.no_list_scroll_animation) {
+                    this.scrollTo(this.$('.bottom-block:not(.edit-bottom-block):not(.participant-bottom-block)').position().top + this.ps_container.scrollTop() - 120);
+                    this.onScroll();
+                }
+                this._vueInstance.updateSecondText($target.text());
             }
-            this.$('.header-buttons .block-name.second-text').text($target.text())
-        }
-        this.updateList(list_name);
-    },
+            this.updateList(list_name);
+        },
 
-    updateList: function (name) {
-        let view = this.child(name);
-        !view && (view = this.addList(name));
-        if (view) {
-            if (name === 'invitations' || name === 'blocked'){
-                this.$('.edit-wrap .tabs .list-variant a').removeClass('active');
-                this.$('.edit-wrap .tabs .list-variant[data-value="' + name + '"] a').addClass('active');
+        updateList: function (name) {
+            let view = this.child(name);
+            !view && (view = this.addList(name));
+            if (view) {
+                if (name === 'invitations' || name === 'blocked') {
+                    this.$('.edit-wrap .tabs .list-variant a').removeClass('active');
+                    this.$('.edit-wrap .tabs .list-variant[data-value="' + name + '"] a').addClass('active');
+                } else {
+                    this.$('.tabs.not-edit .list-variant a').removeClass('active');
+                    this.$('.tabs.not-edit .list-variant[data-value="' + name + '"] a').addClass('active');
+                }
+                view._render();
             }
-            else {
-                this.$('.tabs.not-edit .list-variant a').removeClass('active');
-                this.$('.tabs.not-edit .list-variant[data-value="' + name + '"] a').addClass('active');
+        },
+
+        addList: function (name) {
+            let constructor_func, edit_view;
+            switch (name) {
+                case 'image':
+                    constructor_func = xabber.MediaImagesView;
+                    break;
+                case 'video':
+                    constructor_func = xabber.MediaVideosView;
+                    break;
+                case 'files':
+                    constructor_func = xabber.MediaFilesView;
+                    break;
+                case 'voice':
+                    constructor_func = xabber.MediaVoiceView;
+                    break;
+                case 'blocked':
+                    constructor_func = xabber.BlockedView;
+                    edit_view = true;
+                    break;
+                case 'invitations':
+                    constructor_func = xabber.InvitationsView;
+                    edit_view = true;
+                    break;
             }
-            view._render();
-        }
-    },
+            if (constructor_func && edit_view)
+                return this.addChild(name, constructor_func, {model: this.model, el: this.$('.participants-edit-wrap')[0]});
+            else if (constructor_func)
+                return this.addChild(name, constructor_func, {model: this.model, el: this.$('.participants-wrap')[0]});
+        },
 
-    addList: function (name) {
-        let constructor_func, edit_view;
-        switch (name) {
-            case 'image':
-                constructor_func = xabber.MediaImagesView;
-                break;
-            case 'video':
-                constructor_func = xabber.MediaVideosView;
-                break;
-            case 'files':
-                constructor_func = xabber.MediaFilesView;
-                break;
-            case 'voice':
-                constructor_func = xabber.MediaVoiceView;
-                break;
-            case 'blocked':
-                constructor_func = xabber.BlockedView;
-                edit_view = true;
-                break;
-            case 'invitations':
-                constructor_func = xabber.InvitationsView;
-                edit_view = true;
-                break;
-        }
-        if (constructor_func && edit_view)
-            return this.addChild(name, constructor_func, {model: this.model, el: this.$('.participants-edit-wrap')[0]});
-        else if (constructor_func)
-            return this.addChild(name, constructor_func, {model: this.model, el: this.$('.participants-wrap')[0]});
-    },
+        getInvitations: function (callback, errback) {
+            let iq = $iq({
+                type: 'get',
+                to: this.model.get('full_jid') || this.model.get('jid')})
+                .c('invites', {xmlns: Strophe.NS.GROUP_CHAT});
+            this.account.sendFast(iq, callback, errback);
+        },
 
-    getInvitations: function (callback, errback) {
-        let iq = $iq({
-            type: 'get',
-            to: this.model.get('full_jid') || this.model.get('jid')})
-            .c('invites', {xmlns: Strophe.NS.GROUP_CHAT});
-        this.account.sendFast(iq, callback, errback);
-    },
+        deleteGroup: function () {
+            this.model.deleteWithDialog();
+        },
 
-    deleteGroup: function () {
-        this.model.deleteWithDialog();
-    },
+        blockContact: function () {
+            this.model.blockWithDialog();
+        },
 
-    blockContact: function () {
-        this.model.blockWithDialog();
-    },
+        unblockContact: function () {
+            this.model.unblockWithDialog();
+        },
 
-    unblockContact: function () {
-        this.model.unblockWithDialog();
-    },
+        updateStatus: function () {
+            this.$('.main-info .status-message').text(this.model.getStatusMessage());
+        },
 
-    updateStatus: function () {
-        this.$('.main-info .status-message').text(this.model.getStatusMessage());
-    },
+        updateAvatar: function () {
+            let image = this.model.cached_image;
+            this.$('.main-info .circle-avatar').setAvatar(image, this.avatar_size, this.account);
+        },
 
-    updateAvatar: function () {
-        let image = this.model.cached_image;
-        this.$('.main-info .circle-avatar').setAvatar(image, this.avatar_size, this.account);
-    },
+        openRegularChat: function () {
+            this.account.chats.openChat(this.model);
+        },
 
-    openRegularChat: function () {
-        this.account.chats.openChat(this.model);
-    },
+        openChat: function () {
+            let is_contacts = xabber.body.screen.get('name') === 'contacts' || xabber.body.screen.get('name') === 'groupchats' || xabber.body.screen.get('name') === 'notifications';
+            this.openRegularChat();
+            is_contacts && this.closeDetails();
+            this.clearTabsScrolling(is_contacts);
+        },
 
-    openChat: function () {
-        let is_contacts = xabber.body.screen.get('name') === 'contacts' || xabber.body.screen.get('name') === 'groupchats' || xabber.body.screen.get('name') === 'notifications';
-        this.openRegularChat();
-        is_contacts && this.closeDetails();
-        this.clearTabsScrolling(is_contacts);
-    },
+        clearTabsScrolling: function (is_contacts) {
+            if (is_contacts) {
+                if (!(_.isUndefined(xabber.contacts_view.saved_scroll) || _.isNull(xabber.contacts_view.saved_scroll)))
+                    xabber.contacts_view.saved_scroll = null;
+                if (!(_.isUndefined(xabber.groupchats_view.saved_scroll) || _.isNull(xabber.groupchats_view.saved_scroll)))
+                    xabber.groupchats_view.saved_scroll = null;
+                if (xabber.notifications_view.current_content
+                    && !(_.isUndefined(xabber.notifications_view.current_content.saved_scroll) || _.isNull(xabber.notifications_view.current_content.saved_scroll)))
+                    xabber.notifications_view.current_content.saved_scroll = null;
+            }
+        },
 
-    clearTabsScrolling: function (is_contacts) {
-        if (is_contacts) {
-            if (!(_.isUndefined(xabber.contacts_view.saved_scroll) || _.isNull(xabber.contacts_view.saved_scroll)))
-                xabber.contacts_view.saved_scroll = null;
-            if (!(_.isUndefined(xabber.groupchats_view.saved_scroll) || _.isNull(xabber.groupchats_view.saved_scroll)))
-                xabber.groupchats_view.saved_scroll = null;
-            if (xabber.notifications_view.current_content
-                && !(_.isUndefined(xabber.notifications_view.current_content.saved_scroll) || _.isNull(xabber.notifications_view.current_content.saved_scroll)))
-                xabber.notifications_view.current_content.saved_scroll = null;
-        }
+        closeDetails: function () {
+            this.model.showDetailsRight(xabber.body.screen.get('name'));
+        },
 
-    },
+        chooseAvatar: function () {
+            if (this.account.get('gallery_token') && this.account.get('gallery_url')) {
+                let avatar_view = new xabber.SetAvatarView();
+                avatar_view.render({model: this.account, contact: this.model, parent: this});
+            } else
+                this.$('.circle-avatar input').click();
+        },
 
-    closeDetails: function () {
-        this.model.showDetailsRight(xabber.body.screen.get('name'));
-    },
+        makeSelfie: function () {
+            if (this.account.get('gallery_token') && this.account.get('gallery_url')) {
+                let webcam_panel_view = new xabber.WebcamProfileImageView();
+                webcam_panel_view.open({model: this.account, contact: this.model, parent: this});
+            } else {
+                this.$('.circle-avatar input').click();
+            }
+        },
 
-    chooseAvatar: function () {
-        if (this.account.get('gallery_token') && this.account.get('gallery_url')) {
-            let avatar_view = new xabber.SetAvatarView();
-            avatar_view.render({model: this.account, contact: this.model, parent: this});
-        } else
-            this.$('.circle-avatar input').click();
-    },
+        makeEmojiAvatar: function () {
+            if (this.account.get('gallery_token') && this.account.get('gallery_url')) {
+                let emoji_panel_view = new xabber.EmojiProfileImageView();
+                emoji_panel_view.open({model: this.account, contact: this.model, parent: this});
+            } else
+                this.$('.circle-avatar input').click();
+        },
 
-    makeSelfie: function () {
-        if (this.account.get('gallery_token') && this.account.get('gallery_url')) {
-            let webcam_panel_view = new xabber.WebcamProfileImageView();
-            webcam_panel_view.open({model: this.account, contact: this.model, parent: this});
-        } else {
-            this.$('.circle-avatar input').click();
-        }
-    },
-
-    makeEmojiAvatar: function () {
-        if (this.account.get('gallery_token') && this.account.get('gallery_url')) {
-            let emoji_panel_view = new xabber.EmojiProfileImageView();
-            emoji_panel_view.open({model: this.account, contact: this.model, parent: this});
-        } else
-            this.$('.circle-avatar input').click();
-    },
-
-    setUrlAvatar: function (prepared_avatar) {
-        let iq = $iq({type: 'set', to: this.model.get('jid')})
-            .c('info', {xmlns: Strophe.NS.GROUP_CHAT })
-            .c('avatar')
-            .c('info', {
-                xmlns: Strophe.NS.PUBSUB_AVATAR_METADATA,
-                id: prepared_avatar.id,
-                bytes: prepared_avatar.bytes,
-                type: prepared_avatar.type,
-                url: prepared_avatar.url,
-                width: prepared_avatar.width,
-                height: prepared_avatar.height,
-            });
-        this.account.sendIQFast(iq, (res) => {
-            this.model.parseGroupInfo($(res))
-        }, (error) => {
-            console.error(error);
-            let err_text = $(error).find('text').text() ;
-            utils.dialogs.error(err_text);
-        });
-    },
-
-    changeAvatar: function (ev) {
-        let field = ev.target;
-        if (!field.files.length) {
-            return;
-        }
-        let file = field.files[0];
-        field.value = '';
-        if (file.size > constants.MAX_AVATAR_FILE_SIZE) {
-            utils.dialogs.error(xabber.getString("group_settings__error__avatar_too_large"));
-            return;
-        } else if (!file.type.startsWith('image')) {
-            utils.dialogs.error(xabber.getString("group_settings__error__wrong_image"));
-            return;
-        }
-        $(field).siblings('.preloader-wrap').addClass('visible').find('.preloader-wrapper').addClass('active');
-        utils.images.getAvatarFromFile(file).done((image) => {
-            if (image) {
-                file.base64 = image;
-                this.model.pubAvatar(file, "", function () {
-                    $(field).siblings('.preloader-wrap').removeClass('visible').find('.preloader-wrapper').removeClass('active');
-                }, function (error) {
-                    $(field).siblings('.preloader-wrap').removeClass('visible').find('.preloader-wrapper').removeClass('active');
-
-                    let error_text = $(error).find('text').text() || xabber.getString("groupchat_you_have_no_permissions_to_do_it");
-                    utils.dialogs.error(error_text);
+        setUrlAvatar: function (prepared_avatar) {
+            let iq = $iq({type: 'set', to: this.model.get('jid')})
+                .c('info', {xmlns: Strophe.NS.GROUP_CHAT })
+                .c('avatar')
+                .c('info', {
+                    xmlns: Strophe.NS.PUBSUB_AVATAR_METADATA,
+                    id: prepared_avatar.id,
+                    bytes: prepared_avatar.bytes,
+                    type: prepared_avatar.type,
+                    url: prepared_avatar.url,
+                    width: prepared_avatar.width,
+                    height: prepared_avatar.height,
                 });
-            }
-        });
-    },
+            this.account.sendIQFast(iq, (res) => {
+                this.model.parseGroupInfo($(res));
+            }, (error) => {
+                console.error(error);
+                let err_text = $(error).find('text').text();
+                utils.dialogs.error(err_text);
+            });
+        },
 
-    retractAllMessages: function () {
-        let group_chat = this.account.chats.getChat(this.model);
-        utils.dialogs.ask(xabber.getString("delete_messages__header"), xabber.getString("delete_messages__confirm"), null, { ok_button_text: xabber.getString("delete")}).done((result) => {
-            if (result) {
-                group_chat.retractAllMessages(true);
+        changeAvatar: function (ev) {
+            let field = ev.target;
+            if (!field.files.length) {
+                return;
             }
-        });
+            let file = field.files[0];
+            field.value = '';
+            if (file.size > constants.MAX_AVATAR_FILE_SIZE) {
+                utils.dialogs.error(xabber.getString("group_settings__error__avatar_too_large"));
+                return;
+            } else if (!file.type.startsWith('image')) {
+                utils.dialogs.error(xabber.getString("group_settings__error__wrong_image"));
+                return;
+            }
+            $(field).siblings('.preloader-wrap').addClass('visible').find('.preloader-wrapper').addClass('active');
+            utils.images.getAvatarFromFile(file).done((image) => {
+                if (image) {
+                    file.base64 = image;
+                    this.model.pubAvatar(file, "", function () {
+                        $(field).siblings('.preloader-wrap').removeClass('visible').find('.preloader-wrapper').removeClass('active');
+                    }, function (error) {
+                        $(field).siblings('.preloader-wrap').removeClass('visible').find('.preloader-wrapper').removeClass('active');
+                        let error_text = $(error).find('text').text() || xabber.getString("groupchat_you_have_no_permissions_to_do_it");
+                        utils.dialogs.error(error_text);
+                    });
+                }
+            });
+        },
+
+        retractAllMessages: function () {
+            let group_chat = this.account.chats.getChat(this.model);
+            utils.dialogs.ask(xabber.getString("delete_messages__header"), xabber.getString("delete_messages__confirm"), null, { ok_button_text: xabber.getString("delete")}).done((result) => {
+                if (result) {
+                    group_chat.retractAllMessages(true);
+                }
+            });
+        }
     }
 });
 
