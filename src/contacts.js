@@ -9,6 +9,9 @@ import RosterLeftPanelComponent from './vue/components/contacts/RosterLeftPanel.
 import RosterFullScreenComponent from './vue/components/contacts/RosterFullScreen.vue';
 import ContactEditComponent from './vue/components/contacts/ContactEdit.vue';
 import GroupEditComponent from './vue/components/contacts/GroupEdit.vue';
+import AddContactComponent from './vue/components/contacts/AddContact.vue';
+import GroupSettingsComponent from './vue/components/contacts/GroupSettings.vue';
+import RosterSettingsComponent from './vue/components/contacts/RosterSettings.vue';
 
 let env = xabber.env,
     constants = env.constants,
@@ -9384,9 +9387,13 @@ xabber.GroupLeftView = xabber.GroupView.extend({
     }
 });
 
-xabber.GroupSettingsView = xabber.BasicView.extend({
+xabber.GroupSettingsView = createVueBackboneView(xabber, {
+    component: GroupSettingsComponent,
     className: 'modal main-modal group-settings',
-    template: templates.group_settings,
+    props: function (view) {
+        return { uid: view.cid };
+    },
+    extend: {
     ps_selector: '.modal-content',
     avatar_size: constants.AVATAR_SIZES.GROUP_SETTINGS,
 
@@ -9397,13 +9404,18 @@ xabber.GroupSettingsView = xabber.BasicView.extend({
         "click .btn-cancel": "close"
     },
 
-    _initialize: function () {
+    _vueInit: function () {
+        this.ps_container = this.$('.modal-content')[0];
         this._settings = this.model._settings;
         if (this.model.isSpecial()) {
             this.$('.group-name input').attr('readonly', true);
             this.$('.btn-delete').addClass('hidden');
         }
         this.listenTo(this.model, 'destroy', this.onDestroy);
+    },
+
+    onShow: function () {
+        this.render.apply(this, arguments);
     },
 
     render: function () {
@@ -9465,7 +9477,7 @@ xabber.GroupSettingsView = xabber.BasicView.extend({
     onDestroy: function () {
         this.$el.closeModal({ complete: this.remove.bind(this) });
     }
-});
+}});
 
 xabber.Groups = Backbone.Collection.extend({
     model: xabber.Group,
@@ -13365,17 +13377,24 @@ xabber.RosterFullScreenView = createVueBackboneView(xabber, {
     },
 }});
 
-xabber.RosterSettingsView = xabber.BasicView.extend({
+xabber.RosterSettingsView = createVueBackboneView(xabber, {
+    component: RosterSettingsComponent,
     className: 'roster-settings-wrap',
-    template: templates.roster_settings,
-
+    props: function (view) {
+        return { uid: view.cid };
+    },
+    extend: {
     events: {
         "change .offline-contacts input": "setOfflineSetting",
         "change .sorting-contacts input": "setSortingSetting"
     },
 
-    _initialize: function () {
+    _vueInit: function () {
         this.$el.appendTo(this.parent.$('.settings-subblock-wrap.contact-list'));
+    },
+
+    onShow: function () {
+        this.render.apply(this, arguments);
     },
 
     render: function () {
@@ -13394,7 +13413,7 @@ xabber.RosterSettingsView = xabber.BasicView.extend({
         this.model.save('sorting',
             this.$('.sorting-contacts input[type=radio][name=sorting-contacts]:checked').val());
     }
-});
+}});
 
 xabber.AccountGroupView = xabber.BasicView.extend({
     className: 'group',
@@ -13430,9 +13449,10 @@ xabber.AccountGroupView = xabber.BasicView.extend({
     }
 });
 
-xabber.AddContactView = xabber.BasicView.extend({
+xabber.AddContactView = createVueBackboneView(xabber, {
+    component: AddContactComponent,
     className: 'modal main-modal add-contact-modal',
-    template: templates.add_contact,
+    extend: {
     avatar_size: constants.AVATAR_SIZES.SYNCHRONIZE_ACCOUNT_ITEM,
 
     events: {
@@ -13448,9 +13468,13 @@ xabber.AddContactView = xabber.BasicView.extend({
         "click .btn-cancel": "close"
     },
 
-    _initialize: function () {
+    _vueInit: function () {
         this.group_data = new Backbone.Model;
         this.listenTo(this.group_data, 'change', this.updateGroups);
+    },
+
+    onShow: function () {
+        this.render.apply(this, arguments);
     },
 
     render: function (options) {
@@ -13674,7 +13698,7 @@ xabber.AddContactView = xabber.BasicView.extend({
     close: function () {
         this.$el.closeModal({ complete: this.hide.bind(this) });
     }
-});
+}});
 
 xabber.GroupSettings = Backbone.Model.extend({
     idAttribute: 'name',

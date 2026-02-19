@@ -1,0 +1,69 @@
+<template>
+    <div class="modal-content-wrap vue-migrated">
+        <div class="modal-header">
+            <span>{{ xb.getString("status_editor") }}</span>
+        </div>
+        <ul class="status-values noselect">
+            <li data-value="chat">
+                <span class="status-value one-line">{{ xb.getString("chat") }}</span>
+                <span class="status-bulb" data-status="chat"></span>
+            </li>
+            <li data-value="online">
+                <span class="status-value one-line">{{ xb.getString("online") }}</span>
+                <span class="status-bulb" data-status="online"></span>
+            </li>
+            <li data-value="away">
+                <span class="status-value one-line">{{ xb.getString("away") }}</span>
+                <span class="status-bulb" data-status="away"></span>
+            </li>
+            <li data-value="xa">
+                <span class="status-value one-line">{{ xb.getString("xa") }}</span>
+                <span class="status-bulb" data-status="xa"></span>
+            </li>
+            <li data-value="dnd">
+                <span class="status-value one-line">{{ xb.getString("dnd") }}</span>
+                <span class="status-bulb" data-status="dnd"></span>
+            </li>
+            <li data-value="offline">
+                <span class="status-value one-line">{{ xb.getString("unavailable") }}</span>
+                <span class="status-bulb" data-status="offline"></span>
+            </li>
+        </ul>
+        <div class="modal-content">
+            <div class="row">
+                <div class="input-field status-message-wrap">
+                    <span class="static-label">{{ xb.getString("dialog_status_editor__label_custom_status") }}</span>
+                    <input type="text" class="status-message input-glow">
+                    <i class="clear-input mdi mdi-20px mdi-close"></i>
+                </div>
+                <div class="input-field checkbox-field no-padding">
+                    <input type="checkbox" class="filled-in apply-to-all" :id="uid + '_apply_to_all'"/>
+                    <label :for="uid + '_apply_to_all'">{{ xb.getString("dialog_status_editor__label_apply_to_all") }}</label>
+                </div>
+            </div>
+        </div>
+    </div>
+</template>
+
+<script setup>
+import { useXabber } from '../../composables/useXabber.js';
+
+const xb = useXabber();
+
+const props = defineProps({
+    uid: {
+        type: String,
+        required: true,
+    },
+});
+
+let backboneView = null;
+
+function setBackboneView(view) {
+    backboneView = view;
+}
+
+defineExpose({
+    setBackboneView,
+});
+</script>

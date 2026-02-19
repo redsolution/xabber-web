@@ -5,6 +5,7 @@ import { XABBER_KEY } from "./vue/composables/useXabber.js";
 import SettingsAccountsBlock from "./vue/components/accounts/SettingsAccountsBlock.vue";
 import AccountSettingsModal from "./vue/components/accounts/AccountSettingsModal.vue";
 import VCardPanel from "./vue/components/vcard/VCardPanel.vue";
+import ChangeStatusComponent from "./vue/components/accounts/ChangeStatus.vue";
 
 let env = xabber.env,
     constants = env.constants,
@@ -5240,15 +5241,22 @@ xabber.SettingsAccountsModalBlockView = createVueBackboneView(xabber, {
     }
 });
 
-xabber.ChangeStatusView = xabber.BasicView.extend({
+xabber.ChangeStatusView = createVueBackboneView(xabber, {
+    component: ChangeStatusComponent,
     className: 'modal main-modal change-status-modal',
-    template: templates.change_status,
-
+    props: function (view) {
+        return { uid: view.cid };
+    },
+    extend: {
     events: {
         "click .status-values li": "changeStatus",
         "click .status-message-wrap .clear-input": "clearStatusMessageInput",
         "keyup .status-message": "keyUp",
         "change .apply-to-all": "changeApplyToAll"
+    },
+
+    onShow: function () {
+        this.render.apply(this, arguments);
     },
 
     open: function (account) {
@@ -5336,7 +5344,7 @@ xabber.ChangeStatusView = xabber.BasicView.extend({
     closeModal: function () {
         this.$el.closeModal({ complete: this.hide.bind(this) });
     }
-});
+}});
 
 xabber.SetAvatarView = xabber.BasicView.extend({
     className: 'modal main-modal avatar-picker background-panel',

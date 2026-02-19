@@ -8,6 +8,7 @@ import SavedChatHeadComponent from './vue/components/chats/SavedChatHead.vue';
 import ChatContentComponent from './vue/components/chats/ChatContent.vue';
 import ChatBottomComponent from './vue/components/chats/ChatBottom.vue';
 import AddGroupChatComponent from './vue/components/chats/AddGroupChat.vue';
+import SubscriptionButtonsComponent from './vue/components/chats/SubscriptionButtons.vue';
 
 let env = xabber.env,
     constants = env.constants,
@@ -4003,9 +4004,12 @@ xabber.ChatItemView = xabber.BasicView.extend({
       }
   });
 
-  xabber.SubscriptionButtonsView = xabber.BasicView.extend({
-      template: templates.subscription_buttons,
-
+  xabber.SubscriptionButtonsView = createVueBackboneView(xabber, {
+      component: SubscriptionButtonsComponent,
+      props: function (view) {
+          return { uid: view.cid };
+      },
+      extend: {
       events: {
           "click .btn-decline": "declineSubscription",
           "click .btn-allow-dropdown": "allowSubscription",
@@ -4015,14 +4019,17 @@ xabber.ChatItemView = xabber.BasicView.extend({
           "click .btn-block": "blockContact"
       },
 
-      _initialize: function (options) {
-          this.$el.html(this.template());
+      _vueInit: function (options) {
           this.contact = options.contact;
           this.listenTo(this.contact, 'change:subscription', this.render);
           this.listenTo(this.contact, 'change:in_roster', this.render);
           this.listenTo(this.contact, 'change:blocked', this.render);
           this.listenTo(this.contact, 'change:subscription_request_in', this.render);
           this.listenTo(this.contact, 'change:subscription_request_out', this.render);
+      },
+
+      onShow: function () {
+          this.render.apply(this, arguments);
       },
 
       render: function () {
@@ -4109,7 +4116,7 @@ xabber.ChatItemView = xabber.BasicView.extend({
           this.contact.blockRequest();
           this.hideElement();
       }
-  });
+  }});
 
 xabber.ChatContentView = createVueBackboneView(xabber, {
     component: ChatContentComponent,
