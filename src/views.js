@@ -2,6 +2,7 @@ import xabber from "xabber-core";
 import { transliterate as query_transliterate } from 'transliteration';
 import { createVueBackboneView } from "./vue/mountVue.js";
 import SettingsModal from "./vue/components/settings/SettingsModal.vue";
+import JingleMessageComponent from "./vue/components/JingleMessage.vue";
 
 let env = xabber.env,
     constants = env.constants,
@@ -1537,9 +1538,13 @@ xabber.ToolbarView = xabber.BasicView.extend({
     },
 });
 
-xabber.JingleMessageView = xabber.BasicView.extend({
+xabber.JingleMessageView = createVueBackboneView(xabber, {
+    component: JingleMessageComponent,
     className: 'modal main-modal jingle-message-view',
-    template: templates.jingle_message_calling,
+    props: function (view) {
+        return {};
+    },
+    extend: {
     avatar_size: constants.AVATAR_SIZES.XABBER_VOICE_CALL_VIEW,
 
     events: {
@@ -1554,7 +1559,7 @@ xabber.JingleMessageView = xabber.BasicView.extend({
         "click .btn-full-screen": "setFullScreen"
     },
 
-    _initialize: function (options) {
+    _vueInit: function (options) {
         this.model = options.model;
         this.listenTo(this.model, 'destroy', this.onDestroy);
         this.contact = this.model.contact;
@@ -1568,6 +1573,10 @@ xabber.JingleMessageView = xabber.BasicView.extend({
         this.listenTo(this.model, 'change:video', this.updateCollapsedWindow);
         this.listenTo(this.model, 'change:audio', this.updateButtons);
         this.listenTo(xabber, 'change:video', this.updateButtons);
+    },
+
+    onShow: function () {
+        this.render.apply(this, arguments);
     },
 
     render: function (options) {
@@ -1810,6 +1819,7 @@ xabber.JingleMessageView = xabber.BasicView.extend({
         this.model.reject();
         this.close();
     }
+}
 });
 
 xabber.PlyrPlayerPopupView = xabber.BasicView.extend({

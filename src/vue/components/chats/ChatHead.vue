@@ -1,12 +1,12 @@
 <template>
     <div class="chat-head-details vue-migrated"></div>
-    <div class="account-indicator-background-exclude">
+    <div class="account-indicator-background-exclude vue-migrated">
         <div class="account-indicator ground-color-700"></div>
         <div class="circle-avatar"></div>
     </div>
-    <div class="contact-status hide-offline"></div>
-    <div class="chat-icon hidden"></div>
-    <div class="chat-head-info-buttons-container">
+    <div class="contact-status hide-offline vue-migrated"></div>
+    <div class="chat-icon hidden vue-migrated"></div>
+    <div class="chat-head-info-buttons-container vue-migrated">
         <div class="contact-info">
             <div class="contact-name-wrap">
                 <i class="mdi encrypted-icon mdi-20px mdi-lock"></i>

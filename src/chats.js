@@ -5,6 +5,7 @@ import ChatsPanelComponent from './vue/components/chats/ChatsPanel.vue';
 import ChatHeadComponent from './vue/components/chats/ChatHead.vue';
 import ForwardPanelComponent from './vue/components/chats/ForwardPanel.vue';
 import SavedChatHeadComponent from './vue/components/chats/SavedChatHead.vue';
+import ChatContentComponent from './vue/components/chats/ChatContent.vue';
 
 let env = xabber.env,
     constants = env.constants,
@@ -4108,9 +4109,13 @@ xabber.ChatItemView = xabber.BasicView.extend({
       }
   });
 
-xabber.ChatContentView = xabber.BasicView.extend({
+xabber.ChatContentView = createVueBackboneView(xabber, {
+    component: ChatContentComponent,
     className: 'chat-content-wrap',
-    template: templates.chat_content,
+    props: function (view) {
+        return {};
+    },
+    extend: {
     ps_selector: '.chat-content',
     ps_settings: {
         wheelPropagation: true
@@ -4142,7 +4147,16 @@ xabber.ChatContentView = xabber.BasicView.extend({
         "click .show-code": "showCode",
     },
 
-    _initialize: function (options) {
+    _vueInit: function (options) {
+        if (this.ps_selector) {
+            this.ps_container = this.$(this.ps_selector);
+            if (this.ps_container.length) {
+                this.ps_container.perfectScrollbar(
+                    _.extend(this.ps_settings || {}, xabber.ps_settings)
+                );
+            }
+        }
+
         this.chat_item = options.chat_item;
         this.current_day_indicator = null;
         this._pending_avatars = [];
@@ -9644,6 +9658,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
             }
         }
     },
+}
 });
 
 
@@ -10348,6 +10363,11 @@ xabber.ChatsView = createVueBackboneView(xabber, {
 
     _vueInit: function () {
         this.ps_container = this.$('.chat-list-wrap');
+        if (this.ps_container.length) {
+            this.ps_container.perfectScrollbar(
+                _.extend(this.ps_settings || {}, xabber.ps_settings)
+            );
+        }
         this.active_chat = null;
         this.update_debounce = _.debounce(this.updateChatPositionDebounced, 100, false);
         this.listenTo(this.model, 'add', this.onChatAdded);

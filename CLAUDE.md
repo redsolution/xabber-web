@@ -4,11 +4,6 @@
 
 Views to migrate from Backbone to Vue 3 SFCs using `createVueBackboneView` pattern, ordered simple to complex:
 
-### MEDIUM
-1. **ChatContentView** — chats.js, 29-line template, 0 SVGs, 4 getString
-4. **ContactEditView** — contacts.js, 66-line template, 4 SVGs, 10 getString
-5. **JingleMessageView** — views.js, 38-line template, 0 SVGs, 7 getString
-
 ### COMPLEX
 6. **ChatBottomView** — chats.js, 129-line template, 13 SVGs, 15 getString
 7. **ToolbarView** — views.js, 97-line template, 1 SVG, 15 getString
@@ -28,3 +23,6 @@ Views to migrate from Backbone to Vue 3 SFCs using `createVueBackboneView` patte
 - MentionsView (MentionsPanel.vue)
 - ForwardPanelView (ForwardPanel.vue)
 - SavedChatHeadView (SavedChatHead.vue)
+- ChatContentView (ChatContent.vue)
+- ContactEditView (ContactEdit.vue)
+- JingleMessageView (JingleMessage.vue)

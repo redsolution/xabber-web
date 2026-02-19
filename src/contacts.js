@@ -7,6 +7,7 @@ import GroupChatDetailsRightComponent from "./vue/components/contacts/GroupChatD
 import { transliterate as query_transliterate } from 'transliteration';
 import RosterLeftPanelComponent from './vue/components/contacts/RosterLeftPanel.vue';
 import RosterFullScreenComponent from './vue/components/contacts/RosterFullScreen.vue';
+import ContactEditComponent from './vue/components/contacts/ContactEdit.vue';
 
 let env = xabber.env,
     constants = env.constants,
@@ -8256,10 +8257,15 @@ xabber.ContactEditGroupsView = xabber.BasicView.extend({
     }
 });
 
-xabber.ContactEditView = xabber.BasicView.extend({
-    template: templates.edit_contact,
+xabber.ContactEditView = createVueBackboneView(xabber, {
+    component: ContactEditComponent,
+    props: function (view) {
+        return {};
+    },
+    extend: {
     events: {
         'click .btn-back': 'hideEdit',
+        'click .btn-delete': 'deleteContact',
         'click .btn-request': 'requestSubscription',
         'click .btn-allow': 'allowSubscription',
         'click .btn-cancel-request': 'cancelSubscriptionRequest',
@@ -8270,10 +8276,16 @@ xabber.ContactEditView = xabber.BasicView.extend({
         'click .btn-cancel-subscription-in': 'cancelSubscriptionIn',
     },
 
-    _initialize: function () {
+    _vueInit: function (options) {
         this.account = this.parent.account;
         this.model = this.parent.model;
         this.model.set('edit_hidden', true);
+        this.$('.edit-wrap').hideIf(this.model.get('edit_hidden'));
+        this.name_field = new xabber.ContactNameRightWidget({
+            el: this.$('.name-wrap')[0],
+            model: this.model
+        });
+        this.updateStatuses();
         this.listenTo(this.model, 'change:status_updated', this.updateStatuses);
         this.listenTo(this.model, 'change:subscription', this.updateStatuses);
         this.listenTo(this.model, 'change:subscription_preapproved', this.updateStatuses);
@@ -8282,13 +8294,13 @@ xabber.ContactEditView = xabber.BasicView.extend({
         this.listenTo(this.model, 'change:subscription_request_out', this.updateStatuses);
     },
 
-    render: function () {
-        this.$el.html(this.template(_.extend({view: this}, constants)));
+    showEdit: function () {
+        this.model.set('edit_hidden', false);
+        this.parent.scrollToTop();
+        if (this.parent.ps_container.length) {
+            this.parent.ps_container.perfectScrollbar('destroy')
+        }
         this.$('.edit-wrap').hideIf(this.model.get('edit_hidden'));
-        this.name_field = new xabber.ContactNameRightWidget({
-            el: this.$('.name-wrap')[0],
-            model: this.model
-        });
         this.$('.status-out.dropdown-button').dropdown({
             inDuration: 100,
             outDuration: 100,
@@ -8299,16 +8311,6 @@ xabber.ContactEditView = xabber.BasicView.extend({
             outDuration: 100,
             hover: false
         });
-        this.updateStatuses();
-    },
-
-    showEdit: function () {
-        this.model.set('edit_hidden', false);
-        this.parent.scrollToTop();
-        if (this.parent.ps_container.length) {
-            this.parent.ps_container.perfectScrollbar('destroy')
-        }
-        this.$('.edit-wrap').hideIf(this.model.get('edit_hidden'))
     },
 
     updateStatuses: function () {
@@ -8385,6 +8387,13 @@ xabber.ContactEditView = xabber.BasicView.extend({
         this.model.declineSubscription();
     },
 
+    deleteContact: function () {
+        this.model.deleteWithDialog(() => {
+            this.hideEdit();
+            this.parent.isVisible() && this.parent.closeDetails();
+        });
+    },
+
     hideEdit: function () {
         this.model.set('edit_hidden', true);
         if (this.parent.ps_container.length) {
@@ -8394,6 +8403,7 @@ xabber.ContactEditView = xabber.BasicView.extend({
         }
         this.$('.edit-wrap').hideIf(this.model.get('edit_hidden'));
     },
+}
 });
 
 xabber.GroupEditView = xabber.BasicView.extend({
@@ -10893,6 +10903,11 @@ xabber.RosterLeftView = createVueBackboneView(xabber, {
 
     _vueInit: function () {
         this.ps_container = this.$('.contact-list-wrap');
+        if (this.ps_container.length) {
+            this.ps_container.perfectScrollbar(
+                _.extend(this.ps_settings || {}, xabber.ps_settings)
+            );
+        }
         // From RosterView._initialize
         this._settings = xabber._roster_settings;
         this.updateRosterViews();
@@ -11578,6 +11593,11 @@ xabber.RosterFullScreenView = createVueBackboneView(xabber, {
 
     _vueInit: function (options) {
         this.ps_container = this.$('.contacts-content-wrap');
+        if (this.ps_container.length) {
+            this.ps_container.perfectScrollbar(
+                _.extend(this.ps_settings || {}, xabber.ps_settings)
+            );
+        }
         if (options.is_groupchats)
             this.is_groupchats = true;
         this._settings = xabber._roster_settings;
