@@ -4,10 +4,6 @@
 
 Views to migrate from Backbone to Vue 3 SFCs using `createVueBackboneView` pattern, ordered simple to complex:
 
-### COMPLEX
-9. **GroupEditView** — contacts.js, 199-line template, 10 SVGs, 33 getString
-10. **XmppLoginPanel** — accounts.js, 361-line template, 3 SVGs, 51 getString
-
 ### Already Migrated
 - ChatsView (ChatsPanel.vue)
 - ChatHeadView (ChatHead.vue)
@@ -26,3 +22,7 @@ Views to migrate from Backbone to Vue 3 SFCs using `createVueBackboneView` patte
 - ChatBottomView (ChatBottom.vue)
 - ToolbarView (Toolbar.vue)
 - AddGroupChatView (AddGroupChat.vue)
+- GroupEditView (GroupEdit.vue)
+
+### Skipped (not migrated)
+- XmppLoginPanel — extends AuthView with subclasses (AddAccountView, UnregisterAccountView), manual Vue mount causes infinite recursion due to AuthView.render/onRender chain doing heavy DOM manipulation on Vue-managed elements
