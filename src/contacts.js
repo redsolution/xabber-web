@@ -8,6 +8,7 @@ import { transliterate as query_transliterate } from 'transliteration';
 import RosterLeftPanelComponent from './vue/components/contacts/RosterLeftPanel.vue';
 import RosterFullScreenComponent from './vue/components/contacts/RosterFullScreen.vue';
 import ContactEditComponent from './vue/components/contacts/ContactEdit.vue';
+import GroupEditComponent from './vue/components/contacts/GroupEdit.vue';
 
 let env = xabber.env,
     constants = env.constants,
@@ -2312,6 +2313,20 @@ xabber.GroupChatDetailsViewRight = createVueBackboneView(xabber, {
         ps_selector: '.panel-content-wrap',
         avatar_size: constants.AVATAR_SIZES.CONTACT_DETAILS,
         member_avatar_size: constants.AVATAR_SIZES.GROUPCHAT_MEMBER_ITEM,
+
+        events: {
+            "click .btn-clear-history-chat": "clearHistory",
+            "click .btn-qr-code": "showQRCode",
+            "click .btn-delete-group": "deleteGroup",
+            "click .btn-default-restrictions": "showRestrictions",
+            "click .btn-newbie-permissions": "showNewbiePermissions",
+            "click .btn-clear-history": "retractAllMessages",
+            "change .circle-avatar input": "changeAvatar",
+            "click .description-edit-wrap .btn-choose-image": "chooseAvatar",
+            "click .description-edit-wrap .btn-selfie": "makeSelfie",
+            "click .description-edit-wrap .btn-emoji-panel": "makeEmojiAvatar",
+            "click .edit-pictured-buttons .list-variant": "changeList",
+        },
 
         onShow: function () {
             this.render.apply(this, arguments);
@@ -8413,8 +8428,12 @@ xabber.ContactEditView = createVueBackboneView(xabber, {
 }
 });
 
-xabber.GroupEditView = xabber.BasicView.extend({
-    template: templates.edit_group,
+xabber.GroupEditView = createVueBackboneView(xabber, {
+    component: GroupEditComponent,
+    props: function (view) {
+        return { uid: view.cid };
+    },
+    extend: {
     events: {
         "click .btn-save": "saveChanges",
         'click .edit-header:not(.property-header) .btn-back': 'hideEdit',
@@ -8445,7 +8464,7 @@ xabber.GroupEditView = xabber.BasicView.extend({
         'click .btn-cancel-subscription-in': 'cancelSubscriptionIn',
     },
 
-    _initialize: function () {
+    _vueInit: function () {
         this.account = this.parent.account;
         this.model = this.parent.model;
         this.model.set('edit_hidden', true);
@@ -8459,7 +8478,6 @@ xabber.GroupEditView = xabber.BasicView.extend({
     },
 
     render: function () {
-        this.$el.html(this.template(_.extend({view: this}, constants)));
         this.$('.edit-wrap').hideIf(this.model.get('edit_hidden'));
         this.$('.edit-group-wrap').showIf(this.model.get('subscription') === 'both');
         this.$('.subscription-statuses').showIf(this.model.get('subscription') !== 'both');
@@ -9079,7 +9097,7 @@ xabber.GroupEditView = xabber.BasicView.extend({
         }
         this.$('.edit-wrap').hideIf(this.model.get('edit_hidden'));
     },
-});
+}});
 
 xabber.ContactsBase = Backbone.Collection.extend({
     model: xabber.Contact
