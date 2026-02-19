@@ -1,4 +1,7 @@
 import xabber from "xabber-core";
+import { createVueBackboneView } from "./vue/mountVue.js";
+import { transliterate as query_transliterate } from 'transliteration';
+import ChatsPanelComponent from './vue/components/chats/ChatsPanel.vue';
 
 let env = xabber.env,
     constants = env.constants,
@@ -10304,12 +10307,16 @@ xabber.AddGroupChatView = xabber.SearchView.extend({
     }
 });
 
-xabber.ChatsView = xabber.SearchPanelView.extend({
+xabber.ChatsView = createVueBackboneView(xabber, {
+    component: ChatsPanelComponent,
     className: 'recent-chats-container container',
+    props: function (view) {
+        return {};
+    },
+    extend: {
     ps_selector: '.chat-list-wrap',
     ps_settings: {theme: 'item-list'},
     main_container: '.chat-list',
-    template: templates.chats_panel,
 
     events: {
         "keydown .search-input": "keyUpOnSearch",
@@ -10329,7 +10336,15 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
         "click .subscription-notification-item .btn-close-notification": "closeSubscriptionNotification",
     },
 
-    _initialize: function () {
+    onShow: function () {
+        this.render.apply(this, arguments);
+        _.each(this.children, function (view) {
+            view.render && view.render.apply(view, arguments);
+        });
+    },
+
+    _vueInit: function () {
+        this.ps_container = this.$('.chat-list-wrap');
         this.active_chat = null;
         this.update_debounce = _.debounce(this.updateChatPositionDebounced, 100, false);
         this.listenTo(this.model, 'add', this.onChatAdded);
@@ -11035,7 +11050,484 @@ xabber.ChatsView = xabber.SearchPanelView.extend({
         xabber.toolbar_view.$('.toolbar-item:not(.account-item):not(.toolbar-logo)').removeClass('active')
             .filter('.all-chats:not(.toolbar-logo)').addClass('active');
         this.showAllChats();
+    },
+
+    // --- Inherited from SearchView ---
+
+    getSelectedItem: function () {
+        return this.$('.list-item[data-id="'+this.selection_id+'"]');
+    },
+
+    selectItem: function (id, arrow) {
+        if (!id)
+            return;
+        this.clearSearchSelection();
+        let $selection = this.$('.list-item[data-id="'+id+'"]');
+        if ($selection.length) {
+            this.selection_id = id;
+        } else {
+            this.ps_container[0].scrollTop = 0;
+            $selection = this.$('.list-item:visible').first();
+            this.selection_id = $selection.data('id');
+        }
+        if (arrow === 'down' && ($selection[0].clientHeight + $selection[0].offsetTop >= this.ps_container[0].clientHeight + this.ps_container[0].scrollTop || $selection[0].clientHeight + $selection[0].offsetTop < this.ps_container[0].scrollTop))
+            this.ps_container[0].scrollTop = $selection[0].offsetTop;
+        if (arrow === 'up' && ($selection[0].offsetTop <= this.ps_container[0].scrollTop || $selection[0].offsetTop > this.ps_container[0].scrollTop + this.ps_container[0].clientHeight))
+            this.ps_container[0].scrollTop = $selection[0].offsetTop;
+        $selection.addClass('selected');
+    },
+
+    selectNextItem: function () {
+        this.selectItem(this.ids[this.ids.indexOf(this.selection_id)+1], 'down');
+    },
+
+    selectPreviousItem: function () {
+        this.selectItem(this.ids[this.ids.indexOf(this.selection_id)-1], 'up');
+    },
+
+    updateSearch: function () {
+        !this.update_search_debounce && (this.update_search_debounce = _.debounce(() => {
+            if (!this._update_search_timeout) {
+                let query = this.$('.search-input').val();
+                this.$('.search-form').switchClass('active', query);
+                this.clearSearchSelection();
+                if (query)
+                    this.search(query.toLowerCase());
+                else {
+                    this.$('.list-item').removeClass('hidden');
+                    this.onEmptyQuery();
+                }
+                this.updateScrollBar();
+                this.query = false;
+                this._update_search_timeout = setTimeout(() => {
+                    this._update_search_timeout = null;
+                    this.query && this.updateSearch();
+                }, 150);
+            } else {
+                this.query = true;
+            }
+        }, 350, false));
+        this.update_search_debounce();
+    },
+
+    clearSearchSelection: function (ev) {
+        this.selection_id = null;
+        this.$('.list-item.selected').removeClass('selected');
+        ev && !$(ev.target).val() && this.$el.removeClass('recent-chats-search-active');
+    },
+
+    searchAll: function () {
+        this.$('.list-item').removeClass('hidden');
+    },
+
+    close: function () {},
+
+    onClickItem: function () {},
+
+    // --- Inherited from SearchPanelView ---
+
+    updateSearchWithMessages: function () {
+        this.search_messages = true;
+        this.updateSearch();
+    },
+
+    keyUpOnSearch: function (ev) {
+        ev.stopPropagation();
+        if ($(ev.target).val()) {
+            this.keyUpOnSearchWithQuery(ev);
+            return;
+        }
+        this.ids = this.$('.list-item:not(.hidden)').map(function () {
+            return $(this).data('id');
+        }).toArray();
+        let $selection = this.getSelectedItem();
+        if (ev.keyCode === constants.KEY_ARROW_DOWN) {
+            return this.selectNextItem();
+        }
+        if (ev.keyCode === constants.KEY_ARROW_UP) {
+            return this.selectPreviousItem();
+        }
+        if (ev.keyCode === constants.KEY_ENTER && $selection.length) {
+            ev.preventDefault();
+            return this.onEnterPressed($selection);
+        }
+        if (ev.keyCode === constants.KEY_ESCAPE && !xabber.body.screen.get('right_contact')) {
+            ev.preventDefault();
+            if ($(ev.target).val())
+                return this.clearSearch();
+            else {
+                $(ev.target).focusout();
+                this.close();
+            }
+        }
+        this.updateSearch();
+    },
+
+    onScrollY: function () {
+        if (xabber.all_searched_messages && xabber.all_searched_messages.length && this.queryid && !this._loading_messages && !this._messages_loaded && this.isScrolledToBottom()) {
+            this._loading_messages = true;
+            let options = {};
+            this.queryid = uuid();
+            options.query_id = this.queryid;
+            this.$('.messages-preloader-wrap').removeClass('hidden');
+            let accounts = xabber.accounts.connected;
+            accounts.forEach((account) => {
+                let first_message = xabber.all_searched_messages.find(message => (message.account.get('jid') === account.get('jid')));
+                if (!first_message || account.searched_msgs_loaded) {
+                    this.$('.messages-preloader-wrap').addClass('hidden');
+                    return;
+                }
+                options.account = account;
+                options.before = first_message.get('archive_id');
+                this.MAMRequest(this.query_text, options, (messages) => {
+                    let dfd = new $.Deferred();
+                    if (!messages.length)
+                        this.$('.messages-preloader-wrap').addClass('hidden');
+                    dfd.done(() => {
+                        this.$('.messages-preloader-wrap').addClass('hidden');
+                        this.$('.messages-list-wrap').switchClass('hidden', !this.$('.messages-list').children().length);
+                        this.updateScrollBar();
+                        this._loading_messages = false;
+                    });
+                    let count = 0;
+                    _.each(messages, (message) => {
+                        account.chats.makeMessageObject(message,
+                            _.extend({is_searched: true}, options)
+                        ).then((message_from_stanza) => {
+
+                            let msg_idx = xabber.all_searched_messages.indexOf(message_from_stanza),
+                                $message_item_view;
+                            if (!message_from_stanza
+                                || (
+                                    message_from_stanza.get('from_jid') === message_from_stanza.get('to_jid')
+                                    && message_from_stanza.get('to_jid') === account.get('jid')
+                                )
+                            ) {
+                                count++;
+                                if (count === messages.length) {
+                                    dfd.resolve();
+                                }
+                                return;
+                            } else
+                                $message_item_view = new xabber.MessageItemView({model: message_from_stanza});
+                            if (msg_idx === 0) {
+                                $message_item_view.$el.appendTo(this.$('.messages-list-wrap .messages-list'));
+                            } else {
+                                $message_item_view.$el.insertBefore(this.$('.messages-list-wrap .message-item').eq(-msg_idx));
+                            }
+                            count++;
+                            if (count === messages.length) {
+                                dfd.resolve();
+                            }
+                        });
+                    });
+                }, (err) => {
+                    this.$('.messages-preloader-wrap').addClass('hidden');
+
+                });
+            });
+            (accounts.filter(account => account.searched_msgs_loaded).length === accounts.length) && (this._messages_loaded = true);
+        }
+    },
+
+    onScroll: function () {},
+
+    keyUpOnSearchWithQuery: function (ev) {
+        ev.stopPropagation();
+        this.ids = this.$('.searched-lists-wrap .list-item:not(.hidden)').map(function () {
+            return $(this).data('id');
+        }).toArray();
+        let $selection = this.getSelectedItemWithQuery();
+        if (ev.keyCode === constants.KEY_ARROW_DOWN) {
+            return this.selectNextItemWithQuery();
+        }
+        if (ev.keyCode === constants.KEY_ARROW_UP) {
+            return this.selectPreviousItemWithQuery();
+        }
+        if (ev.keyCode === constants.KEY_ENTER && $selection.length) {
+            ev.preventDefault();
+            return this.onEnterPressed($selection);
+        }
+        else if (ev.keyCode === constants.KEY_ENTER){
+            this.search_messages = true;
+        }
+        if (ev.keyCode === constants.KEY_ESCAPE && !xabber.body.screen.get('right_contact')) {
+            ev.preventDefault();
+            if ($(ev.target).val())
+                return this.clearSearch();
+            else {
+                $(ev.target).focusout();
+                this.close();
+            }
+        }
+        this.updateSearch();
+    },
+
+    getSelectedItemWithQuery: function () {
+        return this.$('.searched-lists-wrap .list-item[data-id="'+this.selection_id+'"]');
+    },
+
+    selectItemWithQuery: function (id, arrow) {
+        if (!id) {
+            if (this.isScrolledToBottom())
+                this.onScrollY();
+            return;
+        }
+        this.clearSearchSelection();
+        let $selection = this.$('.searched-lists-wrap .list-item[data-id="'+id+'"]');
+        if ($selection.length) {
+            this.selection_id = id;
+        } else {
+            this.ps_container[0].scrollTop = 0;
+            $selection = this.$('.searched-lists-wrap .list-item:visible').first();
+            this.selection_id = $selection.data('id');
+        }
+        if (arrow === 'down' && ($selection[0].clientHeight + $selection[0].offsetTop + $selection.parent().parent()[0].offsetTop >= this.ps_container[0].clientHeight + this.ps_container[0].scrollTop
+        || $selection[0].clientHeight + $selection[0].offsetTop + $selection.parent().parent()[0].offsetTop < this.ps_container[0].scrollTop))
+            this.ps_container[0].scrollTop = $selection[0].offsetTop + $selection.parent().parent()[0].offsetTop;
+        if (arrow === 'up' && ($selection[0].offsetTop + $selection.parent().parent()[0].offsetTop <= this.ps_container[0].scrollTop
+        || $selection[0].offsetTop + $selection.parent().parent()[0].offsetTop > this.ps_container[0].scrollTop + this.ps_container[0].clientHeight))
+            this.ps_container[0].scrollTop = $selection[0].offsetTop + $selection.parent().parent()[0].offsetTop;
+        $selection.addClass('selected');
+    },
+
+    selectNextItemWithQuery: function () {
+        this.selectItemWithQuery(this.ids[this.ids.indexOf(this.selection_id)+1], 'down');
+    },
+
+    selectPreviousItemWithQuery: function () {
+        this.selectItemWithQuery(this.ids[this.ids.indexOf(this.selection_id)-1], 'up');
+    },
+
+    search: function (query) {
+        this.$(this.main_container).addClass('hidden');
+        clearTimeout(this.keyup_timeout);
+        this.keyup_timeout = null;
+        this.query_text = query;
+        let query_transliterated = query_transliterate(query);
+        this.$('.contacts-list').html("");
+        this.$('.chats-list').html("");
+        xabber.accounts.connected.forEach((acc) => {
+            if (acc.server_features.get(Strophe.NS.XABBER_FAVORITES)) {
+                let saved_chat = acc.chats.getSavedChat();
+                saved_chat.set('opened', true);
+                saved_chat.item_view.updateLastMessage();
+            }
+        });
+        let query_chats = _.clone(xabber.chats);
+        query_chats.comparator = 'timestamp';
+        query_chats.sort('timestamp').forEach((chat) => {
+            let jid = chat.get('jid').toLowerCase(),
+                name = chat.contact ? (chat.contact.get('roster_name') || chat.contact.get('name')) : chat.get('name');
+            name && (name = name.toLowerCase());
+            if (chat.get('timestamp') || chat.get('saved')) {
+                if (name.indexOf(query) > -1 || jid.indexOf(query) > -1
+                    || name.indexOf(query_transliterated) > -1 || jid.indexOf(query_transliterated) > -1
+                    || (chat.get('saved') && query.includes('saved'))) {
+                    let searched_by = name.indexOf(query) > -1 || name.indexOf(query_transliterated) > -1 ? 'by-name' : 'by-jid',
+                        chat_item = xabber.chats_view.child(chat.get('id'));
+                    chat_item && (chat_item = chat_item.$el.clone().addClass(searched_by));
+                    if (chat_item) {
+                        this.$('.chats-list-wrap').removeClass('hidden');
+                        if (searched_by === 'by-name')
+                            this.$('.chats-list').prepend(chat_item);
+                        else if (this.$('.chats-list .by-jid').length)
+                            chat_item.insertBefore(this.$('.chats-list .by-jid').first());
+                        else
+                            this.$('.chats-list').append(chat_item);
+                        chat_item.click(() => {
+                            this.$('.list-item.active').removeClass('active');
+                            xabber.chats_view.openChat(chat.item_view, {screen: xabber.body.screen.get('name')});
+                            chat_item.addClass('active');
+                        });
+                    }
+                }
+            }
+        });
+        xabber.accounts.each((account) => {
+            account.contacts.each((contact) => {
+                let jid = contact.get('jid').toLowerCase(),
+                    name = contact.get('roster_name') || contact.get('name'),
+                    chat = account.chats.get(contact.hash_id),
+                    chat_id = chat && chat.id;
+                name && (name = name.toLowerCase());
+                if (!chat_id || chat_id && !this.$('.chat-item[data-id="' + chat_id + '"]').length)
+                    if (name.indexOf(query) > -1 || jid.indexOf(query) > -1
+                        || name.indexOf(query_transliterated) > -1 || jid.indexOf(query_transliterated) > -1) {
+                        let searched_by = name.indexOf(query) > -1 || name.indexOf(query_transliterated) > -1 ? 'by-name' : 'by-jid',
+                            item_list = xabber.contacts_left_view.$(`.account-roster-wrap[data-jid="${account.get('jid')}"] .list-item[data-jid="${jid}"]`).first().clone().data('account-jid', account.get('jid'));
+                        item_list.attr({'data-color': account.settings.get('color'), 'data-account': account.get('jid')}).addClass(searched_by);
+                        if (searched_by === 'by-name')
+                            this.$('.contacts-list').prepend(item_list);
+                        else if (this.$('.contacts-list .by-jid').length)
+                            item_list.insertBefore(this.$('.contacts-list .by-jid').first());
+                        else
+                            this.$('.contacts-list').append(item_list);
+                        item_list.click(() => {
+                            this.$('.list-item.active').removeClass('active');
+                            let chat = account.chats.getChat(contact);
+                            chat && xabber.chats_view.openChat(chat.item_view, {clear_search: false, screen: xabber.body.screen.get('name')});
+                            item_list.addClass('active');
+                        });
+                    }
+            });
+        });
+        this.$('.chats-list-wrap').switchClass('hidden', !this.$('.chats-list').children('.list-item:not(.hidden2):not(.hidden3)').length);
+        this.$('.pinned-chat-list').switchClass('hidden', query);
+        query && this.$el.addClass('recent-chats-search-active');
+        this.$('.chats-list').children('.list-item:not(.hidden2):not(.hidden3)').length && this.$('.chats-list').children('.list-item:not(.hidden2):not(.hidden3)').slice(4).addClass('hidden');
+        this.$('.chats-show-more').showIf(this.$('.chats-list').children('.list-item:not(.hidden2):not(.hidden3)').length > 4);
+        this.$('.chats-show-more').text(xabber.getString("search__chats_show_more", [this.$('.chats-list').children('.list-item:not(.hidden2):not(.hidden3)').length]));
+        this.$('.contacts-list-wrap').switchClass('hidden', !this.$('.contacts-list').children().length);
+        this.$('.contacts-list').children().length && this.$('.contacts-list').children().slice(4).addClass('hidden');
+        this.$('.contacts-show-more').showIf(this.$('.contacts-list').children().length > 4);
+        this.$('.contacts-show-more').text(xabber.getString("search__contacts_show_more", [this.$('.contacts-list').children().length]));
+        this.$('.messages-list-wrap').addClass('hidden').find('.messages-list').html("");
+        if (query.length >= 2 && this.search_messages) {
+            this.search_messages = false;
+            this.queryid = uuid();
+            this.searchMessages(query, {query_id: this.queryid});
+        }
+        else if (query.length >= 2 && !this.search_messages){
+            this.$('.btn-search-messages').showIf(query);
+        }
+    },
+
+    searchMessages: function (query, options) {
+        this._loading_messages = true;
+        this._messages_loaded = false;
+        this.$('.messages-list-wrap').showIf(query);
+        this.$('.btn-search-messages').hideIf(query);
+        this.scrollToBottom();
+        this.$('.messages-preloader-wrap').removeClass('hidden');
+        options = options || {};
+        !options.max && (options.max = xabber.settings.mam_messages_limit);
+        !options.before && (options.before = "");
+        xabber.all_searched_messages = new xabber.SearchedMessages();
+        let accounts = xabber.accounts.connected,
+            accounts_length = accounts.length,
+            accounts_count = 0;
+        accounts.forEach((account) => {
+            account.searched_msgs_loaded = false;
+            options.account = account;
+            this.MAMRequest(query, options, (messages) => {
+                if (!this.query_text) {
+                    this.$('.messages-preloader-wrap').addClass('hidden');
+                    return;
+                }
+
+                let dfd = new $.Deferred();
+                dfd.done(() => {
+                    accounts_count++;
+                    if (!this.query_text) {
+                        this.$('.messages-preloader-wrap').addClass('hidden');
+                        return;
+                    }
+                    if (accounts_length === accounts_count){
+                        this.$('.messages-preloader-wrap').addClass('hidden');
+                        this.$('.messages-list-wrap').switchClass('hidden', !this.$('.messages-list').children().length);
+                        this.updateScrollBar();
+                        this._loading_messages = false;
+                    }
+                });
+                let count = 0;
+                _.each(messages, (message) => {
+                    account.chats.makeMessageObject(message,
+                        _.extend({is_searched: true}, options)
+                    ).then((message_from_stanza) => {
+
+                        let msg_idx = xabber.all_searched_messages.indexOf(message_from_stanza),
+                            $message_item_view;
+                        if (!message_from_stanza
+                            || (
+                                message_from_stanza.get('from_jid') === message_from_stanza.get('to_jid')
+                                && message_from_stanza.get('to_jid') === account.get('jid')
+                            )
+                        ) {
+                            count++;
+                            if (count === messages.length) {
+                                dfd.resolve();
+                            }
+                            return;
+                        } else {
+                            $message_item_view = new xabber.MessageItemView({model: message_from_stanza});
+                        }
+                        if (msg_idx === 0) {
+                            $message_item_view.$el.appendTo(this.$('.messages-list-wrap .messages-list'));
+                        } else {
+                            $message_item_view.$el.insertBefore(this.$('.messages-list-wrap .message-item').eq(-msg_idx));
+                        }
+                        count++;
+                        if (count === messages.length) {
+                            dfd.resolve();
+                        }
+                    });
+                });
+                if (!messages.length && count === messages.length){
+                    dfd.resolve();
+                }
+            }, (err) => {
+                this.$('.messages-preloader-wrap').addClass('hidden');
+
+            });
+        });
+        (accounts.filter(account => account.searched_msgs_loaded).length === accounts.length) && (this._messages_loaded = true);
+    },
+
+    MAMRequest: function (query, options, callback, errback) {
+        let messages = [],
+            account = options.account,
+            queryid = uuid(),
+            iq = $iq({type: 'set'})
+                .c('query', {xmlns: Strophe.NS.MAM, queryid: queryid})
+                .c('x', {xmlns: Strophe.NS.DATAFORM, type: 'submit'})
+                .c('field', {'var': 'FORM_TYPE', type: 'hidden'})
+                .c('value').t(Strophe.NS.MAM).up().up()
+                .c('field', {'var': 'withtext'})
+                .c('value').t(query).up().up().up().cnode(new Strophe.RSM(options).toXML()),
+            handler;
+
+        let sendMAMRequest = () => {
+            handler = account.connection._addSysHandler((message) => {
+                let $msg = $(message);
+                if ($msg.find('result').attr('queryid') === queryid) {
+                    messages.push(message);
+                }
+                return true;
+            }, Strophe.NS.MAM, null, null, null, null, {query_id: queryid} );
+            let callb = (res) => {
+                    account.connection.deleteHandler(handler);
+                    handler = null;
+                    let $fin = $(res).find(`fin[xmlns="${Strophe.NS.MAM}"]`);
+                    if ($fin.length && $fin.attr('queryid') === queryid) {
+                        let rsm_complete = ($fin.attr('complete') === 'true');
+                        rsm_complete && (account.searched_msgs_loaded = true);
+                    }
+                    callback && callback(messages);
+                },
+                errb = (err) => {
+                    account.connection.deleteHandler(handler);
+                    handler = null;
+                    xabber.error("MAM search error");
+                    xabber.error(err);
+                    errback && errback(err);
+                };
+            console.error('trying to send for search');
+            account.sendIQ(iq, callb, errb);
+
+        };
+        sendMAMRequest();
+    },
+
+    onEmptyQuery: function () {
+        xabber.accounts.forEach(function (account) {
+            account.searched_msgs_loaded = false;
+        });
+        this.query_text = null;
+        this.queryid = null;
+        this._messages_loaded = false;
     }
+}
 });
 
   xabber.MessageItemView = xabber.BasicView.extend({
