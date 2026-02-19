@@ -1,5 +1,5 @@
 <template>
-    <div class="xmpp-account draggable droppable"
+    <div class="xmpp-account draggable droppable vue-migrated"
          :class="{ disabled: !enabled }"
          :data-color="colorScheme"
          ref="rootEl">

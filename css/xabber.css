@@ -1,5 +1,5 @@
 /* --- Vue 3 migration debug: highlight migrated components --- */
-[data-v-app] {
+.vue-migrated {
     outline: 2px dashed rgba(255, 0, 0, 0.5) !important;
     outline-offset: -2px;
 }

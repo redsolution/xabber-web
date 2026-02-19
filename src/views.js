@@ -1,5 +1,7 @@
 import xabber from "xabber-core";
 import { transliterate as query_transliterate } from 'transliteration';
+import { createVueBackboneView } from "./vue/mountVue.js";
+import SettingsModal from "./vue/components/settings/SettingsModal.vue";
 
 let env = xabber.env,
     constants = env.constants,
@@ -2191,561 +2193,48 @@ xabber.PlyrPlayerPopupView = xabber.BasicView.extend({
     },
 });
 
-xabber.SettingsModalView = xabber.BasicView.extend({
+xabber.SettingsModalView = createVueBackboneView(xabber, {
+    component: SettingsModal,
     className: 'settings-panel-wrap',
-    template: templates.settings_modal,
-    ps_selector: '.settings-panel',
-
-    events: {
-        "click .background-overlay": "closeSettings",
-        "click .btn-back": "backToMenu",
-        "click .btn-back-subsettings": "backToSubMenu",
-        "click .settings-tabs-wrap.global-settings-tabs .settings-tab:not(.delete-all-accounts)": "jumpToBlock",
-        "click .desktop-notifications-clue-wrap b": "goToWebNotifications",
-        "click .btn-add-account": "showAddAccountView",
-        "click .setting.idling label": "setIdling",
-        "change #idle_timeout": "setIdlingTimeout",
-        "click .setting.notifications label": "setNotifications",
-        "click .private-notifications label": "setPrivateNotifications",
-        "click .group-notifications label": "setGroupNotifications",
-        "click .notifications-lever label": "setNotifications",
-        "click .jingle-calls label": "setJingleCalls",
-        "click .setting.message-preview.private-preview label": "setPrivateMessagePreview",
-        "click .setting.message-preview.group-preview label": "setGroupMessagePreview",
-        "click .call-attention label": "setCallAttention",
-        "click .setting.load-media label": "setLoadMedia",
-        "click .setting.typing-notifications label": "setTypingNotifications",
-        "click .setting.mapping-service label": "setMappingService",
-        "click .setting.desktop-autostart label": "setDesktopAutostart",
-        "click .setting.reconnection-popup-log label": "setReconnectionLogs",
-        "click .setting.debug-mode label": "setDebugMode",
-        "change .sound input[type=radio][name=private_sound]": "setPrivateSound",
-        "change .sound input[type=radio][name=group_sound]": "setGroupSound",
-        "change .sound input[type=radio][name=call_sound]": "setCallSound",
-        "change .sound input[type=radio][name=dialtone_sound]": "setDialtoneSound",
-        "change .sound input[type=radio][name=attention_sound]": "setAttentionSound",
-        "change .languages-list input[type=radio][name=language]": "changeLanguage",
-        "change .emoji-fonts-list input[type=radio][name=emoji_font]": "changeEmojiFont",
-        "click .emoji-font-external-url-button": "loadExternalEmojiFont",
-        "change #vignetting": "changeVignetting",
-        "change #blur": "changeBlur",
-        "change #notifications_volume": "changeNotificationsVolume",
-        "change #blur_switch": "switchBlur",
-        "change #vignetting_switch": "switchVignetting",
-        "click .selected-color-wrap": "openColorPicker",
-        "click .client-main-color-item": "chooseMainColor",
-        "change .background input[type=radio][name=background]": "setBackground",
-        "change .settings-font-size input[type=radio][name=font-size]": "setFontSize",
-        "click .current-background-wrap": "changeBackgroundImage",
-        "change .hotkeys input[type=radio][name=hotkeys]": "setHotkeys",
-        "change .avatar-shape input[type=radio][name=avatar_shape]": "setAvatarShape",
-        "change .device-metadata input[type=radio][name=device_metadata]": "setDeviceMetadata",
-        "click .settings-tab.delete-all-accounts": "deleteAllAccounts"
+    props: function (view) {
+        return { model: view.model };
     },
+    extend: {
+        ps_selector: '.settings-panel',
 
-    _initialize: function () {
-        this.$('.xabber-info-wrap .version').text(xabber.get('version_number'));
-        this.listenTo(xabber, 'update_main_color', this.updateMainColor);
-        this.listenTo(this.model, 'change:language', this.updateLanguage);
-        this.listenTo(this.model, 'change:emoji_font', this.updateEmojiFontLabel);
-        this.listenTo(this.model, 'change:avatar_shape', this.updateAvatarLabel);
-        this.listenTo(this.model, 'change:notifications_private', this.updateSoundsLabel);
-        this.listenTo(this.model, 'change:notifications_group', this.updateSoundsLabel);
-        this.listenTo(this.model, 'change:call_attention', this.updateSoundsLabel);
-        this.listenTo(this.model, 'change:private_sound', this.updateSoundsLabel);
-        this.listenTo(this.model, 'change:group_sound', this.updateSoundsLabel);
-        this.listenTo(this.model, 'change:sound_on_private_message', this.updateSoundsLabel);
-        this.listenTo(this.model, 'change:sound_on_group_message', this.updateSoundsLabel);
-        this.listenTo(this.model, 'change:sound_on_call', this.updateSoundsLabel);
-        this.listenTo(this.model, 'change:sound_on_dialtone', this.updateSoundsLabel);
-        this.listenTo(this.model, 'change:sound_on_attention', this.updateSoundsLabel);
-        this.ps_container.on("ps-scroll-y", this.onScrollY.bind(this));
-        $(document).on("keyup", (ev) => {
-            if (ev.keyCode === constants.KEY_ESCAPE && this.data.get('visible')) {
-                this.closeSettings();
+    _vueInit: function () {
+        this._vueInstance.setBackboneView(this);
+        // Set up ps_container after Vue has rendered the DOM
+        if (this.ps_selector) {
+            this.ps_container = this.$(this.ps_selector);
+            if (this.ps_container.length) {
+                this.ps_container.perfectScrollbar(
+                    _.extend(this.ps_settings || {}, xabber.ps_settings)
+                );
             }
-        });
-        xabber.once('accounts_ready',() => {
+        }
+        // Listen for account changes to manage single-account child view
+        xabber.once('accounts_ready', () => {
             xabber.accounts.on("list_changed add change:enabled destroy", this.updateAccounts, this);
-        })
-    },
-
-    render: function (options) {
-        let settings = this.model.attributes,
-            lang = settings.language,
-            emoji_font = settings.emoji_font;
-        this.updateSounds();
-        this.updateLanguages();
-        this.updateEmojiFonts();
-        this.$('.notifications input[type=checkbox]').prop({
-            checked: settings.notifications && xabber._cache.get('notifications')
-        });
-        this.$('.notifications-lever input[type=checkbox]').prop({
-            checked: settings.notifications && xabber._cache.get('notifications')
-        });
-        this.$('.sound input[type=radio][name=group_sound]').prop('disabled', !settings.notifications_group);
-        this.$('.private-notifications input[type=checkbox]')
-            .prop({checked: settings.notifications_private});
-        this.$('.sound input[type=radio][name=private_sound]').prop('disabled', !settings.notifications_private);
-        this.$('.sound input[type=radio][name=call_sound]').prop('disabled', !settings.jingle_calls);
-        this.$('.sound input[type=radio][name=dialtone_sound]').prop('disabled', !settings.jingle_calls);
-        this.$('.group-notifications input[type=checkbox]')
-            .prop({checked: settings.notifications_group});
-        this.$('.jingle-calls input[type=checkbox]')
-            .prop({checked: settings.jingle_calls});
-        this.$('.sound input[type=radio][name=group_sound]').prop('disabled', !settings.notifications_group);
-        this.$('.sound input[type=radio][name=attention_sound]').prop('disabled', !settings.call_attention);
-        this.$('.message-preview.private-preview input[type=checkbox]')
-            .prop({checked: settings.message_preview_private}).prop('disabled', !(settings.notifications && xabber._cache.get('notifications') && settings.notifications_private));
-        this.$('.message-preview.group-preview input[type=checkbox]')
-            .prop({checked: settings.message_preview_group}).prop('disabled', !(settings.notifications && xabber._cache.get('notifications') && settings.notifications_group));
-        this.$('.desktop-notifications-clue-wrap').hideIf(settings.notifications);
-        this.$('.notifications-dependant').switchClass('notifications-dependant-two-line', !settings.notifications);
-        this.$('.call-attention input[type=checkbox]')
-            .prop({checked: settings.call_attention});
-        this.$('.load-media input[type=checkbox]')
-            .prop({checked: settings.load_media});
-        this.$('.typing-notifications input[type=checkbox]')
-            .prop({checked: settings.typing_notifications});
-        this.$('.idling input[type=checkbox]')
-            .prop({checked: settings.idling});
-        this.$('#idle_timeout')
-            .val(settings.idling_time).prop('disabled', !settings.idling);
-        this.$('.mapping-service input[type=checkbox]')
-            .prop({checked: settings.mapping_service});
-        this.$('.reconnection-popup-log input[type=checkbox]')
-            .prop({checked: settings.reconnection_logs});
-        this.$('.debug-mode input[type=checkbox]')
-            .prop({checked: settings.debug_mode});
-        if (constants.DESKTOP_AUTOSTART_OPTION) {
-            this.$('.desktop-autostart input[type=checkbox]')
-                .prop({checked: settings.desktop_autostart});
-        } else {
-            this.$('.desktop-autostart').remove();
-        }
-        let sound_private_value = settings.private_sound ? settings.sound_on_private_message : '';
-        this.$(`.sound input[type=radio][name=private_sound][value="${sound_private_value}"]`)
-                .prop('checked', true);
-        let sound_group_value = settings.group_sound ? settings.sound_on_group_message : '';
-        this.$(`.sound input[type=radio][name=group_sound][value="${sound_group_value}"]`)
-                .prop('checked', true);
-        this.$(`.sound input[type=radio][name=call_sound][value="${settings.sound_on_call}"]`)
-                .prop('checked', true);
-        this.$(`.sound input[type=radio][name=dialtone_sound][value="${settings.sound_on_dialtone}"]`)
-                .prop('checked', true);
-        this.$(`.sound input[type=radio][name=attention_sound][value="${settings.sound_on_attention}"]`)
-                .prop('checked', true);
-        this.$(`.hotkeys input[type=radio][name=hotkeys][value=${settings.hotkeys}]`)
-                .prop('checked', true);
-        this.$(`.avatar-shape input[type=radio][name=avatar_shape][value=${settings.avatar_shape}]`)
-                .prop('checked', true);
-        this.$(`.device-metadata input[type=radio][name=device_metadata][value=${settings.device_metadata}]`)
-                .prop('checked', true);
-        this.$(`.device-metadata-description`).text(xabber.getString(`settings__section_privacy__${settings.device_metadata}_metadata_description`));
-        (lang === xabber.get("default_language")) && (lang = 'default');
-        this.$(`.languages-list input[type=radio][name=language][value="${lang}"]`)
-            .prop('checked', true);
-        this.$(`.emoji-fonts-list input[type=radio][name=emoji_font][value="${emoji_font}"]`)
-            .prop('checked', true);
-        this.$(`.client-main-color-item`).removeClass('chosen-client-color');
-        this.$(`.client-main-color-item[data-value="${settings.main_color}"]`).addClass('chosen-client-color');
-        let notifications_volume = !isNaN(settings.notifications_volume) ? settings.notifications_volume * 100 : 100;
-        this.$(`#notifications_volume`).val(notifications_volume);
-        this.$('.settings-panel-head span').text(this.$('.settings-block-wrap:not(.hidden)').attr('data-header'));
-        this.updateAvatarLabel();
-        this.updateSoundsLabel();
-        this.updateDescription();
-        this.updateBackgroundSetting();
-        this.updateFontSizeSetting();
-        this.updateColor();
-        this.updateMainColor();
-        this.updateLanguage();
-        this.updateEmojiFontLabel();
-        this.$('.toolbar-main-color-setting-wrap .dropdown-button').dropdown({
-            inDuration: 100,
-            outDuration: 100,
-            belowOrigin: true,
-            hover: false
-        });
-        this.$('.left-column').removeClass('hidden');
-        this.$('.left-column .settings-tabs-wrap.global-settings-tabs').removeClass('hidden');
-        this.$('.right-column').addClass('hidden');
-        this.$('.btn-back').removeClass('hidden');
-        this.$('.btn-back-subsettings').addClass('hidden');
-        this.$('.settings-panel-head .description').addClass('hidden');
-        this.$('.desktop-notifications-clue-wrap b').addClass('client-text-color-500');
-        this.updateAccounts(options);
-        this.updateHeight();
-        this.updateSliders();
-        if (options && options.block_name && !options.account_block_name) {
-            let $elem = this.$(`.settings-tab[data-block-name="${options.block_name}"]`);
-            if ($elem.length)
-                this.jumpToBlock({target: $elem[0]});
-        }
-        return this;
-    },
-
-    updateAccounts: function (options) {
-        if (this.settings_single_account_modal){
-            this.settings_single_account_modal.removeChild('blocklist');
-            this.removeChild('single_account');
-            this.settings_single_account_modal.destroyView();
-            this.settings_single_account_modal = undefined;
-        }
-        if (xabber.accounts.length === 1 && xabber.accounts.enabled.length){
-            this.$('.accounts-info-wrap').addClass('hidden');
-            this.$('.btn-add-account').addClass('hidden');
-            this.$('.single-account-info-wrap').removeClass('hidden');
-            let first_account = xabber.accounts.models[0];
-            this.single_account_has_rendered = false;
-            this.settings_single_account_modal = this.addChild('single_account', xabber.AccountSettingsSingleModalView, {
-                model: first_account,
-                forced_ps_container: this.ps_container,
-                single_account_modal: true,
-                el: this.$('.single-account-info-wrap .single-account-info')[0]
-            });
-            if (!this.single_account_has_rendered){
-                this.settings_single_account_modal.show(null, options);
-            }
-            first_account.trigger('render_single_settings', this.settings_single_account_modal);
-            this.settings_single_account_modal.addChild('blocklist', xabber.BlockListView, {
-                account: first_account,
-                el: this.settings_single_account_modal.$('.block-list-view-wrap')[0]
-            });
-        } else {
-            this.$('.btn-add-account').removeClass('hidden');
-            this.$('.accounts-info-wrap').removeClass('hidden');
-            this.$('.single-account-info-wrap').addClass('hidden');
-        }
-        this.updateHeight();
-    },
-
-    updateMainColor: function () {
-        this.$('.toolbar-main-color-setting').attr('data-color', this.model.get('main_color'));
-    },
-
-    updateFontSizeSetting: function () {
-        if (constants.FONT_SIZES_LIST && constants.FONT_SIZES_LIST.length){
-            this.$('.settings-font-size-hidable').removeClass('hidden');
-            this.$('.settings-font-size form').html('');
-            _.each(constants.FONT_SIZES_LIST, (item) => {
-                this.$('.settings-font-size form').append($(`
-        <p>
-            <input class="with-gap" name="font-size" value="${item.type}" type="radio" id="${this.cid}-${item.type}-font-size" />
-            <label for="${this.cid}-${item.type}-font-size">${xabber.getString(`chats_font_size_${item.type}`)}</label>
-        </p>
-`));
-            });
-            this.$(`.settings-font-size input[type=radio][name=font-size][value=${xabber.settings.font_size}]`)
-                .prop('checked', true);
-        } else {
-            this.$('.settings-font-size-hidable').addClass('hidden');
-        }
-
-    },
-
-    updateBackgroundSetting: function () {
-        this.$(`.background input[type=radio][name=background][value=${this.model.get('background').type}]`)
-            .prop('checked', true);
-        if (this.model.get('background').image) {
-            this.$('.current-background').css('background-image', `url(${utils.images.getCachedBackground(this.model.get('background').image)})`);
-        }
-        this.$('.current-background-wrap').switchClass('hidden', !this.model.get('background').image);
-        let appearance = this.model.get('appearance'),
-            blur_switched = appearance.blur !== false,
-            vignetting_switched = appearance.vignetting !== false;
-        this.$('#blur_switch')[0].checked = blur_switched;
-        this.$('.blur-setting .disabled').switchClass('hidden', blur_switched);
-        if (blur_switched)
-            this.$('#blur')[0].value = appearance.blur;
-        this.$('#vignetting_switch')[0].checked = vignetting_switched;
-        this.$('.vignetting-setting .disabled').switchClass('hidden', vignetting_switched);
-        if (vignetting_switched)
-            this.$('#vignetting')[0].value = appearance.vignetting;
-        this.updateScrollBar();
-    },
-
-    updateColor: function () {
-        let color = this.model.get('appearance').color || '#E0E0E0';
-        this.$('.selected-color-item').css('background-color', color);
-        this.$('.selected-color-hex').text(color);
-        let material_color = xabber.ColorPicker.prototype.materialColors.find(c => c.variations.find(v => v.hex.toLowerCase() === color.toLowerCase()));
-        if (material_color) {
-            let tone = material_color.variations.find(v => v.hex.toLowerCase() === color.toLowerCase());
-            this.$('.selected-color-name').text(xabber.getString(`account_color_name_${material_color.color.replace(/-/g, "_")}`).replace(/-/g, " ") + ` ${tone.weight}`);
-        } else {
-            this.$('.selected-color-name').text(xabber.getString("settings__section_appearance__hint_custom_color"));
-        }
-        xabber.toolbar_view.updateColor(color);
-    },
-
-    jumpToBlock: function (ev) {
-        if ($(ev.target).closest('.switch').length)
-            return;
-        let $tab = $(ev.target).closest('.settings-tab'),
-            $elem = this.$('.settings-block-wrap.' + $tab.attr('data-block-name'));
-        if ($tab.hasClass('link-button')) {
-            $tab.parent().siblings().removeClass('active');
-            this.scrollTo(0);
-            return;
-        }
-        this.$('.settings-block-wrap').addClass('hidden');
-        this.$('.left-column').addClass('hidden');
-        this.$('.right-column').removeClass('hidden');
-        $elem.removeClass('hidden');
-        this.$('.settings-panel-head span').text($elem.attr('data-header'));
-        $tab.addClass('active').siblings().removeClass('active');
-        if ($tab.closest('.right-column').length && $tab.attr('data-subblock-parent-name')) {
-            this.$('.btn-back').addClass('hidden');
-            this.$('.btn-back-subsettings').removeClass('hidden');
-            this.$('.btn-back-subsettings').attr('data-subblock-parent-name', $tab.attr('data-subblock-parent-name'));
-        }
-        if ($tab.attr('data-block-name') === 'interface_language')
-            this.$('.settings-panel-head .description').removeClass('hidden');
-        else
-            this.$('.settings-panel-head .description').addClass('hidden');
-        this.scrollToTop();
-        this.updateHeight();
-    },
-
-    updateHeight: function (is_frame_enabled) {
-        let height;
-        if (!this.$('.left-column.main-left-column').hasClass('hidden'))
-            height = this.$('.left-column.main-left-column').height();
-        if (!this.$('.right-column.main-right-column').hasClass('hidden'))
-            height = this.$('.right-column.main-right-column').height();
-        if (is_frame_enabled)
-            height = height + 8;
-        this.ps_container.css('height', height + 'px');
-        setTimeout(() => {
-            this.updateScrollBar();
-        }, 500)
-    },
-
-    updateSliders: function () {
-        this.$('.range-field.range-field-design').each((idx, item) => {
-            let $input = $(item).find('input'),
-                range_min = $input.attr('min'),
-                range_max = $input.attr('max'),
-                range_value = $input.val(),
-                left =  ((182 / (range_max - range_min)) * (range_value - range_min)) + 10;
-            $(item).find('span.thumb').css('left', left + 'px');
-            if ($input.hasClass('materialize-timer'))
-                $(item).find('span.value').text(range_value + 's');
-            else
-                $(item).find('span.value').text(range_value);
-        })
-
-    },
-
-    updateSounds: function () {
-
-        this.$('.notification-field').html('<form action="#"></form>');
-
-        sounds.notifications.forEach((item) => {
-            if (!item.not_selectable){
-                let element = $(templates.setting_radio_input({
-                    input_name: 'private_sound',
-                    input_id: `${this.cid}-private-sound-${item.file_name}`,
-                    label: item.name,
-                    value: item.file_name,
-                }));
-                this.$('.notification-field:not(.group-notification-field)').append(element);
-                let group_element = $(templates.setting_radio_input({
-                    input_name: 'group_sound',
-                    input_id: `${this.cid}-group-sound-${item.file_name}`,
-                    label: item.name,
-                    value: item.file_name,
-                }));
-                this.$('.group-notification-field').append(group_element);
-            }
-        });
-
-        let element_no_sound = $(templates.setting_radio_input({
-            input_name: 'private_sound',
-            input_id: `${this.cid}-private-sound-no`,
-            label: 'No sound',
-            value: '',
-        }));
-        this.$('.notification-field:not(.group-notification-field)').prepend(element_no_sound);
-
-        let group_element_no_sound = $(templates.setting_radio_input({
-            input_name: 'group_sound',
-            input_id: `${this.cid}-group-sound-no`,
-            label: 'No sound',
-            value: '',
-        }));
-        this.$('.group-notification-field').prepend(group_element_no_sound);
-
-        this.$('.dialtone-field').html('<form action="#"></form>');
-        sounds.dialtones.forEach((item) => {
-            if (!item.not_selectable){
-                let element = $(templates.setting_radio_input({
-                    input_name: 'dialtone_sound',
-                    input_id: `${this.cid}-dialtone-sound-${item.file_name}`,
-                    label: item.name,
-                    value: item.file_name,
-                }));
-                this.$('.dialtone-field').append(element);
-            }
-        });
-
-        this.$('.ringtone-field').html('<form action="#"></form>');
-        sounds.ringtones.forEach((item) => {
-            if (!item.not_selectable){
-                let element = $(templates.setting_radio_input({
-                    input_name: 'call_sound',
-                    input_id: `${this.cid}-call-sound-${item.file_name}`,
-                    label: item.name,
-                    value: item.file_name,
-                }));
-                this.$('.ringtone-field').append(element);
-            }
-        });
-
-        this.$('.attention-field').html('<form action="#"></form>');
-        sounds.attention.forEach((item) => {
-            if (!item.not_selectable){
-                let element = $(templates.setting_radio_input({
-                    input_name: 'attention_sound',
-                    input_id: `${this.cid}-attention-sound-${item.file_name}`,
-                    label: item.name,
-                    value: item.file_name,
-                }));
-                this.$('.attention-field').append(element);
-            }
-        });
-
-    },
-
-    updateLanguages: function () {
-        this.$('.languages-list').html('<form action="#"></form>');
-
-        let default_element = $(templates.setting_language_radio_input({
-            input_name: 'language',
-            input_id: `${this.cid}-default`,
-            label: xabber.getString("settings__languages_list___item_default", [constants.languages[xabber.get("default_language") || 'en']]),
-            value: 'default',
-            progress: {},
-        }));
-
-        this.$('.languages-list').append(default_element);
-
-        if (!window.navigator.language.includes('en')){
-            let second_lang = xabber.get("default_language") === 'en' ? window.navigator.language : 'en',
-                second_prog, second_prog_text,
-                second_locale = Object.keys(client_translation_progress)
-                    .find(key => !second_lang.indexOf(key)) || constants.languages_another_locales[second_lang] && Object.keys(client_translation_progress)
-                    .find(key => !constants.languages_another_locales[second_lang].indexOf(key)); // < - check for locales that differ in names
-
-            if (second_locale) {
-                second_prog = client_translation_progress[second_locale];
-                second_prog_text = (second_prog === 100) ? xabber.getString("settings__section_interface_language__translation_progress_fully")
-                    : xabber.getString("settings__section_interface_language__translation_progress", [`${second_prog}%`]);
-
-                let second_element = $(templates.setting_language_radio_input({
-                    input_name: 'language',
-                    input_id: `${this.cid}-${second_lang}`,
-                    label: constants.languages[second_lang],
-                    value: second_lang,
-                    progress: {
-                        text: second_prog_text
-                    },
-                }));
-                this.$('.languages-list').append(second_element);
-            }
-        }
-
-
-        for (let lang in constants.languages) {
-            if (constants.languages.hasOwnProperty(lang)) {
-                if (!lang || lang === xabber.get("default_language") || lang === window.navigator.language)
-                    continue;
-
-                let locale = Object.keys(client_translation_progress)
-                    .find(key => !lang.indexOf(key)) || constants.languages_another_locales[lang] && Object.keys(client_translation_progress)
-                    .find(key => !constants.languages_another_locales[lang].indexOf(key)); // < - check for locales that differ in names
-
-                if (locale) {
-                    let progress = client_translation_progress[locale],
-                        progress_text = (progress === 100) ? xabber.getString("settings__section_interface_language__translation_progress_fully")
-                            : xabber.getString("settings__section_interface_language__translation_progress", [`${progress}%`]);
-
-                    let element = $(templates.setting_language_radio_input({
-                        input_name: 'language',
-                        input_id: `${this.cid}-${lang}`,
-                        label: constants.languages[lang],
-                        value: lang,
-                        progress: {
-                            text: progress_text
-                        },
-                    }));
-                    this.$('.languages-list').append(element);
-                }
-            }
-        }
-    },
-
-    updateEmojiFonts: function () {
-        let emoji_fonts_list = constants.EMOJI_FONTS_LIST;
-
-        if (!Object.keys(emoji_fonts_list).length) {
-            this.$('.settings-tab[data-block-name="emoji_font"').addClass('hidden');
-            return;
-        }
-        this.$('.settings-tab[data-block-name="emoji_font"').removeClass('hidden');
-
-        this.$('.emoji-fonts-list').html('<form action="#"></form>');
-
-        let system_element = $(templates.setting_emoji_font_radio_input({
-            input_name: 'emoji_font',
-            input_id: `${this.cid}-emoji-font-system`,
-            label: xabber.getString("settings__menu_item__emoji_font_system"),
-            value: 'system',
-            hint: null,
-        }));
-
-        this.$('.emoji-fonts-list').append(system_element);
-        emoji_fonts_list = Object.values(emoji_fonts_list);
-
-        emoji_fonts_list.sort((a, b) => {
-            return a.order - b.order;
-        });
-
-        emoji_fonts_list.forEach((item) => {
-            let item_name = item.name,
-                element = $(templates.setting_emoji_font_radio_input({
-                    input_name: 'emoji_font',
-                    input_id: `${this.cid}-emoji-font-${item.value}`,
-                    label: item_name,
-                    value: item.value,
-                    hint: item.hint,
-                }));
-            this.$('.emoji-fonts-list').append(element);
         });
     },
 
-    onScrollY: function () {
-        if (this.getScrollTop() === 0)
-            this.$('.settings-panel-head').removeClass('lined-head');
-        else
-            this.$('.settings-panel-head').addClass('lined-head');
+    onShow: function () {
+        this._vueInstance?.onShow?.(...arguments);
+        if (xabber.accounts) {
+            this.updateAccounts(arguments[0]);
+        }
     },
 
+    // Compatibility methods for external callers
     closeSettings: function () {
-        this.current_sound && this.current_sound.pause();
-        if (xabber.body.screen && xabber.body.screen.get('previous_screen')){
-
-            let previous_screen = xabber.body.screen.get('previous_screen');
-
-            if (previous_screen.right === null){
-                xabber.body.screen.set('right', null);
-            }
-            if (previous_screen.model === null){
-                xabber.body.screen.set('model', null);
-            }
-            if ((previous_screen.name === 'notifications' || previous_screen.name === 'calls' || previous_screen.name === 'contacts' || previous_screen.name === 'groupchats')
-                && previous_screen.open_all_chats){
+        this._vueInstance && this._vueInstance.onHide();
+        // Delegate close logic to Vue
+        let previous_screen = xabber.body.screen && xabber.body.screen.get('previous_screen');
+        if (previous_screen) {
+            if (previous_screen.right === null) xabber.body.screen.set('right', null);
+            if (previous_screen.model === null) xabber.body.screen.set('model', null);
+            if ((previous_screen.name === 'notifications' || previous_screen.name === 'calls' || previous_screen.name === 'contacts' || previous_screen.name === 'groupchats') && previous_screen.open_all_chats) {
                 xabber.toolbar_view.showAllChats();
             } else if (previous_screen.force_open_all_chats) {
                 xabber.toolbar_view.showAllChats(null, true);
@@ -2754,575 +2243,76 @@ xabber.SettingsModalView = xabber.BasicView.extend({
                 xabber.body.setScreen(previous_screen.name, previous_screen);
                 xabber.body.screen.attributes.close_settings = undefined;
             }
-        } else
+        } else {
             xabber.toolbar_view.showAllChats();
-    },
-
-    backToMenu: function () {
-        this.current_sound && this.current_sound.pause();
-        this.$('.left-column').removeClass('hidden');
-        this.$('.right-column').addClass('hidden');
-        this.$('.settings-panel-head .description').addClass('hidden');
-        this.scrollToTop();
-        this.updateHeight();
-    },
-
-    backToSubMenu: function (ev) {
-        this.current_sound && this.current_sound.pause();
-        let $tab = $(ev.target).closest('.btn-back-subsettings'),
-            block_name = $tab.attr('data-subblock-parent-name'),
-            $elem = this.$('.settings-block-wrap.' + block_name),
-            elem_parent = $elem.attr('data-parent-block');
-        this.$('.settings-block-wrap').addClass('hidden');
-        $elem.removeClass('hidden');
-        this.$('.settings-panel-head span.settings-panel-head-title').text($elem.attr('data-header'));
-        if (elem_parent) {
-            $tab.attr('data-subblock-parent-name', elem_parent)
-        } else {
-            this.$('.btn-back').removeClass('hidden');
-            this.$('.btn-back-subsettings').addClass('hidden');
         }
-        this.$('.settings-panel-head .description').addClass('hidden');
-        this.scrollToTop();
-        this.updateHeight();
     },
 
-    goToWebNotifications: function () {
-        this.$('.settings-tab[data-block-name="web-notifications"]').click();
+    updateColor: function () {
+        // Color is reactively updated in Vue via model listener
     },
 
-    setIdling: function (ev) {
-        let value = !this.model.get('idling');
-        this.model.save('idling', value);
-        ev.preventDefault();
-        $(ev.target).closest('.setting.idling').find('input').prop('checked', value);
-        this.$('#idle_timeout').prop('disabled', !value);
+    updateBackgroundSetting: function () {
+        // Background is reactively updated in Vue via model listener
     },
 
-    setIdlingTimeout: function (ev) {
-        let $target = $(ev.target),
-            value = $(ev.target).val();
-        value = parseInt(value);
-        if (_.isNaN(value)){
-            value = constants.IDLING_DEFAULT_TIMEOUT;
-        } else if (value < constants.IDLING_MINIMAL_TIMEOUT){
-            value = constants.IDLING_MINIMAL_TIMEOUT;
+    updateHeight: function (is_frame_enabled) {
+        let height;
+        if (this.$('.left-column.main-left-column:not(.hidden)').length)
+            height = this.$('.left-column.main-left-column').height();
+        if (this.$('.right-column.main-right-column:not(.hidden)').length)
+            height = this.$('.right-column.main-right-column').height();
+        if (is_frame_enabled)
+            height = height + 8;
+        if (this.ps_container && this.ps_container.length)
+            this.ps_container.css('height', height + 'px');
+        setTimeout(() => {
+            this.updateScrollBar();
+        }, 500);
+    },
+
+    updateAccounts: function (options) {
+        this._vueInstance && this._vueInstance.updateAccounts();
+        // Single account logic — delegate to Backbone child views for now
+        if (this.settings_single_account_modal) {
+            this.settings_single_account_modal.removeChild('blocklist');
+            this.removeChild('single_account');
+            this.settings_single_account_modal.destroyView();
+            this.settings_single_account_modal = undefined;
         }
-        this.model.save('idling_time', value);
-        $target.val(value);
-        ev.preventDefault();
-    },
-
-    setNotifications: function (ev) {
-        let value = this.model.get('notifications');
-        ev.preventDefault();
-        if (value === null) {
-            utils.callback_popup_message(xabber.getString("notifications__toast_notifications_not_supported"), 1500);
-        } else {
-            value = value && xabber._cache.get('notifications');
-            if (!xabber._cache.get('notifications')) {
-                window.Notification.requestPermission().then((permission) => {
-                    xabber._cache.save({'notifications': (permission === 'granted'), 'ignore_notifications_warning': true});
-                    xabber.notifications_placeholder && xabber.notifications_placeholder.close();
-                    value = (permission === 'granted');
-                    this.model.save('notifications', value ? value : this.model.get('notifications'));
-                    this.$('.setting.notifications input[type=checkbox]').prop('checked', value);
-                    this.$('.notifications-lever input[type=checkbox]').prop('checked', value);
-                    this.$('.message-preview.private-preview input[type=checkbox]').prop('disabled', !(this.model.get('notifications') && xabber._cache.get('notifications') && this.model.get('notifications_private')));
-                    this.$('.message-preview.group-preview input[type=checkbox]').prop('disabled', !(this.model.get('notifications') && xabber._cache.get('notifications') && this.model.get('notifications_group')));
-                    this.$('.desktop-notifications-clue-wrap').hideIf(value);
-                    this.$('.notifications-dependant').switchClass('notifications-dependant-two-line', !value);
+        if (xabber.accounts && xabber.accounts.length === 1 && xabber.accounts.enabled.length) {
+            // Use nextTick to ensure Vue has rendered the single-account container
+            let self = this;
+            setTimeout(() => {
+                let el = self.$('.single-account-info-wrap .single-account-info')[0];
+                if (!el) return;
+                let first_account = xabber.accounts.models[0];
+                self.single_account_has_rendered = false;
+                self.settings_single_account_modal = self.addChild('single_account', xabber.AccountSettingsSingleModalView, {
+                    model: first_account,
+                    forced_ps_container: self.ps_container,
+                    single_account_modal: true,
+                    el: el
                 });
-            } else {
-                value = !value;
-                this.model.save('notifications', value);
-                this.$('.setting.notifications input[type=checkbox]').prop('checked', value);
-                this.$('.notifications-lever input[type=checkbox]').prop('checked', value);
-                this.$('.message-preview.private-preview input[type=checkbox]').prop('disabled', !(this.model.get('notifications') && xabber._cache.get('notifications') && this.model.get('notifications_private')));
-                this.$('.message-preview.group-preview input[type=checkbox]').prop('disabled', !(this.model.get('notifications') && xabber._cache.get('notifications') && this.model.get('notifications_group')));
-                this.$('.desktop-notifications-clue-wrap').hideIf(value);
-                this.$('.notifications-dependant').switchClass('notifications-dependant-two-line', !value);
-            }
+                if (!self.single_account_has_rendered) {
+                    self.settings_single_account_modal.show(null, options);
+                }
+                first_account.trigger('render_single_settings', self.settings_single_account_modal);
+                self.settings_single_account_modal.addChild('blocklist', xabber.BlockListView, {
+                    account: first_account,
+                    el: self.settings_single_account_modal.$('.block-list-view-wrap')[0]
+                });
+                self.updateHeight();
+            }, 0);
         }
-    },
-
-    setPrivateNotifications: function (ev) {
-        let value = !this.model.get('notifications_private');
-        this.model.save('notifications_private', value);
-        ev.preventDefault();
-        this.$('.sound input[type=radio][name=private_sound]').prop('disabled', !value);
-        this.$('.message-preview.private-preview input[type=checkbox]').prop('disabled', !(this.model.get('notifications') && xabber._cache.get('notifications') && this.model.get('notifications_private')));
-        $(ev.target).closest('.private-notifications').find('input').prop('checked', value);
-    },
-
-    setGroupNotifications: function (ev) {
-        let value = !this.model.get('notifications_group');
-        this.model.save('notifications_group', value);
-        ev.preventDefault();
-        this.$('.sound input[type=radio][name=group_sound]').prop('disabled', !value);
-        this.$('.message-preview.group-preview input[type=checkbox]').prop('disabled', !(this.model.get('notifications') && xabber._cache.get('notifications') && this.model.get('notifications_group')));
-        $(ev.target).closest('.group-notifications').find('input').prop('checked', value);
-    },
-
-    setJingleCalls: function (ev) {
-        let value = !this.model.get('jingle_calls');
-        this.model.save('jingle_calls', value);
-        ev.preventDefault();
-        this.$('.sound input[type=radio][name=call_sound]').prop('disabled', !value);
-        this.$('.sound input[type=radio][name=dialtone_sound]').prop('disabled', !value);
-        $(ev.target).closest('.jingle-calls').find('input').prop('checked', value);
-    },
-
-    setPrivateMessagePreview: function (ev) {
-        let value = !this.model.get('message_preview_private');
-        this.model.save('message_preview_private', value);
-        ev.preventDefault();
-        $(ev.target).closest('.setting.message-preview').find('input').prop('checked', value);
-    },
-
-    setGroupMessagePreview: function (ev) {
-        let value = !this.model.get('message_preview_group');
-        this.model.save('message_preview_group', value);
-        ev.preventDefault();
-        $(ev.target).closest('.setting.message-preview').find('input').prop('checked', value);
-    },
-
-    setCallAttention: function (ev) {
-        let value = !this.model.get('call_attention');
-        this.model.save('call_attention', value);
-        ev.preventDefault();
-        $(ev.target).closest('.call-attention').find('input').prop('checked', value);
-    },
-
-    setLoadMedia: function (ev) {
-        let value = !this.model.get('load_media');
-        this.model.save('load_media', value);
-        ev.preventDefault();
-        $(ev.target).closest('.setting.load-media').find('input').prop('checked', value);
-    },
-
-    setTypingNotifications: function (ev) {
-        let value = !this.model.get('typing_notifications');
-        this.model.save('typing_notifications', value);
-        ev.preventDefault();
-        $(ev.target).closest('.setting.typing-notifications').find('input').prop('checked', value);
-    },
-
-    setMappingService: function (ev) {
-        let value = !this.model.get('mapping_service');
-        this.model.save('mapping_service', value);
-        ev.preventDefault();
-        $(ev.target).closest('.setting.mapping-service').find('input').prop('checked', value);
-    },
-
-    setDesktopAutostart: function (ev) {
-        let value = !this.model.get('desktop_autostart');
-        this.model.save('desktop_autostart', value);
-        ev.preventDefault();
-        $(ev.target).closest('.setting.desktop-autostart').find('input').prop('checked', value);
-    },
-
-    setReconnectionLogs: function (ev) {
-        let value = !this.model.get('reconnection_logs');
-        this.model.save('reconnection_logs', value);
-        ev.preventDefault();
-        $(ev.target).closest('.setting.reconnection-popup-log').find('input').prop('checked', value);
-    },
-
-    setDebugMode: function (ev) {
-        let value = !this.model.get('debug_mode');
-        this.model.save('debug_mode', value);
-        ev.preventDefault();
-        $(ev.target).closest('.setting.debug-mode').find('input').prop('checked', value);
-    },
-
-    setPrivateSound: function (ev) {
-        let value = ev.target.value;
-        if (value) {
-            this.current_sound && this.current_sound.pause();
-            this.current_sound = xabber.playAudio(value, false, !this.model.get('notifications_volume_enabled') ? 0 : this.model.get('notifications_volume'));
-            this.model.save({private_sound: true, sound_on_private_message: value});
-        } else {
-            this.model.save('private_sound', false);
-        }
-    },
-
-    setGroupSound: function (ev) {
-        let value = ev.target.value;
-        if (value) {
-            this.current_sound && this.current_sound.pause();
-            this.current_sound = xabber.playAudio(value, false, !this.model.get('notifications_volume_enabled') ? 0 : this.model.get('notifications_volume'));
-            this.model.save({group_sound: true, sound_on_group_message: value});
-        } else {
-            this.model.save('group_sound', false);
-        }
-    },
-
-    setCallSound: function (ev) {
-        let value = ev.target.value;
-        this.current_sound && this.current_sound.pause();
-        this.current_sound = xabber.playAudio(value, false);
-        this.model.save({sound_on_call: value});
-    },
-
-    setDialtoneSound: function (ev) {
-        let value = ev.target.value;
-        this.current_sound && this.current_sound.pause();
-        this.current_sound = xabber.playAudio(value, false);
-        this.model.save({sound_on_dialtone: value});
-    },
-
-    setAttentionSound: function (ev) {
-        let value = ev.target.value;
-        this.current_sound && this.current_sound.pause();
-        this.current_sound = xabber.playAudio(value, false);
-        this.model.save({sound_on_attention: value});
-    },
-
-    setBackground: function (ev) {
-        let value = ev.target.value;
-        if (value === 'default') {
-            this.model.save('background', {type: 'default'});
-            xabber.body.updateBackground();
-            this.updateBackgroundSetting();
-        } else if (value === 'repeating-pattern' || value === 'image') {
-            let background_view = new xabber.SetBackgroundView();
-            background_view.render({type: value, model: this.model});
-        }
-    },
-
-    setFontSize: function (ev) {
-        this.model.save('font_size', ev.target.value);
-        xabber.trigger('update_font_size');
-    },
-
-    changeBackgroundImage: function () {
-        let type = this.model.get('background').type;
-        if (type === 'repeating-pattern' || type === 'image') {
-            let background_view = new xabber.SetBackgroundView();
-            background_view.render({type: type, model: this.model});
-        }
-    },
-
-    openColorPicker: function () {
-        if (!this.colorPicker)
-            this.colorPicker = new xabber.ColorPicker({model: this.model});
-        this.colorPicker.render();
-    },
-
-    chooseMainColor: function (ev) {
-        let color = $(ev.target).closest('.client-main-color-item').attr('data-value');
-        this.model.save('main_color', color);
-        this.$(`.client-main-color-item`).removeClass('chosen-client-color');
-        this.$(`.client-main-color-item[data-value="${color}"]`).addClass('chosen-client-color');
-        xabber.trigger('update_main_color');
-    },
-
-    changeBlur: function () {
-        let value = this.$('#blur')[0].value,
-            appearance = this.model.get('appearance');
-        xabber.body.updateBlur(value);
-        this.model.save('appearance', _.extend(appearance, {blur: value}));
-    },
-
-    changeNotificationsVolume: function () {
-        let volume = this.$('#notifications_volume')[0].value / 100,
-            sound = this.$('.sound input[type=radio][name=private_sound]:checked').val() || this.$('.sound input[type=radio][name=group_sound]:checked').val();
-        this.model.save('notifications_volume', volume);
-        if (sound) {
-            this.current_sound && this.current_sound.pause();
-            this.current_sound = xabber.playAudio(sound, false, volume);
-        }
-    },
-
-    changeVignetting: function () {
-        let value = this.$('#vignetting')[0].value,
-            appearance = this.model.get('appearance');
-        xabber.body.updateBoxShadow(value);
-        this.model.save('appearance', _.extend(appearance, {vignetting: value}));
-    },
-
-    switchVignetting: function () {
-        let is_switched = this.$('#vignetting_switch:checked').length,
-            appearance = this.model.get('appearance'),
-            value = is_switched ? this.$('#vignetting')[0].value : false;
-        this.$('.vignetting-setting .disabled').switchClass('hidden', is_switched);
-        this.model.save('appearance', _.extend(appearance, {vignetting: value}));
-        xabber.body.updateBoxShadow(value);
-    },
-
-    switchBlur: function () {
-        let is_switched = this.$('#blur_switch:checked').length,
-            appearance = this.model.get('appearance'),
-            value = is_switched ? this.$('#blur')[0].value : false;
-        this.$('.blur-setting .disabled').switchClass('hidden', is_switched);
-        this.model.save('appearance', _.extend(appearance, {blur: value}));
-        xabber.body.updateBlur(value);
-    },
-
-    setHotkeys: function (ev) {
-        this.model.save('hotkeys', ev.target.value);
-    },
-
-    setAvatarShape: function (ev) {
-        this.model.save('avatar_shape', ev.target.value);
-        xabber.trigger('update_avatar_shape');
-    },
-
-
-    setDeviceMetadata: function (ev) {
-        this.model.save('device_metadata', ev.target.value);
-        this.$(`.device-metadata-description`).text(xabber.getString(`settings__section_privacy__${this.model.get('device_metadata')}_metadata_description`));
         this.updateHeight();
     },
 
-    deleteAllAccounts: function () {
-        utils.dialogs.ask(xabber.getString("button_quit"), xabber.getString("settings__dialog_quit_client__confirm", [constants.CLIENT_NAME]), null, { ok_button_text: xabber.getString("button_quit")}).done((res) => {
-            res && xabber.trigger('quit');
-        });
+    _updateSingleAccount: function () {
+        // called from Vue when single account detected
+        this.updateAccounts();
     },
-
-    changeLanguage: function (ev) {
-        let value = ev.target.value,
-            locale = Object.keys(client_translation_progress).find(key => !value.indexOf(key)) || constants.languages_another_locales[value] && Object.keys(client_translation_progress).find(key => !constants.languages_another_locales[value].indexOf(key)),
-            progress = client_translation_progress[locale],
-            platform_text;
-
-        (value === 'default') && (progress = 100);
-
-        if (progress === 100 && ((xabber.get("default_language") === 'en' && value === 'default') || value === 'en')) {
-            platform_text = xabber.getString("settings__dialog_change_language__confirm");
-        } else if (progress === 100) {
-            platform_text = xabber.getString("settings__interface_language__change_language_text_full_translation",
-                [constants.SHORT_CLIENT_NAME, `<a target="_blank" href='${constants.PROJECT_CROWDIN_URL}'>${xabber.getString("settings__section_interface_language__text_description__text_translations")}</a>`, constants.SHORT_CLIENT_NAME, ])
-             + '\n\n' +xabber.getString("settings__dialog_change_language__confirm");
-        } else if (progress === 0) {
-            platform_text = xabber.getString("settings__interface_language__change_language_text_no_translation",
-                [constants.SHORT_CLIENT_NAME, `<a target="_blank" href='${constants.PROJECT_CROWDIN_URL}'>${xabber.getString("settings__section_interface_language__text_description__text_translation")}</a>`]);
-        } else {
-            platform_text = xabber.getString("settings__interface_language__change_language_text_partial_translation",
-                [constants.SHORT_CLIENT_NAME, `<a target="_blank" href='${constants.PROJECT_CROWDIN_URL}'>${xabber.getString("settings__section_interface_language__text_description__text_translation_team")}</a>`, constants.SHORT_CLIENT_NAME])
-                + '\n\n' +xabber.getString("settings__dialog_change_language__confirm");
-        }
-        let modal_classes = ['change-language-modal'], inverted_buttons;
-        if (progress === 0){
-            modal_classes.push('change-language-modal-no-ok');
-        } else if (progress !== 0 && progress < 70){
-            inverted_buttons = true;
-        }
-        utils.dialogs.ask(xabber.getString("settings__dialog_change_language__header"),
-            platform_text,
-            {modal_class: modal_classes, no_dialog_options: true, inverted_buttons: inverted_buttons},
-            { ok_button_text: xabber.getString("settings__dialog_change_language__button_change")}).done((result) => {
-
-            if (result) {
-                this.model.save('language', value);
-                window.location.reload(true);
-            } else {
-                this.$(`.languages-list input[type=radio][name=language][value="${this.model.get('language')}"]`)
-                    .prop('checked', true);
-            }
-        });
-    },
-
-    changeEmojiFont: function (ev) {
-        let value = ev.target.value,
-            emoji_font = constants.EMOJI_FONTS_LIST[value],
-            current_time;
-
-
-        if (!emoji_font && value !== 'system'){
-            $(ev.target).closest('.emoji-font-field').detach();
-            utils.dialogs.error(xabber.getString("settings__menu_item__emoji_font_chosen_does_not_exist"));
-            this.$(`.emoji-fonts-list input[type=radio][name=emoji_font][value="${this.model.get('emoji_font')}"]`)
-                .prop('checked', true);
-            return
-        }
-        this.load_emoji_external_dfd = new $.Deferred();
-        this.load_emoji_external_dfd.done(() => {
-
-            this.font_load_dfd = new $.Deferred();
-            this.currently_loaded_font_value = value;
-
-            this.font_load_dfd.done((response) => {
-                if (this.emoji_load_date !== current_time)
-                    return;
-                this.$('.emoji_font .preloader-wrap').addClass('hidden');
-                this.$('.emoji_font .emoji-font-download-text').addClass('hidden');
-                this.$('.emoji_font .emojis-preview').removeClass('hidden');
-                this.$('.emoji_font .emoji-font-external-url-text').addClass('hidden');
-                this.$('.emoji_font .emoji-font-not-supported-text').addClass('hidden');
-                this.$('.emoji_font .emoji-font-external-url-button').addClass('hidden');
-                this.$(`.emoji-fonts-list input[type=radio][name=emoji_font]`)
-                    .prop('disabled', false);
-
-                this.font_load_dfd = null;
-                this.currently_loaded_font_value = null;
-                if (response && response.error){
-                    this.$('.emoji_font .emoji-font-attribution-text').addClass('hidden');
-                    this.$(`.emoji-fonts-list input[type=radio][name=emoji_font][value="${this.model.get('emoji_font')}"]`)
-                        .prop('checked', true);
-                    $(ev.target).prop('disabled', true);
-                    if (this.model.get('emoji_font') !== 'system' && constants.EMOJI_FONTS_LIST[this.model.get('emoji_font')] && constants.EMOJI_FONTS_LIST[this.model.get('emoji_font')].url) {
-                        xabber.loadEmojiFont(constants.EMOJI_FONTS_LIST[this.model.get('emoji_font')].url);
-                    }
-                } else {
-                    this.model.save('emoji_font', value);
-                }
-            });
-
-            this.$('.emoji_font .emoji-font-external-url-text').addClass('hidden');
-            this.$('.emoji_font .emoji-font-not-supported-text').addClass('hidden');
-            this.$('.emoji_font .emoji-font-external-url-button').addClass('hidden');
-            this.$('.emoji_font .preloader-wrap').removeClass('hidden');
-            this.$('.emoji_font .emoji-font-download-text').removeClass('hidden');
-            let emoji_url = value === 'system' ? value : emoji_font.url;
-            this.load_emoji_external_dfd = null;
-            this.$(`.emoji-fonts-list input[type=radio][name=emoji_font]`)
-                .prop('disabled', true);
-            this.emoji_load_date = Date.now();
-            current_time = this.emoji_load_date;
-            this.$('.settings-tab[data-block-name="emoji_font"] .settings-block-label').text(xabber.getString("settings__menu_item__emoji_font_downloading_text"));
-            xabber.loadEmojiFont(emoji_url, this.font_load_dfd);
-        });
-
-        this.$('.emoji_font .emojis-preview').addClass('hidden');
-        this.$('.emoji_font .emoji-font-attribution-text').addClass('hidden');
-
-        if (value !== 'system'){
-            this.$('.emoji_font .emoji-font-external-url-text').switchClass('hidden', !emoji_font.is_outside_url);
-            this.$('.emoji_font .emoji-font-not-supported-text').switchClass('hidden', !(emoji_font.no_glyph && utils.getBrowser() === "Firefox"));
-            this.$('.emoji_font .emoji-font-not-supported-text').switchClass('also-external', emoji_font.is_outside_url && emoji_font.no_glyph);
-            this.$('.emoji_font .emoji-font-external-url-button').removeClass('hidden');
-        } else {
-            this.load_emoji_external_dfd.resolve();
-        }
-    },
-
-    loadExternalEmojiFont: function () {
-        this.load_emoji_external_dfd && this.load_emoji_external_dfd.resolve();
-    },
-
-    updateEmojiFontLabel: function () {
-        if (!constants.EMOJI_FONTS_LIST[this.model.get('emoji_font')] && this.model.get('emoji_font') !== 'system') {
-            this.$('.settings-tab[data-block-name="emoji_font"] .settings-block-label').text(xabber.getString("settings__menu_item__emoji_font_chosen_does_not_exist"));
-            return;
-        }
-        let label = this.model.get('emoji_font') === 'system' ? 'system' : constants.EMOJI_FONTS_LIST[this.model.get('emoji_font')].name,
-            attribution_text = this.model.get('emoji_font') === 'system' ? '' : constants.EMOJI_FONTS_LIST[this.model.get('emoji_font')].attribution_text;
-        if (label === 'system')
-            label = xabber.getString("settings__menu_item__emoji_font_system");
-        this.$('.settings-tab[data-block-name="emoji_font"] .settings-block-label').text(label);
-        this.$('.emoji-font-attribution-text').switchClass('hidden', !attribution_text);
-        this.$('.emoji-font-attribution-text').html(attribution_text);
-        this.$(`.emoji-fonts-list input[type=radio][name=emoji_font][value="${this.model.get('emoji_font')}"]`)
-            .prop('checked', true);
-        this.$(`.emoji-fonts-list input[type=radio][name=emoji_font]`)
-            .prop('disabled', false);
-        this.$('.emoji_font .emoji-font-external-url-text').addClass('hidden');
-        this.$('.emoji_font .emoji-font-not-supported-text').addClass('hidden');
-        this.$('.emoji_font .emoji-font-external-url-button').addClass('hidden');
-        this.$('.emoji_font .preloader-wrap').addClass('hidden');
-        this.$('.emoji_font .emoji-font-download-text').addClass('hidden');
-        this.$('.emoji_font .emojis-preview').removeClass('hidden');
-        if (this.font_load_dfd && this.currently_loaded_font_value){
-            this.$('.emoji_font .emojis-preview').addClass('hidden');
-            this.$('.emoji-font-attribution-text').addClass('hidden');
-            this.$('.emoji_font .preloader-wrap').removeClass('hidden');
-            this.$('.emoji_font .emoji-font-download-text').removeClass('hidden');
-            this.$(`.emoji-fonts-list input[type=radio][name=emoji_font]`)
-                .prop('disabled', true);
-            this.$(`.emoji-fonts-list input[type=radio][name=emoji_font][value="${this.currently_loaded_font_value}"]`)
-                .prop('checked', true);
-            this.$('.settings-tab[data-block-name="emoji_font"] .settings-block-label').text(xabber.getString("settings__menu_item__emoji_font_downloading_text"));
-        }
-    },
-
-    updateLanguage: function () {
-        if (this.model.get('language') === 'default'){
-            this.$('.settings-tab[data-block-name="interface_language"] .settings-block-label').text(xabber.getString("settings__languages_list___item_default", [constants.languages[xabber.get("default_language") || 'en']]));
-        } else {
-            this.$('.settings-tab[data-block-name="interface_language"] .settings-block-label').text(constants.languages[this.model.get('language')]);
-        }
-    },
-
-    showAddAccountView: function () {
-        xabber.trigger('add_account', {right: null});
-    },
-
-    updateDescription: function () {
-
-        if (!xabber.settings.language)
-            return;
-
-        let lang = xabber.settings.language,
-            locale = Object.keys(client_translation_progress).find(key => !lang.indexOf(key)) || constants.languages_another_locales[lang] && Object.keys(client_translation_progress).find(key => !constants.languages_another_locales[lang].indexOf(key)),
-            progress = client_translation_progress[locale];
-
-        (lang === 'default' || !lang.indexOf('en')) && (progress = 100);
-
-        if (!_.isUndefined(progress)) {
-            let progress_text, platform_text;
-            if (progress === 100 && ((xabber.get("default_language") === 'en' && lang === 'default') || lang === 'en')) {
-                progress_text = xabber.getString("settings__interface_language__text_description_full_translation_english", [constants.SHORT_CLIENT_NAME, `<a target="_blank" class="email-link" href='mailto:${constants.EMAIL_FOR_JOIN_TRANSLATION}'>${constants.EMAIL_FOR_JOIN_TRANSLATION}</a>`, constants.SHORT_CLIENT_NAME]);
-            } else if (progress === 100) {
-                progress_text = xabber.getString("settings__interface_language__text_description_full_translation", [constants.SHORT_CLIENT_NAME, constants.SHORT_CLIENT_NAME]);
-            } else if (progress === 0) {
-                progress_text = xabber.getString("settings__section_interface_language__text_description_no_translations", [constants.SHORT_CLIENT_NAME]);
-            } else {
-                progress_text = xabber.getString("settings__interface_language__text_description_unfull_translation", [constants.SHORT_CLIENT_NAME]);
-            }
-            platform_text = xabber.getString("settings__interface_language__text_description_platform",
-                [constants.SHORT_CLIENT_NAME, `<a target="_blank" href='${constants.PROJECT_CROWDIN_URL}'>${constants.PROJECT_CROWDIN_URL}</a>`]);
-            this.$('.description').html(`${progress_text}<br><br>${platform_text}`);
-        }
-    },
-
-    updateAvatarLabel: function () {
-        let shape = this.model.get('avatar_shape'), label_text;
-        if (shape === 'circle')
-            label_text = xabber.getString("settings__section_appearance__avatars_circle");
-        if (shape === 'squircle')
-            label_text = xabber.getString("settings__section_appearance__avatars_squircle");
-        if (shape === 'octagon')
-            label_text = xabber.getString("settings__section_appearance__avatars_octagon");
-        if (shape === 'hexagon')
-            label_text = xabber.getString("settings__section_appearance__avatars_hexagon");
-        if (shape === 'pentagon')
-            label_text = xabber.getString("settings__section_appearance__avatars_pentagon");
-        if (shape === 'rounded')
-            label_text = xabber.getString("settings__section_appearance__avatars_rounded");
-        if (shape === 'star')
-            label_text = xabber.getString("settings__section_appearance__avatars_star");
-        this.$('.settings-tab[data-block-name="avatars"] .settings-block-label').text(label_text);
-    },
-
-    updateSoundsLabel: function () {
-        let sound_private_value = this.model.get('private_sound') && this.model.get('notifications_private') ? this.model.get('sound_on_private_message') : '',
-            sound_group_value = this.model.get('group_sound') && this.model.get('notifications_group') ? this.model.get('sound_on_group_message') : '',
-            sound_on_attention = this.model.get('call_attention') ? this.model.get('sound_on_attention') : '',
-            sound_private_text, sound_group_text, sound_on_attention_text;
-
-
-        if (sound_private_value === '')
-            sound_private_text = 'No sound';
-        else
-            sound_private_text = sound_private_value.replace('_', ' ');
-
-        if (sound_group_value === '')
-            sound_group_text = 'No sound';
-        else
-            sound_group_text = sound_group_value.replace('_', ' ');
-
-        if (sound_on_attention === '')
-            sound_on_attention_text = 'No sound';
-        else
-            sound_on_attention_text = sound_on_attention.replace('_', ' ');
-
-        this.$('.settings-tab[data-block-name="chats-notifications"] .settings-block-label').text(sound_private_text);
-        this.$('.settings-tab[data-block-name="groupchats-notifications"] .settings-block-label').text(sound_group_text);
-        this.$('.settings-tab[data-block-name="attention-calls"] .settings-block-label').text(sound_on_attention_text);
-    },
+    }
 });
 
 xabber.ColorPicker = xabber.BasicView.extend({

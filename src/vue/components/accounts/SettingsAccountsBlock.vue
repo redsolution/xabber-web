@@ -1,5 +1,5 @@
 <template>
-    <div class="settings-panel-label">{{ xb.getString("settings__menu_item__xmpp_account") }}</div>
+    <div class="settings-panel-label vue-migrated">{{ xb.getString("settings__menu_item__xmpp_account") }}</div>
     <div class="settings-divider"></div>
     <AccountSettingsItem
         v-for="account in sortedAccounts"

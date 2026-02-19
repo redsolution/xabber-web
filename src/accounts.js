@@ -7645,8 +7645,7 @@ xabber.once("start", function () {
 
     this.toolbar_view.addChild('accounts', this.ToolbarAccountsBlockView,
         {model: this.accounts, el: this.toolbar_view.$('.accounts')[0]});
-    this.settings_modal_view.addChild('accounts_modal', this.SettingsAccountsModalBlockView,
-        {model: this.accounts, el: this.settings_modal_view.$('.accounts-info-wrap')[0]});
+    // accounts_modal is now rendered inside SettingsModal.vue directly
 
 
     this.on("add_account", function () {

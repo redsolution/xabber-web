@@ -17,8 +17,8 @@ export function createVueBackboneView(xabber, options) {
             this._vueInit && this._vueInit(viewOptions);
         },
         render: function () { return this; },
-        onShow: function () { this._vueInstance?.onShow?.(); },
-        onHide: function () { this._vueInstance?.onHide?.(); },
+        onShow: function () { this._vueInstance?.onShow?.(...arguments); },
+        onHide: function () { this._vueInstance?.onHide?.(...arguments); },
         remove: function () {
             this._vueApp && this._vueApp.unmount();
             return xabber.BasicView.prototype.remove.call(this);
