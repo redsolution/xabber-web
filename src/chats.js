@@ -5724,7 +5724,7 @@ xabber.ChatContentView = xabber.BasicView.extend({
                         else if (!message.get('synced_invitation_from_server') && !((message.get('notification_msg') && message.get('notification_msg_content'))))
                             this.notifyMessage(message);
                     }
-                    this.model.setMessagesDisplayed(message.get('timestamp'));
+                    !message.get('groupchat_system_msg') && this.model.setMessagesDisplayed(message.get('timestamp'));
                 }
             }
             if (this.contact && this.model.get('archived')){
