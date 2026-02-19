@@ -6,6 +6,7 @@ import ContactDetailsRightComponent from "./vue/components/contacts/ContactDetai
 import GroupChatDetailsRightComponent from "./vue/components/contacts/GroupChatDetailsRight.vue";
 import { transliterate as query_transliterate } from 'transliteration';
 import RosterLeftPanelComponent from './vue/components/contacts/RosterLeftPanel.vue';
+import RosterFullScreenComponent from './vue/components/contacts/RosterFullScreen.vue';
 
 let env = xabber.env,
     constants = env.constants,
@@ -11512,9 +11513,11 @@ xabber.ContactsBodyContainer = xabber.Container.extend({
     className: 'contacts-body-container',
 });
 
-xabber.RosterFullScreenView = xabber.BasicView.extend({
+xabber.RosterFullScreenView = createVueBackboneView(xabber, {
+    component: RosterFullScreenComponent,
     className: 'roster-left-container container',
-    template: templates.roster_fullscreen,
+    props: function (view) { return {}; },
+    extend: {
     ps_selector: '.contacts-content-wrap',
     ps_settings: {theme: 'item-list'},
     events: {
@@ -11569,7 +11572,12 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
         "click .btn-decline-invitation": "declineInvitation",
     },
 
-    _initialize: function (options) {
+    onShow: function () {
+        this.render.apply(this, arguments);
+    },
+
+    _vueInit: function (options) {
+        this.ps_container = this.$('.contacts-content-wrap');
         if (options.is_groupchats)
             this.is_groupchats = true;
         this._settings = xabber._roster_settings;
@@ -11598,13 +11606,11 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
         this.listenTo(xabber, 'change:video', this.updateJingleButtons);
         this.listenTo(xabber, 'change:audio', this.updateJingleButtons);
         this.updateAccountsFilter();
-        if (!_.isUndefined(this.ps_selector)) {
-            this.ps_container2 = this.$('.left-column-filters-container');
-            if (this.ps_container2.length) {
-                this.ps_container2.perfectScrollbar(
-                    _.extend(this.ps_settings || {}, xabber.ps_settings)
-                );
-            }
+        this.ps_container2 = this.$('.left-column-filters-container');
+        if (this.ps_container2.length) {
+            this.ps_container2.perfectScrollbar(
+                _.extend(this.ps_settings || {}, xabber.ps_settings)
+            );
         }
     },
 
@@ -13312,7 +13318,7 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
 
     updateLeftIndicator: function () {
     },
-});
+}});
 
 xabber.RosterSettingsView = xabber.BasicView.extend({
     className: 'roster-settings-wrap',
