@@ -1,4 +1,4 @@
-import { createApp } from 'vue';
+import { createApp, markRaw } from 'vue';
 import { XABBER_KEY } from './composables/useXabber.js';
 
 export const VIEW_EL_KEY = Symbol('viewEl');
@@ -10,7 +10,7 @@ export function createVueBackboneView(xabber, options) {
         template: function () { return ''; },
         _initialize: function (viewOptions) {
             this._vueApp = createApp(component, props ? props(this, viewOptions) : {});
-            this._vueApp.provide(XABBER_KEY, xabber);
+            this._vueApp.provide(XABBER_KEY, markRaw(xabber));
             this._vueApp.provide(VIEW_EL_KEY, this.$el);
             setup && setup(this._vueApp, this);
             this._vueInstance = this._vueApp.mount(this.$el[0]);

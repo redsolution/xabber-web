@@ -155,7 +155,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted, nextTick, watch } from 'vue';
+import { ref, shallowRef, computed, onMounted, onUnmounted, nextTick, watch } from 'vue';
 import { useXabber } from '../../composables/useXabber.js';
 import SvgIcon from '../SvgIcon.vue';
 
@@ -171,7 +171,7 @@ const xb = useXabber();
 const utils = xb.env.utils;
 const Strophe = xb.env.Strophe;
 
-const vcard = ref(props.model.get('vcard') || {});
+const vcard = shallowRef(props.model.get('vcard') || {});
 const refreshing = ref(false);
 const isConnected = ref(props.model.isConnected ? props.model.isConnected() : true);
 const urlValueEl = ref(null);

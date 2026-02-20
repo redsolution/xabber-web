@@ -105,7 +105,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue';
+import { ref, shallowRef, computed, onMounted, onUnmounted, nextTick } from 'vue';
 import { useXabber } from '../../composables/useXabber.js';
 import SvgIcon from '../SvgIcon.vue';
 
@@ -122,7 +122,7 @@ const _ = xb.env._;
 let backboneView = null;
 
 const vcardHidden = ref(true);
-const info = ref(props.model.get('group_info') || {});
+const info = shallowRef(props.model.get('group_info') || {});
 const contactName = ref(props.model.get('name') || '');
 const rosterName = ref(props.model.get('roster_name') || '');
 

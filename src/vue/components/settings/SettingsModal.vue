@@ -822,7 +822,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted, nextTick, inject } from 'vue';
+import { ref, shallowRef, computed, onMounted, onUnmounted, nextTick, inject } from 'vue';
 import { useXabber } from '../../composables/useXabber.js';
 import { VIEW_EL_KEY } from '../../mountVue.js';
 import SettingsAccountsBlock from '../accounts/SettingsAccountsBlock.vue';
@@ -905,7 +905,7 @@ const cachedNotifications = ref(xb._cache.get('notifications'));
 const notificationsVolume = ref(!isNaN(props.model.get('notifications_volume')) ? props.model.get('notifications_volume') * 100 : 100);
 
 // Appearance
-const appearance = ref(props.model.get('appearance') || {});
+const appearance = shallowRef(props.model.get('appearance') || {});
 const blurSwitched = ref(appearance.value.blur !== false);
 const blurValue = ref(blurSwitched.value ? appearance.value.blur : 50);
 const vignettingSwitched = ref(appearance.value.vignetting !== false);
@@ -913,7 +913,7 @@ const vignettingValue = ref(vignettingSwitched.value ? appearance.value.vignetti
 const selectedColor = ref(appearance.value.color || '#E0E0E0');
 
 // Accounts
-const accounts = ref(xb.accounts || null);
+const accounts = shallowRef(xb.accounts || null);
 const isSingleAccount = ref(false);
 
 // Static data

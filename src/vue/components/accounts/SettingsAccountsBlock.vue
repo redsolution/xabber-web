@@ -14,7 +14,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue';
+import { ref, shallowRef, onMounted, onUnmounted } from 'vue';
 import { useXabber } from '../../composables/useXabber.js';
 import AccountSettingsItem from './AccountSettingsItem.vue';
 
@@ -26,7 +26,7 @@ const props = defineProps({
 const xb = useXabber();
 const $ = xb.env.$;
 
-const sortedAccounts = ref([...props.accounts.models]);
+const sortedAccounts = shallowRef([...props.accounts.models]);
 const moveToBottom = ref(null);
 const itemRefs = ref([]);
 

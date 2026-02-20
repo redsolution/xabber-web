@@ -34,7 +34,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue';
+import { ref, shallowRef, computed, onMounted, onUnmounted, nextTick } from 'vue';
 import { useXabber } from '../../composables/useXabber.js';
 
 const props = defineProps({
@@ -51,7 +51,7 @@ const avatarEl = ref(null);
 const dropTarget = ref(null);
 
 const enabled = ref(props.account.get('enabled'));
-const vcard = ref(props.account.get('vcard'));
+const vcard = shallowRef(props.account.get('vcard'));
 const image = ref(props.account.cached_image);
 const colorScheme = ref(props.account.settings.get('color'));
 const encryptionWarning = ref(false);

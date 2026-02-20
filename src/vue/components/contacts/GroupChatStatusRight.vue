@@ -20,7 +20,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue';
+import { ref, shallowRef, computed, onMounted, onUnmounted } from 'vue';
 import { useXabber } from '../../composables/useXabber.js';
 import SvgIcon from '../SvgIcon.vue';
 
@@ -31,7 +31,7 @@ const props = defineProps({
 const xb = useXabber();
 const env = xb.env;
 
-const groupInfo = ref(props.model.get('group_info') || {});
+const groupInfo = shallowRef(props.model.get('group_info') || {});
 const status = ref(props.model.get('status') || '');
 const isInvitation = ref(!!props.model.get('invitation'));
 

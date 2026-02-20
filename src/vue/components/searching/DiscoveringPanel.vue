@@ -90,7 +90,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, nextTick } from 'vue';
+import { ref, shallowRef, computed, onMounted, nextTick } from 'vue';
 import { useXabber } from '../../composables/useXabber.js';
 import AccountItem from './AccountItem.vue';
 import GroupchatItem from './GroupchatItem.vue';
@@ -108,10 +108,10 @@ const propertiesVisible = ref(false);
 const dropdownOpen = ref(false);
 const loading = ref(false);
 const resultString = ref('');
-const chatResults = ref([]);
-const selectedChat = ref(null);
-const selectedAccount = ref(null);
-const connectedAccounts = ref([]);
+const chatResults = shallowRef([]);
+const selectedChat = shallowRef(null);
+const selectedAccount = shallowRef(null);
+const connectedAccounts = shallowRef([]);
 const scrollWrap = ref(null);
 
 const accountColor = computed(() => {
