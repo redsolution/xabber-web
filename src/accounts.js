@@ -10,6 +10,8 @@ import ChangePasswordComponent from "./vue/components/accounts/ChangePassword.vu
 import ResourceComponent from "./vue/components/accounts/Resource.vue";
 import ResourceRightComponent from "./vue/components/accounts/ResourceRight.vue";
 import ChangeAccountPasswordComponent from "./vue/components/accounts/ChangeAccountPassword.vue";
+import SetAvatarComponent from "./vue/components/accounts/SetAvatar.vue";
+import DeleteFilesFromGalleryComponent from "./vue/components/accounts/DeleteFilesFromGallery.vue";
 
 let env = xabber.env,
     constants = env.constants,
@@ -3327,19 +3329,34 @@ xabber.AccountMediaGalleryView = xabber.BasicView.extend({
     },
 });
 
-xabber.DeleteFilesFromGalleryView = xabber.BasicView.extend({
+xabber.DeleteFilesFromGalleryView = createVueBackboneView(xabber, {
+    component: DeleteFilesFromGalleryComponent,
     className: 'modal main-modal delete-files-modal',
+    props: (view) => ({ uid: view.cid }),
+    extend: {
     ps_selector: '.modal-content',
     ps_settings: {
         wheelPropagation: true
     },
-    template: templates.delete_files_media_gallery,
     events: {
         "click .btn-confirm": "deleteFilesFiltered",
         "click .btn-delete-files-percent": "deletePercent",
         "click .btn-cancel": "close",
         "click .gallery-file": "onClickFile",
-        "change #delete_avatars": "onChangeCheckbox",
+        "change .delete-avatars-checkbox input": "onChangeCheckbox",
+    },
+
+    _vueInit: function () {
+        this.ps_container = this.$(this.ps_selector);
+        if (this.ps_container.length) {
+            this.ps_container.perfectScrollbar(
+                _.extend(this.ps_settings || {}, xabber.ps_settings)
+            );
+        }
+    },
+
+    onShow: function () {
+        this.render.apply(this, arguments);
     },
 
     render: function (options) {
@@ -3620,7 +3637,7 @@ xabber.DeleteFilesFromGalleryView = xabber.BasicView.extend({
     closeModal: function () {
         this.$el.closeModal({ complete: this.hide.bind(this) });
     }
-});
+}});
 
 xabber.AccountSettingsModalView = createVueBackboneView(xabber, {
     component: AccountSettingsModal,
@@ -5350,9 +5367,10 @@ xabber.ChangeStatusView = createVueBackboneView(xabber, {
     }
 }});
 
-xabber.SetAvatarView = xabber.BasicView.extend({
+xabber.SetAvatarView = createVueBackboneView(xabber, {
+    component: SetAvatarComponent,
     className: 'modal main-modal avatar-picker background-panel',
-    template: templates.avatars_gallery,
+    extend: {
     ps_selector: '.modal-content',
     ps_settings: {theme: 'item-list'},
 
@@ -5365,8 +5383,18 @@ xabber.SetAvatarView = xabber.BasicView.extend({
         "click .btn-cancel": "close"
     },
 
-    _initialize: function () {
+    _vueInit: function () {
+        this.ps_container = this.$(this.ps_selector);
+        if (this.ps_container.length) {
+            this.ps_container.perfectScrollbar(
+                _.extend(this.ps_settings || {}, xabber.ps_settings)
+            );
+        }
         this.$('input.url')[0].onpaste = this.onPaste.bind(this);
+    },
+
+    onShow: function () {
+        this.render.apply(this, arguments);
     },
 
     render: function (options) {
@@ -5671,7 +5699,7 @@ xabber.SetAvatarView = xabber.BasicView.extend({
             }
         });
     }
-});
+}});
 
 xabber.WebcamProfileImageView = xabber.BasicView.extend({
     className: 'modal main-modal webcam-panel',

@@ -4,6 +4,7 @@ import { createVueBackboneView } from "./vue/mountVue.js";
 import SettingsModal from "./vue/components/settings/SettingsModal.vue";
 import JingleMessageComponent from "./vue/components/JingleMessage.vue";
 import ToolbarComponent from "./vue/components/Toolbar.vue";
+import DurationPickerComponent from "./vue/components/DurationPicker.vue";
 
 let env = xabber.env,
     constants = env.constants,
@@ -4259,9 +4260,10 @@ xabber.DataTimePickerView = xabber.BasicView.extend({
     },
 });
 
-xabber.DurationPickerView = xabber.BasicView.extend({
+xabber.DurationPickerView = createVueBackboneView(xabber, {
+    component: DurationPickerComponent,
     className: 'modal main-modal duration-picker-modal',
-    template: templates.duration_picker,
+    extend: {
 
     events: {
         "change .duration-input": "onInputChange",
@@ -4270,8 +4272,8 @@ xabber.DurationPickerView = xabber.BasicView.extend({
         "click .btn-cancel": "close",
     },
 
-
-    _initialize: function () {
+    onShow: function () {
+        this.render.apply(this, arguments);
     },
 
     updateColorScheme: function () {
@@ -4467,7 +4469,7 @@ xabber.DurationPickerView = xabber.BasicView.extend({
             }
         });
     },
-});
+}});
 
 xabber.AboutView = xabber.BasicView.extend({
     className: 'settings-panel about-panel',

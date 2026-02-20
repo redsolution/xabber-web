@@ -13,6 +13,8 @@ import AddContactComponent from './vue/components/contacts/AddContact.vue';
 import GroupSettingsComponent from './vue/components/contacts/GroupSettings.vue';
 import RosterSettingsComponent from './vue/components/contacts/RosterSettings.vue';
 import SetGroupchatStatusComponent from './vue/components/contacts/SetGroupchatStatus.vue';
+import EditContactsGroupsModalComponent from './vue/components/contacts/EditContactsGroupsModal.vue';
+import GroupchatInvitationComponent from './vue/components/contacts/GroupchatInvitation.vue';
 
 let env = xabber.env,
     constants = env.constants,
@@ -7313,9 +7315,10 @@ xabber.KnownPeerDevices = Backbone.ModelWithStorage.extend({
     },
 });
 
-xabber.GroupchatInvitationView = xabber.BasicView.extend({
+xabber.GroupchatInvitationView = createVueBackboneView(xabber, {
+    component: GroupchatInvitationComponent,
     className: 'details-panel invitation-view',
-    template: templates.group_chats.invitation,
+    extend: {
     ps_selector: '.panel-content',
     avatar_size: constants.AVATAR_SIZES.CONTACT_DETAILS,
 
@@ -7325,12 +7328,22 @@ xabber.GroupchatInvitationView = xabber.BasicView.extend({
         "click .btn-block": "blockContact"
     },
 
-    _initialize: function (options) {
+    _vueInit: function (options) {
+        this.ps_container = this.$(this.ps_selector);
+        if (this.ps_container.length) {
+            this.ps_container.perfectScrollbar(
+                _.extend(this.ps_settings || {}, xabber.ps_settings)
+            );
+        }
         this.account = this.model.account;
         this.$('.msg-text').text(options.message && options.message.get('message') ? options.message.get('message') : xabber.getString("groupchat__public_group__text_invitation", [this.account.get('jid')]));
         this.message = options.message;
         this.listenTo(this.model, 'change', this.update);
         this.getGroupMembers();
+    },
+
+    onShow: function () {
+        this.render.apply(this, arguments);
     },
 
     render: function () {
@@ -7554,7 +7567,7 @@ xabber.GroupchatInvitationView = xabber.BasicView.extend({
             }
         });
     }
-});
+}});
 
 xabber.ContactNameWidget = xabber.InputWidget.extend({
     field_name: 'contact-name',
@@ -11534,12 +11547,17 @@ xabber.RosterLeftView = createVueBackboneView(xabber, {
 });
 
 
-xabber.EditContactsGroupsModalView = xabber.BasicView.extend({
+xabber.EditContactsGroupsModalView = createVueBackboneView(xabber, {
+    component: EditContactsGroupsModalComponent,
     className: 'modal main-modal edit-groups-modal',
-    template: templates.edit_groups_modal,
+    extend: {
     ps_selector: '.modal-content',
     events: {
         "click .btn-cancel": "close",
+    },
+
+    onShow: function () {
+        this.render.apply(this, arguments);
     },
 
     open: function (options) {
@@ -11569,7 +11587,7 @@ xabber.EditContactsGroupsModalView = xabber.BasicView.extend({
     closeModal: function () {
         this.$el.closeModal({ complete: this.hide.bind(this) });
     },
-});
+}});
 
 xabber.ContactsBodyContainer = xabber.Container.extend({
     className: 'contacts-body-container',

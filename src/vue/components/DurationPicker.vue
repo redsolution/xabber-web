@@ -1,0 +1,49 @@
+<template>
+    <div class="modal-header vue-migrated">{{ xb.getString("duration_modal__header_text") }}</div>
+    <div class="modal-content vue-migrated">
+        <div class="duration-inputs-wrap">
+            <div class="time-input-controls">
+            </div>
+            <div class="duration-inputs-container">
+                <div class="duration-input-container">
+                    <i class="btn-add-day mdi mdi-24px mdi-chevron-up btn-change-duration"></i>
+                    <input type="text" min="0" class="duration-input input-glow" name="days_duration" placeholder="0" maxlength="3">
+                    <div class="duration-input-label no-select">{{ xb.getString("days") }}</div>
+                    <i class="btn-minus-day mdi mdi-24px mdi-chevron-down btn-change-duration btn-minus-duration"></i>
+                </div>
+                <div class="duration-input-container">
+                    <i class="btn-add-hour mdi mdi-24px mdi-chevron-up btn-change-duration"></i>
+                    <input type="text" min="0" max="24" class="duration-input input-glow" name="hours_duration" placeholder="0" maxlength="2">
+                    <div class="duration-input-label no-select">{{ xb.getString("hours") }}</div>
+                    <i class="btn-minus-hour mdi mdi-24px mdi-chevron-down btn-change-duration btn-minus-duration"></i>
+                </div>
+                <div class="duration-input-container">
+                    <i class="btn-add-minute mdi mdi-24px mdi-chevron-up btn-change-duration"></i>
+                    <input type="text" min="0" max="60" class="duration-input input-glow" name="minutes_duration" placeholder="0" maxlength="2">
+                    <div class="duration-input-label no-select">{{ xb.getString("minutes") }}</div>
+                    <i class="btn-minus-minute mdi mdi-24px mdi-chevron-down btn-change-duration btn-minus-duration"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer vue-migrated">
+        <button class="btn-flat btn-main btn-set">{{ xb.getString("set") }}</button>
+        <button class="btn-flat btn-main btn-dark btn-cancel">{{ xb.getString("cancel") }}</button>
+    </div>
+</template>
+
+<script setup>
+import { useXabber } from '../composables/useXabber.js';
+
+const xb = useXabber();
+
+let backboneView = null;
+
+function setBackboneView(view) {
+    backboneView = view;
+}
+
+defineExpose({
+    setBackboneView,
+});
+</script>

@@ -11,6 +11,9 @@ import AddGroupChatComponent from './vue/components/chats/AddGroupChat.vue';
 import SubscriptionButtonsComponent from './vue/components/chats/SubscriptionButtons.vue';
 import EphemeralTimerSelectorComponent from './vue/components/chats/EphemeralTimerSelector.vue';
 import ReportAbuseComponent from './vue/components/chats/ReportAbuse.vue';
+import SendMediaComponent from './vue/components/chats/SendMedia.vue';
+import ExportChatHistoryComponent from './vue/components/chats/ExportChatHistory.vue';
+import DeleteWithOptionsComponent from './vue/components/chats/DeleteWithOptions.vue';
 
 let env = xabber.env,
     constants = env.constants,
@@ -13205,9 +13208,10 @@ xabber.InvitationPanelView = xabber.SearchView.extend({
 });
 
 
-  xabber.SendMediaView = xabber.BasicView.extend({
+  xabber.SendMediaView = createVueBackboneView(xabber, {
+      component: SendMediaComponent,
       className: 'modal main-modal avatar-picker background-panel',
-      template: templates.send_media,
+      extend: {
       ps_selector: '.modal-content',
       ps_settings: {theme: 'item-list'},
 
@@ -13220,8 +13224,18 @@ xabber.InvitationPanelView = xabber.SearchView.extend({
           "click .btn-cancel": "close"
       },
 
-      _initialize: function () {
+      _vueInit: function () {
+          this.ps_container = this.$(this.ps_selector);
+          if (this.ps_container.length) {
+              this.ps_container.perfectScrollbar(
+                  _.extend(this.ps_settings || {}, xabber.ps_settings)
+              );
+          }
           this.$('input.url')[0].onpaste = this.onPaste.bind(this);
+      },
+
+      onShow: function () {
+          this.render.apply(this, arguments);
       },
 
       render: function (options) {
@@ -13435,7 +13449,7 @@ xabber.InvitationPanelView = xabber.SearchView.extend({
               }
           });
       }
-  });
+  }});
 
 xabber.ChatLocationView = xabber.BasicView.extend({
     className: 'modal main-modal chat-location ',
@@ -16447,9 +16461,10 @@ xabber.ChatBottomView = createVueBackboneView(xabber, {
 }
 });
 
-xabber.DeleteWithOptionsView = xabber.BasicView.extend({
+xabber.DeleteWithOptionsView = createVueBackboneView(xabber, {
+    component: DeleteWithOptionsComponent,
     className: 'modal main-modal delete-with-options-modal',
-    template: templates.delete_with_options,
+    extend: {
     ps_selector: '.modal-content',
 
     events: {
@@ -16466,6 +16481,20 @@ xabber.DeleteWithOptionsView = xabber.BasicView.extend({
         "click .tag-item": "switchTaggedItemsVisibility",
         "click .select-timer-dropdown-btn": "onSelectTimerDropdownClick",
     },
+
+    _vueInit: function () {
+        this.ps_container = this.$(this.ps_selector);
+        if (this.ps_container.length) {
+            this.ps_container.perfectScrollbar(
+                _.extend(this.ps_settings || {}, xabber.ps_settings)
+            );
+        }
+    },
+
+    onShow: function () {
+        this.render.apply(this, arguments);
+    },
+
     open: function (options) {
         this.account = options.account;
         this.model = options.contact;
@@ -17318,7 +17347,7 @@ xabber.DeleteWithOptionsView = xabber.BasicView.extend({
     closeModal: function () {
         this.$el.closeModal({ complete: this.hide.bind(this) });
     }
-});
+}});
 
 xabber.ReportAbuseView = createVueBackboneView(xabber, {
     component: ReportAbuseComponent,
@@ -17653,17 +17682,31 @@ xabber.ChatSettings = Backbone.ModelWithStorage.extend({
 });
 
 
-xabber.ExportChatHistoryView = xabber.BasicView.extend({
+xabber.ExportChatHistoryView = createVueBackboneView(xabber, {
+    component: ExportChatHistoryComponent,
     className: 'modal main-modal export-history-modal',
+    extend: {
     ps_selector: '.modal-content',
     ps_settings: {
         wheelPropagation: true
     },
-    template: templates.export_history,
     events: {
         "click .btn-cancel": "close",
         "click .export-history-progress-bar": "startLoad",
         "click .btn-confirm": "exportFile",
+    },
+
+    _vueInit: function () {
+        this.ps_container = this.$(this.ps_selector);
+        if (this.ps_container.length) {
+            this.ps_container.perfectScrollbar(
+                _.extend(this.ps_settings || {}, xabber.ps_settings)
+            );
+        }
+    },
+
+    onShow: function () {
+        this.render.apply(this, arguments);
     },
 
     render: function (options) {
@@ -17842,7 +17885,7 @@ xabber.ExportChatHistoryView = xabber.BasicView.extend({
     closeModal: function () {
         this.$el.closeModal({ complete: this.hide.bind(this) });
     }
-});
+}});
 
 xabber.Account.addInitPlugin(function () {
     let checker_object = {
