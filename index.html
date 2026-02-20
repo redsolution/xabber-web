@@ -10,6 +10,16 @@
     <div id="xabber-container" style="height: 100%; width: 100%;">
         <div class="login-container"></div>
     </div>
+    <script>
+        // Suppress Vue DEV-mode "nextSibling" errors caused by Backbone/Vue DOM conflicts
+        window.addEventListener('error', function(e) {
+            if (e.message && e.message.indexOf('nextSibling') !== -1) {
+                e.preventDefault();
+                e.stopImmediatePropagation();
+                return false;
+            }
+        }, true);
+    </script>
     <script type="module">
         import '/src/xabber.js';
         xabber.configure({

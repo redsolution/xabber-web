@@ -2310,15 +2310,16 @@ xabber.SettingsModalView = createVueBackboneView(xabber, {
 
     updateAccounts: function (options) {
         this._vueInstance && this._vueInstance.updateAccounts();
-        // Single account logic — delegate to Backbone child views for now
+        // Tear down old single-account view safely: null out _vueApp
+        // before removal to avoid Vue unmount on DOM owned by parent Vue component
         if (this.settings_single_account_modal) {
+            this.settings_single_account_modal._vueApp = null;
+            this.settings_single_account_modal._vueInstance = null;
             this.settings_single_account_modal.removeChild('blocklist');
             this.removeChild('single_account');
-            this.settings_single_account_modal.destroyView();
             this.settings_single_account_modal = undefined;
         }
         if (xabber.accounts && xabber.accounts.length === 1 && xabber.accounts.enabled.length) {
-            // Use nextTick to ensure Vue has rendered the single-account container
             let self = this;
             setTimeout(() => {
                 let el = self.$('.single-account-info-wrap .single-account-info')[0];

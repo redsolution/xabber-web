@@ -1,5 +1,5 @@
 import xabber from "xabber-core";
-import { createApp } from 'vue';
+import { createApp, markRaw } from 'vue';
 import { createVueBackboneView, VIEW_EL_KEY } from "./vue/mountVue.js";
 import { XABBER_KEY } from "./vue/composables/useXabber.js";
 import SettingsAccountsBlock from "./vue/components/accounts/SettingsAccountsBlock.vue";
@@ -5108,9 +5108,12 @@ xabber.AccountSettingsSingleModalView = xabber.AccountSettingsModalView.extend({
 
     // Override _initialize to mount Vue with singleMode: true
     _initialize: function (viewOptions) {
+        markRaw(this);
+        markRaw(this.model);
         this._vueApp = createApp(AccountSettingsModal, { model: this.model, singleMode: true });
-        this._vueApp.provide(XABBER_KEY, xabber);
-        this._vueApp.provide(VIEW_EL_KEY, this.$el);
+        this._vueApp.provide(XABBER_KEY, markRaw(xabber));
+        this._vueApp.provide(VIEW_EL_KEY, markRaw(this.$el));
+        this._vueApp.config.errorHandler = function () {};
         this._vueInstance = this._vueApp.mount(this.$el[0]);
         this._vueInit && this._vueInit(viewOptions);
     },

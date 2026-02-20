@@ -96,6 +96,11 @@ export default defineConfig({
     define: {
         global: 'globalThis',
     },
+    server: {
+        hmr: {
+            overlay: false,
+        },
+    },
     css: {
         devSourcemap: false,
     },

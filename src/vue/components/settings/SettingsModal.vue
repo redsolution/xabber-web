@@ -1545,10 +1545,6 @@ function updateAccounts() {
     if (!xb.accounts) return;
     let singleEnabled = xb.accounts.length === 1 && xb.accounts.enabled.length;
     isSingleAccount.value = singleEnabled;
-    if (singleEnabled && backboneView) {
-        // Delegate single-account rendering to backbone for now
-        backboneView._updateSingleAccount && backboneView._updateSingleAccount();
-    }
     updateHeight();
 }
 
