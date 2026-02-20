@@ -8825,25 +8825,27 @@ xabber.ChatContentView = xabber.BasicView.extend({
         utils.copyTextToClipboard(location_links, xabber.getString("toast_location_copied"), xabber.getString("toast__not_copied_in_clipboard"));
     },
 
-    showParticipantProperties: function (participant_id, options, open_restrict, callback) {
+    showParticipantProperties: function (participant_id, options, open_restrict, callback, on_show_callback) {
         options = options || {};
         let participant = this.contact.participants.get(participant_id);
-        if (!participant) {
+        if (!participant && options && options.jid) {
             this.contact.getBlockedParticipants((response) => {
                 _.extend(options, {present: null, subscription: null});
-                options.blocked = !!$(response).find(`block jid:contains(${participant.get('jid')})`).length;
-                this.contact.showDetailsRight('all-chats', {type: 'participant'});
+                options.blocked = !!$(response).find(`block jid:contains(${options.jid})`).length;
+                this.contact.showDetailsRight(xabber.body.screen.get('name'), {type: 'participant'});
                 if (!options.id || !options.role || !options.jid)
                     return;
                 participant = new xabber.Participant(options, {contact: this.contact});
                 this.contact.details_view_right.participants.participant_properties_panel.open(participant, {});
+                on_show_callback && on_show_callback()
             }, () => {
                 _.extend(options, {present: null, subscription: null});
-                this.contact.showDetailsRight('all-chats', {type: 'participant'});
+                this.contact.showDetailsRight(xabber.body.screen.get('name'), {type: 'participant'});
                 if (!options.id || !options.role || !options.jid)
                     return;
                 participant = new xabber.Participant(options, {contact: this.contact});
                 this.contact.details_view_right.participants.participant_properties_panel.open(participant, {});
+                on_show_callback && on_show_callback()
             });
             return;
         }
@@ -8851,8 +8853,9 @@ xabber.ChatContentView = xabber.BasicView.extend({
 
         this.contact.participants.participantsRequest({id: participant_id}, (response) => {
             if (participant_id === ''){
-                this.contact.showDetailsRight('all-chats', {type: 'participant'});
+                this.contact.showDetailsRight(xabber.body.screen.get('name'), {type: 'participant'});
                 this.contact.details_view_right && this.contact.details_view_right.participants.participant_properties_panel.open(participant);
+                on_show_callback && on_show_callback()
             } else {
                 this.contact.participants.participantPermissionsRequest({id: participant_id}, (response) => {
                     if (open_restrict){
@@ -8861,22 +8864,25 @@ xabber.ChatContentView = xabber.BasicView.extend({
                         this.account.sendFast(iq_get_rights, (iq_default_rights) => {
                             console.warn(iq_default_rights);
                             options.setup_permissions = iq_default_rights;
-                            this.contact.showDetailsRight('all-chats', {type: 'participant'});
+                            this.contact.showDetailsRight(xabber.body.screen.get('name'), {type: 'participant'});
                             if (this.contact.details_view_right) {
                                 this.contact.details_view_right.participants.participant_properties_panel.open(participant, response, options);
                                 callback && callback(this.contact.details_view_right.participants.participant_properties_panel)
+                                on_show_callback && on_show_callback()
                             }
                         }, (err) => {
                             console.error(err);
                             utils.callback_popup_message(xabber.getString("groupchat_you_have_no_permissions_to_do_it"), 3000);
                         });
                     } else {
-                        this.contact.showDetailsRight('all-chats', {type: 'participant'});
+                        this.contact.showDetailsRight(xabber.body.screen.get('name'), {type: 'participant'});
                         this.contact.details_view_right && this.contact.details_view_right.participants.participant_properties_panel.open(participant, response);
-
+                        on_show_callback && on_show_callback()
                     }
-
                 }, (err) => {
+                    this.contact.showDetailsRight(xabber.body.screen.get('name'), {type: 'participant'});
+                    this.contact.details_view_right && this.contact.details_view_right.participants.participant_properties_panel.open(participant, response);
+                    on_show_callback && on_show_callback()
                     console.error(err);
                 });
             }

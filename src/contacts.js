@@ -1268,8 +1268,21 @@ xabber.Contact = Backbone.Model.extend({
             this.set('name', this.get('roster_name'));
     },
 
-    showDetailsRight: function (screen, options) {
+    showDetailsRight: function (screen, options, on_show_callback) {
         if (this.get('private_chat') && typeof(this.get('private_chat')) === 'string'){
+            if (xabber.body.screen.get('right_contact') && (!options || (options.type !== 'members' && options.type !== 'participant' && !options.right_saved))) {
+                this.set('search_hidden', true);
+                let attrs = {right_contact: '', contact: this};
+                (screen === 'contacts') && (attrs.chat_item = null);
+                (screen === 'groupchats') && (attrs.chat_item = null);
+                if (screen === 'notifications') {
+                    attrs.chat_item = null;
+                    attrs.right = 'notifications';
+                    attrs.notifications = xabber.notifications_view;
+                }
+                xabber.body.setScreen(screen, attrs);
+                return;
+            }
             let not_me_participant = this.participants.find(item => item.get('jid') !== this.account.get('jid'));
             if (not_me_participant){
                 let contact = this.account.contacts.get(this.get('private_chat'));
@@ -1279,7 +1292,7 @@ xabber.Contact = Backbone.Model.extend({
                         if (!chat.item_view.content)
                             chat.item_view.content = new xabber.ChatContentView({chat_item: chat.item_view});
                         let member_id = not_me_participant.id;
-                        member_id && chat.item_view.content && chat.item_view.content.showParticipantProperties(member_id);
+                        member_id && chat.item_view.content && chat.item_view.content.showParticipantProperties(member_id, null, null, null, on_show_callback);
                         return;
                     }
 
@@ -12396,7 +12409,9 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
         if (contact){
             let scrolled_top = this.getScrollTop();
             this.saved_scroll = scrolled_top;
-            contact.showDetailsRight(this.is_groupchats ? 'groupchats' : 'contacts');
+            contact.showDetailsRight(this.is_groupchats ? 'groupchats' : 'contacts', null, () => {
+                this.saved_scroll = scrolled_top;
+            });
             this.saved_scroll = scrolled_top;
             if (xabber.chats_view.active_chat && xabber.chats_view.active_chat.model) {
                 xabber.chats_view.active_chat.model.set('active', false);
