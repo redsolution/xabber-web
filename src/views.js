@@ -8,6 +8,7 @@ import DurationPickerComponent from "./vue/components/DurationPicker.vue";
 import PlyrPlayerPopupComponent from "./vue/components/PlyrPlayerPopup.vue";
 import SetBackgroundComponent from "./vue/components/settings/SetBackground.vue";
 import DataTimePickerComponent from "./vue/components/settings/DataTimePicker.vue";
+import AboutComponent from "./vue/components/settings/About.vue";
 
 let env = xabber.env,
     constants = env.constants,
@@ -4494,18 +4495,22 @@ xabber.DurationPickerView = createVueBackboneView(xabber, {
     },
 }});
 
-xabber.AboutView = xabber.BasicView.extend({
+xabber.AboutView = createVueBackboneView(xabber, {
+    component: AboutComponent,
     className: 'settings-panel about-panel',
-    template: templates.about,
+    extend: {
     ps_selector: '.panel-content',
 
-    _initialize: function () {
+    _vueInit: function () {
+        this.ps_container = this.$(this.ps_selector);
+        if (this.ps_container.length) {
+            this.ps_container.perfectScrollbar(
+                _.extend(this.ps_settings || {}, xabber.ps_settings)
+            );
+        }
         this.$('.xabber-info-wrap .version').text(this.model.get('version_number'));
     },
-
-    render: function () {
-    }
-});
+}});
 
 xabber.DragManager = Backbone.Model.extend({
     initialize: function () {

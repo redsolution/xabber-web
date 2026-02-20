@@ -1,6 +1,7 @@
 import xabber from "xabber-core";
 import { createVueBackboneView } from "./vue/mountVue.js";
 import IncomingTrustSessionComponent from './vue/components/IncomingTrustSession.vue';
+import ActiveSessionModalComponent from './vue/components/trust/ActiveSessionModal.vue';
 
 let env = xabber.env,
     constants = env.constants,
@@ -120,9 +121,10 @@ xabber.IncomingTrustSessionView = createVueBackboneView(xabber, {
     }
 }});
 
-xabber.ActiveSessionModalView = xabber.BasicView.extend({
+xabber.ActiveSessionModalView = createVueBackboneView(xabber, {
+    component: ActiveSessionModalComponent,
     className: 'modal main-modal code-modal',
-    template: templates.active_session_modal,
+    extend: {
     ps_selector: '.new-trusted-devices-list',
     events: {
         "click .btn-cancel": "cancel",
@@ -136,7 +138,16 @@ xabber.ActiveSessionModalView = xabber.BasicView.extend({
         "keydown .code-enter": "keyDownCode",
     },
 
-    render: function (options) {
+    _vueInit: function () {
+        this.ps_container = this.$(this.ps_selector);
+        if (this.ps_container.length) {
+            this.ps_container.perfectScrollbar(
+                _.extend(this.ps_settings || {}, xabber.ps_settings)
+            );
+        }
+    },
+
+    onShow: function (options) {
         this.account = options.account;
         this.contact = options.contact;
         this.code = options.code;
@@ -425,7 +436,7 @@ xabber.ActiveSessionModalView = xabber.BasicView.extend({
     closeModal: function () {
         this.$el.closeModal({ complete: this.hide.bind(this) });
     }
-});
+}});
 
 xabber.ProcessingMessages = Backbone.Collection.extend({
     comparator: 'timestamp',

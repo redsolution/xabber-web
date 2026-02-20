@@ -1,0 +1,150 @@
+<template>
+    <div class="code-modal-wrap vue-migrated">
+        <div class="code-device-info-wrap linear-gradient-color-400-to-700">
+            <div class="circle-avatar contact-session"></div>
+            <svg class="mdi device-type-icon circle-avatar own-device-session phone-icon" v-html="svgContent('device-cellphone')"></svg>
+            <svg class="mdi device-type-icon circle-avatar own-device-session web-icon" v-html="svgContent('device-web')"></svg>
+            <div class="code-device-name"></div>
+            <div class="code-device-jid"></div>
+        </div>
+        <div class="modal-content">
+            <div class="main-process-wrap">
+                <div class="contact-session">
+                    <div class="code-header 0b-step session-step">
+                        {{ xb.getString("show_code__modal_header_awaiting") }}
+                    </div>
+                    <div class="code-header 0a-step session-step">
+                        {{ xb.getString("show_code__modal_header") }}
+                    </div>
+                    <div class="code-header 1b-step session-step">
+                        {{ xb.getString("show_code__modal_header") }}
+                    </div>
+                    <div class="code-header 1a-step session-step">
+                        {{ xb.getString("show_code__modal_header") }}
+                    </div>
+                    <div class="code-header proceeding-step session-step">
+                        {{ xb.getString("show_code__modal_header_proceeding") }}
+                    </div>
+                </div>
+                <div class="own-device-session">
+                    <div class="code-header 0b-step session-step">
+                        {{ xb.getString("show_code__modal_header_awaiting") }}
+                    </div>
+                    <div class="code-header 0a-step session-step">
+                        {{ xb.getString("show_code__own_modal_header") }}
+                    </div>
+                    <div class="code-header 1b-step session-step">
+                        {{ xb.getString("show_code__own_modal_header") }}
+                    </div>
+                    <div class="code-header 1a-step session-step">
+                        {{ xb.getString("show_code__own_modal_header") }}
+                    </div>
+                    <div class="code-header proceeding-step session-step">
+                        {{ xb.getString("show_code__modal_header_proceeding") }}
+                    </div>
+                </div>
+            </div>
+            <div class="session-trusted-devices-wrap">
+                <div class="code-header">
+                    {{ xb.getString("show_code__modal_header_success") }}
+                </div>
+            </div>
+            <div class="main-process-wrap">
+                <div class="contact-session">
+                    <div class="code-contact-text 1b-step session-step">{{ xb.getString("show_code__contact_device_text") }}</div>
+                    <div class="code-contact-text 1a-step session-step">{{ xb.getString("show_code__contact_device_text") }}</div>
+                </div>
+                <div class="own-device-session">
+                    <div class="code-contact-text 1b-step session-step">{{ xb.getString("show_code__own_device_text_code") }}</div>
+                    <div class="code-contact-text 1a-step session-step">{{ xb.getString("show_code__own_device_text_enter") }}</div>
+                </div>
+                <div class="session-awaiting-response-text 0a-step session-step">
+                    {{ xb.getString("session_modal__awaiting_response_text") }}
+                </div>
+                <div class="session-incoming-request-text 0b-step session-step">
+                    {{ xb.getString("session_modal__incoming_request_text") }}
+                </div>
+                <div class="session-incoming-request-text proceeding-step session-step">
+                    {{ xb.getString("session_modal__proceeding_request_text") }}
+                </div>
+                <div class="code-contact-text-tip ">
+                    <div class="contact-session">
+                        <ol class="1b-step session-step" type="1">
+                            <li class="part-one 1b-step session-step">{{ xb.getString("show_code__contact_device_tip_text_part_one") }}</li>
+                            <li class="part-two 1b-step session-step">{{ xb.getString("show_code__contact_device_tip_text_part_two") }}</li>
+                        </ol>
+                        <ol class="1a-step session-step" type="1">
+                            <li class="part-one 1a-step session-step">{{ xb.getString("show_code__contact_device_tip_text_part_one") }}</li>
+                            <li class="part-two 1a-step session-step">{{ xb.getString("show_code__enter_code_contact_device_tip_text_part_two") }}</li>
+                        </ol>
+                    </div>
+                    <div class="own-device-session">
+                        <ol class="0b-step session-step" type="1">
+                            <li class="part-one 0b-step session-step">{{ xb.getString("show_code__own_device_incoming_tip_text_part_one") }}</li>
+                            <li class="part-two 0b-step session-step">{{ xb.getString("show_code__own_device_incoming_tip_text_part_two") }}</li>
+                        </ol>
+                        <ol class="1b-step session-step" type="1">
+                            <li class="part-one 1b-step session-step">{{ xb.getString("show_code__own_device_tip_text_part_one") }}</li>
+                            <li class="part-two 1b-step session-step">{{ xb.getString("show_code__own_device_tip_text_part_two") }}</li>
+                        </ol>
+                        <ol class="1a-step session-step" type="1">
+                            <li class="part-one 1a-step session-step">{{ xb.getString("show_code__enter_code_own_device_tip_text_part_one") }}</li>
+                            <li class="part-two 1a-step session-step">{{ xb.getString("show_code__enter_code_own_device_tip_text_part_two") }}</li>
+                        </ol>
+                    </div>
+                </div>
+                <div class="enter-code-buttons-wrap 1a-step session-step">
+                    <input id="code_enter" type="text" class="code-enter 1a-step session-step input-glow" name="code_enter">
+                </div>
+                <div class="code-text 1b-step session-step"></div></div>
+            <div class="session-trusted-devices-wrap">
+                <div class="code-contact-text">{{ xb.getString("show_code__verification_successful_text") }}</div>
+                <div class="new-trusted-devices-list">
+
+                </div>
+            </div>
+            <div class="main-process-wrap">
+                <div class="active-session-buttons-wrap no-select">
+                    <div class="btn-cancel-session 1b-step session-step btn-flat btn-main btn-dark ">{{ xb.getString("show_code__cancel_session") }}</div>
+                    <button class="btn-enter-code 1a-step session-step btn-flat btn-main text-color-500">{{ xb.getString("show_code__complete_verification") }}</button>
+                    <div class="btn-cancel-session 1a-step session-step btn-flat btn-main btn-dark">{{ xb.getString("show_code__cancel_session") }}</div>
+                    <div class="btn-cancel-session proceeding-step session-step btn-flat btn-main btn-dark">{{ xb.getString("show_code__cancel_session") }}</div>
+                    <div class="btn-accept-session btn-flat btn-main 0b-step session-step text-color-500">{{ xb.getString("show_code__proceed_verification") }}</div>
+                    <div class="btn-reject-session btn-flat btn-main 0b-step session-step">{{ xb.getString("show_code__cancel_verification") }}</div>
+                    <div class="btn-cancel-session 0a-step session-step btn-flat btn-main btn-dark ">{{ xb.getString("show_code__cancel_session") }}</div>
+                    <div class="btn-close 0a-step session-step btn-flat btn-main btn-dark ">{{ xb.getString("close") }}</div>
+                </div>
+            </div>
+            <div class="session-trusted-devices-wrap">
+                <div class="active-session-buttons-wrap no-select">
+                    <div class="btn-close random-applause colored btn-flat btn-main text-color-500">{{ xb.getString("great") }}</div>
+                    <div class="btn-manage-devices btn-flat btn-main text-color-500">{{ xb.getString("omemo__settings__button_manage_devices") }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</template>
+
+<script setup>
+import { useXabber } from '../../composables/useXabber.js';
+
+const xb = useXabber();
+
+function svgContent(name) {
+    const svgTemplates = xb.env.templates.svg;
+    if (svgTemplates && svgTemplates[name]) {
+        return svgTemplates[name]();
+    }
+    return '';
+}
+
+let backboneView = null;
+
+function setBackboneView(view) {
+    backboneView = view;
+}
+
+defineExpose({
+    setBackboneView,
+});
+</script>

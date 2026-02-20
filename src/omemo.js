@@ -1,4 +1,7 @@
 import xabber from "xabber-core";
+import { createVueBackboneView } from "./vue/mountVue.js";
+import FingerprintsComponent from './vue/components/omemo/Fingerprints.vue';
+import FingerprintsOwnDevicesComponent from './vue/components/omemo/FingerprintsOwnDevices.vue';
 
 let env = xabber.env,
     constants = env.constants,
@@ -162,9 +165,10 @@ xabber.Peers = Backbone.Collection.extend({
     }
 });
 
-xabber.Fingerprints = xabber.BasicView.extend({
+xabber.Fingerprints = createVueBackboneView(xabber, {
+    component: FingerprintsComponent,
     className: 'modal main-modal fingerprints-wrap',
-    template: templates.fingerprints,
+    extend: {
     ps_selector: '.fingerprints-content-wrap',
 
     events: {
@@ -185,7 +189,13 @@ xabber.Fingerprints = xabber.BasicView.extend({
         'click .decline-request': "rejectRequest",
     },
 
-    _initialize: function () {
+    _vueInit: function () {
+        this.ps_container = this.$(this.ps_selector);
+        if (this.ps_container.length) {
+            this.ps_container.perfectScrollbar(
+                _.extend(this.ps_settings || {}, xabber.ps_settings)
+            );
+        }
         if (this.model.own_devices) {
             this.account = this.model.account;
             this.omemo = this.model;
@@ -638,7 +648,7 @@ xabber.Fingerprints = xabber.BasicView.extend({
         this.$el.addClass('fingerprint-detail-whole-modal');
     },
 
-    render: function () {
+    onShow: function () {
         this.$el.openModal({
             complete: () => {
                 this.$el.detach();
@@ -881,19 +891,19 @@ xabber.Fingerprints = xabber.BasicView.extend({
         }
         return trust_type;
     },
-});
+}});
 
-xabber.FingerprintsOwnDevices = xabber.BasicView.extend({
+xabber.FingerprintsOwnDevices = createVueBackboneView(xabber, {
+    component: FingerprintsOwnDevicesComponent,
     className: 'modal main-modal fingerprints-devices-wrap',
-    template: templates.fingerprints_devices,
-
+    extend: {
     events: {
         'click .btn-start-trust-session': "startTrustVerificationOwn",
         'click .btn-trust': "trustDevice",
         'click .btn-cancel': "close"
     },
 
-    _initialize: function () {
+    _vueInit: function () {
         this.account = this.model.account;
         this.omemo = this.model;
         this.jid = this.account.get('jid');
@@ -1023,7 +1033,7 @@ xabber.FingerprintsOwnDevices = xabber.BasicView.extend({
         }
     },
 
-    render: function () {
+    onShow: function () {
         this.$el.openModal({
             complete: () => {
                 this.$el.detach();
@@ -1213,7 +1223,7 @@ xabber.FingerprintsOwnDevices = xabber.BasicView.extend({
         this.$el.attr('data-color', this.account.settings.get('color'));
         this.account.settings.once("change:color", this.updateColorScheme, this);
     },
-});
+}});
 
 xabber.Bundle = Backbone.Model.extend({
     initialize: async function (attrs, options) {
