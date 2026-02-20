@@ -23,10 +23,10 @@
             <div class="fingerprints-list-content">
             </div>
             <div class="fingerprints-tips-wrap">
-                <div class="fingerprints-tip">{{ xb.getString("settings_account__trust_tip_verified") }}</div>
-                <div class="fingerprints-tip">{{ xb.getString("settings_account__trust_tip_fingerprint") }}</div>
-                <div class="fingerprints-tip">{{ xb.getString("settings_account__trust_tip_linked") }}</div>
-                <div class="fingerprints-tip">{{ xb.getString("settings_account__trust_tip_untrusted") }}</div>
+                <div class="fingerprints-tip" v-html="xb.getString('settings_account__trust_tip_verified')"></div>
+                <div class="fingerprints-tip" v-html="xb.getString('settings_account__trust_tip_fingerprint')"></div>
+                <div class="fingerprints-tip" v-html="xb.getString('settings_account__trust_tip_linked')"></div>
+                <div class="fingerprints-tip" v-html="xb.getString('settings_account__trust_tip_untrusted')"></div>
             </div>
         </div>
     </div>

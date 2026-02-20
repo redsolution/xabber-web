@@ -1185,6 +1185,7 @@ xabber.FingerprintsOwnDevices = createVueBackboneView(xabber, {
                 });
             }
         }
+        this.close();
     },
 
     addRow: function (id, label, trust, fingerprint, options) {
