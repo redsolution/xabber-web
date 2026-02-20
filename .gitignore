@@ -8,4 +8,5 @@ npm-ready
 !index.html
 /*.pem
 package-lock.json
+dist/
 
