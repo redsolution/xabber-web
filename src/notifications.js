@@ -1,6 +1,7 @@
 import xabber from "xabber-core";
 import { createVueBackboneView } from "./vue/mountVue.js";
 import NotificationsPanelComponent from './vue/components/notifications/NotificationsPanel.vue';
+import NotificationsChatContentComponent from './vue/components/notifications/NotificationsChatContent.vue';
 
 let env = xabber.env,
     constants = env.constants,
@@ -598,9 +599,10 @@ xabber.NotificationsView = createVueBackboneView(xabber, {
     },
 }});
 
-xabber.NotificationsChatContentView = xabber.BasicView.extend({
+xabber.NotificationsChatContentView = createVueBackboneView(xabber, {
+    component: NotificationsChatContentComponent,
     className: 'chat-content-wrap',
-    template: env.templates.chats.chat_content,
+    extend: {
     ps_selector: '.chat-content',
     ps_settings: {
         wheelPropagation: true
@@ -624,7 +626,13 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
         "click .inviter-name": "onClickName",
     },
 
-    _initialize: function () {
+    _vueInit: function () {
+        this.ps_container = this.$(this.ps_selector);
+        if (this.ps_container.length) {
+            this.ps_container.perfectScrollbar(
+                _.extend(this.ps_settings || {}, xabber.ps_settings)
+            );
+        }
 
         this.current_day_indicator = null;
         this.$history_feedback = this.$('.load-history-feedback');
@@ -652,7 +660,7 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
         return this;
     },
 
-    render: function () {
+    onShow: function () {
         if (this._prev_scrolltop)
             this.scrollTo(this._prev_scrolltop);
         else
@@ -2240,7 +2248,7 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
         $message.find('.edited-info').removeClass('hidden').text(xabber.getString("chat_screen__message__label_edited")).prop('title', new_title);
     },
 
-});
+}});
 
 xabber.Account.addInitPlugin(function () {
 

@@ -13,6 +13,7 @@ import ChangeAccountPasswordComponent from "./vue/components/accounts/ChangeAcco
 import SetAvatarComponent from "./vue/components/accounts/SetAvatar.vue";
 import DeleteFilesFromGalleryComponent from "./vue/components/accounts/DeleteFilesFromGallery.vue";
 import AccountToolbarItemComponent from "./vue/components/accounts/AccountToolbarItem.vue";
+import EmojiPickerComponent from "./vue/components/accounts/EmojiPicker.vue";
 
 let env = xabber.env,
     constants = env.constants,
@@ -6010,10 +6011,10 @@ xabber.EmojiProfileImageView = xabber.BasicView.extend({
     },
 });
 
-xabber.EmojiPickerView = xabber.BasicView.extend({
+xabber.EmojiPickerView = createVueBackboneView(xabber, {
+    component: EmojiPickerComponent,
     className: 'modal main-modal emoji-panel emoji-picker',
-    template: templates.emoji_picker,
-
+    extend: {
     events: {
         "click .emojis-bottom-tab-selector": "pickEmojiTab",
         "click .emoji-picker-emoji": "pickEmoji",
@@ -6084,7 +6085,7 @@ xabber.EmojiPickerView = xabber.BasicView.extend({
         this.parent.$('.chosen-emoji').attr('data-value', emoji).text(emoji);
         this.close();
     },
-});
+}});
 
 xabber.ChangePasswordView = createVueBackboneView(xabber, {
     component: ChangePasswordComponent,
