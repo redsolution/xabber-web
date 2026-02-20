@@ -14,6 +14,10 @@ import ReportAbuseComponent from './vue/components/chats/ReportAbuse.vue';
 import SendMediaComponent from './vue/components/chats/SendMedia.vue';
 import ExportChatHistoryComponent from './vue/components/chats/ExportChatHistory.vue';
 import DeleteWithOptionsComponent from './vue/components/chats/DeleteWithOptions.vue';
+import ChatContentPlaceholderComponent from './vue/components/chats/ChatContentPlaceholder.vue';
+import ExpandedMessagePanelComponent from './vue/components/chats/ExpandedMessagePanel.vue';
+import ChatPlaceholderComponent from './vue/components/chats/ChatPlaceholder.vue';
+import ChatLocationComponent from './vue/components/chats/ChatLocation.vue';
 
 let env = xabber.env,
     constants = env.constants,
@@ -9690,25 +9694,16 @@ xabber.ChatContentView = createVueBackboneView(xabber, {
 });
 
 
-xabber.ChatContentPlaceholderView = xabber.BasicView.extend({
+xabber.ChatContentPlaceholderView = createVueBackboneView(xabber, {
+    component: ChatContentPlaceholderComponent,
     className: 'chat-body-content-placeholder-wrap',
-    template: templates.chat_content_placeholder,
+    extend: {
+}});
 
-    events: {
-
-    },
-
-    _initialize: function () {
-        return this;
-    },
-
-    render: function () {
-    },
-});
-
-xabber.ExpandedMessagePanel = xabber.BasicView.extend({
+xabber.ExpandedMessagePanel = createVueBackboneView(xabber, {
+    component: ExpandedMessagePanelComponent,
     className: 'modal expanded-message',
-    template: templates.group_chats.pinned_message_panel,
+    extend: {
     ps_selector: '.modal-content',
     ps_settings: {theme: 'item-list'},
 
@@ -9719,10 +9714,20 @@ xabber.ExpandedMessagePanel = xabber.BasicView.extend({
         'click .mdi-link-variant' : 'onClickLink',
     },
 
-    _initialize: function (options) {
+    _vueInit: function (options) {
+        this.ps_container = this.$(this.ps_selector);
+        if (this.ps_container.length) {
+            this.ps_container.perfectScrollbar(
+                _.extend(this.ps_settings || {}, xabber.ps_settings)
+            );
+        }
         this.account = options.account;
         this.chat_content = options.chat_content;
         this.message = options.message;
+    },
+
+    onShow: function () {
+        this.render.apply(this, arguments);
     },
 
     open: function ($message) {
@@ -9778,7 +9783,7 @@ xabber.ExpandedMessagePanel = xabber.BasicView.extend({
         this.chat_content.initPopup(msg);
         expanded_fwd_message.open(msg);
     }
-});
+}});
 
 xabber.ChatsBase = Backbone.Collection.extend({
     model: xabber.Chat
@@ -13451,9 +13456,10 @@ xabber.InvitationPanelView = xabber.SearchView.extend({
       }
   }});
 
-xabber.ChatLocationView = xabber.BasicView.extend({
-    className: 'modal main-modal chat-location ',
-    template: templates.location_popup,
+xabber.ChatLocationView = createVueBackboneView(xabber, {
+    component: ChatLocationComponent,
+    className: 'modal main-modal chat-location',
+    extend: {
 
     events: {
         "click .btn-cancel": "close",
@@ -13463,11 +13469,14 @@ xabber.ChatLocationView = xabber.BasicView.extend({
         "focusout .nominatim.ol-search input": "destroyScrollbar",
     },
 
-    _initialize: function (options) {
+    _vueInit: function (options) {
         this.view = options.content;
         this.model = this.view.model;
         this.account = this.view.account;
+    },
 
+    onShow: function () {
+        this.render.apply(this, arguments);
     },
 
     render: function () {
@@ -13830,7 +13839,7 @@ xabber.ChatLocationView = xabber.BasicView.extend({
         this.ps_container = this.$('.nominatim.ol-search');
         this.ps_container.perfectScrollbar('destroy');
     },
-});
+}});
 
 xabber.ChatBottomView = createVueBackboneView(xabber, {
     component: ChatBottomComponent,
@@ -17521,14 +17530,15 @@ xabber.ChatBottomContainer = xabber.Container.extend({
     className: 'chat-bottom-container'
 });
 
-xabber.ChatPlaceholderView = xabber.BasicView.extend({
+xabber.ChatPlaceholderView = createVueBackboneView(xabber, {
+    component: ChatPlaceholderComponent,
     className: 'placeholder-wrap chat-placeholder-wrap noselect',
-    template: templates.chat_placeholder,
+    extend: {
     events: {
         "click .btn-open-settings":              "showSettings",
     },
 
-    _initialize: function () {
+    _vueInit: function () {
         this.updatePlaceholderAccounts();
         this.listenTo(xabber.accounts, 'add destroy change:enabled update_order', this.updatePlaceholderAccounts);
         this.listenTo(xabber, 'update_placeholder', this.onPlaceholderUpdate);
@@ -17567,7 +17577,7 @@ xabber.ChatPlaceholderView = xabber.BasicView.extend({
             this.$el.removeClass('fullscreen-placeholder');
         }
     },
-});
+}});
 
 xabber.ChatSettings = Backbone.ModelWithStorage.extend({
 

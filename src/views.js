@@ -5,6 +5,7 @@ import SettingsModal from "./vue/components/settings/SettingsModal.vue";
 import JingleMessageComponent from "./vue/components/JingleMessage.vue";
 import ToolbarComponent from "./vue/components/Toolbar.vue";
 import DurationPickerComponent from "./vue/components/DurationPicker.vue";
+import PlyrPlayerPopupComponent from "./vue/components/PlyrPlayerPopup.vue";
 
 let env = xabber.env,
     constants = env.constants,
@@ -1840,9 +1841,10 @@ xabber.JingleMessageView = createVueBackboneView(xabber, {
 }
 });
 
-xabber.PlyrPlayerPopupView = xabber.BasicView.extend({
+xabber.PlyrPlayerPopupView = createVueBackboneView(xabber, {
+    component: PlyrPlayerPopupComponent,
     className: 'modal main-modal player-overlay plyr-player-popup-view',
-    template: templates.plyr_player_popup,
+    extend: {
 
     events: {
         "click .mdi-close": "closePopup",
@@ -1856,10 +1858,14 @@ xabber.PlyrPlayerPopupView = xabber.BasicView.extend({
         "click .mdi-toggle-mute": "toggleMute",
     },
 
-    _initialize: function () {
+    _vueInit: function () {
         this.data.set('visibility_state', 0);
         this.listenTo(this.data, 'change:visibility_state', this.onVisibilityChange);
         this.listenTo(xabber, 'plyr_player_updated', this.updatePlyrControls);
+    },
+
+    onShow: function () {
+        this.render.apply(this, arguments);
     },
 
     render: function (options) {
@@ -2219,7 +2225,7 @@ xabber.PlyrPlayerPopupView = xabber.BasicView.extend({
         this.$el.attr('data-color', this.account.settings.get('color'));
         this.account.settings.once("change:color", this.updateColorScheme, this);
     },
-});
+}});
 
 xabber.SettingsModalView = createVueBackboneView(xabber, {
     component: SettingsModal,

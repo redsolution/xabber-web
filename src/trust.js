@@ -1,4 +1,6 @@
 import xabber from "xabber-core";
+import { createVueBackboneView } from "./vue/mountVue.js";
+import IncomingTrustSessionComponent from './vue/components/IncomingTrustSession.vue';
 
 let env = xabber.env,
     constants = env.constants,
@@ -13,12 +15,17 @@ let env = xabber.env,
 
 
 
-xabber.IncomingTrustSessionView = xabber.BasicView.extend({
+xabber.IncomingTrustSessionView = createVueBackboneView(xabber, {
+    component: IncomingTrustSessionComponent,
     className: 'modal main-modal incoming-trust-session-modal',
-    template: templates.incoming_trust_session,
+    extend: {
     events: {
         "click .btn-change": "submit",
         "click .btn-cancel": "cancel",
+    },
+
+    onShow: function () {
+        this.render.apply(this, arguments);
     },
 
     render: function (options) {
@@ -111,7 +118,7 @@ xabber.IncomingTrustSessionView = xabber.BasicView.extend({
     closeModal: function () {
         this.$el.closeModal({ complete: this.hide.bind(this) });
     }
-});
+}});
 
 xabber.ActiveSessionModalView = xabber.BasicView.extend({
     className: 'modal main-modal code-modal',
