@@ -2,6 +2,8 @@ import xabber from "xabber-core";
 import { createVueBackboneView } from "./vue/mountVue.js";
 import { transliterate as query_transliterate } from 'transliteration';
 import MentionsPanelComponent from './vue/components/mentions/MentionsPanel.vue';
+import MentionItemComponent from './vue/components/mentions/MentionItem.vue';
+import MentionsPlaceholderComponent from './vue/components/mentions/MentionsPlaceholder.vue';
 
 let env = xabber.env,
     constants = env.constants,
@@ -747,16 +749,17 @@ xabber.MentionsView = createVueBackboneView(xabber, {
 }
 });
 
-xabber.MentionItemView = xabber.BasicView.extend({
+xabber.MentionItemView = createVueBackboneView(xabber, {
+    component: MentionItemComponent,
     className: 'mention-item list-item',
-    template: templates.mention_item,
+    extend: {
     avatar_size: constants.AVATAR_SIZES.CHAT_ITEM,
 
     events: {
         'click .mention-info-wrap': 'openByClick'
     },
 
-    _initialize: function () {
+    _vueInit: function () {
         this.account = this.model.account;
         this.contact = this.model.contact;
         this.$el.attr('data-id', this.model.id);
@@ -909,13 +912,14 @@ xabber.MentionItemView = xabber.BasicView.extend({
         this.$el.attr('data-color', color);
     }
 
-});
+}});
 
-xabber.MentionsPlaceholderView = xabber.BasicView.extend({
+xabber.MentionsPlaceholderView = createVueBackboneView(xabber, {
+    component: MentionsPlaceholderComponent,
     className: 'placeholder-wrap mentions-placeholder-wrap noselect',
-    template: templates.mentions_placeholder,
+    extend: {
 
-    _initialize: function (options) {
+    _vueInit: function (options) {
         xabber.on('update_placeholder',this.onPlaceholderUpdate, this);
     },
 
@@ -926,7 +930,7 @@ xabber.MentionsPlaceholderView = xabber.BasicView.extend({
             this.$('.text').text(xabber.getString("mentions_list__placeholder"));
         }
     },
-});
+}});
 
 xabber.Account.addInitPlugin(function () {
    this.mentions = new xabber.AccountMentions(null, {account: this});

@@ -6,6 +6,8 @@ import JingleMessageComponent from "./vue/components/JingleMessage.vue";
 import ToolbarComponent from "./vue/components/Toolbar.vue";
 import DurationPickerComponent from "./vue/components/DurationPicker.vue";
 import PlyrPlayerPopupComponent from "./vue/components/PlyrPlayerPopup.vue";
+import SetBackgroundComponent from "./vue/components/settings/SetBackground.vue";
+import DataTimePickerComponent from "./vue/components/settings/DataTimePicker.vue";
 
 let env = xabber.env,
     constants = env.constants,
@@ -3322,9 +3324,10 @@ xabber.ColorPicker = xabber.BasicView.extend({
 
 });
 
-xabber.SetBackgroundView = xabber.BasicView.extend({
+xabber.SetBackgroundView = createVueBackboneView(xabber, {
+    component: SetBackgroundComponent,
     className: 'modal main-modal settings-background background-panel',
-    template: templates.backgrounds_gallery,
+    extend: {
     ps_selector: '.modal-content',
     ps_settings: {theme: 'item-list'},
 
@@ -3337,9 +3340,19 @@ xabber.SetBackgroundView = xabber.BasicView.extend({
         "click .btn-cancel": "close"
     },
 
-    _initialize: function () {
+    _vueInit: function () {
+        this.ps_container = this.$(this.ps_selector);
+        if (this.ps_container.length) {
+            this.ps_container.perfectScrollbar(
+                _.extend(this.ps_settings || {}, xabber.ps_settings)
+            );
+        }
         this.$('input.url')[0].onpaste = this.onPaste.bind(this);
         this.ps_container.on("ps-scroll-y", this.onScrollY.bind(this));
+    },
+
+    onShow: function () {
+        this.render.apply(this, arguments);
     },
 
     render: function (options) {
@@ -3589,11 +3602,12 @@ xabber.SetBackgroundView = xabber.BasicView.extend({
             }
         });
     }
-});
+}});
 
-xabber.DataTimePickerView = xabber.BasicView.extend({
+xabber.DataTimePickerView = createVueBackboneView(xabber, {
+    component: DataTimePickerComponent,
     className: 'modal main-modal datatime-picker-modal',
-    template: templates.datatime_picker,
+    extend: {
 
     events: {
         "click .btn-prev-month": "moveBack",
@@ -3608,8 +3622,11 @@ xabber.DataTimePickerView = xabber.BasicView.extend({
         "click .btn-apply": "applySelection",
     },
 
+    onShow: function () {
+        this.render.apply(this, arguments);
+    },
 
-    _initialize: function () {
+    _vueInit: function () {
         this.targetInput = null;
         this.selectedDate = new Date();
         this.onDateUpdate = null;
@@ -4264,7 +4281,7 @@ xabber.DataTimePickerView = xabber.BasicView.extend({
             }
         });
     },
-});
+}});
 
 xabber.DurationPickerView = createVueBackboneView(xabber, {
     component: DurationPickerComponent,

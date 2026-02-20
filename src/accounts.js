@@ -12,6 +12,7 @@ import ResourceRightComponent from "./vue/components/accounts/ResourceRight.vue"
 import ChangeAccountPasswordComponent from "./vue/components/accounts/ChangeAccountPassword.vue";
 import SetAvatarComponent from "./vue/components/accounts/SetAvatar.vue";
 import DeleteFilesFromGalleryComponent from "./vue/components/accounts/DeleteFilesFromGallery.vue";
+import AccountToolbarItemComponent from "./vue/components/accounts/AccountToolbarItem.vue";
 
 let env = xabber.env,
     constants = env.constants,
@@ -2282,9 +2283,10 @@ xabber.Accounts = Backbone.CollectionWithStorage.extend({
     }
 });
 
-xabber.AccountToolbarItemView = xabber.BasicView.extend({
+xabber.AccountToolbarItemView = createVueBackboneView(xabber, {
+    component: AccountToolbarItemComponent,
     className: 'toolbar-item account-item',
-    template: templates.toolbar_item,
+    extend: {
     avatar_size: constants.AVATAR_SIZES.TOOLBAR_ACCOUNT_ITEM,
 
     events: {
@@ -2292,7 +2294,7 @@ xabber.AccountToolbarItemView = xabber.BasicView.extend({
         'click .account-item-avatar-wrap': 'showSettings'
     },
 
-    _initialize: function () {
+    _vueInit: function () {
         this.updateConnected();
         this.updateAuthState();
         this.updateStatus();
@@ -2393,7 +2395,7 @@ xabber.AccountToolbarItemView = xabber.BasicView.extend({
         xabber.body.setScreen('settings-modal', {account_block_name: null, block_name: null});
         xabber.trigger('update_placeholder');
     },
-});
+}});
 
 xabber.OMEMONewDevicePlaceholder = xabber.BasicView.extend({
     className: 'omemo-new-device-placeholder desktop-notification-item',
