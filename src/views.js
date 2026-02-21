@@ -2311,12 +2311,16 @@ xabber.SettingsModalView = createVueBackboneView(xabber, {
     updateAccounts: function (options) {
         this._vueInstance && this._vueInstance.updateAccounts();
         // Tear down old single-account view safely: null out _vueApp
-        // before removal to avoid Vue unmount on DOM owned by parent Vue component
+        // before removal to avoid Vue unmount on DOM owned by parent Vue component.
+        // Don't use removeChild() — it calls view.remove() which destroys the
+        // .single-account-info element that we need to reuse.
         if (this.settings_single_account_modal) {
             this.settings_single_account_modal._vueApp = null;
             this.settings_single_account_modal._vueInstance = null;
             this.settings_single_account_modal.removeChild('blocklist');
-            this.removeChild('single_account');
+            this.settings_single_account_modal.undelegateEvents();
+            this.settings_single_account_modal.stopListening();
+            delete this.children['single_account'];
             this.settings_single_account_modal = undefined;
         }
         if (xabber.accounts && xabber.accounts.length === 1 && xabber.accounts.enabled.length) {
@@ -2324,6 +2328,11 @@ xabber.SettingsModalView = createVueBackboneView(xabber, {
             setTimeout(() => {
                 let el = self.$('.single-account-info-wrap .single-account-info')[0];
                 if (!el) return;
+                // Clear previous Vue app state from the element so a fresh
+                // mount works correctly (Vue checks _vnode for patch diffing)
+                el.innerHTML = '';
+                el._vnode = null;
+                delete el.__vue_app__;
                 let first_account = xabber.accounts.models[0];
                 self.single_account_has_rendered = false;
                 self.settings_single_account_modal = self.addChild('single_account', xabber.AccountSettingsSingleModalView, {

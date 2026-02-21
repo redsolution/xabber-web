@@ -11,7 +11,7 @@
 
                 <div class="single-account-info-wrap account-settings-panel"
                      :class="{ hidden: !isSingleAccount }">
-                    <div class="single-account-info" ref="singleAccountInfo"></div>
+                    <div class="single-account-info" ref="singleAccountInfo" v-once></div>
                 </div>
 
                 <div class="accounts-info-wrap" :class="{ hidden: isSingleAccount }" ref="accountsInfoWrap">
@@ -1593,6 +1593,10 @@ function onShow(options) {
     scrollToTop();
     nextTick(() => {
         if (psContainer.value) {
+            // Reset jQuery-added hidden class on global-settings-tabs
+            // (AccountSettingsSingleModalView.jumpToBlock adds it, but backToMenu
+            // is never called when the panel is closed and reopened)
+            $(psContainer.value).find('.left-column > .settings-tabs-wrap.global-settings-tabs').removeClass('hidden');
             $(psContainer.value).perfectScrollbar(xb.ps_settings || {});
         }
         updateHeight();
