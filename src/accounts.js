@@ -714,9 +714,9 @@ xabber.Account = Backbone.Model.extend({
             if (this.unregister_account_view){
                 if (status === Strophe.Status.REGISTERED) {
                     this.unregister_account_view.close();
-                    this.trigger('deactivate', this);
-                    this.deleteAccount();
-                    xabber.settings_modal_view.closeSettings();
+                    this.session.set('delete', true);
+                    this.destroy();
+                    window.location.reload();
                 } else if (status === Strophe.Status.CONFLICT
                     || status === Strophe.Status.NOTACCEPTABLE
                     || status === Strophe.Status.REGIFAIL) {

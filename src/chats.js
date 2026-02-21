@@ -4179,6 +4179,10 @@ xabber.ChatContentView = createVueBackboneView(xabber, {
         "click .show-code": "showCode",
     },
 
+    onShow: function () {
+        this.render.apply(this, arguments);
+    },
+
     _vueInit: function (options) {
         if (this.ps_selector) {
             this.ps_container = this.$(this.ps_selector);
