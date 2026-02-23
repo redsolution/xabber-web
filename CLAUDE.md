@@ -6,7 +6,7 @@ Xabber Web is an XMPP chat client. It was originally built with Backbone.js + jQ
 
 The XMPP connection layer uses **Strophe.js** (WebSocket) and will continue to do so.
 
-## Current State (as of February 2025)
+## Current State (as of February 2026)
 
 ### Branch: `vue3-migration-v2`
 
@@ -47,6 +47,8 @@ The XMPP connection layer uses **Strophe.js** (WebSocket) and will continue to d
 - Vue `unmount()` removed from `remove()` — Backbone's DOM removal conflicts with Vue's fragment walker
 - Window-level error handler in `index.html` suppresses residual Vue DEV-mode `nextSibling` errors
 - Vite error overlay disabled in `vite.config.js`
+- **Settings panel empty on first login** (`views.js`, `accounts.js`): When a user logs in for the first time (no stored session), both `add` and `list_changed` events fire on the accounts collection, creating competing `setTimeout` callbacks in `SettingsModalView.updateAccounts()`. The old `AccountSettingsSingleModalView` Vue app was only nulled (not unmounted), so its pending reactive updates ran after the new app mounted and overwrote the freshly-rendered content. Fixed by: (1) calling `_vueApp.unmount()` before nulling it; (2) using `clearTimeout` + stored timer ID so only the last callback creates a view; (3) removing the unnecessary `detach()`/`append()` no-op from `AccountSettingsSingleModalView.onShow()`.
+- **Encrypted chats visible when OMEMO disabled** (`chats.js`): `ChatItemView.updateEncrypted()` now applies the `hidden` CSS class to encrypted chat items when `omemo_enabled` is falsy. The existing `ChatsView.updateAccountEncryptedChats()` already handles the reverse (showing them when OMEMO is enabled).
 
 ### Key Files
 
@@ -84,7 +86,7 @@ xabber.SomeView = createVueBackboneView(xabber, {
 **Important caveats for the bridge pattern:**
 - `mountVue.js` applies `markRaw()` to the Backbone view, all props, the jQuery `$el`, and the `xabber` object
 - It sets `app.config.errorHandler` to suppress Vue DEV errors
-- The `remove()` function does NOT call Vue's `unmount()` — it nulls refs and lets Backbone handle DOM cleanup
+- The `remove()` function does NOT call Vue's `unmount()` — it nulls refs and lets Backbone handle DOM cleanup. However, when you need to *reuse* a mount container (e.g. `SettingsModalView.updateAccounts` recreating `AccountSettingsSingleModalView` on the same element), call `_vueApp.unmount()` explicitly *before* clearing `el.innerHTML` — this cancels pending reactive updates that would otherwise overwrite the new app's content.
 - Store Backbone objects (models, views, jQuery) with `shallowRef()`, never `ref()` — `ref()` deep-proxies them causing infinite recursion
 - The `xabber` global object is provided to Vue via `inject(XABBER_KEY)` — always accessed through `useXabber()` composable
 
@@ -160,3 +162,4 @@ The data model is based on the Android version (`github.com:redsolution/xabber-a
 - When creating new Vue components, always use `<script setup>` with Composition API
 - The `dist/` directory is gitignored
 - Android reference project: `github.com:redsolution/xabber-android-ng.git`
+- **E2E tests** live in a sibling repo at `../xabber-tests/xabber-web` (run `npx playwright test` there). The dev server must be running first (`npx vite --host`). 13 tests across 5 Playwright projects (serial-a through serial-d + parallel). All 13 pass; `journey-sessions` occasionally needs its 1 retry due to parallel account-registration load on the test server.
