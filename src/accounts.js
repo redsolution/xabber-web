@@ -5121,8 +5121,6 @@ xabber.AccountSettingsSingleModalView = xabber.AccountSettingsModalView.extend({
     onShow: function (view, options) {
         if (!_.isNull(view))
             return;
-        this.$el.detach();
-        this.parent.$('.single-account-info-wrap').append(this.$el);
         this.ps_container = this.parent.ps_container;
         this.gallery_view.render();
         this._single_account = true;

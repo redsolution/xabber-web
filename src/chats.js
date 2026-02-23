@@ -2676,7 +2676,11 @@ xabber.ChatItemView = xabber.BasicView.extend({
     },
 
     updateEncrypted: function () {
-        this.$el.switchClass('encrypted', this.model.get('encrypted'));
+        let encrypted = this.model.get('encrypted');
+        this.$el.switchClass('encrypted', encrypted);
+        if (encrypted) {
+            this.$el.switchClass('hidden', !this.account.get('omemo_enabled'));
+        }
     },
 
     updatePinned: function () {
