@@ -1,0 +1,68 @@
+<template>
+    <div class="modal-content-wrap vue-migrated">
+        <div class="modal-header">
+            <span>{{ xb.getString("export_history") }}</span>
+        </div>
+        <div class="modal-content">
+            <div class="export-history-progress-bar">
+                <progress value="75" min="0" max="100" style="visibility:hidden;height:0;width:0;"></progress>
+                <div class="export-history-msg-count"></div>
+                <i class="mdi mdi-stop mdi-72px"></i>
+            </div>
+            <div class="file-format-choice">
+                <div class="file-format-choice-label">{{ xb.getString("export_history_file_format_label") }}</div>
+                <div class="field radio-field clickable-field">
+                    <form action="#">
+                        <p>
+                            <input class="with-gap" name="file_format" value="txt" type="radio" id="file-format-txt" />
+                            <label for="file-format-txt">TXT</label>
+                        </p>
+                        <p>
+                            <input class="with-gap" name="file_format" value="csv" type="radio" id="file-format-csv" />
+                            <label for="file-format-csv">CSV</label>
+                        </p>
+                    </form>
+                </div>
+            </div>
+            <div class="date-format-choice">
+                <div class="date-format-choice-label">{{ xb.getString("export_history_date_format_label") }}</div>
+                <div class="field radio-field clickable-field">
+                    <form action="#">
+                        <p>
+                            <input class="with-gap" name="date_format" value="iso" type="radio" id="date-format-iso" />
+                            <label for="date-format-iso">YYYY-MM-DD</label>
+                        </p>
+                        <p>
+                            <input class="with-gap" name="date_format" value="eur" type="radio" id="date-format-eur" />
+                            <label for="date-format-eur">DD.MM.YYYY</label>
+                        </p>
+                        <p>
+                            <input class="with-gap" name="date_format" value="usa" type="radio" id="date-format-usa" />
+                            <label for="date-format-usa">MM/DD/YYYY</label>
+                        </p>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-confirm btn-flat btn-main">{{ xb.getString("export_file") }}</button>
+            <button class="btn-flat btn-main btn-dark btn-cancel">{{ xb.getString("close") }}</button>
+        </div>
+    </div>
+</template>
+
+<script setup>
+import { useXabber } from '../../composables/useXabber.js';
+
+const xb = useXabber();
+
+let backboneView = null;
+
+function setBackboneView(view) {
+    backboneView = view;
+}
+
+defineExpose({
+    setBackboneView,
+});
+</script>
