@@ -23,7 +23,7 @@
     <script type="module">
         import '/src/xabber.js';
         xabber.configure({
-            CONNECTION_URL: 'wss://xmpp.redsolution.com/wsserver',
+            CONNECTION_URL: '%VITE_CONNECTION_URL%',
             LOG_LEVEL: 'INFO',
             DEBUG: true,
             STORAGE_NAME_ENDING: 'dev'
