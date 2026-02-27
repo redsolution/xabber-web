@@ -907,6 +907,7 @@ xabber.Account = Backbone.Model.extend({
 
         afterConnected: function () {
             this.dfd_presence.done(() => {
+                this.getVCard();
                 this.sendPendingStanzas();
                 this.sendPendingMessages();
                 this.session.set({
