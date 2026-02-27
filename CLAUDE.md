@@ -163,3 +163,32 @@ The data model is based on the Android version (`github.com:redsolution/xabber-a
 - The `dist/` directory is gitignored
 - Android reference project: `github.com:redsolution/xabber-android-ng.git`
 - **E2E tests** live in a sibling repo at `../xabber-tests/xabber-web` (run `npx playwright test` there). The dev server must be running first (`npx vite --host`). 13 tests across 5 Playwright projects (serial-a through serial-d + parallel). All 13 pass; `journey-sessions` occasionally needs its 1 retry due to parallel account-registration load on the test server.
+
+## Issue Tracker (Redmine)
+
+| Field | Value |
+|-------|-------|
+| URL | https://redmine.redsolution.ru |
+| Project | [xabber-web](https://redmine.redsolution.ru/projects/xabber-web) |
+| Agent account | `claude.agent` / `claudepassword123` |
+| API key | `34994bd48eb7c3f23e3a73fcd83fffa1af9d929f` |
+| Project ID | `376` (numeric) or `xabber-web` (slug) |
+| Bug tracker ID | `1` (tracker name: "Error") |
+| Feature tracker ID | `3` (tracker name: "Issue") |
+
+**Quick API usage:**
+```bash
+API="34994bd48eb7c3f23e3a73fcd83fffa1af9d929f"
+BASE="https://redmine.redsolution.ru"
+
+# List open bugs
+curl -s -H "X-Redmine-API-Key: $API" \
+  "$BASE/issues.json?project_id=xabber-web&tracker_id=1&status_id=open&limit=100"
+
+# Fetch single issue with notes
+curl -s -H "X-Redmine-API-Key: $API" \
+  "$BASE/issues/12345.json?include=journals"
+```
+
+**Issue statuses:** 1=New, 2=In progress: Assigned, 4=In progress: Feedback,
+7=In progress: Resolved, 14=For Customer approval, 5=Closed, 6=Rejected
