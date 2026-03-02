@@ -309,7 +309,7 @@ var utils = {
 
         let secret = curve25519js.sharedKeyCurve(new Uint8Array(priv_key), new Uint8Array(pub_key));
 
-        return Buffer.from(secret);
+        return new Uint8Array(secret).buffer;
     },
 
     curveSign: function (priv_key, msg) {
