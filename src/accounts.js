@@ -14,6 +14,7 @@ import SetAvatarComponent from "./vue/components/accounts/SetAvatar.vue";
 import DeleteFilesFromGalleryComponent from "./vue/components/accounts/DeleteFilesFromGallery.vue";
 import AccountToolbarItemComponent from "./vue/components/accounts/AccountToolbarItem.vue";
 import EmojiPickerComponent from "./vue/components/accounts/EmojiPicker.vue";
+import TwoFactorAuthComponent from "./vue/components/accounts/TwoFactorAuth.vue";
 
 let env = xabber.env,
     constants = env.constants,
@@ -745,12 +746,20 @@ xabber.Account = Backbone.Model.extend({
                 }
             } else if (status === Strophe.Status.CONNECTED) {
                 this.save('is_new', undefined);
-                if (this.auth_view.stepped_auth && !this.auth_view.data.get('registration'))
-                    this.auth_view.authStepperStart();
-                else{
+                if (this.auth_view.stepped_auth && !this.auth_view.data.get('registration')) {
+                    if (this.auth_view._totp_completed) {
+                        this.auth_view.authStepperTotpComplete();
+                    } else {
+                        this.auth_view.authStepperStart();
+                    }
+                } else {
                     this.auth_view.endAuth();
                 }
 
+            } else if (status === Strophe.Status.TOTP_REQUIRED) {
+                if (this.auth_view.stepped_auth) {
+                    this.auth_view.authStepperTotp(condition);
+                }
             } else if (_.contains(constants.BAD_CONN_STATUSES, status)) {
                 let stepper_auth_error = false;
                 if (status === Strophe.Status.ERROR) {
@@ -4119,6 +4128,10 @@ xabber.AccountSettingsModalView = createVueBackboneView(xabber, {
             xabber.trigger('change_account_password', this.model);
             return;
         }
+        if (block_name === 'two-factor-auth'){
+            xabber.trigger('manage_two_factor_auth', this.model);
+            return;
+        }
         this.$('.settings-block-wrap').addClass('hidden');
         this.$('.left-column').addClass('hidden');
         this.$('.right-column').removeClass('hidden');
@@ -5114,9 +5127,12 @@ xabber.AccountSettingsSingleModalView = xabber.AccountSettingsModalView.extend({
         this._vueApp = createApp(AccountSettingsModal, { model: this.model, singleMode: true });
         this._vueApp.provide(XABBER_KEY, markRaw(xabber));
         this._vueApp.provide(VIEW_EL_KEY, markRaw(this.$el));
-        this._vueApp.config.errorHandler = function () {};
+        this._vueApp.config.errorHandler = function (err, vm, info) { console.error('[AccountSettingsSingle Vue Error]', err, info); };
+        console.log('[SETTINGS DEBUG] mounting AccountSettingsSingleModalView on el:', this.$el[0]);
         this._vueInstance = this._vueApp.mount(this.$el[0]);
+        console.log('[SETTINGS DEBUG] mounted, running _vueInit');
         this._vueInit && this._vueInit(viewOptions);
+        console.log('[SETTINGS DEBUG] _vueInit done');
     },
 
     onShow: function (view, options) {
@@ -6329,6 +6345,150 @@ xabber.ChangeAccountPasswordView = createVueBackboneView(xabber, {
     }
 }});
 
+xabber.TwoFactorAuthView = createVueBackboneView(xabber, {
+    component: TwoFactorAuthComponent,
+    className: 'modal main-modal two-factor-auth-modal',
+    extend: {
+    events: {
+        "click .btn-enable-tfa": "startSetup",
+        "click .btn-confirm-tfa": "confirmSetup",
+        "click .btn-disable-tfa": "disableTfa",
+        "click .btn-cancel": "close",
+        "keyup input[name=tfa_confirm_code]": "keyUpConfirm",
+    },
+
+    onShow: function () {
+        this.render.apply(this, arguments);
+    },
+
+    render: function (options) {
+        this.account = options.model;
+        this._vueInstance.clearError();
+        this.$el.openModal({
+            ready: this.onRender.bind(this),
+            complete: this.close.bind(this)
+        });
+    },
+
+    onRender: function () {
+        this._vueInstance.setState('loading');
+        this.checkStatus();
+    },
+
+    checkStatus: function () {
+        let self = this;
+        let iq = $iq({type: 'get', to: this.account.connection.domain})
+            .c('status', {xmlns: Strophe.NS.AUTH_DEVICES_2FA});
+        console.log('[2FA] checkStatus IQ:', iq.toString(), 'domain:', this.account.connection.domain, 'connected:', this.account.connection.connected);
+        let sent = this.account.sendIQ(iq,
+            function (result) {
+                let $status = $(result).find('status[xmlns="' + Strophe.NS.AUTH_DEVICES_2FA + '"]');
+                let enabled = $status.text() === 'true';
+                self._vueInstance.setState(enabled ? 'enabled' : 'disabled');
+            },
+            function (err) {
+                console.log('[2FA] checkStatus error:', err);
+                self._vueInstance.setState('disabled');
+                self._vueInstance.setError('Could not check 2FA status');
+            }
+        );
+        console.log('[2FA] sendIQ returned:', sent);
+    },
+
+    startSetup: function () {
+        let self = this;
+        this._vueInstance.clearError();
+        this._vueInstance.setState('loading');
+        let iq = $iq({type: 'set', to: this.account.connection.domain})
+            .c('setup', {xmlns: Strophe.NS.AUTH_DEVICES_2FA});
+        this.account.sendIQ(iq,
+            function (result) {
+                let $setup = $(result).find('setup[xmlns="' + Strophe.NS.AUTH_DEVICES_2FA + '"]');
+                let secret = $setup.find('secret').text();
+                let uri = $setup.find('uri').text();
+                self._vueInstance.setSecret(secret);
+                self._vueInstance.setUri(uri);
+                self._vueInstance.setState('setup');
+                self.generateQR(uri);
+            },
+            function () {
+                self._vueInstance.setState('disabled');
+                self._vueInstance.setError('Failed to start 2FA setup');
+            }
+        );
+    },
+
+    generateQR: function (uri) {
+        let self = this;
+        try {
+            let canvas = document.createElement('canvas');
+            if (typeof QRCode !== 'undefined') {
+                QRCode.toCanvas(canvas, uri, {width: 200}, function () {
+                    self._vueInstance.setQrDataUrl(canvas.toDataURL());
+                });
+            }
+        } catch (e) {
+            // QR generation optional
+        }
+    },
+
+    keyUpConfirm: function (ev) {
+        let val = this.$('input[name=tfa_confirm_code]').val() || '';
+        if (ev && ev.keyCode === constants.KEY_ENTER && val.length === 6) {
+            this.confirmSetup();
+        }
+    },
+
+    confirmSetup: function () {
+        let self = this;
+        let code = (this.$('input[name=tfa_confirm_code]').val() || '').trim();
+        if (code.length !== 6) {
+            this._vueInstance.setError('Please enter a 6-digit code');
+            return;
+        }
+        this._vueInstance.clearError();
+        let iq = $iq({type: 'set', to: this.account.connection.domain})
+            .c('confirm', {xmlns: Strophe.NS.AUTH_DEVICES_2FA})
+            .c('code').t(code);
+        this.account.sendIQ(iq,
+            function () {
+                self._vueInstance.setState('success');
+            },
+            function (err) {
+                let errText = $(err).find('text').text() || 'Invalid code. Please try again.';
+                self._vueInstance.setError(errText);
+            }
+        );
+    },
+
+    disableTfa: function () {
+        let self = this;
+        this._vueInstance.clearError();
+        let iq = $iq({type: 'set', to: this.account.connection.domain})
+            .c('disable', {xmlns: Strophe.NS.AUTH_DEVICES_2FA});
+        this.account.sendIQ(iq,
+            function () {
+                self._vueInstance.setState('disabled');
+            },
+            function () {
+                self._vueInstance.setError('Failed to disable 2FA');
+            }
+        );
+    },
+
+    onHide: function () {
+        this.$el.detach();
+    },
+
+    close: function () {
+        this.closeModal();
+    },
+
+    closeModal: function () {
+        this.$el.closeModal({ complete: this.hide.bind(this) });
+    }
+}});
+
 xabber.AuthView = xabber.BasicView.extend({
     _initialize: function () {
         this.$jid_input = this.$('input[name=jid]');
@@ -6519,6 +6679,8 @@ xabber.XmppLoginPanel = xabber.AuthView.extend({
         "click .btn-selfie": "openWebcamPanel",
         "click #select-xmpp-server .property-variant": "changePropertyValueRegistration",
         "click #select-auth-xmpp-server .property-variant": "changePropertyValueAuth",
+        "click .btn-verify-totp": "submitTotpCode",
+        "keyup input[name=totp_code]": "keyUpTotp",
     },
 
     __initialize: function () {
@@ -7206,7 +7368,13 @@ xabber.XmppLoginPanel = xabber.AuthView.extend({
         this.$(`.login-step .preloader-wrapper`).addClass('active').addClass('visible');
         this.$(`.login-step .mdi`).hideIf(true);
         this.$(`.login-step`).removeClass('active-feature');
-        this.$(`.login-step .mdi`).addClass('mdi-alert-circle').removeClass('mdi-checkbox-marked-circle')
+        this.$(`.login-step .mdi`).addClass('mdi-alert-circle').removeClass('mdi-checkbox-marked-circle');
+        this.$(`.login-step.totp-step`).hideIf(true);
+        this.$('.btn-verify-totp').prop('disabled', false);
+        this.$('input[name=totp_code]').val('');
+        this.$('.totp-error').hideIf(true);
+        this._totp_shown = false;
+        this._totp_completed = false;
     },
 
     authStepperShow: function (){
@@ -7264,6 +7432,81 @@ xabber.XmppLoginPanel = xabber.AuthView.extend({
                 this.errorFeedback(options);
             },timeout_timer)
         },timeout_timer)
+    },
+
+    authStepperTotp: function (condition) {
+        this._totp_completed = false;
+        let isRetry = this._totp_shown;
+        this._totp_shown = true;
+        let timeout_timer = 1000;
+
+        let showTotpInput = () => {
+            this.$(`.login-step.totp-step`).hideIf(false);
+            this.$('.btn-verify-totp').prop('disabled', false);
+            this.$('input[name=totp_code]').val('').focus();
+            let $err = this.$('.totp-error');
+            if (condition) {
+                $err.text('Wrong code, ' + condition + ' attempts remaining').hideIf(false);
+            } else {
+                $err.hideIf(true);
+            }
+        };
+
+        if (isRetry) {
+            showTotpInput();
+            return;
+        }
+
+        this.$('.login-step-wrap').hideIf(false);
+        this.$(`.login-step.connecting-step`).hideIf(false);
+        setTimeout(() => {
+            this.$(`.login-step.connecting-step`).addClass('active-feature');
+            this.$(`.login-step.connecting-step .preloader-wrapper`).removeClass('active').removeClass('visible');
+            this.$(`.login-step.connecting-step .mdi`).hideIf(false).removeClass('mdi-alert-circle').addClass('mdi-checkbox-marked-circle');
+            this.$(`.login-step.credentials-step`).hideIf(false);
+            setTimeout(() => {
+                this.$(`.login-step.credentials-step`).addClass('active-feature');
+                this.$(`.login-step.credentials-step .preloader-wrapper`).removeClass('active').removeClass('visible');
+                this.$(`.login-step.credentials-step .mdi`).hideIf(false).removeClass('mdi-alert-circle').addClass('mdi-checkbox-marked-circle');
+                showTotpInput();
+            }, timeout_timer);
+        }, timeout_timer);
+    },
+
+    authStepperTotpComplete: function () {
+        this.$(`.login-step.totp-step`).hideIf(true);
+        let timeout_timer = 1000;
+        setTimeout(() => {
+            if (this.account && this.account.connection) {
+                if (constants.TRUSTED_DOMAINS.indexOf(this.account.connection.domain) > -1) {
+                    this.endAuth();
+                } else {
+                    this.stepped_auth_complete = true;
+                    if (this.first_features_received)
+                        this.successFeedback();
+                }
+            }
+        }, timeout_timer);
+    },
+
+    submitTotpCode: function () {
+        let code = this.$('input[name=totp_code]').val().trim();
+        if (code.length !== 6 || !/^\d{6}$/.test(code)) {
+            this.$('.totp-error').text('Enter a 6-digit code').hideIf(false);
+            return;
+        }
+        this.$('.totp-error').hideIf(true);
+        this.$('.btn-verify-totp').prop('disabled', true);
+        this._totp_completed = true;
+        if (this.account && this.account.connection) {
+            this.account.connection.submitTotpCode(code);
+        }
+    },
+
+    keyUpTotp: function (ev) {
+        if (ev.keyCode === constants.KEY_ENTER) {
+            this.submitTotpCode();
+        }
     },
 
     registerFeedback: function (options) {
@@ -7325,7 +7568,9 @@ xabber.AddAccountView = xabber.XmppLoginPanel.extend({
         "keyup input[name=jid]": "keyUpLogin",
         "keyup input[name=password]": "keyUpLogin",
         "keyup input[name=sign_in_domain]": "keyUpLogin",
-        "click .property-variant": "changePropertyValueAuth"
+        "click .property-variant": "changePropertyValueAuth",
+        "click .btn-verify-totp": "submitTotpCode",
+        "keyup input[name=totp_code]": "keyUpTotp",
     },
 
     render: function () {
@@ -7716,6 +7961,12 @@ xabber.once("start", function () {
         if (!this.change_account_password_view)
             this.change_account_password_view = new this.ChangeAccountPasswordView();
         this.change_account_password_view.show({model: account});
+    }, this);
+
+    this.on("manage_two_factor_auth", function (account) {
+        if (!this.two_factor_auth_view)
+            this.two_factor_auth_view = new this.TwoFactorAuthView();
+        this.two_factor_auth_view.show({model: account});
     }, this);
 
     this.on("show_delete_files", function (options) {

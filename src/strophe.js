@@ -32,6 +32,7 @@ Strophe.addConnectionPlugin('register', {
         Strophe.Status.REGISTERED      = i + 3;
         Strophe.Status.CONFLICT        = i + 4;
         Strophe.Status.NOTACCEPTABLE   = i + 5;
+        Strophe.Status.TOTP_REQUIRED   = i + 6;
 
         if (conn.disco) {
             if(conn.disco.addFeature)
@@ -881,36 +882,96 @@ _.extend(Strophe.Connection.prototype, {
             this._changeConnectStatus(Strophe.Status.AUTHFAIL, null);
             return false;
         } else if (!this.options.explicitResourceBinding) {
-            if (this.x_token_auth &&
-                (!this.x_token || (this.x_token && this.x_token.expire && (parseInt(this.x_token.expire)*1000 < env.moment.now())))
-            ) {
-                this.getXToken((success) => {
-                    let token = $(success).find('secret').text(),
-                        expires_at = $(success).find('expire').text(),
-                        validation_key = $(success).find('validation-key').text(),
-                        token_uid = $(success).find('device').attr('id');
-                    this.x_token = {token: token, expire: expires_at, validation_key: validation_key, token_uid: token_uid,};
-                    this.counter = 1;
-                    this.pass = token;
-                    this._send_auth_bind();
-                    if (this.account) {
-                        this.account.save({
-                            hotp_counter: this.counter,
-                            password: null,
-                        });
-                        this.account.counter_changes_logging.updateCountersList(this.account);
-                    }
-                }, () => {
-                    this._send_auth_bind();
-                });
-            }
-            else {
-                this._send_auth_bind();
-            }
+            this._proceedWithDeviceRegAndBind();
         } else {
             this._changeConnectStatus(Strophe.Status.BINDREQUIRED, null);
         }
         return false;
+    },
+
+    _proceedWithDeviceRegAndBind: function () {
+        if (this.x_token_auth &&
+            (!this.x_token || (this.x_token && this.x_token.expire && (parseInt(this.x_token.expire)*1000 < env.moment.now())))
+        ) {
+            this.getXToken((success) => {
+                let token = $(success).find('secret').text(),
+                    expires_at = $(success).find('expire').text(),
+                    validation_key = $(success).find('validation-key').text(),
+                    token_uid = $(success).find('device').attr('id');
+                this.x_token = {token: token, expire: expires_at, validation_key: validation_key, token_uid: token_uid,};
+                this.counter = 1;
+                this.pass = token;
+                this._send_auth_bind();
+                if (this.account) {
+                    this.account.save({
+                        hotp_counter: this.counter,
+                        password: null,
+                    });
+                    this.account.counter_changes_logging.updateCountersList(this.account);
+                }
+            }, (err_stanza) => {
+                // Check if device registration was blocked by 2FA
+                if (this._isTotpRequiredError(err_stanza)) {
+                    this._totp_attempts_left = 3;
+                    this._requestTotpCode();
+                } else {
+                    this._send_auth_bind();
+                }
+            });
+        }
+        else {
+            this._send_auth_bind();
+        }
+    },
+
+    _isTotpRequiredError: function (stanza) {
+        if (!stanza) return false;
+        // Walk the DOM tree to find text containing "TOTP"
+        let texts = stanza.getElementsByTagName('text');
+        for (let i = 0; i < texts.length; i++) {
+            let t = Strophe.getText(texts[i]);
+            if (t && t.indexOf('TOTP') !== -1) return true;
+        }
+        return false;
+    },
+
+    _requestTotpCode: function () {
+        this._changeConnectStatus(Strophe.Status.TOTP_REQUIRED,
+            this._totp_attempts_left < 3 ? String(this._totp_attempts_left) : null);
+    },
+
+    submitTotpCode: function (code) {
+        let conn = this;
+        let uniq_id = uuid();
+        let iq = $iq({ type: 'set', id: uniq_id })
+            .c('verify', { xmlns: Strophe.NS.AUTH_DEVICES_2FA })
+            .c('code').t(code);
+
+        let handler = function (stanza) {
+            let iqtype = stanza.getAttribute('type');
+            if (iqtype === 'result') {
+                Strophe.info('TOTP 2FA verified successfully');
+                conn._proceedWithDeviceRegAndBind();
+            } else {
+                let remaining = 0;
+                let els = stanza.getElementsByTagName('attempts-remaining');
+                if (els.length > 0) {
+                    remaining = parseInt(Strophe.getText(els[0])) || 0;
+                }
+                conn._totp_attempts_left = remaining;
+
+                if (remaining > 0) {
+                    Strophe.warn('TOTP failed, ' + remaining + ' attempts remaining');
+                    conn._requestTotpCode();
+                } else {
+                    Strophe.warn('TOTP failed, no attempts remaining');
+                    conn._changeConnectStatus(Strophe.Status.AUTHFAIL, 'TOTP verification failed');
+                }
+            }
+        };
+
+        this._addSysHandler(handler.bind(this), null, 'iq', null, uniq_id);
+        this.send(iq.tree());
     },
 
     _send_auth_bind() {
@@ -994,7 +1055,7 @@ _.extend(Strophe.Connection.prototype, {
             }
         };
 
-        this._addSysHandler(handler.bind(this), Strophe.NS.AUTH_DEVICES, 'iq', 'result' , uniq_id);
+        this._addSysHandler(handler.bind(this), null, 'iq', null, uniq_id);
 
         this.send(iq.tree());
     },
@@ -1181,6 +1242,7 @@ Strophe.addNamespace('EXTENDED_CHATSTATES', 'https://xabber.com/protocol/extende
 Strophe.addNamespace('HTTP_AUTH', 'http://jabber.org/protocol/http-auth');
 Strophe.addNamespace('AUTH_TOKENS', 'https://xabber.com/protocol/auth-tokens');
 Strophe.addNamespace('AUTH_DEVICES', 'https://xabber.com/protocol/devices');
+Strophe.addNamespace('AUTH_DEVICES_2FA', 'https://xabber.com/protocol/devices#2fa');
 Strophe.addNamespace('SYNCHRONIZATION', 'https://xabber.com/protocol/synchronization');
 Strophe.addNamespace('SYNCHRONIZATION_REGULAR_CHAT', 'urn:xabber:chat');
 Strophe.addNamespace('SYNCHRONIZATION_CHANNEL', 'https://xabber.com/protocol/channels');

@@ -2309,6 +2309,7 @@ xabber.SettingsModalView = createVueBackboneView(xabber, {
     },
 
     updateAccounts: function (options) {
+        console.log('[SETTINGS DEBUG] updateAccounts called, accounts:', xabber.accounts?.length, 'enabled:', xabber.accounts?.enabled?.length);
         this._vueInstance && this._vueInstance.updateAccounts();
         // Tear down old single-account view safely.
         // Properly unmount the Vue app first to cancel any pending reactive
@@ -2329,10 +2330,12 @@ xabber.SettingsModalView = createVueBackboneView(xabber, {
         // Cancel any previously scheduled creation to prevent competing
         // setTimeout callbacks (e.g. from both 'add' and 'list_changed' firing).
         clearTimeout(this._updateAccountsTimer);
+        console.log('[SETTINGS DEBUG] check single account:', xabber.accounts?.length === 1, 'enabled:', xabber.accounts?.enabled?.length);
         if (xabber.accounts && xabber.accounts.length === 1 && xabber.accounts.enabled.length) {
             let self = this;
             this._updateAccountsTimer = setTimeout(() => {
                 let el = self.$('.single-account-info-wrap .single-account-info')[0];
+                console.log('[SETTINGS DEBUG] single-account-info el:', el, 'el exists:', !!el);
                 if (!el) return;
                 // Clear previous Vue app state from the element so a fresh
                 // mount works correctly (Vue checks _vnode for patch diffing)

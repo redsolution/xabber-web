@@ -25,7 +25,7 @@ export function createVueBackboneView(xabber, options) {
             this._vueApp.provide(VIEW_EL_KEY, markRaw(this.$el));
             // Prevent Vue DEV mode from rethrowing DOM errors during
             // mixed Backbone/Vue lifecycle (e.g. unmount of detached nodes)
-            this._vueApp.config.errorHandler = function () {};
+            this._vueApp.config.errorHandler = function (err, vm, info) { console.error('[Vue Error]', err, info); };
             setup && setup(this._vueApp, this);
             this._vueInstance = this._vueApp.mount(this.$el[0]);
             this._vueInit && this._vueInit(viewOptions);
