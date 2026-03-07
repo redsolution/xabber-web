@@ -3705,6 +3705,7 @@ xabber.AccountSettingsModalView = createVueBackboneView(xabber, {
         this.listenTo(this.model, 'change:image', this.updateAvatar);
         this.listenTo(this.model, 'change:gallery_token', this.updateGallery);
         this.listenTo(this.model, 'activate deactivate', this.updateBlocks);
+        this.listenTo(this.model.session, 'change:connected', this.updateBlocks);
         this.listenTo(this.model, 'destroy', this.remove);
 
         if (this.ps_container && this.ps_container.length) {
@@ -3794,6 +3795,7 @@ xabber.AccountSettingsModalView = createVueBackboneView(xabber, {
             );
         }
         this.updateOmemoDevices();
+        this.updateBlocks();
         this.$('.left-column').removeClass('hidden');
         this.$('.right-column').addClass('hidden');
         this.$('.btn-back-settings').removeClass('hidden');
@@ -5128,11 +5130,8 @@ xabber.AccountSettingsSingleModalView = xabber.AccountSettingsModalView.extend({
         this._vueApp.provide(XABBER_KEY, markRaw(xabber));
         this._vueApp.provide(VIEW_EL_KEY, markRaw(this.$el));
         this._vueApp.config.errorHandler = function (err, vm, info) { console.error('[AccountSettingsSingle Vue Error]', err, info); };
-        console.log('[SETTINGS DEBUG] mounting AccountSettingsSingleModalView on el:', this.$el[0]);
         this._vueInstance = this._vueApp.mount(this.$el[0]);
-        console.log('[SETTINGS DEBUG] mounted, running _vueInit');
         this._vueInit && this._vueInit(viewOptions);
-        console.log('[SETTINGS DEBUG] _vueInit done');
     },
 
     onShow: function (view, options) {
@@ -5179,6 +5178,7 @@ xabber.AccountSettingsSingleModalView = xabber.AccountSettingsModalView.extend({
             );
         }
         this.updateOmemoDevices();
+        this.updateBlocks();
         this.$('.left-column').removeClass('hidden');
         this.$('.right-column').addClass('hidden');
         this.$('.btn-back-settings').removeClass('hidden');
@@ -6407,29 +6407,14 @@ xabber.TwoFactorAuthView = createVueBackboneView(xabber, {
                 let secret = $setup.find('secret').text();
                 let uri = $setup.find('uri').text();
                 self._vueInstance.setSecret(secret);
-                self._vueInstance.setUri(uri);
                 self._vueInstance.setState('setup');
-                self.generateQR(uri);
+                self._vueInstance.setUri(uri);
             },
             function () {
                 self._vueInstance.setState('disabled');
                 self._vueInstance.setError('Failed to start 2FA setup');
             }
         );
-    },
-
-    generateQR: function (uri) {
-        let self = this;
-        try {
-            let canvas = document.createElement('canvas');
-            if (typeof QRCode !== 'undefined') {
-                QRCode.toCanvas(canvas, uri, {width: 200}, function () {
-                    self._vueInstance.setQrDataUrl(canvas.toDataURL());
-                });
-            }
-        } catch (e) {
-            // QR generation optional
-        }
     },
 
     keyUpConfirm: function (ev) {
