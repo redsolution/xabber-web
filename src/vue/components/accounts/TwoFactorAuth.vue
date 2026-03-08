@@ -18,29 +18,22 @@
             </div>
         </div>
 
-        <!-- 2FA setup: show QR + secret + confirm -->
+        <!-- 2FA setup: show QR + confirm -->
         <div class="modal-content tfa-setup-state" v-if="state === 'setup'">
-            <div class="tfa-info">
-                <p>Scan the QR code with your authenticator app (Google Authenticator, Aegis, etc.):</p>
+            <div class="tfa-setup-hint">
+                Scan the QR code with your authenticator app
             </div>
             <div class="tfa-qr-wrap" ref="qrContainer"></div>
-            <div class="tfa-secret-wrap">
-                <div class="tfa-secret-label">Or enter this key manually:</div>
-                <div class="tfa-secret-value" @click="copySecret" :title="copied ? 'Copied!' : 'Click to copy'">
-                    <span class="tfa-secret-text">{{ formattedSecret }}</span>
-                    <svg class="tfa-copy-icon mdi mdi-18px mdi-svg-template" v-html="svgContent('copy')"></svg>
-                </div>
-                <div class="tfa-copied-msg" v-if="copied">Copied to clipboard!</div>
+            <div class="tfa-copy-wrap">
+                <span v-if="!copied" class="tfa-copy-link dotted-underline" @click="copySecret">Copy secret key to clipboard</span>
+                <span v-else class="tfa-copied-text">Copied!</span>
             </div>
             <div class="tfa-confirm-wrap">
-                <div class="block-subheader">
-                    <span class="block-name">Enter the 6-digit code from your app to confirm:</span>
-                </div>
-                <div class="tfa-confirm-field">
-                    <input class="input-glow account-glow tfa-confirm-input" placeholder="000000"
+                <div class="tfa-confirm-label">Enter the 6-digit code from your app:</div>
+                <div class="tfa-code-input-wrap">
+                    <input class="tfa-code-input input-glow" placeholder="000000"
                            type="text" name="tfa_confirm_code" maxlength="6"
                            inputmode="numeric" autocomplete="one-time-code">
-                    <span class="errors fixed"></span>
                 </div>
             </div>
         </div>
@@ -69,7 +62,7 @@
         <div class="modal-footer">
             <button v-if="state === 'disabled'" class="btn-flat btn-main btn-enable-tfa">Enable 2FA</button>
             <button v-if="state === 'setup'" class="btn-flat btn-main btn-confirm-tfa">Confirm</button>
-            <button v-if="state === 'enabled'" class="btn-flat btn-main btn-dark btn-disable-tfa">Disable 2FA</button>
+            <button v-if="state === 'enabled'" class="btn-flat btn-main btn-disable-tfa">Disable 2FA</button>
             <button class="btn-flat btn-main btn-dark btn-cancel">{{ state === 'success' ? 'OK' : 'Cancel' }}</button>
         </div>
     </div>
@@ -88,11 +81,6 @@ const uri = ref('');
 const errorMsg = ref('');
 const copied = ref(false);
 const qrContainer = ref(null);
-
-const formattedSecret = computed(() => {
-    // Format in groups of 4 for readability: JBSW Y3DP EHPK 3PXP
-    return secret.value.replace(/(.{4})/g, '$1 ').trim();
-});
 
 function svgContent(name) {
     let tmpl = xb.env.templates.svg[name];
@@ -131,7 +119,6 @@ function copySecret() {
         copied.value = true;
         setTimeout(() => { copied.value = false; }, 2000);
     }).catch(() => {
-        // Fallback for older browsers
         let ta = document.createElement('textarea');
         ta.value = secret.value;
         ta.style.position = 'fixed';
