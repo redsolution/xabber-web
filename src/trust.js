@@ -2287,41 +2287,55 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
     },
 
     getDevicesIKsForTrustVerification: function (device) {
+        console.log('[trust] getDevicesIKsForTrustVerification device=', device, 'ik=', device && device.get('ik'));
         return new Promise((resolve) => {
             if (device){
                 this.omemo.store.getIdentityKeyPair().then((own_ik) => {
-                    let dfd = new $.Deferred();
-                    dfd.done(() => {
-                        let own_pubkey = own_ik.pubKey,
-                            own_privkey = own_ik.privKey;
-                        if (own_pubkey.byteLength === 33)
-                            own_pubkey = own_pubkey.slice(1);
-                        if (own_privkey.byteLength === 33)
-                            own_privkey = own_privkey.slice(1);
+                    let own_pubkey = own_ik.pubKey,
+                        own_privkey = own_ik.privKey;
+                    if (own_pubkey.byteLength === 33)
+                        own_pubkey = own_pubkey.slice(1);
+                    if (own_privkey.byteLength === 33)
+                        own_privkey = own_privkey.slice(1);
+
+                    const doResolve = () => {
                         let device_pubkey = device.get('ik');
+                        if (!device_pubkey || !device_pubkey.byteLength)
+                            return; // ik still null — wait for the next change:ik
                         if (device_pubkey.byteLength === 33) // иногда после запуска пустой
                             device_pubkey = device_pubkey.slice(1);
+                        resolve({ own_pubkey, own_privkey, device_pubkey });
+                    };
 
-                        resolve({
-                            own_pubkey,
-                            own_privkey,
-                            device_pubkey,
-                        });
-                    });
                     if (device.get('ik') && device.get('ik').byteLength){
-                        dfd.resolve();
+                        doResolve();
                     } else {
-                        let timeout;
-                        device.on('change:ik', () => {
-                            clearTimeout(timeout);
-                            dfd.resolve();
-                        });
-                        timeout = setTimeout(() => {
+                        let timeout, retries = 0;
+                        // Only resolve when ik is actually a non-null ArrayBuffer.
+                        // getBundle()'s error callback sets ik to null, which fires
+                        // change:ik — we must not resolve in that case.
+                        const changeHandler = () => {
+                            if (device.get('ik') && device.get('ik').byteLength) {
+                                clearTimeout(timeout);
+                                device.off('change:ik', changeHandler);
+                                doResolve();
+                            }
+                        };
+                        device.on('change:ik', changeHandler);
+                        const tryFetch = () => {
                             device.getBundle().then(({pk, spk, ik}) => {
                                 device.set('ik', utils.fromBase64toArrayBuffer(ik));
                                 device.set('fingerprint', device.generateFingerprint());
+                                // change:ik fires → changeHandler resolves
+                            }).catch(() => {
+                                if (++retries < 5) {
+                                    timeout = setTimeout(tryFetch, 2000);
+                                }
+                                // If all retries exhausted, promise never resolves —
+                                // the verification session will time out naturally.
                             });
-                        }, 1000);
+                        };
+                        timeout = setTimeout(tryFetch, 1000);
                     }
                 });
             } else {
@@ -2336,73 +2350,112 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
         let device_id = $message.find('verification-start').attr('device-id'),
             sid = $message.find('authenticated-key-exchange').attr('sid'),
             code = utils.randomNumberCode(6),
-            peer,device;
+            peer, device;
         if (contact) {
             peer = this.omemo.getPeer(contact.get('jid'));
             device = peer.devices[device_id];
         } else if (is_own){
             device = this.omemo.own_devices[device_id];
         }
-        if (!device)
-            return;
 
-        this.account.omemo.xabber_trust.addVerificationSessionData(sid, {
+        // Core processing closure — extracted so it can be called either
+        // synchronously (device already in cache) or asynchronously (after
+        // getDevicesNode() loads the peer's device list).
+        const processVerification = async (dev) => {
+            // Guard against double-processing: if another concurrent call already
+            // advanced this session to step 1b, skip.
+            let currentSession = this.account.omemo.xabber_trust.get('active_trust_sessions')[sid];
+            console.log('[trust] processVerification START sid=', sid, 'step=', currentSession && currentSession.verification_step, 'dev.id=', dev && dev.id, 'dev.ik=', dev && dev.get('ik'));
+            if (currentSession && currentSession.verification_step === '1b') { console.log('[trust] processVerification GUARD skip'); return; }
 
-        });
-        this.getDevicesIKsForTrustVerification(device).then((devices_IK) => {
-            this.generateVerificationArrayBuffer(devices_IK.device_pubkey, devices_IK.own_privkey, code).then((response) => {
-                let msg_id = uuid(),
-                    to = contact ? contact.get('jid') : this.account.get('jid'),
-                    stanza = $iq({
-                        type: 'set',
-                        to: to,
-                        id: msg_id
-                    });
-                stanza.c('notify', {xmlns: Strophe.NS.XABBER_NOTIFY});
-                stanza.c('notification', {xmlns: Strophe.NS.XABBER_NOTIFY, type: 'system'});
-                stanza.c('forwarded', {xmlns: Strophe.NS.FORWARD});
-                stanza.c('message', {
+            this.account.omemo.xabber_trust.addVerificationSessionData(sid, {});
+            let devices_IK;
+            try {
+                devices_IK = await this.getDevicesIKsForTrustVerification(dev);
+                console.log('[trust] processVerification getDevicesIKs resolved');
+            } catch(e) {
+                console.error('[trust] processVerification getDevicesIKs FAILED:', e);
+                return;
+            }
+            let response;
+            try {
+                response = await this.generateVerificationArrayBuffer(devices_IK.device_pubkey, devices_IK.own_privkey, code);
+                console.log('[trust] processVerification generateVerificationArrayBuffer resolved');
+            } catch(e) {
+                console.error('[trust] processVerification generateVerificationArrayBuffer FAILED:', e);
+                return;
+            }
+            let msg_id = uuid(),
+                to = contact ? contact.get('jid') : this.account.get('jid'),
+                stanza = $iq({
+                    type: 'set',
                     to: to,
-                    from: this.account.get('jid'),
-                    type: 'chat',
-                    id: uuid()
+                    id: msg_id
                 });
-                stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: sid, timestamp: Math.floor(Date.now() / 1000)});
-                stanza.c('verification-accepted', {'device-id': this.account.omemo.get('device_id')}).up();
-                stanza.c('salt').c('ciphertext').t(response.data).up().c('iv').t(response.iv).up().up().up();
-                stanza.up().up().up();
-                stanza.c('addresses', {xmlns: Strophe.NS.ADDRESS}).c('address',{type: 'to', jid: to}).up().up();
-                this.account.omemo.xabber_trust.addVerificationSessionData(sid, {
-                    active_verification_device: {
-                        device_id: device.id,
-                        is_own_device: is_own,
-                        peer_jid: device.jid,
-                    },
-                    active_verification_code: code,
-                    b_payload: utils.ArrayBuffertoBase64(response.not_encrypted_payload),
-                    verification_step: '1b',
-                    last_sent_message_id: msg_id
-                });
-                msg_item && this.removeAfterHandle(msg_item);
-                this.account.sendFast(stanza, () => {
-                    if (contact){
-                        let $stanza = $(stanza.tree());
-                        $stanza.attr('to',this.account.get('jid'));
-                        let $msg = $stanza.find('notification forwarded message');
-                        $msg.attr('to',this.account.get('jid'));
-                        $msg.attr('type', 'headline');
-                        $msg.children('body').remove();
-                        $msg.find('verification-accepted').attr('device-id', this.account.omemo.get('device_id'));
-                        $msg.find('salt').remove();
-                        $stanza.find(`addresses[xmlns="${Strophe.NS.ADDRESS}"] address[type="to"]`).attr('jid',this.account.get('jid'));
-                        stanza = stanza.tree().cloneNode(true);
-                        this.account.sendFast(stanza, () => {
-                        });
-                    }
-                    utils.callback_popup_message(xabber.getString("trust_verification_traded"), 5000);
-                });
+            stanza.c('notify', {xmlns: Strophe.NS.XABBER_NOTIFY});
+            stanza.c('notification', {xmlns: Strophe.NS.XABBER_NOTIFY, type: 'system'});
+            stanza.c('forwarded', {xmlns: Strophe.NS.FORWARD});
+            stanza.c('message', {
+                to: to,
+                from: this.account.get('jid'),
+                type: 'chat',
+                id: uuid()
             });
-        });
+            stanza.c('authenticated-key-exchange', {xmlns: Strophe.NS.XABBER_TRUST, sid: sid, timestamp: Math.floor(Date.now() / 1000)});
+            stanza.c('verification-accepted', {'device-id': this.account.omemo.get('device_id')}).up();
+            stanza.c('salt').c('ciphertext').t(response.data).up().c('iv').t(response.iv).up().up().up();
+            stanza.up().up().up();
+            stanza.c('addresses', {xmlns: Strophe.NS.ADDRESS}).c('address',{type: 'to', jid: to}).up().up();
+            console.log('[trust] processVerification setting step=1b sid=', sid);
+            this.account.omemo.xabber_trust.addVerificationSessionData(sid, {
+                active_verification_device: {
+                    device_id: dev.id,
+                    is_own_device: is_own,
+                    peer_jid: dev.jid,
+                },
+                active_verification_code: code,
+                b_payload: utils.ArrayBuffertoBase64(response.not_encrypted_payload),
+                verification_step: '1b',
+                last_sent_message_id: msg_id
+            });
+            msg_item && this.removeAfterHandle(msg_item);
+            this.account.sendFast(stanza, () => {
+                if (contact){
+                    let $stanza = $(stanza.tree());
+                    $stanza.attr('to',this.account.get('jid'));
+                    let $msg = $stanza.find('notification forwarded message');
+                    $msg.attr('to',this.account.get('jid'));
+                    $msg.attr('type', 'headline');
+                    $msg.children('body').remove();
+                    $msg.find('verification-accepted').attr('device-id', this.account.omemo.get('device_id'));
+                    $msg.find('salt').remove();
+                    $stanza.find(`addresses[xmlns="${Strophe.NS.ADDRESS}"] address[type="to"]`).attr('jid',this.account.get('jid'));
+                    stanza = stanza.tree().cloneNode(true);
+                    this.account.sendFast(stanza, () => {
+                    });
+                }
+                utils.callback_popup_message(xabber.getString("trust_verification_traded"), 5000);
+            });
+        };
+
+        console.log('[trust] handleTrustVerificationStart device_id=', device_id, 'device=', device, 'peer=', peer);
+        if (!device) {
+            if (peer) {
+                // Device list not loaded yet (updateDevicesKeys() may still be in
+                // flight).  Wait for getDevicesNode() to complete then retry.
+                console.log('[trust] device null, waiting for getDevicesNode...');
+                peer.getDevicesNode().then(() => {
+                    let d = peer.devices[device_id];
+                    console.log('[trust] getDevicesNode resolved, d=', d);
+                    if (d) processVerification(d);
+                    else console.log('[trust] device still null after getDevicesNode!');
+                });
+            } else {
+                console.log('[trust] device null and no peer!');
+            }
+            return;
+        }
+        processVerification(device);
     },
 
     handleTrustVerificationSigned: function ($message, contact, is_own, msg_item, forced_code) {

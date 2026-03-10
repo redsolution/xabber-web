@@ -1543,7 +1543,9 @@ function deleteAllAccounts() {
 
 function updateAccounts() {
     if (!xb.accounts) return;
-    let singleEnabled = xb.accounts.length === 1 && xb.accounts.enabled.length;
+    // Compute enabled count directly — the cached .enabled array can be stale
+    let enabledCount = xb.accounts.filter(a => a.get('enabled')).length;
+    let singleEnabled = xb.accounts.length === 1 && enabledCount > 0;
     isSingleAccount.value = singleEnabled;
     updateHeight();
 }

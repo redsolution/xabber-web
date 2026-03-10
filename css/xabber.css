@@ -5030,6 +5030,70 @@ input[type=text].simple-input-field:hover {
     color: #4CAF50 !important;
     cursor: auto;
 }
+.login-panel-form .login-step-wrap .login-step.totp-step {
+    margin-top: 16px;
+}
+.login-panel-form .login-step-wrap .login-step.totp-step .totp-input-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 8px;
+}
+.login-panel-form .login-step-wrap .login-step.totp-step .totp-input-field {
+    margin: 0;
+    flex: 1;
+}
+.login-panel-form .login-step-wrap .login-step.totp-step .totp-input-field input {
+    font-size: 18px;
+    letter-spacing: 4px;
+    text-align: center;
+    width: 120px;
+    margin: 0;
+    height: 32px;
+}
+.login-panel-form .login-step-wrap .login-step.totp-step .btn-verify-totp {
+    height: 32px;
+    line-height: 32px;
+    padding: 0 16px;
+    font-size: 13px;
+}
+.login-panel-form .login-step-wrap .login-step.totp-step .totp-error {
+    color: #EF5350;
+    font-size: 13px;
+    margin-top: 4px;
+}
+.main-modal.add-account-modal .login-step-wrap .login-step.totp-step {
+    margin-top: 16px;
+}
+.main-modal.add-account-modal .login-step-wrap .login-step.totp-step .totp-input-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 8px;
+}
+.main-modal.add-account-modal .login-step-wrap .login-step.totp-step .totp-input-field {
+    margin: 0;
+    flex: 1;
+}
+.main-modal.add-account-modal .login-step-wrap .login-step.totp-step .totp-input-field input {
+    font-size: 18px;
+    letter-spacing: 4px;
+    text-align: center;
+    width: 120px;
+    margin: 0;
+    height: 32px;
+}
+.main-modal.add-account-modal .login-step-wrap .login-step.totp-step .btn-verify-totp {
+    height: 32px;
+    line-height: 32px;
+    padding: 0 16px;
+    font-size: 13px;
+}
+.main-modal.add-account-modal .login-step-wrap .login-step.totp-step .totp-error {
+    color: #EF5350;
+    font-size: 13px;
+    margin-top: 4px;
+}
 .login-panel-form .input-field-wrap {
     display:flex;
     justify-content: center;
@@ -16388,6 +16452,121 @@ input[type=range].voice-message-volume:focus {
     line-height: 32px;
     text-transform: capitalize;
 }
+
+/* ---------------- TWO-FACTOR AUTH MODAL --------------------- */
+.main-modal.two-factor-auth-modal {
+    height: fit-content;
+    width: 480px !important;
+    max-height: 80vh;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+.main-modal.two-factor-auth-modal .modal-header {
+    font-size: 18px;
+    height: 56px;
+    padding-top: 16px;
+}
+.main-modal.two-factor-auth-modal .modal-content {
+    padding: 16px 24px;
+}
+.main-modal.two-factor-auth-modal .tfa-info {
+    font-size: 14px;
+    line-height: 1.5;
+    color: rgba(0,0,0,.87);
+    margin-bottom: 16px;
+}
+.main-modal.two-factor-auth-modal .tfa-info p {
+    margin: 0;
+}
+.main-modal.two-factor-auth-modal .tfa-enabled-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+.main-modal.two-factor-auth-modal .tfa-enabled-icon path {
+    fill: #4caf50;
+}
+.main-modal.two-factor-auth-modal .tfa-setup-hint {
+    font-size: 14px;
+    color: rgba(60, 60, 67, 0.6);
+    text-align: center;
+    margin-bottom: 16px;
+}
+.main-modal.two-factor-auth-modal .tfa-qr-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 12px;
+}
+.main-modal.two-factor-auth-modal .tfa-qr-wrap canvas {
+    width: 200px;
+    height: 200px;
+}
+.main-modal.two-factor-auth-modal .tfa-copy-wrap {
+    text-align: center;
+    margin-bottom: 20px;
+    font-size: 13px;
+}
+.main-modal.two-factor-auth-modal .tfa-copy-link {
+    cursor: pointer;
+    color: rgba(60, 60, 67, 0.6);
+}
+.main-modal.two-factor-auth-modal .tfa-copy-link:hover {
+    color: rgba(0,0,0,.87);
+}
+.main-modal.two-factor-auth-modal .tfa-copied-text {
+    color: rgba(60, 60, 67, 0.4);
+}
+.main-modal.two-factor-auth-modal .tfa-confirm-wrap {
+    margin-top: 4px;
+}
+.main-modal.two-factor-auth-modal .tfa-confirm-label {
+    font-size: 14px;
+    font-weight: 500;
+    color: rgba(0,0,0,.54);
+    text-align: center;
+    margin-bottom: 8px;
+}
+.main-modal.two-factor-auth-modal .tfa-code-input-wrap {
+    display: flex;
+    justify-content: center;
+    padding: 0 16px;
+    margin-bottom: 8px;
+}
+.main-modal.two-factor-auth-modal .tfa-code-input {
+    font-size: 32px !important;
+    height: 48px !important;
+    padding: 7px 16px !important;
+    text-align: center;
+    width: 200px !important;
+    color: rgb(73, 80, 87);
+    font-family: 'Roboto Mono', monospace;
+    letter-spacing: 6px;
+}
+.main-modal.two-factor-auth-modal .tfa-error {
+    color: #f44336;
+    font-size: 13px;
+    padding: 8px 0;
+    text-align: center;
+}
+.main-modal.two-factor-auth-modal .tfa-loading {
+    text-align: center;
+    padding: 24px;
+    color: rgba(0,0,0,.54);
+}
+.main-modal.two-factor-auth-modal .tfa-success-info {
+    color: #4caf50;
+    font-weight: 500;
+}
+.main-modal.two-factor-auth-modal .modal-footer button:disabled {
+    opacity: .75;
+    pointer-events: none;
+    color: #616161;
+}
+.main-modal.two-factor-auth-modal .btn-disable-tfa {
+    color: #f44336 !important;
+}
+
 /* ---------------- XABBER SETTINGS --------------------- */
 
 .settings-panel .left-column {

@@ -287,6 +287,14 @@
                                     <div class="settings-block-label one-line">{{ xb.getString("settings_account__password_subheader_label") }}</div>
                                 </div>
                                 <div class="settings-tab" data-subblock-parent-name="profile"
+                                     data-block-name="two-factor-auth" @click="jumpToBlock">
+                                    <div class="setting-icon-background">
+                                        <svg class="mdi mdi-24px mdi-svg-template" v-html="svgContent('security')"></svg>
+                                    </div>
+                                    <div class="settings-block-name one-line">Two-Factor Authentication</div>
+                                    <div class="settings-block-label one-line">TOTP-based login verification</div>
+                                </div>
+                                <div class="settings-tab" data-subblock-parent-name="profile"
                                      data-block-name="blocklist" @click="jumpToBlock">
                                     <div class="setting-icon-background">
                                         <svg class="mdi mdi-24px mdi-svg-template" v-html="svgContent('cancel')"></svg>

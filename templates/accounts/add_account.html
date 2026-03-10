@@ -71,6 +71,16 @@
                         </div>
                         <i class="mdi mdi-24px mdi-alert-circle hidden"></i>
                     </div>
+                    <div class="login-step totp-step hidden">
+                        <div class="login-step-text">2-Factor Authentication</div>
+                        <div class="totp-input-wrap">
+                            <div class="input-field totp-input-field">
+                                <input id="totp_code" placeholder="000000" type="text" name="totp_code" maxlength="6" inputmode="numeric" autocomplete="one-time-code">
+                            </div>
+                            <button class="btn btn-flat btn-main-filled btn-verify-totp">Verify</button>
+                        </div>
+                        <div class="totp-error hidden"></div>
+                    </div>
                 </div>
             </div>
         </div>
