@@ -204,7 +204,6 @@ Strophe.addConnectionPlugin('register', {
             bodyWrap = /** @type {Element} */
                 '_reqToData' in conn._proto ? conn._proto._reqToData( /** @type {Request} */req) : req;
         } catch (e) {
-            console.error(e);
             if (e.name !== Strophe.ErrorCondition.BAD_FORMAT) {
                 throw e;
             }
@@ -267,7 +266,6 @@ Strophe.addConnectionPlugin('register', {
             bodyWrap = /** @type {Element} */
                 '_reqToData' in conn._proto ? conn._proto._reqToData( /** @type {Request} */req) : req;
         } catch (e) {
-            console.error(e);
             if (e.name !== Strophe.ErrorCondition.BAD_FORMAT) {
                 throw e;
             }
@@ -1088,8 +1086,6 @@ _.extend(Strophe.Websocket.prototype, {
                     if (this.socket && this.socket.readyState === 1){
                         this.socket.send(rawStanza);
                     } else {
-                        console.error('data went to pending');
-                        console.log(this._conn._data.slice(i));
                         this._conn.account._pending_stanzas.push(this._conn._data.slice(i));
                         this._conn._data = [];
                         return;

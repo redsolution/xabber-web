@@ -589,7 +589,6 @@ let Xabber = Backbone.Model.extend({
                 try {
                     bc = new BroadcastChannel("xabber-web");
                 } catch (e) {
-                    console.error(e);
                     broadcast_dfd.resolve();
                 }
                 if (bc){

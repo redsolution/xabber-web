@@ -235,7 +235,6 @@ $.fn.hyperlinkify = function (options, id) {
                                 try {
                                     x = x.replace(list[i], decodeURI(list[i]));
                                 } catch (e) {
-                                    console.error(e)
                                 }
                             }
                             else
@@ -324,8 +323,6 @@ var utils = {
     curveVerify: function (pubkey, msg, signature) {
         if (!pubkey || !msg)
             return;
-        // console.log(pubkey);
-        // console.log(msg);
 
         let is_verified = curve25519js.verifyCurve(new Uint8Array(pubkey), msg, signature);
 
@@ -482,7 +479,6 @@ var utils = {
                 resolve();
             };
             r.onerror = (e) => {
-                console.log(r.error);
                 reject(r.error);
             };
             r.readAsDataURL(file)
@@ -677,26 +673,22 @@ var utils = {
         const xmppIdOrDomainRegex = /^(?:[a-zA-Z0-9\.\-_\+/=]+@)?(?:(?:[a-zA-Z0-9](?:[a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?)\.)+[a-zA-Z]{2,}$/;
         // Проверка на пустую строку
         if (!input || typeof input !== 'string') {
-            console.error('Пустая строка или не строка')
             return false;
         }
 
         // Проверка на запрещенные символы XMPP (включая / для ресурса и другие)
         const forbiddenChars = /[ "'&<>:\/]/; // убрал @ из запрещенных, так как он нужен для JID
         if (forbiddenChars.test(input)) {
-            console.error('Содержит запрещенные символы XMPP')
             return false;
         }
 
         // Проверка на ресурс (содержит /)
         if (input.includes('/')) {
-            console.error('Содержит ресурс (/)')
             return false;
         }
 
         // Проверка по регулярному выражению
         if (!xmppIdOrDomainRegex.test(input)) {
-            console.error('Не соответствует формату домена или XMPP ID')
             return false;
         }
 
@@ -708,12 +700,10 @@ var utils = {
         const domainParts = domain.split('.');
         for (const part of domainParts) {
             if (part.length > 63) {
-                console.error(`Часть домена "${part}" превышает 63 символа`)
                 return false;
             }
 
             if (part.startsWith('-') || part.endsWith('-')) {
-                console.error(`Часть домена "${part}" не может начинаться или заканчиваться дефисом`)
                 return false;
             }
         }
@@ -722,17 +712,14 @@ var utils = {
         if (hasLocalPart) {
             const localPart = input.split('@')[0];
             if (localPart.length === 0) {
-                console.error('Локальная часть (username) не может быть пустой')
                 return false;
             }
 
             if (localPart.length > 1023) {
-                console.error('Локальная часть превышает 1023 символа')
                 return false;
             }
         }
 
-        console.error('normal')
         return true;
     },
 
@@ -1524,7 +1511,6 @@ var utils = {
         let Crypto = window.crypto.subtle;
         let counterArray = this.padCounter(counter);
 
-        console.log(secret);
         let key = await Crypto.importKey(
             'raw',
             secret,
@@ -1580,7 +1566,6 @@ var utils = {
 
             return padded;
         } catch (e) {
-            console.error(e);
             return '';
         }
     },

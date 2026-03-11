@@ -22,7 +22,6 @@ xabber.Account.addInitPlugin(function () {
                     node = $message.find('items').attr('node');
 
                 if (node.indexOf(Strophe.NS.OMEMO) > -1){
-                    console.log(msg_object);
                     msg_object.ignore = 'xep0060';
                     return msg_object;
                 }
@@ -118,7 +117,6 @@ xabber.Account.addInitPlugin(function () {
                                     contact.set('image', data_avatar);
                                     contact.updateCachedInfo();
                                 } catch (e) {
-                                    console.error(e);
                                 }
                             });
                         }

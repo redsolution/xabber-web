@@ -39,8 +39,6 @@ xabber.BasicView = Backbone.View.extend({
         this.children = {};
         this.$el.addClass(options.classlist);
         if (!this.template){
-            console.error(this);
-            console.log(this.template);
         }
         if (!options.el) {
             this.$el.html(this.template(_.extend({view: this}, constants)));
@@ -153,7 +151,6 @@ xabber.BasicView = Backbone.View.extend({
                 try{
                     this.ps_container.perfectScrollbar('update');
                 } catch (e) {
-                    console.error(e);
                 }
             } else {
                 this.data.set('scroll_top', undefined);
@@ -823,7 +820,6 @@ xabber.SearchView = xabber.BasicView.extend({
                       xabber.error(err);
                       errback && errback(err);
                   };
-              console.error('trying to send for search');
               account.sendIQ(iq, callb, errb);
 
           };
@@ -1116,7 +1112,6 @@ xabber.Body = xabber.NodeView.extend({
             xabber.right_panel.$el.children().detach();
             xabber.right_panel.$el.append(xabber.chat_placeholder.$el);
         } catch (e) {
-            console.log(e)
         }
     },
 
@@ -1345,7 +1340,6 @@ xabber.ToolbarView = xabber.BasicView.extend({
             xabber.body.setScreen('notifications', {right: 'notifications', notifications: xabber.notifications_view}, {right_force_close: true});
             xabber.notifications_view && xabber.notifications_view.onShowNotificationsTab();
         } catch (e) {
-            console.error(e);
         }
     },
 
@@ -2001,7 +1995,6 @@ xabber.PlyrPlayerPopupView = xabber.BasicView.extend({
 
         account.getProxyUrl(options.player.video_src, (response) => {
             if (!response || !response.url) {
-                console.error(response);
                 return;
             }
             let url = response.url;
@@ -2020,7 +2013,6 @@ xabber.PlyrPlayerPopupView = xabber.BasicView.extend({
                     }, 100);
                     dfd.resolve();
                 }).catch((e) => {
-                    console.error(e);
                 });
             } else {
                 options.player.video_src = url;
@@ -5358,7 +5350,6 @@ xabber.DurationPickerView = xabber.BasicView.extend({
             }
         }
         if (minutes && minutes < 0){
-            console.error(hours);
             if (hours || hours === 0){
                 this.$('input[name="minutes_duration"]').val(59);
                 this.$('input[name="hours_duration"]').val(hours - 1);
@@ -5712,18 +5703,15 @@ _.extend(xabber, {
                 font_loaded;
 
             let load_check_interval = setInterval(() => {
-                console.log('status - ' + emoji_font.status);
                 if (emoji_font.status === 'loaded' || emoji_font.status === 'error'){
                     clearInterval(load_check_interval);
                     if (emoji_font.status === 'loaded' && !font_loaded){
                         font_loaded = true;
-                        console.log('loaded - interval');
                         document.fonts.add(emoji_font);
                         $(constants.CONTAINER_ELEMENT).addClass('custom-emoji-font');
                         dfd && dfd.resolve({});
                     } else if (emoji_font.status === 'error' && !font_loaded) {
                         font_loaded = true;
-                        console.log('error - interval');
                         utils.dialogs.error(xabber.getString("settings__menu_item__emoji_font_error_loading"));
                         $(constants.CONTAINER_ELEMENT).removeClass('custom-emoji-font');
                         dfd && dfd.resolve({error: true});
@@ -5732,7 +5720,6 @@ _.extend(xabber, {
             }, 1000);
 
             emoji_font.load().then(() => {
-                console.log('loaded');
                 if (font_loaded)
                     return;
                 font_loaded = true;
@@ -5740,8 +5727,6 @@ _.extend(xabber, {
                 $(constants.CONTAINER_ELEMENT).addClass('custom-emoji-font');
                 dfd && dfd.resolve({});
             }).catch((error) => {
-                console.log('error');
-                console.log(error);
                 if (font_loaded)
                     return;
                 font_loaded = true;
@@ -5750,7 +5735,6 @@ _.extend(xabber, {
                 dfd && dfd.resolve({error: true});
             });
         } else if (url === 'system'){
-            console.log('system font');
             $(constants.CONTAINER_ELEMENT).removeClass('custom-emoji-font');
             dfd && dfd.resolve({});
         }

@@ -222,7 +222,6 @@ xabber.Account = Backbone.Model.extend({
                             callback && callback(avatar_hash);
                         },
                         function (data_error) {
-                        console.error(data_error);
                             errback && errback(data_error);
                         });
                 }
@@ -245,7 +244,6 @@ xabber.Account = Backbone.Model.extend({
                                     callback && callback(avatar_hash);
                                 },
                                 function (data_error) {
-                                    console.error(data_error);
                                     errback && errback(data_error);
                                 });
                         },
@@ -460,10 +458,7 @@ xabber.Account = Backbone.Model.extend({
         },
 
         reconnect: function (is_fast) {
-            console.error(this);
-            console.error('reconnect called');
             if (!this.get('enabled')){
-                console.error('reconnect called on disabled account');
                 this.deactivate();
                 return;
             }
@@ -485,7 +480,6 @@ xabber.Account = Backbone.Model.extend({
             this.connection.account = this;
             setTimeout(() => {
                 if (!this.get('enabled')){
-                    console.error('reconnect timeout called on disabled account');
                     this.deactivate();
                     return;
                 }
@@ -494,7 +488,6 @@ xabber.Account = Backbone.Model.extend({
                 this.connFeedback(xabber.getString("application_state_connecting"));
                 this.restoreStatus();
                 this.connection.reset();
-                console.error('started reconnecting');
                 xabber._settings.get('reconnection_logs') && utils.callback_popup_message('started reconnecting', 3000);
                 this.conn_manager.reconnect(this.reconnectionCallback.bind(this));
             }, timeout);
@@ -583,7 +576,6 @@ xabber.Account = Backbone.Model.extend({
             }
             this.session.set({conn_status: status, conn_condition: condition});
             if (status === Strophe.Status.CONNECTED) {
-                console.log('reconnected main connection');
                 xabber._settings.get('reconnection_logs') && utils.callback_popup_message(`reconnected main connection , conn_retries: ${this.session.get('conn_retries')}`, 5000);
                 this.session.set('on_token_revoked', false);
                 if (this.connection.x_token) {
@@ -624,7 +616,6 @@ xabber.Account = Backbone.Model.extend({
                     return;
                 let max_retries = xabber.settings.max_connection_retries;
                 if (max_retries === -1 || this.session.get('conn_retries') < max_retries) {
-                    console.log(`started another reconnecting, conn_retries: ${this.session.get('conn_retries')},status: ${status} ,condition: ${condition} `);
                     xabber._settings.get('reconnection_logs') && utils.callback_popup_message(`started another reconnecting, conn_retries: ${this.session.get('conn_retries')},status: ${status} ,condition: ${condition} `, 3000);
                     this.reconnect();
                 } else {
@@ -760,8 +751,6 @@ xabber.Account = Backbone.Model.extend({
         },
 
         onAuthFailed: function (text) {
-            console.error(text);
-            console.error(this);
             if (!this.auth_view && !text){
                 utils.dialogs.error(xabber.getString("connection__error__text_authentication_failed", [this.get('jid')]));
                 this.password_view.show();
@@ -915,11 +904,8 @@ xabber.Account = Backbone.Model.extend({
         },
 
         sendPendingMessages: function () {
-            console.log('pending messages');
-            console.log(this._pending_messages);
             this._pending_messages.sort((a,b) => (a.timestamp > b.timestamp) ? 1 : ((b.timestamp > a.timestamp) ? -1 : 0));
             _.each(this._pending_messages, (item) => {
-                console.log(item);
                 let msg = this.messages.get(item.unique_id), msg_iq;
                 msg && (msg_iq = msg.get('xml'));
                 if (msg && msg.collection && msg.collection.chat && msg.collection.chat.get('group_chat'))
@@ -1060,7 +1046,6 @@ xabber.Account = Backbone.Model.extend({
                         }));
                     return sha1(bin);
                 } catch (e) {
-                    console.error(e);
                     return "";
                 }
             }
@@ -1165,7 +1150,6 @@ xabber.Account = Backbone.Model.extend({
         },
 
         verifyDevices: function (callback, errback) {
-            this.settings_account_modal && console.error(this.settings_account_modal.active_trust_session);
             if (!this.omemo || !this.omemo.get('device_id') || !this.server_features.get(Strophe.NS.XABBER_NOTIFY) || (this.settings_account_modal && this.settings_account_modal.active_trust_session))
                 return;
 
@@ -1190,7 +1174,6 @@ xabber.Account = Backbone.Model.extend({
             stanza.c('fallback',{xmlns: Strophe.NS.XABBER_NOTIFY}).t(`device verification fallback text`).up();
             stanza.c('addresses', {xmlns: Strophe.NS.ADDRESS}).c('address',{type: 'to', jid: this.get('jid')}).up().up();
             this.sendFast(stanza, (re) => {
-                console.warn(re);
                 let peer = this.omemo.getPeer(this.get('jid'));
                 peer.updateDevicesKeys();
 
@@ -1299,8 +1282,6 @@ xabber.Account = Backbone.Model.extend({
             if (is_reactivating && !(this.session.get('no_reconnect') || this.session.get('auth_failed'))){
                 clearInterval(this.reactivate_interval);
                 this.reactivate_interval = setInterval(() => {
-                    console.error(this);
-                    console.error(this.isConnected());
                     if (!this.isConnected()){
                         this.activate();
                         clearInterval(this.reactivate_interval);
@@ -1504,11 +1485,9 @@ xabber.Account = Backbone.Model.extend({
                         contentType: "application/json",
                         data: {size: file.size, name: file.name, hash: sha1(bytes)},
                         success: (response) => {
-                            console.log(response);
                             callback && callback(response);
                         },
                         error: (response) => {
-                            console.log(response);
                             if (response && response.responseJSON
                                 && response.responseJSON.status === '403'
                                 && response.responseJSON.error === 'Quota exceeded'){
@@ -1527,7 +1506,6 @@ xabber.Account = Backbone.Model.extend({
                     });
                 };
                 reader.onerror = () => {
-                    console.log(reader.error);
                     callback && callback(false)
                 };
                 reader.readAsDataURL(file);
@@ -1565,7 +1543,6 @@ xabber.Account = Backbone.Model.extend({
                         }
                     },
                     error: (response) => {
-                        console.error(response);
                         this.save('service_auth', false);
                         this.gallery_code_requests = [];
                         errback && errback();
@@ -1605,7 +1582,6 @@ xabber.Account = Backbone.Model.extend({
                         this.handleCommonGalleryErrors(response, errback);
                         this.set('gallery_auth', false);
                         this.gallery_code_requests = [];
-                        console.log(response)
                     }
                 });
             }
@@ -1643,7 +1619,6 @@ xabber.Account = Backbone.Model.extend({
                         this.handleCommonProxyViewerErrors(response, errback);
                         this.set('proxy_viewer_auth', false);
                         this.proxy_code_requests = [];
-                        console.log(response)
                     }
                 });
             }
@@ -1671,7 +1646,6 @@ xabber.Account = Backbone.Model.extend({
                     error: (response) => {
                         this.set('gallery_auth', false);
                         this.handleCommonGalleryErrors(response);
-                        console.log(response)
                     }
                 });
             }
@@ -1701,7 +1675,6 @@ xabber.Account = Backbone.Model.extend({
                     error: (response) => {
                         this.set('proxy_viewer_auth', false);
                         this.handleCommonProxyViewerErrors(response);
-                        console.log(response)
                     }
                 });
             }
@@ -1731,7 +1704,6 @@ xabber.Account = Backbone.Model.extend({
                     },
                     error: (response) => {
                         this.save('service_auth', false);
-                        console.log(response)
                     }
                 });
             }
@@ -1801,7 +1773,6 @@ xabber.Account = Backbone.Model.extend({
                         },
                         error: (response) => {
                             this.handleCommonGalleryErrors(response, null, this.getStorageStats, arguments, this);
-                            console.log(response)
                         }
                     });
             });
@@ -1822,7 +1793,6 @@ xabber.Account = Backbone.Model.extend({
                         },
                         error: (response) => {
                             this.handleCommonGalleryErrors(response);
-                            console.log(response);
                         }
                     });
 
@@ -1836,8 +1806,6 @@ xabber.Account = Backbone.Model.extend({
                     if (original_url.split('?url=').length && original_url.split('?url=')[1])
                         original_url = original_url.split('?url=')[1];
                     else{
-                        console.error('NO SPLIT??');
-                        console.error(original_url);
                         return;
                     }
                 }
@@ -1846,8 +1814,6 @@ xabber.Account = Backbone.Model.extend({
                        if (res.proxy_url){
                            callback && callback({url: res.proxy_url})
                        } else {
-                           console.error(original_url);
-                           console.error(res);
                            errback && errback({status: res.error})
                        }
                    } else {
@@ -1869,7 +1835,6 @@ xabber.Account = Backbone.Model.extend({
                                    });
                                },
                                error: (response) => {
-                                   console.error(response);
                                    if (response.status === 404)
                                        xabber.cached_proxy_urls.putInCachedProxyUrls({
                                            original_url: original_url,
@@ -1880,15 +1845,11 @@ xabber.Account = Backbone.Model.extend({
                                }
                            });
                        }, (err) => {
-                           console.error(err);
                            errback && errback(err)
                        })
                    }
                 });
             } else {
-                console.error('noproxy');
-                this.test_images && console.error(this.get('proxy_viewer_url'));
-                this.test_images && console.error(this.get('proxy_viewer_token'));
             }
         },
 
@@ -1917,12 +1878,10 @@ xabber.Account = Backbone.Model.extend({
                         contentType: false,
                         processData: false,
                         success: (response) => {
-                            console.log(response);
                             callback && callback(response);
                         },
                         error: (response) => {
                             this.handleCommonGalleryErrors(response, null, this.uploadFile, arguments, this);
-                            console.log(response);
                             errback && errback(response);
                         }
                     });
@@ -1947,12 +1906,10 @@ xabber.Account = Backbone.Model.extend({
                         contentType: false,
                         processData: false,
                         success: (response) => {
-                            console.log(response);
                             callback && callback(response)
                         },
                         error: (response) => {
                             this.handleCommonGalleryErrors(response, null, this.uploadAvatar, arguments, this);
-                            console.log(response);
                             errback && errback(response)
                         }
                     });
@@ -1972,12 +1929,10 @@ xabber.Account = Backbone.Model.extend({
                         contentType: "application/json",
                         data: JSON.stringify(options),
                         success: (response) => {
-                            console.log(response);
                             callback && callback(response)
                         },
                         error: (response) => {
                             this.handleCommonGalleryErrors(response, null, this.deleteFile, arguments, this);
-                            console.log(response);
                             errback && errback(response)
                         }
                     });
@@ -1997,12 +1952,10 @@ xabber.Account = Backbone.Model.extend({
                         contentType: "application/json",
                         data: JSON.stringify(options),
                         success: (response) => {
-                            console.log(response);
                             callback && callback(response)
                         },
                         error: (response) => {
                             this.handleCommonGalleryErrors(response, null, this.deleteFileByUrl, arguments, this);
-                            console.log(response);
                             errback && errback(response)
                         }
                     });
@@ -2030,13 +1983,11 @@ xabber.Account = Backbone.Model.extend({
                             response.image_height = $(response.ogp).closest('meta[property="og:image:height"]').attr('content');
                             response.image_width = $(response.ogp).closest('meta[property="og:image:width"]').attr('content');
                             response.video_url = $(response.ogp).closest('meta[property="og:video:url"]').attr('content');
-                            console.log(response);
                             callback && callback(response)
                         },
                         error: (response) => {
                             this.handleCommonGalleryErrors(response, null, this.getOpenGraphData, arguments, this);
                             errback && errback(response);
-                            console.log(response)
                         }
                     });
             });
@@ -2169,11 +2120,8 @@ xabber.Accounts = Backbone.CollectionWithStorage.extend({
     },
 
     getConnectedList: function () {
-        console.error('getConnectedList');
         this.trigger('connected_list_changed');
         this.connected = this.filter(account => account.isConnected());
-        console.error(this.connected);
-        console.error(this.connected.length);
     },
 
     onListChanged: function () {
@@ -3077,7 +3025,6 @@ xabber.AccountMediaGalleryView = xabber.BasicView.extend({
                 aud.load(file_url);
             }
         } catch (e) {
-            console.error(e);
         }
 
         return aud;
@@ -3132,7 +3079,6 @@ xabber.AccountMediaGalleryView = xabber.BasicView.extend({
                     error: (response) => {
                         this.account.handleCommonGalleryErrors(response, null, this.getFiles, arguments, this);
                         this.current_rendered_type = undefined;
-                        console.log(response);
                         this.loading_files = false;
                         this.$('.gallery-files .preloader-wrapper').remove()
                     }
@@ -3167,7 +3113,6 @@ xabber.AccountMediaGalleryView = xabber.BasicView.extend({
                     error: (response) => {
                         this.account.handleCommonGalleryErrors(response, null, this.getAvatars, arguments, this);
                         this.current_rendered_type = undefined;
-                        console.log(response);
                         this.loading_files = false;
                         this.$('.gallery-files .preloader-wrapper').remove()
                     }
@@ -3257,7 +3202,6 @@ xabber.AccountMediaGalleryView = xabber.BasicView.extend({
                     },
                     error: (response) => {
                         this.account.handleCommonGalleryErrors(response, null, this.deleteAvatar, arguments, this);
-                        console.log(response);
                     }
                 });
         });
@@ -3438,7 +3382,6 @@ xabber.DeleteFilesFromGalleryView = xabber.BasicView.extend({
                     data: options,
                     traditional: true,
                     success: (response) => {
-                        console.log(response);
                         let current_page = this.current_page_preview;
                         if (current_page < response.total_pages){
                             this.current_page_preview++;
@@ -3467,7 +3410,6 @@ xabber.DeleteFilesFromGalleryView = xabber.BasicView.extend({
                         }
                     },
                     error: (response) => {
-                        console.log(response);
                         this.$('.preloader-wrapper').remove();
                         this.$('.media-gallery-delete-items-wrap .no-files').removeClass('hidden');
                         this.$('.delete-files-text').addClass('hidden');
@@ -3579,13 +3521,11 @@ xabber.DeleteFilesFromGalleryView = xabber.BasicView.extend({
                         contentType: "application/json",
                         data: JSON.stringify(options),
                         success: (response) => {
-                            console.log(response);
                             this.close();
                         },
                         error: (response) => {
                             this.account.handleCommonGalleryErrors(response, null, this.deleteFilesFiltered, arguments, this);
                             this.close();
-                            console.log(response)
                         }
                     });
                 }
@@ -3911,12 +3851,10 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
                             }
 
                         } else {
-                            console.error('Loading error:', response.status);
                         }
                     })
-                    .catch(error => console.error('Error:', error));
+                    .catch(() => {});
             } catch (e) {
-                console.error('Error:', e)
             }
 
         });
@@ -4650,13 +4588,8 @@ xabber.AccountSettingsModalView = xabber.BasicView.extend({
                 });
                 !peers_trusted_devices.length && $trust_peer.addClass('hidden');
                 if (peers_trusted_devices){
-                    console.error(peers_trusted_devices);
-                    console.error(contact);
                     this.model.omemo.checkContactFingerprints(contact).then((obj) => {
                         let is_contact_trusted = obj.trust;
-                        console.error(item);
-                        console.error(obj);
-                        console.error(contact);
                         if (is_contact_trusted === 'error') {
                             $trust_peer.find('.trust-item-peer-encryption-status').removeClass('hidden');
                             $trust_peer.find('.trust-item-peer-encryption-status').addClass('contact-error-icon-visible');
@@ -5662,12 +5595,10 @@ xabber.SetAvatarView = xabber.BasicView.extend({
                     contentType: "application/json",
                     data: options,
                     success: (response) => {
-                        console.log(response);
                         this.renderFiles(response)
                     },
                     error: (response) => {
                         this.model.handleCommonGalleryErrors(response, null, this.createLibrary, arguments, this);
-                        console.log(response);
                         this.$('.library-wrap .preloader-wrapper').remove()
                     }
                 });
@@ -5925,8 +5856,7 @@ xabber.WebcamProfileImageView = xabber.BasicView.extend({
                 this.video.srcObject = stream;
                 this.video.play();
             })
-            .catch((err) => {
-                console.log("An error occurred: " + err);
+            .catch(() => {
             });
 
         this.video.addEventListener('canplay', () => {
@@ -7826,17 +7756,6 @@ xabber.once("start", function () {
         objStoreName: 'cached_proxy_urls_items',
         primKey: 'original_url'
     });
-    this.test_cached2 = () => {
-        this.cached_proxy_urls.getFromCachedProxyUrls('https://gallery.dev.xabber.com/media/tL5BbGu7j5iW/avatar.png', (res) => {
-            console.log('CACHED TEST');
-            console.log(res);
-        });
-        this.cached_proxy_urls.getAllFromCachedProxyUrls((res) => {
-            console.log('CACHED all TEST');
-            console.log(res);
-        });
-    }
-    this.test_cached2();
 
     this.trigger('accounts_ready');
 

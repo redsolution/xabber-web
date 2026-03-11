@@ -374,12 +374,9 @@ xabber.Fingerprints = xabber.BasicView.extend({
 
     renderDevices: function () {
         if (this.data.get('visible')){
-            console.warn('here');
             this.model.getDevicesNode().then(() => {
-                console.warn('here2');
                 let contact = this.account.contacts.get(this.jid);
                 this.account.omemo.checkContactFingerprints(contact).then(() => {
-                    console.warn('here3');
                     this.updateFingerprints(this.model.devices);
                 });
             });
@@ -1038,7 +1035,6 @@ xabber.FingerprintsOwnDevices = xabber.BasicView.extend({
             device = this.model.own_devices[device_id];
         $container.html('');
         dfd.done((is_error) => {
-            console.log(is_error);
             this.$('.dropdown-button').dropdown({
                 inDuration: 100,
                 outDuration: 100,
@@ -1522,8 +1518,6 @@ xabber.Device = Backbone.Model.extend({
                 deviceId: this.address.getDeviceId()
             };
         } catch (e) {
-            console.log('Error:', e);
-            console.warn('Could not encrypt data for device with id ' + this.address.getDeviceId());
 
             return null;
         }
@@ -1607,7 +1601,6 @@ xabber.Omemo = Backbone.ModelWithStorage.extend({
         this.account.on("devices_updated", this.onOwnDevicesUpdated, this);
         this.store.on('prekey_removed', this.removePreKey, this);
         this.store.on('session_stored', this.cacheSession, this);
-        console.log('here');
         this.xabber_trust = new xabber.Trust({id: 'xabber-trust'}, {
             omemo: this,
             storage_name: xabber.getStorageName() + '-trusted-devices-' + this.account.get('jid'),
@@ -1839,7 +1832,6 @@ xabber.Omemo = Backbone.ModelWithStorage.extend({
 
             return {message: message, is_trusted: encryptedMessage.is_trusted};
         }).catch((msg) => {
-            console.error(msg);
         });
     },
 
@@ -2080,7 +2072,6 @@ xabber.Omemo = Backbone.ModelWithStorage.extend({
                     }
                     this.account.chats.receiveChatMessage($message[0], options);
                 }).catch((e) => {
-                    console.error(e);
                     if (e.name === 'MessageCounterError')//for capturing double decryption of same message
                         return;
                     if (options.synced_msg && !options.decryption_retry) {
@@ -2194,24 +2185,15 @@ xabber.Omemo = Backbone.ModelWithStorage.extend({
             let is_trusted = true,
                 peer = this.getPeer(contact.get('jid')),
                 dfd = new $.Deferred(), counter = 0, unverified_counter = 0;
-            console.log(contact.get('jid'));
-            console.log(peer);
             dfd.done((t) => {
-                console.log(t);
-                console.log(unverified_counter);
                 let trust = t === null ? 'error' : (t === undefined ? 'none' : t);
                 contact.trigger('update_trusted', trust, peer);
                 resolve({trust: trust, unverified_counter: unverified_counter});
             });
-            console.log(Object.keys(peer.devices).length);
-            console.log(peer)
             if (Object.keys(peer.devices).length) {
                 counter = Object.keys(peer.devices).length;
-                console.log(peer.devices);
                 for (let device_id in peer.devices) {
                     let device = peer.devices[device_id];
-                    console.log(device);
-                    console.log(device_id);
                     if (device.get('fingerprint')) {
                         let trusted = this.isTrusted(contact.get('jid'), device.id, device.get('fingerprint'));
                         if (trusted === undefined && is_trusted !== null){
@@ -2223,11 +2205,9 @@ xabber.Omemo = Backbone.ModelWithStorage.extend({
                             unverified_counter++;
                         }
                         counter--;
-                        console.log(counter);
                         !counter && dfd.resolve(is_trusted);
                     } else if (device.get('ik')) {
                         device.set('fingerprint', device.generateFingerprint());
-                        console.log(device);
                         let trusted = this.isTrusted(contact.get('jid'), device.id, device.get('fingerprint'));
                         if (trusted === undefined && is_trusted !== null){
                             is_trusted = undefined;
@@ -2238,22 +2218,9 @@ xabber.Omemo = Backbone.ModelWithStorage.extend({
                             unverified_counter++;
                         }
                         counter--;
-                        console.log(counter);
                         !counter && dfd.resolve(is_trusted);
                     } else {
                         if (device.get('ik') === null) {
-                        //     counter--;
-                            console.log(' NO IK device!!!!!!!1');
-                            console.log(device);
-                            console.log(device.get('ik'));
-                        //     if (!counter) {
-                        //         if (Object.keys(peer.devices).length === 1){
-                        //             is_trusted = 'nil';
-                        //             unverified_counter++;
-                        //         }
-                        //         dfd.resolve(is_trusted);
-                        //     }
-                        //     continue;
                         }
                         device.getBundle().then(({pk, spk, ik}) => {
                             device.set('ik', utils.fromBase64toArrayBuffer(ik));
@@ -2268,12 +2235,9 @@ xabber.Omemo = Backbone.ModelWithStorage.extend({
                                 unverified_counter++;
                             }
                             counter--;
-                            console.error(counter);
                             !counter && dfd.resolve(is_trusted);
                         }).catch((e) => {
                             counter--;
-                            console.error(e);
-                            console.error(counter);
                             if (!counter) {
                                 if (Object.keys(peer.devices).length === 1){
                                     is_trusted = 'nil';
@@ -2285,24 +2249,15 @@ xabber.Omemo = Backbone.ModelWithStorage.extend({
                     }
                 }
             } else {
-                console.log(peer);
                 peer.getDevicesNode().then(() => {
-                    console.log(peer.devices);
                     counter = Object.keys(peer.devices).length;
-                    console.log(counter);
                     !counter && dfd.resolve('nil');
                     for (let device_id in peer.devices) {
                         let device = peer.devices[device_id];
-                        console.log(device_id);
-                        console.log(device);
                         device.getBundle().then(({pk, spk, ik}) => {
-                            console.log({pk, spk, ik});
                             device.set('ik', utils.fromBase64toArrayBuffer(ik));
                             device.set('fingerprint', device.generateFingerprint());
-                            console.log(device.get('ik'));
-                            console.log(device.get('fingerprint'));
                             let trusted = this.isTrusted(contact.get('jid'), device.id, device.get('fingerprint'));
-                            console.error(trusted);
                             if (trusted === undefined && is_trusted !== null){
                                 is_trusted = undefined;
                                 unverified_counter++;
@@ -2318,12 +2273,9 @@ xabber.Omemo = Backbone.ModelWithStorage.extend({
                                 }
                             }
                             counter--;
-                            console.log(counter);
                             !counter && dfd.resolve(is_trusted);
                         }).catch((e) => {
-                            console.error(e);
                             counter--;
-                            console.error(counter);
                             if (!counter) {
                                 if (Object.keys(peer.devices).length === 1){
                                     is_trusted = 'nil';
@@ -3033,16 +2985,10 @@ xabber.Account.addInitPlugin(function () {
                             contact = this.contacts.get(msg_object.conversation ? msg_object.conversation : jid),
                             stanza_id = $msg.children(`stanza-id[by="${this.get('jid')}"]`).attr('id');
 
-                        console.error(stanza_id);
-                        console.error(contact);
-                        console.error(msg_object.synced_msg);
-                        console.error(contact.get('jid') === this.get('jid'));
                         if (msg_object.synced_msg && contact.get('jid') === this.get('jid')){
                             msg_object.ignore = 'omemo_own_synced_msg';
                             return resolve(msg_object);
                         }
-                        console.error(jid);
-                        console.error($message[0]);
                         let cached_msg;
                         if (!msg_object.notification_msg && contact) {
                             cached_msg = stanza_id && this.omemo.cached_messages && this.omemo.cached_messages.getMessage(contact, stanza_id);
@@ -3073,9 +3019,6 @@ xabber.Account.addInitPlugin(function () {
                             msg_object.ignore = 'omemo';
                             return resolve(msg_object);
                         }
-                        console.error(cached_msg);
-                        console.error(msg_object);
-
                         if (cached_msg && cached_msg.envelope) {
                             if (!msg_object.replaced) {
                                 msg_object.encrypted = true;
@@ -3199,11 +3142,6 @@ xabber.Account.addInitPlugin(function () {
                                 }
                                 return resolve(msg_object);
                             }).catch((e) => {
-                                console.error(stanza_id);
-                                console.error(contact);
-                                console.error(jid);
-                                console.error($message[0]);
-                                console.error(e);
                                 if (e.name === 'MessageCounterError') {//for capturing double decryption of same message
                                     msg_object.ignore = 'omemo';
                                     return resolve(msg_object);

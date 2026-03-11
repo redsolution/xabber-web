@@ -37,12 +37,10 @@
             let resulted = false
             if (this._connection && this._connection.sendIQ){
                 this._connection.sendIQ(iq, (stanza) => {
-                    // console.error(stanza);
                     resulted = true;
                     callback && callback(stanza);
                 }, function (err) {
                     resulted = true;
-                    // console.error(err);
                     if ($(err).find('error').attr('code') === '404' && !jid)
                         createDeviceNode.call(this, callback);
                     else

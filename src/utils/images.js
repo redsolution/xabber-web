@@ -206,7 +206,6 @@ var setCss = function (image_el, cached_image, img_size, account, name) {
         if (send_request){
             account.getProxyUrl(cached_image.url, (response) => {
                 if (!response || !response.url) {
-                    console.error(response);
                     return;
                 }
                 let proxy_url = response.url;
@@ -222,7 +221,6 @@ var setCss = function (image_el, cached_image, img_size, account, name) {
                     callback && callback(cached_proxy_url.url);
                 }
             }, (err) => {
-                console.error(err);
                 if (err.status === 404 && name){
                     image_el.setAvatar(getDefaultAvatar(name), img_size);
                     _proxy_url_callbacks[cached_image.url] = [];

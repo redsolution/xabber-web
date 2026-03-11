@@ -332,7 +332,6 @@ xabber.Account.addConnPlugin(function () {
     this.connection.deleteHandler(this._last_stanza_handler);
     this._last_stanza_handler = this.connection.addHandler(() => {
         if (!this.get('enabled')){
-            console.error('received stanza on disabled account');
             this.deactivate();
             return;
         }
@@ -360,20 +359,13 @@ xabber.Account.addConnPlugin(function () {
         }
         if (!navigator.onLine || downtime > (constants.DOWNTIME_RECONNECTION_TIMEOUT || 15) && downtime_ping && downtime_ping <= (constants.DOWNTIME_RECONNECTION_TIMEOUT || 15) && downtime_ping > 5) {
             if (!navigator.onLine){
-                console.log('navigator: ' + navigator.onLine);
-                console.log('this.connection.connected: ' + this.connection.connected);
                 xabber._settings.get('reconnection_logs') && utils.callback_popup_message('this.connection.connected: ' + this.connection.connected, 2000);
             }
-            console.log('downtime main to disconnect: ' + downtime);
-            downtime_ping && console.log('downtime main from last ping to disconnect: ' + downtime_ping);
             xabber._settings.get('reconnection_logs') && utils.callback_popup_message('downtime main to disconnect: ' + downtime, 2000);
-            console.log(this.connection.connected);
             this.connection._doDisconnect();
             this._main_interval_worker.terminate();
         }
         if (downtime > (constants.PING_SENDING_INTERVAL || 10)) {
-            console.log('downtime main to ping: ' + downtime);
-            downtime_ping && console.log('downtime main from last ping: ' + downtime_ping);
             this.connection && this.connection.ping.ping(this.get('domain'));
             if (!this.last_ping_timestamp || downtime_ping >= 10){
                 this.last_ping_timestamp = moment.now();

@@ -1,2 +1,2 @@
-(self.webpackChunkxabber_web=self.webpackChunkxabber_web||[]).push([[1411],{21411:(e,b,a)=>{var k;void 0===(k=(()=>({})).call(b,a,b,e))||(e.exports=k)}}]);
+(self.webpackChunkxabber_web=self.webpackChunkxabber_web||[]).push([[1411],{21411(e,b,a){var k;void 0===(k=(()=>({})).call(b,a,b,e))||(e.exports=k)}}]);
 //# sourceMappingURL=xabber.1411.js.map

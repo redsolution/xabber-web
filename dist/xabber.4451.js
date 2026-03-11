@@ -1,2 +1,2 @@
-(self.webpackChunkxabber_web=self.webpackChunkxabber_web||[]).push([[4451],{34451:(o,a,c)=>{var r;void 0===(r=(()=>({account_compression:"Comprime",account_host:"Hospes",account_password:"Signum",confirm_password:"Signum confirma",account_port:"Porta",account_priority:"Prioritas"})).call(a,c,a,o))||(o.exports=r)}}]);
+(self.webpackChunkxabber_web=self.webpackChunkxabber_web||[]).push([[4451],{34451(o,a,c){var r;void 0===(r=(()=>({account_compression:"Comprime",account_host:"Hospes",account_password:"Signum",confirm_password:"Signum confirma",account_port:"Porta",account_priority:"Prioritas"})).call(a,c,a,o))||(o.exports=r)}}]);
 //# sourceMappingURL=xabber.4451.js.map

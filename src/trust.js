@@ -467,35 +467,6 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
 
         stanza.c('addresses', {xmlns: Strophe.NS.ADDRESS}).c('address',{type: 'to', jid: to}).up().up();
 
-        console.log($(stanza.tree()));
-        console.log(stanza.tree());
-        this.account.sendFast(stanza, () => {
-            utils.callback_popup_message(xabber.getString("trust_verification_decrypt_failed"), 5000);
-        });
-    },
-
-
-    sendTestNotification2: function (to) {
-        to = to || this.account.get('jid');
-        let msg_id = uuid(),
-            stanza = $iq({
-                type: 'set',
-                to: to,
-                id: msg_id
-            });
-        stanza.c('notify', {xmlns: Strophe.NS.XABBER_NOTIFY});
-        stanza.c('notification', {xmlns: Strophe.NS.XABBER_NOTIFY});
-
-
-        stanza.c('mention', {xmlns: Strophe.NS.MARKUP}).t('xmpp:mychat@capulet.it?id=ex2ogo0jma4tshwi');
-
-        stanza.up().up();
-
-
-        stanza.c('addresses', {xmlns: Strophe.NS.ADDRESS}).c('address',{type: 'to', jid: to}).up().up();
-
-        console.log($(stanza.tree()));
-        console.log(stanza.tree());
         this.account.sendFast(stanza, () => {
             utils.callback_popup_message(xabber.getString("trust_verification_decrypt_failed"), 5000);
         });
@@ -619,7 +590,6 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
         my_saved_trusted_device = my_trusted_devices.filter(item => item.is_me || item.device_id == this.omemo.get('device_id'));
 
         if (!my_saved_trusted_device.length){
-            console.error('no own device');
             return;
         } else {
             my_saved_trusted_device = my_saved_trusted_device[0];
@@ -847,7 +817,6 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                     this.trigger('trust_updated');
                     this.publishOwnTrustedDevices();
                 }).catch((err) => {
-                    console.error(err);
                 });
         } else {
         }
@@ -933,15 +902,11 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
 
         let own_trusted_device = own_trusted_devices.find(item => item.device_id == this.omemo.get('device_id') && !item.is_me);
 
-        console.error('fixMyTrustedDeviceAndPublish');
-        console.error(own_trusted_device);
-
         if (own_trusted_device){
 
             let peer = this.omemo.getPeer(this.account.get('jid')),
                 own_device = peer.devices[this.omemo.get('device_id')];
             if (!own_device){
-                console.error('STILL NO DEVICE????');
                 return;
             }
 
@@ -949,7 +914,6 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                 own_trusted_device = this.get('trusted_devices')[this.account.get('jid')].find(item => item.device_id == this.omemo.get('device_id') && !item.is_me);
 
                 if (!own_trusted_device){
-                    console.error('FIXED ALREADY AND PUBLISHED');
                     this.publishOwnTrustedDevices(callback);
                     return;
                 }
@@ -968,13 +932,10 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                 updated_trusted_devices[this.account.get('jid')][index] = own_trusted_device;
                 this.save('trusted_devices', updated_trusted_devices);
                 this.trigger('trust_updated');
-                console.error('FIXED AND PUBLISHED');
                 this.publishOwnTrustedDevices(callback);
             }).catch((err) => {
-                console.error(err);
             });
         } else {
-            console.error('NO FIX NEEDED');
             this.publishOwnTrustedDevices(callback);
         }
     },
@@ -1927,7 +1888,6 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
     },
 
     addToSequentialProcessingList: function (message, options) {
-        console.log(message);
         let $whole_notification_msg = $(message).parent().closest('message');
 
         if (!$whole_notification_msg.length)
@@ -1950,10 +1910,6 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
     },
 
     sequentialTrustVerificationMessageProcessing: function () {
-        console.error(this);
-        console.error(this.processing_messages);
-        console.error(this.processing_messages.length);
-        console.error(this.is_processing);
         if (!this.processing_messages.length || this.is_processing)
             return;
         this.is_processing = true;
@@ -2009,7 +1965,6 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
             }
         }
 
-        this.active_sessions_data[sid] && console.log(this.active_sessions_data[sid].session_check_jid);
         if (this.active_sessions_data[sid]
             && (this.active_sessions_data[sid].session_check_jid === Strophe.getBareJidFromJid($message.attr('to'))) && !this.active_sessions_data[sid].verification_started){
             if ($message.find(`verification-accepted`).length && $message.find(`verification-accepted`).attr('device-id') != this.omemo.get('device_id')) {
@@ -2306,8 +2261,6 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                         }, 1000);
                     }
                 });
-            } else {
-                console.log('no device');
             }
         });
 
@@ -2468,7 +2421,6 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                             });
                         });
                     }).catch(e => {
-                        console.error(e);
 
                         let msg_id = uuid(),
                             to = contact ? contact.get('jid') : this.account.get('jid'),
@@ -2573,7 +2525,6 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                                     });
                                 });
                             }).catch(e => {
-                                console.error(e);
 
                                 let msg_id = uuid(),
                                     to = contact ? contact.get('jid') : this.account.get('jid'),
@@ -2631,8 +2582,6 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
             code = this.active_sessions_data[sid].active_verification_code;
 
         this.getDevicesIKsForTrustVerification(device).then((devices_IK) => {
-            console.log(devices_IK);
-
             let curve = utils.doCurve(devices_IK.own_privkey, devices_IK.device_pubkey),
                 $salt = $message.find('salt'),
                 $hash = $message.find('hash');
@@ -3006,7 +2955,6 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
         stanza.c('addresses', {xmlns: Strophe.NS.ADDRESS}).c('address',{type: 'to', jid: to}).up().up();
 
         this.account.sendFast(stanza, () => {
-            console.error(to);
             if (to !== this.account.get('jid')){
                 let $stanza = $(stanza.tree());
                 $stanza.attr('to',this.account.get('jid'));
@@ -3016,7 +2964,6 @@ xabber.Trust = Backbone.ModelWithStorage.extend({
                 this.account.sendFast(stanza, () => {
                 });
             }
-            stanza && stanza.tree && console.log(stanza.tree());
             this.clearData(sid);
             utils.callback_popup_message(xabber.getString("trust_verification_verification_succeded"), 5000);
         });

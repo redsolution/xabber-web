@@ -710,7 +710,6 @@ xabber.CallsView = xabber.BasicView.extend({
                 (this.isVisible() || force_render) && this.updateCurrentCalls();
                 (this.isVisible() || force_render) && this.updateCallContacts();
             } catch (e) {
-                console.error(e)
             }
         } else {
             if (!xabber.accounts.enabled.length){
@@ -893,7 +892,6 @@ xabber.CallsView = xabber.BasicView.extend({
                         account.chats.onCompletedMAMRequest(deferred);
                         errback && errback(err);
                     };
-                console.error('trying to send for calls');
                 account.sendIQ(iq, callb, errb);
 
             };

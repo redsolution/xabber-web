@@ -502,7 +502,6 @@ xabber.NotificationsView = xabber.BasicView.extend({
                 });
                 this.updateCurrentNotifications();
             } catch (e) {
-                console.error(e)
             }
         } else {
             // if no accounts
@@ -566,7 +565,6 @@ xabber.NotificationsView = xabber.BasicView.extend({
                     chat = chat[0];
                 }
                 if (!chat || !chat.item_view){
-                    console.log('no chat!');
                     return;
                 }
                 notifications_chats.push(chat);
@@ -1604,7 +1602,6 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
             chat.item_view.content = new xabber.ChatContentView({chat_item: chat.item_view});
 
         if (!chat || !chat.item_view|| !chat.item_view.content) {
-            console.error(message);
             return;
         }
 
@@ -1683,7 +1680,6 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
             chat.item_view.content = new xabber.ChatContentView({chat_item: chat.item_view});
 
         if (!chat || !chat.item_view|| !chat.item_view.content) {
-            console.error(message);
             return;
         }
         let $message = chat.item_view.content.buildMessageHtml(message),
@@ -1750,7 +1746,6 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
             chat.item_view.content = new xabber.ChatContentView({chat_item: chat.item_view});
 
         if (!chat || !chat.item_view|| !chat.item_view.content) {
-            console.error(msg);
             return;
         }
         if (!$msg.hasClass('hidden')) {
@@ -2155,7 +2150,6 @@ xabber.NotificationsChatContentView = xabber.BasicView.extend({
             chat.item_view.content = new xabber.ChatContentView({chat_item: chat.item_view});
 
         if (!chat || !chat.item_view|| !chat.item_view.content) {
-            console.log(message);
             return;
         }
 

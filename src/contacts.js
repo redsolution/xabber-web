@@ -559,8 +559,6 @@ xabber.Contact = Backbone.Model.extend({
                 callback && callback(avatar_info);
             }
             else {
-                console.error(image);
-                console.error('cant upload this avatar');
                 errback && errback();
             }
         });
@@ -680,7 +678,6 @@ xabber.Contact = Backbone.Model.extend({
                         chat.trigger("close_chat");
                         xabber.body.setScreen('all-chats', {right_contact: '', right: undefined});
                     }, (error) => {
-                        console.error(error);
                         if ($(error).find('not-allowed').length)
                             utils.dialogs.error(xabber.getString("groupchat_you_have_no_permissions_to_do_it"));
                     });
@@ -1429,7 +1426,6 @@ xabber.SetGroupchatStatusView = xabber.BasicView.extend({
                 .c('status').t(status);
         this.account.sendFast(iq_set_status, (res) => {
         }, (err) => {
-            console.error(err)
 
         });
     },
@@ -2673,7 +2669,6 @@ xabber.GroupChatDetailsViewRight = xabber.BasicView.extend({
             this.$('.panel-background-clickable').addClass('temporary-fading-search-background');
             this.$('.panel-background-clickable').addClass('fading-search-background');
             setTimeout(() => {
-                console.error('here');
                 this.$('.panel-background-clickable').removeClass('temporary-fading-search-background');
             }, 20);
         }
@@ -3022,7 +3017,6 @@ xabber.GroupChatDetailsViewRight = xabber.BasicView.extend({
         this.account.sendIQFast(iq, (res) => {
             this.model.parseGroupInfo($(res))
         }, (error) => {
-            console.error(error);
             let err_text = $(error).find('text').text() ;
             utils.dialogs.error(err_text);
         });
@@ -3539,7 +3533,6 @@ xabber.MediaBaseView = xabber.BasicView.extend({
         if (url){
             this.account.getProxyUrl(url, (response) => {
                 if (!response || !response.url) {
-                    console.error(response);
                     return;
                 }
                 let proxy_url = response.url;
@@ -3776,7 +3769,6 @@ xabber.MediaBaseView = xabber.BasicView.extend({
                 aud.load(file_url);
             }
         } catch (e) {
-            console.error(e);
         }
 
         return aud;
@@ -4061,7 +4053,6 @@ xabber.BlockedView = xabber.BasicView.extend({
     blockId: function () {
         utils.dialogs.ask_enter_value(xabber.getString("contact_bar_block"), xabber.getString("groupchat_dialog_block__text"), {input_placeholder_value: xabber.getString("groupchat_dialog_block__input_placeholder")}, { ok_button_text: xabber.getString("contact_bar_block")}).done((result) => {
             if (result) {
-                console.error(utils.validateXMPPIdOrDomain(result))
                 if (!utils.validateXMPPIdOrDomain(result)){
                     utils.dialogs.error(xabber.getString("groupchat_incorrect_jid_or_domain"));
                     return;
@@ -4098,7 +4089,6 @@ xabber.ParticipantsViewRight = xabber.BasicView.extend({
     },
 
     _initialize: function () {
-        console.error(this);
         this.account = this.model.account;
         this.participants = this.model.participants;
         this.listenTo(this.participants, 'participants_updated', this.onParticipantsUpdated);
@@ -4272,10 +4262,8 @@ xabber.ParticipantsViewRight = xabber.BasicView.extend({
                 let iq = $iq({to: this.model.get('jid'), type: 'get'});
                 iq.c('permissions', {xmlns: `${Strophe.NS.GROUP_CHAT_PERMISSIONS}`});
                 this.account.sendFast(iq, (response) => {
-                    console.warn(response);
                     this.renderParticipants(response);
                 }, (error) => {
-                    console.warn(error);
                 });
             } else {
                 this.renderParticipants();
@@ -4465,13 +4453,11 @@ xabber.ParticipantsViewRight = xabber.BasicView.extend({
                         let iq_get_rights = $iq({type: 'get', to: this.model.get('jid')})
                             .c('defaults', {xmlns: `${Strophe.NS.GROUP_CHAT_PERMISSIONS}`});
                         this.account.sendFast(iq_get_rights, (iq_default_rights) => {
-                            console.warn(iq_default_rights);
                             options.close_on_response && this.closeParentWindows();
                             options.setup_permissions = iq_default_rights;
                             this.participant_properties_panel.open(participant, response, options);
                             callback && callback(this)
                         }, (err) => {
-                            console.error(err);
                             utils.callback_popup_message(xabber.getString("groupchat_you_have_no_permissions_to_do_it"), 3000);
                         });
                     } else {
@@ -4480,7 +4466,6 @@ xabber.ParticipantsViewRight = xabber.BasicView.extend({
                         callback && callback(this)
                     }
                 }, (err) => {
-                    console.error(err);
                     options.close_on_response && this.closeParentWindows();
                     let is_own = participant_item.attr('data-jid') && participant_item.attr('data-jid') === this.account.get('jid');
                     this.participant_properties_panel.open(participant, null, {no_edit: is_own ? false : true});
@@ -4797,7 +4782,6 @@ xabber.ParticipantPropertiesViewRight = xabber.BasicView.extend({
                         position: 'top',
                         timeFormat: '24h',
                         onDateUpdate: (date) => {
-                            console.log('Выбрана дата:', date);
                             this.onCustomTimeInputChange()
                         }
                     });
@@ -5106,7 +5090,6 @@ xabber.ParticipantPropertiesViewRight = xabber.BasicView.extend({
                 this.updateMemberAvatar(member, true);
             }
         }, (error) => {
-            console.error(error);
             let err_text = $(error).find('text').text() ;
             utils.dialogs.error(err_text);
         });
@@ -5269,8 +5252,6 @@ xabber.ParticipantPropertiesViewRight = xabber.BasicView.extend({
                     position: 'top',
                     timeFormat: '24h',
                     onDateUpdate: (date) => {
-                        console.log('Выбрана дата:', date);
-                        console.log($input);
                         this.onCustomDropdownDateInputChange($input, date)
                     }
                 });
@@ -5306,8 +5287,6 @@ xabber.ParticipantPropertiesViewRight = xabber.BasicView.extend({
         let $property_item = $(ev.target),
             $property_value = $property_item.closest('.select-timer').find('.property-value'),
             $input_item = $property_item.closest('.right-item').find('input');
-        console.error($property_item.attr('data-value'));
-        console.error($property_value.attr('data-value'));
         if ($property_item.closest('.right-item').find('.default-permission-placeholder').length){
             $property_value.text(xabber.getString("dialog_rights__button_set_timer"));
             $property_value.attr('data-value', 0);
@@ -5333,8 +5312,6 @@ xabber.ParticipantPropertiesViewRight = xabber.BasicView.extend({
                 position: 'top',
                 timeFormat: '24h',
                 onDateUpdate: (date) => {
-                    console.log('Выбрана дата:', date);
-                    console.log($input);
                     this.onCustomDropdownDateInputChange($input, date)
                 }
             });
@@ -5482,7 +5459,6 @@ xabber.ParticipantPropertiesViewRight = xabber.BasicView.extend({
             if (result) {
                 if (result === 'block'){
                     this.participant.block(() => {
-                            console.error('here');
                             this.participant.kick(() => {
                                 this.close();
                                 this.parent.participants._render();
@@ -5666,7 +5642,6 @@ xabber.ParticipantPropertiesViewRight = xabber.BasicView.extend({
                 $restriction_expire = $(templates.group_chats.right_expire_variants({
                 right_name: ('default-' + attrs.name),
             }));
-            console.error('heeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee')
             _.each($restriction_expire.find('.property-variant'), (item) => {
                 if ($(item).attr('data-value') === 'custom')
                     return;
@@ -5860,7 +5835,6 @@ xabber.ParticipantPropertiesViewRight = xabber.BasicView.extend({
             if (this.$('.changed-timer').length) {
                 has_changes = true;
             }
-            console.error(has_changes);
             this.updateButtons(has_changes);
             this.checkTimersDifference();
             this.updateTagLevers();
@@ -5946,17 +5920,12 @@ xabber.ParticipantPropertiesViewRight = xabber.BasicView.extend({
                     timer = '0';
                 }
 
-                console.error(permission.seconds);
-                console.error(global_timer);
-                console.error(timer);
                 iq_rights_changes.c('permission', {
                     name: permission.name,
                     status: permission.status,
                     seconds: timer,
                 }).up();
             });
-            console.error(changed_rights);
-            console.error(iq_rights_changes.tree());
             this.account.sendIQFast(iq_rights_changes, (res) => {
                     !callback && this.close();
                     callback && callback();
@@ -5978,9 +5947,7 @@ xabber.ParticipantPropertiesViewRight = xabber.BasicView.extend({
             .c('delete', {xmlns: Strophe.NS.GROUP_CHAT_PERMISSIONS});
         iq_rights_changes.c('permissions', {xmlns: Strophe.NS.GROUP_CHAT_PERMISSIONS, target: member_id });
 
-        console.error(iq_rights_changes.tree());
         this.account.sendIQFast(iq_rights_changes, (res) => {
-                console.warn(res);
                 this.close();
             },
             (error) => {
@@ -6172,7 +6139,6 @@ xabber.DefaultRestrictionsRightView = xabber.BasicView.extend({
             let text = `${$(iq_all_rights).find('permission[status="true"]').length} / ${$(iq_all_rights).find('permission').length}`;
             callback && callback(text);
         }, (err) => {
-            console.error(err);
         });
     },
 
@@ -6250,7 +6216,6 @@ xabber.DefaultRestrictionsRightView = xabber.BasicView.extend({
             callback && callback();
         }, () => {
 
-            console.error('heeeeeee');
             utils.callback_popup_message(xabber.getString("groupchat_you_have_no_permissions_to_do_it"), 3000);
         });
     },
@@ -6352,7 +6317,6 @@ xabber.DefaultRestrictionsRightView = xabber.BasicView.extend({
 
             if (view.length)
                 view.detach();
-            tag && console.error(this.$(`.right-item.tag-${utils.toSnakeCase(tag)}`));
 
             if (tag && this.$(`.right-item.tag-${utils.toSnakeCase(tag)}`).length){
                 this.$(`.right-item.tag-${utils.toSnakeCase(tag)}`).find('.tagged-restrictions-container').append($restriction_item);
@@ -6379,7 +6343,6 @@ xabber.DefaultRestrictionsRightView = xabber.BasicView.extend({
 
                 let checked_count = 0;
                 _.each($item.find('.tagged-restrictions-container').children(), (child) => {
-                    console.error($(child).find('input:checked'));
                     if ($(child).find('input:checked').length)
                         checked_count++;
                 });
@@ -6418,7 +6381,6 @@ xabber.DefaultRestrictionsRightView = xabber.BasicView.extend({
     },
 
     saveChanges: function () {
-        console.error(this.$('.btn-default-restrictions-save').hasClass('fade-out'));
         if (this.$('.btn-default-restrictions-save').hasClass('fade-out'))
             return;
         this.$('.btn-default-restrictions-save').addClass('fade-out');
@@ -6572,8 +6534,6 @@ xabber.NewbiePermissionsRightView = xabber.BasicView.extend({
             let iq_get_newbie_rights = $iq({type: 'get', to: this.contact.get('jid')})
                 .c('newbies', {xmlns: `${Strophe.NS.GROUP_CHAT_PERMISSIONS}`});
                 this.account.sendFast(iq_get_newbie_rights, (iq_all_newbie_rights) => {
-                    console.warn(iq_all_rights);
-                    console.warn(iq_all_newbie_rights);
                     this.showNewbiePermissions(iq_all_rights, iq_all_newbie_rights);
                     callback && callback();
                 }, () => {
@@ -6652,7 +6612,6 @@ xabber.NewbiePermissionsRightView = xabber.BasicView.extend({
             has_changes = true;
         }
 
-        console.error(has_changes)
         this.$('.btn-default-restrictions-save').switchClass('fade-out', !has_changes);
         if (has_changes) {
             this.$('.block-name.second-text').html(xabber.getString("edit_vcard"));
@@ -6815,7 +6774,6 @@ xabber.NewbiePermissionsRightView = xabber.BasicView.extend({
 
         let actual_permission = this.newbie_permissions.find(restriction => (restriction.name === $item.find('input').attr('id'))),
             timer;
-        actual_permission && console.error(actual_permission.seconds);
         if (actual_permission && val === actual_permission.seconds) {
             $input.closest('.right-item').removeClass('changed-timer');
             $property_value.addClass('text-color-500');
@@ -7132,13 +7090,10 @@ xabber.NewbiePermissionsRightView = xabber.BasicView.extend({
                     status: permission.status,
                 };
                 permission.seconds && (attrs.seconds = permission.seconds);
-                console.error(permission);
                 iq_change_newbie_rights.c('permission', attrs).up();
             });
         }
-        console.error(iq_change_newbie_rights.tree());
         this.account.sendIQFast(iq_change_newbie_rights, (res) => {
-            console.error(res);
             this.$('.edit-save-preloader.preloader-wrap').removeClass('visible').find('.preloader-wrapper').removeClass('active');
             this.openNewbiePermissions();
         }, (error) => {
@@ -7204,7 +7159,6 @@ xabber.Participant = Backbone.Model.extend({
                 errback && errback(err);
             });
         } else {
-            console.error('NO JID INFO');
         }
     },
 
@@ -7335,10 +7289,8 @@ xabber.Participants = Backbone.Collection.extend({
             iq = $iq({to: this.contact.get('jid'), type: 'get'});
             iq.c('permissions', {xmlns: `${Strophe.NS.GROUP_CHAT_PERMISSIONS}` , target: participant_id});
         this.account.sendFast(iq, (response) => {
-            console.warn(response);
             callback && callback(response);
         }, (error) => {
-            console.warn(error);
             errback && errback(error);
         });
     },
@@ -7552,9 +7504,6 @@ xabber.KnownPeerDevices = Backbone.ModelWithStorage.extend({
         });
 
         if (unknown_devices.length){
-            console.error(device_ids);
-            console.error(known_peers);
-            console.error(unknown_devices);
         }
         is_initially_empty || unknown_devices.length || this.save('known_peers', known_peers);
         return unknown_devices;
@@ -7636,7 +7585,6 @@ xabber.GroupchatInvitationView = xabber.BasicView.extend({
                             contact.set('image', data_avatar);
                             contact.updateCachedInfo();
                         } catch (e) {
-                            console.error(e);
                         }
                     });
                 } else {
@@ -10124,8 +10072,6 @@ xabber.Roster = xabber.ContactsBase.extend({
             msg, options = {synced_msg: true,},
             current_chat_timestamp = chat.get('last_sync_timestamp');
         if (current_chat_timestamp && current_chat_timestamp > chat_timestamp){
-            console.log('old_sync_conv');
-            console.log(item);
             return;
         }
         chat.set('last_sync_timestamp', chat_timestamp);
@@ -10402,8 +10348,6 @@ xabber.Roster = xabber.ContactsBase.extend({
             msg, options = {synced_msg: true,},
             current_chat_timestamp = chat.get('last_sync_timestamp');
         if (current_chat_timestamp && current_chat_timestamp > chat_timestamp){
-            console.log('old_sync_conv');
-            console.log(item);
             return;
         }
         chat.set('last_sync_timestamp', chat_timestamp);
@@ -11915,7 +11859,6 @@ xabber.RosterFullScreenView = xabber.BasicView.extend({
                 this.updateAllOutgoingSubscriptions();
                 this.updateIncomingInvitations();
             } catch (e) {
-                console.error(e)
             }
         } else {
             if (!xabber.accounts.enabled.length){
@@ -13509,7 +13452,6 @@ xabber.CachedNotifications = Backbone.ModelWithDataBase.extend({
                 callback && callback(false);
             }
         } catch (e) {
-            console.error(e);
         }
     },
 
@@ -13527,7 +13469,6 @@ xabber.CachedNotifications = Backbone.ModelWithDataBase.extend({
 
     handleCachedNotifications: function (self, callback) {
         this.getAllFromCachedNotifications((res) => {
-            console.error(res.length);
             if (res.length){
                 let parser = new DOMParser();
                 _.each(res, (msg_item) => {
@@ -13701,7 +13642,6 @@ xabber.Account.addInitPlugin(function () {
     this._added_pres_handlers.push(this.contacts.handlePresence.bind(this.contacts));
 
     this.on("ready_to_get_roster", function () {
-        console.warn(this.get('features_handled'));
         if (!this.get('features_handled') || this.get('roster_ready_called'))
             return;
         this.set('roster_ready_called', true);
@@ -13748,7 +13688,6 @@ xabber.Account.addInitPlugin(function () {
                 this.blocklist.getFromServer();
             });
         });
-        console.log(this.roster);
         if (this.roster) {
             dfd.resolve();
         } else {
