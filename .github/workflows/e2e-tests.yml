@@ -1,0 +1,118 @@
+name: E2E Tests
+
+# SECURITY: Only triggers on push (direct commits / merged PRs).
+# Never triggers on pull_request — prevents forks from running code on the runner.
+on:
+  push:
+    branches:
+      - vue3-migration-v2
+  workflow_dispatch:  # manual trigger from GitHub UI
+
+jobs:
+  e2e-trust-tests:
+    if: github.repository == 'redsolution/xabber-web'
+    runs-on: [self-hosted, macos, xabber-tests]
+    timeout-minutes: 30
+    env:
+      PATH: /Users/admin/node/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin
+
+    steps:
+      - name: Pull latest xabber-web
+        run: |
+          cd ~/xabber-web
+          git fetch origin
+          git checkout vue3-migration-v2
+          git reset --hard origin/vue3-migration-v2
+          npm install
+
+      - name: Pull latest xabber-tests
+        run: |
+          cd ~/xabber-tests
+          git pull
+
+      - name: Reset seed container
+        run: |
+          docker rm -f testing-xabberserver-seed 2>/dev/null || true
+          sleep 2
+          docker run -d --name testing-xabberserver-seed \
+            -p 443:443 -p 5222:5222 -p 5223:5223 -p 5269:5269 \
+            -p 5280:5280 -p 5443:5443 -p 80:80 \
+            redsolution/testing-xabberserver:seed
+          # Wait for XMPP port
+          echo "Waiting for ejabberd to start..."
+          for i in $(seq 1 90); do
+            nc -z localhost 5222 2>/dev/null && break
+            sleep 1
+          done
+          # Wait for WebSocket port
+          for i in $(seq 1 60); do
+            CODE=$(curl -s -o /dev/null -w "%{http_code}" --max-time 2 http://127.0.0.1:5280/ws 2>/dev/null)
+            [ "$CODE" != "000" ] && [ -n "$CODE" ] && break
+            sleep 1
+          done
+          echo "Waiting for ejabberd module init..."
+          sleep 15
+          echo "Server ready."
+
+      - name: Start Vite dev server
+        run: |
+          # Kill any existing Vite process
+          pkill -f "vite --host" 2>/dev/null || true
+          sleep 1
+          cd ~/xabber-web
+          nohup npx vite --host > ~/vite-ci.log 2>&1 &
+          # Wait for Vite to be ready
+          for i in $(seq 1 30); do
+            curl -s -o /dev/null http://localhost:5173 && break
+            sleep 1
+          done
+          echo "Vite dev server ready."
+
+      - name: Run trust tests
+        run: |
+          cd ~/xabber-tests/xabber-web
+          npx playwright test --config=playwright.trust.config.ts
+
+      - name: Save report with traces and videos
+        if: always()
+        run: |
+          TIMESTAMP=$(date +%Y-%m-%d_%H-%M-%S)
+          COMMIT_SHA="${GITHUB_SHA:0:8}"
+          REPORT_DIR=~/test-reports/${TIMESTAMP}_${COMMIT_SHA}
+          mkdir -p "$REPORT_DIR"
+
+          # Copy HTML report (includes traces and videos when configured)
+          cp -R ~/xabber-tests/xabber-web/playwright-report/* "$REPORT_DIR/" 2>/dev/null || true
+
+          # Copy test-results (contains videos and traces per test)
+          cp -R ~/xabber-tests/xabber-web/test-results "$REPORT_DIR/test-results" 2>/dev/null || true
+
+          # Update latest symlink
+          rm -f ~/test-reports/latest
+          ln -s "$REPORT_DIR" ~/test-reports/latest
+
+          echo "Report saved to $REPORT_DIR"
+          echo "REPORT_DIR=$REPORT_DIR" >> $GITHUB_ENV
+
+      - name: Host latest report
+        if: always()
+        run: |
+          # Kill any existing report server
+          pkill -f "playwright show-report" 2>/dev/null || true
+          sleep 1
+          # Serve the latest report
+          cd ~/test-reports/latest
+          nohup npx --prefix ~/xabber-tests/xabber-web \
+            playwright show-report . --host 0.0.0.0 --port 9323 \
+            > ~/report-server.log 2>&1 &
+          echo "Report hosted at http://192.168.11.56:9323"
+
+      - name: Stop Vite dev server
+        if: always()
+        run: pkill -f "vite --host" 2>/dev/null || true
+
+      - name: Cleanup old reports (keep last 10)
+        if: always()
+        run: |
+          cd ~/test-reports
+          ls -dt */ 2>/dev/null | grep -v latest | tail -n +11 | xargs rm -rf 2>/dev/null || true
