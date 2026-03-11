@@ -32,17 +32,10 @@ jobs:
           git pull
 
       - name: Reset seed container
-        shell: /bin/bash -e {0}
+        shell: bash --noprofile --norc {0}
         run: |
-          echo "PATH=$PATH"
-          echo "HOME=$HOME"
-          echo "whoami=$(whoami)"
-          echo "Checking docker..."
-          which docker || echo "docker NOT FOUND"
-          docker version 2>&1 || echo "docker version failed"
-          docker ps 2>&1 || echo "docker ps failed"
+          set -x
           docker rm -f testing-xabberserver-seed 2>/dev/null || true
-          # Poll until container is fully removed
           for i in $(seq 1 30); do
             docker inspect testing-xabberserver-seed >/dev/null 2>&1 || break
             sleep 1
@@ -52,16 +45,21 @@ jobs:
             -p 443:443 -p 5222:5222 -p 5223:5223 -p 5269:5269 \
             -p 5280:5280 -p 5443:5443 -p 80:80 \
             redsolution/testing-xabberserver:seed
-          # Wait for XMPP port (macOS nc uses -G for timeout)
-          echo "Waiting for ejabberd to start..."
+          if [ $? -ne 0 ]; then echo "docker run failed"; exit 1; fi
+          echo "Waiting for XMPP port..."
           for i in $(seq 1 90); do
             nc -z -G 2 localhost 5222 2>/dev/null && echo "XMPP port open" && break
             sleep 1
           done
-          # Wait for WebSocket port
+          echo "Waiting for WebSocket port..."
+          WS_READY=false
           for i in $(seq 1 60); do
-            CODE=$(curl -s -o /dev/null -w "%{http_code}" --max-time 2 http://127.0.0.1:5280/ws 2>/dev/null)
-            [ "$CODE" != "000" ] && [ -n "$CODE" ] && echo "WS port ready (HTTP $CODE)" && break
+            CODE=$(curl -s -o /dev/null -w "%{http_code}" --max-time 2 http://127.0.0.1:5280/ws 2>/dev/null || true)
+            if [ -n "$CODE" ] && [ "$CODE" != "000" ]; then
+              echo "WS port ready (HTTP $CODE)"
+              WS_READY=true
+              break
+            fi
             sleep 1
           done
           echo "Waiting for ejabberd module init..."
@@ -69,18 +67,17 @@ jobs:
           echo "Server ready."
 
       - name: Start Vite dev server
+        shell: bash --noprofile --norc {0}
         run: |
-          # Kill any existing Vite process
           pkill -f "vite --host" 2>/dev/null || true
           sleep 1
           cd ~/xabber-web
           nohup npx vite --host > ~/vite-ci.log 2>&1 &
-          # Wait for Vite to be ready
+          echo "Waiting for Vite..."
           for i in $(seq 1 30); do
-            curl -s -o /dev/null http://localhost:5173 && break
+            curl -s -o /dev/null http://localhost:5173 2>/dev/null && echo "Vite ready" && break
             sleep 1
           done
-          echo "Vite dev server ready."
 
       - name: Run trust tests
         run: |
@@ -89,33 +86,25 @@ jobs:
 
       - name: Save report with traces and videos
         if: always()
+        shell: bash --noprofile --norc {0}
         run: |
           TIMESTAMP=$(date +%Y-%m-%d_%H-%M-%S)
-          COMMIT_SHA="${GITHUB_SHA:0:8}"
+          COMMIT_SHA=$(echo "$GITHUB_SHA" | cut -c1-8)
           REPORT_DIR=~/test-reports/${TIMESTAMP}_${COMMIT_SHA}
           mkdir -p "$REPORT_DIR"
-
-          # Copy HTML report (includes traces and videos when configured)
           cp -R ~/xabber-tests/xabber-web/playwright-report/* "$REPORT_DIR/" 2>/dev/null || true
-
-          # Copy test-results (contains videos and traces per test)
           cp -R ~/xabber-tests/xabber-web/test-results "$REPORT_DIR/test-results" 2>/dev/null || true
-
-          # Update latest symlink
           rm -f ~/test-reports/latest
           ln -s "$REPORT_DIR" ~/test-reports/latest
-
           echo "Report saved to $REPORT_DIR"
-          echo "REPORT_DIR=$REPORT_DIR" >> $GITHUB_ENV
 
       - name: Host latest report
         if: always()
+        shell: bash --noprofile --norc {0}
         run: |
-          # Kill any existing report server
           pkill -f "playwright show-report" 2>/dev/null || true
           sleep 1
-          # Serve the latest report
-          cd ~/test-reports/latest
+          cd ~/test-reports/latest 2>/dev/null || exit 0
           nohup npx --prefix ~/xabber-tests/xabber-web \
             playwright show-report . --host 0.0.0.0 --port 9323 \
             > ~/report-server.log 2>&1 &
@@ -123,10 +112,12 @@ jobs:
 
       - name: Stop Vite dev server
         if: always()
+        shell: bash --noprofile --norc {0}
         run: pkill -f "vite --host" 2>/dev/null || true
 
       - name: Cleanup old reports (keep last 10)
         if: always()
+        shell: bash --noprofile --norc {0}
         run: |
-          cd ~/test-reports
+          cd ~/test-reports 2>/dev/null || exit 0
           ls -dt */ 2>/dev/null | grep -v latest | tail -n +11 | xargs rm -rf 2>/dev/null || true
