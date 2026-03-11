@@ -9,10 +9,10 @@ on:
   workflow_dispatch:  # manual trigger from GitHub UI
 
 jobs:
-  e2e-trust-tests:
+  e2e-tests:
     if: github.repository == 'redsolution/xabber-web'
     runs-on: [self-hosted, macos, xabber-tests]
-    timeout-minutes: 30
+    timeout-minutes: 60
     env:
       PATH: /Users/admin/node/bin:/usr/local/bin:/Applications/Docker.app/Contents/Resources/bin:/usr/bin:/bin:/usr/sbin:/sbin
       HOME: /Users/admin
@@ -79,36 +79,68 @@ jobs:
             sleep 1
           done
 
+      - name: Run seeded tests
+        id: seeded
+        shell: bash --noprofile --norc {0}
+        run: |
+          cd ~/xabber-tests/xabber-web
+          npx playwright test --config=playwright.seeded.config.ts
+          echo "SEEDED_EXIT=$?" >> "$GITHUB_OUTPUT"
+
+      - name: Save seeded report
+        if: always()
+        shell: bash --noprofile --norc {0}
+        run: |
+          cd ~/xabber-tests/xabber-web
+          rm -rf seeded-report seeded-test-results
+          mv playwright-report seeded-report 2>/dev/null || true
+          mv test-results seeded-test-results 2>/dev/null || true
+
       - name: Run trust tests
+        id: trust
+        if: always()
+        shell: bash --noprofile --norc {0}
         run: |
           cd ~/xabber-tests/xabber-web
           npx playwright test --config=playwright.trust.config.ts
+          echo "TRUST_EXIT=$?" >> "$GITHUB_OUTPUT"
 
-      - name: Save report with traces and videos
+      - name: Save reports with traces and videos
         if: always()
         shell: bash --noprofile --norc {0}
         run: |
           TIMESTAMP=$(date +%Y-%m-%d_%H-%M-%S)
           COMMIT_SHA=$(echo "$GITHUB_SHA" | cut -c1-8)
           REPORT_DIR=~/test-reports/${TIMESTAMP}_${COMMIT_SHA}
-          mkdir -p "$REPORT_DIR"
-          cp -R ~/xabber-tests/xabber-web/playwright-report/* "$REPORT_DIR/" 2>/dev/null || true
-          cp -R ~/xabber-tests/xabber-web/test-results "$REPORT_DIR/test-results" 2>/dev/null || true
+          mkdir -p "$REPORT_DIR/seeded" "$REPORT_DIR/trust"
+          # Seeded report
+          cp -R ~/xabber-tests/xabber-web/seeded-report/* "$REPORT_DIR/seeded/" 2>/dev/null || true
+          cp -R ~/xabber-tests/xabber-web/seeded-test-results "$REPORT_DIR/seeded/test-results" 2>/dev/null || true
+          # Trust report
+          cp -R ~/xabber-tests/xabber-web/playwright-report/* "$REPORT_DIR/trust/" 2>/dev/null || true
+          cp -R ~/xabber-tests/xabber-web/test-results "$REPORT_DIR/trust/test-results" 2>/dev/null || true
           rm -f ~/test-reports/latest
           ln -s "$REPORT_DIR" ~/test-reports/latest
           echo "Report saved to $REPORT_DIR"
 
-      - name: Host latest report
+      - name: Host reports
         if: always()
         shell: bash --noprofile --norc {0}
         run: |
           pkill -f "playwright show-report" 2>/dev/null || true
           sleep 1
-          cd ~/test-reports/latest 2>/dev/null || exit 0
-          nohup npx --prefix ~/xabber-tests/xabber-web \
-            playwright show-report . --host 0.0.0.0 --port 9323 \
-            > ~/report-server.log 2>&1 &
-          echo "Report hosted at http://192.168.11.56:9323"
+          # Host seeded report on port 9324
+          cd ~/test-reports/latest/seeded 2>/dev/null && \
+            nohup npx --prefix ~/xabber-tests/xabber-web \
+              playwright show-report . --host 0.0.0.0 --port 9324 \
+              > ~/seeded-report-server.log 2>&1 &
+          # Host trust report on port 9323
+          cd ~/test-reports/latest/trust 2>/dev/null && \
+            nohup npx --prefix ~/xabber-tests/xabber-web \
+              playwright show-report . --host 0.0.0.0 --port 9323 \
+              > ~/report-server.log 2>&1 &
+          echo "Seeded report: http://192.168.11.56:9324"
+          echo "Trust report:  http://192.168.11.56:9323"
 
       - name: Stop Vite dev server
         if: always()
@@ -121,3 +153,15 @@ jobs:
         run: |
           cd ~/test-reports 2>/dev/null || exit 0
           ls -dt */ 2>/dev/null | grep -v latest | tail -n +11 | xargs rm -rf 2>/dev/null || true
+
+      - name: Check results
+        if: always()
+        run: |
+          SEEDED=${{ steps.seeded.outputs.SEEDED_EXIT || '1' }}
+          TRUST=${{ steps.trust.outputs.TRUST_EXIT || '1' }}
+          echo "Seeded tests exit code: $SEEDED"
+          echo "Trust tests exit code: $TRUST"
+          if [ "$SEEDED" != "0" ] || [ "$TRUST" != "0" ]; then
+            echo "One or more test suites failed"
+            exit 1
+          fi
