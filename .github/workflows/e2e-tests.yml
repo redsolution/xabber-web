@@ -14,7 +14,8 @@ jobs:
     runs-on: [self-hosted, macos, xabber-tests]
     timeout-minutes: 30
     env:
-      PATH: /Users/admin/node/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin
+      PATH: /Users/admin/node/bin:/usr/local/bin:/Applications/Docker.app/Contents/Resources/bin:/usr/bin:/bin:/usr/sbin:/sbin
+      HOME: /Users/admin
 
     steps:
       - name: Pull latest xabber-web
@@ -32,22 +33,31 @@ jobs:
 
       - name: Reset seed container
         run: |
+          echo "PATH=$PATH"
+          echo "Checking docker..."
+          which docker
+          docker version --format '{{.Client.Version}}'
           docker rm -f testing-xabberserver-seed 2>/dev/null || true
+          # Poll until container is fully removed
+          for i in $(seq 1 30); do
+            docker inspect testing-xabberserver-seed >/dev/null 2>&1 || break
+            sleep 1
+          done
           sleep 2
           docker run -d --name testing-xabberserver-seed \
             -p 443:443 -p 5222:5222 -p 5223:5223 -p 5269:5269 \
             -p 5280:5280 -p 5443:5443 -p 80:80 \
             redsolution/testing-xabberserver:seed
-          # Wait for XMPP port
+          # Wait for XMPP port (macOS nc uses -G for timeout)
           echo "Waiting for ejabberd to start..."
           for i in $(seq 1 90); do
-            nc -z localhost 5222 2>/dev/null && break
+            nc -z -G 2 localhost 5222 2>/dev/null && echo "XMPP port open" && break
             sleep 1
           done
           # Wait for WebSocket port
           for i in $(seq 1 60); do
             CODE=$(curl -s -o /dev/null -w "%{http_code}" --max-time 2 http://127.0.0.1:5280/ws 2>/dev/null)
-            [ "$CODE" != "000" ] && [ -n "$CODE" ] && break
+            [ "$CODE" != "000" ] && [ -n "$CODE" ] && echo "WS port ready (HTTP $CODE)" && break
             sleep 1
           done
           echo "Waiting for ejabberd module init..."
