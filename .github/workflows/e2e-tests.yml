@@ -32,11 +32,15 @@ jobs:
           git pull
 
       - name: Reset seed container
+        shell: /bin/bash -e {0}
         run: |
           echo "PATH=$PATH"
+          echo "HOME=$HOME"
+          echo "whoami=$(whoami)"
           echo "Checking docker..."
-          which docker
-          docker version --format '{{.Client.Version}}'
+          which docker || echo "docker NOT FOUND"
+          docker version 2>&1 || echo "docker version failed"
+          docker ps 2>&1 || echo "docker ps failed"
           docker rm -f testing-xabberserver-seed 2>/dev/null || true
           # Poll until container is fully removed
           for i in $(seq 1 30); do
