@@ -25,6 +25,7 @@ Send and receive audio,  images, voice messages and files, view and forward them
 * XEP-0184: Message Delivery Receipts
 * XEP-0313: Message Archive Management
 * XEP-0363: HTTP File Upload
+* XEP-0384: OMEMO
 * RFC-3920: Core
 * RFC-3921: Instant Messaging and Presence
 
